@@ -48,7 +48,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Success == nil {
 					out.Success = new(TransStruct)
 				}
-				(*out.Success).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, out.Success)
 			}
 		case "authErr":
 			if in.IsNull() {
@@ -58,7 +58,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.AuthErr == nil {
 					out.AuthErr = new(AuthErr)
 				}
-				(*out.AuthErr).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in, out.AuthErr)
 			}
 		case "otherAuthErr":
 			if in.IsNull() {
@@ -68,7 +68,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.OtherAuthErr == nil {
 					out.OtherAuthErr = new(OtherAuthErr)
 				}
-				(*out.OtherAuthErr).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in, out.OtherAuthErr)
 			}
 		default:
 			in.SkipRecursive()
@@ -92,7 +92,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.Success).MarshalEasyJSON(out)
+		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
 	}
 	if in.AuthErr != nil {
 		const prefix string = ",\"authErr\":"
@@ -102,7 +102,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.AuthErr).MarshalEasyJSON(out)
+		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
 	}
 	if in.OtherAuthErr != nil {
 		const prefix string = ",\"otherAuthErr\":"
@@ -112,7 +112,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.OtherAuthErr).MarshalEasyJSON(out)
+		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out, *in.OtherAuthErr)
 	}
 	out.RawByte('}')
 }
@@ -139,6 +139,283 @@ func (v *SimpleService_Trans_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_Trans_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceTrans(l, v)
+}
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in *jlexer.Lexer, out *OtherAuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out *jwriter.Writer, in OtherAuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
+	}
+	out.RawByte('}')
+}
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in *jlexer.Lexer, out *AuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out *jwriter.Writer, in AuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
+	}
+	out.RawByte('}')
+}
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *TransStruct) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	var RiderSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		case "driver":
+			if in.IsNull() {
+				in.Skip()
+				out.Driver = nil
+			} else {
+				if out.Driver == nil {
+					out.Driver = new(NestedStruct)
+				}
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in, out.Driver)
+			}
+		case "rider":
+			if in.IsNull() {
+				in.Skip()
+				out.Rider = nil
+			} else {
+				if out.Rider == nil {
+					out.Rider = new(NestedStruct)
+				}
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in, out.Rider)
+			}
+			RiderSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+	if !RiderSet {
+		in.AddError(fmt.Errorf("key 'rider' is required"))
+	}
+}
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out *jwriter.Writer, in TransStruct) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
+	}
+	if in.Driver != nil {
+		const prefix string = ",\"driver\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Driver)
+	}
+	{
+		const prefix string = ",\"rider\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Rider == nil {
+			out.RawString("null")
+		} else {
+			easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Rider)
+		}
+	}
+	out.RawByte('}')
+}
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in *jlexer.Lexer, out *NestedStruct) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MsgSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "msg":
+			out.Msg = string(in.String())
+			MsgSet = true
+		case "check":
+			if in.IsNull() {
+				in.Skip()
+				out.Check = nil
+			} else {
+				if out.Check == nil {
+					out.Check = new(int32)
+				}
+				*out.Check = int32(in.Int32())
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MsgSet {
+		in.AddError(fmt.Errorf("key 'msg' is required"))
+	}
+}
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out *jwriter.Writer, in NestedStruct) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"msg\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Msg))
+	}
+	if in.Check != nil {
+		const prefix string = ",\"check\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(*in.Check))
+	}
+	out.RawByte('}')
 }
 func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceTrans1(in *jlexer.Lexer, out *SimpleService_Trans_Args) {
 	isTopLevel := in.IsStart()
@@ -168,7 +445,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Arg1 == nil {
 					out.Arg1 = new(TransStruct)
 				}
-				(*out.Arg1).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, out.Arg1)
 			}
 			Arg1Set = true
 		case "arg2":
@@ -179,7 +456,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Arg2 == nil {
 					out.Arg2 = new(TransStruct)
 				}
-				(*out.Arg2).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, out.Arg2)
 			}
 		default:
 			in.SkipRecursive()
@@ -209,7 +486,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Arg1 == nil {
 			out.RawString("null")
 		} else {
-			(*in.Arg1).MarshalEasyJSON(out)
+			easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Arg1)
 		}
 	}
 	if in.Arg2 != nil {
@@ -220,7 +497,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.Arg2).MarshalEasyJSON(out)
+		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Arg2)
 	}
 	out.RawByte('}')
 }
