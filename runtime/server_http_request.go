@@ -103,6 +103,7 @@ func NewServerHTTPRequest(
 	httpRequest := r.WithContext(ctx)
 
 	scope := endpoint.scope.Tagged(scopeTags)
+	logger := endpoint.logger.With(logFields...)
 
 	req := &ServerHTTPRequest{
 		httpRequest:  httpRequest,
@@ -114,7 +115,7 @@ func NewServerHTTPRequest(
 		Method:       httpRequest.Method,
 		Params:       params,
 		Header:       NewServerHTTPHeader(r.Header),
-		logger:       endpoint.logger,
+		logger:       logger,
 		scope:        scope,
 	}
 
