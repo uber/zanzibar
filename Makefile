@@ -23,6 +23,8 @@ EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 GOIMPORTS = "$(PWD)/vendor/golang.org/x/tools/cmd/goimports"
 GOBINDATA = "$(PWD)/vendor/github.com/jteeuwen/go-bindata/go-bindata"
 GOMOCK = "$(PWD)/vendor/github.com/golang/mock/mockgen"
+GOGOSLICK = "$(PWD)/vendor/github.com/gogo/protobuf/protoc-gen-gogoslick"
+YARPCGO = "$(PWD)/vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go"
 
 .PHONY: install
 install:
@@ -35,6 +37,8 @@ install:
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 	go build -o $(GOMOCK)/mockgen ./vendor/github.com/golang/mock/mockgen/
+	go build -o $(GOGOSLICK)/protoc-gen-gogoslick ./vendor/github.com/gogo/protobuf/protoc-gen-gogoslick/
+	go build -o $(YARPCGO)/protoc-gen-yarpc-go ./vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go/
 
 .PHONY: check-licence
 check-licence:
@@ -112,7 +116,7 @@ generate:
 	@./node_modules/.bin/uber-licence --file "production.gen.go" --dir "config" > /dev/null
 	@$(GOBINDATA)/go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
-	@PATH=$(GOIMPORTS):$(GOMOCK):$(PATH) bash ./scripts/generate.sh
+	@PATH=$(GOGOSLICK):$(YARPCGO):$(GOIMPORTS):$(GOMOCK):$(PATH) bash ./scripts/generate.sh
 
 .PHONY: check-generate
 check-generate:
