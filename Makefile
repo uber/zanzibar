@@ -35,6 +35,9 @@ install:
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 	go build -o $(GOMOCK)/mockgen ./vendor/github.com/golang/mock/mockgen/
+#	 todo: vendor
+	go get github.com/gogo/protobuf/protoc-gen-gogoslick
+	go get go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go
 
 .PHONY: check-licence
 check-licence:
