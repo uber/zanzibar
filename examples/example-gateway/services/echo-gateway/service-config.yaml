@@ -4,3 +4,4 @@ config: {}
 dependencies:
   endpoint:
   - tchannel/echo
+  - bounce

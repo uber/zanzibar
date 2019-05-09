@@ -26,6 +26,10 @@ package module
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
+	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
+	echoclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
+	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
+	bounceendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
@@ -47,7 +51,8 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Baz bazclientgenerated.Client
+	Baz  bazclientgenerated.Client
+	Echo echoclientgenerated.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -59,7 +64,8 @@ type MiddlewareDependenciesNodes struct {
 
 // EndpointDependenciesNodes contains endpoint dependencies
 type EndpointDependenciesNodes struct {
-	Echo echoendpointgenerated.Endpoint
+	Bounce bounceendpointgenerated.Endpoint
+	Echo   echoendpointgenerated.Endpoint
 }
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
@@ -85,6 +91,9 @@ func InitializeDependencies(
 	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -106,6 +115,17 @@ func InitializeDependencies(
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
+	initializedEndpointDependencies.Bounce = bounceendpointgenerated.NewEndpoint(&bounceendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &bounceendpointmodule.ClientDependencies{
+			Echo: initializedClientDependencies.Echo,
+		},
+		Middleware: &bounceendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Middleware: &echoendpointmodule.MiddlewareDependencies{
@@ -118,7 +138,8 @@ func InitializeDependencies(
 	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &EndpointDependencies{
-			Echo: initializedEndpointDependencies.Echo,
+			Bounce: initializedEndpointDependencies.Bounce,
+			Echo:   initializedEndpointDependencies.Echo,
 		},
 	}
 
