@@ -1026,7 +1026,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
-				"{{$methodName}}",
+				"{{$serviceMethod}}",
 				{{end}}
 			},
 			baseURL,
@@ -1110,7 +1110,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$serviceMethod}}", c.httpClient)
 
 	{{if .ReqHeaderGoStatements }}
 	{{range $index, $line := .ReqClientHeaderGoStatements -}}
@@ -1300,7 +1300,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11474, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11480, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2277,7 +2277,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 		{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 			{{if $methodName -}}
-			"{{$serviceMethod}}": "{{$methodName}}",
+			"{{$serviceMethod}}": "{{title .Name}}",
 			{{end -}}
 		{{ end -}}
 		{{ end -}}

@@ -43,12 +43,12 @@ func (wjs *writeJSONSuit) SetupSuite() {
 		zap.NewNop(),
 		tally.NewTestScope("", nil),
 		"foo",
-		[]string{"bar"},
+		[]string{"foo::bar"},
 		"test",
 		nil,
 		time.Microsecond*time.Duration(20),
 	)
-	wjs.req = NewClientHTTPRequest(context.TODO(), "foo", "bar", client)
+	wjs.req = NewClientHTTPRequest(context.TODO(), "foo", "foo::bar", client)
 	wjs.expectedRawBody = []byte("{\"field\":\"hello\"}")
 
 }

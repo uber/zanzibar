@@ -67,13 +67,13 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
 		"clientID",
-		[]string{"DoStuff"},
+		[]string{"clientID::DoStuff"},
 		"/",
 		map[string]string{},
 		time.Second,
 	)
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "clientID::DoStuff", client)
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
@@ -102,13 +102,13 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.RootScope,
 		"clientID",
-		[]string{"DoStuff"},
+		[]string{"clientID::DoStuff"},
 		"/",
 		map[string]string{},
 		time.Second,
 	)
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "clientID::DoStuff", client)
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
@@ -149,7 +149,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	client := barClient.HTTPClient()
 
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "bar::Normal", client)
 
 	err = req.WriteJSON(
 		"POST",
@@ -463,7 +463,7 @@ func TestInjectSpan(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "bar::Normal", client)
 	err = req.WriteJSON(
 		"POST",
 		client.BaseURL+"/bar-path",

@@ -54,7 +54,7 @@ func NewHTTPClient(
 	logger *zap.Logger,
 	scope tally.Scope,
 	clientID string,
-	methodNames []string,
+	serviceMethodNames []string,
 	baseURL string,
 	defaultHeaders map[string]string,
 	timeout time.Duration,
@@ -63,7 +63,7 @@ func NewHTTPClient(
 		logger,
 		NewContextMetrics(scope),
 		clientID,
-		methodNames,
+		serviceMethodNames,
 		baseURL,
 		defaultHeaders,
 		timeout,
@@ -75,17 +75,19 @@ func NewHTTPClientContext(
 	logger *zap.Logger,
 	ContextMetrics ContextMetrics,
 	clientID string,
-	methodNames []string,
+	serviceMethodNames []string,
 	baseURL string,
 	defaultHeaders map[string]string,
 	timeout time.Duration,
 ) *HTTPClient {
-	loggers := make(map[string]*zap.Logger, len(methodNames))
+	loggers := make(map[string]*zap.Logger, len(serviceMethodNames))
 
-	for _, methodName := range methodNames {
-		loggers[methodName] = logger.With(
+	for _, serviceMethodName := range serviceMethodNames {
+		serviceName, methodName := SplitServiceMethodName(serviceMethodName)
+		loggers[serviceName] = logger.With(
 			zap.String("clientID", clientID),
 			zap.String("clientMethod", methodName),
+			zap.String("clientService", serviceName),
 		)
 	}
 	return &HTTPClient{

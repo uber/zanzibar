@@ -84,8 +84,8 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"contacts",
 			[]string{
-				"SaveContacts",
-				"TestURLURL",
+				"Contacts::saveContacts",
+				"Contacts::testUrlUrl",
 			},
 			baseURL,
 			defaultHeaders,
@@ -158,7 +158,7 @@ func (c *contactsClient) SaveContacts(
 	}
 
 	var defaultRes *clientsContactsContacts.SaveContactsResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Contacts::saveContacts", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
@@ -224,7 +224,7 @@ func (c *contactsClient) TestURLURL(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Contacts::testUrlUrl", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/contacts" + "/testUrl"

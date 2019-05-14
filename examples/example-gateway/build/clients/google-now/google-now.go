@@ -84,8 +84,8 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"google-now",
 			[]string{
-				"AddCredentials",
-				"CheckCredentials",
+				"GoogleNowService::addCredentials",
+				"GoogleNowService::checkCredentials",
 			},
 			baseURL,
 			defaultHeaders,
@@ -157,7 +157,7 @@ func (c *googleNowClient) AddCredentials(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "GoogleNowService::addCredentials", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/add-credentials"
@@ -226,7 +226,7 @@ func (c *googleNowClient) CheckCredentials(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "GoogleNowService::checkCredentials", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/check-credentials"

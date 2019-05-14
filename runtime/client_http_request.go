@@ -36,6 +36,7 @@ import (
 // ClientHTTPRequest is the struct for making a single client request using an outbound http client.
 type ClientHTTPRequest struct {
 	ClientID       string
+	ServiceName    string
 	MethodName     string
 	client         *HTTPClient
 	httpReq        *http.Request
@@ -53,17 +54,23 @@ type ClientHTTPRequest struct {
 // NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
 func NewClientHTTPRequest(
 	ctx context.Context,
-	clientID, methodName string,
+	clientID, serviceMethodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
-	scopeTags := map[string]string{scopeTagClientMethod: methodName, scopeTagClient: clientID}
+	serviceName, methodName := SplitServiceMethodName(serviceMethodName)
+	scopeTags := map[string]string{
+		scopeTagClientMethod:  methodName,
+		scopeTagClient:        clientID,
+		scopeTagClientService: serviceName,
+	}
 	ctx = WithScopeTags(ctx, scopeTags)
 	req := &ClientHTTPRequest{
 		ClientID:       clientID,
 		MethodName:     methodName,
+		ServiceName:    serviceName,
 		client:         client,
-		Logger:         client.loggers[methodName],
-		ContextLogger:  NewContextLogger(client.loggers[methodName]),
+		Logger:         client.loggers[serviceName],
+		ContextLogger:  NewContextLogger(client.loggers[serviceName]),
 		defaultHeaders: client.DefaultHeaders,
 		ctx:            ctx,
 		metrics:        client.contextMetrics,
@@ -168,7 +175,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 
 // Do will send the request out.
 func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
-	opName := fmt.Sprintf("%s.%s", req.ClientID, req.MethodName)
+	opName := fmt.Sprintf("%s.%s", req.ServiceName, req.MethodName)
 	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
 	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
 	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)

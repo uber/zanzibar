@@ -102,7 +102,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 		{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 			{{if $methodName -}}
-			"{{$serviceMethod}}": "{{$methodName}}",
+			"{{$serviceMethod}}": "{{title .Name}}",
 			{{end -}}
 		{{ end -}}
 		{{ end -}}
