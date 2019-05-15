@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
@@ -33,47 +34,51 @@ import (
 	"go.uber.org/zap"
 )
 
+var metricNormalizer = strings.NewReplacer("::", "--")
+
 // ClientHTTPRequest is the struct for making a single client request using an outbound http client.
 type ClientHTTPRequest struct {
-	ClientID       string
-	ServiceName    string
-	MethodName     string
-	client         *HTTPClient
-	httpReq        *http.Request
-	res            *ClientHTTPResponse
-	started        bool
-	startTime      time.Time
-	Logger         *zap.Logger
-	ContextLogger  ContextLogger
-	rawBody        []byte
-	defaultHeaders map[string]string
-	ctx            context.Context
-	metrics        ContextMetrics
+	ClientID             string
+	ClientTargetEndpoint string
+	MethodName           string
+	client               *HTTPClient
+	httpReq              *http.Request
+	res                  *ClientHTTPResponse
+	started              bool
+	startTime            time.Time
+	Logger               *zap.Logger
+	ContextLogger        ContextLogger
+	rawBody              []byte
+	defaultHeaders       map[string]string
+	ctx                  context.Context
+	metrics              ContextMetrics
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
 func NewClientHTTPRequest(
 	ctx context.Context,
-	clientID, serviceMethodName string,
+	clientID string,
+	clientMethod string,
+	clientTargetEndpoint string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
-	serviceName, methodName := SplitServiceMethodName(serviceMethodName)
 	scopeTags := map[string]string{
-		scopeTagClientMethod:  methodName,
-		scopeTagClient:        clientID,
-		scopeTagClientService: serviceName,
+		scopeTagClientMethod:         clientMethod,
+		scopeTagClient:               clientID,
+		scopeTagClientTargetEndpoint: metricNormalizer.Replace(clientTargetEndpoint),
 	}
+
 	ctx = WithScopeTags(ctx, scopeTags)
 	req := &ClientHTTPRequest{
-		ClientID:       clientID,
-		MethodName:     methodName,
-		ServiceName:    serviceName,
-		client:         client,
-		Logger:         client.loggers[serviceMethodName],
-		ContextLogger:  NewContextLogger(client.loggers[serviceMethodName]),
-		defaultHeaders: client.DefaultHeaders,
-		ctx:            ctx,
-		metrics:        client.contextMetrics,
+		ClientID:             clientID,
+		MethodName:           clientMethod,
+		ClientTargetEndpoint: clientTargetEndpoint,
+		client:               client,
+		Logger:               client.loggers[clientMethod],
+		ContextLogger:        NewContextLogger(client.loggers[clientMethod]),
+		defaultHeaders:       client.DefaultHeaders,
+		ctx:                  ctx,
+		metrics:              client.contextMetrics,
 	}
 	req.res = NewClientHTTPResponse(req)
 	req.start()
@@ -175,7 +180,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 
 // Do will send the request out.
 func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
-	opName := fmt.Sprintf("%s.%s", req.ServiceName, req.MethodName)
+	opName := fmt.Sprintf("%s.%s(%s)", req.ClientID, req.MethodName, req.ClientTargetEndpoint)
 	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
 	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
 	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)

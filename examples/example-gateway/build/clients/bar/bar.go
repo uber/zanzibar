@@ -237,6 +237,40 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"bar",
 			[]string{
+				"ArgNotStruct",
+				"ArgWithHeaders",
+				"ArgWithManyQueryParams",
+				"ArgWithNestedQueryParams",
+				"ArgWithParams",
+				"ArgWithParamsAndDuplicateFields",
+				"ArgWithQueryHeader",
+				"ArgWithQueryParams",
+				"DeleteFoo",
+				"Hello",
+				"ListAndEnum",
+				"MissingArg",
+				"NoRequest",
+				"Normal",
+				"NormalRecur",
+				"TooManyArgs",
+				"EchoBinary",
+				"EchoBool",
+				"EchoDouble",
+				"EchoEnum",
+				"EchoI16",
+				"EchoI32",
+				"EchoI32Map",
+				"EchoI64",
+				"EchoI8",
+				"EchoString",
+				"EchoStringList",
+				"EchoStringMap",
+				"EchoStringSet",
+				"EchoStructList",
+				"EchoStructSet",
+				"EchoTypedef",
+			},
+			[]string{
 				"Bar::argNotStruct",
 				"Bar::argWithHeaders",
 				"Bar::argWithManyQueryParams",
@@ -340,7 +374,7 @@ func (c *barClient) ArgNotStruct(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argNotStruct", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgNotStruct", "Bar::argNotStruct", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/arg-not-struct-path"
@@ -416,7 +450,7 @@ func (c *barClient) ArgWithHeaders(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithHeaders", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithHeaders", "Bar::argWithHeaders", c.httpClient)
 
 	headers["name"] = string(r.Name)
 	headers["x-uuid"] = string(*r.UserUUID)
@@ -492,7 +526,7 @@ func (c *barClient) ArgWithManyQueryParams(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithManyQueryParams", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithManyQueryParams", "Bar::argWithManyQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithManyQueryParams"
@@ -641,7 +675,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithNestedQueryParams", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNestedQueryParams", "Bar::argWithNestedQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
@@ -750,7 +784,7 @@ func (c *barClient) ArgWithParams(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithParams", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParams", "Bar::argWithParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParams" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
@@ -821,7 +855,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithParamsAndDuplicateFields", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParamsAndDuplicateFields", "Bar::argWithParamsAndDuplicateFields", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParamsAndDuplicateFields" + "/" + string(r.EntityUUID) + "/segment"
@@ -889,7 +923,7 @@ func (c *barClient) ArgWithQueryHeader(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithQueryHeader", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryHeader", "Bar::argWithQueryHeader", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryHeader"
@@ -957,7 +991,7 @@ func (c *barClient) ArgWithQueryParams(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::argWithQueryParams", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryParams", "Bar::argWithQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryParams"
@@ -1041,7 +1075,7 @@ func (c *barClient) DeleteFoo(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::deleteFoo", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteFoo", "Bar::deleteFoo", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/foo"
@@ -1105,7 +1139,7 @@ func (c *barClient) Hello(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::helloWorld", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Hello", "Bar::helloWorld", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/hello"
@@ -1182,7 +1216,7 @@ func (c *barClient) ListAndEnum(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::listAndEnum", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ListAndEnum", "Bar::listAndEnum", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/list-and-enum"
@@ -1268,7 +1302,7 @@ func (c *barClient) MissingArg(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::missingArg", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "MissingArg", "Bar::missingArg", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/missing-arg-path"
@@ -1345,7 +1379,7 @@ func (c *barClient) NoRequest(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::noRequest", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoRequest", "Bar::noRequest", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/no-request-path"
@@ -1423,7 +1457,7 @@ func (c *barClient) Normal(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::normal", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Normal", "Bar::normal", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar-path"
@@ -1501,7 +1535,7 @@ func (c *barClient) NormalRecur(
 	}
 
 	var defaultRes *clientsBarBar.BarResponseRecur
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::normalRecur", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NormalRecur", "Bar::normalRecur", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/recur"
@@ -1578,7 +1612,7 @@ func (c *barClient) TooManyArgs(
 	}
 
 	var defaultRes *clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Bar::tooManyArgs", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TooManyArgs", "Bar::tooManyArgs", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/too-many-args-path"
@@ -1665,7 +1699,7 @@ func (c *barClient) EchoBinary(
 	}
 
 	var defaultRes []byte
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoBinary", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoBinary", "Echo::echoBinary", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/binary"
@@ -1737,7 +1771,7 @@ func (c *barClient) EchoBool(
 	}
 
 	var defaultRes bool
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoBool", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoBool", "Echo::echoBool", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/bool"
@@ -1809,7 +1843,7 @@ func (c *barClient) EchoDouble(
 	}
 
 	var defaultRes float64
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoDouble", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoDouble", "Echo::echoDouble", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/double"
@@ -1881,7 +1915,7 @@ func (c *barClient) EchoEnum(
 	}
 
 	var defaultRes clientsBarBar.Fruit
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoEnum", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoEnum", "Echo::echoEnum", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/enum"
@@ -1953,7 +1987,7 @@ func (c *barClient) EchoI16(
 	}
 
 	var defaultRes int16
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoI16", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI16", "Echo::echoI16", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i16"
@@ -2025,7 +2059,7 @@ func (c *barClient) EchoI32(
 	}
 
 	var defaultRes int32
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoI32", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32", "Echo::echoI32", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i32"
@@ -2097,7 +2131,7 @@ func (c *barClient) EchoI32Map(
 	}
 
 	var defaultRes map[int32]*clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoI32Map", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32Map", "Echo::echoI32Map", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i32-map"
@@ -2169,7 +2203,7 @@ func (c *barClient) EchoI64(
 	}
 
 	var defaultRes int64
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoI64", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI64", "Echo::echoI64", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i64"
@@ -2241,7 +2275,7 @@ func (c *barClient) EchoI8(
 	}
 
 	var defaultRes int8
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoI8", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI8", "Echo::echoI8", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i8"
@@ -2313,7 +2347,7 @@ func (c *barClient) EchoString(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoString", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Echo::echoString", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string"
@@ -2385,7 +2419,7 @@ func (c *barClient) EchoStringList(
 	}
 
 	var defaultRes []string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoStringList", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringList", "Echo::echoStringList", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-list"
@@ -2457,7 +2491,7 @@ func (c *barClient) EchoStringMap(
 	}
 
 	var defaultRes map[string]*clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoStringMap", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringMap", "Echo::echoStringMap", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-map"
@@ -2529,7 +2563,7 @@ func (c *barClient) EchoStringSet(
 	}
 
 	var defaultRes map[string]struct{}
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoStringSet", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringSet", "Echo::echoStringSet", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-set"
@@ -2601,7 +2635,7 @@ func (c *barClient) EchoStructList(
 	}
 
 	var defaultRes []*clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoStructList", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructList", "Echo::echoStructList", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-list"
@@ -2673,7 +2707,7 @@ func (c *barClient) EchoStructSet(
 	}
 
 	var defaultRes []*clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoStructSet", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructSet", "Echo::echoStructSet", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-set"
@@ -2745,7 +2779,7 @@ func (c *barClient) EchoTypedef(
 	}
 
 	var defaultRes clientsBarBar.UUID
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Echo::echoTypedef", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoTypedef", "Echo::echoTypedef", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/typedef"

@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/uber-go/tally"
@@ -65,19 +64,19 @@ const (
 )
 
 const (
-	scopeTagClientMethod    = "clientmethod"
-	scopeTagClientService   = "clientservice"
-	scopeTagEndpointMethod  = "endpointmethod"
-	scopeTagClient          = "clientid"
-	scopeTagEndpoint        = "endpointid"
-	scopeTagHandler         = "handlerid"
-	scopeTagError           = "error"
-	scopeTagStatus          = "status"
-	scopeTagProtocol        = "protocol"
-	scopeTagHTTP            = "HTTP"
-	scopeTagTChannel        = "TChannel"
-	scopeTagsTargetService  = "targetservice"
-	scopeTagsTargetEndpoint = "targetendpoint"
+	scopeTagClientMethod         = "clientmethod"
+	scopeTagClientTargetEndpoint = "clienttargetendpoint"
+	scopeTagEndpointMethod       = "endpointmethod"
+	scopeTagClient               = "clientid"
+	scopeTagEndpoint             = "endpointid"
+	scopeTagHandler              = "handlerid"
+	scopeTagError                = "error"
+	scopeTagStatus               = "status"
+	scopeTagProtocol             = "protocol"
+	scopeTagHTTP                 = "HTTP"
+	scopeTagTChannel             = "TChannel"
+	scopeTagsTargetService       = "targetservice"
+	scopeTagsTargetEndpoint      = "targetendpoint"
 )
 
 // WithEndpointField adds the endpoint information in the
@@ -311,18 +310,4 @@ func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int6
 func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Duration) {
 	tags := GetScopeTagsFromCtx(ctx)
 	c.scope.Tagged(tags).Timer(name).Record(d)
-}
-
-// SplitServiceMethodName splits the service method name into the service and method parts. They are returned in
-// TitleCase. Old versions of zanzibar only accepted method name rather than service and method name strings. In
-// order to be compatible, we fall back to considering the full string the method name
-func SplitServiceMethodName(serviceMethodName string) (string, string) {
-	var serviceName, methodName string
-	parts := strings.Split(serviceMethodName, "::")
-	if len(parts) == 2 {
-		serviceName, methodName = parts[0], strings.Title(parts[1])
-	} else {
-		methodName = parts[0]
-	}
-	return serviceName, methodName
 }

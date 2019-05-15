@@ -102,6 +102,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
+				"{{$methodName}}",
+				{{end}}
+			},
+			[]string{
+				{{range $serviceMethod, $methodName := $exposedMethods -}}
 				"{{$serviceMethod}}",
 				{{end}}
 			},
@@ -186,7 +191,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$serviceMethod}}", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", "{{$serviceMethod}}", c.httpClient)
 
 	{{if .ReqHeaderGoStatements }}
 	{{range $index, $line := .ReqClientHeaderGoStatements -}}

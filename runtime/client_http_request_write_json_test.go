@@ -43,12 +43,13 @@ func (wjs *writeJSONSuit) SetupSuite() {
 		zap.NewNop(),
 		tally.NewTestScope("", nil),
 		"foo",
+		[]string{"bar"},
 		[]string{"foo::bar"},
 		"test",
 		nil,
 		time.Microsecond*time.Duration(20),
 	)
-	wjs.req = NewClientHTTPRequest(context.TODO(), "foo", "foo::bar", client)
+	wjs.req = NewClientHTTPRequest(context.TODO(), "foo", "bar", "foo::bar", client)
 	wjs.expectedRawBody = []byte("{\"field\":\"hello\"}")
 
 }
@@ -78,7 +79,7 @@ func (m *myTypeError) MarshalJSON() ([]byte, error) {
 func (wjs *writeJSONSuit) TestWriteJSONCustomMarshalerError() {
 	m := &myTypeError{"hello"}
 	err := wjs.req.WriteJSON("POST", "test", nil, m)
-	assert.EqualError(wjs.T(), err, "Could not serialize foo.Bar request json: json: error calling MarshalJSON for type *zanzibar.myTypeError: can not marshal")
+	assert.EqualError(wjs.T(), err, "Could not serialize foo.bar request json: json: error calling MarshalJSON for type *zanzibar.myTypeError: can not marshal")
 }
 
 type myTypeDefault struct {

@@ -94,6 +94,9 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"corge-http",
 			[]string{
+				"EchoString",
+			},
+			[]string{
 				"Corge::echoString",
 			},
 			baseURL,
@@ -167,7 +170,7 @@ func (c *corgeHTTPClient) EchoString(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Corge::echoString", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Corge::echoString", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
 	headers[c.calleeHeader] = c.calleeName
