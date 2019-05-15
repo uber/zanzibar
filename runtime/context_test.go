@@ -224,3 +224,39 @@ func TestExtractLogField(t *testing.T) {
 	fields := extractors.ExtractLogFields(ctx)
 	assert.Equal(t, expected, fields)
 }
+
+func TestSplitServiceMethodName(t *testing.T) {
+	tests := []struct {
+		name                   string
+		inputServiceMethodName string
+		wantServiceName        string
+		wantMethodName         string
+	}{
+		{
+			"empty value",
+			"",
+			"",
+			"",
+		},
+		{
+			"only method",
+			"SomeMethod",
+			"",
+			"SomeMethod",
+		},
+		{
+			"service and method",
+			"SomeService::someMethod",
+			"SomeService",
+			"SomeMethod",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			serviceName, methodName := SplitServiceMethodName(tt.inputServiceMethodName)
+			assert.Equal(t, tt.wantServiceName, serviceName)
+			assert.Equal(t, tt.wantMethodName, methodName)
+		})
+	}
+}
