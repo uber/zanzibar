@@ -149,7 +149,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	client := barClient.HTTPClient()
 
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "bar::Normal", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Bar::normal", client)
 
 	err = req.WriteJSON(
 		"POST",
@@ -276,6 +276,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"statusCode":                       float64(200),
 		"clientMethod":                     "Normal",
 		"clientID":                         "bar",
+		"clientService":                    "Bar",
 		"clientHTTPMethod":                 "POST",
 		"Client-Req-Header-X-Client-Id":    "bar",
 		"Client-Req-Header-Content-Type":   "application/json",
@@ -463,7 +464,7 @@ func TestInjectSpan(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "bar::Normal", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Bar::normal", client)
 	err = req.WriteJSON(
 		"POST",
 		client.BaseURL+"/bar-path",

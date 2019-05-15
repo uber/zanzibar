@@ -78,7 +78,7 @@ func (m *myTypeError) MarshalJSON() ([]byte, error) {
 func (wjs *writeJSONSuit) TestWriteJSONCustomMarshalerError() {
 	m := &myTypeError{"hello"}
 	err := wjs.req.WriteJSON("POST", "test", nil, m)
-	assert.EqualError(wjs.T(), err, "Could not serialize foo.bar request json: json: error calling MarshalJSON for type *zanzibar.myTypeError: can not marshal")
+	assert.EqualError(wjs.T(), err, "Could not serialize foo.Bar request json: json: error calling MarshalJSON for type *zanzibar.myTypeError: can not marshal")
 }
 
 type myTypeDefault struct {

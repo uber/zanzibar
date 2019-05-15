@@ -90,7 +90,7 @@ func TestHTTPEndpointToHTTPClient(t *testing.T) {
 
 	assert.Equal(t, 2, len(spans))
 	endpointSpan, clientSpan := spans[1], spans[0]
-	assert.Equal(t, "bar.Hello", clientSpan.GetOperationName())
+	assert.Equal(t, "Bar.HelloWorld", clientSpan.GetOperationName())
 	assert.Equal(t, "bar.helloWorld", endpointSpan.GetOperationName())
 	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())
 }
@@ -172,7 +172,7 @@ func TestHTTPEndpointToHTTPClientWithUpstreamSpan(t *testing.T) {
 
 	assert.Equal(t, 2, len(spans))
 	endpointSpan, clientSpan := spans[1], spans[0]
-	assert.Equal(t, "bar.Hello", clientSpan.GetOperationName())
+	assert.Equal(t, "Bar.HelloWorld", clientSpan.GetOperationName())
 	assert.Equal(t, "bar.helloWorld", endpointSpan.GetOperationName())
 	assert.Equal(t, int64(upstreamSpanID), endpointSpan.GetParentSpanId())
 	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())

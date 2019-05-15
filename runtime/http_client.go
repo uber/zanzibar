@@ -84,7 +84,7 @@ func NewHTTPClientContext(
 
 	for _, serviceMethodName := range serviceMethodNames {
 		serviceName, methodName := SplitServiceMethodName(serviceMethodName)
-		loggers[serviceName] = logger.With(
+		loggers[serviceMethodName] = logger.With(
 			zap.String("clientID", clientID),
 			zap.String("clientMethod", methodName),
 			zap.String("clientService", serviceName),
