@@ -86,7 +86,7 @@ func NewHTTPClientContext(
 		loggers[methodName] = logger.With(
 			zap.String("clientID", clientID),
 			zap.String(logFieldClientMethod, methodName),
-			zap.String("targetEndpoint", targetEndpointName),
+			zap.String(logFieldClientThriftMethod, targetEndpointName),
 		)
 	}
 	return &HTTPClient{
