@@ -280,7 +280,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"statusCode":                       float64(200),
 		"clientMethod":                     "Normal",
 		"clientID":                         "bar",
-		"targetEndpoint":                   "Bar::normal",
+		"clientThriftMethod":               "Bar::normal",
 		"clientHTTPMethod":                 "POST",
 		"Client-Req-Header-X-Client-Id":    "bar",
 		"Client-Req-Header-Content-Type":   "application/json",
