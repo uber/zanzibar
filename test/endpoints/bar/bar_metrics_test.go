@@ -231,7 +231,7 @@ func TestCallMetrics(t *testing.T) {
 		"statusCode":                     float64(200),
 		"clientID":                       "bar",
 		"clientMethod":                   "Normal",
-		"targetEndpoint":                 "Bar::normal",
+		"clientThriftMethod":             "Bar::normal",
 		"clientHTTPMethod":               "POST",
 		"Client-Req-Header-X-Client-Id":  "bar",
 		"Client-Req-Header-Content-Type": "application/json",
