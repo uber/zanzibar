@@ -70,14 +70,16 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
 		"bar",
-		[]string{"echo"},
+		map[string]string{
+			"echo": "bar::echo",
+		},
 		baseURL,
 		map[string]string{},
 		time.Second,
 	)
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
@@ -128,14 +130,16 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
 		"bar",
-		[]string{"echo"},
+		map[string]string{
+			"echo": "bar::echo",
+		},
 		baseURL,
 		map[string]string{},
 		time.Second,
 	)
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
@@ -185,7 +189,9 @@ func TestUnknownStatusCode(t *testing.T) {
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
 		"bar",
-		[]string{"echo"},
+		map[string]string{
+			"echo": "bar::echo",
+		},
 		baseURL,
 		map[string]string{},
 		time.Second,
@@ -193,7 +199,7 @@ func TestUnknownStatusCode(t *testing.T) {
 
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)

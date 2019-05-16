@@ -78,8 +78,8 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"withexceptions",
-			[]string{
-				"Func1",
+			map[string]string{
+				"Func1": "WithExceptions::Func1",
 			},
 			baseURL,
 			defaultHeaders,
@@ -151,7 +151,7 @@ func (c *withexceptionsClient) Func1(
 	}
 
 	var defaultRes *clientsWithexceptionsWithexceptions.Response
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", "WithExceptions::Func1", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/withexceptions" + "/func1"

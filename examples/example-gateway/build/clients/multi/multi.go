@@ -81,9 +81,9 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"multi",
-			[]string{
-				"HelloA",
-				"HelloB",
+			map[string]string{
+				"HelloA": "ServiceABack::hello",
+				"HelloB": "ServiceBBack::hello",
 			},
 			baseURL,
 			defaultHeaders,
@@ -155,7 +155,7 @@ func (c *multiClient) HelloA(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::hello", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceA_b" + "/hello"
@@ -221,7 +221,7 @@ func (c *multiClient) HelloB(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::hello", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceB_b" + "/hello"
