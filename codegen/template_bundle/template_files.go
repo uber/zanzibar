@@ -1024,14 +1024,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"{{$clientID}}",
-			[]string{
+			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
-				"{{$methodName}}",
-				{{end}}
-			},
-			[]string{
-				{{range $serviceMethod, $methodName := $exposedMethods -}}
-				"{{$serviceMethod}}",
+				"{{$methodName}}": "{{$serviceMethod}}",
 				{{end}}
 			},
 			baseURL,
@@ -1305,7 +1300,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11616, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11527, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2282,7 +2277,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 		{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 			{{if $methodName -}}
-			"{{$serviceMethod}}": "{{title .Name}}",
+			"{{$serviceMethod}}": "{{$methodName}}",
 			{{end -}}
 		{{ end -}}
 		{{ end -}}

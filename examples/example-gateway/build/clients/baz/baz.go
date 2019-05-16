@@ -242,13 +242,13 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::getProfile":        "GetProfile",
 		"SimpleService::headerSchema":      "HeaderSchema",
 		"SimpleService::ping":              "Ping",
-		"SimpleService::sillyNoop":         "SillyNoop",
-		"SimpleService::testUuid":          "TestUuid",
+		"SimpleService::sillyNoop":         "DeliberateDiffNoop",
+		"SimpleService::testUuid":          "TestUUID",
 		"SimpleService::trans":             "Trans",
 		"SimpleService::transHeaders":      "TransHeaders",
 		"SimpleService::transHeadersNoReq": "TransHeadersNoReq",
 		"SimpleService::transHeadersType":  "TransHeadersType",
-		"SimpleService::urlTest":           "UrlTest",
+		"SimpleService::urlTest":           "URLTest",
 	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)

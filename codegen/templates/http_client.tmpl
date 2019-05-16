@@ -100,14 +100,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"{{$clientID}}",
-			[]string{
+			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
-				"{{$methodName}}",
-				{{end}}
-			},
-			[]string{
-				{{range $serviceMethod, $methodName := $exposedMethods -}}
-				"{{$serviceMethod}}",
+				"{{$methodName}}": "{{$serviceMethod}}",
 				{{end}}
 			},
 			baseURL,

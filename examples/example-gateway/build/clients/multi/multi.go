@@ -81,13 +81,9 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"multi",
-			[]string{
-				"HelloA",
-				"HelloB",
-			},
-			[]string{
-				"ServiceABack::hello",
-				"ServiceBBack::hello",
+			map[string]string{
+				"HelloA": "ServiceABack::hello",
+				"HelloB": "ServiceBBack::hello",
 			},
 			baseURL,
 			defaultHeaders,

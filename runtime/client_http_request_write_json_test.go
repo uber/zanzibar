@@ -43,8 +43,9 @@ func (wjs *writeJSONSuit) SetupSuite() {
 		zap.NewNop(),
 		tally.NewTestScope("", nil),
 		"foo",
-		[]string{"bar"},
-		[]string{"foo::bar"},
+		map[string]string{
+			"bar": "foo::bar",
+		},
 		"test",
 		nil,
 		time.Microsecond*time.Duration(20),

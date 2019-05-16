@@ -64,19 +64,18 @@ const (
 )
 
 const (
-	scopeTagClientMethod         = "clientmethod"
-	scopeTagClientTargetEndpoint = "clienttargetendpoint"
-	scopeTagEndpointMethod       = "endpointmethod"
-	scopeTagClient               = "clientid"
-	scopeTagEndpoint             = "endpointid"
-	scopeTagHandler              = "handlerid"
-	scopeTagError                = "error"
-	scopeTagStatus               = "status"
-	scopeTagProtocol             = "protocol"
-	scopeTagHTTP                 = "HTTP"
-	scopeTagTChannel             = "TChannel"
-	scopeTagsTargetService       = "targetservice"
-	scopeTagsTargetEndpoint      = "targetendpoint"
+	scopeTagClientMethod    = "clientmethod"
+	scopeTagEndpointMethod  = "endpointmethod"
+	scopeTagClient          = "clientid"
+	scopeTagEndpoint        = "endpointid"
+	scopeTagHandler         = "handlerid"
+	scopeTagError           = "error"
+	scopeTagStatus          = "status"
+	scopeTagProtocol        = "protocol"
+	scopeTagHTTP            = "HTTP"
+	scopeTagTChannel        = "TChannel"
+	scopeTagsTargetService  = "targetservice"
+	scopeTagsTargetEndpoint = "targetendpoint"
 )
 
 // WithEndpointField adds the endpoint information in the

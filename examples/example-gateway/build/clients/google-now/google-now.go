@@ -83,13 +83,9 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"google-now",
-			[]string{
-				"AddCredentials",
-				"CheckCredentials",
-			},
-			[]string{
-				"GoogleNowService::addCredentials",
-				"GoogleNowService::checkCredentials",
+			map[string]string{
+				"AddCredentials":   "GoogleNowService::addCredentials",
+				"CheckCredentials": "GoogleNowService::checkCredentials",
 			},
 			baseURL,
 			defaultHeaders,

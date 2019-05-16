@@ -78,11 +78,8 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"withexceptions",
-			[]string{
-				"Func1",
-			},
-			[]string{
-				"WithExceptions::Func1",
+			map[string]string{
+				"Func1": "WithExceptions::Func1",
 			},
 			baseURL,
 			defaultHeaders,

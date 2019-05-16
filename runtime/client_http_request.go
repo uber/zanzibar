@@ -63,9 +63,9 @@ func NewClientHTTPRequest(
 	client *HTTPClient,
 ) *ClientHTTPRequest {
 	scopeTags := map[string]string{
-		scopeTagClientMethod:         clientMethod,
-		scopeTagClient:               clientID,
-		scopeTagClientTargetEndpoint: metricNormalizer.Replace(clientTargetEndpoint),
+		scopeTagClientMethod:    clientMethod,
+		scopeTagClient:          clientID,
+		scopeTagsTargetEndpoint: metricNormalizer.Replace(clientTargetEndpoint),
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)

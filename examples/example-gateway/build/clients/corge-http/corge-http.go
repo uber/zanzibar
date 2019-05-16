@@ -93,11 +93,8 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"corge-http",
-			[]string{
-				"EchoString",
-			},
-			[]string{
-				"Corge::echoString",
+			map[string]string{
+				"EchoString": "Corge::echoString",
 			},
 			baseURL,
 			defaultHeaders,

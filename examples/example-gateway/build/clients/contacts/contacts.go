@@ -83,13 +83,9 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"contacts",
-			[]string{
-				"SaveContacts",
-				"TestURLURL",
-			},
-			[]string{
-				"Contacts::saveContacts",
-				"Contacts::testUrlUrl",
+			map[string]string{
+				"SaveContacts": "Contacts::saveContacts",
+				"TestURLURL":   "Contacts::testUrlUrl",
 			},
 			baseURL,
 			defaultHeaders,
