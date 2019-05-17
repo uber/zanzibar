@@ -68,19 +68,20 @@ func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCo
 	name = strings.Replace(name, "/", "-", -1)
 	name = strings.Replace(name, ":", "-", -1)
 	name = strings.Replace(name, ".", "-", -1)
+	tagMap := map[string]string{"name": name}
 	return &M3Collector{
-		scope:                   m.scope,
-		attemptsPrefix:          name + ".circuitbreaker" + ".attempts",
-		errorsPrefix:            name + ".circuitbreaker" + ".errors",
-		successesPrefix:         name + ".circuitbreaker" + ".successes",
-		failuresPrefix:          name + ".circuitbreaker" + ".failures",
-		rejectsPrefix:           name + ".circuitbreaker" + ".rejects",
-		shortCircuitsPrefix:     name + ".circuitbreaker" + ".shortCircuits",
-		timeoutsPrefix:          name + ".circuitbreaker" + ".timeouts",
-		fallbackSuccessesPrefix: name + ".circuitbreaker" + ".fallbackSuccesses",
-		fallbackFailuresPrefix:  name + ".circuitbreaker" + ".fallbackFailures",
-		totalDurationPrefix:     name + ".circuitbreaker" + ".totalDuration",
-		runDurationPrefix:       name + ".circuitbreaker" + ".runDuration",
+		scope:                   m.scope.Tagged(tagMap),
+		attemptsPrefix:          "circuitbreaker" + ".attempts",
+		errorsPrefix:            "circuitbreaker" + ".errors",
+		successesPrefix:         "circuitbreaker" + ".successes",
+		failuresPrefix:          "circuitbreaker" + ".failures",
+		rejectsPrefix:           "circuitbreaker" + ".rejects",
+		shortCircuitsPrefix:     "circuitbreaker" + ".shortCircuits",
+		timeoutsPrefix:          "circuitbreaker" + ".timeouts",
+		fallbackSuccessesPrefix: "circuitbreaker" + ".fallbackSuccesses",
+		fallbackFailuresPrefix:  "circuitbreaker" + ".fallbackFailures",
+		totalDurationPrefix:     "circuitbreaker" + ".totalDuration",
+		runDurationPrefix:       "circuitbreaker" + ".runDuration",
 	}
 }
 
