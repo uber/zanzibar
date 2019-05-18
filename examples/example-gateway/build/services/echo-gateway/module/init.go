@@ -84,6 +84,8 @@ func InitializeDependencies(
 		Tracer:           g.Tracer,
 		Config:           g.Config,
 		Channel:          g.Channel,
+
+		YARPCClientDispatcher: g.YAPRCClientDispatcher,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}

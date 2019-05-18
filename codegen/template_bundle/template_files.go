@@ -1698,6 +1698,8 @@ func InitializeDependencies(
 		Tracer:         g.Tracer,
 		Config:         g.Config,
 		Channel:        g.Channel,
+
+		YARPCClientDispatcher: g.YAPRCClientDispatcher,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -1729,7 +1731,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2403, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2454, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
