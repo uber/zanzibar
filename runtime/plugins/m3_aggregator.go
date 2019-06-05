@@ -62,13 +62,13 @@ func InitializeM3Collector(scope tally.Scope) *M3CollectorClient {
 }
 
 // NewM3Collector creates a collector for a specific circuit. The
-// prefix given to this circuit will be {circuit_name}.circuitbreaker.{metric}...
+// prefix given to this circuit will be circuitbreaker.{metric}...
 // Circuits with "/" in their names will have them replaced with ".".
 func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCollector {
 	name = strings.Replace(name, "/", "-", -1)
 	name = strings.Replace(name, ":", "-", -1)
 	name = strings.Replace(name, ".", "-", -1)
-	tagMap := map[string]string{"name": name}
+	tagMap := map[string]string{"emitter-name": name}
 	return &M3Collector{
 		scope:                   m.scope.Tagged(tagMap),
 		attemptsPrefix:          "circuitbreaker" + ".attempts",
