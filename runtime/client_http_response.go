@@ -169,6 +169,8 @@ func (res *ClientHTTPResponse) finish() {
 	res.finished = true
 	res.finishTime = time.Now()
 
+	logFn := res.req.ContextLogger.Info
+
 	// emit metrics
 	res.req.metrics.RecordTimer(res.req.ctx, clientLatency, res.finishTime.Sub(res.req.startTime))
 	_, known := knownStatusCodes[res.StatusCode]
@@ -184,10 +186,11 @@ func (res *ClientHTTPResponse) finish() {
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		res.req.metrics.IncCounter(res.req.ctx, clientErrors, 1)
+		logFn = res.req.ContextLogger.Warn
 	}
 
 	// write logs
-	res.req.ContextLogger.Info(
+	logFn(
 		res.req.ctx,
 		"Finished an outgoing client HTTP request",
 		clientHTTPLogFields(res.req, res)...,
