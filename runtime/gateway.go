@@ -551,7 +551,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		var ok bool
 		logLevel, ok = levelMap[levelString]
 		if !ok {
-			return errors.Errorf("unknown log level for gateway logger: %s", logLevel)
+			return errors.Errorf("unknown log level for gateway logger: %s", levelString)
 		}
 	}
 
