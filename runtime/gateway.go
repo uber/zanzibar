@@ -544,7 +544,17 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	var output zapcore.WriteSyncer
 	logEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+
 	logLevel := zap.InfoLevel
+	if config.ContainsKey("logger.level") {
+		levelString := config.MustGetString("logger.level")
+		var ok bool
+		logLevel, ok = levelMap[levelString]
+		if !ok {
+			return errors.Errorf("unknown log level for gateway logger: %s", logLevel)
+		}
+	}
+
 	tempLogger := zap.New(
 		zapcore.NewCore(
 			logEncoder,
