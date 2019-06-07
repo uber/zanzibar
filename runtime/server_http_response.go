@@ -103,9 +103,11 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	} else {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
+
+	logFn := res.logger.Info
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		tagged.Counter(endpointAppErrors).Inc(1)
-
+		logFn = res.logger.Warn
 	}
 
 	span := res.Request.GetSpan()
@@ -113,7 +115,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		span.Finish()
 	}
 
-	res.logger.Info(
+	logFn(
 		"Finished an incoming server HTTP request",
 		append(logFields, serverHTTPLogFields(res.Request, res)...)...,
 	)
