@@ -71,17 +71,17 @@ func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCo
 	tagMap := map[string]string{"emitter-name": name}
 	return &M3Collector{
 		scope:                   m.scope.Tagged(tagMap),
-		attemptsPrefix:          "circuitbreaker" + ".attempts",
-		errorsPrefix:            "circuitbreaker" + ".errors",
-		successesPrefix:         "circuitbreaker" + ".successes",
-		failuresPrefix:          "circuitbreaker" + ".failures",
-		rejectsPrefix:           "circuitbreaker" + ".rejects",
-		shortCircuitsPrefix:     "circuitbreaker" + ".shortCircuits",
-		timeoutsPrefix:          "circuitbreaker" + ".timeouts",
-		fallbackSuccessesPrefix: "circuitbreaker" + ".fallbackSuccesses",
-		fallbackFailuresPrefix:  "circuitbreaker" + ".fallbackFailures",
-		totalDurationPrefix:     "circuitbreaker" + ".totalDuration",
-		runDurationPrefix:       "circuitbreaker" + ".runDuration",
+		attemptsPrefix:          "circuitbreaker.attempts",
+		errorsPrefix:            "circuitbreaker.errors",
+		successesPrefix:         "circuitbreaker.successes",
+		failuresPrefix:          "circuitbreaker.failures",
+		rejectsPrefix:           "circuitbreaker.rejects",
+		shortCircuitsPrefix:     "circuitbreaker.shortCircuits",
+		timeoutsPrefix:          "circuitbreaker.timeouts",
+		fallbackSuccessesPrefix: "circuitbreaker.fallbackSuccesses",
+		fallbackFailuresPrefix:  "circuitbreaker.fallbackFailures",
+		totalDurationPrefix:     "circuitbreaker.totalDuration",
+		runDurationPrefix:       "circuitbreaker.runDuration",
 	}
 }
 
