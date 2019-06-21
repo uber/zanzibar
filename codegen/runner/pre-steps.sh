@@ -2,16 +2,16 @@
 set -e
 set -o pipefail
 
-if [ -z "$1" ]; then
+if [[ -z "$1" ]]; then
 	echo "build dir argument (\$1) is missing"
 	exit 1
 fi
 
-if [ -z "$2" ]; then
+if [[ -z "$2" ]]; then
 	echo "config dir argument (\$2) is missing"
 	exit 1
 fi
-if [ -z "$3" ]; then
+if [[ -z "$3" ]]; then
 	echo "annotation prefix argument (\$3) is missing"
 	exit 1
 fi
@@ -23,7 +23,7 @@ ANNOPREFIX="$3"
 
 IDL_DIR="${IDL_DIR:-$CONFIG_DIR/idl}"
 
-if [ -z "$4" ]; then
+if [[ -z "$4" ]]; then
 	THRIFTRW_SRCS="$(find "$IDL_DIR" -name '*.thrift')"
 else
 	THRIFTRW_SRCS="$4"
@@ -40,7 +40,7 @@ RESOLVE_THRIFT_BINARY="$DIRNAME/../../scripts/resolve_thrift/resolve_thrift"
 RESOLVE_I64_FILE="$DIRNAME/../../scripts/resolve_i64/main.go"
 RESOLVE_I64_BINARY="$DIRNAME/../../scripts/resolve_i64/resolve_i64"
 
-if [ -d "$DIRNAME/../../vendor" ]; then
+if [[ -d "$DIRNAME/../../vendor" ]]; then
 	THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
 	THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
 	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
@@ -67,7 +67,45 @@ for tfile in ${THRIFTRW_SRCS}; do
 		--no-embed-idl \
 		--thrift-root="$IDL_DIR" "$tfile"
 done
-gofmt -w "$BUILD_DIR/gen-code/"
+
+echo "Generating Go code from Proto files"
+ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
+ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
+config_files=$(find "$CONFIG_DIR" -name "*-config.json" -o -name "*-config.yaml" | sort)
+found_protos=""
+for config_file in ${config_files}; do
+	if [[ ${config_file} == "./vendor"* ]]; then
+		continue
+	fi
+
+	processor="$YQ"
+	if [[ ${config_file} == *.json ]]; then
+		processor="jq"
+	fi
+
+	dir=$(dirname "$config_file")
+	yaml_files=$(find "$dir" -name "*.json" -o -name "*.yaml")
+	for yaml_file in ${yaml_files}; do
+		processor="$YQ"
+		if [[ ${yaml_file} == *.json ]]; then
+			processor="jq"
+		fi
+
+		proto_file=$(${processor} -r '.. | .protoFile? | select(strings | endswith(".proto"))' "$yaml_file")
+		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
+			found_protos+=" $proto_file"
+			proto_dir=$(dirname "$proto_file")
+			proto_path="$ABS_IDL_DIR/$proto_dir"
+			gencode_path="$ABS_GENCODE_DIR/$proto_dir"
+			mkdir -p "$gencode_path"
+			proto_file="$ABS_IDL_DIR/$proto_file"
+			protoc --proto_path="$proto_path" --gogoslick_out="$gencode_path" \
+                   --yarpc-go_out="$gencode_path" "$proto_file"
+		fi
+	done
+done
+
+gofmt -w -s "$BUILD_DIR/gen-code/"
 
 end=$(date +%s)
 runtime=$((end-start))
@@ -82,32 +120,40 @@ go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
 go build -o "$RESOLVE_I64_BINARY" "$RESOLVE_I64_FILE"
 
 # find the modules that actually need JSON (un)marshallers
-ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
-ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 target_dirs=""
 found_thrifts=""
-config_files=$(find "$CONFIG_DIR" -name "*-config.json" -o -name "*-config.yaml" | sort)
+proto_path="$IDL_DIR"
 for config_file in ${config_files}; do
 	if [[ ${config_file} == "./vendor"* ]]; then
 		continue
 	fi
 
 	processor="$YQ"
-	if [[ $config_file == *.json ]]; then
+	if [[ ${config_file} == *.json ]]; then
 		processor="jq"
 	fi
 
-	module_type=$($processor -r .type "$config_file")
+	module_type=$(${processor} -r .type "$config_file")
 	[[ ${module_type} != *"http"* ]] && continue
 	dir=$(dirname "$config_file")
 	yaml_files=$(find "$dir" -name "*.json" -o -name "*.yaml")
 	for yaml_file in ${yaml_files}; do
 		processor="$YQ"
-		if [[ $yaml_file == *.json ]]; then
+		if [[ ${yaml_file} == *.json ]]; then
 			processor="jq"
 		fi
 
-		thrift_file=$($processor -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
+		thrift_file=$(${processor} -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
+
+		# process .proto files
+		proto_file=$(${processor} -r '.. | .protoFile? | select(strings | endswith(".proto"))' "$yaml_file")
+		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
+			found_protos+=" $proto_file"
+			proto_file="$IDL_DIR/$proto_file"
+			protoc --proto_path=
+
+		fi
+
 		[[ -z ${thrift_file} ]] && continue
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
 		found_thrifts+=" $thrift_file"

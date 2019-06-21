@@ -39,7 +39,6 @@ import:
   version: ^1.2.0
 - package: github.com/pborman/uuid
   version: ^1.1.0
-
 - package: github.com/kisielk/gotool
   version: master
 - package: github.com/kisielk/errcheck
@@ -59,6 +58,8 @@ import:
   version: master
 - package: go.uber.org/multierr
   version: ^1
+- package: go.uber.org/yarpc
+  version: ^1.37.4
 
 # https://github.com/uber/zanzibar/issues/583
 - package: honnef.co/go/tools/cmd/staticcheck

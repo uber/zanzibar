@@ -21,23 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package echoclient
 
 import (
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
-
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
+	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
 )
 
-// Dependencies contains dependencies for the echo-gateway service module
-type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
-}
+// Client defines the echo client interface.
+type Client = gen.EchoYARPCClient
 
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bounce bounceendpointgenerated.Endpoint
-	Echo   echoendpointgenerated.Endpoint
+// NewClient creates a now echo grpc client, panics if config for echo is missing.
+func NewClient(deps *module.Dependencies) Client {
+	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("echo")
+	return gen.NewEchoYARPCClient(oc)
 }

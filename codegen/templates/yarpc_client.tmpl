@@ -1,0 +1,19 @@
+{{- $instance := .Instance }}
+{{- $genPkg := .GenPkg }}
+{{- $clientID := $instance.InstanceName -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	gen "{{$genPkg}}"
+)
+
+// Client defines the {{$clientID}} client interface.
+type Client = gen.{{pascal $clientID}}YARPCClient
+
+// NewClient creates a now {{$clientID}} grpc client, panics if config for {{$clientID}} is missing.
+func NewClient(deps *module.Dependencies) Client{
+	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("{{$clientID}}")
+	return gen.New{{pascal $clientID}}YARPCClient(oc)
+}

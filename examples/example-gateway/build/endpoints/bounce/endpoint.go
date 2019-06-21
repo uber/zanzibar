@@ -21,23 +21,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package bounceendpoint
 
 import (
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
-
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the echo-gateway service module
-type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
+// Endpoint registers a request handler on a gateway
+type Endpoint interface {
+	Register(*zanzibar.Gateway) error
 }
 
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bounce bounceendpointgenerated.Endpoint
-	Echo   echoendpointgenerated.Endpoint
+// NewEndpoint returns a collection of endpoints that can be registered on
+// a gateway
+func NewEndpoint(deps *module.Dependencies) Endpoint {
+	return &EndpointHandlers{
+		BounceBounceHandler: NewBounceBounceHandler(deps),
+	}
+}
+
+// EndpointHandlers is a collection of individual endpoint handlers
+type EndpointHandlers struct {
+	BounceBounceHandler *BounceBounceHandler
+}
+
+// Register registers the endpoint handlers with the gateway
+func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
+	err0 := handlers.BounceBounceHandler.Register(gateway)
+	if err0 != nil {
+		return err0
+	}
+	return nil
 }

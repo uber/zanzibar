@@ -29,6 +29,9 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/mock-client"
+	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
+	bounceendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
@@ -41,7 +44,8 @@ import (
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Baz *bazclientgenerated.MockClient
+	Baz  *bazclientgenerated.MockClient
+	Echo *echoclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -64,11 +68,13 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Baz: bazclientgenerated.NewMockClient(ctrl),
+		Baz:  bazclientgenerated.NewMockClient(ctrl),
+		Echo: echoclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Baz = mockClientNodes.Baz
+	initializedClientDependencies.Echo = mockClientNodes.Echo
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -90,6 +96,17 @@ func InitializeDependenciesMock(
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
+	initializedEndpointDependencies.Bounce = bounceendpointgenerated.NewEndpoint(&bounceendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &bounceendpointmodule.ClientDependencies{
+			Echo: initializedClientDependencies.Echo,
+		},
+		Middleware: &bounceendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Middleware: &echoendpointmodule.MiddlewareDependencies{
@@ -102,7 +119,8 @@ func InitializeDependenciesMock(
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &module.EndpointDependencies{
-			Echo: initializedEndpointDependencies.Echo,
+			Bounce: initializedEndpointDependencies.Bounce,
+			Echo:   initializedEndpointDependencies.Echo,
 		},
 	}
 

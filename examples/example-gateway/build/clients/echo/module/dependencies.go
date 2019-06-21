@@ -24,20 +24,10 @@
 package module
 
 import (
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the echo-gateway service module
+// Dependencies contains dependencies for the echo client module
 type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
-}
-
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bounce bounceendpointgenerated.Endpoint
-	Echo   echoendpointgenerated.Endpoint
+	Default *zanzibar.DefaultDependencies
 }
