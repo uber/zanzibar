@@ -100,7 +100,7 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 		))
 	}
 
-	fields = append(fields, logFieldsFromCtx(ctx)...)
+	fields = append(fields, GetLogFieldsFromCtx(ctx)...)
 	return fields
 }
 
