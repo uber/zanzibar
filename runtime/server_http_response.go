@@ -68,7 +68,7 @@ func NewServerHTTPResponse(
 
 // finish will handle final logic, like metrics
 func (res *ServerHTTPResponse) finish(ctx context.Context) {
-	logFields := logFieldsFromCtx(ctx)
+	logFields := GetLogFieldsFromCtx(ctx)
 	if !res.Request.started {
 		/* coverage ignore next line */
 		res.logger.Error(

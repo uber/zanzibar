@@ -152,7 +152,8 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
-func logFieldsFromCtx(ctx context.Context) []zap.Field {
+// GetLogFieldsFromCtx returns the log fields attached to the context.Context
+func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
 	var fields []zap.Field
 	v := ctx.Value(requestLogFields)
 	if v != nil {
@@ -185,7 +186,7 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
-	previousFields := logFieldsFromCtx(ctx)
+	previousFields := GetLogFieldsFromCtx(ctx)
 	return append(previousFields, newFields...)
 }
 

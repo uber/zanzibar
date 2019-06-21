@@ -92,7 +92,7 @@ func (c *tchannelInboundCall) logFields(ctx context.Context) []zap.Field {
 		))
 	}
 
-	fields = append(fields, logFieldsFromCtx(ctx)...)
+	fields = append(fields, GetLogFieldsFromCtx(ctx)...)
 	return fields
 }
 
