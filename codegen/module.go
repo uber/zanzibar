@@ -1022,18 +1022,50 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 	return spec, true, nil
 }
 
-func (system *ModuleSystem) tryResolveIncrementalBuild(
+// getAllAncestors adds classInstance to classModules if any of the classModules is in the recursive dependency tree of the instance.
+func getAllAncestors(classInstance *ModuleInstance, classModules map[string]*ModuleInstance) {
+	for _, instance := range classModules {
+		classInstanceTransitives, ok := classInstance.RecursiveDependencies[instance.ClassName]
+		if !ok {
+			continue
+		}
+
+		for _, classInstanceDependency := range classInstanceTransitives {
+			if classInstanceDependency.InstanceName == instance.InstanceName && classInstanceDependency.ClassName == instance.ClassName {
+				// toBeBuiltInstance is in the recursive dependency tree of classInstance
+
+				classModules[classInstance.InstanceName] = classInstance
+				fmt.Printf(
+					"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
+					classInstance.InstanceName,
+					classInstance.ClassName,
+					classInstance.ClassType,
+					instance.InstanceName,
+					instance.ClassName,
+					instance.ClassType,
+				)
+
+				break
+			}
+		}
+	}
+}
+
+// collectTransitiveDependencies walks up the tree of dependencies starting at the leaves provided by instances and
+// returns all visited nodes.
+func (system *ModuleSystem) collectTransitiveDependencies(
 	instances []ModuleDependency,
 	resolvedModules map[string][]*ModuleInstance,
 ) (map[string][]*ModuleInstance, error) {
 
-	toBeBuiltModules := make(map[string]map[string]*ModuleInstance, 0)
+	toBeBuiltModulesUnique := make(map[string]map[string]*ModuleInstance, 0)
 	for _, className := range system.classOrder {
-		toBeBuiltModules[className] = make(map[string]*ModuleInstance, 0)
+		toBeBuiltModulesUnique[className] = make(map[string]*ModuleInstance, 0)
 	}
 
-	for _, classOrder := range system.classOrder {
-		classInstances := resolvedModules[classOrder]
+	for _, className := range system.classOrder {
+		// convert input []ModuleDependency to resolved []*ModuleInstance for this first loop over classInstances
+		classInstances := resolvedModules[className]
 		for _, classInstance := range classInstances {
 			spec, ok, err := system.getSpec(classInstance)
 			if err != nil {
@@ -1046,6 +1078,7 @@ func (system *ModuleSystem) tryResolveIncrementalBuild(
 			found := false
 			for _, instance := range instances {
 				if instance.ClassName == classInstance.ClassName && instance.InstanceName == classInstance.InstanceName {
+					toBeBuiltModulesUnique[classInstance.ClassName][classInstance.InstanceName] = classInstance
 					found = true
 					break
 				}
@@ -1058,49 +1091,23 @@ func (system *ModuleSystem) tryResolveIncrementalBuild(
 					classInstance.ClassName,
 					classInstance.ClassType,
 				)
-				continue
 			}
-
-			toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
 		}
 
-		// Collect things of the same class that depend on us
+		// Collect all things of that depend (directly or indirectly) on something in toBeBuiltModulesUnique.
 		for _, classInstance := range classInstances {
 			// classInstance needs to be built if any of the dependencies that are to be built is in the recursive
 			// dependency tree of classInstance.
-
 			for _, className := range system.classOrder {
-				for _, toBeBuiltInstance := range toBeBuiltModules[className] {
-					classInstanceTransitives, ok := classInstance.RecursiveDependencies[toBeBuiltInstance.ClassName]
-					if !ok {
-						continue
-					}
-
-					for _, classInstanceDependency := range classInstanceTransitives {
-						if classInstanceDependency.InstanceName == toBeBuiltInstance.InstanceName && classInstanceDependency.ClassName == toBeBuiltInstance.ClassName {
-							// toBeBuiltInstance is in the recursive dependency tree of classInstance
-
-							toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
-							fmt.Printf(
-								"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
-								classInstance.InstanceName,
-								classInstance.ClassName,
-								classInstance.ClassType,
-								toBeBuiltInstance.InstanceName,
-								toBeBuiltInstance.ClassName,
-								toBeBuiltInstance.ClassType,
-							)
-						}
-					}
-				}
+				getAllAncestors(classInstance, toBeBuiltModulesUnique[className])
 			}
 		}
 	}
 
 	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
 	for _, className := range system.classOrder {
-		toBeBuiltModulesList[className] = make([]*ModuleInstance, 0, len(toBeBuiltModules[className]))
-		for _, classInstance := range toBeBuiltModules[className] {
+		toBeBuiltModulesList[className] = make([]*ModuleInstance, 0, len(toBeBuiltModulesUnique[className]))
+		for _, classInstance := range toBeBuiltModulesUnique[className] {
 			toBeBuiltModulesList[className] = append(toBeBuiltModulesList[className], classInstance)
 		}
 	}
@@ -1116,15 +1123,15 @@ func (system *ModuleSystem) IncrementalBuild(
 	instances []ModuleDependency,
 	resolvedModules map[string][]*ModuleInstance,
 	commitChange bool,
-) error {
+) (map[string][]*ModuleInstance, error) {
 	if len(instances) == 0 {
-		fmt.Printf("Skipping build since no module dependency is provided\n")
-		return nil
+		fmt.Println("Skipping build since no module dependency is provided")
+		return make(map[string][]*ModuleInstance), nil
 	}
 
-	toBeBuiltModules, err := system.tryResolveIncrementalBuild(instances, resolvedModules)
+	toBeBuiltModules, err := system.collectTransitiveDependencies(instances, resolvedModules)
 	if err != nil {
-		// if incrementalbuild fails, perform a full build.
+		// if incrementalBuild fails, perform a full build.
 		toBeBuiltModules = resolvedModules
 	}
 
@@ -1142,12 +1149,12 @@ func (system *ModuleSystem) IncrementalBuild(
 			prettyDir, _ := filepath.Rel(baseDirectory, physicalGenDir)
 			PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName, prettyDir, moduleIndex, moduleCount)
 			if err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange); err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 
-	return nil
+	return toBeBuiltModules, nil
 }
 
 // Build invokes the generator for a module instance and optionally writes the files to disk
