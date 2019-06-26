@@ -1023,6 +1023,7 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 }
 
 // getAllAncestors adds classInstance to classModules if any of the classModules is in the recursive dependency tree of the instance.
+// This method modifies the classModules in place.
 func getAllAncestors(classInstance *ModuleInstance, classModules map[string]*ModuleInstance) {
 	for _, instance := range classModules {
 		classInstanceTransitives, ok := classInstance.RecursiveDependencies[instance.ClassName]
@@ -1132,6 +1133,7 @@ func (system *ModuleSystem) IncrementalBuild(
 	toBeBuiltModules, err := system.collectTransitiveDependencies(instances, resolvedModules)
 	if err != nil {
 		// if incrementalBuild fails, perform a full build.
+		fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
 		toBeBuiltModules = resolvedModules
 	}
 
