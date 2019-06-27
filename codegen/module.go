@@ -1022,36 +1022,6 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 	return spec, true, nil
 }
 
-// getAllAncestors adds classInstance to classModules if any of the classModules is in the recursive dependency tree of the instance.
-// This method modifies the classModules in place.
-func getAllAncestors(classInstance *ModuleInstance, classModules map[string]*ModuleInstance) {
-	for _, instance := range classModules {
-		classInstanceTransitives, ok := classInstance.RecursiveDependencies[instance.ClassName]
-		if !ok {
-			continue
-		}
-
-		for _, classInstanceDependency := range classInstanceTransitives {
-			if classInstanceDependency.InstanceName == instance.InstanceName && classInstanceDependency.ClassName == instance.ClassName {
-				// toBeBuiltInstance is in the recursive dependency tree of classInstance
-
-				classModules[classInstance.InstanceName] = classInstance
-				fmt.Printf(
-					"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
-					classInstance.InstanceName,
-					classInstance.ClassName,
-					classInstance.ClassType,
-					instance.InstanceName,
-					instance.ClassName,
-					instance.ClassType,
-				)
-
-				break
-			}
-		}
-	}
-}
-
 // collectTransitiveDependencies walks up the tree of dependencies starting at the leaves provided by instances and
 // returns all visited nodes.
 func (system *ModuleSystem) collectTransitiveDependencies(
@@ -1099,11 +1069,41 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 		for _, classInstance := range classInstances {
 			// classInstance needs to be built if any of the dependencies that are to be built is in the recursive
 			// dependency tree of classInstance.
+			// e.g.,
+			// iterate over all modules of a given class order, .e.g, endpoint foo
+			// -> iterate over all modules that needs to be built, e.g., client bar needs building
+			// --> find all transitive dependencies of the module, e.g., transitive dependencies of endpoint foo
+			// ---> if the current module is in the transitive dependency of the module that needs to be built, e.g., foo has a dependency on bar
+			// ----> add current module to the list of modules that need to be built as well.
 			for _, className := range system.classOrder {
-				getAllAncestors(classInstance, toBeBuiltModulesUnique[className])
+				for _, instance := range toBeBuiltModulesUnique[className] {
+					classInstanceTransitives, ok := classInstance.RecursiveDependencies[instance.ClassName]
+					if !ok {
+						continue
+					}
+					for _, classInstanceDependency := range classInstanceTransitives {
+						if classInstanceDependency.InstanceName == instance.InstanceName && classInstanceDependency.ClassName == instance.ClassName {
+							// toBeBuiltInstance is in the recursive dependency tree of classInstance
+							toBeBuiltModulesUnique[classInstance.ClassName][classInstance.InstanceName] = classInstance
+							fmt.Printf(
+								"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
+								classInstance.InstanceName,
+								classInstance.ClassName,
+								classInstance.ClassType,
+								instance.InstanceName,
+								instance.ClassName,
+								instance.ClassType,
+							)
+
+							break
+						}
+					}
+				}
 			}
 		}
 	}
+
+	fmt.Printf("+%v\n", toBeBuiltModulesUnique)
 
 	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
 	for _, className := range system.classOrder {
