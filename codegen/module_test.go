@@ -589,29 +589,6 @@ func TestExampleServiceIncremental(t *testing.T) {
 		},
 	}
 
-	expectedEmbeddedClient := ModuleInstance{
-		BaseDirectory: testServiceDir,
-		ClassName:     "client",
-		ClassType:     "http",
-		Directory:     "endpoints/health/embedded-client",
-		InstanceName:  "endpoints/health/embedded-client",
-		JSONFileName:  "",
-		YAMLFileName:  "client-config.yaml",
-		PackageInfo: &PackageInfo{
-			ExportName:            "NewClient",
-			ExportType:            "Client",
-			GeneratedPackageAlias: "embeddedClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health/embedded-client",
-			IsExportGenerated:     true,
-			PackageAlias:          "embeddedClientStatic",
-			PackageName:           "embeddedClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health/embedded-client",
-		},
-		Dependencies:          []ModuleDependency{},
-		ResolvedDependencies:  map[string][]*ModuleInstance{},
-		RecursiveDependencies: map[string][]*ModuleInstance{},
-	}
-
 	expectedHealthEndpointInstance := ModuleInstance{
 		BaseDirectory: testServiceDir,
 		ClassName:     "endpoint",
@@ -728,8 +705,6 @@ func TestExampleServiceIncremental(t *testing.T) {
 
 	expectedClients := []*ModuleInstance{
 		&expectedClientInstance,
-		&expectedClientDependency,
-		&expectedEmbeddedClient,
 	}
 	expectedEndpoints := []*ModuleInstance{
 		&expectedHealthEndpointInstance,
@@ -1857,4 +1832,159 @@ func TestModuleSearchDuplicateGlobs(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, []string{"client"}, instances["client"][0].DependencyOrder)
+}
+
+func TestTransitiveSimple(t *testing.T) {
+	ls := &ModuleInstance{
+		InstanceName: "location-store",
+		ClassName: "client",
+	}
+	endpoint := &ModuleInstance{
+		InstanceName: "getLocation",
+		ClassName: "endpoint",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {ls},
+		},
+	}
+	service := &ModuleInstance{
+		InstanceName: "edge-gateway",
+		ClassName: "service",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"endpoint": {endpoint},
+		},
+	}
+
+	graph := map[string][]*ModuleInstance{
+		"client": {ls},
+		"endpoint": {endpoint},
+		"service": {service},
+	}
+
+	ms := &ModuleSystem{
+		classOrder: []string{"client", "endpoint", "service"},
+	}
+	results, err := ms.collectTransitiveDependencies([]ModuleDependency{
+		{
+			InstanceName: "location-store",
+			ClassName: "client",
+		},
+	}, graph)
+	assert.NoError(t, err)
+
+	t.Logf("%+v", results)
+
+	assert.Len(t, results["client"], 1)
+	assert.Equal(t, "location-store", results["client"][0].InstanceName)
+	assert.Len(t, results["endpoint"], 1)
+	assert.Equal(t, "getLocation", results["endpoint"][0].InstanceName)
+	assert.Len(t, results["service"], 1)
+	assert.Equal(t, "edge-gateway", results["service"][0].InstanceName)
+}
+
+func TestTransitiveMultipleClients(t *testing.T) {
+	pp := &ModuleInstance{
+		InstanceName: "passport",
+		ClassName: "client",
+	}
+	ls := &ModuleInstance{
+		InstanceName: "location-store",
+		ClassName: "client",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {pp},
+		},
+	}
+	endpoint := &ModuleInstance{
+		InstanceName: "getLocation",
+		ClassName: "endpoint",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {ls},
+		},
+	}
+	service := &ModuleInstance{
+		InstanceName: "edge-gateway",
+		ClassName: "service",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"endpoint": {endpoint},
+		},
+	}
+
+	graph := map[string][]*ModuleInstance{
+		"client": {ls, pp},
+		"endpoint": {endpoint},
+		"service": {service},
+	}
+
+	ms := &ModuleSystem{
+		classOrder: []string{"client", "endpoint", "service"},
+	}
+	results, err := ms.collectTransitiveDependencies([]ModuleDependency{
+		{
+			InstanceName: "passport",
+			ClassName: "client",
+		},
+	}, graph)
+	assert.NoError(t, err)
+
+	t.Logf("%+v", results)
+
+	assert.Len(t, results["client"], 2)
+	// map iteration order is undefined
+	clients := make(map[string]*ModuleInstance)
+	for _, instance := range results["client"] {
+		clients[instance.InstanceName] = instance
+	}
+	assert.NotNil(t, clients["location-store"])
+	assert.NotNil(t, clients["passport"])
+	assert.Len(t, results["endpoint"], 1)
+	assert.Equal(t, "getLocation", results["endpoint"][0].InstanceName)
+	assert.Len(t, results["service"], 1)
+	assert.Equal(t, "edge-gateway", results["service"][0].InstanceName)
+}
+
+func TestTransitiveDoesntBuildUnrelated(t *testing.T) {
+	ls := &ModuleInstance{
+		InstanceName: "location-store",
+		ClassName: "client",
+	}
+	endpoint := &ModuleInstance{
+		InstanceName: "getLocation",
+		ClassName: "endpoint",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {ls},
+		},
+	}
+
+	unused := &ModuleInstance{
+		InstanceName: "getLocation",
+		ClassName: "endpoint",
+	}
+	service := &ModuleInstance{
+		InstanceName: "edge-gateway",
+		ClassName: "service",
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"endpoint": {endpoint},
+		},
+	}
+
+	graph := map[string][]*ModuleInstance{
+		"client": {ls},
+		"endpoint": {endpoint, unused},
+		"service": {service},
+	}
+
+	ms := &ModuleSystem{
+		classOrder: []string{"client", "endpoint", "service"},
+	}
+	results, err := ms.collectTransitiveDependencies([]ModuleDependency{
+		{
+			InstanceName: "location-store",
+			ClassName: "client",
+		},
+	}, graph)
+	assert.NoError(t, err)
+
+	t.Logf("%+v", results)
+
+	assert.Len(t, results["endpoint"], 1)
+	assert.Equal(t, "getLocation", results["endpoint"][0].InstanceName)
 }

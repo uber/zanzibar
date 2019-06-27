@@ -1022,95 +1022,70 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 	return spec, true, nil
 }
 
-// getAllAncestors adds classInstance to classModules if any of the classModules is in the recursive dependency tree of the instance.
-// This method modifies the classModules in place.
-func getAllAncestors(classInstance *ModuleInstance, classModules map[string]*ModuleInstance) {
-	for _, instance := range classModules {
-		classInstanceTransitives, ok := classInstance.RecursiveDependencies[instance.ClassName]
-		if !ok {
-			continue
-		}
-
-		for _, classInstanceDependency := range classInstanceTransitives {
-			if classInstanceDependency.InstanceName == instance.InstanceName && classInstanceDependency.ClassName == instance.ClassName {
-				// toBeBuiltInstance is in the recursive dependency tree of classInstance
-
-				classModules[classInstance.InstanceName] = classInstance
-				fmt.Printf(
-					"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
-					classInstance.InstanceName,
-					classInstance.ClassName,
-					classInstance.ClassType,
-					instance.InstanceName,
-					instance.ClassName,
-					instance.ClassType,
-				)
-
-				break
-			}
-		}
-	}
-}
-
-// collectTransitiveDependencies walks up the tree of dependencies starting at the leaves provided by instances and
-// returns all visited nodes.
+// collectTransitiveDependencies will collect every instance in resolvedModules that depends on something in initialInstances.
 func (system *ModuleSystem) collectTransitiveDependencies(
-	instances []ModuleDependency,
-	resolvedModules map[string][]*ModuleInstance,
+	initialInstances []ModuleDependency,
+	allModules map[string][]*ModuleInstance,
 ) (map[string][]*ModuleInstance, error) {
 
-	toBeBuiltModulesUnique := make(map[string]map[string]*ModuleInstance, 0)
-	for _, className := range system.classOrder {
-		toBeBuiltModulesUnique[className] = make(map[string]*ModuleInstance, 0)
-	}
+	toBeBuiltModules := make(map[ModuleDependency]*ModuleInstance, 0)
 
 	for _, className := range system.classOrder {
-		// convert input []ModuleDependency to resolved []*ModuleInstance for this first loop over classInstances
-		classInstances := resolvedModules[className]
-		for _, classInstance := range classInstances {
-			spec, ok, err := system.getSpec(classInstance)
-			if err != nil {
-				return nil, err
-			}
-			if ok {
-				classInstance.genSpec = spec
-			}
 
+		// Convert every ModuleDependency to its corresponding *ModuleInstance
+		for _, instance := range allModules[className] {
 			found := false
-			for _, instance := range instances {
-				if instance.ClassName == classInstance.ClassName && instance.InstanceName == classInstance.InstanceName {
-					toBeBuiltModulesUnique[classInstance.ClassName][classInstance.InstanceName] = classInstance
+
+			for _, initialInstance := range initialInstances {
+				if initialInstance.equal(instance) {
+					toBeBuiltModules[instance.AsModuleDependency()] = instance
 					found = true
 					break
 				}
 			}
+
 			if !found {
 				fmt.Printf(
 					"Skipping generation of %q %q class of type %q "+
 						"as not needed for incremental build\n",
-					classInstance.InstanceName,
-					classInstance.ClassName,
-					classInstance.ClassType,
+					instance.InstanceName,
+					instance.ClassName,
+					instance.ClassType,
 				)
 			}
 		}
 
-		// Collect all things of that depend (directly or indirectly) on something in toBeBuiltModulesUnique.
-		for _, classInstance := range classInstances {
-			// classInstance needs to be built if any of the dependencies that are to be built is in the recursive
-			// dependency tree of classInstance.
-			for _, className := range system.classOrder {
-				getAllAncestors(classInstance, toBeBuiltModulesUnique[className])
+		// Collect all the ModuleInstances that depend on anything from toBeBuiltModules
+		for _, instance := range allModules[className] {
+			for _, dependentInstance := range toBeBuiltModules {
+				classInstanceTransitives := instance.RecursiveDependencies[dependentInstance.ClassName]
+				for _, classInstanceDependency := range classInstanceTransitives {
+					if classInstanceDependency.equal(dependentInstance) {
+						toBeBuiltModules[instance.AsModuleDependency()] = instance
+						fmt.Printf(
+							"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
+							instance.InstanceName,
+							instance.ClassName,
+							instance.ClassType,
+							dependentInstance.InstanceName,
+							dependentInstance.ClassName,
+							dependentInstance.ClassType,
+						)
+
+						break
+					}
+				}
 			}
 		}
 	}
 
 	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
-	for _, className := range system.classOrder {
-		toBeBuiltModulesList[className] = make([]*ModuleInstance, 0, len(toBeBuiltModulesUnique[className]))
-		for _, classInstance := range toBeBuiltModulesUnique[className] {
-			toBeBuiltModulesList[className] = append(toBeBuiltModulesList[className], classInstance)
+	for _, instance := range toBeBuiltModules {
+		if _, ok := toBeBuiltModulesList[instance.ClassName]; !ok {
+			toBeBuiltModulesList[instance.ClassName] = make([]*ModuleInstance, 0)
 		}
+
+		toBeBuiltModulesList[instance.ClassName] = append(toBeBuiltModulesList[instance.ClassName], instance)
 	}
 
 	return toBeBuiltModulesList, nil
@@ -1484,12 +1459,29 @@ func (instance *ModuleInstance) GeneratedSpec() interface{} {
 	return instance.genSpec
 }
 
+// Equal checks equality of two ModuleInstances
+func (instance *ModuleInstance) equal(other *ModuleInstance) bool {
+	return instance.InstanceName == other.InstanceName && instance.ClassName == other.ClassName
+}
+
+// AsModuleDependency creates an equivalent ModuleDependency object for this instance
+func (instance *ModuleInstance) AsModuleDependency() ModuleDependency {
+	return ModuleDependency{
+		InstanceName: instance.InstanceName,
+		ClassName: instance.ClassName,
+	}
+}
+
 // ModuleDependency defines a module instance required by another instance
 type ModuleDependency struct {
 	// ClassName is the name of the class as defined in the module system
 	ClassName string
 	// InstanceName is the name of the dependency instance as configu
 	InstanceName string
+}
+
+func (m ModuleDependency) equal(other *ModuleInstance) bool {
+	return m.InstanceName == other.InstanceName && m.ClassName == other.ClassName
 }
 
 // ClassConfigBase defines the shared data fields for all class configs.
