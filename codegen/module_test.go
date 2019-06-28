@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -43,28 +42,47 @@ type TestClientSpec struct {
 	Info string
 }
 
+type TestEndpointSpec struct {
+	Info string
+}
+
+var tSpec = &TestClientSpec {
+	Info: "tchannel",
+}
+var hSpec = &TestClientSpec {
+	Info: "http",
+}
+
 type TestHTTPClientGenerator struct{}
 
-func (*TestHTTPClientGenerator) Generate(
+func (t *TestHTTPClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	return &BuildResult{
-		Spec: &TestClientSpec{
-			Info: "http",
-		},
+		Spec: &hSpec,
 	}, nil
+}
+
+func (*TestHTTPClientGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return &hSpec, nil
 }
 
 type TestTChannelClientGenerator struct{}
 
-func (*TestTChannelClientGenerator) Generate(
+func (t *TestTChannelClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	return &BuildResult{
-		Spec: &TestClientSpec{
-			Info: "tchannel",
-		},
+		Spec: &tSpec,
 	}, nil
+}
+
+func (*TestTChannelClientGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return &tSpec, nil
 }
 
 type TestHTTPEndpointGenerator struct{}
@@ -73,6 +91,14 @@ func (*TestHTTPEndpointGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	return nil, nil
+}
+
+func (*TestHTTPEndpointGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return &TestEndpointSpec{
+		Info: "http",
+	}, nil
 }
 
 func TestExampleService(t *testing.T) {
@@ -726,9 +752,6 @@ func TestExampleServiceIncremental(t *testing.T) {
 		})
 
 		if className == "client" {
-			fmt.Printf("+%v\n", classInstances)
-			fmt.Printf("+%v\n", expectedClients)
-
 			if len(classInstances) != len(expectedClients) {
 				t.Errorf(
 					"Expected %d client class instance but found %d",
@@ -741,9 +764,6 @@ func TestExampleServiceIncremental(t *testing.T) {
 				compareInstances(t, instance, expectedClients[i])
 			}
 		} else if className == "endpoint" {
-			fmt.Printf("+%v\n", classInstances)
-			fmt.Printf("+%v\n", expectedEndpoints)
-
 			if len(classInstances) != len(expectedEndpoints) {
 				t.Errorf(
 					"Expected %d endpoint class instance but found %d",
@@ -752,19 +772,14 @@ func TestExampleServiceIncremental(t *testing.T) {
 				)
 			}
 
-			sort.Slice(classInstances, func(i, j int) bool {
-				return classInstances[i].InstanceName < classInstances[j].InstanceName
-			})
-
-			sort.Slice(expectedEndpoints, func(i, j int) bool {
-				return expectedEndpoints[i].InstanceName < expectedEndpoints[j].InstanceName
-			})
-
 			for i, instance := range classInstances {
 				compareInstances(t, instance, expectedEndpoints[i])
 
 				clientDependency := instance.ResolvedDependencies["client"][0]
-				clientSpec := clientDependency.GeneratedSpec().(*TestClientSpec)
+				clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
+				if !ok {
+					t.Errorf("type casting failed %s\n", clientDependency)
+				}
 
 				if clientSpec.Info != instance.ClassType {
 					t.Errorf(
