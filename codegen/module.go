@@ -1490,7 +1490,7 @@ func (instance *ModuleInstance) equal(other *ModuleInstance) bool {
 func (instance *ModuleInstance) AsModuleDependency() ModuleDependency {
 	return ModuleDependency{
 		InstanceName: instance.InstanceName,
-		ClassName: instance.ClassName,
+		ClassName:    instance.ClassName,
 	}
 }
 

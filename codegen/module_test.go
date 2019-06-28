@@ -46,10 +46,10 @@ type TestEndpointSpec struct {
 	Info string
 }
 
-var tSpec = &TestClientSpec {
+var tSpec = &TestClientSpec{
 	Info: "tchannel",
 }
-var hSpec = &TestClientSpec {
+var hSpec = &TestClientSpec{
 	Info: "http",
 }
 
@@ -1852,27 +1852,27 @@ func TestModuleSearchDuplicateGlobs(t *testing.T) {
 func TestTransitiveSimple(t *testing.T) {
 	ls := &ModuleInstance{
 		InstanceName: "location-store",
-		ClassName: "client",
+		ClassName:    "client",
 	}
 	endpoint := &ModuleInstance{
 		InstanceName: "getLocation",
-		ClassName: "endpoint",
+		ClassName:    "endpoint",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"client": {ls},
 		},
 	}
 	service := &ModuleInstance{
 		InstanceName: "edge-gateway",
-		ClassName: "service",
+		ClassName:    "service",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"endpoint": {endpoint},
 		},
 	}
 
 	graph := map[string][]*ModuleInstance{
-		"client": {ls},
+		"client":   {ls},
 		"endpoint": {endpoint},
-		"service": {service},
+		"service":  {service},
 	}
 
 	ms := &ModuleSystem{
@@ -1881,7 +1881,7 @@ func TestTransitiveSimple(t *testing.T) {
 	results, err := ms.collectTransitiveDependencies([]ModuleDependency{
 		{
 			InstanceName: "location-store",
-			ClassName: "client",
+			ClassName:    "client",
 		},
 	}, graph)
 	assert.NoError(t, err)
@@ -1899,34 +1899,34 @@ func TestTransitiveSimple(t *testing.T) {
 func TestTransitiveMultipleClients(t *testing.T) {
 	pp := &ModuleInstance{
 		InstanceName: "passport",
-		ClassName: "client",
+		ClassName:    "client",
 	}
 	ls := &ModuleInstance{
 		InstanceName: "location-store",
-		ClassName: "client",
+		ClassName:    "client",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"client": {pp},
 		},
 	}
 	endpoint := &ModuleInstance{
 		InstanceName: "getLocation",
-		ClassName: "endpoint",
+		ClassName:    "endpoint",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"client": {ls},
 		},
 	}
 	service := &ModuleInstance{
 		InstanceName: "edge-gateway",
-		ClassName: "service",
+		ClassName:    "service",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"endpoint": {endpoint},
 		},
 	}
 
 	graph := map[string][]*ModuleInstance{
-		"client": {ls, pp},
+		"client":   {ls, pp},
 		"endpoint": {endpoint},
-		"service": {service},
+		"service":  {service},
 	}
 
 	ms := &ModuleSystem{
@@ -1935,7 +1935,7 @@ func TestTransitiveMultipleClients(t *testing.T) {
 	results, err := ms.collectTransitiveDependencies([]ModuleDependency{
 		{
 			InstanceName: "passport",
-			ClassName: "client",
+			ClassName:    "client",
 		},
 	}, graph)
 	assert.NoError(t, err)
@@ -1959,11 +1959,11 @@ func TestTransitiveMultipleClients(t *testing.T) {
 func TestTransitiveDoesntBuildUnrelated(t *testing.T) {
 	ls := &ModuleInstance{
 		InstanceName: "location-store",
-		ClassName: "client",
+		ClassName:    "client",
 	}
 	endpoint := &ModuleInstance{
 		InstanceName: "getLocation",
-		ClassName: "endpoint",
+		ClassName:    "endpoint",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"client": {ls},
 		},
@@ -1971,20 +1971,20 @@ func TestTransitiveDoesntBuildUnrelated(t *testing.T) {
 
 	unused := &ModuleInstance{
 		InstanceName: "getLocation",
-		ClassName: "endpoint",
+		ClassName:    "endpoint",
 	}
 	service := &ModuleInstance{
 		InstanceName: "edge-gateway",
-		ClassName: "service",
+		ClassName:    "service",
 		RecursiveDependencies: map[string][]*ModuleInstance{
 			"endpoint": {endpoint},
 		},
 	}
 
 	graph := map[string][]*ModuleInstance{
-		"client": {ls},
+		"client":   {ls},
 		"endpoint": {endpoint, unused},
-		"service": {service},
+		"service":  {service},
 	}
 
 	ms := &ModuleSystem{
@@ -1993,7 +1993,7 @@ func TestTransitiveDoesntBuildUnrelated(t *testing.T) {
 	results, err := ms.collectTransitiveDependencies([]ModuleDependency{
 		{
 			InstanceName: "location-store",
-			ClassName: "client",
+			ClassName:    "client",
 		},
 	}, graph)
 	assert.NoError(t, err)
