@@ -1100,16 +1100,38 @@ func (system *ModuleSystem) IncrementalBuild(
 	resolvedModules map[string][]*ModuleInstance,
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
+
 	if len(instances) == 0 {
 		fmt.Println("Skipping build since no module dependency is provided")
 		return make(map[string][]*ModuleInstance), nil
 	}
 
-	toBeBuiltModules, err := system.collectTransitiveDependencies(instances, resolvedModules)
-	if err != nil {
-		// if incrementalBuild fails, perform a full build.
-		fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
-		toBeBuiltModules = resolvedModules
+	toBeBuiltModules := make(map[string][]*ModuleInstance)
+
+	for _, className := range system.classOrder {
+		for _, instance := range resolvedModules[className] {
+			spec, ok, err := system.getSpec(instance)
+			if err != nil {
+				// if incrementalBuild fails, perform a full build.
+				fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
+				toBeBuiltModules = resolvedModules
+			}
+			if ok {
+				instance.genSpec = spec
+			}
+		}
+	}
+
+	// If toBeBuiltModules is not empty already, it is likely that one of the modules does not implement
+	// the SpecProvider interface, hence incremental build is not possible.
+	if len(toBeBuiltModules) == 0 {
+		var err error
+		toBeBuiltModules, err = system.collectTransitiveDependencies(instances, resolvedModules)
+		if err != nil {
+			// if incrementalBuild fails, perform a full build.
+			fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
+			toBeBuiltModules = resolvedModules
+		}
 	}
 
 	moduleCount := 0
