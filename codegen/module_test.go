@@ -46,10 +46,10 @@ type TestEndpointSpec struct {
 	Info string
 }
 
-var tSpec = &TestClientSpec{
+var tSpec = TestClientSpec{
 	Info: "tchannel",
 }
-var hSpec = &TestClientSpec{
+var hSpec = TestClientSpec{
 	Info: "http",
 }
 
