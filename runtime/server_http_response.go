@@ -218,18 +218,24 @@ func (res *ServerHTTPResponse) WriteJSON(
 		return
 	}
 
+	contentTypePresent := false
 	if headers != nil {
 		for _, k := range headers.Keys() {
 			v, ok := headers.Get(k)
 			if ok {
+				if k == "Content-Type" {
+					contentTypePresent = true
+				}
 				res.responseWriter.Header().Set(k, v)
 			}
 		}
 	}
 
-	res.responseWriter.Header().
-		Set("content-type", "application/json")
-
+	// Set the content-type to application/json if not already available
+	if !contentTypePresent {
+		res.responseWriter.Header().
+			Set("content-type", "application/json")
+	}
 	res.pendingStatusCode = statusCode
 	res.pendingBodyBytes = bytes
 	res.pendingBodyObj = body
