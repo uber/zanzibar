@@ -1,0 +1,152 @@
+// Copyright (c) 2019 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+package router
+
+import (
+	"context"
+	"net/http"
+)
+
+// Router dispatches http requests to a registered http.Handler.
+// It implements a similar interface to the one in github.com/julienschmidt/httprouter,
+// the main differences are:
+// 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175)
+// 2. this router does not treat "/a/:b" and "/a/:c" as different routes (https://github.com/julienschmidt/httprouter/issues/6)
+// 3. this router does tno treat "/a" and "/a/" as different routes
+type Router struct {
+	tries map[string]*Trie
+
+	// If enabled, the router checks if another method is allowed for the
+	// current route, if the current request can not be routed.
+	// If this is the case, the request is answered with 'Method Not Allowed'
+	// and HTTP status code 405.
+	// If no other Method is allowed, the request is delegated to the NotFound
+	// handler.
+	HandleMethodNotAllowed bool
+
+	// Configurable http.Handler which is called when a request
+	// cannot be routed and HandleMethodNotAllowed is true.
+	// If it is not set, http.Error with http.StatusMethodNotAllowed is used.
+	// The "Allow" header with allowed request methods is set before the handler
+	// is called.
+	MethodNotAllowed http.Handler
+
+	// Configurable http.Handler which is called when no matching route is
+	// found. If it is not set, http.NotFound is used.
+	NotFound http.Handler
+
+	// Function to handle panics recovered from http handlers.
+	// It should be used to generate a error page and return the http error code
+	// 500 (Internal Server Error).
+	// The handler can be used to keep your server from crashing because of
+	// unrecovered panics.
+	PanicHandler func(http.ResponseWriter, *http.Request, interface{})
+
+	// TODO: (clu) maybe support OPTIONS
+}
+
+type paramsKey string
+
+// urlParamsKey is the request context key under which URL params are stored.
+const urlParamsKey = paramsKey("urlParamsKey")
+
+// ParamsFromContext pulls the URL parameters from a request context,
+// or returns nil if none are present.
+func ParamsFromContext(ctx context.Context) []Param {
+	p, _ := ctx.Value(urlParamsKey).([]Param)
+	return p
+}
+
+// Handle registers a http.Handler for given method and path.
+func (r *Router) Handle(method, path string, handler http.Handler) error {
+	if r.tries == nil {
+		r.tries = make(map[string]*Trie)
+	}
+
+	trie, ok := r.tries[method]
+	if !ok {
+		trie = NewTrie()
+		r.tries[method] = trie
+	}
+	return trie.Set(path, handler)
+}
+
+// ServeHTTP dispatches the request to a register handler to handle.
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if r.PanicHandler != nil {
+		defer func(w http.ResponseWriter, req *http.Request) {
+			if recovered := recover(); recovered != nil {
+				r.PanicHandler(w, req, recovered)
+			}
+		}(w, req)
+	}
+
+	reqPath := req.URL.Path
+	if trie, ok := r.tries[req.Method]; ok {
+		if handler, params, err := trie.Get(reqPath); err == nil {
+			ctx := context.WithValue(req.Context(), urlParamsKey, params)
+			req = req.WithContext(ctx)
+			handler.ServeHTTP(w, req)
+			return
+		}
+	}
+
+	if r.HandleMethodNotAllowed {
+		if allowed := r.allowed(reqPath, req.Method); allowed != "" {
+			w.Header().Set("Allow", allowed)
+			if r.MethodNotAllowed != nil {
+				r.MethodNotAllowed.ServeHTTP(w, req)
+			} else {
+				http.Error(w,
+					http.StatusText(http.StatusMethodNotAllowed),
+					http.StatusMethodNotAllowed,
+				)
+			}
+			return
+		}
+	}
+
+	if r.NotFound != nil {
+		r.NotFound.ServeHTTP(w, req)
+	} else {
+		http.NotFound(w, req)
+	}
+}
+
+func (r *Router) allowed(path, reqMethod string) string {
+	allow := ""
+
+	for method, trie := range r.tries {
+		if method == reqMethod || method == "OPTIONS" {
+			continue
+		}
+
+		if _, _, err := trie.Get(path); err == nil {
+			if len(allow) == 0 {
+				allow = method
+			} else {
+				allow += ", " + method
+			}
+		}
+	}
+
+	return allow
+}
