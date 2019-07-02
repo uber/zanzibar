@@ -178,13 +178,6 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 
 // Register register a handler function.
 func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (err error) {
-	defer func() {
-		recoveredValue := recover()
-		if recoveredValue != nil {
-			err = fmt.Errorf("caught error when registering %s %s: %+v", method, prefix, recoveredValue)
-		}
-	}()
-
 	h := func(w http.ResponseWriter, r *http.Request) {
 		reqUUID := r.Header.Get(router.requestUUIDHeaderKey)
 		if reqUUID == "" {
