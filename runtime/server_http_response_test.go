@@ -365,6 +365,69 @@ func TestResponseSetHeaders(t *testing.T) {
 	)
 }
 
+func TestWriteJSONWithContentType(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	headers := zanzibar.ServerHTTPHeader{}
+	headers.Set("foo", "bar")
+	headers.Set("Content-Type", "application/test+json")
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, headers, &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				})
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 200)
+	assert.Equal(
+		t,
+		resp.Header.Get("foo"),
+		"bar",
+	)
+	// Ensure content-type is set for JSON body.
+	assert.Equal(
+		t,
+		resp.Header.Get("Content-type"),
+		"application/test+json",
+	)
+}
+
 func TestResponsePeekBodyError(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
