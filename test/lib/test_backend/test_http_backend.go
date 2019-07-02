@@ -25,8 +25,8 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/uber/zanzibar/runtime"
+	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
 )
 
@@ -38,7 +38,7 @@ type TestHTTPBackend struct {
 	RealPort  int32
 	RealAddr  string
 	WaitGroup *sync.WaitGroup
-	router    *httprouter.Router
+	router    *zrouter.Router
 }
 
 // BuildHTTPBackends returns a map of backends based on config
@@ -83,7 +83,7 @@ func (backend *TestHTTPBackend) Bootstrap() error {
 func (backend *TestHTTPBackend) HandleFunc(
 	method string, path string, handler http.HandlerFunc,
 ) {
-	backend.router.HandlerFunc(method, path, handler)
+	_ = backend.router.Handle(method, path, handler)
 }
 
 // Close ...
@@ -103,7 +103,7 @@ func CreateHTTPBackend(port int32) *TestHTTPBackend {
 		IP:        "127.0.0.1",
 		Port:      port,
 		WaitGroup: &sync.WaitGroup{},
-		router: &httprouter.Router{
+		router: &zrouter.Router{
 			HandleMethodNotAllowed: true,
 		},
 	}

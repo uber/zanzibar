@@ -39,7 +39,7 @@ func TestHandle(t *testing.T) {
 	assert.NoError(t, err, "unexpected error")
 
 	req, _ := http.NewRequest("GET", "/foo", nil)
-	r.ServeHttp(nil, req)
+	r.ServeHTTP(nil, req)
 	assert.True(t, handled)
 }
 
@@ -58,7 +58,7 @@ func TestParamsFromContext(t *testing.T) {
 	assert.NoError(t, err, "unexpected error")
 
 	req, _ := http.NewRequest("GET", "/foo", nil)
-	r.ServeHttp(nil, req)
+	r.ServeHTTP(nil, req)
 	assert.True(t, handled)
 }
 
@@ -77,7 +77,7 @@ func TestPanicHandler(t *testing.T) {
 	assert.NoError(t, err, "unexpected error")
 
 	req, _ := http.NewRequest("GET", "/foo", nil)
-	r.ServeHttp(nil, req)
+	r.ServeHTTP(nil, req)
 	assert.True(t, handled)
 }
 
@@ -98,7 +98,7 @@ func TestMethodNotAllowedDefault(t *testing.T) {
 
 	req, _ := http.NewRequest("PUT", "/foo", nil)
 	res := httptest.NewRecorder()
-	r.ServeHttp(res, req)
+	r.ServeHTTP(res, req)
 	assert.False(t, handled)
 	assert.Equal(t, http.StatusMethodNotAllowed, res.Result().StatusCode)
 	assert.Equal(t, "GET", res.Result().Header.Get("Allow"))
@@ -127,7 +127,7 @@ func TestMethodNotAllowedCustom(t *testing.T) {
 
 	req, _ := http.NewRequest("PUT", "/foo", nil)
 	res := httptest.NewRecorder()
-	r.ServeHttp(res, req)
+	r.ServeHTTP(res, req)
 	assert.False(t, handled)
 	assert.Equal(t, "42", res.Result().Header.Get("life"))
 	assert.Equal(t, "GET, POST", res.Result().Header.Get("Allow"))
@@ -138,7 +138,7 @@ func TestNotFoundDefault(t *testing.T) {
 
 	req, _ := http.NewRequest("GET", "/foo", nil)
 	res := httptest.NewRecorder()
-	r.ServeHttp(res, req)
+	r.ServeHTTP(res, req)
 	assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
 }
 
@@ -153,7 +153,7 @@ func TestNotFoundCustom(t *testing.T) {
 
 	req, _ := http.NewRequest("GET", "/foo", nil)
 	res := httptest.NewRecorder()
-	r.ServeHttp(res, req)
+	r.ServeHTTP(res, req)
 	assert.True(t, handled)
 	assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
 }

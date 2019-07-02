@@ -81,8 +81,8 @@ func (s *routerSuite) TestRouter() {
 	}{
 		{"GET", "/notfound", nil, http.StatusNotFound, []byte("404 page not found\n")},
 		{"GET", "/noslash", nil, http.StatusOK, []byte("noslash\n")},
-		{"GET", "/noslash/", nil, http.StatusMovedPermanently, []byte(`<a href="/noslash">Moved Permanently</a>.` + "\n\n")},
-		{"GET", "/withslash", nil, http.StatusMovedPermanently, []byte(`<a href="/withslash/">Moved Permanently</a>.` + "\n\n")},
+		{"GET", "/noslash/", nil, http.StatusOK, []byte("noslash\n")},
+		{"GET", "/withslash", nil, http.StatusOK, []byte("withslash\n")},
 		{"GET", "/withslash/", nil, http.StatusOK, []byte("withslash\n")},
 		{"GET", "/postonly", nil, http.StatusMethodNotAllowed, []byte("Method Not Allowed\n")},
 		{"GET", "/panicerror", nil, http.StatusInternalServerError, []byte("Internal Server Error\n")},

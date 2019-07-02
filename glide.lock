@@ -77,8 +77,6 @@ imports:
   version: c0795c8afcf41dd1d786bebce68636c199b3bb45
 - name: github.com/jteeuwen/go-bindata
   version: 6025e8de665b31fa74ab1a66f2cddd8c0abf887e
-- name: github.com/julienschmidt/httprouter
-  version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
 - name: github.com/kardianos/osext
   version: 2bc1f35cddc0cc527b4bc3dce8578fc2a6c11384
 - name: github.com/kisielk/errcheck
