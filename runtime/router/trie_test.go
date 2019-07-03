@@ -144,6 +144,27 @@ func TestTriePathsWithPatten(t *testing.T) {
 
 	trie = NewTrie()
 	tests = []ts{
+		// test ":a" is not treated as a pattern when queried as a url
+		{op: set, path: "/a", value: "foo"},
+		{op: get, path: "/:a", errMsg: errNotFound.Error()},
+
+		{op: set, path: "/a:b", value: "bar"},
+		{op: set, path: "/a:c", value: "baz"},
+		{op: get, path: "/a:b", expectedValue: "bar"},
+		{op: get, path: "/ac", errMsg: errNotFound.Error()},
+		{op: get, path: "/a:", errMsg: errNotFound.Error()},
+	}
+	runTrieTests(t, trie, tests)
+
+	trie = NewTrie()
+	tests = []ts{
+		{op: set, path: "/:a", value: "foo"},
+		{op: get, path: "/:a", expectedValue: "foo", expectedParams: []Param{{"a", ":a"}}},
+	}
+	runTrieTests(t, trie, tests)
+
+	trie = NewTrie()
+	tests = []ts{
 		// test "/a" does not collide with "/:a/b"
 		{op: set, path: "/:a/b", value: "foo"},
 		{op: set, path: "/a", value: "bar"},

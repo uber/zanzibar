@@ -23,6 +23,8 @@ package router
 import (
 	"context"
 	"net/http"
+	"sort"
+	"strings"
 )
 
 // Router dispatches http requests to a registered http.Handler.
@@ -30,7 +32,7 @@ import (
 // the main differences are:
 // 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175)
 // 2. this router does not treat "/a/:b" and "/a/:c" as different routes (https://github.com/julienschmidt/httprouter/issues/6)
-// 3. this router does tno treat "/a" and "/a/" as different routes
+// 3. this router does not treat "/a" and "/a/" as different routes
 type Router struct {
 	tries map[string]*Trie
 
@@ -132,21 +134,20 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) allowed(path, reqMethod string) string {
-	allow := ""
+	var allow []string
 
 	for method, trie := range r.tries {
-		if method == reqMethod || method == "OPTIONS" {
+		if method == reqMethod || method == http.MethodOptions {
 			continue
 		}
 
 		if _, _, err := trie.Get(path); err == nil {
-			if len(allow) == 0 {
-				allow = method
-			} else {
-				allow += ", " + method
-			}
+			allow = append(allow, method)
 		}
 	}
+	sort.Slice(allow, func(i, j int) bool {
+		return allow[i] < allow[j]
+	})
 
-	return allow
+	return strings.Join(allow, ", ")
 }
