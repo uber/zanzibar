@@ -651,6 +651,25 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 	return true
 }
 
+// WriteBytesBody replace the request body
+// we only change things cached in this layer, not in the raw httpRequest
+// Assumption is that encoding does not change
+func (req *ServerHTTPRequest) WriteBytesBody(
+	body []byte) bool {
+	if body == nil {
+		req.logger.Error("Could not serialize nil pointer body")
+		return false
+	}
+
+	// Replace the cached body bytes and fix dependent header
+	req.rawBody = body
+	if _, ok := req.Header.Get("Content-Length"); ok {
+		req.Header.Set("Content-Length", strconv.Itoa(len(body)))
+	}
+
+	return true
+}
+
 // GetSpan returns the http request span
 func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 	return req.span
