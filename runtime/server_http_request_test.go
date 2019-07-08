@@ -1448,6 +1448,64 @@ func TestPeekBody(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 }
 
+func TestReplaceBody(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				_, success := req.ReadAll()
+				assert.True(t, success)
+				assert.NotEqual(t, 0, len(req.GetRawBody()))
+
+				value, vType, err := req.PeekBody("arg1", "b1", "c1")
+				assert.NoError(t, err, "do not expect error")
+				assert.Equal(t, []byte("result"), value)
+				assert.Equal(t, jsonparser.String, vType)
+
+				req.ReplaceBody([]byte(`{"arg1":{"b2":"foo"}}`))
+				_, _, err = req.PeekBody("arg1", "b1")
+				assert.Error(t, err, "expected this to have been replaced already")
+				value, vType, err = req.PeekBody("arg1", "b2")
+				assert.NoError(t, err, "do not expect error")
+				assert.Equal(t, []byte("foo"), value)
+				assert.Equal(t, jsonparser.String, vType)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := gateway.MakeRequest("POST", "/foo?foo=bar", nil, bytes.NewReader([]byte(`{"arg1":{"b1":{"c1":"result","d1":"efg"}}}`)))
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, "200 OK", resp.Status)
+}
+
 func TestSpanCreated(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
