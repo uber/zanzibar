@@ -660,8 +660,6 @@ func (req *ServerHTTPRequest) ReplaceBody(body []byte) {
 	if _, ok := req.Header.Get("Content-Length"); ok {
 		req.Header.Set("Content-Length", strconv.Itoa(len(body)))
 	}
-
-	return
 }
 
 // GetSpan returns the http request span
