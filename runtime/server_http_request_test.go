@@ -1448,7 +1448,7 @@ func TestPeekBody(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 }
 
-func TestWriteBytesBody(t *testing.T) {
+func TestReplaceBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
@@ -1486,8 +1486,7 @@ func TestWriteBytesBody(t *testing.T) {
 				assert.Equal(t, []byte("result"), value)
 				assert.Equal(t, jsonparser.String, vType)
 
-				success = req.WriteBytesBody([]byte(`{"arg1":{"b2":"foo"}}`))
-				assert.True(t, success)
+				req.ReplaceBody([]byte(`{"arg1":{"b2":"foo"}}`))
 				_, _, err = req.PeekBody("arg1", "b1")
 				assert.Error(t, err, "expected this to have been replaced already")
 				value, vType, err = req.PeekBody("arg1", "b2")

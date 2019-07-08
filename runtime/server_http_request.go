@@ -651,18 +651,17 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 	return true
 }
 
-// WriteBytesBody replace the request body
-// we only change things cached in this layer, not in the raw httpRequest
-// Assumption is that encoding does not change
-func (req *ServerHTTPRequest) WriteBytesBody(
-	body []byte) bool {
+// ReplaceBody replaces the raw request body with given body and updates the request content-length header accordingly.
+// This method is only supposed to be used in middlewares where request body needs to be modified.
+// The encoding of the body should stay the same.
+func (req *ServerHTTPRequest) ReplaceBody(body []byte) {
 	// Replace the cached body bytes and fix dependent header
 	req.rawBody = body
 	if _, ok := req.Header.Get("Content-Length"); ok {
 		req.Header.Set("Content-Length", strconv.Itoa(len(body)))
 	}
 
-	return true
+	return
 }
 
 // GetSpan returns the http request span
