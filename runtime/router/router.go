@@ -31,7 +31,7 @@ import (
 // It implements a similar interface to the one in github.com/julienschmidt/httprouter,
 // the main differences are:
 // 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175)
-// 2. this router does not treat "/a/:b" and "/a/:c" as different routes (https://github.com/julienschmidt/httprouter/issues/6)
+// 2. this router does not allow "/a/:b" and "/a/:c" as different routes and therefore does not allow them to be registered at the same time (https://github.com/julienschmidt/httprouter/issues/6)
 // 3. this router does not treat "/a" and "/a/" as different routes
 type Router struct {
 	tries map[string]*Trie
