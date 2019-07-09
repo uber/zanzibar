@@ -78,6 +78,7 @@ func (r *RawTChannelClient) Call(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
+	extractor ContextExtractor,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 

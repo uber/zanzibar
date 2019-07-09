@@ -174,7 +174,7 @@ func (h *SimpleServiceEchoHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "SimpleService", "Echo", reqHeaders, req, res)
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "Echo", reqHeaders, req, res, h.Deps.Default.ContextExtractor)
 	// hostPort is added above, so there should not be any error returned for the
 	// following line
 	// nolint

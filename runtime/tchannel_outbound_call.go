@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -87,17 +86,6 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 		zap.String("remoteAddr", hostPort),
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
-	}
-
-	for k, v := range c.reqHeaders {
-		fields = append(fields, zap.String(
-			fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k), v,
-		))
-	}
-	for k, v := range c.resHeaders {
-		fields = append(fields, zap.String(
-			fmt.Sprintf("%s-%s", logFieldClientResponseHeaderPrefix, k), v,
-		))
 	}
 
 	fields = append(fields, GetLogFieldsFromCtx(ctx)...)

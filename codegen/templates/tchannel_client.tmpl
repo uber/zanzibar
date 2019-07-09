@@ -212,12 +212,12 @@ type {{$clientName}} struct {
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = caller(
-				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, c.client.Extractor,
 			)
 		} else {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				success, respHeaders, err = caller(
-					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, c.client.Extractor,
 				)
 				return err
 			}, nil)

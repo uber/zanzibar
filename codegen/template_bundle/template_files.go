@@ -2121,7 +2121,7 @@ func (m *mockService) MakeTChannelRequest(
 
 	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
-	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
+	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res, nil)
 }
 `)
 
@@ -2135,7 +2135,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5283, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5288, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2390,12 +2390,12 @@ type {{$clientName}} struct {
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = caller(
-				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, c.client.Extractor,
 			)
 		} else {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				success, respHeaders, err = caller(
-					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, c.client.Extractor,
 				)
 				return err
 			}, nil)
@@ -2446,7 +2446,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 9539, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 9579, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2832,7 +2832,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
+	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res, h.Deps.Default.ContextExtractor)
 	// hostPort is added above, so there should not be any error returned for the
 	// following line
 	// nolint
@@ -2854,7 +2854,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8782, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8815, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

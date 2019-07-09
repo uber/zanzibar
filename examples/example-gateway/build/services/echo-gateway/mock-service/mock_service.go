@@ -209,5 +209,5 @@ func (m *mockService) MakeTChannelRequest(
 
 	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
-	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
+	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res, nil)
 }

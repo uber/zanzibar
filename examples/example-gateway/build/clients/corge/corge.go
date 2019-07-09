@@ -188,12 +188,12 @@ func (c *corgeClient) EchoString(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "Corge", "echoString", reqHeaders, args, &result,
+			ctx, "Corge", "echoString", reqHeaders, args, &result, c.client.Extractor,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "Corge", "echoString", reqHeaders, args, &result,
+				ctx, "Corge", "echoString", reqHeaders, args, &result, c.client.Extractor,
 			)
 			return err
 		}, nil)

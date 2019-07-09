@@ -83,6 +83,7 @@ type TChannelClient struct {
 	metrics           ContextMetrics
 
 	requestUUIDHeaderKey string
+	Extractor         ContextExtractor
 }
 
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
@@ -146,6 +147,7 @@ func (c *TChannelClient) Call(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
+	extractor ContextExtractor,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{
@@ -154,8 +156,17 @@ func (c *TChannelClient) Call(
 		scopeTagsTargetService:  c.serviceName,
 		scopeTagsTargetEndpoint: serviceMethod,
 	}
+	var logFields []zap.Field
+	headers := map[string]string{}
+	for k, v := range reqHeaders {
+		// TODO: this 0th element logic is probably not correct
+		headers[k] = string(v[0])
+	}
+	ctx = WithEndpointRequestHeadersField(ctx, headers)
+	logFields = append(logFields, extractor.ExtractLogFields(ctx)...)
 
 	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithLogFields(ctx, logFields...)
 	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
@@ -174,6 +185,7 @@ func (c *TChannelClient) CallThruAltChannel(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
+	extractor ContextExtractor,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{

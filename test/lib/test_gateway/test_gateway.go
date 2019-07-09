@@ -330,7 +330,7 @@ func (gateway *ChildProcessGateway) MakeTChannelRequest(
 	sc := gateway.channel.GetSubChannel(gateway.serviceName)
 	sc.Peers().Add(gateway.RealTChannelAddr)
 
-	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res)
+	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res, gateway.ContextExtractor)
 }
 
 // HTTPBackends returns the HTTP backends

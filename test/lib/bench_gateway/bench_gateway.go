@@ -283,7 +283,7 @@ func (gateway *BenchGateway) MakeTChannelRequest(
 	sc := gateway.ActualGateway.Channel.GetSubChannel(gateway.ActualGateway.ServiceName)
 	sc.Peers().Add(gateway.ActualGateway.RealTChannelAddr)
 
-	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res)
+	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res, gateway.ActualGateway.ContextExtractor)
 }
 
 // Close test gateway
