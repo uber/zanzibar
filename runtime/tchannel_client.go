@@ -160,7 +160,6 @@ func (c *TChannelClient) Call(
 	if extractor != nil {
 		headers := map[string]string{}
 		for k, v := range reqHeaders {
-			// TODO: this 0th element logic is probably not correct
 			headers[k] = v
 		}
 		ctx = WithEndpointRequestHeadersField(ctx, headers)

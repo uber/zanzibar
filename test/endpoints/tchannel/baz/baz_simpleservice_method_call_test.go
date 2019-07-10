@@ -183,15 +183,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"regionname":           "sf",
 
 		// client specific logs
-		"clientID":                          "baz",
-		"clientService":                     "bazService",
-		"clientThriftMethod":                "SimpleService::call",
-		"clientMethod":                      "Call",
-		"Client-Req-Header-Device":          "ios",
-		"Client-Req-Header-x-uuid":          "uuid",
-		"Client-Req-Header-Regionname":      "sf",
-		"Client-Req-Header-Deviceversion":   "1.0",
-		"Client-Res-Header-some-res-header": "something",
+		"clientID":           "baz",
+		"clientService":      "bazService",
+		"clientThriftMethod": "SimpleService::call",
+		"clientMethod":       "Call",
 	}
 	for actualKey, actualValue := range logs {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
