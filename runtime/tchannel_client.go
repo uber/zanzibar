@@ -69,8 +69,9 @@ type TChannelClientOption struct {
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
-	ClientID string
-	Loggers  map[string]*zap.Logger
+	ClientID  string
+	Extractor ContextExtractor
+	Loggers   map[string]*zap.Logger
 
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
@@ -83,7 +84,6 @@ type TChannelClient struct {
 	metrics           ContextMetrics
 
 	requestUUIDHeaderKey string
-	Extractor         ContextExtractor
 }
 
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
@@ -157,16 +157,18 @@ func (c *TChannelClient) Call(
 		scopeTagsTargetEndpoint: serviceMethod,
 	}
 	var logFields []zap.Field
-	headers := map[string]string{}
-	for k, v := range reqHeaders {
-		// TODO: this 0th element logic is probably not correct
-		headers[k] = string(v[0])
-	}
-	ctx = WithEndpointRequestHeadersField(ctx, headers)
-	logFields = append(logFields, extractor.ExtractLogFields(ctx)...)
+	if extractor != nil {
+		headers := map[string]string{}
+		for k, v := range reqHeaders {
+			// TODO: this 0th element logic is probably not correct
+			headers[k] = v
+		}
+		ctx = WithEndpointRequestHeadersField(ctx, headers)
+		logFields = append(logFields, extractor.ExtractLogFields(ctx)...)
 
-	ctx = WithScopeTags(ctx, scopeTags)
-	ctx = WithLogFields(ctx, logFields...)
+		ctx = WithScopeTags(ctx, scopeTags)
+		ctx = WithLogFields(ctx, logFields...)
+	}
 	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
