@@ -158,8 +158,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"hostname",
 		"pid",
 		"timestamp-finished",
-		"Client-Req-Header-x-request-uuid",
-		"Client-Req-Header-$tracing$uber-trace-id",
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)
