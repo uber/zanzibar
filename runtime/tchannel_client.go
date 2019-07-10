@@ -165,10 +165,9 @@ func (c *TChannelClient) Call(
 		}
 		ctx = WithEndpointRequestHeadersField(ctx, headers)
 		logFields = append(logFields, extractor.ExtractLogFields(ctx)...)
-
-		ctx = WithScopeTags(ctx, scopeTags)
 		ctx = WithLogFields(ctx, logFields...)
 	}
+	ctx = WithScopeTags(ctx, scopeTags)
 	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
