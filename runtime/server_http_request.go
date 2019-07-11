@@ -242,6 +242,16 @@ func (req *ServerHTTPRequest) GetQueryValue(key string) (string, bool) {
 	return req.queryValues.Get(key), true
 }
 
+// SetQueryValue will set the value of the query parameter, replacing any existing value
+// We only work with one value, and not a list (in keeping with other url.Values methods)
+func (req *ServerHTTPRequest) SetQueryValue(key string, value string) {
+	if req.queryValues == nil {
+		req.queryValues = make(url.Values)
+	}
+
+	req.queryValues.Set(key, value)
+}
+
 // GetQueryBool will return a query param as a boolean
 func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 	success := req.parseQueryValues()

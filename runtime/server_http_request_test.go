@@ -1391,6 +1391,53 @@ func TestGetQueryValues(t *testing.T) {
 	assert.Equal(t, 0, len(lastQueryParam))
 }
 
+func TestSetQueryValue(t *testing.T) {
+	lastQueryParam := []string{}
+
+	ms := ms.MustCreateTestService(t)
+	ms.Start()
+	defer ms.Stop()
+
+	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				req.SetQueryValue("foo", "changed")
+				params, ok := req.GetQueryValues("foo")
+				if !assert.Equal(t, true, ok) {
+					return
+				}
+				lastQueryParam = params
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	for _, query := range []string{"", "?foo=bar", "?foo=baz&foo=baz2", "?bar=bar"} {
+		resp, err := ms.MakeHTTPRequest("GET", "/foo"+query, nil, nil)
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, []string{"changed"}, lastQueryParam)
+	}
+}
+
 func TestPeekBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
