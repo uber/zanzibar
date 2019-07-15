@@ -69,9 +69,8 @@ type TChannelClientOption struct {
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
-	ClientID  string
-	Extractor ContextExtractor
-	Loggers   map[string]*zap.Logger
+	ClientID string
+	Loggers  map[string]*zap.Logger
 
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
@@ -82,6 +81,7 @@ type TChannelClient struct {
 	timeoutPerAttempt time.Duration
 	routingKey        *string
 	metrics           ContextMetrics
+	contextExtractor  ContextExtractor
 
 	requestUUIDHeaderKey string
 }
@@ -91,12 +91,14 @@ func NewTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
 	scope tally.Scope,
+	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
 ) *TChannelClient {
 	return NewTChannelClientContext(
 		ch,
 		logger,
 		NewContextMetrics(scope),
+		contextExtractor,
 		opt,
 	)
 }
@@ -106,6 +108,7 @@ func NewTChannelClientContext(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
 	metrics ContextMetrics,
+	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
 ) *TChannelClient {
 	numMethods := len(opt.MethodNames)
@@ -131,6 +134,7 @@ func NewTChannelClientContext(
 		routingKey:        opt.RoutingKey,
 		Loggers:           loggers,
 		metrics:           metrics,
+		contextExtractor:  contextExtractor,
 
 		requestUUIDHeaderKey: opt.RequestUUIDHeaderKey,
 	}
@@ -147,7 +151,6 @@ func (c *TChannelClient) Call(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
-	extractor ContextExtractor,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{
@@ -155,16 +158,6 @@ func (c *TChannelClient) Call(
 		scopeTagClientMethod:    methodName,
 		scopeTagsTargetService:  c.serviceName,
 		scopeTagsTargetEndpoint: serviceMethod,
-	}
-	var logFields []zap.Field
-	if extractor != nil {
-		headers := map[string]string{}
-		for k, v := range reqHeaders {
-			headers[k] = v
-		}
-		ctx = WithEndpointRequestHeadersField(ctx, headers)
-		logFields = append(logFields, extractor.ExtractLogFields(ctx)...)
-		ctx = WithLogFields(ctx, logFields...)
 	}
 	ctx = WithScopeTags(ctx, scopeTags)
 	call := &tchannelOutboundCall{
@@ -185,7 +178,6 @@ func (c *TChannelClient) CallThruAltChannel(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
-	extractor ContextExtractor,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{

@@ -102,6 +102,7 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
+		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:          serviceName,
 			ClientID:             "corge",
@@ -188,12 +189,12 @@ func (c *corgeClient) EchoString(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "Corge", "echoString", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "Corge", "echoString", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "Corge", "echoString", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)

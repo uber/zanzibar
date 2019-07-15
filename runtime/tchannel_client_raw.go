@@ -66,7 +66,7 @@ func NewRawTChannelClient(
 
 	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClientContext(ch, logger, metrics, opt),
+		tc:      NewTChannelClientContext(ch, logger, metrics, nil, opt),
 		logger:  l,
 		metrics: metrics,
 	}
@@ -78,7 +78,6 @@ func (r *RawTChannelClient) Call(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
-	extractor ContextExtractor,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 

@@ -164,6 +164,7 @@ func (h *EchoEchoHandler) redirectToDeputy(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
+		h.Deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "",
@@ -174,7 +175,7 @@ func (h *EchoEchoHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "Echo", "echo", reqHeaders, req, res, h.Deps.Default.ContextExtractor)
+	success, respHeaders, err := client.Call(ctx, "Echo", "echo", reqHeaders, req, res)
 	// hostPort is added above, so there should not be any error returned for the
 	// following line
 	// nolint

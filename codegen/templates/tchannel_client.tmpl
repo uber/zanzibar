@@ -114,6 +114,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
+		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:          serviceName,
 			ClientID:             "{{$clientID}}",
@@ -212,12 +213,12 @@ type {{$clientName}} struct {
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = caller(
-				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				success, respHeaders, err = caller(
-					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, c.client.Extractor,
+					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
 				return err
 			}, nil)

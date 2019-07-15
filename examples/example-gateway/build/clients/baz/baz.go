@@ -257,6 +257,7 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
+		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:          serviceName,
 			ClientID:             "baz",
@@ -343,12 +344,12 @@ func (c *bazClient) EchoBinary(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoBinary", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoBinary", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -393,12 +394,12 @@ func (c *bazClient) EchoBool(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoBool", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoBool", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -443,12 +444,12 @@ func (c *bazClient) EchoDouble(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoDouble", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoDouble", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -493,12 +494,12 @@ func (c *bazClient) EchoEnum(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoEnum", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoEnum", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -543,12 +544,12 @@ func (c *bazClient) EchoI16(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI16", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoI16", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -593,12 +594,12 @@ func (c *bazClient) EchoI32(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI32", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoI32", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -643,12 +644,12 @@ func (c *bazClient) EchoI64(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI64", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoI64", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -693,12 +694,12 @@ func (c *bazClient) EchoI8(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI8", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoI8", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -743,12 +744,12 @@ func (c *bazClient) EchoString(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoString", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoString", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoString", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoString", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -793,12 +794,12 @@ func (c *bazClient) EchoStringList(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringList", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoStringList", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -843,12 +844,12 @@ func (c *bazClient) EchoStringMap(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -893,12 +894,12 @@ func (c *bazClient) EchoStringSet(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -943,12 +944,12 @@ func (c *bazClient) EchoStructList(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStructList", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoStructList", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -993,12 +994,12 @@ func (c *bazClient) EchoStructSet(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1043,12 +1044,12 @@ func (c *bazClient) EchoTypedef(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1092,12 +1093,12 @@ func (c *bazClient) Call(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "call", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "call", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "call", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "call", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1140,12 +1141,12 @@ func (c *bazClient) Compare(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "compare", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "compare", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "compare", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "compare", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1194,12 +1195,12 @@ func (c *bazClient) GetProfile(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "getProfile", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "getProfile", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1246,12 +1247,12 @@ func (c *bazClient) HeaderSchema(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1300,12 +1301,12 @@ func (c *bazClient) Ping(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "ping", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "ping", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "ping", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "ping", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1349,12 +1350,12 @@ func (c *bazClient) DeliberateDiffNoop(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1398,12 +1399,12 @@ func (c *bazClient) TestUUID(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "testUuid", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "testUuid", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1444,12 +1445,12 @@ func (c *bazClient) Trans(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "trans", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "trans", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "trans", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "trans", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1498,12 +1499,12 @@ func (c *bazClient) TransHeaders(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1552,12 +1553,12 @@ func (c *bazClient) TransHeadersNoReq(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1604,12 +1605,12 @@ func (c *bazClient) TransHeadersType(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)
@@ -1657,12 +1658,12 @@ func (c *bazClient) URLTest(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
-			ctx, "SimpleService", "urlTest", reqHeaders, args, &result, c.client.Extractor,
+			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = caller(
-				ctx, "SimpleService", "urlTest", reqHeaders, args, &result, c.client.Extractor,
+				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 			)
 			return err
 		}, nil)

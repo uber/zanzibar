@@ -162,6 +162,7 @@ func CreateGateway(
 		gateway.Channel,
 		gateway.Logger,
 		gateway.RootScope,
+		gateway.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       gateway.ServiceName,
 			MethodNames:       opts.TChannelClientMethods,
@@ -283,7 +284,7 @@ func (gateway *BenchGateway) MakeTChannelRequest(
 	sc := gateway.ActualGateway.Channel.GetSubChannel(gateway.ActualGateway.ServiceName)
 	sc.Peers().Add(gateway.ActualGateway.RealTChannelAddr)
 
-	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res, gateway.ActualGateway.ContextExtractor)
+	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
 
 // Close test gateway

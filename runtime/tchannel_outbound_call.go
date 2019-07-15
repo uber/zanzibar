@@ -88,6 +88,17 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 		zap.Time("timestamp-finished", c.finishTime),
 	}
 
+	var logFields []zap.Field
+	if c.client != nil && c.client.contextExtractor != nil {
+		headers := map[string]string{}
+		for k, v := range c.reqHeaders {
+			headers[k] = v
+		}
+		ctx = WithEndpointRequestHeadersField(ctx, headers)
+		logFields = append(logFields, c.client.contextExtractor.ExtractLogFields(ctx)...)
+		ctx = WithLogFields(ctx, logFields...)
+	}
+
 	fields = append(fields, GetLogFieldsFromCtx(ctx)...)
 	return fields
 }
