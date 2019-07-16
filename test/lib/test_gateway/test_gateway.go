@@ -203,7 +203,6 @@ func CreateGateway(
 
 		return tags
 	}
-
 	extractors := &zanzibar.ContextExtractors{
 		ScopeTagsExtractors: []zanzibar.ContextScopeTagsExtractor{scopeExtractor},
 	}
@@ -212,7 +211,7 @@ func CreateGateway(
 		channel,
 		zap.NewNop(),
 		zanzibar.NewContextMetrics(tally.NoopScope),
-		extractors,
+		nil,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			MethodNames:       opts.TChannelClientMethods,

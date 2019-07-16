@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -89,24 +90,45 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 	}
 
 	headers := map[string]string{}
+
 	for k, v := range c.reqHeaders {
-		headers[logFieldClientRequestHeaderPrefix+"-"+k] = v
+		 fields = append(fields, zap.String(
+			fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k), v,
+		))
+		s  := fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k)
+		headers[s] = v
 	}
 	for k, v := range c.resHeaders {
-		headers[logFieldClientResponseHeaderPrefix+"-"+k] = v
+		/*fields = append(fields, zap.String(
+			fmt.Sprintf("%s-%s", logFieldClientResponseHeaderPrefix, k), v,
+		))*/
+		s  := fmt.Sprintf("%s-%s", logFieldClientResponseHeaderPrefix, k)
+		headers[s] = v
 	}
 
-	// If an extractor function is provided, use it, else copy all the headers
-	if c.client != nil && c.client.contextExtractor != nil {
-		ctx = WithEndpointRequestHeadersField(ctx, headers)
-		fields = append(fields, c.client.contextExtractor.ExtractLogFields(ctx)...)
-	} else {
-		for k, v := range headers {
-			fields = append(fields, zap.String(k, v))
+/*
+		for k, v := range c.reqHeaders {
+		    s  := fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k)
+			headers[s] = v
 		}
-	}
+		for k, v := range c.resHeaders {
+			s  := fmt.Sprintf("%s-%s", logFieldClientResponseHeaderPrefix, k)
+			headers[s] = v
+		}
+*/
+		// If an extractor function is provided, use it, else copy all the headers
+
+		if c.client != nil && c.client.contextExtractor != nil {
+			ctx = WithEndpointRequestHeadersField(ctx, headers)
+			fields = append(fields, c.client.contextExtractor.ExtractLogFields(ctx)...)
+		} else {
+			for k, v := range headers {
+				fields = append(fields, zap.String(k, v))
+			}
+		}
 
 	fields = append(fields, GetLogFieldsFromCtx(ctx)...)
+	fmt.Println("hello", ctx)
 	return fields
 }
 
