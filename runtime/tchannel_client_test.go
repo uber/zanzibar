@@ -49,10 +49,15 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 
 	// one field for each of the:
 	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader
-	assert.Len(t, fields, 4)
+	assert.Len(t, fields, 6)
 	assert.Equal(t, fields[0].Key, "remoteAddr")
 	// nil call should cause remoteAddr to be set to unknown
 	assert.Equal(t, fields[0].String, "unknown")
-	assert.Equal(t, fields[3].Key, "foo")
-	assert.Equal(t, fields[3].String, "bar")
+
+	assert.Equal(t, fields[3].Key, "Client-Req-Header-header-key")
+	assert.Equal(t, fields[3].String, "header-value")
+	assert.Equal(t, fields[4].Key, "Client-Res-Header-header-key")
+	assert.Equal(t, fields[4].String, "header-value")
+	assert.Equal(t, fields[5].Key, "foo")
+	assert.Equal(t, fields[5].String, "bar")
 }

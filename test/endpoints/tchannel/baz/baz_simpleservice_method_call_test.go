@@ -158,6 +158,8 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"hostname",
 		"pid",
 		"timestamp-finished",
+		"Client-Req-Header-x-request-uuid",
+		"Client-Req-Header-$tracing$uber-trace-id",
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)
@@ -181,10 +183,15 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"regionname":           "sf",
 
 		// client specific logs
-		"clientID":           "baz",
-		"clientService":      "bazService",
-		"clientThriftMethod": "SimpleService::call",
-		"clientMethod":       "Call",
+		"clientID":                          "baz",
+		"clientService":                     "bazService",
+		"clientThriftMethod":                "SimpleService::call",
+		"clientMethod":                      "Call",
+		"Client-Req-Header-Device":          "ios",
+		"Client-Req-Header-x-uuid":          "uuid",
+		"Client-Req-Header-Regionname":      "sf",
+		"Client-Req-Header-Deviceversion":   "1.0",
+		"Client-Res-Header-some-res-header": "something",
 	}
 	for actualKey, actualValue := range logs {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
