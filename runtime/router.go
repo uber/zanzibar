@@ -25,11 +25,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
+	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
 	"net/url"
 )
@@ -61,9 +61,9 @@ type HTTPRouter interface {
 
 // ParamsFromContext extracts the URL parameters that are embedded in the context by the Zanzibar HTTP router implementation.
 func ParamsFromContext(ctx context.Context) url.Values {
-	julienParams := httprouter.ParamsFromContext(ctx)
+	params := zrouter.ParamsFromContext(ctx)
 	urlValues := make(url.Values)
-	for _, paramValue := range julienParams {
+	for _, paramValue := range params {
 		urlValues.Add(paramValue.Key, paramValue.Value)
 	}
 	return urlValues
@@ -131,7 +131,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 // httpRouter data structure to handle and register endpoints
 type httpRouter struct {
 	gateway                  *Gateway
-	httpRouter               *httprouter.Router
+	httpRouter               *zrouter.Router
 	notFoundEndpoint         *RouterEndpoint
 	methodNotAllowedEndpoint *RouterEndpoint
 	panicCount               tally.Counter
@@ -167,8 +167,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		requestUUIDHeaderKey: gateway.requestUUIDHeaderKey,
 	}
 
-	router.httpRouter = &httprouter.Router{
-		RedirectTrailingSlash:  true,
+	router.httpRouter = &zrouter.Router{
 		HandleMethodNotAllowed: true,
 		NotFound:               http.HandlerFunc(router.handleNotFound),
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
@@ -179,13 +178,6 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 
 // Register register a handler function.
 func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (err error) {
-	defer func() {
-		recoveredValue := recover()
-		if recoveredValue != nil {
-			err = fmt.Errorf("caught error when registering %s %s: %+v", method, prefix, recoveredValue)
-		}
-	}()
-
 	h := func(w http.ResponseWriter, r *http.Request) {
 		reqUUID := r.Header.Get(router.requestUUIDHeaderKey)
 		if reqUUID == "" {
@@ -197,8 +189,7 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 		handler.ServeHTTP(w, r)
 	}
 
-	router.httpRouter.Handler(method, prefix, http.HandlerFunc(h))
-	return err
+	return router.httpRouter.Handle(method, prefix, http.HandlerFunc(h))
 }
 
 // ServeHTTP implements the http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
