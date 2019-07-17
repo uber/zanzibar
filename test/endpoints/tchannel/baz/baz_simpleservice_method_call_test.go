@@ -136,9 +136,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"x-uuid":               "uuid",
 		"calling-service":      "test-gateway",
 		"zone":                 "unknown",
-		"regionname":           "sf",
-		"device":               "ios",
-		"deviceversion":        "1.0",
+		"Device":               "ios",
+		"Regionname":           "sf",
+		"Deviceversion":        "1.0",
+		"x-token":              "token",
 
 		"Res-Header-some-res-header": "something",
 	}
@@ -178,9 +179,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"endpointThriftMethod": "SimpleService::Call",
 		"endpointHandler":      "call",
 		"x-uuid":               "uuid",
-		"deviceversion":        "1.0",
-		"device":               "ios",
-		"regionname":           "sf",
+		"Deviceversion":        "1.0",
+		"Device":               "ios",
+		"Regionname":           "sf",
+		"x-token":              "token",
 
 		// client specific logs
 		"clientID":                          "baz",

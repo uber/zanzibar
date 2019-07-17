@@ -203,15 +203,26 @@ func CreateGateway(
 
 		return tags
 	}
+
+	logFieldsExtractors := func(ctx context.Context) []zap.Field {
+		reqHeaders := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+		fields := make([]zap.Field, 0, len(reqHeaders))
+		for k, v := range reqHeaders {
+			fields = append(fields, zap.String(k, v))
+		}
+		return fields
+	}
+
 	extractors := &zanzibar.ContextExtractors{
 		ScopeTagsExtractors: []zanzibar.ContextScopeTagsExtractor{scopeExtractor},
+		LogFieldsExtractors: []zanzibar.ContextLogFieldsExtractor{logFieldsExtractors},
 	}
 
 	tchannelClient := zanzibar.NewTChannelClientContext(
 		channel,
 		zap.NewNop(),
 		zanzibar.NewContextMetrics(tally.NoopScope),
-		nil,
+		extractors,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			MethodNames:       opts.TChannelClientMethods,

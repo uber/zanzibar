@@ -241,10 +241,13 @@ func TestCallMetrics(t *testing.T) {
 		"service":         "example-gateway",
 		"endpointID":      "bar",
 		"endpointHandler": "normal",
-		"x-uuid":          "uuid",
-		"regionname":      "san_francisco",
-		"device":          "ios",
-		"deviceversion":   "carbon",
+		"X-Uuid":          "uuid",
+		"Regionname":      "san_francisco",
+		"Device":          "ios",
+		"Deviceversion":   "carbon",
+		"Content-Length":  "128",
+		"User-Agent":      "Go-http-client/1.1",
+		"Accept-Encoding": "gzip",
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
