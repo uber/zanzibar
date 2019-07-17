@@ -214,6 +214,7 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
+		h.Deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "",

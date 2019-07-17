@@ -81,6 +81,7 @@ type TChannelClient struct {
 	timeoutPerAttempt time.Duration
 	routingKey        *string
 	metrics           ContextMetrics
+	contextExtractor  ContextExtractor
 
 	requestUUIDHeaderKey string
 }
@@ -90,12 +91,14 @@ func NewTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
 	scope tally.Scope,
+	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
 ) *TChannelClient {
 	return NewTChannelClientContext(
 		ch,
 		logger,
 		NewContextMetrics(scope),
+		contextExtractor,
 		opt,
 	)
 }
@@ -105,6 +108,7 @@ func NewTChannelClientContext(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
 	metrics ContextMetrics,
+	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
 ) *TChannelClient {
 	numMethods := len(opt.MethodNames)
@@ -130,6 +134,7 @@ func NewTChannelClientContext(
 		routingKey:        opt.RoutingKey,
 		Loggers:           loggers,
 		metrics:           metrics,
+		contextExtractor:  contextExtractor,
 
 		requestUUIDHeaderKey: opt.RequestUUIDHeaderKey,
 	}
@@ -154,7 +159,6 @@ func (c *TChannelClient) Call(
 		scopeTagsTargetService:  c.serviceName,
 		scopeTagsTargetEndpoint: serviceMethod,
 	}
-
 	ctx = WithScopeTags(ctx, scopeTags)
 	call := &tchannelOutboundCall{
 		client:        c,

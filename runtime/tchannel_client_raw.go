@@ -66,7 +66,7 @@ func NewRawTChannelClient(
 
 	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClientContext(ch, logger, metrics, opt),
+		tc:      NewTChannelClientContext(ch, logger, metrics, nil, opt),
 		logger:  l,
 		metrics: metrics,
 	}

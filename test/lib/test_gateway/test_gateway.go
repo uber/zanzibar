@@ -194,18 +194,6 @@ func CreateGateway(
 		timeoutPerAttempt = time.Duration(t.(int)) * time.Millisecond
 	}
 
-	tchannelClient := zanzibar.NewTChannelClientContext(
-		channel,
-		zap.NewNop(),
-		zanzibar.NewContextMetrics(tally.NoopScope),
-		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
-			MethodNames:       opts.TChannelClientMethods,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-		},
-	)
-
 	scopeExtractor := func(ctx context.Context) map[string]string {
 		tags := map[string]string{}
 		headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
@@ -216,9 +204,32 @@ func CreateGateway(
 		return tags
 	}
 
+	logFieldsExtractors := func(ctx context.Context) []zap.Field {
+		reqHeaders := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+		fields := make([]zap.Field, 0, len(reqHeaders))
+		for k, v := range reqHeaders {
+			fields = append(fields, zap.String(k, v))
+		}
+		return fields
+	}
+
 	extractors := &zanzibar.ContextExtractors{
 		ScopeTagsExtractors: []zanzibar.ContextScopeTagsExtractor{scopeExtractor},
+		LogFieldsExtractors: []zanzibar.ContextLogFieldsExtractor{logFieldsExtractors},
 	}
+
+	tchannelClient := zanzibar.NewTChannelClientContext(
+		channel,
+		zap.NewNop(),
+		zanzibar.NewContextMetrics(tally.NoopScope),
+		extractors,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			MethodNames:       opts.TChannelClientMethods,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+		},
+	)
 
 	testGateway := &ChildProcessGateway{
 		channel:     channel,

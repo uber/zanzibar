@@ -257,6 +257,7 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
+		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:          serviceName,
 			ClientID:             "baz",

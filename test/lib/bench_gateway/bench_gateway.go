@@ -162,6 +162,7 @@ func CreateGateway(
 		gateway.Channel,
 		gateway.Logger,
 		gateway.RootScope,
+		gateway.ContextExtractor,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       gateway.ServiceName,
 			MethodNames:       opts.TChannelClientMethods,
