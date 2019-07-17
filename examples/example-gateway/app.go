@@ -21,6 +21,8 @@
 package app
 
 import (
+	"net/textproto"
+
 	"go.uber.org/zap"
 
 	"context"
@@ -64,6 +66,9 @@ func getRequestFields(ctx context.Context) []zap.Field {
 	headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
 
 	for k, v := range headers {
+		if textproto.CanonicalMIMEHeaderKey("x-token") == textproto.CanonicalMIMEHeaderKey(k) {
+			continue
+		}
 		fields = append(fields, zap.String(k, v))
 	}
 	return fields

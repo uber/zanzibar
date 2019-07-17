@@ -139,7 +139,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"Device":               "ios",
 		"Regionname":           "sf",
 		"Deviceversion":        "1.0",
-		"x-token":              "token",
 
 		"Res-Header-some-res-header": "something",
 	}
@@ -182,7 +181,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"Deviceversion":        "1.0",
 		"Device":               "ios",
 		"Regionname":           "sf",
-		"x-token":              "token",
 
 		// client specific logs
 		"clientID":                          "baz",
