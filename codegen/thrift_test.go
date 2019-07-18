@@ -59,7 +59,7 @@ func (f *fakePackageNameResover) TypePackageName(string) (string, error) {
 func TestGoTypeUnknownType(t *testing.T) {
 	s := &fakeSpec{}
 	p := &fakePackageNameResover{}
-	assert.PanicsWithValue(t, "Unknown type (*codegen_test.fakeSpec) &{}", func() {
+	assert.PanicsWithValue(t, "Unknown type (*codegen_test.fakeSpec) for fake", func() {
 		_, _ = codegen.GoType(p, s)
 	})
 

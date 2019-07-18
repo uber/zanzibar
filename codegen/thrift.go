@@ -77,7 +77,7 @@ func GoType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
 		return goCustomType(p, spec)
 	default:
-		panic(fmt.Sprintf("Unknown type (%T) %v", spec, spec))
+		panic(fmt.Sprintf("Unknown type (%T) for %s", spec, spec.ThriftName()))
 	}
 }
 
@@ -156,8 +156,8 @@ func pointerMethodType(typeSpec compile.TypeSpec) string {
 		pointerMethod = "Int32"
 	default:
 		panic(fmt.Sprintf(
-			"Unknown type (%T) %v for allocating a pointer",
-			typeSpec, typeSpec,
+			"Unknown type (%T) for %s for allocating a pointer",
+			typeSpec, typeSpec.ThriftName(),
 		))
 	}
 

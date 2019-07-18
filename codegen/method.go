@@ -1058,14 +1058,14 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 			queryMethod = "GetQueryValues"
 		default:
 			panic(fmt.Sprintf(
-				"Unsupported list value type (%T) %v for query string parameter",
-				t.ValueSpec, t.ValueSpec,
+				"Unsupported list value type (%T) for %s as query string parameter",
+				t.ValueSpec, t.ValueSpec.ThriftName(),
 			))
 		}
 	default:
 		panic(fmt.Sprintf(
-			"Unknown type (%T) %v for query string parameter",
-			typeSpec, typeSpec,
+			"Unsupported type (%T) for %s as query string parameter",
+			typeSpec, typeSpec.ThriftName(),
 		))
 	}
 
@@ -1147,14 +1147,14 @@ func getQueryEncodeExpression(
 			}
 		default:
 			panic(fmt.Sprintf(
-				"Unsupported list value type (%T) %v for query string parameter",
-				t.ValueSpec, t.ValueSpec,
+				"Unsupported list value type (%T) for %s as query string parameter",
+				t.ValueSpec, t.ValueSpec.ThriftName(),
 			))
 		}
 	default:
 		panic(fmt.Sprintf(
-			"Unknown type (%T) %v for query string parameter",
-			typeSpec, typeSpec,
+			"Unsupported type (%T) for %s as query string parameter",
+			typeSpec, typeSpec.ThriftName(),
 		))
 	}
 
