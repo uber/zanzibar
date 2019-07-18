@@ -403,13 +403,13 @@ func TestPrimaryType(t *testing.T) {
 		if key, ok := headers.Get("x-int"); ok {
 			if v, err := strconv.ParseInt(key,10,16); err == nil {
 				val:=int16(v)
-				in.I5=v
+				in.I5=val
 			}
 		}
 		if key, ok := headers.Get("x-int"); ok {
 			if v, err := strconv.ParseInt(key,10,16); err == nil {
 				val:=int16(v)
-				in.I6=&v
+				in.I6=&val
 			}
 		}
 		if key, ok := headers.Get("x-string"); ok {
