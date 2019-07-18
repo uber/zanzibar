@@ -1153,6 +1153,12 @@ func (system *ModuleSystem) IncrementalBuild(
 		}
 	}
 
+	for i, hook := range system.postGenHook {
+		if err := hook(toBeBuiltModules); err != nil {
+			return toBeBuiltModules, errors.Wrapf(err, "error running %dth post generation hook", i)
+		}
+	}
+
 	return toBeBuiltModules, nil
 }
 
@@ -1228,14 +1234,6 @@ func (system *ModuleSystem) Build(
 		}
 	}
 
-	resolvedModules := make(map[string][]*ModuleInstance)
-	resolvedModules[instance.ClassName] = []*ModuleInstance{instance}
-	for i, hook := range system.postGenHook {
-		if err := hook(resolvedModules); err != nil {
-			return errors.Wrapf(err, "error running %dth post generation hook", i)
-		}
-	}
-
 	return nil
 }
 
@@ -1277,6 +1275,12 @@ func (system *ModuleSystem) GenerateBuild(
 			if err != nil {
 				return nil, err
 			}
+		}
+	}
+
+	for i, hook := range system.postGenHook {
+		if err := hook(resolvedModules); err != nil {
+			return resolvedModules, errors.Wrapf(err, "error running %dth post generation hook", i)
 		}
 	}
 
