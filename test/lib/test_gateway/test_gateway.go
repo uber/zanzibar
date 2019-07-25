@@ -292,6 +292,8 @@ func CreateGateway(
 	composedConfig["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
 	composedConfig["metrics.runtime.collectInterval"] = 10
 	composedConfig["logger.output"] = "stdout"
+	composedConfig["logger.level"] = "debug"
+
 	composedConfig["env"] = "test"
 
 	err = testGateway.createAndSpawnChild(
