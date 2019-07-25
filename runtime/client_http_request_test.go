@@ -273,7 +273,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 
 	expectedValues := map[string]interface{}{
 		"msg":                              "Finished an outgoing client HTTP request",
-		"level":                            "info",
+		"level":                            "debug",
 		"env":                              "test",
 		"zone":                             "unknown",
 		"service":                          "example-gateway",

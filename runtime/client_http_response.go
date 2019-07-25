@@ -169,7 +169,7 @@ func (res *ClientHTTPResponse) finish() {
 	res.finished = true
 	res.finishTime = time.Now()
 
-	logFn := res.req.ContextLogger.Info
+	logFn := res.req.ContextLogger.Debug
 
 	// emit metrics
 	res.req.metrics.RecordTimer(res.req.ctx, clientLatency, res.finishTime.Sub(res.req.startTime))

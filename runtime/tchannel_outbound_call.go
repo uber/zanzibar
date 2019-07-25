@@ -69,7 +69,7 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	// write logs
 	fields := c.logFields(ctx)
 	if err == nil {
-		c.logger.Info("Finished an outgoing client TChannel request", fields...)
+		c.logger.Debug("Finished an outgoing client TChannel request", fields...)
 	} else {
 		fields = append(fields, zap.Error(err))
 		c.logger.Warn("Failed to send outgoing client TChannel request", fields...)
