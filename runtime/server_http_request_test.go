@@ -1665,6 +1665,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		"statusCode":      float64(200),
 		"endpointHandler": "foo",
 		"endpointID":      "foo",
+		"url":             "/foo",
 
 		"Accept-Encoding":         "gzip",
 		"User-Agent":              "Go-http-client/1.1",

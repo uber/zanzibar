@@ -76,6 +76,7 @@ func NewServerHTTPRequest(
 	logFields := []zap.Field{
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
 		zap.String(logFieldEndpointHandler, endpoint.HandlerName),
+		zap.String(logFieldRequestURL, r.URL.Path),
 	}
 
 	// put request scope tags on context
