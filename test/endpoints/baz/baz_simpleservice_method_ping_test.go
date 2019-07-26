@@ -206,7 +206,7 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	assert.Len(t, gateway.Logs("info", "Created new active connection."), 1)
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)
 	assert.Len(t, gateway.Logs("warn", "Client failure: TChannel client call returned error"), 1)
-	assert.Len(t, gateway.Logs("warn", "Finished an incoming server HTTP request"), 1)
+	assert.Len(t, gateway.Logs("debug", "Finished an incoming server HTTP request"), 1)
 	assert.Len(t, gateway.Logs("warn", "Failed to send outgoing client TChannel request"), 1)
 	assert.Len(t, gateway.Logs("warn", "Client failure: could not make client request"), 1)
 
