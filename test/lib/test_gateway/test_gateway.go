@@ -292,7 +292,10 @@ func CreateGateway(
 	composedConfig["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
 	composedConfig["metrics.runtime.collectInterval"] = 10
 	composedConfig["logger.output"] = "stdout"
-	composedConfig["logger.level"] = "debug"
+
+	if _, contains := composedConfig["logger.level"]; !contains {
+		composedConfig["logger.level"] = "debug"
+	}
 
 	composedConfig["env"] = "test"
 
