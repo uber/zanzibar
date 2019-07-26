@@ -106,7 +106,10 @@ func CreateGateway(
 	if _, ok := seedConfig["logger.fileName"]; !ok {
 		seedConfig["logger.fileName"] = "zanzibar.log"
 	}
-	seedConfig["logger.level"] = "debug"
+	if _, ok := seedConfig["logger.level"]; !ok {
+		seedConfig["logger.level"] = "debug"
+	}
+
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.serviceName"] = "bench-gateway"
 	seedConfig["metrics.m3.includeHost"] = true
