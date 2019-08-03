@@ -109,7 +109,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 	if !demoIdsOk {
 		return
 	}
-	demoIdsQuery, ok := req.GetQueryValues("demoIds")
+	demoIdsQuery, ok := req.GetQueryValueList("demoIds")
 	if !ok {
 		return
 	}
