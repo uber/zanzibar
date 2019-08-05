@@ -126,7 +126,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 
 	fooOk := req.HasQueryValue("foo")
 	if fooOk {
-		fooQuery, ok := req.GetQueryValues("foo")
+		fooQuery, ok := req.GetQueryValueList("foo")
 		if !ok {
 			return
 		}

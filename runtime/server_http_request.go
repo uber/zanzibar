@@ -418,6 +418,8 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 	return number, true
 }
 
+// -- Query params as  lists --
+
 // GetQueryBoolList will return a query param as a list of boolean
 func (req *ServerHTTPRequest) GetQueryBoolList(key string) ([]bool, bool) {
 	success := req.parseQueryValues()
@@ -554,6 +556,159 @@ func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
 	}
 
 	return req.queryValues[key], true
+}
+
+// GetQueryValueList will return all query parameters for key.
+func (req *ServerHTTPRequest) GetQueryValueList(key string) ([]string, bool) {
+	return req.GetQueryValues(key)
+}
+
+// -- Query param as set --
+
+// The "value" in the map representation of a set datastructure
+var _nullVal = struct{}{}
+
+// GetQueryBoolSet will return a query param as a set of boolean
+// @argo: Does this method even make sense?
+func (req *ServerHTTPRequest) GetQueryBoolSet(key string) (map[bool]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make(map[bool]struct{}, len(values))
+	for _, value := range values {
+		if value == "true" {
+			ret[true] = _nullVal
+		} else if value == "false" {
+			ret[false] = _nullVal
+		} else {
+			err := &strconv.NumError{
+				Func: "ParseBool",
+				Num:  value,
+				Err:  strconv.ErrSyntax,
+			}
+			req.logAndSendQueryError(err, "bool", key, value)
+			return nil, false
+		}
+	}
+
+	return ret, true
+}
+
+// GetQueryInt8Set will return a query params as set of int8
+func (req *ServerHTTPRequest) GetQueryInt8Set(key string) (map[int8]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make(map[int8]struct{}, len(values))
+	for _, value := range values {
+		number, err := strconv.ParseInt(value, 10, 8)
+		if err != nil {
+			req.logAndSendQueryError(err, "int8", key, value)
+			return nil, false
+		}
+		ret[int8(number)] = _nullVal
+	}
+	return ret, true
+}
+
+// GetQueryInt16Set will return a query params as set of int16
+func (req *ServerHTTPRequest) GetQueryInt16Set(key string) (map[int16]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make(map[int16]struct{}, len(values))
+	for _, value := range values {
+		number, err := strconv.ParseInt(value, 10, 16)
+		if err != nil {
+			req.logAndSendQueryError(err, "int16", key, value)
+			return nil, false
+		}
+		ret[int16(number)] = _nullVal
+	}
+	return ret, true
+}
+
+// GetQueryInt32Set will return a query params as set of int32
+func (req *ServerHTTPRequest) GetQueryInt32Set(key string) (map[int32]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make(map[int32]struct{}, len(values))
+	for _, value := range values {
+		number, err := strconv.ParseInt(value, 10, 32)
+		if err != nil {
+			req.logAndSendQueryError(err, "int32", key, value)
+			return nil, false
+		}
+		ret[int32(number)] = _nullVal
+	}
+	return ret, true
+}
+
+// GetQueryInt64Set will return a query params as set of int64
+func (req *ServerHTTPRequest) GetQueryInt64Set(key string) (map[int64]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make(map[int64]struct{}, len(values))
+	for _, value := range values {
+		number, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			req.logAndSendQueryError(err, "int64", key, value)
+			return nil, false
+		}
+		ret[number] = _nullVal
+	}
+	return ret, true
+}
+
+// GetQueryFloat64Set will return a query params as set of float64
+func (req *ServerHTTPRequest) GetQueryFloat64Set(key string) (map[float64]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make(map[float64]struct{}, len(values))
+	for _, value := range values {
+		number, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			req.logAndSendQueryError(err, "float64", key, value)
+			return nil, false
+		}
+		ret[number] = _nullVal
+	}
+	return ret, true
+}
+
+// GetQueryValueSet will return all query parameters for key as a set
+func (req *ServerHTTPRequest) GetQueryValueSet(key string) (map[string]struct{}, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	ret := make(map[string]struct{}, len(req.queryValues[key]))
+	for _, v := range req.queryValues[key] {
+		ret[v] = _nullVal
+	}
+	return ret, true
 }
 
 // HasQueryPrefix will check if any query param starts with key.

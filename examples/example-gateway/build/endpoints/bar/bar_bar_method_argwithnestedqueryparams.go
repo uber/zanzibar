@@ -143,7 +143,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	if !requestFooOk {
 		return
 	}
-	requestFooQuery, ok := req.GetQueryValues("request.foo")
+	requestFooQuery, ok := req.GetQueryValueList("request.foo")
 	if !ok {
 		return
 	}
