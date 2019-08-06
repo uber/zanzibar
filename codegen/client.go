@@ -34,18 +34,8 @@ type clientConfig interface {
 		h *PackageHelper) (*ClientSpec, error)
 }
 
-// ClientThriftConfig is the "config" field in the client-config.yaml for http
-// client and tchannel client.
-type ClientThriftConfig struct {
-	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
-	ThriftFile     string            `yaml:"thriftFile" json:"thriftFile" validate:"nonzero"`
-	ThriftFileSha  string            `yaml:"thriftFileSha,omitempty" json:"thriftFileSha"`
-	SidecarRouter  string            `yaml:"sidecarRouter" json:"sidecarRouter"`
-	Fixture        *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
-}
-
-// ClientIDLConfig is the "config" field in the client-config.yaml for gRPC clients.
-// This struct is generic and can be used to replace HTTP/TChannel client config as well.
+// ClientIDLConfig is the "config" field in the client-config.yaml for
+// HTTP/TChannel/gRPC clients.
 type ClientIDLConfig struct {
 	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
 	IDLFile        string            `yaml:"idlFile" json:"idlFile" validate:"nonzero"`
@@ -95,8 +85,8 @@ func validateExposedMethods(v interface{}, param string) error {
 // HTTPClientConfig represents the "config" field for a HTTP client-config.yaml
 type HTTPClientConfig struct {
 	ClassConfigBase `yaml:",inline" json:",inline"`
-	Dependencies    Dependencies        `yaml:"dependencies,omitempty" json:"dependencies"`
-	Config          *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
+	Dependencies    Dependencies     `yaml:"dependencies,omitempty" json:"dependencies"`
+	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
@@ -117,12 +107,12 @@ func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
 
 func newClientSpec(
 	clientType string,
-	config *ClientThriftConfig,
+	config *ClientIDLConfig,
 	instance *ModuleInstance,
 	h *PackageHelper,
 	annotate bool,
 ) (*ClientSpec, error) {
-	thriftFile := filepath.Join(h.ThriftIDLPath(), config.ThriftFile)
+	thriftFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
 	mspec, err := NewModuleSpec(thriftFile, annotate, false, h)
 
 	if err != nil {
@@ -161,8 +151,8 @@ func (c *HTTPClientConfig) NewClientSpec(
 // TChannelClientConfig represents the "config" field for a TChannel client-config.yaml
 type TChannelClientConfig struct {
 	ClassConfigBase `yaml:",inline" json:",inline"`
-	Dependencies    Dependencies        `yaml:"dependencies,omitempty" json:"dependencies"`
-	Config          *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
+	Dependencies    Dependencies     `yaml:"dependencies,omitempty" json:"dependencies"`
+	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newTChannelClientConfig(raw []byte) (*TChannelClientConfig, error) {

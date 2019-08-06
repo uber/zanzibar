@@ -2,8 +2,8 @@
 	"name": "bar",
 	"type": "http",
 	"config": {
-		"thriftFile": "clients/bar/bar.thrift",
-		"thriftFileSha": "{{placeholder}}",
+		"idlFile": "clients/bar/bar.thrift",
+		"idlFileSha": "{{placeholder}}",
 		"exposedMethods": {
 			"Normal": "Bar::normal",
 			"NormalRecur": "Bar::normalRecur",

@@ -2,7 +2,7 @@ config:
   exposedMethods:
     EchoString: Corge::echoString
   sidecarRouter: default
-  thriftFile: clients/corge/corge.thrift
-  thriftFileSha: '{{placeholder}}'
+  idlFile: clients/corge/corge.thrift
+  idlFileSha: '{{placeholder}}'
 name: corge
 type: tchannel

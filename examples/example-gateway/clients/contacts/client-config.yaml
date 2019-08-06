@@ -7,7 +7,7 @@ config:
     scenarios:
       SaveContacts:
       - success
-  thriftFile: clients/contacts/contacts.thrift
-  thriftFileSha: '{{placeholder}}'
+  idlFile: clients/contacts/contacts.thrift
+  idlFileSha: '{{placeholder}}'
 name: contacts
 type: http
