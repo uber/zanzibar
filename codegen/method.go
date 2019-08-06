@@ -1182,9 +1182,14 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		if field.Required {
-			if isList || isSet {
+			if isList {
 				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for _, value := range %s {", "r"+longFieldName)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.append("}")
+			} else if isSet {
+				encodeExpr := getQueryEncodeExpression(field.Type, "value")
+				statements.appendf("for value := range %s {", "r"+longFieldName)
 				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
 				statements.append("}")
 			} else {
@@ -1194,9 +1199,14 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 			}
 		} else {
 			statements.appendf("if r%s != nil {", longFieldName)
-			if isList || isSet {
+			if isList {
 				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for _, value := range %s {", "r"+longFieldName)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.append("}")
+			} else if isSet {
+				encodeExpr := getQueryEncodeExpression(field.Type, "value")
+				statements.appendf("for value := range %s {", "r"+longFieldName)
 				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
 				statements.append("}")
 			} else {

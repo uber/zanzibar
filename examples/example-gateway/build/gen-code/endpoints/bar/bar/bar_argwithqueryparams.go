@@ -16,10 +16,12 @@ import (
 //
 // The arguments for argWithQueryParams are sent and received over the wire as this struct.
 type Bar_ArgWithQueryParams_Args struct {
-	Name     string   `json:"name,required"`
-	UserUUID *string  `json:"userUUID,omitempty"`
-	Foo      []string `json:"foo,omitempty"`
-	Bar      []int8   `json:"bar,required"`
+	Name     string              `json:"name,required"`
+	UserUUID *string             `json:"userUUID,omitempty"`
+	Foo      []string            `json:"foo,omitempty"`
+	Bar      []int8              `json:"bar,required"`
+	Baz      map[int32]struct{}  `json:"baz,omitempty"`
+	Bazbaz   map[string]struct{} `json:"bazbaz,omitempty"`
 }
 
 type _List_Byte_ValueList []int8
@@ -48,6 +50,58 @@ func (_List_Byte_ValueList) ValueType() wire.Type {
 
 func (_List_Byte_ValueList) Close() {}
 
+type _Set_I32_ValueList map[int32]struct{}
+
+func (v _Set_I32_ValueList) ForEach(f func(wire.Value) error) error {
+	for x := range v {
+		w, err := wire.NewValueI32(x), error(nil)
+		if err != nil {
+			return err
+		}
+
+		if err := f(w); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _Set_I32_ValueList) Size() int {
+	return len(v)
+}
+
+func (_Set_I32_ValueList) ValueType() wire.Type {
+	return wire.TI32
+}
+
+func (_Set_I32_ValueList) Close() {}
+
+type _Set_String_ValueList map[string]struct{}
+
+func (v _Set_String_ValueList) ForEach(f func(wire.Value) error) error {
+	for x := range v {
+		w, err := wire.NewValueString(x), error(nil)
+		if err != nil {
+			return err
+		}
+
+		if err := f(w); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _Set_String_ValueList) Size() int {
+	return len(v)
+}
+
+func (_Set_String_ValueList) ValueType() wire.Type {
+	return wire.TBinary
+}
+
+func (_Set_String_ValueList) Close() {}
+
 // ToWire translates a Bar_ArgWithQueryParams_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
@@ -65,7 +119,7 @@ func (_List_Byte_ValueList) Close() {}
 //   }
 func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [4]wire.Field
+		fields [6]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -102,6 +156,22 @@ func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 4, Value: w}
 	i++
+	if v.Baz != nil {
+		w, err = wire.NewValueSet(_Set_I32_ValueList(v.Baz)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 5, Value: w}
+		i++
+	}
+	if v.Bazbaz != nil {
+		w, err = wire.NewValueSet(_Set_String_ValueList(v.Bazbaz)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 6, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -121,6 +191,44 @@ func _List_Byte_Read(l wire.ValueList) ([]int8, error) {
 		return nil
 	})
 	l.Close()
+	return o, err
+}
+
+func _Set_I32_Read(s wire.ValueList) (map[int32]struct{}, error) {
+	if s.ValueType() != wire.TI32 {
+		return nil, nil
+	}
+
+	o := make(map[int32]struct{}, s.Size())
+	err := s.ForEach(func(x wire.Value) error {
+		i, err := x.GetI32(), error(nil)
+		if err != nil {
+			return err
+		}
+
+		o[i] = struct{}{}
+		return nil
+	})
+	s.Close()
+	return o, err
+}
+
+func _Set_String_Read(s wire.ValueList) (map[string]struct{}, error) {
+	if s.ValueType() != wire.TBinary {
+		return nil, nil
+	}
+
+	o := make(map[string]struct{}, s.Size())
+	err := s.ForEach(func(x wire.Value) error {
+		i, err := x.GetString(), error(nil)
+		if err != nil {
+			return err
+		}
+
+		o[i] = struct{}{}
+		return nil
+	})
+	s.Close()
 	return o, err
 }
 
@@ -184,6 +292,22 @@ func (v *Bar_ArgWithQueryParams_Args) FromWire(w wire.Value) error {
 				}
 				barIsSet = true
 			}
+		case 5:
+			if field.Value.Type() == wire.TSet {
+				v.Baz, err = _Set_I32_Read(field.Value.GetSet())
+				if err != nil {
+					return err
+				}
+
+			}
+		case 6:
+			if field.Value.Type() == wire.TSet {
+				v.Bazbaz, err = _Set_String_Read(field.Value.GetSet())
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -205,7 +329,7 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [4]string
+	var fields [6]string
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
@@ -219,6 +343,14 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 	}
 	fields[i] = fmt.Sprintf("Bar: %v", v.Bar)
 	i++
+	if v.Baz != nil {
+		fields[i] = fmt.Sprintf("Baz: %v", v.Baz)
+		i++
+	}
+	if v.Bazbaz != nil {
+		fields[i] = fmt.Sprintf("Bazbaz: %v", v.Bazbaz)
+		i++
+	}
 
 	return fmt.Sprintf("Bar_ArgWithQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
 }
@@ -231,6 +363,34 @@ func _List_Byte_Equals(lhs, rhs []int8) bool {
 	for i, lv := range lhs {
 		rv := rhs[i]
 		if !(lv == rv) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func _Set_I32_Equals(lhs, rhs map[int32]struct{}) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for x := range rhs {
+		if _, ok := lhs[x]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+func _Set_String_Equals(lhs, rhs map[string]struct{}) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for x := range rhs {
+		if _, ok := lhs[x]; !ok {
 			return false
 		}
 	}
@@ -260,6 +420,12 @@ func (v *Bar_ArgWithQueryParams_Args) Equals(rhs *Bar_ArgWithQueryParams_Args) b
 	if !_List_Byte_Equals(v.Bar, rhs.Bar) {
 		return false
 	}
+	if !((v.Baz == nil && rhs.Baz == nil) || (v.Baz != nil && rhs.Baz != nil && _Set_I32_Equals(v.Baz, rhs.Baz))) {
+		return false
+	}
+	if !((v.Bazbaz == nil && rhs.Bazbaz == nil) || (v.Bazbaz != nil && rhs.Bazbaz != nil && _Set_String_Equals(v.Bazbaz, rhs.Bazbaz))) {
+		return false
+	}
 
 	return true
 }
@@ -271,6 +437,28 @@ type _List_Byte_Zapper []int8
 func (l _List_Byte_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
 	for _, v := range l {
 		enc.AppendInt8(v)
+	}
+	return err
+}
+
+type _Set_I32_Zapper map[int32]struct{}
+
+// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
+// fast logging of _Set_I32_Zapper.
+func (s _Set_I32_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
+	for v := range s {
+		enc.AppendInt32(v)
+	}
+	return err
+}
+
+type _Set_String_Zapper map[string]struct{}
+
+// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
+// fast logging of _Set_String_Zapper.
+func (s _Set_String_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
+	for v := range s {
+		enc.AppendString(v)
 	}
 	return err
 }
@@ -289,6 +477,12 @@ func (v *Bar_ArgWithQueryParams_Args) MarshalLogObject(enc zapcore.ObjectEncoder
 		err = multierr.Append(err, enc.AddArray("foo", (_List_String_Zapper)(v.Foo)))
 	}
 	err = multierr.Append(err, enc.AddArray("bar", (_List_Byte_Zapper)(v.Bar)))
+	if v.Baz != nil {
+		err = multierr.Append(err, enc.AddArray("baz", (_Set_I32_Zapper)(v.Baz)))
+	}
+	if v.Bazbaz != nil {
+		err = multierr.Append(err, enc.AddArray("bazbaz", (_Set_String_Zapper)(v.Bazbaz)))
+	}
 	return err
 }
 
@@ -345,6 +539,36 @@ func (v *Bar_ArgWithQueryParams_Args) IsSetBar() bool {
 	return v != nil && v.Bar != nil
 }
 
+// GetBaz returns the value of Baz if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithQueryParams_Args) GetBaz() (o map[int32]struct{}) {
+	if v != nil && v.Baz != nil {
+		return v.Baz
+	}
+
+	return
+}
+
+// IsSetBaz returns true if Baz is not nil.
+func (v *Bar_ArgWithQueryParams_Args) IsSetBaz() bool {
+	return v != nil && v.Baz != nil
+}
+
+// GetBazbaz returns the value of Bazbaz if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithQueryParams_Args) GetBazbaz() (o map[string]struct{}) {
+	if v != nil && v.Bazbaz != nil {
+		return v.Bazbaz
+	}
+
+	return
+}
+
+// IsSetBazbaz returns true if Bazbaz is not nil.
+func (v *Bar_ArgWithQueryParams_Args) IsSetBazbaz() bool {
+	return v != nil && v.Bazbaz != nil
+}
+
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -371,6 +595,8 @@ var Bar_ArgWithQueryParams_Helper = struct {
 		userUUID *string,
 		foo []string,
 		bar []int8,
+		baz map[int32]struct{},
+		bazbaz map[string]struct{},
 	) *Bar_ArgWithQueryParams_Args
 
 	// IsException returns true if the given error can be thrown
@@ -414,12 +640,16 @@ func init() {
 		userUUID *string,
 		foo []string,
 		bar []int8,
+		baz map[int32]struct{},
+		bazbaz map[string]struct{},
 	) *Bar_ArgWithQueryParams_Args {
 		return &Bar_ArgWithQueryParams_Args{
 			Name:     name,
 			UserUUID: userUUID,
 			Foo:      foo,
 			Bar:      bar,
+			Baz:      baz,
+			Bazbaz:   bazbaz,
 		}
 	}
 
