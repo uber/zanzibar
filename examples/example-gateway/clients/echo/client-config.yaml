@@ -1,4 +1,4 @@
 name: echo
 type: grpc
 config:
-  protoFile: clients/echo/echo.proto
+  idlFile: clients/echo/echo.proto

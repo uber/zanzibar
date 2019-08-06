@@ -805,7 +805,7 @@ func (g *YarpcClientGenerator) ComputeSpec(
 func (g *YarpcClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	clientConfig := &ClassConfig{}
+	clientConfig := &GRPCClientConfig{}
 	if err := yaml.Unmarshal(instance.YAMLFileRaw, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -821,15 +821,7 @@ func (g *YarpcClientGenerator) Generate(
 		Instance: instance,
 	}
 
-	v, ok := clientConfig.Config["protoFile"]
-	if !ok {
-		return nil, errors.Errorf(
-			"Missing \"protoFile\" field in %q YAML config",
-			instance.InstanceName,
-		)
-	}
-	protoFile := v.(string)
-	parts := strings.Split(protoFile, "/")
+	parts := strings.Split(clientConfig.Config.IDLFile, "/")
 	genDir := strings.Join(parts[0:len(parts)-1], "/")
 
 	data.GenPkg = path.Join(
