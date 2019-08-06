@@ -27,8 +27,8 @@ config:
     TransHeadersNoReq: SimpleService::transHeadersNoReq
     TransHeadersType: SimpleService::transHeadersType
     URLTest: SimpleService::urlTest
-  thriftFile: clients/baz/baz.thrift
-  thriftFileSha: '{{placeholder}}'
+  idlFile: clients/baz/baz.thrift
+  idlFileSha: '{{placeholder}}'
   genTestServer: true
 name: baz
 type: tchannel

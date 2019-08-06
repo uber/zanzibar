@@ -2,8 +2,8 @@
 	"name": "withexceptions",
 	"type": "http",
 	"config": {
-		"thriftFile": "clients/withexceptions/withexceptions.thrift",
-		"thriftFileSha": "{{placeholder}}",
+		"idlFile": "clients/withexceptions/withexceptions.thrift",
+		"idlFileSha": "{{placeholder}}",
 		"exposedMethods": {
 			"Func1": "WithExceptions::Func1"
 		}

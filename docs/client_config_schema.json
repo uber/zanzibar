@@ -25,14 +25,14 @@
 		"config": {
 			"type": "object",
 			"properties": {
-				"thriftFile": {
+				"idlFile": {
 					"type": "string",
 					"description": "Path to client thrift file, relative to idl path",
 					"examples": [
 						"clients/contacts/contacts.thrift"
 					]
 				},
-				"thriftFileSha": {
+				"idlFileSha": {
 					"type": "string",
 					"description": "Sha of the thrift file, reserved but currently not used",
 					"examples": [

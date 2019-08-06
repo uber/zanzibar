@@ -2,7 +2,7 @@ config:
   exposedMethods:
     AddCredentials: GoogleNowService::addCredentials
     CheckCredentials: GoogleNowService::checkCredentials
-  thriftFile: clients/googlenow/googlenow.thrift
-  thriftFileSha: '{{placeholder}}'
+  idlFile: clients/googlenow/googlenow.thrift
+  idlFileSha: '{{placeholder}}'
 name: google-now
 type: http
