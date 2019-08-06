@@ -91,7 +91,7 @@ for config_file in ${config_files}; do
 			processor="jq"
 		fi
 
-		proto_file=$(${processor} -r '.. | .protoFile? | select(strings | endswith(".proto"))' "$yaml_file")
+		proto_file=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".proto"))' "$yaml_file")
 		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
 			found_protos+=" $proto_file"
 			proto_dir=$(dirname "$proto_file")
@@ -146,7 +146,7 @@ for config_file in ${config_files}; do
 		thrift_file=$(${processor} -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
 
 		# process .proto files
-		proto_file=$(${processor} -r '.. | .protoFile? | select(strings | endswith(".proto"))' "$yaml_file")
+		proto_file=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".proto"))' "$yaml_file")
 		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
 			found_protos+=" $proto_file"
 			proto_file="$IDL_DIR/$proto_file"

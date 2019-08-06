@@ -44,6 +44,16 @@ type ClientThriftConfig struct {
 	Fixture        *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
 }
 
+// ClientIDLConfig is the "config" field in the client-config.yaml for gRPC clients.
+// This struct is generic and can be used to replace HTTP/TChannel client config as well.
+type ClientIDLConfig struct {
+	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
+	IDLFile        string            `yaml:"idlFile" json:"idlFile" validate:"nonzero"`
+	IDLFileSha     string            `yaml:"idlFileSha,omitempty" json:"idlFileSha"`
+	SidecarRouter  string            `yaml:"sidecarRouter" json:"sidecarRouter"`
+	Fixture        *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
+}
+
 // Fixture specifies client fixture import path and all scenarios
 type Fixture struct {
 	// ImportPath is the package where the user-defined Fixture global variable is contained.
@@ -222,6 +232,13 @@ func (c *CustomClientConfig) NewClientSpec(
 	}
 
 	return spec, nil
+}
+
+// GRPCClientConfig represents the "config" field for a gRPC client-config.yaml.
+type GRPCClientConfig struct {
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    Dependencies     `yaml:"dependencies,omitempty" json:"dependencies"`
+	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func clientType(raw []byte) (string, error) {
