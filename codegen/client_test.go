@@ -150,7 +150,7 @@ config:
 	assert.Error(t, err)
 	assert.Equal(
 		t,
-		fmt.Sprintf("%s client config validation failed: Config.ThriftFile: zero value", clientType),
+		fmt.Sprintf("%s client config validation failed: Config.IDLFile: zero value", clientType),
 		err.Error())
 }
 
@@ -273,12 +273,12 @@ func TestNewClientConfigGetHTTPClient(t *testing.T) {
 		Dependencies: Dependencies{
 			Client: []string{"a", "b"},
 		},
-		Config: &ClientThriftConfig{
+		Config: &ClientIDLConfig{
 			ExposedMethods: map[string]string{
 				"a": "method",
 			},
-			ThriftFileSha: "thriftFileSha",
-			ThriftFile:    "clients/bar/bar.thrift",
+			IDLFileSha:    "thriftFileSha",
+			IDLFile:       "clients/bar/bar.thrift",
 			SidecarRouter: "sidecar",
 			Fixture: &Fixture{
 				ImportPath: "import",
@@ -302,12 +302,12 @@ func TestNewClientConfigGetTChannelClient(t *testing.T) {
 		Dependencies: Dependencies{
 			Client: []string{"a", "b"},
 		},
-		Config: &ClientThriftConfig{
+		Config: &ClientIDLConfig{
 			ExposedMethods: map[string]string{
 				"a": "method",
 			},
-			ThriftFileSha: "thriftFileSha",
-			ThriftFile:    "clients/bar/bar.thrift",
+			IDLFileSha:    "thriftFileSha",
+			IDLFile:       "clients/bar/bar.thrift",
 			SidecarRouter: "sidecar",
 			Fixture: &Fixture{
 				ImportPath: "import",
