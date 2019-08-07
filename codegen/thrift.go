@@ -70,7 +70,7 @@ func GoType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if !isHashable(s.ValueSpec) {
+		if !isHashable(s.ValueSpec) || isSliceSetType(s) {
 			return fmt.Sprintf("[]%s", v), nil
 		}
 		return fmt.Sprintf("map[%s]struct{}", v), nil
@@ -132,6 +132,13 @@ func isHashable(spec compile.TypeSpec) bool {
 	default:
 		return false
 	}
+}
+
+// IsSliceSetType returns true if the given thrift type is a Set implemented as a slice (as opposed to a map)
+func isSliceSetType(spec compile.TypeSpec) bool {
+	spec = compile.RootTypeSpec(spec)
+	_, isSet := spec.(*compile.SetSpec)
+	return isSet && spec.ThriftAnnotations()["go.type"] == "slice"
 }
 
 func pointerMethodType(typeSpec compile.TypeSpec) string {
@@ -212,6 +219,7 @@ func walkFieldGroupsInternal(
 		case *compile.I64Spec:
 		case *compile.EnumSpec:
 		case *compile.ListSpec:
+		case *compile.SetSpec:
 		case *compile.StructSpec:
 			bail := walkFieldGroupsInternal(
 				goPrefix+"."+PascalCase(field.Name),
@@ -223,8 +231,6 @@ func walkFieldGroupsInternal(
 			if bail {
 				return true
 			}
-		case *compile.SetSpec:
-			// TODO: implement
 		case *compile.MapSpec:
 			// TODO: implement
 		default:

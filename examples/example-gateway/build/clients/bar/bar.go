@@ -977,6 +977,16 @@ func (c *barClient) ArgWithQueryParams(
 	for _, value := range r.Bar {
 		queryValues.Add("bar", strconv.Itoa(int(value)))
 	}
+	if r.Baz != nil {
+		for value := range r.Baz {
+			queryValues.Add("baz", strconv.Itoa(int(value)))
+		}
+	}
+	if r.Bazbaz != nil {
+		for value := range r.Bazbaz {
+			queryValues.Add("bazbaz", value)
+		}
+	}
 	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
