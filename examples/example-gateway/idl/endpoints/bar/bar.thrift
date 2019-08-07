@@ -162,6 +162,9 @@ service Bar {
         2: optional string userUUID
         3: optional list<string> foo
         4: required list<i8> bar
+        5: optional set<i32> baz
+        6: optional set<string> bazbaz
+
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"

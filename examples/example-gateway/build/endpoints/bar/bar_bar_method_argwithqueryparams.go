@@ -126,7 +126,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 
 	fooOk := req.HasQueryValue("foo")
 	if fooOk {
-		fooQuery, ok := req.GetQueryValues("foo")
+		fooQuery, ok := req.GetQueryValueList("foo")
 		if !ok {
 			return
 		}
@@ -142,6 +142,24 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		return
 	}
 	requestBody.Bar = barQuery
+
+	bazOk := req.HasQueryValue("baz")
+	if bazOk {
+		bazQuery, ok := req.GetQueryInt32Set("baz")
+		if !ok {
+			return
+		}
+		requestBody.Baz = bazQuery
+	}
+
+	bazbazOk := req.HasQueryValue("bazbaz")
+	if bazbazOk {
+		bazbazQuery, ok := req.GetQueryValueSet("bazbaz")
+		if !ok {
+			return
+		}
+		requestBody.Bazbaz = bazbazQuery
+	}
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {

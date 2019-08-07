@@ -160,14 +160,14 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -222,14 +222,14 @@ func TestFailingGetQueryBool(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -284,14 +284,14 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -346,14 +346,14 @@ func TestFailingHasQueryValue(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -408,14 +408,14 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -470,14 +470,14 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -532,14 +532,14 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -594,14 +594,14 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -656,14 +656,14 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
 	logs := bgateway.AllLogs()
@@ -675,11 +675,11 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 }
 
 func TestGetQueryBoolList(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -705,7 +705,7 @@ func TestGetQueryBoolList(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=true&a[]=true&a[]=false", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=true&a[]=true&a[]=false", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "200 OK", resp.Status)
@@ -713,11 +713,11 @@ func TestGetQueryBoolList(t *testing.T) {
 }
 
 func TestFailingGetQueryBoolList(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -742,45 +742,150 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=truer", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=truer", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
+	)
+}
+
+func TestGetQueryBoolSet(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryBoolSet("a[]")
+				assert.True(t, ok)
+				expected := map[bool]struct{}{false: {}, true: {}}
+				assert.Equal(t, expected, l)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	queries := []string{"a[]=false&a[]=true", "a[]=false&a[]=true&a[]=false"}
+	for _, query := range queries {
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo?"+query, nil, nil)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, 200, resp.StatusCode)
+	}
+}
+
+func TestFailingGetQueryBoolSet(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryBoolSet("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=truer", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err = ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
 	)
 }
 
 func TestGetQueryInt8List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -806,7 +911,7 @@ func TestGetQueryInt8List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "200 OK", resp.Status)
@@ -814,11 +919,11 @@ func TestGetQueryInt8List(t *testing.T) {
 }
 
 func TestFailingGetQueryInt8List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -843,45 +948,150 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
+	)
+}
+
+func TestGetQueryInt8Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt8Set("a[]")
+				assert.True(t, ok)
+				expected := map[int8]struct{}{42: {}, 49: {}}
+				assert.Equal(t, expected, l)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	queries := []string{"a[]=42&a[]=49", "a[]=42&a[]=42&a[]=49"}
+	for _, query := range queries {
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo?"+query, nil, nil)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, 200, resp.StatusCode)
+	}
+}
+
+func TestFailingGetQueryInt8Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt8Set("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err = ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
 	)
 }
 
 func TestGetQueryInt16List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -907,7 +1117,7 @@ func TestGetQueryInt16List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "200 OK", resp.Status)
@@ -915,11 +1125,11 @@ func TestGetQueryInt16List(t *testing.T) {
 }
 
 func TestFailingGetQueryInt16List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -944,45 +1154,150 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
+	)
+}
+
+func TestGetQueryInt16Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt16Set("a[]")
+				assert.True(t, ok)
+				expected := map[int16]struct{}{42: {}, 49: {}}
+				assert.Equal(t, expected, l)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	queries := []string{"a[]=42&a[]=49", "a[]=42&a[]=42&a[]=49"}
+	for _, query := range queries {
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo?"+query, nil, nil)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, 200, resp.StatusCode)
+	}
+}
+
+func TestFailingGetQueryInt16Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt16Set("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err = ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
 	)
 }
 
 func TestGetQueryInt32List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1008,7 +1323,7 @@ func TestGetQueryInt32List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "200 OK", resp.Status)
@@ -1016,11 +1331,11 @@ func TestGetQueryInt32List(t *testing.T) {
 }
 
 func TestFailingGetQueryInt32List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1045,45 +1360,150 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
+	)
+}
+
+func TestGetQueryInt32Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt32Set("a[]")
+				assert.True(t, ok)
+				expected := map[int32]struct{}{42: {}, 49: {}}
+				assert.Equal(t, expected, l)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	queries := []string{"a[]=42&a[]=49", "a[]=42&a[]=42&a[]=49"}
+	for _, query := range queries {
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo?"+query, nil, nil)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, 200, resp.StatusCode)
+	}
+}
+
+func TestFailingGetQueryInt32Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt32Set("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err = ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
 	)
 }
 
 func TestGetQueryInt64List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1109,7 +1529,7 @@ func TestGetQueryInt64List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "200 OK", resp.Status)
@@ -1117,11 +1537,11 @@ func TestGetQueryInt64List(t *testing.T) {
 }
 
 func TestFailingGetQueryInt64List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1146,45 +1566,150 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
+	)
+}
+
+func TestGetQueryInt64Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt64Set("a[]")
+				assert.True(t, ok)
+				expected := map[int64]struct{}{42: {}, 49: {}}
+				assert.Equal(t, expected, l)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	queries := []string{"a[]=42&a[]=49", "a[]=42&a[]=42&a[]=49"}
+	for _, query := range queries {
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo?"+query, nil, nil)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, 200, resp.StatusCode)
+	}
+}
+
+func TestFailingGetQueryInt64Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryInt64Set("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42&a[]=49er", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err = ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
 	)
 }
 
 func TestGetQueryFloat64List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1210,7 +1735,7 @@ func TestGetQueryFloat64List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42.42&a[]=49.94", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42.42&a[]=49.94", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "200 OK", resp.Status)
@@ -1218,11 +1743,11 @@ func TestGetQueryFloat64List(t *testing.T) {
 }
 
 func TestFailingGetQueryFloat64List(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1247,45 +1772,45 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?a[]=42.24&a[]=49.94er", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42.24&a[]=49.94er", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
 	)
 }
 
-func TestFailingGetQueryValues(t *testing.T) {
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+func TestGetQueryFloat64Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1302,7 +1827,49 @@ func TestFailingGetQueryValues(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				l, ok := req.GetQueryValues("a[]")
+				l, ok := req.GetQueryFloat64Set("a[]")
+				assert.True(t, ok)
+				expected := map[float64]struct{}{42.24: {}, 49.94: {}}
+				assert.EqualValues(t, expected, l)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	queries := []string{"a[]=42.24&a[]=49.94", "a[]=42.24&a[]=42.24&a[]=49.94"}
+	for _, query := range queries {
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo?"+query, nil, nil)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "200 OK", resp.Status)
+		assert.Equal(t, 200, resp.StatusCode)
+	}
+}
+
+func TestFailingGetQueryFloat64Set(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryFloat64Set("a[]")
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
@@ -1310,33 +1877,45 @@ func TestFailingGetQueryValues(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?a[]=42.24&a[]=49.94er", nil, nil)
+	assert.NoError(t, err)
 
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	assert.Equal(t,
 		`{"error":"Could not parse query string"}`,
-		string(bytes),
+		string(respBytes),
+	)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err = ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
 	)
 }
 
-func TestGetQueryValues(t *testing.T) {
-	lastQueryParam := []string{}
+func TestFailingGetQueryValueList(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
-
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1353,7 +1932,58 @@ func TestGetQueryValues(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				params, ok := req.GetQueryValues("foo")
+				l, ok := req.GetQueryValueList("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+}
+
+func TestGetQueryValueList(t *testing.T) {
+	lastQueryParam := []string{}
+
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				params, ok := req.GetQueryValueList("foo")
 				if !assert.Equal(t, true, ok) {
 					return
 				}
@@ -1365,7 +1995,7 @@ func TestGetQueryValues(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	resp, err := ms.MakeHTTPRequest("GET", "/foo?foo=bar", nil, nil)
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?foo=bar", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1373,7 +2003,7 @@ func TestGetQueryValues(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 	assert.Equal(t, []string{"bar"}, lastQueryParam)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?foo=baz&foo=baz2", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?foo=baz&foo=baz2", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1381,7 +2011,7 @@ func TestGetQueryValues(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 	assert.Equal(t, []string{"baz", "baz2"}, lastQueryParam)
 
-	resp, err = ms.MakeHTTPRequest("GET", "/foo?bar=bar", nil, nil)
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?bar=bar", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1391,14 +2021,125 @@ func TestGetQueryValues(t *testing.T) {
 	assert.Equal(t, 0, len(lastQueryParam))
 }
 
+func TestGetQueryValueSet(t *testing.T) {
+	lastQueryParam := map[string]struct{}{}
+
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				params, ok := req.GetQueryValueSet("foo")
+				if !assert.Equal(t, true, ok) {
+					return
+				}
+
+				lastQueryParam = params
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?foo=bar", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "200 OK", resp.Status)
+	assert.Equal(t, map[string]struct{}{"bar": {}}, lastQueryParam)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?foo=baz&foo=baz2&foo=baz", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "200 OK", resp.Status)
+	assert.Equal(t, map[string]struct{}{"baz": {}, "baz2": {}}, lastQueryParam)
+
+	resp, err = mockService.MakeHTTPRequest("GET", "/foo?bar=bar", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "200 OK", resp.Status)
+	assert.Equal(t, map[string]struct{}{}, lastQueryParam)
+	assert.Equal(t, 0, len(lastQueryParam))
+}
+
+func TestFailingGetQueryValueSet(t *testing.T) {
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
+
+	g := mockService.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			g.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				l, ok := req.GetQueryValueSet("a[]")
+				assert.False(t, ok)
+				assert.Nil(t, l)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := mockService.MakeHTTPRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+}
+
 func TestSetQueryValue(t *testing.T) {
 	lastQueryParam := []string{}
 
-	ms := ms.MustCreateTestService(t)
-	ms.Start()
-	defer ms.Stop()
+	mockService := ms.MustCreateTestService(t)
+	mockService.Start()
+	defer mockService.Stop()
 
-	g := ms.Server()
+	g := mockService.Server()
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         g.RootScope,
 		Logger:        g.Logger,
@@ -1428,7 +2169,7 @@ func TestSetQueryValue(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, query := range []string{"", "?foo=bar", "?foo=baz&foo=baz2", "?bar=bar"} {
-		resp, err := ms.MakeHTTPRequest("GET", "/foo"+query, nil, nil)
+		resp, err := mockService.MakeHTTPRequest("GET", "/foo"+query, nil, nil)
 		if !assert.NoError(t, err) {
 			return
 		}

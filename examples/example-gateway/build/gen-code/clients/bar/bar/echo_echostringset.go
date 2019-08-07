@@ -19,32 +19,6 @@ type Echo_EchoStringSet_Args struct {
 	Arg map[string]struct{} `json:"arg,required"`
 }
 
-type _Set_String_ValueList map[string]struct{}
-
-func (v _Set_String_ValueList) ForEach(f func(wire.Value) error) error {
-	for x := range v {
-		w, err := wire.NewValueString(x), error(nil)
-		if err != nil {
-			return err
-		}
-
-		if err := f(w); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v _Set_String_ValueList) Size() int {
-	return len(v)
-}
-
-func (_Set_String_ValueList) ValueType() wire.Type {
-	return wire.TBinary
-}
-
-func (_Set_String_ValueList) Close() {}
-
 // ToWire translates a Echo_EchoStringSet_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
@@ -79,25 +53,6 @@ func (v *Echo_EchoStringSet_Args) ToWire() (wire.Value, error) {
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _Set_String_Read(s wire.ValueList) (map[string]struct{}, error) {
-	if s.ValueType() != wire.TBinary {
-		return nil, nil
-	}
-
-	o := make(map[string]struct{}, s.Size())
-	err := s.ForEach(func(x wire.Value) error {
-		i, err := x.GetString(), error(nil)
-		if err != nil {
-			return err
-		}
-
-		o[i] = struct{}{}
-		return nil
-	})
-	s.Close()
-	return o, err
 }
 
 // FromWire deserializes a Echo_EchoStringSet_Args struct from its Thrift-level
@@ -157,20 +112,6 @@ func (v *Echo_EchoStringSet_Args) String() string {
 	return fmt.Sprintf("Echo_EchoStringSet_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _Set_String_Equals(lhs, rhs map[string]struct{}) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-
-	for x := range rhs {
-		if _, ok := lhs[x]; !ok {
-			return false
-		}
-	}
-
-	return true
-}
-
 // Equals returns true if all the fields of this Echo_EchoStringSet_Args match the
 // provided Echo_EchoStringSet_Args.
 //
@@ -186,17 +127,6 @@ func (v *Echo_EchoStringSet_Args) Equals(rhs *Echo_EchoStringSet_Args) bool {
 	}
 
 	return true
-}
-
-type _Set_String_Zapper map[string]struct{}
-
-// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
-// fast logging of _Set_String_Zapper.
-func (s _Set_String_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
-	for v := range s {
-		enc.AppendString(v)
-	}
-	return err
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling
