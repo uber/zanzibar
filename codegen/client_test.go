@@ -37,8 +37,8 @@ dependencies:
     - a
     - b
 config:
-  thriftFileSha: thriftFileSha
-  thriftFile: clients/bar/bar.thrift
+  idlFileSha: idlFileSha
+  idlFile: clients/bar/bar.thrift
   customImportPath: path
   sidecarRouter: sidecar
   fixture:
@@ -59,8 +59,8 @@ dependencies:
     - a
     - b
 config:
-  thriftFileSha: thriftFileSha
-  thriftFile: clients/bar/bar.thrift
+  idlFileSha: idlFileSha
+  idlFile: clients/bar/bar.thrift
   customImportPath: path
   sidecarRouter: sidecar
   fixture:
@@ -142,8 +142,8 @@ func doThriftFileMissingTest(t *testing.T, clientType string) {
 name: test
 type: %s
 config:
-  thriftFileSha: thriftFileSha
-  # thriftFile is missing
+  idlFileSha: idlFileSha
+  # idlFile is missing
 `, clientType)
 
 	_, err := newClientConfig([]byte(configYAML))
@@ -164,8 +164,8 @@ func doThriftFileShaMissingTest(t *testing.T, clientType string) {
 name: test
 type: %s
 config:
-  # thriftFileSha is missing
-  thriftFile: thriftFile
+  # idlFileSha is missing
+  idlFile: idlFile
 `, clientType)
 
 	_, err := newClientConfig([]byte(configYAML))
@@ -182,7 +182,7 @@ func TestCustomClientRequiresCustomImportPath(t *testing.T) {
 name: test
 type: custom
 config:
-  thriftFileSha: thriftFileSha
+  idlFileSha: idlFileSha
   # CustomImportPath is missing
 `
 	_, err := newCustomClientConfig([]byte(configYAML))
@@ -196,8 +196,8 @@ func doDuplicatedExposedMethodsTest(t *testing.T, clientType string) {
 name: test
 type: %s
 config:
-  thriftFileSha: thriftFileSha
-  thriftFile: thriftFile
+  idlFileSha: idlFileSha
+  idlFile: idlFile
   exposedMethods:
     a: method
     b: method
@@ -241,7 +241,7 @@ func TestNewClientConfigTypeError(t *testing.T) {
 name: test
 type: : # malformated type
 config:
-  thriftFileSha: thriftFileSha
+  idlFileSha: idlFileSha
 `
 
 	_, err := newClientConfig([]byte(configYAML))
@@ -255,7 +255,7 @@ func TestNewClientConfigUnknownClientType(t *testing.T) {
 name: test
 type: unknown
 config:
-  thriftFileSha: thriftFileSha
+  idlFileSha: idlFileSha
 `
 	_, err := newClientConfig([]byte(configYAML))
 	expectedErr := "Unknown client type \"unknown\""
@@ -277,7 +277,7 @@ func TestNewClientConfigGetHTTPClient(t *testing.T) {
 			ExposedMethods: map[string]string{
 				"a": "method",
 			},
-			IDLFileSha:    "thriftFileSha",
+			IDLFileSha:    "idlFileSha",
 			IDLFile:       "clients/bar/bar.thrift",
 			SidecarRouter: "sidecar",
 			Fixture: &Fixture{
@@ -306,7 +306,7 @@ func TestNewClientConfigGetTChannelClient(t *testing.T) {
 			ExposedMethods: map[string]string{
 				"a": "method",
 			},
-			IDLFileSha:    "thriftFileSha",
+			IDLFileSha:    "idlFileSha",
 			IDLFile:       "clients/bar/bar.thrift",
 			SidecarRouter: "sidecar",
 			Fixture: &Fixture{
@@ -376,8 +376,8 @@ func TestHTTPClientNewClientSpecFailedWithThriftCompilation(t *testing.T) {
 name: test
 type: http
 config:
-  thriftFileSha: thriftFileSha
-  thriftFile: NOT_EXIST
+  idlFileSha: idlFileSha
+  idlFile: NOT_EXIST
   exposedMethods:
     a: method
 `
@@ -405,7 +405,7 @@ func doNewClientSpecTest(t *testing.T, rawConfig []byte, clientType string) {
 	}
 	h := newTestPackageHelper(t)
 
-	thriftFile := filepath.Join(h.ThriftIDLPath(), "clients/bar/bar.thrift")
+	idlFile := filepath.Join(h.ThriftIDLPath(), "clients/bar/bar.thrift")
 	expectedSpec := &ClientSpec{
 		ModuleSpec:         nil,
 		YAMLFile:           instance.YAMLFileName,
@@ -415,7 +415,7 @@ func doNewClientSpecTest(t *testing.T, rawConfig []byte, clientType string) {
 		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
 		ExportName:         instance.PackageInfo.ExportName,
 		ExportType:         instance.PackageInfo.ExportType,
-		ThriftFile:         thriftFile,
+		ThriftFile:         idlFile,
 		ClientID:           instance.InstanceName,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		ExposedMethods: map[string]string{
