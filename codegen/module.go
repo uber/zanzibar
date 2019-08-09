@@ -641,21 +641,21 @@ func (system *ModuleSystem) ResolveModules(
 					)
 				}
 			}
+		}
 
-			// Resolve dependencies for all classes
-			resolveErr := system.populateResolvedDependencies(
-				resolvedModules[className],
-				resolvedModules,
-			)
-			if resolveErr != nil {
-				return nil, resolveErr
-			}
+		// Resolve dependencies for all classes
+		resolveErr := system.populateResolvedDependencies(
+			resolvedModules[className],
+			resolvedModules,
+		)
+		if resolveErr != nil {
+			return nil, resolveErr
+		}
 
-			// Resolved recursive dependencies for all classes
-			recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
-			if recursiveErr != nil {
-				return nil, recursiveErr
-			}
+		// Resolved recursive dependencies for all classes
+		recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
+		if recursiveErr != nil {
+			return nil, recursiveErr
 		}
 	}
 
