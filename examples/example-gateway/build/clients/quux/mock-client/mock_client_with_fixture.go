@@ -36,6 +36,22 @@ type MockClientWithFixture struct {
 	echoStringMock  *EchoStringMock
 }
 
+// Call is a thin wrapper around gomock.Call for exposing the methods that do not mutate the fixture related information
+// like Return().
+type Call struct {
+	call *gomock.Call
+}
+
+// MaxTimes marks a fixture as callable up to a maximum number of times.
+func (c Call) MaxTimes(max int) {
+	c.call.MaxTimes(max)
+}
+
+// MinTimes marks a fixture as must be called a minimum number of times.
+func (c Call) MinTimes(max int) {
+	c.call.MinTimes(max)
+}
+
 // New creates a new mock instance
 func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockClientWithFixture {
 	return &MockClientWithFixture{
@@ -69,7 +85,7 @@ func (m *MockClientWithFixture) ExpectEchoMessage() *EchoMessageMock {
 
 // Success sets the expected scenario as defined in the concrete fixture package
 // github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
-func (s *EchoMessageMock) Success() {
+func (s *EchoMessageMock) Success() Call {
 	f := s.scenarios.Success
 
 	var arg0 interface{}
@@ -80,7 +96,7 @@ func (s *EchoMessageMock) Success() {
 
 	ret0 := f.Ret0
 
-	s.mockClient.EXPECT().EchoMessage(arg0).Return(ret0)
+	return Call{call: s.mockClient.EXPECT().EchoMessage(arg0).Return(ret0)}
 }
 
 // EchoStringMock mocks the EchoString method
@@ -102,7 +118,7 @@ func (m *MockClientWithFixture) ExpectEchoString() *EchoStringMock {
 
 // Success sets the expected scenario as defined in the concrete fixture package
 // github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
-func (s *EchoStringMock) Success() {
+func (s *EchoStringMock) Success() Call {
 	f := s.scenarios.Success
 
 	var arg0 interface{}
@@ -113,5 +129,5 @@ func (s *EchoStringMock) Success() {
 
 	ret0 := f.Ret0
 
-	s.mockClient.EXPECT().EchoString(arg0).Return(ret0)
+	return Call{call: s.mockClient.EXPECT().EchoString(arg0).Return(ret0)}
 }

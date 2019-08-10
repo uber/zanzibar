@@ -1,0 +1,8 @@
+config:
+  endpoints:
+    - echostring.yaml
+dependencies:
+  client:
+    - quux
+name: quux
+type: tchannel
