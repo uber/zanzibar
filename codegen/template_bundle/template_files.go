@@ -91,6 +91,22 @@ type MockClientWithFixture struct {
 	{{- end}}
 }
 
+// Call is a thin wrapper around gomock.Call for exposing the methods that do not mutate the fixture related information
+// like Return().
+type Call struct {
+	call *gomock.Call
+}
+
+// MaxTimes marks a fixture as callable up to a maximum number of times.
+func (c Call) MaxTimes(max int) {
+	c.call.MaxTimes(max)
+}
+
+// MinTimes marks a fixture as must be called a minimum number of times.
+func (c Call) MinTimes(max int) {
+	c.call.MinTimes(max)
+}
+
 // New creates a new mock instance
 func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockClientWithFixture {
 	return &MockClientWithFixture{
@@ -132,7 +148,7 @@ func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 {{$scenarioMethod := pascal $scenario}}
 // {{$scenarioMethod}} sets the expected scenario as defined in the concrete fixture package
 // {{$fixturePkg}}
-func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
+func (s *{{$methodMockType}}) {{$scenarioMethod}}() Call {
 	f := s.scenarios.{{$scenarioMethod}}
 
 	{{range $argName, $argType := $method.In}}
@@ -147,7 +163,7 @@ func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
 	{{$retName}} := f.{{title $retName}}
 	{{- end}}
 
-	s.mockClient.EXPECT().{{$methodName}}({{$method.InString}}).Return({{$method.OutString}})
+	return Call{call: s.mockClient.EXPECT().{{$methodName}}({{$method.InString}}).Return({{$method.OutString}})}
 }
 {{- end -}}
 {{- end -}}
@@ -163,7 +179,7 @@ func augmented_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2491, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2959, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

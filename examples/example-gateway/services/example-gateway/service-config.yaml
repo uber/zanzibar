@@ -11,4 +11,5 @@ dependencies:
   - multi
   - panic
   - tchannel/panic
+  - tchannel/quux
   - withexceptions

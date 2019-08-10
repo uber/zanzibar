@@ -51,6 +51,8 @@ import (
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	quuxendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux"
+	quuxendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux/module"
 	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
 	withexceptionsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
@@ -236,6 +238,17 @@ func InitializeDependenciesMock(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Quux = quuxendpointgenerated.NewEndpoint(&quuxendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &quuxendpointmodule.ClientDependencies{
+			Quux: initializedClientDependencies.Quux,
+		},
+		Middleware: &quuxendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &withexceptionsendpointmodule.ClientDependencies{
@@ -259,6 +272,7 @@ func InitializeDependenciesMock(
 			Panic:          initializedEndpointDependencies.Panic,
 			BazTChannel:    initializedEndpointDependencies.BazTChannel,
 			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
+			Quux:           initializedEndpointDependencies.Quux,
 			Withexceptions: initializedEndpointDependencies.Withexceptions,
 		},
 	}
