@@ -35,6 +35,22 @@ type MockClientWithFixture struct {
 	saveContactsMock *SaveContactsMock
 }
 
+// Call is a thin wrapper around gomock.Call for exposing the methods that do not mutate the fixture related information
+// like Return().
+type Call struct {
+	call *gomock.Call
+}
+
+// MaxTimes marks a fixture as callable up to a maximum number of times.
+func (c Call) MaxTimes(max int) {
+	c.call.MaxTimes(max)
+}
+
+// MinTimes marks a fixture as must be called a minimum number of times.
+func (c Call) MinTimes(max int) {
+	c.call.MinTimes(max)
+}
+
 // New creates a new mock instance
 func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockClientWithFixture {
 	return &MockClientWithFixture{
@@ -68,7 +84,7 @@ func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
 
 // Success sets the expected scenario as defined in the concrete fixture package
 // github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
-func (s *SaveContactsMock) Success() {
+func (s *SaveContactsMock) Success() Call {
 	f := s.scenarios.Success
 
 	var arg0 interface{}
@@ -91,5 +107,5 @@ func (s *SaveContactsMock) Success() {
 	ret1 := f.Ret1
 	ret2 := f.Ret2
 
-	s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2)
+	return Call{call: s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2)}
 }
