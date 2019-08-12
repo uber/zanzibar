@@ -31,7 +31,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
@@ -115,18 +114,13 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 		},
 	}
 
-	timeout := time.Duration(10000) * time.Millisecond
-	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
-
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
 		server.Logger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       server.ServiceName,
-			ClientID:          "TestClient",
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
+			ServiceName: server.ServiceName,
+			ClientID:    "TestClient",
 		},
 	)
 
