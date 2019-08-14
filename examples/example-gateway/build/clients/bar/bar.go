@@ -419,7 +419,7 @@ func (c *barClient) ArgWithHeaders(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithHeaders", "Bar::argWithHeaders", c.httpClient)
 
 	headers["name"] = string(r.Name)
-	if r != nil {
+	if r.UserUUID != nil {
 		headers["x-uuid"] = string(*r.UserUUID)
 	}
 

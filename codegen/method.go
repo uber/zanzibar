@@ -802,14 +802,9 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 					// Note header values are always string
 					headerNameValuePair = "headers[%q]= string(r%s)"
 				} else {
-					headerNameValuePair = "if r%s != nil {" +
-						"headers[%q]= string(*r%s)" + "}"
+					headerNameValuePair = "headers[%q]= string(*r%s)"
 				}
-				if len(seenOptStructs) == 0 {
-					statements.appendf(headerNameValuePair,
-						headerName, bodyIdentifier,
-					)
-				} else {
+				if len(seenOptStructs) != 0 {
 					closeFunction := ""
 					for seenStruct := range seenOptStructs {
 						if strings.HasPrefix(longFieldName, seenStruct) {
@@ -817,10 +812,16 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 							closeFunction = closeFunction + "}"
 						}
 					}
+					statements.append(closeFunction)
+				}
+				if field.Required {
 					statements.appendf(headerNameValuePair,
 						headerName, bodyIdentifier,
 					)
-					statements.append(closeFunction)
+				} else {
+					statements.appendf("if r%s != nil {", bodyIdentifier)
+					statements.appendf(headerNameValuePair, headerName, bodyIdentifier)
+					statements.append("}")
 				}
 			}
 		}
