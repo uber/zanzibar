@@ -419,7 +419,9 @@ func (c *barClient) ArgWithHeaders(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithHeaders", "Bar::argWithHeaders", c.httpClient)
 
 	headers["name"] = string(r.Name)
-	headers["x-uuid"] = string(*r.UserUUID)
+	if r.UserUUID != nil {
+		headers["x-uuid"] = string(*r.UserUUID)
+	}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithHeaders"
