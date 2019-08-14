@@ -802,7 +802,7 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 					// Note header values are always string
 					headerNameValuePair = "headers[%q]= string(r%s)"
 				} else {
-					headerNameValuePair = "if r != nil {" +
+					headerNameValuePair = "if r%s != nil {" +
 						"headers[%q]= string(*r%s)" + "}"
 				}
 				if len(seenOptStructs) == 0 {
