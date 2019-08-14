@@ -2375,47 +2375,4 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 
 	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", nil, nil)
 	assert.NoError(t, err)
-
-	allLogs := bgateway.AllLogs()
-	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request"]))
-
-	tags := allLogs["Finished an incoming server HTTP request"][0]
-	dynamicHeaders := []string{
-		"requestUUID",
-		"remoteAddr",
-		"timestamp-started",
-		"ts",
-		"hostname",
-		"host",
-		"pid",
-		"timestamp-finished",
-	}
-	for _, dynamicValue := range dynamicHeaders {
-		assert.Contains(t, tags, dynamicValue)
-		delete(tags, dynamicValue)
-	}
-
-	expectedValues := map[string]interface{}{
-		"msg":             "Finished an incoming server HTTP request",
-		"env":             "test",
-		"level":           "info",
-		"zone":            "unknown",
-		"service":         "example-gateway",
-		"method":          "GET",
-		"pathname":        "/foo?bar=bar",
-		"statusCode":      float64(200),
-		"endpointHandler": "foo",
-		"endpointID":      "foo",
-		"url":             "/foo",
-
-		"Accept-Encoding":         "gzip",
-		"User-Agent":              "Go-http-client/1.1",
-		"Res-Header-Content-Type": "application/json",
-	}
-	for actualKey, actualValue := range tags {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
-	}
-	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
-	}
 }

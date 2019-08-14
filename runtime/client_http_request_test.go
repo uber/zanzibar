@@ -172,9 +172,6 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	bytes, err := res.ReadAll()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("Example-Value"), bytes)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestBarClientWithoutHeaders(t *testing.T) {
@@ -249,50 +246,6 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, body)
 	assert.Equal(t, "Example-Value", headers["Example-Header"])
-
-	logs := bgateway.AllLogs()
-	logMsgs := logs["Finished an outgoing client HTTP request"]
-	assert.Len(t, logMsgs, 1)
-	logMsg := logMsgs[0]
-
-	dynamicHeaders := []string{
-		"url",
-		"timestamp-finished",
-		"Client-Req-Header-Uber-Trace-Id",
-		"Client-Res-Header-Content-Length",
-		"timestamp-started",
-		"Client-Res-Header-Date",
-		"ts",
-		"hostname",
-		"pid",
-	}
-	for _, dynamicValue := range dynamicHeaders {
-		assert.Contains(t, logMsg, dynamicValue)
-		delete(logMsg, dynamicValue)
-	}
-
-	expectedValues := map[string]interface{}{
-		"msg":                              "Finished an outgoing client HTTP request",
-		"level":                            "info",
-		"env":                              "test",
-		"zone":                             "unknown",
-		"service":                          "example-gateway",
-		"statusCode":                       float64(200),
-		"clientMethod":                     "Normal",
-		"clientID":                         "bar",
-		"clientThriftMethod":               "Bar::normal",
-		"clientHTTPMethod":                 "POST",
-		"Client-Req-Header-X-Client-Id":    "bar",
-		"Client-Req-Header-Content-Type":   "application/json",
-		"Client-Res-Header-Example-Header": "Example-Value",
-		"Client-Res-Header-Content-Type":   "text/plain; charset=utf-8",
-	}
-	for actualKey, actualValue := range logMsg {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
-	}
-	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, logMsg[expectedKey], expectedValue, "unexpected field %q", expectedKey)
-	}
 }
 
 func TestMakingClientCallWithThriftException(t *testing.T) {

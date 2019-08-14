@@ -104,7 +104,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
 
-	logFn := res.logger.Info
+	logFn := res.logger.Debug
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		tagged.Counter(endpointAppErrors).Inc(1)
 		logFn = res.logger.Warn
