@@ -795,18 +795,19 @@ func (gateway *Gateway) setupYARPCClientDispatcher(config *StaticConfig) error {
 
 	clientServiceNameMapping := make(map[string]string)
 	config.MustGetStruct("grpc.clientServiceNameMapping", &clientServiceNameMapping)
+	if len(clientServiceNameMapping) == 0 {
+		return nil
+	}
 
-	// TODO: no op if there is no YARPC clients
+	unaryOutbound := grpc.NewTransport(
+		grpc.Logger(gateway.Logger),
+		grpc.Tracer(gateway.Tracer),
+	).NewSingleOutbound(address)
 	outbounds := make(yarpc.Outbounds, len(clientServiceNameMapping))
 	for key, value := range clientServiceNameMapping {
 		outbounds[key] = transport.Outbounds{
 			ServiceName: value,
-			// TODO: this setup opens one TCP connection to the sidecar router per client
-			//       Is it better to share the same TCP connection among the clients?
-			Unary: grpc.NewTransport(
-				grpc.Logger(gateway.Logger),
-				grpc.Tracer(gateway.Tracer),
-			).NewSingleOutbound(address),
+			Unary:       unaryOutbound,
 		}
 	}
 
