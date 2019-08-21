@@ -1,5 +1,5 @@
-hash: c0ec5e96d89f6c9995110f8fef2c5b9e3cec0d4dc08295730c7a94d4c7b29d57
-updated: 2019-08-21T14:59:29.60538-07:00
+hash: 4492c157f8db00ea300b73b2f96ab088282ae275a241391eaf5101d828d7049b
+updated: 2019-08-21T16:07:47.235227-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -126,7 +126,7 @@ imports:
   subpackages:
   - difflib
 - name: github.com/prometheus/client_golang
-  version: 2641b987480bca71fb39738eb8c8b0d577cb1d76
+  version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
   - prometheus/internal
@@ -164,13 +164,12 @@ imports:
   subpackages:
   - internal/mapstructure
 - name: github.com/uber-go/tally
-  version: 3332297784e46cd346ab6d9894fd4ea027dc9368
+  version: 24c699f78afd17db5aac42f83c1c5cad70254294
   subpackages:
   - m3
   - m3/customtransports
   - m3/thrift
   - m3/thriftudp
-  - thirdparty/github.com/apache/thrift/lib/go/thrift
 - name: github.com/uber/jaeger-client-go
   version: 2f47546e3facd43297739439600bcf43f44cce5d
   subpackages:
@@ -326,6 +325,10 @@ imports:
   - ipv4
   - ipv6
   - trace
+- name: golang.org/x/sys
+  version: fde4db37ae7ad8191b03d30d27f258b5291ae4e3
+  subpackages:
+  - unix
 - name: golang.org/x/text
   version: 342b2e1fbaa52c93f31447ad2c6abc048c63e475
   subpackages:
