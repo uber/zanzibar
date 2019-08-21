@@ -1133,10 +1133,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 	var statements LineBuilder
 	var hasQueryFields bool
 	var stack []string
-	nilResultStr := ""
-	if funcSpec.ResultSpec.ReturnType != nil {
-		nilResultStr = "nil, "
-	}
+	isVoidReturn := funcSpec.ResultSpec.ReturnType == nil
 
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
@@ -1161,13 +1158,17 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 			if field.Required {
 				statements.appendf("if r%s == nil {", longFieldName)
-				// TODO: generate correct number of nils...
-				statements.appendf("\treturn %snil, errors.New(", nilResultStr)
+				// Generate correct number of nils...
+				if isVoidReturn {
+					statements.append("\treturn nil, errors.New(")
+				} else {
+					statements.append("\treturn nil, nil, errors.New(")
+				}
 				statements.appendf("\t\t\"The field %s is required\",",
 					longFieldName,
 				)
 				statements.append("\t)")
-				statements.appendf("}")
+				statements.append("}")
 			} else {
 				stack = append(stack, longFieldName)
 
