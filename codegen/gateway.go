@@ -30,9 +30,9 @@ import (
 	"sort"
 	"strings"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
-	yaml "gopkg.in/yaml.v2"
 )
 
 const (
@@ -183,7 +183,7 @@ type MiddlewareSpec struct {
 	// The middleware package name.
 	Name string `yaml:"name"`
 	// Middleware specific configuration options.
-	Options map[interface{}]interface{} `yaml:"options"`
+	Options map[string]interface{} `yaml:"options"`
 	// Options pretty printed for template initialization
 	PrettyOptions map[string]string
 	// Module Dependencies,  clients etc.
@@ -275,7 +275,7 @@ type EndpointSpec struct {
 	ClientSpec *ClientSpec `yaml:"-"`
 }
 
-func ensureFields(config map[interface{}]interface{}, mandatoryFields []string, yamlFile string) error {
+func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {
 	for i := 0; i < len(mandatoryFields); i++ {
 		fieldName := mandatoryFields[i]
 		if _, ok := config[fieldName]; !ok {
@@ -305,7 +305,7 @@ func NewEndpointSpec(
 		)
 	}
 
-	endpointConfigObj := map[interface{}]interface{}{}
+	endpointConfigObj := map[string]interface{}{}
 	err = yaml.Unmarshal(bytes, &endpointConfigObj)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -486,7 +486,7 @@ func sortByMiddlewareOrdering(
 	return middlewares, nil
 }
 
-func testFixtures(endpointConfigObj map[interface{}]interface{}) (map[string]*EndpointTestFixture, error) {
+func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*EndpointTestFixture, error) {
 	field, ok := endpointConfigObj["testFixtures"]
 	if !ok {
 		return nil, errors.Errorf("missing testFixtures field")
@@ -500,7 +500,7 @@ func testFixtures(endpointConfigObj map[interface{}]interface{}) (map[string]*En
 	return ret, err
 }
 
-func loadHeadersFromConfig(endpointCfgObj map[interface{}]interface{}, key string) (map[string]string, error) {
+func loadHeadersFromConfig(endpointCfgObj map[string]interface{}, key string) (map[string]string, error) {
 	// TODO define endpointConfigObj to avoid type assertion
 
 	headers, ok := endpointCfgObj[key]
@@ -508,10 +508,10 @@ func loadHeadersFromConfig(endpointCfgObj map[interface{}]interface{}, key strin
 		return nil, errors.Errorf("unable to parse %q", key)
 	}
 	headersMap := make(map[string]string)
-	for key, val := range headers.(map[interface{}]interface{}) {
+	for key, val := range headers.(map[string]interface{}) {
 		switch value := val.(type) {
 		case string:
-			headersMap[textproto.CanonicalMIMEHeaderKey(key.(string))] = value
+			headersMap[textproto.CanonicalMIMEHeaderKey(key)] = value
 		default:
 			return nil, errors.Errorf(
 				"unable to parse string %q in headers %q", value, headers)
@@ -535,7 +535,7 @@ func sortedHeaders(headerMap map[string]*TypedHeader, filterRequired bool) []str
 
 func resolveHeaders(
 	espec *EndpointSpec,
-	endpointConfigObj map[interface{}]interface{},
+	endpointConfigObj map[string]interface{},
 	key string,
 ) error {
 	var (
@@ -663,7 +663,7 @@ func resolveHeaderModels(ms *ModuleSpec, modelPath string) (map[string]*TypedHea
 
 func augmentEndpointSpec(
 	espec *EndpointSpec,
-	endpointConfigObj map[interface{}]interface{},
+	endpointConfigObj map[string]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 	defaultMidSpecs []MiddlewareSpec,
 ) (*EndpointSpec, error) {
@@ -678,7 +678,7 @@ func augmentEndpointSpec(
 		}
 
 		for _, middleware := range endpointMids {
-			middlewareObj, ok := middleware.(map[interface{}]interface{})
+			middlewareObj, ok := middleware.(map[string]interface{})
 			if !ok {
 				return nil, errors.Errorf(
 					"Unable to parse middleware %s",
@@ -734,14 +734,14 @@ func augmentEndpointSpec(
 			}
 			// TODO(sindelar): Validate Options against middleware spec and support
 			// nested typed objects.
-			opts, ok := middlewareObj["options"].(map[interface{}]interface{})
+			opts, ok := middlewareObj["options"].(map[string]interface{})
 			if !ok {
-				opts = make(map[interface{}]interface{})
+				opts = make(map[string]interface{})
 			}
 
 			prettyOpts := map[string]string{}
 			for k, value := range opts {
-				key := k.(string)
+				key := k
 				rValue := reflect.ValueOf(value)
 				kind := rValue.Kind()
 
@@ -802,9 +802,9 @@ func augmentEndpointSpec(
 	return espec, nil
 }
 
-func setPropagateMiddleware(middlewareObj map[interface{}]interface{}) (map[string]FieldMapperEntry, error) {
+func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
 	fieldMap := make(map[string]FieldMapperEntry)
-	opts, ok := middlewareObj["options"].(map[interface{}]interface{})
+	opts, ok := middlewareObj["options"].(map[string]interface{})
 	if !ok {
 		return nil, errors.New(
 			"missing or invalid options for propagate middleware",
@@ -813,7 +813,7 @@ func setPropagateMiddleware(middlewareObj map[interface{}]interface{}) (map[stri
 	propagates := opts["propagate"].([]interface{})
 	dest := make(map[string]string)
 	for _, propagate := range propagates {
-		propagateMap := propagate.(map[interface{}]interface{})
+		propagateMap := propagate.(map[string]interface{})
 		fromField, ok := propagateMap["from"].(string)
 		if !ok {
 			return nil, errors.New(
@@ -840,9 +840,9 @@ func setPropagateMiddleware(middlewareObj map[interface{}]interface{}) (map[stri
 	return fieldMap, nil
 }
 
-func setTransformMiddleware(middlewareObj map[interface{}]interface{}) (map[string]FieldMapperEntry, error) {
+func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
 	fieldMap := make(map[string]FieldMapperEntry)
-	opts, ok := middlewareObj["options"].(map[interface{}]interface{})
+	opts, ok := middlewareObj["options"].(map[string]interface{})
 	if !ok {
 		return nil, errors.Errorf(
 			"transform middleware found with no options.",
@@ -850,7 +850,7 @@ func setTransformMiddleware(middlewareObj map[interface{}]interface{}) (map[stri
 	}
 	transforms := opts["transforms"].([]interface{})
 	for _, transform := range transforms {
-		transformMap := transform.(map[interface{}]interface{})
+		transformMap := transform.(map[string]interface{})
 		fromField, ok := transformMap["from"].(string)
 		if !ok {
 			return nil, errors.New(

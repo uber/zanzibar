@@ -32,8 +32,8 @@ import (
 	"runtime"
 	"strings"
 
+	yamllib "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var cachedBinaryFile *testBinaryInfo
@@ -77,7 +77,7 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 	}
 
 	yamlFile := path.Join(tempConfigDir, "test.yaml")
-	configBytes, err := yaml.Marshal(config)
+	configBytes, err := yamllib.Marshal(config)
 	if err != nil {
 		return "", err
 	}

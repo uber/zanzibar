@@ -30,9 +30,9 @@ import (
 	"sync"
 	"sync/atomic"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"gopkg.in/validator.v2"
-	yaml "gopkg.in/yaml.v2"
 )
 
 const (

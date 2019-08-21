@@ -30,8 +30,8 @@ import (
 	"sort"
 	"strings"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains
