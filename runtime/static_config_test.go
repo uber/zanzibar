@@ -21,19 +21,18 @@
 package zanzibar_test
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 
-	"encoding/json"
-
-	"io/ioutil"
-
+	yaml "github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var testDir string = getDirName()
@@ -817,10 +816,10 @@ func TestInspectFromFile(t *testing.T) {
 		"a.b.c": "v",
 		"bool":  true,
 		"float": float64(1.2),
-		"int":   int(1),
+		"int":   float64(1),
 		"struct": map[string]interface{}{
 			"Field": "a",
-			"Foo":   int(4),
+			"Foo":   float64(4),
 		},
 	})
 

@@ -32,11 +32,12 @@ import (
 	"strings"
 	"time"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/kardianos/osext"
-	"github.com/uber/zanzibar/test/lib/util"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	yaml "gopkg.in/yaml.v2"
+
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 var logger = zap.New(

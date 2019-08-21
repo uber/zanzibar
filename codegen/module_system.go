@@ -28,9 +28,9 @@ import (
 	"sort"
 	"strings"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
-	"gopkg.in/yaml.v2"
 )
 
 // EndpointMeta saves meta data used to render an endpoint.
@@ -82,14 +82,14 @@ type EndpointTestMeta struct {
 
 // FixtureBlob implements default string used for (http | tchannel)
 // request/response
-type FixtureBlob map[interface{}]interface{}
+type FixtureBlob map[string]interface{}
 
-func toStringMap(i map[interface{}]interface{}) map[string]interface{} {
+func toStringMap(i map[string]interface{}) map[string]interface{} {
 	m := make(map[string]interface{}, len(i))
 	for k, v := range i {
-		key := k.(string)
+		key := k
 		switch val := v.(type) {
-		case map[interface{}]interface{}:
+		case map[string]interface{}:
 			m[key] = toStringMap(val)
 		case FixtureBlob:
 			m[key] = toStringMap(val)
@@ -134,6 +134,7 @@ func (fb *FixtureBody) String() string {
 		return fb.BodyString
 	case "json":
 		if fb.BodyJSON == nil {
+
 			panic(errors.New("invalid http body type"))
 		}
 		return fb.BodyJSON.String()

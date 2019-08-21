@@ -94,7 +94,7 @@ config:
 func TestNewHTTPClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
 	_, err := newHTTPClientConfig([]byte(invalidYAML))
-	expectedErr := "Could not parse HTTP client config data: yaml: line 1: did not find expected node content"
+	expectedErr := "Could not parse HTTP client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
 }
@@ -102,7 +102,7 @@ func TestNewHTTPClientConfigUnmarshalFilure(t *testing.T) {
 func TestNewTChannelClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
 	_, err := newTChannelClientConfig([]byte(invalidYAML))
-	expectedErr := "Could not parse TChannel client config data: yaml: line 1: did not find expected node content"
+	expectedErr := "Could not parse TChannel client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
 }
@@ -110,7 +110,7 @@ func TestNewTChannelClientConfigUnmarshalFilure(t *testing.T) {
 func TestNewCustomClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
 	_, err := newCustomClientConfig([]byte(invalidYAML))
-	expectedErr := "Could not parse Custom client config data: yaml: line 1: did not find expected node content"
+	expectedErr := "Could not parse Custom client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
 }
@@ -220,7 +220,7 @@ func TestNewClientConfigDuplicatedMethodsFailure(t *testing.T) {
 func TestGetConfigTypeFailure(t *testing.T) {
 	clientType, err := clientType([]byte("{{{"))
 
-	expectedErr := "Could not parse client config data to determine client type: yaml: line 1: did not find expected node content"
+	expectedErr := "Could not parse client config data to determine client type: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Equal(t, "", clientType)
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -245,7 +245,7 @@ config:
 `
 
 	_, err := newClientConfig([]byte(configYAML))
-	expectedErr := "Could not determine client type: Could not parse client config data to determine client type: yaml: line 3: mapping values are not allowed in this context"
+	expectedErr := "Could not determine client type: Could not parse client config data to determine client type: error converting YAML to JSON: yaml: line 3: mapping values are not allowed in this context"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
 }
