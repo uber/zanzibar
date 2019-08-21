@@ -109,7 +109,7 @@ func easyjson883c5671DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Request == nil {
 					out.Request = new(BarRequest)
 				}
-				(*out.Request).UnmarshalEasyJSON(in)
+				easyjson883c5671DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(in, out.Request)
 			}
 			RequestSet = true
 		case "filter":
@@ -156,7 +156,7 @@ func easyjson883c5671EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
-			(*in.Request).MarshalEasyJSON(out)
+			easyjson883c5671EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out, *in.Request)
 		}
 	}
 	{
@@ -204,4 +204,152 @@ func (v *Bar_DeleteWithQueryParams_Args) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Bar_DeleteWithQueryParams_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson883c5671DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarDeleteWithQueryParams1(l, v)
+}
+func easyjson883c5671DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(in *jlexer.Lexer, out *BarRequest) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var StringFieldSet bool
+	var BoolFieldSet bool
+	var BinaryFieldSet bool
+	var TimestampSet bool
+	var EnumFieldSet bool
+	var LongFieldSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "stringField":
+			out.StringField = string(in.String())
+			StringFieldSet = true
+		case "boolField":
+			out.BoolField = bool(in.Bool())
+			BoolFieldSet = true
+		case "binaryField":
+			if in.IsNull() {
+				in.Skip()
+				out.BinaryField = nil
+			} else {
+				out.BinaryField = in.Bytes()
+			}
+			BinaryFieldSet = true
+		case "timestamp":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Timestamp).UnmarshalJSON(data))
+			}
+			TimestampSet = true
+		case "enumField":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.EnumField).UnmarshalJSON(data))
+			}
+			EnumFieldSet = true
+		case "longField":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.LongField).UnmarshalJSON(data))
+			}
+			LongFieldSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !StringFieldSet {
+		in.AddError(fmt.Errorf("key 'stringField' is required"))
+	}
+	if !BoolFieldSet {
+		in.AddError(fmt.Errorf("key 'boolField' is required"))
+	}
+	if !BinaryFieldSet {
+		in.AddError(fmt.Errorf("key 'binaryField' is required"))
+	}
+	if !TimestampSet {
+		in.AddError(fmt.Errorf("key 'timestamp' is required"))
+	}
+	if !EnumFieldSet {
+		in.AddError(fmt.Errorf("key 'enumField' is required"))
+	}
+	if !LongFieldSet {
+		in.AddError(fmt.Errorf("key 'longField' is required"))
+	}
+}
+func easyjson883c5671EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out *jwriter.Writer, in BarRequest) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"stringField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.StringField))
+	}
+	{
+		const prefix string = ",\"boolField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.BoolField))
+	}
+	{
+		const prefix string = ",\"binaryField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Base64Bytes(in.BinaryField)
+	}
+	{
+		const prefix string = ",\"timestamp\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.Timestamp).MarshalJSON())
+	}
+	{
+		const prefix string = ",\"enumField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.EnumField).MarshalJSON())
+	}
+	{
+		const prefix string = ",\"longField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.LongField).MarshalJSON())
+	}
+	out.RawByte('}')
 }
