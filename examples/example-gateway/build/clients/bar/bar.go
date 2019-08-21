@@ -88,6 +88,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_DeleteFoo_Args,
 	) (map[string]string, error)
+	DeleteWithQueryParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_DeleteWithQueryParams_Args,
+	) (map[string]string, error)
 	Hello(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -246,6 +251,7 @@ func NewClient(deps *module.Dependencies) Client {
 				"ArgWithQueryHeader":              "Bar::argWithQueryHeader",
 				"ArgWithQueryParams":              "Bar::argWithQueryParams",
 				"DeleteFoo":                       "Bar::deleteFoo",
+				"DeleteWithQueryParams":           "Bar::deleteWithQueryParams",
 				"Hello":                           "Bar::helloWorld",
 				"ListAndEnum":                     "Bar::listAndEnum",
 				"MissingArg":                      "Bar::missingArg",
@@ -757,9 +763,6 @@ func (c *barClient) ArgWithParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParams" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
 
-	if r.Params != nil {
-	}
-
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1057,6 +1060,79 @@ func (c *barClient) DeleteFoo(
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/foo"
+
+	err := req.WriteJSON("DELETE", fullURL, headers, r)
+	if err != nil {
+		return nil, err
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+	}
+
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// DeleteWithQueryParams calls "/bar/withQueryParams" endpoint.
+func (c *barClient) DeleteWithQueryParams(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_DeleteWithQueryParams_Args,
+) (map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithQueryParams", "Bar::deleteWithQueryParams", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/withQueryParams"
+
+	queryValues := &url.Values{}
+	filterQuery := r.Filter
+	queryValues.Set("filter", filterQuery)
+	if r.Count != nil {
+		countQuery := strconv.Itoa(int(*r.Count))
+		queryValues.Set("count", countQuery)
+	}
+	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
