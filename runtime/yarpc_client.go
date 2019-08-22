@@ -105,10 +105,10 @@ type callHelper struct {
 
 // NewYARPCClientCallHelper used to initialize a helper that will
 // be used to track logging and metric for a YARPC Client call.
-func NewYARPCClientCallHelper(ctx context.Context, opts *YARPCClientOpts) (context.Context, YARPCClientCallHelper) {
-	ctx = WithScopeTags(ctx, opts.ScopeTags[opts.ServiceName])
+func NewYARPCClientCallHelper(ctx context.Context, serviceMethod string, opts *YARPCClientOpts) (context.Context, YARPCClientCallHelper) {
+	ctx = WithScopeTags(ctx, opts.ScopeTags[serviceMethod])
 	return ctx, &callHelper{
-		logger:    opts.Loggers[opts.ServiceName],
+		logger:    opts.Loggers[serviceMethod],
 		metrics:   opts.Metrics,
 		extractor: opts.ContextExtractor,
 	}

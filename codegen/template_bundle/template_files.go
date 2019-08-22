@@ -3382,7 +3382,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	methodNames := map[string]string{
 		{{range $i, $svc := .ProtoServices -}}
 			{{range $j, $method := $svc.RPC -}}
-				"{{print "%s::%s" $svc.Name $method.Name}}": "{{$method.Name}}",
+				"{{printf "%s::%s" $svc.Name $method.Name}}": "{{$method.Name}}",
 			{{- end -}}
 		{{- end}}
 	}
@@ -3449,7 +3449,7 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 {{range $i, $svc := .ProtoServices -}}
 {{range $j, $method := $svc.RPC -}}
 {{if $method.Name -}}
-// {{$method.Name}} is a client RPC call for method {{print "%s::%s" $svc.Name $method.Name}}.
+// {{$method.Name}} is a client RPC call for method {{printf "%s::%s" $svc.Name $method.Name}}.
 func (e *{{$clientName}}) {{$method.Name}}(
 	ctx context.Context,
 	request *gen.{{$method.Request.Name}},
@@ -3458,7 +3458,7 @@ func (e *{{$clientName}}) {{$method.Name}}(
 	var result *gen.{{$method.Response.Name}}
 	var err error
 
-	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, e.opts)
+	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, "{{printf "%s::%s" $svc.Name $method.Name}}", e.opts)
 
 	if e.opts.RoutingKey != "" {
 		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))
@@ -3501,7 +3501,7 @@ func yarpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "yarpc_client.tmpl", size: 5988, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "yarpc_client.tmpl", size: 6036, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

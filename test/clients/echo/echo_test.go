@@ -29,14 +29,17 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
-	"github.com/uber/zanzibar/runtime"
+	"github.com/uber-go/tally"
 	"go.uber.org/yarpc"
 	"go.uber.org/yarpc/api/transport"
 	"go.uber.org/yarpc/transport/grpc"
+	"go.uber.org/zap"
+
+	"github.com/uber/zanzibar/config"
+	echoclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 type echoServer struct{}
@@ -78,6 +81,9 @@ func TestEcho(t *testing.T) {
 	client := echoclient.NewClient(&module.Dependencies{
 		Default: &zanzibar.DefaultDependencies{
 			YARPCClientDispatcher: dispatcher,
+			Config:                sc,
+			Logger:                zap.NewNop(),
+			ContextMetrics:        zanzibar.NewContextMetrics(tally.NewTestScope("", nil)),
 		},
 	})
 
