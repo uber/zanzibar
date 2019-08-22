@@ -24,15 +24,140 @@
 package echoclient
 
 import (
+	"context"
+
+	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/yarpc"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
 	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Client defines the echo client interface.
-type Client = gen.EchoYARPCClient
+// Client defines echo client interface.
+type Client interface {
+	Echo(
+		ctx context.Context,
+		request *gen.Request,
+		opts ...yarpc.CallOption,
+	) (*gen.Response, error)
+}
 
-// NewClient creates a now echo grpc client, panics if config for echo is missing.
+// echoClient is the gRPC client for downstream service.
+type echoClient struct {
+	client gen.EchoYARPCClient
+	opts   *zanzibar.YARPCClientOpts
+}
+
+// NewClient returns a new gRPC client for service echo
 func NewClient(deps *module.Dependencies) Client {
 	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("echo")
-	return gen.NewEchoYARPCClient(oc)
+	var routingKey string
+	if deps.Default.Config.ContainsKey("clients.echo.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.echo.routingKey")
+	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("clients.echo.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("clients.echo.requestUUIDHeaderKey")
+	}
+	timeoutInMS := int(deps.Default.Config.MustGetInt("clients.echo.timeout"))
+	methodNames := map[string]string{
+		"%s::%sEchoEcho": "Echo",
+	}
+	return &echoClient{
+		client: gen.NewEchoYARPCClient(oc),
+		opts: zanzibar.NewYARPCClientOpts(
+			deps.Default.Logger,
+			deps.Default.ContextMetrics,
+			deps.Default.ContextExtractor,
+			methodNames,
+			"echo", // user serviceName
+			"echo",
+			routingKey,
+			requestUUIDHeaderKey,
+			configureCicruitBreaker(deps, timeoutInMS),
+			timeoutInMS,
+		),
+	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.echo.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.echo.circuitBreakerDisabled")
+	}
+	if circuitBreakerDisabled {
+		return false
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.echo.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.echo.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.echo.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.echo.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.echo.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.echo.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.echo.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.echo.requestVolumeThreshold"))
+	}
+
+	hystrix.ConfigureCommand("echo", hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
+	return circuitBreakerDisabled
+}
+
+// Echo is a client RPC call for method %s::%sEchoEcho.
+func (e *echoClient) Echo(
+	ctx context.Context,
+	request *gen.Request,
+	opts ...yarpc.CallOption,
+) (*gen.Response, error) {
+	var result *gen.Response
+	var err error
+
+	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, e.opts)
+
+	if e.opts.RoutingKey != "" {
+		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))
+	}
+	if e.opts.RequestUUIDHeaderKey != "" {
+		reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+		if reqUUID != "" {
+			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
+		}
+	}
+	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
+	defer cancel()
+
+	runFunc := e.client.Echo
+	callHelper.Start()
+	if e.opts.CircuitBreakerDisabled {
+		result, err = runFunc(ctx, request, opts...)
+	} else {
+		err = hystrix.DoC(ctx, "echo", func(ctx context.Context) error {
+			result, err = runFunc(ctx, request, opts...)
+			return err
+		}, nil)
+	}
+	callHelper.Finish(ctx, err)
+
+	return result, err
 }

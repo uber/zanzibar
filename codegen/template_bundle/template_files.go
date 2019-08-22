@@ -3327,25 +3327,168 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _yarpc_clientTmpl = []byte(`{{- $instance := .Instance }}
+var _yarpc_clientTmpl = []byte(`{{- /* template to render gateway yarpc client code */ -}}
+{{- $instance := .Instance }}
 {{- $genPkg := .GenPkg }}
-{{- $clientID := $instance.InstanceName -}}
-
 package {{$instance.PackageInfo.PackageName}}
 
 import (
+	"context"
+
+	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/yarpc"
+
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	gen "{{$genPkg}}"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Client defines the {{$clientID}} client interface.
-type Client = gen.{{pascal $clientID}}YARPCClient
+{{$clientID := $instance.InstanceName -}}
+{{$exposedMethods := .ExposedMethods -}}
+{{- $clientName := printf "%sClient" (camel $clientID) }}
+{{- $exportName := .ExportName}}
 
-// NewClient creates a now {{$clientID}} grpc client, panics if config for {{$clientID}} is missing.
-func NewClient(deps *module.Dependencies) Client{
-	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("{{$clientID}}")
-	return gen.New{{pascal $clientID}}YARPCClient(oc)
+// Client defines {{$clientID}} client interface.
+type Client interface {
+{{range $i, $svc := .ProtoServices -}}
+	{{range $j, $method := $svc.RPC -}}
+		{{title $method.Name}} (
+			ctx context.Context,
+			request *gen.{{$method.Request.Name}},
+			opts ...yarpc.CallOption,
+		) (*gen.{{$method.Response.Name}}, error)
+	{{- end -}}
+{{- end}}
 }
+
+// {{$clientName}} is the gRPC client for downstream service.
+type {{$clientName}} struct {
+	client gen.{{pascal $clientID}}YARPCClient
+	opts   *zanzibar.YARPCClientOpts
+}
+
+// NewClient returns a new gRPC client for service {{$clientID}}
+func {{$exportName}}(deps *module.Dependencies) Client {
+	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("{{$clientID}}")
+	var routingKey string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.requestUUIDHeaderKey")
+	}
+	timeoutInMS := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
+	methodNames := map[string]string{
+		{{range $i, $svc := .ProtoServices -}}
+			{{range $j, $method := $svc.RPC -}}
+				"{{print "%s::%s" $svc.Name $method.Name}}": "{{$method.Name}}",
+			{{- end -}}
+		{{- end}}
+	}
+	return &{{$clientName}}{
+		client: gen.New{{pascal $clientID}}YARPCClient(oc),
+		opts: zanzibar.NewYARPCClientOpts(
+			deps.Default.Logger,
+			deps.Default.ContextMetrics,
+			deps.Default.ContextExtractor,
+			methodNames,
+			"{{$clientID}}", // user serviceName
+			"{{$clientID}}",
+			routingKey,
+			requestUUIDHeaderKey,
+			configureCicruitBreaker(deps, timeoutInMS),
+			timeoutInMS,
+		),
+	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	}
+	if circuitBreakerDisabled {
+		return false
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
+	}
+
+	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
+	return circuitBreakerDisabled
+}
+
+{{range $i, $svc := .ProtoServices -}}
+{{range $j, $method := $svc.RPC -}}
+{{if $method.Name -}}
+// {{$method.Name}} is a client RPC call for method {{print "%s::%s" $svc.Name $method.Name}}.
+func (e *{{$clientName}}) {{$method.Name}}(
+	ctx context.Context,
+	request *gen.{{$method.Request.Name}},
+	opts ...yarpc.CallOption,
+) (*gen.{{$method.Response.Name}}, error) {
+	var result *gen.{{$method.Response.Name}}
+	var err error
+
+	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, e.opts)
+
+	if e.opts.RoutingKey != "" {
+		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))
+	}
+	if e.opts.RequestUUIDHeaderKey != "" {
+		reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+		if reqUUID != "" {
+			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
+		}
+	}
+	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
+	defer cancel()
+
+	runFunc := e.client.{{$method.Name}}
+	callHelper.Start()
+	if e.opts.CircuitBreakerDisabled {
+		result, err = runFunc(ctx, request, opts...)
+	} else {
+		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			result, err = runFunc(ctx, request, opts...)
+			return err
+		}, nil)
+	}
+	callHelper.Finish(ctx, err)
+
+	return result, err
+}
+{{end -}}
+{{end -}}
+{{end}}
 `)
 
 func yarpc_clientTmplBytes() ([]byte, error) {
@@ -3358,7 +3501,7 @@ func yarpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "yarpc_client.tmpl", size: 620, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "yarpc_client.tmpl", size: 5988, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

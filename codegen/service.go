@@ -22,9 +22,12 @@ package codegen
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
+	"github.com/emicklei/proto"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -34,6 +37,8 @@ type ModuleSpec struct {
 	// CompiledModule is the resolved module from thrift file
 	// that will contain modules and typedefs not directly mounted on AST
 	CompiledModule *compile.Module `json:"omitempty"`
+	// ProtoModule foo
+	ProtoModule *proto.Proto
 	// Source thrift file to generate the code.
 	ThriftFile string
 	// Whether the ThriftFile should have annotations or not
@@ -47,6 +52,7 @@ type ModuleSpec struct {
 	// Generated imports
 	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
+	ProtoServices    []*ProtoService
 }
 
 // GoPackageImport ...
@@ -69,6 +75,30 @@ type ServiceSpec struct {
 	Methods []*MethodSpec
 	// thriftrw compile spec.
 	CompileSpec *compile.ServiceSpec
+}
+
+// NewProtoModuleSpec returns a specification for a proto module.
+func NewProtoModuleSpec(protoFile string, isEndpoint bool) (*ModuleSpec, error) {
+	reader, err := os.Open(protoFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed reading proto file")
+	}
+	defer func() { _ = reader.Close() }()
+
+	parser := proto.NewParser(reader)
+	protoModules, err := parser.Parse()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed parsing proto file")
+	}
+
+	moduleSpec := &ModuleSpec{
+		ProtoModule: protoModules,
+		ThriftFile:  protoFile,
+		WantAnnot:   false,
+		IsEndpoint:  isEndpoint,
+		PackageName: packageName(filepath.Base(protoModules.Filename)),
+	}
+	return moduleSpec, nil
 }
 
 // NewModuleSpec returns a specification for a thrift module
