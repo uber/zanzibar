@@ -144,7 +144,6 @@ for config_file in ${config_files}; do
 		fi
 
 		thrift_file=$(${processor} -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
-		thrift_file+=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".thrift"))' "$yaml_file")
 
 		# process .proto files
 		proto_file=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".proto"))' "$yaml_file")
