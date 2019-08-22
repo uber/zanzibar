@@ -23,7 +23,6 @@ package codegen
 import (
 	"encoding/json"
 	"net/textproto"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -798,7 +797,29 @@ type YarpcClientGenerator struct {
 func (g *YarpcClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	return (*ClientSpec)(nil), nil
+	// Parse the client config from the endpoint YAML file
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"error reading gRPC client %q YAML config",
+			instance.InstanceName,
+		)
+	}
+
+	clientSpec, err := clientConfig.NewClientSpec(
+		instance,
+		g.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"error initializing gRPCClientSpec for %q",
+			instance.InstanceName,
+		)
+	}
+
+	return clientSpec, nil
 }
 
 // Generate returns the yarpc client build result, which contains the files and
@@ -806,33 +827,43 @@ func (g *YarpcClientGenerator) ComputeSpec(
 func (g *YarpcClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	clientConfig := &GRPCClientConfig{}
-	if err := yaml.Unmarshal(instance.YAMLFileRaw, &clientConfig); err != nil {
+	clientSpecUntyped, err := g.ComputeSpec(instance)
+	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading yarpc client %q YAML config",
+			"error initializing GRPCClientSpec for %q",
 			instance.InstanceName,
 		)
 	}
+	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	data := &struct {
-		Instance *ModuleInstance
-		GenPkg   string
-	}{
-		Instance: instance,
+	reversedMethods := make(map[string]string, len(clientSpec.ExposedMethods))
+	for exposedMethod, thriftMethod := range clientSpec.ExposedMethods {
+		reversedMethods[thriftMethod] = exposedMethod
 	}
 
-	parts := strings.Split(clientConfig.Config.IDLFile, "/")
-	genDir := strings.Join(parts[0:len(parts)-1], "/")
-
-	data.GenPkg = path.Join(
+	parts := strings.Split(clientSpec.ThriftFile, "/")
+	genDir := strings.Join(parts[len(parts)-3:len(parts)-1], "/")
+	genPkg := filepath.Join(
 		g.packageHelper.GenCodePackage(),
 		genDir,
 	)
+	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
+	clientMeta := &ClientMeta{
+		ProtoServices:    clientSpec.ModuleSpec.ProtoServices,
+		Instance:         instance,
+		ExportName:       clientSpec.ExportName,
+		ExportType:       clientSpec.ExportType,
+		Services:         nil,
+		IncludedPackages: nil,
+		ClientID:         clientSpec.ClientID,
+		ExposedMethods:   reversedMethods,
+		GenPkg:           genPkg,
+	}
 
 	client, err := g.templates.ExecTemplate(
 		"yarpc_client.tmpl",
-		data,
+		clientMeta,
 		g.packageHelper,
 	)
 	if err != nil {
@@ -1470,11 +1501,13 @@ type ClientMeta struct {
 	ClientID         string
 	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
+	ProtoServices    []*ProtoService
 	ExposedMethods   map[string]string
 	SidecarRouter    string
 	Fixture          *Fixture
 	StagingReqHeader string
 	DeputyReqHeader  string
+	GenPkg           string
 }
 
 func findMethod(

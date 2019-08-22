@@ -23,6 +23,7 @@ package codegen
 import (
 	"path/filepath"
 
+	"github.com/emicklei/proto"
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	validator "gopkg.in/validator.v2"
@@ -231,6 +232,135 @@ type GRPCClientConfig struct {
 	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
+func newGRPCClientConfig(raw []byte) (*GRPCClientConfig, error) {
+	config := &GRPCClientConfig{}
+	if errUnmarshal := yaml.Unmarshal(raw, config); errUnmarshal != nil {
+		return nil, errors.Wrap(
+			errUnmarshal, "could not parse gRPC client config data")
+	}
+
+	if err := validator.SetValidationFunc("exposedMethods", validateExposedMethods); err != nil {
+		return nil, errors.Wrap(
+			err, "could not set validator function on gRPC client config")
+	}
+	if errValidate := validator.Validate(config); errValidate != nil {
+		return nil, errors.Wrap(
+			errValidate, "gRPC client config validation failed")
+	}
+
+	return config, nil
+}
+
+// ProtoService is an internal representation of Proto service and methods in that service.
+type ProtoService struct {
+	Name string
+	RPC  []*ProtoRPC
+}
+
+// ProtoRPC is an internal representation of Proto RPC method and its request/response types.
+type ProtoRPC struct {
+	Name     string
+	Request  *ProtoMessage
+	Response *ProtoMessage
+}
+
+// ProtoMessage is an internal representation of a Proto Message.
+type ProtoMessage struct {
+	Name string
+}
+
+type visitor struct {
+	protoServices []*ProtoService
+}
+
+func newVisitor() *visitor {
+	return &visitor{
+		protoServices: make([]*ProtoService, 0),
+	}
+}
+
+func (v *visitor) VisitService(e *proto.Service) {
+	v.protoServices = append(v.protoServices, &ProtoService{
+		Name: e.Name,
+		RPC:  make([]*ProtoRPC, 0),
+	})
+	for _, c := range e.Elements {
+		c.Accept(v)
+	}
+}
+
+func (v *visitor) VisitRPC(r *proto.RPC) {
+	s := v.protoServices[len(v.protoServices)-1]
+	s.RPC = append(s.RPC, &ProtoRPC{
+		Name:     r.Name,
+		Request:  &ProtoMessage{Name: r.RequestType},
+		Response: &ProtoMessage{Name: r.ReturnsType},
+	})
+}
+
+func (v *visitor) VisitMessage(e *proto.Message)         {}
+func (v *visitor) VisitSyntax(e *proto.Syntax)           {}
+func (v *visitor) VisitPackage(e *proto.Package)         {}
+func (v *visitor) VisitOption(e *proto.Option)           {}
+func (v *visitor) VisitImport(e *proto.Import)           {}
+func (v *visitor) VisitNormalField(e *proto.NormalField) {}
+func (v *visitor) VisitEnumField(e *proto.EnumField)     {}
+func (v *visitor) VisitEnum(e *proto.Enum)               {}
+func (v *visitor) VisitComment(e *proto.Comment)         {}
+func (v *visitor) VisitOneof(o *proto.Oneof)             {}
+func (v *visitor) VisitOneofField(o *proto.OneOfField)   {}
+func (v *visitor) VisitReserved(r *proto.Reserved)       {}
+func (v *visitor) VisitMapField(f *proto.MapField)       {}
+func (v *visitor) VisitGroup(g *proto.Group)             {}
+func (v *visitor) VisitExtensions(e *proto.Extensions)   {}
+
+func newGRPCClientSpec(
+	clientType string,
+	config *ClientIDLConfig,
+	instance *ModuleInstance,
+	h *PackageHelper,
+) (*ClientSpec, error) {
+	protoFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
+	protoSpec, err := NewProtoModuleSpec(protoFile, false)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "could not build proto spec for proto file %s: ", protoFile,
+		)
+	}
+
+	v := newVisitor()
+	for _, e := range protoSpec.ProtoModule.Elements {
+		e.Accept(v)
+	}
+	protoSpec.ProtoServices = v.protoServices
+
+	cspec := &ClientSpec{
+		ModuleSpec:         protoSpec,
+		YAMLFile:           instance.YAMLFileName,
+		JSONFile:           instance.JSONFileName,
+		ClientType:         clientType,
+		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
+		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
+		ExportName:         instance.PackageInfo.ExportName,
+		ExportType:         instance.PackageInfo.ExportType,
+		ThriftFile:         protoFile,
+		ClientID:           instance.InstanceName,
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
+		ExposedMethods:     config.ExposedMethods,
+		SidecarRouter:      config.SidecarRouter,
+	}
+
+	return cspec, nil
+}
+
+// NewClientSpec creates a client spec from a client module instance
+func (c *GRPCClientConfig) NewClientSpec(
+	instance *ModuleInstance,
+	h *PackageHelper,
+) (*ClientSpec, error) {
+	return newGRPCClientSpec(c.Type, c.Config, instance, h)
+}
+
 func clientType(raw []byte) (string, error) {
 	clientConfig := ClassConfigBase{}
 	if err := yaml.Unmarshal(raw, &clientConfig); err != nil {
@@ -252,6 +382,8 @@ func newClientConfig(raw []byte) (clientConfig, error) {
 		return newHTTPClientConfig(raw)
 	case "tchannel":
 		return newTChannelClientConfig(raw)
+	case "grpc":
+		return newGRPCClientConfig(raw)
 	case "custom":
 		return newCustomClientConfig(raw)
 	default:

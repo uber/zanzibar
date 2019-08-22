@@ -85,3 +85,5 @@ import:
   - prometheus
   - prometheus/internal
   - prometheus/promhttp
+
+- package: github.com/emicklei/proto
