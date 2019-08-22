@@ -32,8 +32,8 @@ import (
 	"runtime"
 	"strings"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var cachedBinaryFile *testBinaryInfo

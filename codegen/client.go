@@ -23,9 +23,9 @@ package codegen
 import (
 	"path/filepath"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	validator "gopkg.in/validator.v2"
-	yaml "gopkg.in/yaml.v2"
 )
 
 type clientConfig interface {

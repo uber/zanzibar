@@ -14,8 +14,9 @@ import:
   version: ^0.8.0
 - package: go.uber.org/atomic
   version: ^1.3.0
+# Version 3.3.11 has incompatibilities
 - package: github.com/uber-go/tally
-  version: ^3.3.8
+  version: 3.3.10
 - package: github.com/kardianos/osext
   version: master
 - package: go.uber.org/thriftrw
@@ -57,6 +58,8 @@ import:
   version: ^1
 - package: go.uber.org/yarpc
   version: ^1.37.4
+- package: github.com/ghodss/yaml
+  version: master
 
 # https://github.com/uber/zanzibar/issues/583
 - package: honnef.co/go/tools/cmd/staticcheck
@@ -68,3 +71,17 @@ import:
 
 # Transitive dependency of fx
 - package: go.uber.org/dig
+
+# Needed by vendor/golang.org/x/net/internal
+- package: golang.org/x/sys
+  version: master
+  subpackages:
+  - unix
+
+# Added due to: https://github.com/prometheus/procfs/issues/167
+- package: github.com/prometheus/client_golang
+  version: c5b7fccd204277076155f10851dad72b76a49317
+  subpackages:
+  - prometheus
+  - prometheus/internal
+  - prometheus/promhttp

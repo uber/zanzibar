@@ -21,15 +21,14 @@
 package zanzibar
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
 
+	"github.com/ghodss/yaml"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 type configType int
@@ -390,32 +389,10 @@ func (conf *StaticConfig) parseFile(
 		))
 	}
 
-	var object map[interface{}]interface{}
+	var object map[string]interface{}
 	err := yaml.Unmarshal(bytes, &object)
 	if err != nil {
 		panic(err)
 	}
-	return stringizeMapKey(object).(map[string]interface{})
-}
-
-// yaml.Unmarshal deserializes nested maps to map[interface{}]interface{}, which is
-// unsupported type for json.Marshal, we need to convert the map key to string
-// so that the object can be serialized by both yaml and json marshalers.
-func stringizeMapKey(in interface{}) interface{} {
-	switch v := in.(type) {
-	case map[interface{}]interface{}:
-		ret := make(map[string]interface{}, len(v))
-		for key, value := range v {
-			ret[fmt.Sprintf("%v", key)] = stringizeMapKey(value)
-		}
-		return ret
-	case []interface{}:
-		ret := make([]interface{}, len(v))
-		for i, value := range v {
-			ret[i] = stringizeMapKey(value)
-		}
-		return ret
-	default:
-		return v
-	}
+	return object
 }
