@@ -22,6 +22,7 @@ clients.corge.timeout: 10000
 clients.corge.timeoutPerAttempt: 2000
 clients.corge.maxConcurrentRequests: 1000
 clients.corge.errorPercentThreshold: 20
+clients.echo.timeout: 20
 clients.google-now.ip: 127.0.0.1
 clients.google-now.port: 14120
 clients.google-now.timeout: 10000
