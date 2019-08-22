@@ -62,7 +62,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	timeoutInMS := int(deps.Default.Config.MustGetInt("clients.echo.timeout"))
 	methodNames := map[string]string{
-		"%s::%sEchoEcho": "Echo",
+		"Echo::Echo": "Echo",
 	}
 	return &echoClient{
 		client: gen.NewEchoYARPCClient(oc),
@@ -124,7 +124,7 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	return circuitBreakerDisabled
 }
 
-// Echo is a client RPC call for method %s::%sEchoEcho.
+// Echo is a client RPC call for method Echo::Echo.
 func (e *echoClient) Echo(
 	ctx context.Context,
 	request *gen.Request,
@@ -133,7 +133,7 @@ func (e *echoClient) Echo(
 	var result *gen.Response
 	var err error
 
-	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, e.opts)
+	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, "Echo::Echo", e.opts)
 
 	if e.opts.RoutingKey != "" {
 		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))
