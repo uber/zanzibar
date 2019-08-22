@@ -915,7 +915,7 @@ func (c *TypeConverter) genStructConverter(
 			// 	toField.Type.TypeCode().String(), toField.Name,
 			// )
 
-			// pkgName, err := h.TypePackageName(toField.Type.IDLFile())
+			// pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
 			// if err != nil {
 			// 	return nil, err
 			// }

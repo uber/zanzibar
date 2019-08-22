@@ -2,7 +2,7 @@ config:
   exposedMethods:
     HelloA: ServiceABack::hello
     HelloB: ServiceBBack::hello
-  idlFile: clients/multi/multi.thrift
-  idlFileSha: '{{placeholder}}'
+  thriftFile: clients/multi/multi.thrift
+  thriftFileSha: '{{placeholder}}'
 name: multi
 type: http
