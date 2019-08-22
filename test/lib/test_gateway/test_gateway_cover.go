@@ -32,7 +32,7 @@ import (
 	"runtime"
 	"strings"
 
-	yamllib "github.com/ghodss/yaml"
+	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 )
 
@@ -77,7 +77,7 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 	}
 
 	yamlFile := path.Join(tempConfigDir, "test.yaml")
-	configBytes, err := yamllib.Marshal(config)
+	configBytes, err := yaml.Marshal(config)
 	if err != nil {
 		return "", err
 	}

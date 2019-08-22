@@ -396,4 +396,3 @@ func (conf *StaticConfig) parseFile(
 	}
 	return object
 }
-
