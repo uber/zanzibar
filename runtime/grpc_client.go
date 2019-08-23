@@ -30,8 +30,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// YARPCClientOpts used to configure various client options.
-type YARPCClientOpts struct {
+// GRPCClientOpts used to configure various client options.
+type GRPCClientOpts struct {
 	ServiceName            string
 	ClientID               string
 	MethodNames            map[string]string
@@ -45,8 +45,8 @@ type YARPCClientOpts struct {
 	ScopeTags              map[string]map[string]string
 }
 
-// NewYARPCClientOpts creates a new instance of YARPCClientOpts.
-func NewYARPCClientOpts(
+// NewGRPCClientOpts creates a new instance of GRPCClientOpts.
+func NewGRPCClientOpts(
 	logger *zap.Logger,
 	metrics ContextMetrics,
 	contextExtractor ContextExtractor,
@@ -54,7 +54,7 @@ func NewYARPCClientOpts(
 	clientID, serviceName, routingKey, requestUUIDHeaderKey string,
 	circuitBreakerDisabled bool,
 	timeoutInMS int,
-) *YARPCClientOpts {
+) *GRPCClientOpts {
 	numMethods := len(methodNames)
 	loggers := make(map[string]*zap.Logger, numMethods)
 	for serviceMethod, methodName := range methodNames {
@@ -72,7 +72,7 @@ func NewYARPCClientOpts(
 			scopeTagsTargetService: serviceName,
 		}
 	}
-	return &YARPCClientOpts{
+	return &GRPCClientOpts{
 		ServiceName:            serviceName,
 		ClientID:               clientID,
 		MethodNames:            methodNames,
@@ -87,11 +87,11 @@ func NewYARPCClientOpts(
 	}
 }
 
-// YARPCClientCallHelper is used to track internal state of logging and metrics.
-type YARPCClientCallHelper interface {
-	// Start method should be used just before calling the actual YARPC client method call.
+// GRPCClientCallHelper is used to track internal state of logging and metrics.
+type GRPCClientCallHelper interface {
+	// Start method should be used just before calling the actual gRPC client method call.
 	Start()
-	// Finish method should be used right after the actual call to YARPC client method.
+	// Finish method should be used right after the actual call to gRPC client method.
 	Finish(ctx context.Context, err error) context.Context
 }
 
@@ -103,9 +103,9 @@ type callHelper struct {
 	extractor  ContextExtractor
 }
 
-// NewYARPCClientCallHelper used to initialize a helper that will
-// be used to track logging and metric for a YARPC Client call.
-func NewYARPCClientCallHelper(ctx context.Context, serviceMethod string, opts *YARPCClientOpts) (context.Context, YARPCClientCallHelper) {
+// NewGRPCClientCallHelper used to initialize a helper that will
+// be used to track logging and metric for a gRPC Client call.
+func NewGRPCClientCallHelper(ctx context.Context, serviceMethod string, opts *GRPCClientOpts) (context.Context, GRPCClientCallHelper) {
 	ctx = WithScopeTags(ctx, opts.ScopeTags[serviceMethod])
 	return ctx, &callHelper{
 		logger:    opts.Loggers[serviceMethod],
@@ -114,13 +114,13 @@ func NewYARPCClientCallHelper(ctx context.Context, serviceMethod string, opts *Y
 	}
 }
 
-// Start method should be used just before calling the actual YARPC client method call.
+// Start method should be used just before calling the actual gRPC client method call.
 // This method starts a timer used for metric.
 func (c *callHelper) Start() {
 	c.startTime = time.Now()
 }
 
-// Finish method should be used right after the actual call to YARPC client method.
+// Finish method should be used right after the actual call to gRPC client method.
 // This method emits latency and error metric as well as logging in case of error.
 func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 	c.finishTime = time.Now()

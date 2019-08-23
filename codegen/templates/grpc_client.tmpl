@@ -1,4 +1,4 @@
-{{- /* template to render gateway yarpc client code */ -}}
+{{- /* template to render gateway gRPC client code */ -}}
 {{- $instance := .Instance }}
 {{- $genPkg := .GenPkg }}
 package {{$instance.PackageInfo.PackageName}}
@@ -35,12 +35,12 @@ type Client interface {
 // {{$clientName}} is the gRPC client for downstream service.
 type {{$clientName}} struct {
 	client gen.{{pascal $clientID}}YARPCClient
-	opts   *zanzibar.YARPCClientOpts
+	opts   *zanzibar.GRPCClientOpts
 }
 
 // NewClient returns a new gRPC client for service {{$clientID}}
 func {{$exportName}}(deps *module.Dependencies) Client {
-	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("{{$clientID}}")
+	oc := deps.Default.GRPCClientDispatcher.MustOutboundConfig("{{$clientID}}")
 	var routingKey string
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
 		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
@@ -59,7 +59,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 	return &{{$clientName}}{
 		client: gen.New{{pascal $clientID}}YARPCClient(oc),
-		opts: zanzibar.NewYARPCClientOpts(
+		opts: zanzibar.NewGRPCClientOpts(
 			deps.Default.Logger,
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
@@ -129,7 +129,7 @@ func (e *{{$clientName}}) {{$method.Name}}(
 	var result *gen.{{$method.Response.Name}}
 	var err error
 
-	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, "{{printf "%s::%s" $svc.Name $method.Name}}", e.opts)
+	ctx, callHelper := zanzibar.NewGRPCClientCallHelper(ctx, "{{printf "%s::%s" $svc.Name $method.Name}}", e.opts)
 
 	if e.opts.RoutingKey != "" {
 		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))

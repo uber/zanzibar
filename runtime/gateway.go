@@ -103,8 +103,8 @@ type Gateway struct {
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
 
-	// Yarpc client dispatcher for yarpc client lifecycle management
-	YAPRCClientDispatcher *yarpc.Dispatcher
+	// gRPC client dispatcher for gRPC client lifecycle management
+	GRPCClientDispatcher *yarpc.Dispatcher
 
 	atomLevel       *zap.AtomicLevel
 	loggerFile      *os.File
@@ -137,8 +137,8 @@ type DefaultDependencies struct {
 	Config  *StaticConfig
 	Channel *tchannel.Channel
 
-	// dispatcher for managing yarpc(grpc) clients
-	YARPCClientDispatcher *yarpc.Dispatcher
+	// dispatcher for managing gRPC clients
+	GRPCClientDispatcher *yarpc.Dispatcher
 }
 
 // CreateGateway func
@@ -225,8 +225,8 @@ func CreateGateway(
 		return nil, err
 	}
 
-	// setup YARPC client dispatcher afrer metrics, logger and tracer
-	if err := gateway.setupYARPCClientDispatcher(config); err != nil {
+	// setup gRPC client dispatcher after metrics, logger and tracer
+	if err := gateway.setupGRPCClientDispatcher(config); err != nil {
 		return nil, err
 	}
 
@@ -294,9 +294,9 @@ func (gateway *Gateway) Bootstrap() error {
 
 	gateway.RootScope.Counter("startup.success").Inc(1)
 
-	err = gateway.YAPRCClientDispatcher.Start()
+	err = gateway.GRPCClientDispatcher.Start()
 	if err != nil {
-		gateway.Logger.Error("Error starting YARPC client dispatcher", zap.Error(err))
+		gateway.Logger.Error("error starting gRPC client dispatcher", zap.Error(err))
 		return err
 	}
 
@@ -401,8 +401,8 @@ func (gateway *Gateway) Shutdown() {
 	swg.Add(1)
 	go func() {
 		defer swg.Done()
-		if err := gateway.YAPRCClientDispatcher.Stop(); err != nil {
-			ec <- errors.Wrap(err, "error stopping yarpc client dispatcher")
+		if err := gateway.GRPCClientDispatcher.Stop(); err != nil {
+			ec <- errors.Wrap(err, "error stopping gRPC client dispatcher")
 		}
 	}()
 
@@ -788,7 +788,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	return nil
 }
 
-func (gateway *Gateway) setupYARPCClientDispatcher(config *StaticConfig) error {
+func (gateway *Gateway) setupGRPCClientDispatcher(config *StaticConfig) error {
 	ip := config.MustGetString("sidecarRouter.default.grpc.ip")
 	port := config.MustGetInt("sidecarRouter.default.grpc.port")
 	address := fmt.Sprintf("%s:%d", ip, port)
@@ -823,7 +823,7 @@ func (gateway *Gateway) setupYARPCClientDispatcher(config *StaticConfig) error {
 			Tally: gateway.RootScope,
 		},
 	})
-	gateway.YAPRCClientDispatcher = dispatcher
+	gateway.GRPCClientDispatcher = dispatcher
 	return nil
 }
 

@@ -305,7 +305,7 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("client", "grpc", &YarpcClientGenerator{
+	if err := system.RegisterClassType("client", "grpc", &GRPCClientGenerator{
 		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {
@@ -784,17 +784,17 @@ func (g *CustomClientGenerator) Generate(
 }
 
 /*
- * yarpc client generator
+ * gRPC client generator
  */
 
-// YarpcClientGenerator generates grpc clients.
-type YarpcClientGenerator struct {
+// GRPCClientGenerator generates grpc clients.
+type GRPCClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 }
 
-// ComputeSpec returns the spec for a yarpc client
-func (g *YarpcClientGenerator) ComputeSpec(
+// ComputeSpec returns the spec for a gRPC client
+func (g *GRPCClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
@@ -822,9 +822,9 @@ func (g *YarpcClientGenerator) ComputeSpec(
 	return clientSpec, nil
 }
 
-// Generate returns the yarpc client build result, which contains the files and
+// Generate returns the gRPC client build result, which contains the files and
 // the generated client spec
-func (g *YarpcClientGenerator) Generate(
+func (g *GRPCClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	clientSpecUntyped, err := g.ComputeSpec(instance)
@@ -862,14 +862,14 @@ func (g *YarpcClientGenerator) Generate(
 	}
 
 	client, err := g.templates.ExecTemplate(
-		"yarpc_client.tmpl",
+		"grpc_client.tmpl",
 		clientMeta,
 		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing YARPC client template for %q",
+			"Error executing gRPC client template for %q",
 			instance.InstanceName,
 		)
 	}
