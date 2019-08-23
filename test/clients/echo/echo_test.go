@@ -80,10 +80,10 @@ func TestEcho(t *testing.T) {
 
 	client := echoclient.NewClient(&module.Dependencies{
 		Default: &zanzibar.DefaultDependencies{
-			YARPCClientDispatcher: dispatcher,
-			Config:                sc,
-			Logger:                zap.NewNop(),
-			ContextMetrics:        zanzibar.NewContextMetrics(tally.NewTestScope("", nil)),
+			GRPCClientDispatcher: dispatcher,
+			Config:               sc,
+			Logger:               zap.NewNop(),
+			ContextMetrics:       zanzibar.NewContextMetrics(tally.NewTestScope("", nil)),
 		},
 	})
 
