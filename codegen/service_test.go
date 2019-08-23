@@ -21,9 +21,12 @@
 package codegen_test
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/uber/zanzibar/codegen"
 )
 
@@ -31,6 +34,23 @@ func TestModuleSpec(t *testing.T) {
 	barThrift := "../examples/example-gateway/idl/clients/bar/bar.thrift"
 	_, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the thrift file")
+}
+
+func TestProtoModuleSpec(t *testing.T) {
+	echoProto := "../examples/example-gateway/idl/clients/echo/echo.proto"
+	_, err := codegen.NewProtoModuleSpec(echoProto, false)
+	assert.NoError(t, err, "unable to parse the proto file")
+}
+
+func TestProtoModuleSpecParseError(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("../examples/example-gateway/idl/clients/", "temp*.proto")
+	assert.NoError(t, err, "failed to create temp file")
+	defer os.Remove(tmpFile.Name())
+	_, err = tmpFile.WriteString("test")
+	assert.NoError(t, err, "failed writing to temp file")
+
+	_, err = codegen.NewProtoModuleSpec(tmpFile.Name(), false)
+	assert.Error(t, err, "failed parsing proto file")
 }
 
 func TestExceptionValidation(t *testing.T) {
