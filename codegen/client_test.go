@@ -451,6 +451,7 @@ config:
 
 	h := newTestPackageHelper(t)
 	_, errSpec := client.NewClientSpec(nil /* ModuleInstance */, h)
+	fmt.Println(errSpec)
 	assert.Error(t, errSpec)
 }
 
