@@ -72,6 +72,26 @@ config:
   exposedMethods:
     a: method
 `
+	grpcClientYAML = `
+name: test
+type: grpc
+dependencies:
+  client:
+    - a
+    - b
+config:
+  idlFileSha: idlFileSha
+  idlFile: clients/echo/echo.proto
+  customImportPath: path
+  fixture:
+    importPath: import
+    scenarios:
+      scenario:
+        - s1
+        - s2
+  exposedMethods:
+    a: method
+`
 
 	customClientYAML = `
 name: test
@@ -107,6 +127,14 @@ func TestNewTChannelClientConfigUnmarshalFilure(t *testing.T) {
 	assert.Equal(t, expectedErr, err.Error())
 }
 
+func TestNewGRPCClientConfigUnmarshalFilure(t *testing.T) {
+	invalidYAML := "{{{"
+	_, err := newGRPCClientConfig([]byte(invalidYAML))
+	expectedErr := "could not parse gRPC client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
+	assert.Error(t, err)
+	assert.Equal(t, expectedErr, err.Error())
+}
+
 func TestNewCustomClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
 	_, err := newCustomClientConfig([]byte(invalidYAML))
@@ -134,6 +162,7 @@ type: %s
 func TestNewClientConfigSubConfigMissing(t *testing.T) {
 	doSubConfigMissingTest(t, "http")
 	doSubConfigMissingTest(t, "tchannel")
+	doSubConfigMissingTest(t, "grpc")
 	doSubConfigMissingTest(t, "custom")
 }
 
@@ -157,6 +186,7 @@ config:
 func TestThriftFileMissingValidation(t *testing.T) {
 	doThriftFileMissingTest(t, "http")
 	doThriftFileMissingTest(t, "tchannel")
+	doThriftFileMissingTest(t, "grpc")
 }
 
 func doThriftFileShaMissingTest(t *testing.T, clientType string) {
@@ -175,6 +205,7 @@ config:
 func TestThriftFileShaMissingValidation(t *testing.T) {
 	doThriftFileShaMissingTest(t, "http")
 	doThriftFileShaMissingTest(t, "tchannel")
+	doThriftFileShaMissingTest(t, "grpc")
 }
 
 func TestCustomClientRequiresCustomImportPath(t *testing.T) {
@@ -215,6 +246,7 @@ config:
 func TestNewClientConfigDuplicatedMethodsFailure(t *testing.T) {
 	doDuplicatedExposedMethodsTest(t, "http")
 	doDuplicatedExposedMethodsTest(t, "tchannel")
+	doDuplicatedExposedMethodsTest(t, "grpc")
 }
 
 func TestGetConfigTypeFailure(t *testing.T) {
@@ -321,6 +353,34 @@ func TestNewClientConfigGetTChannelClient(t *testing.T) {
 	assert.Equal(t, &expectedClient, client)
 }
 
+func TestNewClientConfigGetGRPCClient(t *testing.T) {
+	client, err := newClientConfig([]byte(grpcClientYAML))
+	expectedClient := GRPCClientConfig{
+		ClassConfigBase: ClassConfigBase{
+			Name: "test",
+			Type: "grpc",
+		},
+		Dependencies: Dependencies{
+			Client: []string{"a", "b"},
+		},
+		Config: &ClientIDLConfig{
+			ExposedMethods: map[string]string{
+				"a": "method",
+			},
+			IDLFileSha: "idlFileSha",
+			IDLFile:    "clients/echo/echo.proto",
+			Fixture: &Fixture{
+				ImportPath: "import",
+				Scenarios: map[string][]string{
+					"scenario": {"s1", "s2"},
+				},
+			},
+		},
+	}
+	assert.NoError(t, err)
+	assert.Equal(t, &expectedClient, client)
+}
+
 func TestNewClientConfigGetCustomClient(t *testing.T) {
 	client, err := newClientConfig([]byte(customClientYAML))
 	expectedClient := CustomClientConfig{
@@ -371,16 +431,21 @@ func newTestPackageHelper(t *testing.T) *PackageHelper {
 
 }
 
-func TestHTTPClientNewClientSpecFailedWithThriftCompilation(t *testing.T) {
-	configYAML := `
+func TestClientNewClientSpecFailedWithThriftCompilation(t *testing.T) {
+	testNewClientSpecFailedWithCompilation(t, "http")
+	testNewClientSpecFailedWithCompilation(t, "grpc")
+}
+
+func testNewClientSpecFailedWithCompilation(t *testing.T, clientType string) {
+	configYAML := fmt.Sprintf(`
 name: test
-type: http
+type: %s
 config:
   idlFileSha: idlFileSha
   idlFile: NOT_EXIST
   exposedMethods:
     a: method
-`
+`, clientType)
 	client, errClient := newClientConfig([]byte(configYAML))
 	assert.NoError(t, errClient)
 
@@ -436,6 +501,45 @@ func TestHTTPClientNewClientSpec(t *testing.T) {
 
 func TestTChannelClientNewClientSpec(t *testing.T) {
 	doNewClientSpecTest(t, []byte(tchannelClientYAML), "tchannel")
+}
+
+func TestGRPCClientNewClientSpec(t *testing.T) {
+	client, errClient := newClientConfig([]byte(grpcClientYAML))
+	assert.NoError(t, errClient)
+	instance := &ModuleInstance{
+		YAMLFileName: "YAMLFileName",
+		JSONFileName: "JSONFileName",
+		InstanceName: "InstanceName",
+		PackageInfo: &PackageInfo{
+			ExportName:            "ExportName",
+			ExportType:            "ExportType",
+			QualifiedInstanceName: "QualifiedInstanceName",
+		},
+	}
+	h := newTestPackageHelper(t)
+
+	idlFile := filepath.Join(h.ThriftIDLPath(), "clients/echo/echo.proto")
+	expectedSpec := &ClientSpec{
+		ModuleSpec:         nil,
+		YAMLFile:           instance.YAMLFileName,
+		JSONFile:           instance.JSONFileName,
+		ClientType:         "grpc",
+		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
+		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
+		ExportName:         instance.PackageInfo.ExportName,
+		ExportType:         instance.PackageInfo.ExportType,
+		ThriftFile:         idlFile,
+		ClientID:           instance.InstanceName,
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
+		ExposedMethods: map[string]string{
+			"a": "method",
+		},
+	}
+
+	spec, errSpec := client.NewClientSpec(instance, h)
+	spec.ModuleSpec = nil // Not interested in ModuleSpec here
+	assert.NoError(t, errSpec)
+	assert.Equal(t, expectedSpec, spec)
 }
 
 func TestCustomClientNewClientSpec(t *testing.T) {
