@@ -238,13 +238,10 @@ func newGRPCClientConfig(raw []byte) (*GRPCClientConfig, error) {
 			errUnmarshal, "could not parse gRPC client config data")
 	}
 
-	if err := validator.SetValidationFunc("exposedMethods", validateExposedMethods); err != nil {
-		return nil, errors.Wrap(
-			err, "could not set validator function on gRPC client config")
-	}
+	validator.SetValidationFunc("exposedMethods", validateExposedMethods)
 	if errValidate := validator.Validate(config); errValidate != nil {
 		return nil, errors.Wrap(
-			errValidate, "gRPC client config validation failed")
+			errValidate, "grpc client config validation failed")
 	}
 
 	return config, nil
