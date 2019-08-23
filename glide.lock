@@ -1,5 +1,5 @@
-hash: 4492c157f8db00ea300b73b2f96ab088282ae275a241391eaf5101d828d7049b
-updated: 2019-08-21T16:07:47.235227-07:00
+hash: 88d305204a739687702bbb8e6e1395eb0b3496bd67541e187f36d9d64dc7b590
+updated: 2019-08-23T00:40:19.337162-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -23,6 +23,8 @@ imports:
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
   - spew
+- name: github.com/emicklei/proto
+  version: 81cafc1ff2e77b4342b32f8824cfb5b722bfd79c
 - name: github.com/fatih/structtag
   version: 76ae1d6d2117609598c7d4e8f3e938145f204e8f
 - name: github.com/ghodss/yaml
@@ -337,7 +339,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: 547ecf7b1ef191ac7fb91078460aa55f0fb4416d
+  version: 65e3620a7ae7ac25e8494a60f0e5ef4e4fba03b3
   subpackages:
   - cmd/goimports
   - cmd/stringer
