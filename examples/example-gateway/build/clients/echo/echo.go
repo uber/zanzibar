@@ -46,12 +46,12 @@ type Client interface {
 // echoClient is the gRPC client for downstream service.
 type echoClient struct {
 	client gen.EchoYARPCClient
-	opts   *zanzibar.YARPCClientOpts
+	opts   *zanzibar.GRPCClientOpts
 }
 
 // NewClient returns a new gRPC client for service echo
 func NewClient(deps *module.Dependencies) Client {
-	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("echo")
+	oc := deps.Default.GRPCClientDispatcher.MustOutboundConfig("echo")
 	var routingKey string
 	if deps.Default.Config.ContainsKey("clients.echo.routingKey") {
 		routingKey = deps.Default.Config.MustGetString("clients.echo.routingKey")
@@ -66,7 +66,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	return &echoClient{
 		client: gen.NewEchoYARPCClient(oc),
-		opts: zanzibar.NewYARPCClientOpts(
+		opts: zanzibar.NewGRPCClientOpts(
 			deps.Default.Logger,
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
@@ -133,7 +133,7 @@ func (e *echoClient) Echo(
 	var result *gen.Response
 	var err error
 
-	ctx, callHelper := zanzibar.NewYARPCClientCallHelper(ctx, "Echo::Echo", e.opts)
+	ctx, callHelper := zanzibar.NewGRPCClientCallHelper(ctx, "Echo::Echo", e.opts)
 
 	if e.opts.RoutingKey != "" {
 		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))

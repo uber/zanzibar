@@ -88,7 +88,7 @@ func InitializeDependencies(
 		Config:           g.Config,
 		Channel:          g.Channel,
 
-		YARPCClientDispatcher: g.YAPRCClientDispatcher,
+		GRPCClientDispatcher: g.GRPCClientDispatcher,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
