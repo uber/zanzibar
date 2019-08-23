@@ -23,10 +23,9 @@ package codegen
 import (
 	"path/filepath"
 
-	"github.com/emicklei/proto"
-	yaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	validator "gopkg.in/validator.v2"
+	"gopkg.in/validator.v2"
 )
 
 type clientConfig interface {
@@ -251,69 +250,6 @@ func newGRPCClientConfig(raw []byte) (*GRPCClientConfig, error) {
 	return config, nil
 }
 
-// ProtoService is an internal representation of Proto service and methods in that service.
-type ProtoService struct {
-	Name string
-	RPC  []*ProtoRPC
-}
-
-// ProtoRPC is an internal representation of Proto RPC method and its request/response types.
-type ProtoRPC struct {
-	Name     string
-	Request  *ProtoMessage
-	Response *ProtoMessage
-}
-
-// ProtoMessage is an internal representation of a Proto Message.
-type ProtoMessage struct {
-	Name string
-}
-
-type visitor struct {
-	protoServices []*ProtoService
-}
-
-func newVisitor() *visitor {
-	return &visitor{
-		protoServices: make([]*ProtoService, 0),
-	}
-}
-
-func (v *visitor) VisitService(e *proto.Service) {
-	v.protoServices = append(v.protoServices, &ProtoService{
-		Name: e.Name,
-		RPC:  make([]*ProtoRPC, 0),
-	})
-	for _, c := range e.Elements {
-		c.Accept(v)
-	}
-}
-
-func (v *visitor) VisitRPC(r *proto.RPC) {
-	s := v.protoServices[len(v.protoServices)-1]
-	s.RPC = append(s.RPC, &ProtoRPC{
-		Name:     r.Name,
-		Request:  &ProtoMessage{Name: r.RequestType},
-		Response: &ProtoMessage{Name: r.ReturnsType},
-	})
-}
-
-func (v *visitor) VisitMessage(e *proto.Message)         {}
-func (v *visitor) VisitSyntax(e *proto.Syntax)           {}
-func (v *visitor) VisitPackage(e *proto.Package)         {}
-func (v *visitor) VisitOption(e *proto.Option)           {}
-func (v *visitor) VisitImport(e *proto.Import)           {}
-func (v *visitor) VisitNormalField(e *proto.NormalField) {}
-func (v *visitor) VisitEnumField(e *proto.EnumField)     {}
-func (v *visitor) VisitEnum(e *proto.Enum)               {}
-func (v *visitor) VisitComment(e *proto.Comment)         {}
-func (v *visitor) VisitOneof(o *proto.Oneof)             {}
-func (v *visitor) VisitOneofField(o *proto.OneOfField)   {}
-func (v *visitor) VisitReserved(r *proto.Reserved)       {}
-func (v *visitor) VisitMapField(f *proto.MapField)       {}
-func (v *visitor) VisitGroup(g *proto.Group)             {}
-func (v *visitor) VisitExtensions(e *proto.Extensions)   {}
-
 func newGRPCClientSpec(
 	clientType string,
 	config *ClientIDLConfig,
@@ -328,11 +264,7 @@ func newGRPCClientSpec(
 		)
 	}
 
-	v := newVisitor()
-	for _, e := range protoSpec.ProtoModule.Elements {
-		e.Accept(v)
-	}
-	protoSpec.ProtoServices = v.protoServices
+	protoSpec.ProtoServices = newVisitor().Visit(protoSpec.ProtoModule)
 
 	cspec := &ClientSpec{
 		ModuleSpec:         protoSpec,
