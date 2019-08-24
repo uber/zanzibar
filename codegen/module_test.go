@@ -31,13 +31,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type handler struct{}
-
-var testHandler = handler{}
-var staticHandler = handler{}
-var variableHandler = handler{}
-var splatHandler = handler{}
-
 type TestClientSpec struct {
 	Info string
 }
@@ -51,6 +44,9 @@ var tSpec = TestClientSpec{
 }
 var hSpec = TestClientSpec{
 	Info: "http",
+}
+var gSpec = TestClientSpec{
+	Info: "grpc",
 }
 
 type TestHTTPClientGenerator struct{}
@@ -80,6 +76,22 @@ func (t *TestTChannelClientGenerator) Generate(
 }
 
 func (*TestTChannelClientGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return &tSpec, nil
+}
+
+type TestGRPCClientGenerator struct{}
+
+func (*TestGRPCClientGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	return &BuildResult{
+		Spec: &tSpec,
+	}, nil
+}
+
+func (*TestGRPCClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	return &tSpec, nil
@@ -145,6 +157,15 @@ func TestExampleService(t *testing.T) {
 	)
 	if err != nil {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"grpc",
+		&TestGRPCClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error regarding grpc client class type :%s", err)
 	}
 
 	err = moduleSystem.RegisterClass(ModuleClass{
