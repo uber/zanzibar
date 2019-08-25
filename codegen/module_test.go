@@ -278,6 +278,42 @@ func TestExampleService(t *testing.T) {
 		},
 	}
 
+	expectedGRPCClientInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "grpc",
+		Directory:     "clients/example-example",
+		InstanceName:  "example-grpc",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+	}
+
 	expectedEmbeddedClient := ModuleInstance{
 		BaseDirectory: testServiceDir,
 		ClassName:     "client",
@@ -419,6 +455,7 @@ func TestExampleService(t *testing.T) {
 		&expectedClientInstance,
 		&expectedClientDependency,
 		&expectedEmbeddedClient,
+		&expectedGRPCClientInstance,
 	}
 	// Note: Stable ordering is not required by POSIX
 	expectedEndpoints := []*ModuleInstance{
@@ -513,6 +550,15 @@ func TestExampleServiceIncremental(t *testing.T) {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
 	}
 
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"grpc",
+		&TestGRPCClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error regarding grpc client class type :%s", err)
+	}
+
 	err = moduleSystem.RegisterClass(ModuleClass{
 		Name:       "endpoint",
 		NamePlural: "endpoints",
@@ -569,6 +615,10 @@ func TestExampleServiceIncremental(t *testing.T) {
 				ClassName:    "client",
 				InstanceName: "example",
 			},
+			{
+				ClassName:    "client",
+				InstanceName: "example-grpc",
+			},
 		},
 		resolvedModules,
 		true,
@@ -617,6 +667,42 @@ func TestExampleServiceIncremental(t *testing.T) {
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
 			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+	}
+
+	expectedGRPCClientInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "grpc",
+		Directory:     "clients/example-example",
+		InstanceName:  "example-grpc",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -752,6 +838,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 
 	expectedClients := []*ModuleInstance{
 		&expectedClientInstance,
+		&expectedGRPCClientInstance,
 	}
 	expectedEndpoints := []*ModuleInstance{
 		&expectedHealthEndpointInstance,

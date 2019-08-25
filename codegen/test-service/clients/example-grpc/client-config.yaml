@@ -1,0 +1,8 @@
+config:
+  headers:
+    x-service-name: example-grpc
+dependencies:
+  client:
+  - example-dependency
+name: example-grpc
+type: grpc
