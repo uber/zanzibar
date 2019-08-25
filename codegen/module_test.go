@@ -969,7 +969,7 @@ func TestDefaultDependency(t *testing.T) {
 
 	for className, classInstances := range instances {
 		if className == "client" {
-			expectedLen := 2
+			expectedLen := 3
 			if len(classInstances) != expectedLen {
 				t.Errorf(
 					"Expected %d client class instance but found %d",
@@ -988,7 +988,7 @@ func TestDefaultDependency(t *testing.T) {
 			}
 
 			for _, instance := range classInstances {
-				expectedLen = 3
+				expectedLen = 4
 				if len(instance.Dependencies) != expectedLen {
 					t.Errorf(
 						"Expected %s to have %d dependencies but found %d",
@@ -997,7 +997,7 @@ func TestDefaultDependency(t *testing.T) {
 						len(instance.Dependencies),
 					)
 				}
-				expectedLen = 2
+				expectedLen = 3
 				if len(instance.ResolvedDependencies["client"]) != expectedLen {
 					t.Errorf(
 						"Expected %s to have %d resolved dependencies but found %d",
@@ -1006,7 +1006,7 @@ func TestDefaultDependency(t *testing.T) {
 						len(instance.ResolvedDependencies["client"]),
 					)
 				}
-				expectedLen = 2
+				expectedLen = 3
 				if len(instance.RecursiveDependencies["client"]) != expectedLen {
 					t.Errorf(
 						"Expected %s to have %d recursive dependencies but found %d",
@@ -1090,7 +1090,7 @@ func TestSingleDefaultDependency(t *testing.T) {
 
 	for className, classInstances := range instances {
 		if className == "client" {
-			expectedLen := 2
+			expectedLen := 3
 			if len(classInstances) != expectedLen {
 				t.Errorf(
 					"Expected %d client class instance but found %d",
