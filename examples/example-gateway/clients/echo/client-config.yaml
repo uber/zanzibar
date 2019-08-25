@@ -3,4 +3,4 @@ type: grpc
 config:
   idlFile: clients/echo/echo.proto
   exposedMethods:
-    "EchoEcho": "Echo::echo"
+    "EchoEcho": "Echo::Echo"
