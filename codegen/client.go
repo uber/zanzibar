@@ -261,8 +261,6 @@ func newGRPCClientSpec(
 		)
 	}
 
-	protoSpec.ProtoServices = newVisitor().Visit(protoSpec.ProtoModule)
-
 	cspec := &ClientSpec{
 		ModuleSpec:         protoSpec,
 		YAMLFile:           instance.YAMLFileName,

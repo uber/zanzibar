@@ -27,7 +27,7 @@ import (
 	"sort"
 	"strings"
 
-	yaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -668,13 +668,13 @@ func (g *TChannelClientGenerator) Generate(
 // reverse index and validate the exposed methods map
 func reverseExposedMethods(clientSpec *ClientSpec, instance *ModuleInstance) (map[string]string, error) {
 	reversed := map[string]string{}
-	for exposedMethod, thriftMethod := range clientSpec.ExposedMethods {
-		reversed[thriftMethod] = exposedMethod
-		if !hasMethod(clientSpec, thriftMethod) {
+	for exposedMethod, idlMethod := range clientSpec.ExposedMethods {
+		reversed[idlMethod] = exposedMethod
+		if !hasMethod(clientSpec, idlMethod) {
 			return nil, errors.Errorf(
 				"Invalid exposedMethods for client %q, method %q not found",
 				instance.InstanceName,
-				thriftMethod,
+				idlMethod,
 			)
 		}
 	}
@@ -682,12 +682,20 @@ func reverseExposedMethods(clientSpec *ClientSpec, instance *ModuleInstance) (ma
 	return reversed, nil
 }
 
-func hasMethod(cspec *ClientSpec, thriftMethod string) bool {
-	segments := strings.Split(thriftMethod, "::")
+func hasMethod(cspec *ClientSpec, idlMethod string) bool {
+	segments := strings.Split(idlMethod, "::")
 	service := segments[0]
 	method := segments[1]
 
-	for _, s := range cspec.ModuleSpec.Services {
+	if cspec.ModuleSpec.Services != nil {
+		return hasThriftMethod(cspec.ModuleSpec.Services, service, method)
+	}
+
+	return hasProtoMethod(cspec.ModuleSpec.ProtoServices, service, method)
+}
+
+func hasThriftMethod(thriftSpec []*ServiceSpec, service, method string) bool {
+	for _, s := range thriftSpec {
 		if s.Name == service {
 			for _, m := range s.Methods {
 				if m.Name == method {
@@ -695,7 +703,19 @@ func hasMethod(cspec *ClientSpec, thriftMethod string) bool {
 				}
 			}
 		}
+	}
+	return false
+}
 
+func hasProtoMethod(protoSpec []*ProtoService, service, method string) bool {
+	for _, s := range protoSpec {
+		if s.Name == service {
+			for _, m := range s.RPC {
+				if m.Name == method {
+					return true
+				}
+			}
+		}
 	}
 	return false
 }
@@ -837,9 +857,9 @@ func (g *GRPCClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	reversedMethods := make(map[string]string, len(clientSpec.ExposedMethods))
-	for exposedMethod, thriftMethod := range clientSpec.ExposedMethods {
-		reversedMethods[thriftMethod] = exposedMethod
+	reversedMethods, err := reverseExposedMethods(clientSpec, instance)
+	if err != nil {
+		return nil, err
 	}
 
 	parts := strings.Split(clientSpec.ThriftFile, "/")

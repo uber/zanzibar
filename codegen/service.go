@@ -90,13 +90,15 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool) (*ModuleSpec, error) 
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parsing proto file")
 	}
+	protoServices := newVisitor().Visit(protoModules)
 
 	moduleSpec := &ModuleSpec{
-		ProtoModule: protoModules,
-		ThriftFile:  protoFile,
-		WantAnnot:   false,
-		IsEndpoint:  isEndpoint,
-		PackageName: packageName(filepath.Base(protoModules.Filename)),
+		ProtoModule:   protoModules,
+		ProtoServices: protoServices,
+		ThriftFile:    protoFile,
+		WantAnnot:     false,
+		IsEndpoint:    isEndpoint,
+		PackageName:   packageName(filepath.Base(protoModules.Filename)),
 	}
 	return moduleSpec, nil
 }
