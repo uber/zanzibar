@@ -147,7 +147,7 @@ func (hp *HeaderPropagator) initNilOpt(path string, toFields []*compile.FieldSpe
 			return err
 		}
 		ftype := f.Type
-		t, err := goCustomType(hp.Helper, ftype)
+		t, err := GoCustomType(hp.Helper, ftype)
 		if err != nil {
 			return errors.Wrapf(
 				err,
