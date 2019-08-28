@@ -114,7 +114,7 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 		RequestVolumeThreshold: requestVolumeThreshold,
 		Timeout:                timeoutVal,
 	})
-	return circuitBreakerDisabled
+	return true
 }
 
 {{range $i, $svc := .ProtoServices -}}
