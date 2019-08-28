@@ -75,7 +75,7 @@ func GoType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 		}
 		return fmt.Sprintf("map[%s]struct{}", v), nil
 	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
-		return goCustomType(p, spec)
+		return GoCustomType(p, spec)
 	default:
 		panic(fmt.Sprintf("Unknown type (%T) for %s", spec, spec.ThriftName()))
 	}
@@ -97,11 +97,11 @@ func GoReferenceType(p PackageNameResolver, spec compile.TypeSpec) (string, erro
 	return t, nil
 }
 
-// goCustomType returns the user-defined Go type with its importing package.
-func goCustomType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
+// GoCustomType returns the user-defined Go type with its importing package.
+func GoCustomType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 	f := spec.ThriftFile()
 	if f == "" {
-		return "", fmt.Errorf("goCustomType called with native type (%T) %v", spec, spec)
+		return "", fmt.Errorf("GoCustomType called with native type (%T) %v", spec, spec)
 	}
 
 	pkg, err := p.TypePackageName(f)

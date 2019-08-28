@@ -149,7 +149,7 @@ func convertIdentifiersToNilChecks(identifiers []string) []string {
 }
 
 func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
-	t, err := goCustomType(c.Helper, fieldType)
+	t, err := GoCustomType(c.Helper, fieldType)
 	if err != nil {
 		return "", errors.Wrapf(
 			err,

@@ -73,7 +73,7 @@ func TestCustomTypeError(t *testing.T) {
 	typ, err := codegen.GoType(p, es)
 	assert.Equal(t, "", typ)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "goCustomType called with native type (*compile.EnumSpec)")
+	assert.Contains(t, err.Error(), "GoCustomType called with native type (*compile.EnumSpec)")
 }
 
 func TestCustomTypeInListError(t *testing.T) {
@@ -86,7 +86,7 @@ func TestCustomTypeInListError(t *testing.T) {
 	typ, err := codegen.GoType(p, es)
 	assert.Equal(t, "", typ)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "goCustomType called with native type (*compile.StructSpec)")
+	assert.Contains(t, err.Error(), "GoCustomType called with native type (*compile.StructSpec)")
 }
 
 func TestCustomTypeInSetError(t *testing.T) {
@@ -99,7 +99,7 @@ func TestCustomTypeInSetError(t *testing.T) {
 	typ, err := codegen.GoType(p, es)
 	assert.Equal(t, "", typ)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "goCustomType called with native type (*compile.TypedefSpec)")
+	assert.Contains(t, err.Error(), "GoCustomType called with native type (*compile.TypedefSpec)")
 }
 
 func TestCustomTypeAsMapKeyError(t *testing.T) {
@@ -112,7 +112,7 @@ func TestCustomTypeAsMapKeyError(t *testing.T) {
 	typ, err := codegen.GoType(p, es)
 	assert.Equal(t, "", typ)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "goCustomType called with native type (*compile.TypedefSpec)")
+	assert.Contains(t, err.Error(), "GoCustomType called with native type (*compile.TypedefSpec)")
 }
 
 func TestCustomTypeAsMapValueError(t *testing.T) {
@@ -126,5 +126,5 @@ func TestCustomTypeAsMapValueError(t *testing.T) {
 	typ, err := codegen.GoType(p, es)
 	assert.Equal(t, "", typ)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "goCustomType called with native type (*compile.TypedefSpec)")
+	assert.Contains(t, err.Error(), "GoCustomType called with native type (*compile.TypedefSpec)")
 }
