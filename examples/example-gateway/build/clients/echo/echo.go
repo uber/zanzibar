@@ -121,7 +121,7 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 		RequestVolumeThreshold: requestVolumeThreshold,
 		Timeout:                timeoutVal,
 	})
-	return circuitBreakerDisabled
+	return true
 }
 
 // Echo is a client RPC call for method Echo::Echo.
