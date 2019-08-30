@@ -142,6 +142,9 @@ func (conf *StaticConfig) MustGetFloat(key string) float64 {
 	}
 
 	if value, contains := conf.configValues[key]; contains {
+		if v, ok := value.(int); ok {
+			return float64(v)
+		}
 		return value.(float64)
 	}
 
@@ -154,6 +157,9 @@ func mustConvertableToInt(value interface{}, key string) int64 {
 		if v != float64(int64(v)) {
 			panic(errors.Errorf("Key (%s) is a float", key))
 		}
+		return int64(v)
+	}
+	if v, ok := value.(int); ok {
 		return int64(v)
 	}
 	return value.(int64)
