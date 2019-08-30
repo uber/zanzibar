@@ -324,7 +324,6 @@ func DoCanReadFromFileTest(t *testing.T, filePath string) {
 	assert.Equal(t, config.MustGetString("a.b.c"), "v")
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
-	assert.Equal(t, config.MustGetFloat("float"), float64(1.2))
 	assert.Equal(t, config.ContainsKey("exist"), true)
 
 	type testStruct struct {
@@ -896,4 +895,15 @@ func TestStaticConfigPanicBadConfig(t *testing.T) {
 			{},
 		}, nil)
 	})
+}
+
+func TestReadFromDict(t *testing.T) {
+	testConfig := zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+		"intFromDict":   500,
+		"floatFromDict": 1,
+	})
+	intActual := int(testConfig.MustGetInt("intFromDict"))
+	assert.Equal(t, 500, intActual)
+	floatActual := testConfig.MustGetFloat("floatFromDict")
+	assert.Equal(t, float64(1), floatActual)
 }

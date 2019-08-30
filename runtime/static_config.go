@@ -131,6 +131,13 @@ func (conf *StaticConfig) MustGetBoolean(key string) bool {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
+func mustConvertableToFloat(value interface{}, key string) float64 {
+	if v, ok := value.(int); ok {
+		return float64(v)
+	}
+	return value.(float64)
+}
+
 // MustGetFloat returns the value as a float or panics.
 func (conf *StaticConfig) MustGetFloat(key string) float64 {
 	if conf.destroyed {
@@ -138,14 +145,11 @@ func (conf *StaticConfig) MustGetFloat(key string) float64 {
 	}
 
 	if value, contains := conf.seedConfig[key]; contains {
-		return value.(float64)
+		return mustConvertableToFloat(value, key)
 	}
 
 	if value, contains := conf.configValues[key]; contains {
-		if v, ok := value.(int); ok {
-			return float64(v)
-		}
-		return value.(float64)
+		return mustConvertableToFloat(value, key)
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
