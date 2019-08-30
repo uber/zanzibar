@@ -90,10 +90,6 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Uuid"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	clientRespBody, _, err := w.Clients.Baz.HeaderSchema(
 		ctx, clientHeaders, clientRequest,

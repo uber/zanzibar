@@ -27,15 +27,15 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/config"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/ruleengine"
 
 	"go.uber.org/zap"
-
-	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
@@ -196,22 +196,37 @@ func NewClient(deps *module.Dependencies) Client {
 	port := deps.Default.Config.MustGetInt("clients.baz.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.baz.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.baz.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.baz.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.baz.staging.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	}
+	/*Ex:
+	{
+	  "clients.rider-presentation.alternates": {
+		"routingConfigs": [
+		  {
+			"headerName": "x-api-environment",
+			"headerValue": "*",
+			"serviceName": "presentation-sandbox"
+		  },
+		  {
+			"headerName": "RTAPI-Container",
+			"headerValue": "test*",
+			"serviceName": "mpx-prism"
+		  }
+		],
+		"servicesDetail": {
+		  "presentation-sandbox": {
+			"ip": "127.0.0.1",
+			"port": 5437
+		  },
+		  "mpx-prism": {
+			"ip": "127.0.0.1",
+			"port": 12958
+		  }
+		}
+	  }
+	}*/
+	var re ruleengine.RuleEngine
+	var headerPatterns []string
+	var altChannelMap map[string]*tchannel.SubChannel
+	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.baz.timeout"))
 	timeout := time.Millisecond * time.Duration(
@@ -265,8 +280,10 @@ func NewClient(deps *module.Dependencies) Client {
 			Timeout:              timeout,
 			TimeoutPerAttempt:    timeoutPerAttempt,
 			RoutingKey:           &routingKey,
-			AltSubchannelName:    scAltName,
+			RuleEngine:           re,
+			HeaderPatterns:       headerPatterns,
 			RequestUUIDHeaderKey: requestUUIDHeaderKey,
+			AltChannelMap:        altChannelMap,
 		},
 	)
 
@@ -274,6 +291,32 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+	if deps.Default.Config.ContainsKey("clients.corge.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.corge.alternates", &alternateServiceDetail)
+
+		ruleWrapper := ruleengine.RuleWrapper{}
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			rawRule := ruleengine.RawRule{Patterns: []string{routingConfig.HeaderName, routingConfig.HeaderValue},
+				Value: routingConfig.ServiceName}
+			headerPatterns = append(headerPatterns, routingConfig.HeaderName)
+			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
+
+			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
+			if !ok {
+				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
+			}
+			scAlt.Peers().Add(serviceRouting.IP + ":" + strconv.Itoa(serviceRouting.Port))
+			altChannelMap[routingConfig.ServiceName] = scAlt
+		}
+
+		re = ruleengine.NewRuleEngine(ruleWrapper)
+	}
+	return headerPatterns, re
 }
 
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
@@ -334,21 +377,16 @@ func (c *bazClient) EchoBinary(
 
 	logger := c.client.Loggers["SecondService::echoBinary"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 			)
 			return err
@@ -384,21 +422,16 @@ func (c *bazClient) EchoBool(
 
 	logger := c.client.Loggers["SecondService::echoBool"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 			)
 			return err
@@ -434,21 +467,16 @@ func (c *bazClient) EchoDouble(
 
 	logger := c.client.Loggers["SecondService::echoDouble"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 			)
 			return err
@@ -484,21 +512,16 @@ func (c *bazClient) EchoEnum(
 
 	logger := c.client.Loggers["SecondService::echoEnum"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 			)
 			return err
@@ -534,21 +557,16 @@ func (c *bazClient) EchoI16(
 
 	logger := c.client.Loggers["SecondService::echoI16"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 			)
 			return err
@@ -584,21 +602,16 @@ func (c *bazClient) EchoI32(
 
 	logger := c.client.Loggers["SecondService::echoI32"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 			)
 			return err
@@ -634,21 +647,16 @@ func (c *bazClient) EchoI64(
 
 	logger := c.client.Loggers["SecondService::echoI64"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 			)
 			return err
@@ -684,21 +692,16 @@ func (c *bazClient) EchoI8(
 
 	logger := c.client.Loggers["SecondService::echoI8"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 			)
 			return err
@@ -734,21 +737,16 @@ func (c *bazClient) EchoString(
 
 	logger := c.client.Loggers["SecondService::echoString"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoString", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoString", reqHeaders, args, &result,
 			)
 			return err
@@ -784,21 +782,16 @@ func (c *bazClient) EchoStringList(
 
 	logger := c.client.Loggers["SecondService::echoStringList"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 			)
 			return err
@@ -834,21 +827,16 @@ func (c *bazClient) EchoStringMap(
 
 	logger := c.client.Loggers["SecondService::echoStringMap"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 			)
 			return err
@@ -884,21 +872,16 @@ func (c *bazClient) EchoStringSet(
 
 	logger := c.client.Loggers["SecondService::echoStringSet"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 			)
 			return err
@@ -934,21 +917,16 @@ func (c *bazClient) EchoStructList(
 
 	logger := c.client.Loggers["SecondService::echoStructList"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 			)
 			return err
@@ -984,21 +962,16 @@ func (c *bazClient) EchoStructSet(
 
 	logger := c.client.Loggers["SecondService::echoStructSet"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 			)
 			return err
@@ -1034,21 +1007,16 @@ func (c *bazClient) EchoTypedef(
 
 	logger := c.client.Loggers["SecondService::echoTypedef"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 			)
 			return err
@@ -1083,21 +1051,16 @@ func (c *bazClient) Call(
 
 	logger := c.client.Loggers["SimpleService::call"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "call", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "call", reqHeaders, args, &result,
 			)
 			return err
@@ -1131,21 +1094,16 @@ func (c *bazClient) Compare(
 
 	logger := c.client.Loggers["SimpleService::compare"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "compare", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "compare", reqHeaders, args, &result,
 			)
 			return err
@@ -1185,21 +1143,16 @@ func (c *bazClient) GetProfile(
 
 	logger := c.client.Loggers["SimpleService::getProfile"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 			)
 			return err
@@ -1237,21 +1190,16 @@ func (c *bazClient) HeaderSchema(
 
 	logger := c.client.Loggers["SimpleService::headerSchema"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 			)
 			return err
@@ -1291,21 +1239,16 @@ func (c *bazClient) Ping(
 	logger := c.client.Loggers["SimpleService::ping"]
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "ping", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "ping", reqHeaders, args, &result,
 			)
 			return err
@@ -1340,21 +1283,16 @@ func (c *bazClient) DeliberateDiffNoop(
 	logger := c.client.Loggers["SimpleService::sillyNoop"]
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 			)
 			return err
@@ -1389,21 +1327,16 @@ func (c *bazClient) TestUUID(
 	logger := c.client.Loggers["SimpleService::testUuid"]
 
 	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 			)
 			return err
@@ -1435,21 +1368,16 @@ func (c *bazClient) Trans(
 
 	logger := c.client.Loggers["SimpleService::trans"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "trans", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "trans", reqHeaders, args, &result,
 			)
 			return err
@@ -1489,21 +1417,16 @@ func (c *bazClient) TransHeaders(
 
 	logger := c.client.Loggers["SimpleService::transHeaders"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 			)
 			return err
@@ -1543,21 +1466,16 @@ func (c *bazClient) TransHeadersNoReq(
 
 	logger := c.client.Loggers["SimpleService::transHeadersNoReq"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 			)
 			return err
@@ -1595,21 +1513,16 @@ func (c *bazClient) TransHeadersType(
 
 	logger := c.client.Loggers["SimpleService::transHeadersType"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 			)
 			return err
@@ -1648,21 +1561,16 @@ func (c *bazClient) URLTest(
 	logger := c.client.Loggers["SimpleService::urlTest"]
 
 	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 			)
 			return err

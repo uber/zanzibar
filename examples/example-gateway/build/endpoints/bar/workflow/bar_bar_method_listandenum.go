@@ -74,10 +74,6 @@ func (w barListAndEnumWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	clientRespBody, _, err := w.Clients.Bar.ListAndEnum(
 		ctx, clientHeaders, clientRequest,

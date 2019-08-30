@@ -74,10 +74,6 @@ func (w barArgNotStructWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	_, err := w.Clients.Bar.ArgNotStruct(
 		ctx, clientHeaders, clientRequest,

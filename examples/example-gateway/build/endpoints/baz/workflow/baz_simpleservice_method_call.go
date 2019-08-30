@@ -82,10 +82,6 @@ func (w simpleServiceCallWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Uuid"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	cliRespHeaders, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,

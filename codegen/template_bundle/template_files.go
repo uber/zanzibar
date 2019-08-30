@@ -2383,15 +2383,20 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"errors"
-	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+	"github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/runtime/ruleengine"
+
+
 	"go.uber.org/zap"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-	tchannel "github.com/uber/tchannel-go"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -2404,7 +2409,6 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
-{{- $stagingReqHeader := .StagingReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2448,22 +2452,37 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.{{$clientID}}.staging.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	}
+	/*Ex:
+	{
+	  "clients.rider-presentation.alternates": {
+		"routingConfigs": [
+		  {
+			"headerName": "x-api-environment",
+			"headerValue": "*",
+			"serviceName": "presentation-sandbox"
+		  },
+		  {
+			"headerName": "RTAPI-Container",
+			"headerValue": "test*",
+			"serviceName": "mpx-prism"
+		  }
+		],
+		"servicesDetail": {
+		  "presentation-sandbox": {
+			"ip": "127.0.0.1",
+			"port": 5437
+		  },
+		  "mpx-prism": {
+			"ip": "127.0.0.1",
+			"port": 12958
+		  }
+		}
+	  }
+	}*/
+	var re ruleengine.RuleEngine
+	var headerPatterns []string
+	var altChannelMap map[string]*tchannel.SubChannel
+	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
@@ -2494,14 +2513,16 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
-			ServiceName:          serviceName,
-			ClientID:             "{{$clientID}}",
-			MethodNames:          methodNames,
-			Timeout:              timeout,
-			TimeoutPerAttempt:    timeoutPerAttempt,
-			RoutingKey:           &routingKey,
-			AltSubchannelName:    scAltName,
+			ServiceName:		  serviceName,
+			ClientID:			 "{{$clientID}}",
+			MethodNames:		  methodNames,
+			Timeout:			  timeout,
+			TimeoutPerAttempt:	  timeoutPerAttempt,
+			RoutingKey:		      &routingKey,
+			RuleEngine:		      re,
+			HeaderPatterns:	      headerPatterns,
 			RequestUUIDHeaderKey: requestUUIDHeaderKey,
+			AltChannelMap:        altChannelMap,
 		},
 	)
 
@@ -2509,6 +2530,32 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+	if deps.Default.Config.ContainsKey("clients.corge.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.corge.alternates", &alternateServiceDetail)
+
+		ruleWrapper := ruleengine.RuleWrapper{}
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			rawRule := ruleengine.RawRule{Patterns: []string{routingConfig.HeaderName, routingConfig.HeaderValue},
+				Value: routingConfig.ServiceName}
+			headerPatterns = append(headerPatterns, routingConfig.HeaderName)
+			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
+
+			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
+			if !ok {
+				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
+			}
+			scAlt.Peers().Add(serviceRouting.IP + ":" + strconv.Itoa(serviceRouting.Port))
+			altChannelMap[routingConfig.ServiceName] = scAlt
+		}
+
+		re = ruleengine.NewRuleEngine(ruleWrapper)
+	}
+	return headerPatterns, re
 }
 
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
@@ -2544,9 +2591,9 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
+			SleepWindow:			sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
+			Timeout:				timeoutVal,
 		})
 	}
 	return circuitBreakerDisabled
@@ -2581,21 +2628,16 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
-			caller = c.client.CallThruAltChannel
-		}
-
 		var success bool
 		var respHeaders map[string]string
 		var err error
 		if (c.circuitBreakerDisabled) {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-				success, respHeaders, err = caller(
+				success, respHeaders, err = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
 				return err
@@ -2647,7 +2689,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 9572, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10551, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

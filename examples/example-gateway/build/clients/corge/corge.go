@@ -30,16 +30,14 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
-
-	"go.uber.org/zap"
-
 	"github.com/uber/tchannel-go"
-
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/ruleengine"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
+	"go.uber.org/zap"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 )
 
@@ -71,29 +69,29 @@ func NewClient(deps *module.Dependencies) Client {
 
 	/*Ex:
 	{
-	  "clients.rider-presentation.serviceName.alternates": {
-	    "routingConfigs": [
-	      {
-	        "headerName": "x-api-environment",
-	        "headerValue": "*",
-	        "serviceName": "presentation-sandbox"
-	      },
-	      {
-	        "headerName": "RTAPI-Container",
-	        "headerValue": "test*",
-	        "serviceName": "mpx-prism"
-	      }
-	    ],
-	    "servicesDetail": {
-	      "presentation-sandbox": {
-	        "ip": "127.0.0.1",
-	        "port": 5437
-	      },
-	      "mpx-prism": {
-	        "ip": "127.0.0.1",
-	        "port": 12958
-	      }
-	    }
+	  "clients.rider-presentation.alternates": {
+		"routingConfigs": [
+		  {
+			"headerName": "x-api-environment",
+			"headerValue": "*",
+			"serviceName": "presentation-sandbox"
+		  },
+		  {
+			"headerName": "RTAPI-Container",
+			"headerValue": "test*",
+			"serviceName": "mpx-prism"
+		  }
+		],
+		"servicesDetail": {
+		  "presentation-sandbox": {
+			"ip": "127.0.0.1",
+			"port": 5437
+		  },
+		  "mpx-prism": {
+			"ip": "127.0.0.1",
+			"port": 12958
+		  }
+		}
 	  }
 	}*/
 	var re ruleengine.RuleEngine

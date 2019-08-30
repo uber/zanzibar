@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
-    "github.com/uber/tchannel-go"
-    zanzibar "github.com/uber/zanzibar/runtime"
-    "github.com/uber/tchannel-go"
+	"github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime/ruleengine"
 
@@ -76,29 +76,29 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 
 	/*Ex:
 	{
-	  "clients.rider-presentation.serviceName.alternates": {
-	    "routingConfigs": [
-	      {
-	        "headerName": "x-api-environment",
-	        "headerValue": "*",
-	        "serviceName": "presentation-sandbox"
-	      },
-	      {
-	        "headerName": "RTAPI-Container",
-	        "headerValue": "test*",
-	        "serviceName": "mpx-prism"
-	      }
-	    ],
-	    "servicesDetail": {
-	      "presentation-sandbox": {
-	        "ip": "127.0.0.1",
-	        "port": 5437
-	      },
-	      "mpx-prism": {
-	        "ip": "127.0.0.1",
-	        "port": 12958
-	      }
-	    }
+	  "clients.rider-presentation.alternates": {
+		"routingConfigs": [
+		  {
+			"headerName": "x-api-environment",
+			"headerValue": "*",
+			"serviceName": "presentation-sandbox"
+		  },
+		  {
+			"headerName": "RTAPI-Container",
+			"headerValue": "test*",
+			"serviceName": "mpx-prism"
+		  }
+		],
+		"servicesDetail": {
+		  "presentation-sandbox": {
+			"ip": "127.0.0.1",
+			"port": 5437
+		  },
+		  "mpx-prism": {
+			"ip": "127.0.0.1",
+			"port": 12958
+		  }
+		}
 	  }
 	}*/
 	var re ruleengine.RuleEngine
@@ -135,16 +135,16 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
-			ServiceName:          serviceName,
-			ClientID:             "{{$clientID}}",
-			MethodNames:          methodNames,
-			Timeout:              timeout,
-			TimeoutPerAttempt:    timeoutPerAttempt,
-			RoutingKey:           &routingKey,
-			RuleEngine:           re,
-			HeaderPatterns:       headerPatterns,
+			ServiceName:		  serviceName,
+			ClientID:			 "{{$clientID}}",
+			MethodNames:		  methodNames,
+			Timeout:			  timeout,
+			TimeoutPerAttempt:	  timeoutPerAttempt,
+			RoutingKey:		      &routingKey,
+			RuleEngine:		      re,
+			HeaderPatterns:	      headerPatterns,
 			RequestUUIDHeaderKey: requestUUIDHeaderKey,
-			AltChannelMap: altChannelMap,
+			AltChannelMap:        altChannelMap,
 		},
 	)
 
@@ -213,9 +213,9 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
+			SleepWindow:			sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
+			Timeout:				timeoutVal,
 		})
 	}
 	return circuitBreakerDisabled
