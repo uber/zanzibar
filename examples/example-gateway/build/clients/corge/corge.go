@@ -27,17 +27,19 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
 
 	"go.uber.org/zap"
 
-	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/tchannel-go"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
+	"github.com/uber/zanzibar/config"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/ruleengine"
+
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 )
 
@@ -67,22 +69,37 @@ func NewClient(deps *module.Dependencies) Client {
 	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.corge.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.corge.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.corge.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.corge.staging.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	}
+	/*Ex:
+	{
+	  "clients.rider-presentation.serviceName.alternates": {
+	    "routingConfigs": [
+	      {
+	        "headerName": "x-api-environment",
+	        "headerValue": "*",
+	        "serviceName": "presentation-sandbox"
+	      },
+	      {
+	        "headerName": "RTAPI-Container",
+	        "headerValue": "test*",
+	        "serviceName": "mpx-prism"
+	      }
+	    ],
+	    "servicesDetail": {
+	      "presentation-sandbox": {
+	        "ip": "127.0.0.1",
+	        "port": 5437
+	      },
+	      "mpx-prism": {
+	        "ip": "127.0.0.1",
+	        "port": 12958
+	      }
+	    }
+	  }
+	}*/
+	var re ruleengine.RuleEngine
+	var headerPatterns []string
+	var altChannelMap map[string]*tchannel.SubChannel
+	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.corge.timeout"))
 	timeout := time.Millisecond * time.Duration(
@@ -110,8 +127,10 @@ func NewClient(deps *module.Dependencies) Client {
 			Timeout:              timeout,
 			TimeoutPerAttempt:    timeoutPerAttempt,
 			RoutingKey:           &routingKey,
-			AltSubchannelName:    scAltName,
+			RuleEngine:           re,
+			HeaderPatterns:       headerPatterns,
 			RequestUUIDHeaderKey: requestUUIDHeaderKey,
+			AltChannelMap:        altChannelMap,
 		},
 	)
 
@@ -119,6 +138,32 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+	if deps.Default.Config.ContainsKey("clients.corge.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.corge.alternates", &alternateServiceDetail)
+
+		ruleWrapper := ruleengine.RuleWrapper{}
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			rawRule := ruleengine.RawRule{Patterns: []string{routingConfig.HeaderName, routingConfig.HeaderValue},
+				Value: routingConfig.ServiceName}
+			headerPatterns = append(headerPatterns, routingConfig.HeaderName)
+			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
+
+			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
+			if !ok {
+				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
+			}
+			scAlt.Peers().Add(serviceRouting.IP + ":" + strconv.Itoa(serviceRouting.Port))
+			altChannelMap[routingConfig.ServiceName] = scAlt
+		}
+
+		re = ruleengine.NewRuleEngine(ruleWrapper)
+	}
+	return headerPatterns, re
 }
 
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
@@ -179,21 +224,16 @@ func (c *corgeClient) EchoString(
 
 	logger := c.client.Loggers["Corge::echoString"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
-	}
-
 	var success bool
 	var respHeaders map[string]string
 	var err error
 	if c.circuitBreakerDisabled {
-		success, respHeaders, err = caller(
+		success, respHeaders, err = c.client.Call(
 			ctx, "Corge", "echoString", reqHeaders, args, &result,
 		)
 	} else {
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)
 			return err

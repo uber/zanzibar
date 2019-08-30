@@ -32,6 +32,22 @@ type EnvConfig map[string]struct {
 	DataType string `json:"dataType"`
 }
 
+type RoutingConfig struct {
+	HeaderName  string `json:"headerName"`
+	HeaderValue string `json:"headerValue"`
+	ServiceName string `json:"serviceName"`
+}
+
+type ServiceRouting struct {
+	IP   string `json:"ip"`
+	Port int    `json:"port"`
+}
+
+type AlternateServiceDetail struct {
+	RoutingConfigs    []RoutingConfig           `json:"routingConfigs"`
+	ServicesDetailMap map[string]ServiceRouting `json:"servicesDetail"`
+}
+
 // NewRuntimeConfigOrDie returns a static config struct
 // that is pre-set with the service configuration defaults
 // and overridden by service.env.config
