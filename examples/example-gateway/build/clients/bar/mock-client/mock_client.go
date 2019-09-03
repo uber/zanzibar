@@ -178,21 +178,6 @@ func (mr *MockClientMockRecorder) DeleteFoo(arg0, arg1, arg2 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFoo", reflect.TypeOf((*MockClient)(nil).DeleteFoo), arg0, arg1, arg2)
 }
 
-// DeleteWithQueryParams mocks base method
-func (m *MockClient) DeleteWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithQueryParams_Args) (map[string]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteWithQueryParams", arg0, arg1, arg2)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DeleteWithQueryParams indicates an expected call of DeleteWithQueryParams
-func (mr *MockClientMockRecorder) DeleteWithQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWithQueryParams", reflect.TypeOf((*MockClient)(nil).DeleteWithQueryParams), arg0, arg1, arg2)
-}
-
 // EchoBinary mocks base method
 func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBinary_Args) ([]byte, map[string]string, error) {
 	m.ctrl.T.Helper()
