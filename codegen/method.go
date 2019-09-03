@@ -238,7 +238,7 @@ func NewMethod(
 
 	method.setValidStatusCodes()
 
-	if method.RequestType != "" {
+	if method.HTTPMethod == "GET" && method.RequestType != "" {
 		if method.IsEndpoint {
 			err := method.setParseQueryParamStatements(funcSpec, packageHelper)
 			if err != nil {
@@ -1132,19 +1132,13 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 ) error {
 	var statements LineBuilder
 	var hasQueryFields bool
-	var stack []string
-	isVoidReturn := funcSpec.ResultSpec.ReturnType == nil
+	var stack = []string{}
 
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
 		longFieldName := goPrefix + "." + PascalCase(field.Name)
-
-		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
-		if !strings.HasPrefix(httpRefAnnotation, "query") {
-			return false
-		}
 
 		if len(stack) > 0 {
 			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
@@ -1158,23 +1152,24 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 			if field.Required {
 				statements.appendf("if r%s == nil {", longFieldName)
-				// Generate correct number of nils...
-				if isVoidReturn {
-					statements.append("\treturn nil, errors.New(")
-				} else {
-					statements.append("\treturn nil, nil, errors.New(")
-				}
+				// TODO: generate correct number of nils...
+				statements.append("\treturn nil, nil, errors.New(")
 				statements.appendf("\t\t\"The field %s is required\",",
 					longFieldName,
 				)
 				statements.append("\t)")
-				statements.append("}")
+				statements.appendf("}")
 			} else {
 				stack = append(stack, longFieldName)
 
 				statements.appendf("if r%s != nil {", longFieldName)
 			}
 
+			return false
+		}
+
+		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
+		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
 			return false
 		}
 
@@ -1255,11 +1250,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		longFieldName := goPrefix + "." + PascalCase(field.Name)
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 
-		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
-		if !strings.HasPrefix(httpRefAnnotation, "query") {
-			return false
-		}
-
 		if len(stack) > 0 {
 			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
 				stack = stack[:len(stack)-1]
@@ -1334,6 +1324,11 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			return false
 		}
 		identifierName := CamelCase(longQueryName) + "Query"
+
+		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
+		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
+			return false
+		}
 
 		okIdentifierName := CamelCase(longQueryName) + "Ok"
 		if field.Required {
