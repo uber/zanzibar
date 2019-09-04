@@ -23,6 +23,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
@@ -36,6 +37,11 @@ import (
 // 4. the exception struct, generated from given thrift or its includes;
 func main() {
 	thriftFile := os.Args[1]
+	if !strings.HasSuffix(thriftFile, ".thrift") {
+		fmt.Printf("Skipping compilation: %s is not a thrift file", thriftFile)
+		return
+	}
+
 	module, err := compile.Compile(thriftFile)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse thrift file: %s", thriftFile))
