@@ -25,8 +25,8 @@ package workflow
 
 import (
 	"context"
+	"net/textproto"
 
-	"github.com/uber/zanzibar/codegen"
 	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -99,7 +99,7 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 		clientHeaders["X-Deputy-Forwarded"] = h
 	}
 	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
-		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		transformedHeaderName := textproto.CanonicalMIMEHeaderKey(whitelistedHeader)
 		headerVal, ok := reqHeaders.Get(transformedHeaderName)
 		if ok {
 			clientHeaders[transformedHeaderName] = headerVal

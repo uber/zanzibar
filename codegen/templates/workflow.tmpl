@@ -17,8 +17,7 @@ package workflow
 
 import (
 	"context"
-
-	"github.com/uber/zanzibar/codegen"
+	"net/textproto"
 	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -146,7 +145,7 @@ func (w {{$workflowStruct}}) Handle(
 	}
 	{{- end}}
 	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
-		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		transformedHeaderName := textproto.CanonicalMIMEHeaderKey(whitelistedHeader)
 		headerVal, ok := reqHeaders.Get(transformedHeaderName)
 		if ok {
 			clientHeaders[transformedHeaderName] = headerVal

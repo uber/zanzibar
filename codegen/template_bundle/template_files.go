@@ -3122,8 +3122,8 @@ package workflow
 
 import (
 	"context"
+	"net/textproto"
 
-	"github.com/uber/zanzibar/codegen"
 	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -3251,7 +3251,7 @@ func (w {{$workflowStruct}}) Handle(
 	}
 	{{- end}}
 	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
-		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		transformedHeaderName := textproto.CanonicalMIMEHeaderKey(whitelistedHeader)
 		headerVal, ok := reqHeaders.Get(transformedHeaderName)
 		if ok {
 			clientHeaders[transformedHeaderName] = headerVal
@@ -3393,7 +3393,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8366, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
