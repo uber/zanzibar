@@ -8,6 +8,7 @@ package workflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
@@ -16,6 +17,9 @@ package workflow
 
 import (
 	"context"
+
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -73,9 +77,19 @@ Handle(
 
 // New{{$workflowInterface}} creates a workflow
 func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &{{$workflowStruct}}{
 		Clients: deps.Client,
 		Logger:  deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
@@ -83,6 +97,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 type {{$workflowStruct}} struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -130,6 +145,14 @@ func (w {{$workflowStruct}}) Handle(
 		clientHeaders["{{$typedHeader.TransformTo}}"] = h
 	}
 	{{- end}}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
+	}
+
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)

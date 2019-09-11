@@ -2533,9 +2533,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 }
 
 func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
-	if deps.Default.Config.ContainsKey("clients.corge.alternates") {
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
-		deps.Default.Config.MustGetStruct("clients.corge.alternates", &alternateServiceDetail)
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
 
 		ruleWrapper := ruleengine.RuleWrapper{}
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
@@ -2689,7 +2689,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10551, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10567, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3113,6 +3113,7 @@ package workflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
@@ -3121,6 +3122,9 @@ package workflow
 
 import (
 	"context"
+
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -3178,9 +3182,19 @@ Handle(
 
 // New{{$workflowInterface}} creates a workflow
 func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &{{$workflowStruct}}{
 		Clients: deps.Client,
 		Logger:  deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
@@ -3188,6 +3202,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 type {{$workflowStruct}} struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -3235,6 +3250,14 @@ func (w {{$workflowStruct}}) Handle(
 		clientHeaders["{{$typedHeader.TransformTo}}"] = h
 	}
 	{{- end}}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
+	}
+
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
@@ -3370,7 +3393,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7478, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

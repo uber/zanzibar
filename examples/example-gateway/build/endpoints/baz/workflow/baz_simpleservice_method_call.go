@@ -26,6 +26,9 @@ package workflow
 import (
 	"context"
 
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
@@ -46,16 +49,27 @@ type SimpleServiceCallWorkflow interface {
 
 // NewSimpleServiceCallWorkflow creates a workflow
 func NewSimpleServiceCallWorkflow(deps *module.Dependencies) SimpleServiceCallWorkflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.baz.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &simpleServiceCallWorkflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // simpleServiceCallWorkflow calls thrift client Baz.Call
 type simpleServiceCallWorkflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -81,6 +95,13 @@ func (w simpleServiceCallWorkflow) Handle(
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h
+	}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
 	}
 
 	cliRespHeaders, err := w.Clients.Baz.Call(

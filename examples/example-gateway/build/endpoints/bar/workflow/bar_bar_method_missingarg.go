@@ -26,6 +26,9 @@ package workflow
 import (
 	"context"
 
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
@@ -45,16 +48,27 @@ type BarMissingArgWorkflow interface {
 
 // NewBarMissingArgWorkflow creates a workflow
 func NewBarMissingArgWorkflow(deps *module.Dependencies) BarMissingArgWorkflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.bar.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.bar.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &barMissingArgWorkflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // barMissingArgWorkflow calls thrift client Bar.MissingArg
 type barMissingArgWorkflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -70,6 +84,13 @@ func (w barMissingArgWorkflow) Handle(
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
+	}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
 	}
 
 	clientRespBody, _, err := w.Clients.Bar.MissingArg(

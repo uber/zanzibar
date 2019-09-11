@@ -26,6 +26,9 @@ package workflow
 import (
 	"context"
 
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	clientsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/withexceptions/withexceptions"
@@ -45,16 +48,27 @@ type WithExceptionsFunc1Workflow interface {
 
 // NewWithExceptionsFunc1Workflow creates a workflow
 func NewWithExceptionsFunc1Workflow(deps *module.Dependencies) WithExceptionsFunc1Workflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.withexceptions.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.withexceptions.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &withExceptionsFunc1Workflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // withExceptionsFunc1Workflow calls thrift client Withexceptions.Func1
 type withExceptionsFunc1Workflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -70,6 +84,13 @@ func (w withExceptionsFunc1Workflow) Handle(
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
+	}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
 	}
 
 	clientRespBody, _, err := w.Clients.Withexceptions.Func1(

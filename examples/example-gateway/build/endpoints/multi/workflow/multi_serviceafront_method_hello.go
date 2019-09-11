@@ -26,6 +26,9 @@ package workflow
 import (
 	"context"
 
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
@@ -42,16 +45,27 @@ type ServiceAFrontHelloWorkflow interface {
 
 // NewServiceAFrontHelloWorkflow creates a workflow
 func NewServiceAFrontHelloWorkflow(deps *module.Dependencies) ServiceAFrontHelloWorkflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.multi.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.multi.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &serviceAFrontHelloWorkflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // serviceAFrontHelloWorkflow calls thrift client Multi.HelloA
 type serviceAFrontHelloWorkflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -67,6 +81,13 @@ func (w serviceAFrontHelloWorkflow) Handle(
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
+	}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
 	}
 
 	clientRespBody, _, err := w.Clients.Multi.HelloA(

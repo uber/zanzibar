@@ -29,7 +29,7 @@ import (
 func TestRuleEngine(t *testing.T) {
 
 	rule1 := RawRule{
-		Patterns: []string{"\\.*", "test\\.*"},
+		Patterns: []string{"RTAPI-Container", "test\\.*"},
 		Value:    "presentation-staging",
 	}
 	rule2 := RawRule{

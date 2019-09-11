@@ -27,6 +27,9 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
@@ -47,16 +50,27 @@ type SimpleServiceTransHeadersNoReqWorkflow interface {
 
 // NewSimpleServiceTransHeadersNoReqWorkflow creates a workflow
 func NewSimpleServiceTransHeadersNoReqWorkflow(deps *module.Dependencies) SimpleServiceTransHeadersNoReqWorkflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.baz.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &simpleServiceTransHeadersNoReqWorkflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // simpleServiceTransHeadersNoReqWorkflow calls thrift client Baz.TransHeadersNoReq
 type simpleServiceTransHeadersNoReqWorkflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -85,6 +99,13 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
+	}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
 	}
 
 	clientRespBody, _, err := w.Clients.Baz.TransHeadersNoReq(

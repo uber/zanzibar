@@ -294,9 +294,9 @@ func NewClient(deps *module.Dependencies) Client {
 }
 
 func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
-	if deps.Default.Config.ContainsKey("clients.corge.alternates") {
+	if deps.Default.Config.ContainsKey("clients.baz.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
-		deps.Default.Config.MustGetStruct("clients.corge.alternates", &alternateServiceDetail)
+		deps.Default.Config.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
 
 		ruleWrapper := ruleengine.RuleWrapper{}
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {

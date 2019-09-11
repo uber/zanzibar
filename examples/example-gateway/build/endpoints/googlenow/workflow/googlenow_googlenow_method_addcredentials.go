@@ -26,6 +26,9 @@ package workflow
 import (
 	"context"
 
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/config"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
@@ -46,16 +49,27 @@ type GoogleNowAddCredentialsWorkflow interface {
 
 // NewGoogleNowAddCredentialsWorkflow creates a workflow
 func NewGoogleNowAddCredentialsWorkflow(deps *module.Dependencies) GoogleNowAddCredentialsWorkflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.google-now.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.google-now.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+		}
+	}
+
 	return &googleNowAddCredentialsWorkflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // googleNowAddCredentialsWorkflow calls thrift client GoogleNow.AddCredentials
 type googleNowAddCredentialsWorkflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -81,6 +95,13 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h
+	}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		transformedHeaderName := codegen.CamelCase(whitelistedHeader)
+		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		if ok {
+			clientHeaders[transformedHeaderName] = headerVal
+		}
 	}
 
 	cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
