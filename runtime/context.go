@@ -41,6 +41,7 @@ const (
 	endpointKey           = contextFieldKey("endpoint")
 	requestUUIDKey        = contextFieldKey("requestUUID")
 	routingDelegateKey    = contextFieldKey("rd")
+	shardKey              = contextFieldKey("sk")
 	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
 	requestLogFields      = contextFieldKey("requestLogFields")
 	scopeTags             = contextFieldKey("scopeTags")
