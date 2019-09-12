@@ -118,8 +118,7 @@ func BuildTChannelBackends(
 			if backendIndex == 0 {
 				cfg["clients."+clientID+".port"] = int64(backend.RealPort)
 			} else {
-				transformedClientID := clientID + ":" + strconv.Itoa(backendIndex)
-				result[transformedClientID] = backend
+				transformedClientID = clientID + ":" + strconv.Itoa(backendIndex)
 			}
 			result[transformedClientID] = backend
 		}
