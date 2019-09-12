@@ -26,7 +26,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
@@ -62,8 +61,6 @@ const (
 	  }
 	}`
 )
-
-var NameSpace_UUID = uuid.MustParse("6ba7b812-9dad-11d1-80b4-00c04fd430c8")
 
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {

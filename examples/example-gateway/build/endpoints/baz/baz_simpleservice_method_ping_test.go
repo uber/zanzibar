@@ -32,7 +32,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
