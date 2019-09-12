@@ -863,10 +863,10 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 					)
 			if i == 1 {
-            	headers["x-api-environment"] = "sandbox"
-            } else {
-            	headers["RTAPI-Container"] = "test1"
-            }
+				headers["x-api-environment"] = "sandbox"
+			} else {
+				headers["RTAPI-Container"] = "test1"
+			}
 		}
 		assert.NoError(t, err)
 		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, i, headers)
@@ -933,7 +933,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6880, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6844, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
