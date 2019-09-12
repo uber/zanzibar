@@ -235,7 +235,7 @@ func (c *TChannelClient) call(
 
 	sk := GetShardKeyFromCtx(ctx)
 	if sk != "" {
-		fmt.Println("sk="+sk)
+		fmt.Println("sk=" + sk)
 		ctxBuilder.SetShardKey(sk)
 	}
 
