@@ -22,9 +22,12 @@ package testbackend
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
@@ -51,11 +54,11 @@ const (
 		"servicesDetail": {
 		  "presentation-sandbox": {
 			"ip": "127.0.0.1",
-			"port": 7001
+			"port": %d
 		  },
 		  "mpx-prism": {
 			"ip": "127.0.0.1",
-			"port": 7002
+			"port": %d
 		  }
 		}
 	  }`
@@ -92,11 +95,12 @@ func BuildTChannelBackends(
 		cfg["clients."+clientID+".ip"] = "127.0.0.1"
 		cfg["clients."+clientID+".timeout"] = int64(10000)
 		cfg["clients."+clientID+".timeoutPerAttempt"] = int64(10000)
-		cfg["clients."+clientID+".alternates"] = alternateConfig
 
+		var clientPorts []int
 		// create 3 backends for the same client with first one being default and other two for dynamic routing
 		for backendIndex := 0; backendIndex < 3; backendIndex++ {
-			clientPort := uniquePort(clientIndex, backendIndex)
+			clientPort := uniquePort(backendIndex)
+			clientPorts = append(clientPorts, clientPort)
 			backend, err := CreateTChannelBackend(int32(clientPort), serviceName)
 			if err != nil {
 				return nil, err
@@ -120,16 +124,20 @@ func BuildTChannelBackends(
 			result[transformedClientID] = backend
 		}
 
+		cfg["clients."+clientID+".alternates"] = fmt.Sprintf(alternateConfig, clientPorts[1], clientPorts[2])
 	}
 
 	return result, nil
 }
 
-func uniquePort(i, j int) int {
-	if j == 0 {
+func uniquePort(backendIndex int) int {
+	if backendIndex == 0 {
 		return 0
 	}
-	return 7000*(i+1) + j
+	rand.Seed(time.Now().UnixNano())
+	min := 7000
+	max := 15000
+	return rand.Intn(max-min) + min
 }
 
 // Bootstrap creates a backend for testing
