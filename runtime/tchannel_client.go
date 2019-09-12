@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -231,6 +232,13 @@ func (c *TChannelClient) call(
 	if rd != "" {
 		ctxBuilder.SetRoutingDelegate(rd)
 	}
+
+	sk := GetShardKeyFromCtx(ctx)
+	if sk != "" {
+		fmt.Println("sk="+sk)
+		ctxBuilder.SetShardKey(sk)
+	}
+
 	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
 

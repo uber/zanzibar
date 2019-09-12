@@ -147,6 +147,16 @@ func GetRoutingDelegateFromCtx(ctx context.Context) string {
 	return ""
 }
 
+// GetShardKeyFromCtx returns the tchannel shardkey info
+// extracted from context.
+func GetShardKeyFromCtx(ctx context.Context) string {
+	if val := ctx.Value(shardKey); val != nil {
+		sk, _ := val.(string)
+		return sk
+	}
+	return ""
+}
+
 // WithLogFields returns a new context with the given log fields attached to context.Context
 func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context {
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
