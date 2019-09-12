@@ -155,10 +155,10 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 					)
 			if i == 1 {
-            	headers["x-api-environment"] = "sandbox"
-            } else {
-            	headers["RTAPI-Container"] = "test1"
-            }
+				headers["x-api-environment"] = "sandbox"
+			} else {
+				headers["RTAPI-Container"] = "test1"
+			}
 		}
 		assert.NoError(t, err)
 		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, i, headers)
