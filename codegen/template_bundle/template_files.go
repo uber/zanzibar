@@ -850,7 +850,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 			{{end -}}
 		}
 
-
+		headers := map[string]string{}
 		if i == 0 {
 			err = gateway.TChannelBackends()["{{$clientName}}"].Register(
 						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
@@ -862,17 +862,21 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 					)
+			if i == 1 {
+            	headers["x-api-environment"] = "sandbox"
+            } else {
+            	headers["RTAPI-Container"] = "test1"
+            }
 		}
 		assert.NoError(t, err)
-		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, i)
+		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, i, headers)
 		{{end}}
 	}
 
 
 }
 
-func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
-	headers := map[string]string{}
+func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
 	{{ if $headers -}}
 	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
 	headers["{{$k}}"] = "{{$v}}"
@@ -929,7 +933,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6690, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6880, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

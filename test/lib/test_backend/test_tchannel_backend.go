@@ -58,8 +58,7 @@ const (
 			"port": 7002
 		  }
 		}
-	  }
-	}`
+	  }`
 )
 
 // TestTChannelBackend will pretend to be a http backend
@@ -79,8 +78,8 @@ func BuildTChannelBackends(
 	n := len(knownTChannelBackends)
 	result := make(map[string]*TestTChannelBackend, n)
 
-	for i := 0; i < n; i++ {
-		clientID := knownTChannelBackends[i]
+	for clientIndex := 0; clientIndex < n; clientIndex++ {
+		clientID := knownTChannelBackends[clientIndex]
 
 		val, ok := cfg["clients."+clientID+".serviceName"]
 		var serviceName string
@@ -96,8 +95,8 @@ func BuildTChannelBackends(
 		cfg["clients."+clientID+".alternates"] = alternateConfig
 
 		// create 3 backends for the same client with first one being default and other two for dynamic routing
-		for j := 0; j < 3; j++ {
-			clientPort := uniquePort(i, j)
+		for backendIndex := 0; backendIndex < 3; backendIndex++ {
+			clientPort := uniquePort(clientIndex, backendIndex)
 			backend, err := CreateTChannelBackend(int32(clientPort), serviceName)
 			if err != nil {
 				return nil, err
@@ -109,14 +108,16 @@ func BuildTChannelBackends(
 			}
 
 			// we need only one client but different backend.
-			// result map is needed for register handler for a backend, using a default one for 0 index i.e. 7000.
+			// result map is needed for register handler for a backend, using a default one for 0 index clientIndex.e. 7000.
 			// cfg map is used for init'ing client.
-			if j == 0 {
-				result[clientID] = backend
+			transformedClientID := clientID
+			if backendIndex == 0 {
 				cfg["clients."+clientID+".port"] = int64(backend.RealPort)
 			} else {
-				result[clientID+":"+strconv.Itoa(i)] = backend
+				transformedClientID := clientID + ":" + strconv.Itoa(backendIndex)
+				result[transformedClientID] = backend
 			}
+			result[transformedClientID] = backend
 		}
 
 	}

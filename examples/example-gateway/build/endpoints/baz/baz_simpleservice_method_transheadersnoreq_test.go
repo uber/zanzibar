@@ -100,6 +100,7 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 			return &res, resHeaders, nil
 		}
 
+		headers := map[string]string{}
 		if i == 0 {
 			err = gateway.TChannelBackends()["baz"].Register(
 				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
@@ -111,16 +112,20 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
 				bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
 			)
+			if i == 1 {
+				headers["x-api-environment"] = "sandbox"
+			} else {
+				headers["RTAPI-Container"] = "test1"
+			}
 		}
 		assert.NoError(t, err)
-		makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, i)
+		makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, i, headers)
 
 	}
 
 }
 
-func makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
-	headers := map[string]string{}
+func makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
 	headers["b3"] = "true"
 	headers["i2"] = "321"
 	headers["s1"] = "string"

@@ -81,6 +81,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 			return resHeaders, nil
 		}
 
+		headers := map[string]string{}
 		if i == 0 {
 			err = gateway.TChannelBackends()["baz"].Register(
 				"baz", "call", "SimpleService::call",
@@ -92,16 +93,20 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "call", "SimpleService::call",
 				bazclient.NewSimpleServiceCallHandler(fakeCall),
 			)
+			if i == 1 {
+				headers["x-api-environment"] = "sandbox"
+			} else {
+				headers["RTAPI-Container"] = "test1"
+			}
 		}
 		assert.NoError(t, err)
-		makeRequestAndValidateCallSuccessfulRequest(t, gateway, i)
+		makeRequestAndValidateCallSuccessfulRequest(t, gateway, i, headers)
 
 	}
 
 }
 
-func makeRequestAndValidateCallSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
-	headers := map[string]string{}
+func makeRequestAndValidateCallSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 

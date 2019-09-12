@@ -78,6 +78,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 			return resHeaders, nil
 		}
 
+		headers := map[string]string{}
 		if i == 0 {
 			err = gateway.TChannelBackends()["baz"].Register(
 				"baz", "sillyNoop", "SimpleService::sillyNoop",
@@ -89,16 +90,20 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "sillyNoop", "SimpleService::sillyNoop",
 				bazclient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 			)
+			if i == 1 {
+				headers["x-api-environment"] = "sandbox"
+			} else {
+				headers["RTAPI-Container"] = "test1"
+			}
 		}
 		assert.NoError(t, err)
-		makeRequestAndValidateSillyNoopSuccessfulRequest(t, gateway, i)
+		makeRequestAndValidateSillyNoopSuccessfulRequest(t, gateway, i, headers)
 
 	}
 
 }
 
-func makeRequestAndValidateSillyNoopSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
-	headers := map[string]string{}
+func makeRequestAndValidateSillyNoopSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
 
 	endpointRequest := []byte(`{}`)
 

@@ -100,6 +100,7 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 			return &res, resHeaders, nil
 		}
 
+		headers := map[string]string{}
 		if i == 0 {
 			err = gateway.TChannelBackends()["baz"].Register(
 				"baz", "trans", "SimpleService::trans",
@@ -111,16 +112,20 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "trans", "SimpleService::trans",
 				bazclient.NewSimpleServiceTransHandler(fakeTrans),
 			)
+			if i == 1 {
+				headers["x-api-environment"] = "sandbox"
+			} else {
+				headers["RTAPI-Container"] = "test1"
+			}
 		}
 		assert.NoError(t, err)
-		makeRequestAndValidateTransSuccessfulRequest(t, gateway, i)
+		makeRequestAndValidateTransSuccessfulRequest(t, gateway, i, headers)
 
 	}
 
 }
 
-func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
-	headers := map[string]string{}
+func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
 
 	endpointRequest := []byte(`{"arg1":{"driver":{"check":2,"msg":"arg1_driver_msg"},"message":"msg_arg1","rider":{"check":1,"msg":"arg1_rider_msg"}},"arg2":{"driver":{"check":4,"msg":"arg2_driver_msg"},"message":"msg_arg2","rider":{"check":3,"msg":"arg2_rider_msg"}},"message":"message"}`)
 
