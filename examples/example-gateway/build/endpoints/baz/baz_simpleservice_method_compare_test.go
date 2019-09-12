@@ -28,6 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,6 @@ import (
 )
 
 func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
-	testcompareCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -59,7 +59,6 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
 	) (*clientsBazBase.BazResponse, map[string]string, error) {
-		testcompareCounter++
 
 		var resHeaders map[string]string
 
@@ -80,6 +79,47 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	for i := 0; i < 3; i++ {
+
+		fakeCompare := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *clientsBazBaz.SimpleService_Compare_Args,
+		) (*clientsBazBase.BazResponse, map[string]string, error) {
+
+			var resHeaders map[string]string
+
+			var res clientsBazBase.BazResponse
+
+			clientResponse := []byte(strconv.Itoa(i) + `:{"message":"different"}`)
+			err := json.Unmarshal(clientResponse, &res)
+			if err != nil {
+				t.Fatal("cant't unmarshal client response json to client response struct")
+				return nil, resHeaders, err
+			}
+			return &res, resHeaders, nil
+		}
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["baz"].Register(
+				"baz", "compare", "SimpleService::compare",
+				bazclient.NewSimpleServiceCompareHandler(fakeCompare),
+			)
+		} else {
+
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "compare", "SimpleService::compare",
+				bazclient.NewSimpleServiceCompareHandler(fakeCompare),
+			)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidateCompareSuccessfulRequest(t, gateway, i)
+
+	}
+
+}
+
+func makeRequestAndValidateCompareSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 
 	endpointRequest := []byte(`{"arg1":{"b1":true,"i3":42,"s2":"hello"},"arg2":{"b1":true,"i3":42,"s2":"hola"}}`)
@@ -100,7 +140,6 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testcompareCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, `{"message":"different"}`, string(data))
+	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{"message":"different"}`, string(data))
 }

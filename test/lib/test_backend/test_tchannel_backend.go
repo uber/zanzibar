@@ -26,12 +26,44 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/uber/zanzibar/runtime"
 )
+
+const (
+	alternateConfig = `{
+		"routingConfigs": [
+		  {
+			"headerName": "x-api-environment",
+			"headerValue": "*",
+			"serviceName": "presentation-sandbox"
+		  },
+		  {
+			"headerName": "RTAPI-Container",
+			"headerValue": "test*",
+			"serviceName": "mpx-prism"
+		  }
+		],
+		"servicesDetail": {
+		  "presentation-sandbox": {
+			"ip": "127.0.0.1",
+			"port": 7001
+		  },
+		  "mpx-prism": {
+			"ip": "127.0.0.1",
+			"port": 7002
+		  }
+		}
+	  }
+	}`
+)
+
+var NameSpace_UUID = uuid.MustParse("6ba7b812-9dad-11d1-80b4-00c04fd430c8")
 
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
@@ -61,25 +93,45 @@ func BuildTChannelBackends(
 		} else {
 			serviceName = val.(string)
 		}
-
-		backend, err := CreateTChannelBackend(0, serviceName)
-		if err != nil {
-			return nil, err
-		}
-
-		err = backend.Bootstrap()
-		if err != nil {
-			return nil, err
-		}
-
-		result[clientID] = backend
 		cfg["clients."+clientID+".ip"] = "127.0.0.1"
-		cfg["clients."+clientID+".port"] = int64(backend.RealPort)
 		cfg["clients."+clientID+".timeout"] = int64(10000)
 		cfg["clients."+clientID+".timeoutPerAttempt"] = int64(10000)
+		cfg["clients."+clientID+".alternates"] = alternateConfig
+
+		// create 3 backends for the same client with first one being default and other two for dynamic routing
+		for j := 0; j < 3; j++ {
+			clientPort := uniquePort(i, j)
+			backend, err := CreateTChannelBackend(int32(clientPort), serviceName)
+			if err != nil {
+				return nil, err
+			}
+
+			err = backend.Bootstrap()
+			if err != nil {
+				return nil, err
+			}
+
+			// we need only one client but different backend.
+			// result map is needed for register handler for a backend, using a default one for 0 index i.e. 7000.
+			// cfg map is used for init'ing client.
+			if j == 0 {
+				result[clientID] = backend
+				cfg["clients."+clientID+".port"] = int64(backend.RealPort)
+			} else {
+				result[clientID+":"+strconv.Itoa(i)] = backend
+			}
+		}
+
 	}
 
 	return result, nil
+}
+
+func uniquePort(i, j int) int {
+	if j == 0 {
+		return 0
+	}
+	return 7000*(i+1) + j
 }
 
 // Bootstrap creates a backend for testing

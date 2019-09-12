@@ -28,6 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,6 @@ import (
 )
 
 func TestTransHeadersSuccessfulRequestOKResponse(t *testing.T) {
-	testtransHeadersCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -59,7 +59,6 @@ func TestTransHeadersSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_TransHeaders_Args,
 	) (*clientsBazBase.TransHeaders, map[string]string, error) {
-		testtransHeadersCounter++
 
 		var resHeaders map[string]string
 
@@ -80,6 +79,47 @@ func TestTransHeadersSuccessfulRequestOKResponse(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	for i := 0; i < 3; i++ {
+
+		fakeTransHeaders := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *clientsBazBaz.SimpleService_TransHeaders_Args,
+		) (*clientsBazBase.TransHeaders, map[string]string, error) {
+
+			var resHeaders map[string]string
+
+			var res clientsBazBase.TransHeaders
+
+			clientResponse := []byte(strconv.Itoa(i) + `:{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
+			err := json.Unmarshal(clientResponse, &res)
+			if err != nil {
+				t.Fatal("cant't unmarshal client response json to client response struct")
+				return nil, resHeaders, err
+			}
+			return &res, resHeaders, nil
+		}
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["baz"].Register(
+				"baz", "transHeaders", "SimpleService::transHeaders",
+				bazclient.NewSimpleServiceTransHeadersHandler(fakeTransHeaders),
+			)
+		} else {
+
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "transHeaders", "SimpleService::transHeaders",
+				bazclient.NewSimpleServiceTransHeadersHandler(fakeTransHeaders),
+			)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidateTransHeadersSuccessfulRequest(t, gateway, i)
+
+	}
+
+}
+
+func makeRequestAndValidateTransHeadersSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
@@ -102,7 +142,6 @@ func TestTransHeadersSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testtransHeadersCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, `{}`, string(data))
+	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{}`, string(data))
 }

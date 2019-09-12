@@ -26,6 +26,7 @@ package bazendpoint
 import (
 	"bytes"
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,7 +38,6 @@ import (
 )
 
 func TestCallSuccessfulRequestOKResponse(t *testing.T) {
-	testcallCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -56,7 +56,6 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Call_Args,
 	) (map[string]string, error) {
-		testcallCounter++
 
 		var resHeaders map[string]string
 
@@ -69,6 +68,39 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	for i := 0; i < 3; i++ {
+
+		fakeCall := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *clientsBazBaz.SimpleService_Call_Args,
+		) (map[string]string, error) {
+
+			var resHeaders map[string]string
+
+			return resHeaders, nil
+		}
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["baz"].Register(
+				"baz", "call", "SimpleService::call",
+				bazclient.NewSimpleServiceCallHandler(fakeCall),
+			)
+		} else {
+
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "call", "SimpleService::call",
+				bazclient.NewSimpleServiceCallHandler(fakeCall),
+			)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidateCallSuccessfulRequest(t, gateway, i)
+
+	}
+
+}
+
+func makeRequestAndValidateCallSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
@@ -85,6 +117,5 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testcallCounter)
 	assert.Equal(t, 204, res.StatusCode)
 }

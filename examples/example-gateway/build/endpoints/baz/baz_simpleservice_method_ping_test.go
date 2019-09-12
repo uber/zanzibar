@@ -28,9 +28,11 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
@@ -39,7 +41,6 @@ import (
 )
 
 func TestPingSuccessfulRequestOKResponse(t *testing.T) {
-	testpingCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -57,7 +58,6 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (*clientsBazBase.BazResponse, map[string]string, error) {
-		testpingCounter++
 
 		var resHeaders map[string]string
 
@@ -78,6 +78,46 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	for i := 0; i < 3; i++ {
+
+		fakePing := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+		) (*clientsBazBase.BazResponse, map[string]string, error) {
+
+			var resHeaders map[string]string
+
+			var res clientsBazBase.BazResponse
+
+			clientResponse := []byte(strconv.Itoa(i) + `:{"message":"pong"}`)
+			err := json.Unmarshal(clientResponse, &res)
+			if err != nil {
+				t.Fatal("cant't unmarshal client response json to client response struct")
+				return nil, resHeaders, err
+			}
+			return &res, resHeaders, nil
+		}
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["baz"].Register(
+				"baz", "ping", "SimpleService::ping",
+				bazclient.NewSimpleServicePingHandler(fakePing),
+			)
+		} else {
+
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "ping", "SimpleService::ping",
+				bazclient.NewSimpleServicePingHandler(fakePing),
+			)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidatePingSuccessfulRequest(t, gateway, i)
+
+	}
+
+}
+
+func makeRequestAndValidatePingSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 
 	endpointRequest := []byte(`{}`)
@@ -98,7 +138,6 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testpingCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, `{"message":"pong"}`, string(data))
+	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{"message":"pong"}`, string(data))
 }

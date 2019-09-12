@@ -28,6 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,6 @@ import (
 )
 
 func TestTransSuccessfulRequestOKResponse(t *testing.T) {
-	testtransCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -59,7 +59,6 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Trans_Args,
 	) (*clientsBazBase.TransStruct, map[string]string, error) {
-		testtransCounter++
 
 		var resHeaders map[string]string
 
@@ -80,6 +79,47 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	for i := 0; i < 3; i++ {
+
+		fakeTrans := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *clientsBazBaz.SimpleService_Trans_Args,
+		) (*clientsBazBase.TransStruct, map[string]string, error) {
+
+			var resHeaders map[string]string
+
+			var res clientsBazBase.TransStruct
+
+			clientResponse := []byte(strconv.Itoa(i) + `:{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
+			err := json.Unmarshal(clientResponse, &res)
+			if err != nil {
+				t.Fatal("cant't unmarshal client response json to client response struct")
+				return nil, resHeaders, err
+			}
+			return &res, resHeaders, nil
+		}
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["baz"].Register(
+				"baz", "trans", "SimpleService::trans",
+				bazclient.NewSimpleServiceTransHandler(fakeTrans),
+			)
+		} else {
+
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "trans", "SimpleService::trans",
+				bazclient.NewSimpleServiceTransHandler(fakeTrans),
+			)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidateTransSuccessfulRequest(t, gateway, i)
+
+	}
+
+}
+
+func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 
 	endpointRequest := []byte(`{"arg1":{"driver":{"check":2,"msg":"arg1_driver_msg"},"message":"msg_arg1","rider":{"check":1,"msg":"arg1_rider_msg"}},"arg2":{"driver":{"check":4,"msg":"arg2_driver_msg"},"message":"msg_arg2","rider":{"check":3,"msg":"arg2_rider_msg"}},"message":"message"}`)
@@ -100,7 +140,6 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testtransCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, `{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_msg"}}`, string(data))
+	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_msg"}}`, string(data))
 }

@@ -10,6 +10,7 @@ import (
 	{{end -}}
 	"path/filepath"
 	"testing"
+	"strconv"
 	{{if ne .Method.ResponseType "" -}}
 	"io/ioutil"
 	{{end}}
@@ -34,11 +35,9 @@ import (
 {{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $testName, $testFixture := $.TestFixtures}}
 func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKResponse(t *testing.T) {
-	{{$counter}} := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		{{/* the serviceName here is service discovery name, therefore is ok to be arbitrary */ -}}
@@ -62,7 +61,6 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		args {{$clientMethodRequestType}},
 		{{end -}}
 	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
-		{{$counter}}++
 
 		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
 		assert.Equal(
@@ -101,6 +99,71 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	assert.NoError(t, err)
 	{{end}}
 
+
+	for i := 0; i < 3; i++ {
+
+		{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
+		{{$clientFunc := printf "fake%s" (title $clientCallFixture.ClientMethod) -}}
+		{{$clientFunc}} := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			{{if $clientMethod.RequestType -}}
+			args {{$clientMethodRequestType}},
+			{{end -}}
+		) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
+
+			{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
+			assert.Equal(
+				t,
+				"{{$v}}",
+				reqHeaders["{{$k}}"])
+			{{end -}}
+
+			var resHeaders map[string]string
+			{{if (len $clientCallFixture.ClientResHeaders) -}}
+			resHeaders = map[string]string{}
+			{{end -}}
+			{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
+			resHeaders["{{$k}}"] = "{{$v}}"
+			{{end}}
+
+			{{if $clientMethod.ResponseType -}}
+			var res {{unref $clientMethod.ResponseType}}
+
+			clientResponse := []byte(strconv.Itoa(i) + {{printf "`:%s`" $clientCallFixture.ClientResponse.Body}})
+			err := json.Unmarshal(clientResponse, &res)
+			if err!= nil {
+				t.Fatal("cant't unmarshal client response json to client response struct")
+				return nil, resHeaders, err
+			}
+			return &res, resHeaders, nil
+			{{else -}}
+			return resHeaders, nil
+			{{end -}}
+		}
+
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["{{$clientName}}"].Register(
+						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
+						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
+					)
+		} else {
+
+			err = gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)].Register(
+						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
+						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
+					)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, i)
+		{{end}}
+	}
+
+
+}
+
+func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 	{{ if $headers -}}
 	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
@@ -132,7 +195,6 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	}
 	{{end}}
 
-	assert.Equal(t, 1, {{$counter}})
 	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
 	{{range $k, $v := $testFixture.EndpointResHeaders -}}
 	assert.Equal(
@@ -141,7 +203,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		res.Header.Get("{{$k}}"))
 	{{end -}}
 	{{if $responseType -}}
-		assert.JSONEq(t, `{{$testFixture.EndpointResponse.Body}}`, string(data))
+		assert.JSONEq(t, strconv.Itoa(clientIndex) + `:{{$testFixture.EndpointResponse.Body}}`, string(data))
 	{{end -}}
 }
 

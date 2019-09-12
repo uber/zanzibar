@@ -28,6 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +40,6 @@ import (
 )
 
 func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
-	testtransHeadersTypeCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -58,7 +58,6 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_TransHeadersType_Args,
 	) (*clientsBazBaz.TransHeaderType, map[string]string, error) {
-		testtransHeadersTypeCounter++
 
 		var resHeaders map[string]string
 
@@ -79,6 +78,47 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	for i := 0; i < 3; i++ {
+
+		fakeTransHeadersType := func(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *clientsBazBaz.SimpleService_TransHeadersType_Args,
+		) (*clientsBazBaz.TransHeaderType, map[string]string, error) {
+
+			var resHeaders map[string]string
+
+			var res clientsBazBaz.TransHeaderType
+
+			clientResponse := []byte(strconv.Itoa(i) + `:{"b1":true,"f3":3.14,"i1":3,"i2":3,"s6":"2a629c1a-262a-43f0-8623-869b0256a321","u4":"2a629c1a-262a-43f0-8623-869b0256a321","u5":"2a629c1a-262a-43f0-8623-869b0256a321"}`)
+			err := json.Unmarshal(clientResponse, &res)
+			if err != nil {
+				t.Fatal("cant't unmarshal client response json to client response struct")
+				return nil, resHeaders, err
+			}
+			return &res, resHeaders, nil
+		}
+
+		if i == 0 {
+			err = gateway.TChannelBackends()["baz"].Register(
+				"baz", "transHeadersType", "SimpleService::transHeadersType",
+				bazclient.NewSimpleServiceTransHeadersTypeHandler(fakeTransHeadersType),
+			)
+		} else {
+
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "transHeadersType", "SimpleService::transHeadersType",
+				bazclient.NewSimpleServiceTransHeadersTypeHandler(fakeTransHeadersType),
+			)
+		}
+		assert.NoError(t, err)
+		makeRequestAndValidateTransHeadersTypeSuccessfulRequest(t, gateway, i)
+
+	}
+
+}
+
+func makeRequestAndValidateTransHeadersTypeSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int) {
 	headers := map[string]string{}
 	headers["x-boolean"] = "true"
 	headers["x-float"] = "3.14"
@@ -103,7 +143,6 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testtransHeadersTypeCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, `{}`, string(data))
+	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{}`, string(data))
 }
