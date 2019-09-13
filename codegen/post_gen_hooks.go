@@ -141,8 +141,16 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 					importPath := importPathMap[key]
 
-					// generate mock client, this starts a sub process
-					mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
+					clientInterfacesMap := h.GetInterfacesMap()
+					var mock []byte
+					var err error
+					// generate mock client, this starts a sub process.
+					// if an interfaces name is provided use that, else use "Client"
+					if val, ok := clientInterfacesMap[importPath]; ok {
+						mock, err = bin.GenMock(importPath, "clientmock", val)
+					} else {
+						mock, err = bin.GenMock(importPath, "clientmock", clientInterface)
+					}
 					if err != nil {
 						ec <- errors.Wrapf(
 							err,
