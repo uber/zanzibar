@@ -77,7 +77,7 @@ func (b byMethodName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byMethodName) Less(i, j int) bool { return b[i].Name < b[j].Name }
 
 // AugmentMockWithFixture generates mocks with fixture for the interface in the given package
-func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf string) ([]byte, []byte, error) {
+func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture) ([]byte, []byte, error) {
 	methodsMap := make(map[string]*model.Method, len(pkg.Interfaces[0].Methods))
 	validationMap := make(map[string]interface{}, len(pkg.Interfaces[0].Methods))
 	for _, m := range pkg.Interfaces[0].Methods {

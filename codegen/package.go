@@ -63,8 +63,6 @@ type PackageHelper struct {
 	moduleSearchPaths map[string][]string
 	// defaultDependencies is a dictionary of glob patterns for default dependencies
 	defaultDependencies map[string][]string
-	// clientinterfacesList is a list of interfaces to mock for a given client
-	clientInterfacesMock map[string][]string
 }
 
 //NewDefaultPackageHelperOptions returns a new default PackageHelperOptions, all optional fields are set as default.
@@ -102,8 +100,6 @@ type PackageHelperOptions struct {
 	ModuleSearchPaths map[string][]string
 	// DefaultDependencies is a dictionary of glob patterns for folders that contain default dependencies
 	DefaultDependencies map[string][]string
-	// clientInterfaceMock is a map of interfaces to mock for a given client
-	ClientInterfacesMock map[string][]string
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {
@@ -219,7 +215,6 @@ func NewPackageHelper(
 		traceKey:               options.traceKey(),
 		moduleSearchPaths:      options.ModuleSearchPaths,
 		defaultDependencies:    options.DefaultDependencies,
-		clientInterfacesMock:   options.ClientInterfacesMock,
 	}
 	return p, nil
 }
@@ -282,18 +277,6 @@ func (p PackageHelper) ThriftIDLPath() string {
 // be generated.
 func (p PackageHelper) CodeGenTargetPath() string {
 	return p.targetGenDir
-}
-
-// GetInterfacesMap returns the file path where the code should
-// be generated.
-func (p PackageHelper) GetInterfacesMap() map[string]string {
-	var clientInterfacesMap = make(map[string]string)
-	for k, v := range p.clientInterfacesMock {
-		for _, inter := range v {
-			clientInterfacesMap[k] = inter
-		}
-	}
-	return clientInterfacesMap
 }
 
 // TypePackageName returns the package name that defines the type.

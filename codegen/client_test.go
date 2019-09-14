@@ -394,6 +394,7 @@ func TestNewClientConfigGetCustomClient(t *testing.T) {
 		Config: &struct {
 			Fixture          *Fixture `yaml:"fixture" json:"fixture"`
 			CustomImportPath string   `yaml:"customImportPath" json:"customImportPath" validate:"nonzero"`
+			CustomInterface  string   `yaml:"customInterface,omitempty" json:"customInterface,omitempty"`
 		}{
 			CustomImportPath: "path",
 			Fixture: &Fixture{
@@ -402,6 +403,7 @@ func TestNewClientConfigGetCustomClient(t *testing.T) {
 					"scenario": {"s1", "s2"},
 				},
 			},
+			CustomInterface: "",
 		},
 	}
 	assert.NoError(t, err)
@@ -592,8 +594,34 @@ config:
 		Config: &struct {
 			Fixture          *Fixture `yaml:"fixture" json:"fixture"`
 			CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
+			CustomInterface  string   `yaml:"customInterface,omitempty" json:"customInterface,omitempty"`
 		}{
 			CustomImportPath: "path",
+		},
+	}
+	assert.Equal(t, expectedClient, client)
+}
+
+func TestConfigCustomInterface(t *testing.T) {
+	configYAML := `
+name: test
+type: testable
+config:
+  customInterface: name
+`
+	client, err := newMockableClient([]byte(configYAML))
+	assert.NoError(t, err)
+	expectedClient := &mockableClient{
+		ClassConfigBase: ClassConfigBase{
+			Name: "test",
+			Type: "testable",
+		},
+		Config: &struct {
+			Fixture          *Fixture `yaml:"fixture" json:"fixture"`
+			CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
+			CustomInterface  string   `yaml:"customInterface,omitempty" json:"customInterface,omitempty"`
+		}{
+			CustomInterface: "name",
 		},
 	}
 	assert.Equal(t, expectedClient, client)

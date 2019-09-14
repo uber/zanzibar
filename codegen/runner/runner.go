@@ -112,11 +112,6 @@ func main() {
 	defaultDependencies := make(map[string][]string, 0)
 	config.MustGetStruct("defaultDependencies", &defaultDependencies)
 
-	clientInterfacesMock := make(map[string][]string, 0)
-	if config.ContainsKey("clientInterfacesMock") {
-		config.MustGetStruct("clientInterfacesMock", &clientInterfacesMock)
-	}
-
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
@@ -130,7 +125,6 @@ func main() {
 		TraceKey:                      config.MustGetString("traceKey"),
 		ModuleSearchPaths:             searchPaths,
 		DefaultDependencies:           defaultDependencies,
-		ClientInterfacesMock:          clientInterfacesMock,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(

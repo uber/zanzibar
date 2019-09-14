@@ -66,6 +66,8 @@ type ClientSpec struct {
 	ClientType string
 	// If "custom" then where to import custom code from
 	CustomImportPath string
+	// If "custom" then this is where the interface to mock comes from
+	CustomInterface string
 	// The path to the client package import
 	ImportPackagePath string
 	// The globally unique package alias for the import
