@@ -54,31 +54,6 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeTrans := func(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Trans_Args,
-	) (*clientsBazBase.TransStruct, map[string]string, error) {
-
-		var resHeaders map[string]string
-
-		var res clientsBazBase.TransStruct
-
-		clientResponse := []byte(`{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
-		err := json.Unmarshal(clientResponse, &res)
-		if err != nil {
-			t.Fatal("cant't unmarshal client response json to client response struct")
-			return nil, resHeaders, err
-		}
-		return &res, resHeaders, nil
-	}
-
-	err = gateway.TChannelBackends()["baz"].Register(
-		"baz", "trans", "SimpleService::trans",
-		bazclient.NewSimpleServiceTransHandler(fakeTrans),
-	)
-	assert.NoError(t, err)
-
 	for i := 0; i < 3; i++ {
 
 		fakeTrans := func(
@@ -91,7 +66,7 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 
 			var res clientsBazBase.TransStruct
 
-			clientResponse := []byte(strconv.Itoa(i) + `:{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
+			clientResponse := []byte(`{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
 			err := json.Unmarshal(clientResponse, &res)
 			if err != nil {
 				t.Fatal("cant't unmarshal client response json to client response struct")
@@ -106,15 +81,14 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "trans", "SimpleService::trans",
 				bazclient.NewSimpleServiceTransHandler(fakeTrans),
 			)
-		} else {
-
+		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "trans", "SimpleService::trans",
 				bazclient.NewSimpleServiceTransHandler(fakeTrans),
 			)
 			if i == 1 {
 				headers["x-api-environment"] = "sandbox"
-			} else {
+			} else if i == 2 {
 				headers["RTAPI-Container"] = "test1"
 			}
 		}
@@ -146,5 +120,5 @@ func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGate
 	}
 
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_msg"}}`, string(data))
+	assert.JSONEq(t, `{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_msg"}}`, string(data))
 }

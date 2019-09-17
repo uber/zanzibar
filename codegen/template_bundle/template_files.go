@@ -760,54 +760,6 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	}
 	defer gateway.Close()
 
-	{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
-	{{$clientFunc := printf "fake%s" (title $clientCallFixture.ClientMethod) -}}
-	{{$clientFunc}} := func(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		{{if $clientMethod.RequestType -}}
-		args {{$clientMethodRequestType}},
-		{{end -}}
-	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
-
-		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
-		assert.Equal(
-			t,
-			"{{$v}}",
-			reqHeaders["{{$k}}"])
-		{{end -}}
-
-		var resHeaders map[string]string
-		{{if (len $clientCallFixture.ClientResHeaders) -}}
-		resHeaders = map[string]string{}
-		{{end -}}
-		{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
-		resHeaders["{{$k}}"] = "{{$v}}"
-		{{end}}
-
-		{{if $clientMethod.ResponseType -}}
-		var res {{unref $clientMethod.ResponseType}}
-
-		clientResponse := []byte({{printf "` + "`" + `%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
-		err := json.Unmarshal(clientResponse, &res)
-		if err!= nil {
-			t.Fatal("cant't unmarshal client response json to client response struct")
-			return nil, resHeaders, err
-		}
-		return &res, resHeaders, nil
-		{{else -}}
-		return resHeaders, nil
-		{{end -}}
-	}
-
-	err = gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
-		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
-	)
-	assert.NoError(t, err)
-	{{end}}
-
-
 	for i := 0; i < 3; i++ {
 
 		{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
@@ -838,7 +790,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 			{{if $clientMethod.ResponseType -}}
 			var res {{unref $clientMethod.ResponseType}}
 
-			clientResponse := []byte(strconv.Itoa(i) + {{printf "` + "`" + `:%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
+			clientResponse := []byte({{printf "` + "`" + `%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
 			err := json.Unmarshal(clientResponse, &res)
 			if err!= nil {
 				t.Fatal("cant't unmarshal client response json to client response struct")
@@ -856,15 +808,14 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 					)
-		} else {
-
+		} else if gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)] != nil {
 			err = gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)].Register(
 						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 					)
 			if i == 1 {
 				headers["x-api-environment"] = "sandbox"
-			} else {
+			} else if i == 2 {
 				headers["RTAPI-Container"] = "test1"
 			}
 		}
@@ -915,7 +866,7 @@ func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.T
 		res.Header.Get("{{$k}}"))
 	{{end -}}
 	{{if $responseType -}}
-		assert.JSONEq(t, strconv.Itoa(clientIndex) + ` + "`" + `:{{$testFixture.EndpointResponse.Body}}` + "`" + `, string(data))
+		assert.JSONEq(t, ` + "`" + `{{$testFixture.EndpointResponse.Body}}` + "`" + `, string(data))
 	{{end -}}
 }
 
@@ -933,7 +884,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6844, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 5331, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2547,7 +2498,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}*/
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
-	var altChannelMap map[string]*tchannel.SubChannel
+	altChannelMap  := make(map[string]*tchannel.SubChannel)
 	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
@@ -2755,7 +2706,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10567, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10573, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

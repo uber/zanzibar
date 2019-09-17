@@ -96,7 +96,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}*/
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
-	var altChannelMap map[string]*tchannel.SubChannel
+	altChannelMap := make(map[string]*tchannel.SubChannel)
 	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.corge.timeout"))

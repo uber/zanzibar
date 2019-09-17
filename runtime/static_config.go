@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -236,25 +237,35 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	}
 
 	if v, contains := conf.configValues[key]; contains {
-		if value, ok := v.(map[string]interface{}); ok {
-			err := mapstructure.Decode(value, ptr)
-			if err != nil {
-				panic(errors.Errorf("Decoding key (%s) failed", key))
-			}
-			return
-		}
-		if value, ok := v.([]interface{}); ok {
-			err := mapstructure.Decode(value, ptr)
-			if err != nil {
-				panic(errors.Errorf("Decoding key (%s) failed", key))
-			}
-			return
-		}
-		panic(errors.Errorf(
-			"Key (%s) value is neither a struct nor array", key))
+		conf.mustGetStructHelper(key, v, ptr)
+		return
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
+}
+
+func (conf *StaticConfig) mustGetStructHelper(key string, v interface{}, ptr interface{}) {
+	if value, ok := v.(map[string]interface{}); ok {
+		err := mapstructure.Decode(value, ptr)
+		if err != nil {
+			panic(errors.Errorf("Decoding key (%s) failed", key))
+		}
+		return
+	} else if value, ok := v.([]interface{}); ok {
+		err := mapstructure.Decode(value, ptr)
+		if err != nil {
+			panic(errors.Errorf("Decoding key (%s) failed", key))
+		}
+		return
+	} else {
+		stringVal := v.(string)
+		err := json.Unmarshal([]byte(stringVal), ptr)
+		if err != nil {
+			panic(errors.Errorf(
+				"Key (%s) value is neither a struct, map or array", key))
+		}
+		return
+	}
 }
 
 // SetConfigValueOrDie sets the static config value.

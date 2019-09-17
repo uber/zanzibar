@@ -54,31 +54,6 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeTransHeadersType := func(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-	) (*clientsBazBase.TransHeaders, map[string]string, error) {
-
-		var resHeaders map[string]string
-
-		var res clientsBazBase.TransHeaders
-
-		clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
-		err := json.Unmarshal(clientResponse, &res)
-		if err != nil {
-			t.Fatal("cant't unmarshal client response json to client response struct")
-			return nil, resHeaders, err
-		}
-		return &res, resHeaders, nil
-	}
-
-	err = gateway.TChannelBackends()["baz"].Register(
-		"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
-		bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
-	)
-	assert.NoError(t, err)
-
 	for i := 0; i < 3; i++ {
 
 		fakeTransHeadersType := func(
@@ -91,7 +66,7 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 
 			var res clientsBazBase.TransHeaders
 
-			clientResponse := []byte(strconv.Itoa(i) + `:{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
+			clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
 			err := json.Unmarshal(clientResponse, &res)
 			if err != nil {
 				t.Fatal("cant't unmarshal client response json to client response struct")
@@ -106,15 +81,14 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
 				bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
 			)
-		} else {
-
+		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
 				bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
 			)
 			if i == 1 {
 				headers["x-api-environment"] = "sandbox"
-			} else {
+			} else if i == 2 {
 				headers["RTAPI-Container"] = "test1"
 			}
 		}
@@ -149,5 +123,5 @@ func makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t *testing.T, gate
 	}
 
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{}`, string(data))
+	assert.JSONEq(t, `{}`, string(data))
 }

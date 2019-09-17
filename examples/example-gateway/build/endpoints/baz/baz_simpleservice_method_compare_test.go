@@ -54,31 +54,6 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeCompare := func(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Compare_Args,
-	) (*clientsBazBase.BazResponse, map[string]string, error) {
-
-		var resHeaders map[string]string
-
-		var res clientsBazBase.BazResponse
-
-		clientResponse := []byte(`{"message":"different"}`)
-		err := json.Unmarshal(clientResponse, &res)
-		if err != nil {
-			t.Fatal("cant't unmarshal client response json to client response struct")
-			return nil, resHeaders, err
-		}
-		return &res, resHeaders, nil
-	}
-
-	err = gateway.TChannelBackends()["baz"].Register(
-		"baz", "compare", "SimpleService::compare",
-		bazclient.NewSimpleServiceCompareHandler(fakeCompare),
-	)
-	assert.NoError(t, err)
-
 	for i := 0; i < 3; i++ {
 
 		fakeCompare := func(
@@ -91,7 +66,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 
 			var res clientsBazBase.BazResponse
 
-			clientResponse := []byte(strconv.Itoa(i) + `:{"message":"different"}`)
+			clientResponse := []byte(`{"message":"different"}`)
 			err := json.Unmarshal(clientResponse, &res)
 			if err != nil {
 				t.Fatal("cant't unmarshal client response json to client response struct")
@@ -106,15 +81,14 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "compare", "SimpleService::compare",
 				bazclient.NewSimpleServiceCompareHandler(fakeCompare),
 			)
-		} else {
-
+		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "compare", "SimpleService::compare",
 				bazclient.NewSimpleServiceCompareHandler(fakeCompare),
 			)
 			if i == 1 {
 				headers["x-api-environment"] = "sandbox"
-			} else {
+			} else if i == 2 {
 				headers["RTAPI-Container"] = "test1"
 			}
 		}
@@ -146,5 +120,5 @@ func makeRequestAndValidateCompareSuccessfulRequest(t *testing.T, gateway testGa
 	}
 
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{"message":"different"}`, string(data))
+	assert.JSONEq(t, `{"message":"different"}`, string(data))
 }

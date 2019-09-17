@@ -22,7 +22,6 @@ package testbackend
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"net"
 	"os"
@@ -34,6 +33,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -42,12 +42,12 @@ const (
 		"routingConfigs": [
 		  {
 			"headerName": "x-api-environment",
-			"headerValue": "*",
+			"headerValue": "\\*",
 			"serviceName": "presentation-sandbox"
 		  },
 		  {
 			"headerName": "RTAPI-Container",
-			"headerValue": "test*",
+			"headerValue": "test\\*",
 			"serviceName": "mpx-prism"
 		  }
 		],
@@ -76,7 +76,7 @@ type TestTChannelBackend struct {
 
 // BuildTChannelBackends returns a map of TChannel backends based on config
 func BuildTChannelBackends(
-	cfg map[string]interface{}, knownTChannelBackends []string,
+	cfg map[string]interface{}, knownTChannelBackends []string, staticConfig *zanzibar.StaticConfig,
 ) (map[string]*TestTChannelBackend, error) {
 	n := len(knownTChannelBackends)
 	result := make(map[string]*TestTChannelBackend, n)
@@ -96,37 +96,53 @@ func BuildTChannelBackends(
 		cfg["clients."+clientID+".timeout"] = int64(10000)
 		cfg["clients."+clientID+".timeoutPerAttempt"] = int64(10000)
 
-		var clientPorts []int
-		// create 3 backends for the same client with first one being default and other two for dynamic routing
-		for backendIndex := 0; backendIndex < 3; backendIndex++ {
-			clientPort := uniquePort(backendIndex)
-			clientPorts = append(clientPorts, clientPort)
-			backend, err := CreateTChannelBackend(int32(clientPort), serviceName)
-			if err != nil {
-				return nil, err
-			}
-
-			err = backend.Bootstrap()
-			if err != nil {
-				return nil, err
-			}
-
-			// we need only one client but different backend.
-			// result map is needed for register handler for a backend, using a default one for 0 index clientIndex.e. 7000.
-			// cfg map is used for init'ing client.
-			transformedClientID := clientID
-			if backendIndex == 0 {
-				cfg["clients."+clientID+".port"] = int64(backend.RealPort)
-			} else {
-				transformedClientID = clientID + ":" + strconv.Itoa(backendIndex)
-			}
-			result[transformedClientID] = backend
+		backend, err := CreateTChannelBackend(int32(0), serviceName)
+		if err != nil {
+			return nil, err
 		}
+		err = backend.Bootstrap()
+		if err != nil {
+			return nil, err
+		}
+		result[clientID] = backend
 
-		cfg["clients."+clientID+".alternates"] = fmt.Sprintf(alternateConfig, clientPorts[1], clientPorts[2])
+		cfg["clients."+clientID+".port"] = int64(backend.RealPort)
+
+		initializeAlternateBackends(staticConfig, clientID, result)
 	}
 
 	return result, nil
+}
+
+func initializeAlternateBackends(staticConfig *zanzibar.StaticConfig, clientID string,
+	result map[string]*TestTChannelBackend) error {
+	if staticConfig == nil || !staticConfig.ContainsKey("clients." + clientID + ".alternates") {
+		return nil
+	}
+	var alternateServiceDetail config.AlternateServiceDetail
+	staticConfig.MustGetStruct("clients."+clientID+".alternates", &alternateServiceDetail)
+	// create backends for the same client with first one being default and other two for dynamic routing
+	backendIndex := 1
+	for sName, serviceRouting := range alternateServiceDetail.ServicesDetailMap {
+		clientPort := serviceRouting.Port
+		backend, err := CreateTChannelBackend(int32(clientPort), sName)
+		if err != nil {
+			return err
+		}
+
+		err = backend.Bootstrap()
+		if err != nil {
+			return err
+		}
+
+		// we need only one client but different backend.
+		// cfg map is used for init'ing client.
+		transformedClientID := clientID + ":" + strconv.Itoa(backendIndex)
+		result[transformedClientID] = backend
+
+		backendIndex++
+	}
+	return nil
 }
 
 func uniquePort(backendIndex int) int {

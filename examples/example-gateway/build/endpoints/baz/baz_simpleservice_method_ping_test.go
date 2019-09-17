@@ -53,30 +53,6 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakePing := func(
-		ctx context.Context,
-		reqHeaders map[string]string,
-	) (*clientsBazBase.BazResponse, map[string]string, error) {
-
-		var resHeaders map[string]string
-
-		var res clientsBazBase.BazResponse
-
-		clientResponse := []byte(`{"message":"pong"}`)
-		err := json.Unmarshal(clientResponse, &res)
-		if err != nil {
-			t.Fatal("cant't unmarshal client response json to client response struct")
-			return nil, resHeaders, err
-		}
-		return &res, resHeaders, nil
-	}
-
-	err = gateway.TChannelBackends()["baz"].Register(
-		"baz", "ping", "SimpleService::ping",
-		bazclient.NewSimpleServicePingHandler(fakePing),
-	)
-	assert.NoError(t, err)
-
 	for i := 0; i < 3; i++ {
 
 		fakePing := func(
@@ -88,7 +64,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 
 			var res clientsBazBase.BazResponse
 
-			clientResponse := []byte(strconv.Itoa(i) + `:{"message":"pong"}`)
+			clientResponse := []byte(`{"message":"pong"}`)
 			err := json.Unmarshal(clientResponse, &res)
 			if err != nil {
 				t.Fatal("cant't unmarshal client response json to client response struct")
@@ -103,15 +79,14 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "ping", "SimpleService::ping",
 				bazclient.NewSimpleServicePingHandler(fakePing),
 			)
-		} else {
-
+		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "ping", "SimpleService::ping",
 				bazclient.NewSimpleServicePingHandler(fakePing),
 			)
 			if i == 1 {
 				headers["x-api-environment"] = "sandbox"
-			} else {
+			} else if i == 2 {
 				headers["RTAPI-Container"] = "test1"
 			}
 		}
@@ -143,5 +118,5 @@ func makeRequestAndValidatePingSuccessfulRequest(t *testing.T, gateway testGatew
 	}
 
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, strconv.Itoa(clientIndex)+`:{"message":"pong"}`, string(data))
+	assert.JSONEq(t, `{"message":"pong"}`, string(data))
 }

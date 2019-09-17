@@ -103,7 +103,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}*/
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
-	var altChannelMap map[string]*tchannel.SubChannel
+	altChannelMap  := make(map[string]*tchannel.SubChannel)
 	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}

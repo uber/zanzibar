@@ -170,7 +170,7 @@ func CreateGateway(
 		return nil, err
 	}
 
-	backendsTChannel, err := testBackend.BuildTChannelBackends(composedConfig, opts.KnownTChannelBackends)
+	backendsTChannel, err := testBackend.BuildTChannelBackends(composedConfig, opts.KnownTChannelBackends, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -51,23 +51,6 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeCall := func(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Call_Args,
-	) (map[string]string, error) {
-
-		var resHeaders map[string]string
-
-		return resHeaders, nil
-	}
-
-	err = gateway.TChannelBackends()["baz"].Register(
-		"baz", "call", "SimpleService::call",
-		bazclient.NewSimpleServiceCallHandler(fakeCall),
-	)
-	assert.NoError(t, err)
-
 	for i := 0; i < 3; i++ {
 
 		fakeCall := func(
@@ -87,15 +70,14 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "call", "SimpleService::call",
 				bazclient.NewSimpleServiceCallHandler(fakeCall),
 			)
-		} else {
-
+		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "call", "SimpleService::call",
 				bazclient.NewSimpleServiceCallHandler(fakeCall),
 			)
 			if i == 1 {
 				headers["x-api-environment"] = "sandbox"
-			} else {
+			} else if i == 2 {
 				headers["RTAPI-Container"] = "test1"
 			}
 		}
