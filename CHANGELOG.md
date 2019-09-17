@@ -5,14 +5,72 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Added support for circuit breaker, logging, and metrics similar to other protocol clients for gRPC clients ([#627](https://github.com/uber/zanzibar/pull/627))
+### Fixed
+- Fixed some bugs around legacy JSON config file support ([#626](https://github.com/uber/zanzibar/pull/626))
 ### Changed
-- **BREAKING** It is now configurable whether to emit non-runtime metrics with `host` tag or not. Runtime config now expects the boolean field `metrics.m3.includeHost` to be set. Runtime metrics are always emitted with `host` tag.
+- `resolve_thrift` tool will now check if the given file has the `.thrift` extension. ([#634](https://github.com/uber/zanzibar/pull/634))
+
+
+## 0.4.0 - 2019-08-21
+### Fixed
+- Fixed some nil pointer exceptions when dereferencing optional fields. ([#622](https://github.com/uber/zanzibar/pull/622))
+
+## 0.3.1 - 2019-08-20
+### Added
+- Added support for `MaxTimes` and `MinTimes` in generated mocks. ([#620](https://github.com/uber/zanzibar/pull/620))
+- Added support for query parameters for all HTTP methods rather than just `GET`. ([#625](https://github.com/uber/zanzibar/pull/625))
+
+### Changed
+- Use a single downstream TCP connection for outbound YARPC requests (when using gRPC). ([#624](https://github.com/uber/zanzibar/pull/624))
+
+## 0.3.0 - 2019-08-09
+### Added
+- Added support for gRPC downstream clients by wrapping [YARPC](http://go.uber.org/yarpc). ([#592](https://github.com/uber/zanzibar/pull/592))
+- Middlewares can be specified as default and therefore mandatory for endpoints. ([#558](https://github.com/uber/zanzibar/pull/558))
+- Added getter for HTTP response [`Headers`](https://godoc.org/github.com/uber/zanzibar/runtime#ServerHTTPResponse.Headers). ([#566](https://github.com/uber/zanzibar/pull/566))
+- Added support for multiple Thrift exceptions with the same status code. ([#565](https://github.com/uber/zanzibar/pull/565))
+- Allow users to specify an incoming header to be designated as a request UUID, and logs using the context logger will include that header as a log field. ([#574](https://github.com/uber/zanzibar/pull/574))
+- Endpoint and client request and response headers will be attached to log fields. ([#576](https://github.com/uber/zanzibar/pull/576))
+- Added support for nested lists or maps containing structs, for example `list<map<string,FooStruct>>` in type converter. ([#586](https://github.com/uber/zanzibar/pull/586))
+- Added support for HTTP query parameters to decoded into a Thrift set, in addition to the list already supported. ([#617](https://github.com/uber/zanzibar/pull/617))
+- Alowed customizing the log level of the gateway logger ([#597](https://github.com/uber/zanzibar/pull/597))
+- HTTP 404 log messages should include the URL that did not match any route for better debugging. ([#613](https://github.com/uber/zanzibar/pull/613))
+
+
+### Fixed
+- Endpoint mocks using non-standard import paths should generate with the correct import path in the mock. ([#555](https://github.com/uber/zanzibar/pull/555)).
+- Fixed a bug with middlewares that have `/` in the name. ([#556](https://github.com/uber/zanzibar/pull/556)). 
+- Mock server now uses `Shutdown` (graceful shutdown) rather than `Close`. 
+- Test servers should listen on localhost rather than public IP address, preventing firewall warnings. ([#575](https://github.com/uber/zanzibar/pull/575))
+- Fixed a nil pointer exception in assigning request UUID to outgoing request when request UUID is not present. ([#580](https://github.com/uber/zanzibar/pull/580/))
+- Mock servers fixed to search for configuration under `TEST_SRCDIR` to support running under bazel. ([#587](https://github.com/uber/zanzibar/pull/587))
+- When serving HTTP responses, only set `Content-Type` header to `application/json` if it is not already set, rather than unconditionally setting it, possibly overwriting it. ([#604](https://github.com/uber/zanzibar/pull/604))
+- Fixed a bug with type converter for int16. ([#610](https://github.com/uber/zanzibar/pull/610))
+- Post-gen build hooks should run once per build instead of once per module instance. ([#612](https://github.com/uber/zanzibar/pull/612))
+
+### Changed
+- **BREAKING** `NewTChannelClientContext` now requires a `ContextExtractor` ([#608](https://github.com/uber/zanzibar/pull/608))
+- **BREAKING** `NewHTTPClientContext` signature changed to support multiple Thrift services. Now requires a `map[string]string` in place of a `[]string` for method names. ([#594](https://github.com/uber/zanzibar/pull/594))
+- **BREAKING** `build.yaml` field `moduleSearchPaths` API changed, instead of a list of globbing patterns it is now a `map[string]string` map of class name to globbing pattern. ([#542](https://github.com/uber/zanzibar/pull/542))
+- **BREAKING** It is now configurable whether to emit non-runtime metrics with `host` tag or not. Runtime config now expects the boolean field `metrics.m3.includeHost` to be set. Runtime metrics are always emitted with `host` tag. ([#570](https://github.com/uber/zanzibar/pull/570))
+- **BREAKING** Circuit breaker metrics are now emitted with tags for the circuit breaker name rather than part of the metric name. ([#595](https://github.com/uber/zanzibar/pull/595))
+- HTTP router changed from [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter) to be built-in to avoid limitations of [httprouter#6](https://github.com/julienschmidt/httprouter/issues/6) and [httprouter#175](https://github.com/julienschmidt/httprouter/issues/175). ([#605](https://github.com/uber/zanzibar/pull/605))
+- Default values for downstream client headers overwrite request values rather than appending. ([#551](https://github.com/uber/zanzibar/pull/551))
+- Unpinned `tchannel-go` and `apache/thrift` in dependencies ([#554](https://github.com/uber/zanzibar/pull/554)). 
+- Mandatory header checks will now only check that a header is present rather than checking that it is non-empty ([#588](https://github.com/uber/zanzibar/pull/588))
+- When a HTTP client returns a 4xx or 5xx error, changed the log associated with that request to be a warning rather than info level. ([#596](https://github.com/uber/zanzibar/pull/596))
+- Panics in type converter should have more information as to what type caused the panic. ([#611](https://github.com/uber/zanzibar/pull/611))
+
+
+### Removed
 - Removed logger metrics since it is barely useful.
 
 ## 0.2.0 - 2019-01-17
 ### Added
 - Application configuration (e.g. `config/base.json`) can now be specified in YAML in addition to JSON (#504). Zanzibar will look for the `yaml` file first, and fall back to `json` file if it does not exist. JSON static configuration support may be removed in future major releases.
-- Module configuration (`services/<name>/service-config.json`) can now be specified as YAML ina ddition to JSON (#468).
+- Module configuration (`services/<name>/service-config.json`) can now be specified as YAML in addition to JSON (#468).
 - Panics in endpoints are now caught (#458). HTTP endpoints return `502` status code with a body `"Unexpected workflow panic, recovered at endpoint."`. TChannel endpoints will return `ErrCodeUnexpected`.
 - Transport specific client config structs added (`HTTPClientConfig`, `TChannelClientConfig`, `CustomClientConfig`) that match the JSON serialized objects in `client-config.json` for the supported client transports.
 - Client calls are now protected with circuit breaker (https://github.com/uber/zanzibar/pull/539). Circuit breaker is enabled by default for each client, it can be disabled or fine tuned with proper configurations. It also emits appropriate metrics for monitoring/alerting.
