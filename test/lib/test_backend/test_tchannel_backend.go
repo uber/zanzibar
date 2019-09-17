@@ -35,33 +35,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-const (
-	alternateConfig = `{
-		"routingConfigs": [
-		  {
-			"headerName": "x-api-environment",
-			"headerValue": "\\*",
-			"serviceName": "presentation-sandbox"
-		  },
-		  {
-			"headerName": "RTAPI-Container",
-			"headerValue": "test\\*",
-			"serviceName": "mpx-prism"
-		  }
-		],
-		"servicesDetail": {
-		  "presentation-sandbox": {
-			"ip": "127.0.0.1",
-			"port": %d
-		  },
-		  "mpx-prism": {
-			"ip": "127.0.0.1",
-			"port": %d
-		  }
-		}
-	  }`
-)
-
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
 	Channel  *tchannel.Channel
