@@ -230,6 +230,9 @@ type ClientTestFixture struct {
 // module system (clients, endpoints, services) with a post build hook to generate client and service mocks
 func NewDefaultModuleSystemWithMockHook(
 	h *PackageHelper,
+	clientsMock bool,
+	workflowMock bool,
+	serviceMock bool,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
 	t, err := NewDefaultTemplate()
@@ -237,13 +240,20 @@ func NewDefaultModuleSystemWithMockHook(
 		return nil, err
 	}
 
-	clientMockGenHook, err := ClientMockGenHook(h, t)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating client mock gen hook")
+	var clientMockGenHook, workflowMockGenHook, serviceMockGenHook PostGenHook
+	if clientsMock {
+		clientMockGenHook, err = ClientMockGenHook(h, t)
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating client mock gen hook")
+		}
 	}
 
-	workflowMockGenHook := WorkflowMockGenHook(h, t)
-	serviceMockGenHook := ServiceMockGenHook(h, t)
+	if workflowMock {
+		workflowMockGenHook = WorkflowMockGenHook(h, t)
+	}
+	if serviceMock {
+		serviceMockGenHook = ServiceMockGenHook(h, t)
+	}
 
 	allHooks := append([]PostGenHook{
 		clientMockGenHook,
