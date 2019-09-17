@@ -87,7 +87,7 @@ func BuildTChannelBackends(
 
 func initializeAlternateBackends(staticConfig *zanzibar.StaticConfig, clientID string,
 	result map[string]*TestTChannelBackend) error {
-	if staticConfig == nil || !staticConfig.ContainsKey("clients." + clientID + ".alternates") {
+	if staticConfig == nil || !staticConfig.ContainsKey("clients."+clientID+".alternates") {
 		return nil
 	}
 	var alternateServiceDetail config.AlternateServiceDetail
