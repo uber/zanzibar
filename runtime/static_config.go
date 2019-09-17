@@ -230,42 +230,42 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	if rptr.Kind() != reflect.Ptr || rptr.IsNil() {
 		panic(errors.Errorf("Cannot GetStruct (%s) into nil ptr", key))
 	}
-
 	if v, contains := conf.seedConfig[key]; contains {
 		rptr.Elem().Set(reflect.ValueOf(v))
 		return
 	}
 
 	if v, contains := conf.configValues[key]; contains {
-		conf.mustGetStructHelper(key, v, ptr)
+		err := conf.mustGetStructHelper(key, v, ptr)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-func (conf *StaticConfig) mustGetStructHelper(key string, v interface{}, ptr interface{}) {
+func (conf *StaticConfig) mustGetStructHelper(key string, v interface{}, ptr interface{}) error {
 	if value, ok := v.(map[string]interface{}); ok {
-		err := mapstructure.Decode(value, ptr)
+		bytes, err := json.Marshal(value)
 		if err != nil {
 			panic(errors.Errorf("Decoding key (%s) failed", key))
 		}
-		return
+		err = json.Unmarshal(bytes, ptr)
+		if err != nil {
+			panic(errors.Errorf("Decoding key (%s) failed", key))
+		}
+		return nil
 	} else if value, ok := v.([]interface{}); ok {
 		err := mapstructure.Decode(value, ptr)
 		if err != nil {
 			panic(errors.Errorf("Decoding key (%s) failed", key))
 		}
-		return
-	} else {
-		stringVal := v.(string)
-		err := json.Unmarshal([]byte(stringVal), ptr)
-		if err != nil {
-			panic(errors.Errorf(
-				"Key (%s) value is neither a struct, map or array", key))
-		}
-		return
+		return nil
 	}
+
+	return errors.Errorf("cant cast value into one of known types (%s)", key)
 }
 
 // SetConfigValueOrDie sets the static config value.

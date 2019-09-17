@@ -22,11 +22,9 @@ package testbackend
 
 import (
 	"context"
-	"math/rand"
 	"net"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
@@ -123,9 +121,9 @@ func initializeAlternateBackends(staticConfig *zanzibar.StaticConfig, clientID s
 	staticConfig.MustGetStruct("clients."+clientID+".alternates", &alternateServiceDetail)
 	// create backends for the same client with first one being default and other two for dynamic routing
 	backendIndex := 1
-	for sName, serviceRouting := range alternateServiceDetail.ServicesDetailMap {
+	for serviceName, serviceRouting := range alternateServiceDetail.ServicesDetailMap {
 		clientPort := serviceRouting.Port
-		backend, err := CreateTChannelBackend(int32(clientPort), sName)
+		backend, err := CreateTChannelBackend(int32(clientPort), serviceName)
 		if err != nil {
 			return err
 		}
@@ -143,16 +141,6 @@ func initializeAlternateBackends(staticConfig *zanzibar.StaticConfig, clientID s
 		backendIndex++
 	}
 	return nil
-}
-
-func uniquePort(backendIndex int) int {
-	if backendIndex == 0 {
-		return 0
-	}
-	rand.Seed(time.Now().UnixNano())
-	min := 7000
-	max := 15000
-	return rand.Intn(max-min) + min
 }
 
 // Bootstrap creates a backend for testing
