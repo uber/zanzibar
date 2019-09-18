@@ -215,3 +215,9 @@ func CamelToSnake(s string) string {
 	}
 	return strings.ToLower(strings.Join(words, "_"))
 }
+
+// LowerPascal is Pascal with first char lower
+func LowerPascal(str string) string {
+	str = PascalCase(str)
+	return strings.ToLower(string(str[0])) + string(str[1:])
+}
