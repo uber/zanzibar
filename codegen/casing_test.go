@@ -32,6 +32,9 @@ var fixtures = map[string]string{
 	"aBCID": "aBCID",
 	"xUUID": "xUUID",
 	"Uuid":  "uUID",
+	"a_b_c": "aBC",
+	"a_id":  "aID",
+	"a_BC":  "aBc",
 }
 
 func TestLowerPascal(t *testing.T) {
