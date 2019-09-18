@@ -1049,13 +1049,6 @@ func TestDeleteFoo(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"DELETE", "/bar/foo",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
-
-			err = r.Body.Close()
-			assert.NoError(t, err)
-
-			assert.JSONEq(t, `{ "request":{ "binaryField": null, "boolField": false, "enumField": "APPLE", "longField": { "high": 0, "low": 0 }, "stringField": "", "timestamp": "1970-01-01T00:00:00Z" } }`, string(body))
 		},
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -1064,7 +1057,40 @@ func TestDeleteFoo(t *testing.T) {
 	_, err = bar.DeleteFoo(
 		context.Background(),
 		map[string]string{"x-uuid": "a-uuid"},
-		&barGen.Bar_DeleteFoo_Args{Request: &barGen.BarRequest{}},
+		&barGen.Bar_DeleteFoo_Args{UserUUID: "a-uuid"},
+	)
+	assert.NoError(t, err)
+}
+
+func TestDeleteWithQueryParams(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"DELETE", "/bar/withQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			qparams := r.URL.Query()
+			assert.Equal(t, "foo", qparams["filter"][0])
+			assert.Equal(t, "3", qparams["count"][0])
+		},
+	)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+	var count int32 = 3
+
+	_, err = bar.DeleteWithQueryParams(
+		context.Background(),
+		nil,
+		&barGen.Bar_DeleteWithQueryParams_Args{Filter: "foo", Count: &count},
 	)
 	assert.NoError(t, err)
 }
