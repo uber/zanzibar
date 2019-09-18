@@ -67,7 +67,7 @@ func createGateway() (*zanzibar.Gateway, error) {
 }
 
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started ExampleGateway",
+	server.Logger.Info("Started Example-gateway",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),

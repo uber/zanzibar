@@ -1012,14 +1012,14 @@ func TestConvertMapStringToStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-out.UUIDMap = make(map[string]*structs.MapValue, len(in.UUIDMap))
-for key1, value2 := range in.UUIDMap {
+out.UuidMap = make(map[string]*structs.MapValue, len(in.UuidMap))
+for key1, value2 := range in.UuidMap {
 	if value2 != nil {
-		out.UUIDMap[key1] = &structs.MapValue{}
-		out.UUIDMap[key1].One = string(in.UUIDMap[key1].One)
-		out.UUIDMap[key1].Two = (*string)(in.UUIDMap[key1].Two)
+		out.UuidMap[key1] = &structs.MapValue{}
+		out.UuidMap[key1].One = string(in.UuidMap[key1].One)
+		out.UuidMap[key1].Two = (*string)(in.UuidMap[key1].Two)
 	} else {
-		out.UUIDMap[key1] = nil
+		out.UuidMap[key1] = nil
 	}
 }
 	`), lines)
@@ -1051,14 +1051,14 @@ func TestConvertMapTypeDefToStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-out.UUIDMap = make(map[structs.UUID]*structs.MapValue, len(in.UUIDMap))
-for key1, value2 := range in.UUIDMap {
+out.UuidMap = make(map[structs.UUID]*structs.MapValue, len(in.UuidMap))
+for key1, value2 := range in.UuidMap {
 	if value2 != nil {
-		out.UUIDMap[key1] = &structs.MapValue{}
-		out.UUIDMap[key1].One = string(in.UUIDMap[key1].One)
-		out.UUIDMap[key1].Two = (*string)(in.UUIDMap[key1].Two)
+		out.UuidMap[key1] = &structs.MapValue{}
+		out.UuidMap[key1].One = string(in.UuidMap[key1].One)
+		out.UuidMap[key1].Two = (*string)(in.UuidMap[key1].Two)
 	} else {
-		out.UUIDMap[key1] = nil
+		out.UuidMap[key1] = nil
 	}
 }
 	`), lines)
