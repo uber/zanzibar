@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 // CommonInitialisms is taken from https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
@@ -133,12 +134,59 @@ func ensureGolangAncronymCasing(segment []byte) []byte {
 
 // PascalCase converts the given string to pascal case
 func PascalCase(src string) string {
-	byteSrc := []byte(src)
-	chunks := camelingRegex.FindAll(byteSrc, -1)
-	for idx, val := range chunks {
-		chunks[idx] = ensureGolangAncronymCasing(bytes.Title(val))
+	// borrow pascal casing logic from thriftrw-go since the two implementations
+	// must match otherwise the thriftrw-go generated field name does not match
+	// the RequestType/ResponseType we use in the endpoint/client templates.
+	// https://github.com/thriftrw/thriftrw-go/blob/1c52f516bdc5ca90dc090ba2a8ee0bd11bf04f96/gen/string.go#L48
+	words := strings.Split(src, "_")
+	return pascalCase(len(words) == 1 /* all caps */, words...)
+}
+
+// pascalCase combines the given words using PascalCase.
+//
+// If allowAllCaps is true, when an all-caps word that is not a known
+// abbreviation is encountered, it is left unchanged. Otherwise, it is
+// Titlecased.
+func pascalCase(allowAllCaps bool, words ...string) string {
+	for i, chunk := range words {
+		if len(chunk) == 0 {
+			// foo__bar
+			continue
+		}
+
+		// known initalism
+		init := strings.ToUpper(chunk)
+		if _, ok := CommonInitialisms[init]; ok {
+			words[i] = init
+			continue
+		}
+
+		// Was SCREAMING_SNAKE_CASE and not a known initialism so Titlecase it.
+		if isAllCaps(chunk) && !allowAllCaps {
+			// A single ALLCAPS word does not count as SCREAMING_SNAKE_CASE.
+			// There must be at least one underscore.
+			words[i] = strings.Title(strings.ToLower(chunk))
+			continue
+		}
+
+		// Just another word, but could already be camelCased somehow, so just
+		// change the first letter.
+		head, headIndex := utf8.DecodeRuneInString(chunk)
+		words[i] = string(unicode.ToUpper(head)) + string(chunk[headIndex:])
 	}
-	return string(bytes.Join(chunks, nil))
+
+	return strings.Join(words, "")
+}
+
+// isAllCaps checks if a string contains all capital letters only. Non-letters
+// are not considered.
+func isAllCaps(s string) bool {
+	for _, r := range s {
+		if unicode.IsLetter(r) && !unicode.IsUpper(r) {
+			return false
+		}
+	}
+	return true
 }
 
 // CamelToSnake converts a given string to snake case, based on
