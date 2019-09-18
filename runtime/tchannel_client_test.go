@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -50,14 +51,26 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 	// one field for each of the:
 	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader
 	assert.Len(t, fields, 6)
-	assert.Equal(t, fields[0].Key, "remoteAddr")
-	// nil call should cause remoteAddr to be set to unknown
-	assert.Equal(t, fields[0].String, "unknown")
 
-	assert.Equal(t, fields[3].Key, "Client-Req-Header-header-key")
-	assert.Equal(t, fields[3].String, "header-value")
-	assert.Equal(t, fields[4].Key, "Client-Res-Header-header-key")
-	assert.Equal(t, fields[4].String, "header-value")
-	assert.Equal(t, fields[5].Key, "foo")
-	assert.Equal(t, fields[5].String, "bar")
+	var addr, reqKey, resKey, foo bool
+	for i, f := range fields {
+		switch f.Key {
+		case "remoteAddr":
+			assert.Equal(t, f.String, "unknown")
+			addr = true
+		case "Client-Req-Header-header-key":
+			assert.Equal(t, f.String, "header-value")
+			reqKey = true
+		case "Client-Res-Header-header-key":
+			assert.Equal(t, f.String, "header-value")
+			resKey = true
+		case "foo":
+			assert.Equal(t, f.String, "bar")
+			foo = true
+		}
+	}
+	assert.True(t, addr, "remoteAddr key not present")
+	assert.True(t, reqKey, "Client-Req-Header-header-key key not present")
+	assert.True(t, resKey, "Client-Res-Header-header-key key not present")
+	assert.True(t, foo, "foo key not present")
 }
