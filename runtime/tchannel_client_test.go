@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -53,7 +52,7 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 	assert.Len(t, fields, 6)
 
 	var addr, reqKey, resKey, foo bool
-	for i, f := range fields {
+	for _, f := range fields {
 		switch f.Key {
 		case "remoteAddr":
 			assert.Equal(t, f.String, "unknown")
