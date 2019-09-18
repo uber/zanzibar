@@ -105,7 +105,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.True(t, success)
 
 	allLogs := gateway.AllLogs()
-	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
+	assert.Equal(t, 1, len(allLogs["Started Example-gateway"]))
 	assert.Equal(t, 2, len(allLogs["Created new active connection."]))
 	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
 	assert.Equal(t, 1, len(allLogs["Finished an incoming server TChannel request"]))
@@ -273,7 +273,7 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.Nil(t, resHeaders)
 	assert.False(t, success)
 
-	assert.Len(t, gateway.Logs("info", "Started ExampleGateway"), 1)
+	assert.Len(t, gateway.Logs("info", "Started Example-gateway"), 1)
 	assert.Len(t, gateway.Logs("info", "Created new active connection."), 2)
 
 	// logged from tchannel client runtime
