@@ -11,6 +11,7 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 )
 
@@ -4093,7 +4094,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.FooException == nil {
 					out.FooException = new(foo.FooException)
 				}
-				(*out.FooException).UnmarshalEasyJSON(in)
+				easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(in, out.FooException)
 			}
 		default:
 			in.SkipRecursive()
@@ -4133,7 +4134,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.FooException).MarshalEasyJSON(out)
+		easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(out, *in.FooException)
 	}
 	out.RawByte('}')
 }
@@ -4160,6 +4161,53 @@ func (v *Bar_TooManyArgs_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Bar_TooManyArgs_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarTooManyArgs(l, v)
+}
+func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(in *jlexer.Lexer, out *foo.FooException) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var TeapotSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "teapot":
+			out.Teapot = string(in.String())
+			TeapotSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !TeapotSet {
+		in.AddError(fmt.Errorf("key 'teapot' is required"))
+	}
+}
+func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(out *jwriter.Writer, in foo.FooException) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"teapot\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Teapot))
+	}
+	out.RawByte('}')
 }
 func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarTooManyArgs1(in *jlexer.Lexer, out *Bar_TooManyArgs_Args) {
 	isTopLevel := in.IsStart()
@@ -4200,7 +4248,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Foo == nil {
 					out.Foo = new(foo.FooStruct)
 				}
-				(*out.Foo).UnmarshalEasyJSON(in)
+				easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo1(in, out.Foo)
 			}
 		default:
 			in.SkipRecursive()
@@ -4231,7 +4279,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	if in.Foo != nil {
 		const prefix string = ",\"foo\":"
 		out.RawString(prefix)
-		(*in.Foo).MarshalEasyJSON(out)
+		easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo1(out, *in.Foo)
 	}
 	out.RawByte('}')
 }
@@ -4258,6 +4306,214 @@ func (v *Bar_TooManyArgs_Args) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Bar_TooManyArgs_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarTooManyArgs1(l, v)
+}
+func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo1(in *jlexer.Lexer, out *foo.FooStruct) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var FooStringSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "fooString":
+			out.FooString = string(in.String())
+			FooStringSet = true
+		case "fooI32":
+			if in.IsNull() {
+				in.Skip()
+				out.FooI32 = nil
+			} else {
+				if out.FooI32 == nil {
+					out.FooI32 = new(int32)
+				}
+				*out.FooI32 = int32(in.Int32())
+			}
+		case "fooI16":
+			if in.IsNull() {
+				in.Skip()
+				out.FooI16 = nil
+			} else {
+				if out.FooI16 == nil {
+					out.FooI16 = new(int16)
+				}
+				*out.FooI16 = int16(in.Int16())
+			}
+		case "fooDouble":
+			if in.IsNull() {
+				in.Skip()
+				out.FooDouble = nil
+			} else {
+				if out.FooDouble == nil {
+					out.FooDouble = new(float64)
+				}
+				*out.FooDouble = float64(in.Float64())
+			}
+		case "fooBool":
+			if in.IsNull() {
+				in.Skip()
+				out.FooBool = nil
+			} else {
+				if out.FooBool == nil {
+					out.FooBool = new(bool)
+				}
+				*out.FooBool = bool(in.Bool())
+			}
+		case "fooMap":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.FooMap = make(map[string]string)
+				} else {
+					out.FooMap = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v52 string
+					v52 = string(in.String())
+					(out.FooMap)[key] = v52
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
+		case "message":
+			if in.IsNull() {
+				in.Skip()
+				out.Message = nil
+			} else {
+				if out.Message == nil {
+					out.Message = new(base.Message)
+				}
+				easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(in, out.Message)
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !FooStringSet {
+		in.AddError(fmt.Errorf("key 'fooString' is required"))
+	}
+}
+func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo1(out *jwriter.Writer, in foo.FooStruct) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"fooString\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.FooString))
+	}
+	if in.FooI32 != nil {
+		const prefix string = ",\"fooI32\":"
+		out.RawString(prefix)
+		out.Int32(int32(*in.FooI32))
+	}
+	if in.FooI16 != nil {
+		const prefix string = ",\"fooI16\":"
+		out.RawString(prefix)
+		out.Int16(int16(*in.FooI16))
+	}
+	if in.FooDouble != nil {
+		const prefix string = ",\"fooDouble\":"
+		out.RawString(prefix)
+		out.Float64(float64(*in.FooDouble))
+	}
+	if in.FooBool != nil {
+		const prefix string = ",\"fooBool\":"
+		out.RawString(prefix)
+		out.Bool(bool(*in.FooBool))
+	}
+	if len(in.FooMap) != 0 {
+		const prefix string = ",\"fooMap\":"
+		out.RawString(prefix)
+		{
+			out.RawByte('{')
+			v53First := true
+			for v53Name, v53Value := range in.FooMap {
+				if v53First {
+					v53First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v53Name))
+				out.RawByte(':')
+				out.String(string(v53Value))
+			}
+			out.RawByte('}')
+		}
+	}
+	if in.Message != nil {
+		const prefix string = ",\"message\":"
+		out.RawString(prefix)
+		easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(out, *in.Message)
+	}
+	out.RawByte('}')
+}
+func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(in *jlexer.Lexer, out *base.Message) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var BodySet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "body":
+			out.Body = string(in.String())
+			BodySet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !BodySet {
+		in.AddError(fmt.Errorf("key 'body' is required"))
+	}
+}
+func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(out *jwriter.Writer, in base.Message) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"body\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Body))
+	}
+	out.RawByte('}')
 }
 func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarNormal(in *jlexer.Lexer, out *Bar_Normal_Result) {
 	isTopLevel := in.IsStart()
@@ -5054,9 +5310,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.DemoIds = (out.DemoIds)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v52 string
-					v52 = string(in.String())
-					out.DemoIds = append(out.DemoIds, v52)
+					var v54 string
+					v54 = string(in.String())
+					out.DemoIds = append(out.DemoIds, v54)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -5098,11 +5354,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v53, v54 := range in.DemoIds {
-				if v53 > 0 {
+			for v55, v56 := range in.DemoIds {
+				if v55 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v54))
+				out.String(string(v56))
 			}
 			out.RawByte(']')
 		}
@@ -5865,9 +6121,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.Foo = (out.Foo)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v55 string
-					v55 = string(in.String())
-					out.Foo = append(out.Foo, v55)
+					var v57 string
+					v57 = string(in.String())
+					out.Foo = append(out.Foo, v57)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -5888,9 +6144,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.Bar = (out.Bar)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v56 int8
-					v56 = int8(in.Int8())
-					out.Bar = append(out.Bar, v56)
+					var v58 int8
+					v58 = int8(in.Int8())
+					out.Bar = append(out.Bar, v58)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -5931,11 +6187,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v57, v58 := range in.Foo {
-				if v57 > 0 {
+			for v59, v60 := range in.Foo {
+				if v59 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v58))
+				out.String(string(v60))
 			}
 			out.RawByte(']')
 		}
@@ -5947,11 +6203,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v59, v60 := range in.Bar {
-				if v59 > 0 {
+			for v61, v62 := range in.Bar {
+				if v61 > 0 {
 					out.RawByte(',')
 				}
-				out.Int8(int8(v60))
+				out.Int8(int8(v62))
 			}
 			out.RawByte(']')
 		}
@@ -6862,9 +7118,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.AListUUID = (out.AListUUID)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v61 UUID
-					v61 = UUID(in.String())
-					out.AListUUID = append(out.AListUUID, v61)
+					var v63 UUID
+					v63 = UUID(in.String())
+					out.AListUUID = append(out.AListUUID, v63)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -6886,9 +7142,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.AnOptListUUID = (out.AnOptListUUID)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v62 UUID
-					v62 = UUID(in.String())
-					out.AnOptListUUID = append(out.AnOptListUUID, v62)
+					var v64 UUID
+					v64 = UUID(in.String())
+					out.AnOptListUUID = append(out.AnOptListUUID, v64)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -6909,9 +7165,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.AStringList = (out.AStringList)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v63 string
-					v63 = string(in.String())
-					out.AStringList = append(out.AStringList, v63)
+					var v65 string
+					v65 = string(in.String())
+					out.AStringList = append(out.AStringList, v65)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -6933,9 +7189,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.AnOptStringList = (out.AnOptStringList)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v64 string
-					v64 = string(in.String())
-					out.AnOptStringList = append(out.AnOptStringList, v64)
+					var v66 string
+					v66 = string(in.String())
+					out.AnOptStringList = append(out.AnOptStringList, v66)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -6956,9 +7212,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.AUUIDList = (out.AUUIDList)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v65 UUID
-					v65 = UUID(in.String())
-					out.AUUIDList = append(out.AUUIDList, v65)
+					var v67 UUID
+					v67 = UUID(in.String())
+					out.AUUIDList = append(out.AUUIDList, v67)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -6980,9 +7236,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.AnOptUUIDList = (out.AnOptUUIDList)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v66 UUID
-					v66 = UUID(in.String())
-					out.AnOptUUIDList = append(out.AnOptUUIDList, v66)
+					var v68 UUID
+					v68 = UUID(in.String())
+					out.AnOptUUIDList = append(out.AnOptUUIDList, v68)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -7141,11 +7397,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v67, v68 := range in.AListUUID {
-				if v67 > 0 {
+			for v69, v70 := range in.AListUUID {
+				if v69 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v68))
+				out.String(string(v70))
 			}
 			out.RawByte(']')
 		}
@@ -7155,11 +7411,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v69, v70 := range in.AnOptListUUID {
-				if v69 > 0 {
+			for v71, v72 := range in.AnOptListUUID {
+				if v71 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v70))
+				out.String(string(v72))
 			}
 			out.RawByte(']')
 		}
@@ -7171,11 +7427,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v71, v72 := range in.AStringList {
-				if v71 > 0 {
+			for v73, v74 := range in.AStringList {
+				if v73 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v72))
+				out.String(string(v74))
 			}
 			out.RawByte(']')
 		}
@@ -7185,11 +7441,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v73, v74 := range in.AnOptStringList {
-				if v73 > 0 {
+			for v75, v76 := range in.AnOptStringList {
+				if v75 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v74))
+				out.String(string(v76))
 			}
 			out.RawByte(']')
 		}
@@ -7201,11 +7457,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v75, v76 := range in.AUUIDList {
-				if v75 > 0 {
+			for v77, v78 := range in.AUUIDList {
+				if v77 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v76))
+				out.String(string(v78))
 			}
 			out.RawByte(']')
 		}
@@ -7215,11 +7471,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v77, v78 := range in.AnOptUUIDList {
-				if v77 > 0 {
+			for v79, v80 := range in.AnOptUUIDList {
+				if v79 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v78))
+				out.String(string(v80))
 			}
 			out.RawByte(']')
 		}
@@ -7577,9 +7833,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 					out.Nodes = (out.Nodes)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v79 string
-					v79 = string(in.String())
-					out.Nodes = append(out.Nodes, v79)
+					var v81 string
+					v81 = string(in.String())
+					out.Nodes = append(out.Nodes, v81)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -7615,11 +7871,11 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v80, v81 := range in.Nodes {
-				if v80 > 0 {
+			for v82, v83 := range in.Nodes {
+				if v82 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v81))
+				out.String(string(v83))
 			}
 			out.RawByte(']')
 		}
@@ -7702,9 +7958,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				for !in.IsDelim('}') {
 					key := UUID(in.String())
 					in.WantColon()
-					var v82 int32
-					v82 = int32(in.Int32())
-					(out.MapIntWithRange)[key] = v82
+					var v84 int32
+					v84 = int32(in.Int32())
+					(out.MapIntWithRange)[key] = v84
 					in.WantComma()
 				}
 				in.Delim('}')
@@ -7723,9 +7979,9 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v83 int32
-					v83 = int32(in.Int32())
-					(out.MapIntWithoutRange)[key] = v83
+					var v85 int32
+					v85 = int32(in.Int32())
+					(out.MapIntWithoutRange)[key] = v85
 					in.WantComma()
 				}
 				in.Delim('}')
@@ -7803,16 +8059,16 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString(`null`)
 		} else {
 			out.RawByte('{')
-			v85First := true
-			for v85Name, v85Value := range in.MapIntWithRange {
-				if v85First {
-					v85First = false
+			v87First := true
+			for v87Name, v87Value := range in.MapIntWithRange {
+				if v87First {
+					v87First = false
 				} else {
 					out.RawByte(',')
 				}
-				out.String(string(v85Name))
+				out.String(string(v87Name))
 				out.RawByte(':')
-				out.Int32(int32(v85Value))
+				out.Int32(int32(v87Value))
 			}
 			out.RawByte('}')
 		}
@@ -7824,16 +8080,16 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawString(`null`)
 		} else {
 			out.RawByte('{')
-			v86First := true
-			for v86Name, v86Value := range in.MapIntWithoutRange {
-				if v86First {
-					v86First = false
+			v88First := true
+			for v88Name, v88Value := range in.MapIntWithoutRange {
+				if v88First {
+					v88First = false
 				} else {
 					out.RawByte(',')
 				}
-				out.String(string(v86Name))
+				out.String(string(v88Name))
 				out.RawByte(':')
-				out.Int32(int32(v86Value))
+				out.Int32(int32(v88Value))
 			}
 			out.RawByte('}')
 		}
