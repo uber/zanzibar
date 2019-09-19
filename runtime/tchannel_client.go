@@ -80,6 +80,7 @@ type TChannelClient struct {
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
 	routingKey        *string
+	shardKey          *string
 	metrics           ContextMetrics
 	contextExtractor  ContextExtractor
 
@@ -231,6 +232,12 @@ func (c *TChannelClient) call(
 	if rd != "" {
 		ctxBuilder.SetRoutingDelegate(rd)
 	}
+
+	sk := GetShardKeyFromCtx(ctx)
+	if sk != "" {
+		ctxBuilder.SetShardKey(sk)
+	}
+
 	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
 

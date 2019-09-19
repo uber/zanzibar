@@ -41,6 +41,7 @@ const (
 	endpointKey           = contextFieldKey("endpoint")
 	requestUUIDKey        = contextFieldKey("requestUUID")
 	routingDelegateKey    = contextFieldKey("rd")
+	shardKey              = contextFieldKey("sk")
 	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
 	requestLogFields      = contextFieldKey("requestLogFields")
 	scopeTags             = contextFieldKey("scopeTags")
@@ -143,6 +144,22 @@ func GetRoutingDelegateFromCtx(ctx context.Context) string {
 	if val := ctx.Value(routingDelegateKey); val != nil {
 		rd, _ := val.(string)
 		return rd
+	}
+	return ""
+}
+
+// WithShardKey adds the tchannel shard key information in the
+// request context.
+func WithShardKey(ctx context.Context, sk string) context.Context {
+	return context.WithValue(ctx, shardKey, sk)
+}
+
+// GetShardKeyFromCtx returns the tchannel shardkey info
+// extracted from context.
+func GetShardKeyFromCtx(ctx context.Context) string {
+	if val := ctx.Value(shardKey); val != nil {
+		sk, _ := val.(string)
+		return sk
 	}
 	return ""
 }
