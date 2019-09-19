@@ -2222,8 +2222,10 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 		},
 	}
 
-	timeout := time.Duration(10000) * time.Millisecond
-	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
+	// TChannel clients must have a timeout defined, so defining a long timeout that should not realistically
+	// be hit in tests.
+	timeout := time.Duration(5) * time.Minute
+	timeoutPerAttempt := time.Duration(1) * time.Minute
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
@@ -2330,7 +2332,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5283, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5394, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
