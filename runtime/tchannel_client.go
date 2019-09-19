@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -81,6 +80,7 @@ type TChannelClient struct {
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
 	routingKey        *string
+	shardKey          *string
 	metrics           ContextMetrics
 	contextExtractor  ContextExtractor
 
@@ -235,7 +235,6 @@ func (c *TChannelClient) call(
 
 	sk := GetShardKeyFromCtx(ctx)
 	if sk != "" {
-		fmt.Println("sk=" + sk)
 		ctxBuilder.SetShardKey(sk)
 	}
 
@@ -273,6 +272,7 @@ func (c *TChannelClient) call(
 		if cerr := call.writeReqBody(ctx, req); cerr != nil {
 			return cerr
 		}
+
 
 		response := call.call.Response()
 		if cerr = call.readResHeaders(response); cerr != nil {
