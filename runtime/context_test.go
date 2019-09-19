@@ -141,6 +141,24 @@ func TestGetRoutingDelegateFromCtx(t *testing.T) {
 	assert.Equal(t, expected, rd)
 }
 
+func TestWithShardKey(t *testing.T) {
+	expected := "myshardkey"
+	ctx := WithShardKey(context.TODO(), expected)
+	sk := ctx.Value(shardKey)
+	shardKey, ok := sk.(string)
+
+	assert.True(t, ok)
+	assert.Equal(t, shardKey, expected)
+}
+
+func TestGetShardKeyFromCtx(t *testing.T) {
+	expected := "myshardkey"
+	ctx := WithShardKey(context.TODO(), expected)
+	sk := GetShardKeyFromCtx(ctx)
+
+	assert.Equal(t, expected, sk)
+}
+
 func TestContextLogger(t *testing.T) {
 	zapLoggerCore, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(zapLoggerCore)

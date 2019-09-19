@@ -148,6 +148,12 @@ func GetRoutingDelegateFromCtx(ctx context.Context) string {
 	return ""
 }
 
+// WithShardKey adds the tchannel shard key information in the
+// request context.
+func WithShardKey(ctx context.Context, sk string) context.Context {
+	return context.WithValue(ctx, shardKey, sk)
+}
+
 // GetShardKeyFromCtx returns the tchannel shardkey info
 // extracted from context.
 func GetShardKeyFromCtx(ctx context.Context) string {
