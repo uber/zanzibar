@@ -1497,6 +1497,10 @@ func GenerateDependencyStruct(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
+	genCustom, _ := instance.Config["customInterface"].(string)
+	if genCustom != "" {
+		instance.PackageInfo.ExportType = instance.Config["customInterface"].(string)
+	}
 	return template.ExecTemplate(
 		"dependency_struct.tmpl",
 		instance,

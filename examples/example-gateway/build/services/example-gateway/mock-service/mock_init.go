@@ -76,7 +76,7 @@ type MockClientNodes struct {
 	Contacts       *contactsclientgenerated.MockClientWithFixture
 	GoogleNow      *googlenowclientgenerated.MockClient
 	Multi          *multiclientgenerated.MockClient
-	Quux           *quuxclientgenerated.MockClientWithFixture
+	Quux           *quuxclientgenerated.MockIClientWithFixture
 	Withexceptions *withexceptionsclientgenerated.MockClient
 }
 

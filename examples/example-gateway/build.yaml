@@ -4,9 +4,6 @@ copyrightHeader: ./copyright_header.txt
 endpointConfig: ./endpoints
 genCodePackage: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
 genMock: true
-clientInterfacesMock:
-  github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts:
-  - Client
 middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
 packageRoot: github.com/uber/zanzibar/examples/example-gateway

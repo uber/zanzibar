@@ -25,8 +25,8 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 )
 
-// Client is a custom client that does nothing yet
-type Client interface {
+// IClient is a custom client that does nothing yet
+type IClient interface {
 	EchoString(string) string
 	EchoMessage(m *base.Message) *base.Message
 	DropMessages(m1, m2 *base.Message)
@@ -35,7 +35,7 @@ type Client interface {
 type quux struct{}
 
 // NewClient creates a new Quux client
-func NewClient(deps *module.Dependencies) Client {
+func NewClient(deps *module.Dependencies) IClient {
 	return &quux{}
 }
 

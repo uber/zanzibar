@@ -86,7 +86,7 @@ type ClientDependenciesNodes struct {
 	Contacts       contactsclientgenerated.Client
 	GoogleNow      googlenowclientgenerated.Client
 	Multi          multiclientgenerated.Client
-	Quux           quuxclientstatic.Client
+	Quux           quuxclientstatic.IClient
 	Withexceptions withexceptionsclientgenerated.Client
 }
 

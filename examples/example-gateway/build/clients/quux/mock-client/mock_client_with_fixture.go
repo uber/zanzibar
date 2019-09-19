@@ -27,9 +27,9 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-// MockClientWithFixture is a mock of Client interface with preset fixture
-type MockClientWithFixture struct {
-	*MockClient
+// MockIClientWithFixture is a mock of Client interface with preset fixture
+type MockIClientWithFixture struct {
+	*MockIClient
 	fixture *ClientFixture
 
 	echoMessageMock *EchoMessageMock
@@ -53,31 +53,31 @@ func (c Call) MinTimes(max int) {
 }
 
 // New creates a new mock instance
-func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockClientWithFixture {
-	return &MockClientWithFixture{
-		MockClient: NewMockClient(ctrl),
-		fixture:    fixture,
+func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockIClientWithFixture {
+	return &MockIClientWithFixture{
+		MockIClient: NewMockIClient(ctrl),
+		fixture:     fixture,
 	}
 }
 
 // EXPECT shadows the EXPECT method on the underlying mock client.
 // It should not be called directly.
-func (m *MockClientWithFixture) EXPECT() {
+func (m *MockIClientWithFixture) EXPECT() {
 	panic("should not call EXPECT directly.")
 }
 
 // EchoMessageMock mocks the EchoMessage method
 type EchoMessageMock struct {
 	scenarios  *EchoMessageScenarios
-	mockClient *MockClient
+	mockClient *MockIClient
 }
 
 // ExpectEchoMessage returns an object that allows the caller to choose expected scenario for EchoMessage
-func (m *MockClientWithFixture) ExpectEchoMessage() *EchoMessageMock {
+func (m *MockIClientWithFixture) ExpectEchoMessage() *EchoMessageMock {
 	if m.echoMessageMock == nil {
 		m.echoMessageMock = &EchoMessageMock{
 			scenarios:  m.fixture.EchoMessage,
-			mockClient: m.MockClient,
+			mockClient: m.MockIClient,
 		}
 	}
 	return m.echoMessageMock
@@ -102,15 +102,15 @@ func (s *EchoMessageMock) Success() Call {
 // EchoStringMock mocks the EchoString method
 type EchoStringMock struct {
 	scenarios  *EchoStringScenarios
-	mockClient *MockClient
+	mockClient *MockIClient
 }
 
 // ExpectEchoString returns an object that allows the caller to choose expected scenario for EchoString
-func (m *MockClientWithFixture) ExpectEchoString() *EchoStringMock {
+func (m *MockIClientWithFixture) ExpectEchoString() *EchoStringMock {
 	if m.echoStringMock == nil {
 		m.echoStringMock = &EchoStringMock{
 			scenarios:  m.fixture.EchoString,
-			mockClient: m.MockClient,
+			mockClient: m.MockIClient,
 		}
 	}
 	return m.echoStringMock

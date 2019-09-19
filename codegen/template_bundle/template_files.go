@@ -73,15 +73,17 @@ var _augmented_mockTmpl = []byte(`{{- /* template to render client mock code for
 {{- $methods := .Methods}}
 {{- $fixturePkg := .Fixture.ImportPath -}}
 {{- $scenarios := .Fixture.Scenarios -}}
+{{- $clientinterface := .ClientInterface}}
+
 package clientmock
 
 import (
 	"github.com/golang/mock/gomock"
 )
 
-// MockClientWithFixture is a mock of Client interface with preset fixture
-type MockClientWithFixture struct {
-	*MockClient
+// Mock{{$clientinterface}}WithFixture is a mock of Client interface with preset fixture
+type Mock{{$clientinterface}}WithFixture struct {
+	*Mock{{$clientinterface}}
 	fixture *ClientFixture
 
 	{{range $method := $methods}}
@@ -108,16 +110,16 @@ func (c Call) MinTimes(max int) {
 }
 
 // New creates a new mock instance
-func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockClientWithFixture {
-	return &MockClientWithFixture{
-		MockClient: NewMockClient(ctrl),
+func New(ctrl *gomock.Controller, fixture *ClientFixture) *Mock{{$clientinterface}}WithFixture {
+	return &Mock{{$clientinterface}}WithFixture{
+		Mock{{$clientinterface}}: NewMock{{$clientinterface}}(ctrl),
 		fixture:    fixture,
 	}
 }
 
 // EXPECT shadows the EXPECT method on the underlying mock client.
 // It should not be called directly.
-func (m *MockClientWithFixture) EXPECT() {
+func (m *Mock{{$clientinterface}}WithFixture) EXPECT() {
 	panic("should not call EXPECT directly.")
 }
 
@@ -130,15 +132,15 @@ func (m *MockClientWithFixture) EXPECT() {
 // {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
 	scenarios  *{{$methodName}}Scenarios
-	mockClient *MockClient
+	mockClient *Mock{{$clientinterface}}
 }
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
 // {{$methodMockMethod}} returns an object that allows the caller to choose expected scenario for {{$methodName}}
-func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
+func (m *Mock{{$clientinterface}}WithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 	if m.{{$methodMockField}} == nil {
 		m.{{$methodMockField}} = &{{$methodMockType}}{
 			scenarios:  m.fixture.{{$methodName}},
-			mockClient: m.MockClient,
+			mockClient: m.Mock{{$clientinterface}},
 		}
 	}
 	return m.{{$methodMockField}}
@@ -179,7 +181,7 @@ func augmented_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2959, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 3157, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

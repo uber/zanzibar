@@ -36,8 +36,8 @@ import (
 )
 
 const (
-	defaulClientInterface = "Client"
-	custom                = "custom"
+	defaultClientInterface = "Client"
+	custom                 = "custom"
 )
 
 type mockableClient struct {
@@ -79,7 +79,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		importPathMap := make(map[string]string, mockCount)
 		fixtureMap := make(map[string]*Fixture, mockCount)
-		customInterfaceMap := make(map[string]string)
+		clientInterfaceMap := make(map[string]string)
 		pathSymbolMap := make(map[string]string)
 		for _, instance := range clientInstances {
 			key := instance.ClassType + instance.InstanceName
@@ -98,13 +98,18 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 				importPath = client.Config.CustomImportPath
 			}
 
+			clientInterface := defaultClientInterface
+			// if an interfaces name is provided use that, else use "Client"
+			if customInterface != "" {
+				clientInterface = customInterface
+			}
 			importPathMap[key] = importPath
-			customInterfaceMap[key] = customInterface
+			clientInterfaceMap[key] = clientInterface
 
 			// gather all modules that need to generate fixture types
 			f := client.Config.Fixture
 			if f != nil && f.Scenarios != nil {
-				pathSymbolMap[importPath] = defaulClientInterface
+				pathSymbolMap[importPath] = clientInterface
 				fixtureMap[key] = f
 			}
 		}
@@ -144,18 +149,9 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 					genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
 
 					importPath := importPathMap[key]
-					customInterface := customInterfaceMap[key]
 
-					var mock []byte
-					var err error
-					var clientInterface = "Client"
 					// generate mock client, this starts a sub process.
-					// if an interfaces name is provided use that, else use "Client"
-					if customInterface != "" {
-						clientInterface = customInterface
-					}
-
-					mock, err = bin.GenMock(importPath, "clientmock", clientInterface)
+					mock, err := bin.GenMock(importPath, "clientmock", clientInterfaceMap[key])
 					if err != nil {
 						ec <- errors.Wrapf(
 							err,
@@ -168,7 +164,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 					// generate fixture types and augmented mock client
 					if f, ok := fixtureMap[key]; ok {
-						types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f)
+						types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f, clientInterfaceMap[key])
 						if err != nil {
 							ec <- errors.Wrapf(
 								err,

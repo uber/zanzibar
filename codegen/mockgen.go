@@ -22,14 +22,15 @@ package codegen
 
 import (
 	"bytes"
-	"github.com/golang/mock/mockgen/model"
-	"github.com/pkg/errors"
 	"go/token"
 	"os/exec"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/golang/mock/mockgen/model"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -77,7 +78,7 @@ func (b byMethodName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byMethodName) Less(i, j int) bool { return b[i].Name < b[j].Name }
 
 // AugmentMockWithFixture generates mocks with fixture for the interface in the given package
-func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture) ([]byte, []byte, error) {
+func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf string) ([]byte, []byte, error) {
 	methodsMap := make(map[string]*model.Method, len(pkg.Interfaces[0].Methods))
 	validationMap := make(map[string]interface{}, len(pkg.Interfaces[0].Methods))
 	for _, m := range pkg.Interfaces[0].Methods {
@@ -128,9 +129,10 @@ func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture) ([]by
 	}
 
 	data := map[string]interface{}{
-		"Imports": pkgPathToAlias,
-		"Methods": methods,
-		"Fixture": f,
+		"Imports":         pkgPathToAlias,
+		"Methods":         methods,
+		"Fixture":         f,
+		"ClientInterface": intf,
 	}
 	types, err := m.tmpl.ExecTemplate("fixture_types.tmpl", data, m.pkgHelper)
 	if err != nil {

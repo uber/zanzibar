@@ -37,13 +37,13 @@ import (
 // MockClientNodes contains mock client dependencies for the tchannel/baz endpoint module
 type MockClientNodes struct {
 	Baz  *bazclientgeneratedmock.MockClient
-	Quux *quuxclientgeneratedmock.MockClientWithFixture
+	Quux *quuxclientgeneratedmock.MockIClientWithFixture
 }
 
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
 	Baz  bazclientgenerated.Client
-	Quux quuxclientstatic.Client
+	Quux quuxclientstatic.IClient
 }
 
 // middlewareDependenciesNodes contains middleware dependencies
