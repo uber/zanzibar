@@ -274,10 +274,9 @@ func (c *TChannelClient) call(
 }
 
 func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
-	sc *tchannel.SubChannel) (ch *tchannel.SubChannel) {
-	ch = sc
+	sc *tchannel.SubChannel) *tchannel.SubChannel {
 	if c.ruleEngine == nil {
-		return
+		return sc
 	}
 	for _, headerPattern := range c.headerPatterns {
 		// this header is not present, so can't match a rule
@@ -297,9 +296,9 @@ func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]str
 		}
 		// we know service has a channel, as this was constructed in c'tor
 		sc = c.altChannelMap[serviceName]
-		return
+		return sc
 
 	}
 	// if nothing matches return the default channel/**/
-	return
+	return sc
 }
