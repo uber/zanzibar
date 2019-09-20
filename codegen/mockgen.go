@@ -22,14 +22,15 @@ package codegen
 
 import (
 	"bytes"
-	"github.com/golang/mock/mockgen/model"
-	"github.com/pkg/errors"
 	"go/token"
 	"os/exec"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/golang/mock/mockgen/model"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -128,9 +129,10 @@ func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf 
 	}
 
 	data := map[string]interface{}{
-		"Imports": pkgPathToAlias,
-		"Methods": methods,
-		"Fixture": f,
+		"Imports":         pkgPathToAlias,
+		"Methods":         methods,
+		"Fixture":         f,
+		"ClientInterface": intf,
 	}
 	types, err := m.tmpl.ExecTemplate("fixture_types.tmpl", data, m.pkgHelper)
 	if err != nil {

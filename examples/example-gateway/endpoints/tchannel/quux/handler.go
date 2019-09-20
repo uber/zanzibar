@@ -31,7 +31,7 @@ import (
 )
 
 type handler struct {
-	quux quux.Client
+	quux quux.IClient
 }
 
 // NewSimpleServiceEchoStringWorkflow ...

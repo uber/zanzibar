@@ -37,11 +37,12 @@ type clientConfig interface {
 // ClientIDLConfig is the "config" field in the client-config.yaml for
 // HTTP/TChannel/gRPC clients.
 type ClientIDLConfig struct {
-	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
-	IDLFile        string            `yaml:"idlFile" json:"idlFile" validate:"nonzero"`
-	IDLFileSha     string            `yaml:"idlFileSha,omitempty" json:"idlFileSha"`
-	SidecarRouter  string            `yaml:"sidecarRouter" json:"sidecarRouter"`
-	Fixture        *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
+	ExposedMethods  map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
+	IDLFile         string            `yaml:"idlFile" json:"idlFile" validate:"nonzero"`
+	IDLFileSha      string            `yaml:"idlFileSha,omitempty" json:"idlFileSha"`
+	SidecarRouter   string            `yaml:"sidecarRouter" json:"sidecarRouter"`
+	Fixture         *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
+	CustomInterface string            `yaml:"customInterface,omitempty" json:"customInterface,omitempty"`
 }
 
 // Fixture specifies client fixture import path and all scenarios
@@ -136,6 +137,7 @@ func newClientSpec(
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		ExposedMethods:     config.ExposedMethods,
 		SidecarRouter:      config.SidecarRouter,
+		CustomInterface:    config.CustomInterface,
 	}
 
 	return cspec, nil
@@ -185,6 +187,7 @@ type CustomClientConfig struct {
 	Config          *struct {
 		Fixture          *Fixture `yaml:"fixture" json:"fixture"`
 		CustomImportPath string   `yaml:"customImportPath" json:"customImportPath" validate:"nonzero"`
+		CustomInterface  string   `yaml:"customInterface,omitempty" json:"customInterface,omitempty"`
 	} `yaml:"config" json:"config" validate:"nonzero"`
 }
 
@@ -219,6 +222,7 @@ func (c *CustomClientConfig) NewClientSpec(
 		ClientID:           c.Name,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		CustomImportPath:   c.Config.CustomImportPath,
+		CustomInterface:    c.Config.CustomInterface,
 	}
 
 	return spec, nil

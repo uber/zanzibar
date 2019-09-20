@@ -9,5 +9,6 @@ config:
       - success
   idlFile: clients/contacts/contacts.thrift
   idlFileSha: '{{placeholder}}'
+  customInterface: Client
 name: contacts
 type: http

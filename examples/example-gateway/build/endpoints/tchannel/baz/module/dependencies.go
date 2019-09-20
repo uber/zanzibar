@@ -44,7 +44,7 @@ type Dependencies struct {
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
 	Baz  bazclientgenerated.Client
-	Quux quuxclientstatic.Client
+	Quux quuxclientstatic.IClient
 }
 
 // MiddlewareDependencies contains middleware dependencies
