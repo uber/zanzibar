@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING** `build.yaml` field `moduleSearchPaths` API changed, instead of a list of globbing patterns it is now a `map[string]string` map of class name to globbing pattern. ([#542](https://github.com/uber/zanzibar/pull/542))
 - **BREAKING** It is now configurable whether to emit non-runtime metrics with `host` tag or not. Runtime config now expects the boolean field `metrics.m3.includeHost` to be set. Runtime metrics are always emitted with `host` tag. ([#570](https://github.com/uber/zanzibar/pull/570))
 - **BREAKING** Circuit breaker metrics are now emitted with tags for the circuit breaker name rather than part of the metric name. ([#595](https://github.com/uber/zanzibar/pull/595))
+- **BREAKING** `ClientThriftConfig` struct renamed to `ClientIDLConfig`. Client configuration files key `thriftFile` changed to `idlFile`. ([#618](https://github.com/uber/zanzibar/pull/618))
 - HTTP router changed from [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter) to be built-in to avoid limitations of [httprouter#6](https://github.com/julienschmidt/httprouter/issues/6) and [httprouter#175](https://github.com/julienschmidt/httprouter/issues/175). ([#605](https://github.com/uber/zanzibar/pull/605))
 - Default values for downstream client headers overwrite request values rather than appending. ([#551](https://github.com/uber/zanzibar/pull/551))
 - Unpinned `tchannel-go` and `apache/thrift` in dependencies ([#554](https://github.com/uber/zanzibar/pull/554)). 
