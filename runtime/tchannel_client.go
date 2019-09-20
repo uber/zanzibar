@@ -273,23 +273,33 @@ func (c *TChannelClient) call(
 	return call.success, call.resHeaders, err
 }
 
-func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string, sc *tchannel.SubChannel) *tchannel.SubChannel {
-	if c.ruleEngine != nil {
-		for _, headerPattern := range c.headerPatterns {
-			headerPatternVal, ok := reqHeaders[headerPattern]
-			if ok {
-				val, match := c.ruleEngine.GetValue([]string{headerPattern, headerPatternVal})
-				if match {
-					serviceName, ok := val.(string)
-					if ok {
-						// we know service has a channel, as this was constructed in c'tor
-						sc = c.altChannelMap[serviceName]
-						return sc
-					}
-				}
-			}
+func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
+	sc *tchannel.SubChannel) (ch *tchannel.SubChannel) {
+	ch = sc
+	if c.ruleEngine == nil {
+		return
+	}
+	for _, headerPattern := range c.headerPatterns {
+		// this header is not present, so can't match a rule
+		headerPatternVal, ok := reqHeaders[headerPattern]
+		if !ok {
+			continue
 		}
+		val, match := c.ruleEngine.GetValue(headerPattern, headerPatternVal)
+		// if rule doesn't match, continue with a next input
+		if !match {
+			continue
+		}
+		serviceName, ok := val.(string)
+		// if a wrong value type, continue with next input
+		if !ok {
+			continue
+		}
+		// we know service has a channel, as this was constructed in c'tor
+		sc = c.altChannelMap[serviceName]
+		return
+
 	}
 	// if nothing matches return the default channel/**/
-	return sc
+	return
 }

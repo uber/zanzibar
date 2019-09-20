@@ -21,6 +21,7 @@
 package ruleengine
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,12 +30,12 @@ import (
 func TestRuleEngine(t *testing.T) {
 
 	rule1 := RawRule{
-		Patterns: []string{"RTAPI-Container", "test\\.*"},
-		Value:    "presentation-staging",
+		Patterns: []string{"x-test-env", `test.*`},
+		Value:    "test-staging",
 	}
 	rule2 := RawRule{
-		Patterns: []string{"x-api-environment", "sandbox"},
-		Value:    "external-api-sandbox",
+		Patterns: []string{"x-container", `^sandbox$`},
+		Value:    "dummy-sandbox",
 	}
 	rw := RuleWrapper{
 		Rules: []RawRule{rule1, rule2},
@@ -43,15 +44,24 @@ func TestRuleEngine(t *testing.T) {
 
 	var tests = []struct {
 		patternValues []string
+		matchValue    string
+		noMatch       bool
 	}{
-		{patternValues: []string{"x-api-environment", "sandbox"}},
-		{patternValues: []string{"RTAPI-Container", "test1"}},
+		{patternValues: []string{"x-container", "sandbox"}, matchValue: "dummy-sandbox"},
+		{patternValues: []string{"x-test-env", "test1"}, matchValue: "test-staging"},
+		{patternValues: []string{"x-container", "sandbox123"}, noMatch: true},
 	}
 	for _, tt := range tests {
 		t.Run("tests", func(t *testing.T) {
-			val, exists := re.GetValue(tt.patternValues)
-			assert.True(t, exists)
-			assert.NotNil(t, val)
+			val, exists := re.GetValue(tt.patternValues...)
+			if !tt.noMatch {
+				assert.Equal(t, val, tt.matchValue)
+				assert.True(t, exists)
+			} else {
+				fmt.Println(tt.patternValues[1])
+				fmt.Println(val)
+				assert.False(t, exists)
+			}
 		})
 	}
 }

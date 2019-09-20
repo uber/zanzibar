@@ -201,24 +201,24 @@ func NewClient(deps *module.Dependencies) Client {
 	  "clients.rider-presentation.alternates": {
 		"routingConfigs": [
 		  {
-			"headerName": "x-api-environment",
+			"headerName": "x-test-env",
 			"headerValue": "*",
-			"serviceName": "presentation-sandbox"
+			"serviceName": "testservice"
 		  },
 		  {
-			"headerName": "RTAPI-Container",
-			"headerValue": "test*",
-			"serviceName": "mpx-prism"
+			"headerName": "x-container",
+			"headerValue": "container*",
+			"serviceName": "relayer"
 		  }
 		],
 		"servicesDetail": {
-		  "presentation-sandbox": {
+		  "testservice": {
 			"ip": "127.0.0.1",
-			"port": 5437
+			"port": 5000
 		  },
-		  "mpx-prism": {
+		  "relayer": {
 			"ip": "127.0.0.1",
-			"port": 12958
+			"port": 12000
 		  }
 		}
 	  }

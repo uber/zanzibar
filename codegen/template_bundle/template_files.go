@@ -2474,24 +2474,24 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	  "clients.rider-presentation.alternates": {
 		"routingConfigs": [
 		  {
-			"headerName": "x-api-environment",
+			"headerName": "x-test-env",
 			"headerValue": "*",
-			"serviceName": "presentation-sandbox"
+			"serviceName": "testservice"
 		  },
 		  {
-			"headerName": "RTAPI-Container",
-			"headerValue": "test*",
-			"serviceName": "mpx-prism"
+			"headerName": "x-container",
+			"headerValue": "container*",
+			"serviceName": "relayer"
 		  }
 		],
 		"servicesDetail": {
-		  "presentation-sandbox": {
+		  "testservice": {
 			"ip": "127.0.0.1",
-			"port": 5437
+			"port": 5000
 		  },
-		  "mpx-prism": {
+		  "relayer": {
 			"ip": "127.0.0.1",
-			"port": 12958
+			"port": 12000
 		  }
 		}
 	  }
@@ -2706,7 +2706,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10573, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10545, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -47,7 +47,7 @@ type rule struct {
 // RuleEngine provides a way to get a value if rule matched
 type RuleEngine interface {
 	// GetValue returns a value, true if rule matched, else returns a nil, false if no rule matched
-	GetValue(patternValues []string) (interface{}, bool)
+	GetValue(patternValues ...string) (interface{}, bool)
 }
 
 // NewRuleEngine initializes a rule engine
@@ -68,7 +68,7 @@ func convertRawRules(rawRule RawRule) rule {
 	return r
 }
 
-func (r *ruleEngine) GetValue(patternValues []string) (interface{}, bool) {
+func (r *ruleEngine) GetValue(patternValues ...string) (interface{}, bool) {
 	for _, rule := range r.rules {
 		matched := true
 		if len(rule.patterns) != len(patternValues) {
