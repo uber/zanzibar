@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed some bugs around legacy JSON config file support ([#626](https://github.com/uber/zanzibar/pull/626))
 ### Changed
+- **BREAKING** `NewDefaultModuleSystemWithMockHook` API changed to add option for which hooks to execute. ([#638](https://github.com/uber/zanzibar/pull/638))
 - `resolve_thrift` tool will now check if the given file has the `.thrift` extension. ([#634](https://github.com/uber/zanzibar/pull/634))
 
 
