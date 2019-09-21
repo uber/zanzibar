@@ -61,6 +61,7 @@ func InitializeDependenciesMock(
 		Config:        g.Config,
 		Channel:       g.Channel,
 		Tracer:        g.Tracer,
+		GRPCClientDispatcher: g.GRPCClientDispatcher,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
