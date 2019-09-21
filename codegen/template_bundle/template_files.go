@@ -1996,6 +1996,7 @@ func InitializeDependenciesMock(
 		Config:        g.Config,
 		Channel:       g.Channel,
 		Tracer:        g.Tracer,
+		GRPCClientDispatcher: g.GRPCClientDispatcher,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -2048,7 +2049,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4324, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4372, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
