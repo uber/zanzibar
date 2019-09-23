@@ -253,8 +253,10 @@ func (c *TChannelClient) call(
 		}
 
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
-			Format:       tchannel.Thrift,
-			RequestState: rs,
+			Format:          tchannel.Thrift,
+			ShardKey:        GetShardKeyFromCtx(ctx),
+			RequestState:    rs,
+			RoutingDelegate: GetRoutingDelegateFromCtx(ctx),
 		})
 		if cerr != nil {
 			return errors.Wrapf(
