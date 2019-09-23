@@ -294,10 +294,12 @@ func (gateway *Gateway) Bootstrap() error {
 
 	gateway.RootScope.Counter("startup.success").Inc(1)
 
-	err = gateway.GRPCClientDispatcher.Start()
-	if err != nil {
-		gateway.Logger.Error("error starting gRPC client dispatcher", zap.Error(err))
-		return err
+	if gateway.GRPCClientDispatcher != nil {
+		err = gateway.GRPCClientDispatcher.Start()
+		if err != nil {
+			gateway.Logger.Error("error starting gRPC client dispatcher", zap.Error(err))
+			return err
+		}
 	}
 
 	return nil
@@ -398,13 +400,15 @@ func (gateway *Gateway) Shutdown() {
 	}()
 
 	// stop all grpc clients
-	swg.Add(1)
-	go func() {
-		defer swg.Done()
-		if err := gateway.GRPCClientDispatcher.Stop(); err != nil {
-			ec <- errors.Wrap(err, "error stopping gRPC client dispatcher")
-		}
-	}()
+	if gateway.GRPCClientDispatcher != nil {
+		swg.Add(1)
+		go func() {
+			defer swg.Done()
+			if err := gateway.GRPCClientDispatcher.Stop(); err != nil {
+				ec <- errors.Wrap(err, "error stopping gRPC client dispatcher")
+			}
+		}()
+	}
 
 	swg.Wait()
 
