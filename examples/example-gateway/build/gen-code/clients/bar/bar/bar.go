@@ -2562,6 +2562,614 @@ func (v *QueryParamsStruct) IsSetFoo() bool {
 	return v != nil && v.Foo != nil
 }
 
+type QueryParamsUntaggedOptStruct struct {
+	Name     string   `json:"name,required"`
+	UserUUID *string  `json:"userUUID,omitempty"`
+	Count    int32    `json:"count,required"`
+	OptCount *int32   `json:"optCount,omitempty"`
+	Foos     []string `json:"foos,required"`
+}
+
+// ToWire translates a QueryParamsUntaggedOptStruct struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *QueryParamsUntaggedOptStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [5]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Name), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.UserUUID != nil {
+		w, err = wire.NewValueString(*(v.UserUUID)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	w, err = wire.NewValueI32(v.Count), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 3, Value: w}
+	i++
+	if v.OptCount != nil {
+		w, err = wire.NewValueI32(*(v.OptCount)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 4, Value: w}
+		i++
+	}
+	if v.Foos == nil {
+		return w, errors.New("field Foos of QueryParamsUntaggedOptStruct is required")
+	}
+	w, err = wire.NewValueList(_List_String_ValueList(v.Foos)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 5, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a QueryParamsUntaggedOptStruct struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a QueryParamsUntaggedOptStruct struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v QueryParamsUntaggedOptStruct
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *QueryParamsUntaggedOptStruct) FromWire(w wire.Value) error {
+	var err error
+
+	nameIsSet := false
+
+	countIsSet := false
+
+	foosIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Name, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				nameIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.UserUUID = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 3:
+			if field.Value.Type() == wire.TI32 {
+				v.Count, err = field.Value.GetI32(), error(nil)
+				if err != nil {
+					return err
+				}
+				countIsSet = true
+			}
+		case 4:
+			if field.Value.Type() == wire.TI32 {
+				var x int32
+				x, err = field.Value.GetI32(), error(nil)
+				v.OptCount = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 5:
+			if field.Value.Type() == wire.TList {
+				v.Foos, err = _List_String_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				foosIsSet = true
+			}
+		}
+	}
+
+	if !nameIsSet {
+		return errors.New("field Name of QueryParamsUntaggedOptStruct is required")
+	}
+
+	if !countIsSet {
+		return errors.New("field Count of QueryParamsUntaggedOptStruct is required")
+	}
+
+	if !foosIsSet {
+		return errors.New("field Foos of QueryParamsUntaggedOptStruct is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a QueryParamsUntaggedOptStruct
+// struct.
+func (v *QueryParamsUntaggedOptStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [5]string
+	i := 0
+	fields[i] = fmt.Sprintf("Name: %v", v.Name)
+	i++
+	if v.UserUUID != nil {
+		fields[i] = fmt.Sprintf("UserUUID: %v", *(v.UserUUID))
+		i++
+	}
+	fields[i] = fmt.Sprintf("Count: %v", v.Count)
+	i++
+	if v.OptCount != nil {
+		fields[i] = fmt.Sprintf("OptCount: %v", *(v.OptCount))
+		i++
+	}
+	fields[i] = fmt.Sprintf("Foos: %v", v.Foos)
+	i++
+
+	return fmt.Sprintf("QueryParamsUntaggedOptStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _I32_EqualsPtr(lhs, rhs *int32) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+// Equals returns true if all the fields of this QueryParamsUntaggedOptStruct match the
+// provided QueryParamsUntaggedOptStruct.
+//
+// This function performs a deep comparison.
+func (v *QueryParamsUntaggedOptStruct) Equals(rhs *QueryParamsUntaggedOptStruct) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !(v.Name == rhs.Name) {
+		return false
+	}
+	if !_String_EqualsPtr(v.UserUUID, rhs.UserUUID) {
+		return false
+	}
+	if !(v.Count == rhs.Count) {
+		return false
+	}
+	if !_I32_EqualsPtr(v.OptCount, rhs.OptCount) {
+		return false
+	}
+	if !_List_String_Equals(v.Foos, rhs.Foos) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of QueryParamsUntaggedOptStruct.
+func (v *QueryParamsUntaggedOptStruct) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	enc.AddString("name", v.Name)
+	if v.UserUUID != nil {
+		enc.AddString("userUUID", *v.UserUUID)
+	}
+	enc.AddInt32("count", v.Count)
+	if v.OptCount != nil {
+		enc.AddInt32("optCount", *v.OptCount)
+	}
+	err = multierr.Append(err, enc.AddArray("foos", (_List_String_Zapper)(v.Foos)))
+	return err
+}
+
+// GetName returns the value of Name if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedOptStruct) GetName() (o string) {
+	if v != nil {
+		o = v.Name
+	}
+	return
+}
+
+// GetUserUUID returns the value of UserUUID if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedOptStruct) GetUserUUID() (o string) {
+	if v != nil && v.UserUUID != nil {
+		return *v.UserUUID
+	}
+
+	return
+}
+
+// IsSetUserUUID returns true if UserUUID is not nil.
+func (v *QueryParamsUntaggedOptStruct) IsSetUserUUID() bool {
+	return v != nil && v.UserUUID != nil
+}
+
+// GetCount returns the value of Count if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedOptStruct) GetCount() (o int32) {
+	if v != nil {
+		o = v.Count
+	}
+	return
+}
+
+// GetOptCount returns the value of OptCount if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedOptStruct) GetOptCount() (o int32) {
+	if v != nil && v.OptCount != nil {
+		return *v.OptCount
+	}
+
+	return
+}
+
+// IsSetOptCount returns true if OptCount is not nil.
+func (v *QueryParamsUntaggedOptStruct) IsSetOptCount() bool {
+	return v != nil && v.OptCount != nil
+}
+
+// GetFoos returns the value of Foos if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedOptStruct) GetFoos() (o []string) {
+	if v != nil {
+		o = v.Foos
+	}
+	return
+}
+
+// IsSetFoos returns true if Foos is not nil.
+func (v *QueryParamsUntaggedOptStruct) IsSetFoos() bool {
+	return v != nil && v.Foos != nil
+}
+
+type QueryParamsUntaggedStruct struct {
+	Name     string   `json:"name,required"`
+	UserUUID *string  `json:"userUUID,omitempty"`
+	Count    int32    `json:"count,required"`
+	OptCount *int32   `json:"optCount,omitempty"`
+	Foos     []string `json:"foos,required"`
+}
+
+// ToWire translates a QueryParamsUntaggedStruct struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *QueryParamsUntaggedStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [5]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Name), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.UserUUID != nil {
+		w, err = wire.NewValueString(*(v.UserUUID)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	w, err = wire.NewValueI32(v.Count), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 3, Value: w}
+	i++
+	if v.OptCount != nil {
+		w, err = wire.NewValueI32(*(v.OptCount)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 4, Value: w}
+		i++
+	}
+	if v.Foos == nil {
+		return w, errors.New("field Foos of QueryParamsUntaggedStruct is required")
+	}
+	w, err = wire.NewValueList(_List_String_ValueList(v.Foos)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 5, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a QueryParamsUntaggedStruct struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a QueryParamsUntaggedStruct struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v QueryParamsUntaggedStruct
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *QueryParamsUntaggedStruct) FromWire(w wire.Value) error {
+	var err error
+
+	nameIsSet := false
+
+	countIsSet := false
+
+	foosIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Name, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				nameIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.UserUUID = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 3:
+			if field.Value.Type() == wire.TI32 {
+				v.Count, err = field.Value.GetI32(), error(nil)
+				if err != nil {
+					return err
+				}
+				countIsSet = true
+			}
+		case 4:
+			if field.Value.Type() == wire.TI32 {
+				var x int32
+				x, err = field.Value.GetI32(), error(nil)
+				v.OptCount = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 5:
+			if field.Value.Type() == wire.TList {
+				v.Foos, err = _List_String_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				foosIsSet = true
+			}
+		}
+	}
+
+	if !nameIsSet {
+		return errors.New("field Name of QueryParamsUntaggedStruct is required")
+	}
+
+	if !countIsSet {
+		return errors.New("field Count of QueryParamsUntaggedStruct is required")
+	}
+
+	if !foosIsSet {
+		return errors.New("field Foos of QueryParamsUntaggedStruct is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a QueryParamsUntaggedStruct
+// struct.
+func (v *QueryParamsUntaggedStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [5]string
+	i := 0
+	fields[i] = fmt.Sprintf("Name: %v", v.Name)
+	i++
+	if v.UserUUID != nil {
+		fields[i] = fmt.Sprintf("UserUUID: %v", *(v.UserUUID))
+		i++
+	}
+	fields[i] = fmt.Sprintf("Count: %v", v.Count)
+	i++
+	if v.OptCount != nil {
+		fields[i] = fmt.Sprintf("OptCount: %v", *(v.OptCount))
+		i++
+	}
+	fields[i] = fmt.Sprintf("Foos: %v", v.Foos)
+	i++
+
+	return fmt.Sprintf("QueryParamsUntaggedStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this QueryParamsUntaggedStruct match the
+// provided QueryParamsUntaggedStruct.
+//
+// This function performs a deep comparison.
+func (v *QueryParamsUntaggedStruct) Equals(rhs *QueryParamsUntaggedStruct) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !(v.Name == rhs.Name) {
+		return false
+	}
+	if !_String_EqualsPtr(v.UserUUID, rhs.UserUUID) {
+		return false
+	}
+	if !(v.Count == rhs.Count) {
+		return false
+	}
+	if !_I32_EqualsPtr(v.OptCount, rhs.OptCount) {
+		return false
+	}
+	if !_List_String_Equals(v.Foos, rhs.Foos) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of QueryParamsUntaggedStruct.
+func (v *QueryParamsUntaggedStruct) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	enc.AddString("name", v.Name)
+	if v.UserUUID != nil {
+		enc.AddString("userUUID", *v.UserUUID)
+	}
+	enc.AddInt32("count", v.Count)
+	if v.OptCount != nil {
+		enc.AddInt32("optCount", *v.OptCount)
+	}
+	err = multierr.Append(err, enc.AddArray("foos", (_List_String_Zapper)(v.Foos)))
+	return err
+}
+
+// GetName returns the value of Name if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedStruct) GetName() (o string) {
+	if v != nil {
+		o = v.Name
+	}
+	return
+}
+
+// GetUserUUID returns the value of UserUUID if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedStruct) GetUserUUID() (o string) {
+	if v != nil && v.UserUUID != nil {
+		return *v.UserUUID
+	}
+
+	return
+}
+
+// IsSetUserUUID returns true if UserUUID is not nil.
+func (v *QueryParamsUntaggedStruct) IsSetUserUUID() bool {
+	return v != nil && v.UserUUID != nil
+}
+
+// GetCount returns the value of Count if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedStruct) GetCount() (o int32) {
+	if v != nil {
+		o = v.Count
+	}
+	return
+}
+
+// GetOptCount returns the value of OptCount if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedStruct) GetOptCount() (o int32) {
+	if v != nil && v.OptCount != nil {
+		return *v.OptCount
+	}
+
+	return
+}
+
+// IsSetOptCount returns true if OptCount is not nil.
+func (v *QueryParamsUntaggedStruct) IsSetOptCount() bool {
+	return v != nil && v.OptCount != nil
+}
+
+// GetFoos returns the value of Foos if it is set or its
+// zero value if it is unset.
+func (v *QueryParamsUntaggedStruct) GetFoos() (o []string) {
+	if v != nil {
+		o = v.Foos
+	}
+	return
+}
+
+// IsSetFoos returns true if Foos is not nil.
+func (v *QueryParamsUntaggedStruct) IsSetFoos() bool {
+	return v != nil && v.Foos != nil
+}
+
 type RequestWithDuplicateType struct {
 	Request1 *BarRequest `json:"request1,omitempty"`
 	Request2 *BarRequest `json:"request2,omitempty"`
@@ -4482,16 +5090,6 @@ func _Byte_EqualsPtr(lhs, rhs *int8) bool {
 }
 
 func _I16_EqualsPtr(lhs, rhs *int16) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
-func _I32_EqualsPtr(lhs, rhs *int32) bool {
 	if lhs != nil && rhs != nil {
 
 		x := *lhs
@@ -7094,12 +7692,10 @@ func (v *Bar_ArgWithQueryHeader_Result) EnvelopeType() wire.EnvelopeType {
 //
 // The arguments for argWithQueryParams are sent and received over the wire as this struct.
 type Bar_ArgWithQueryParams_Args struct {
-	Name     string              `json:"name,required"`
-	UserUUID *string             `json:"userUUID,omitempty"`
-	Foo      []string            `json:"foo,omitempty"`
-	Bar      []int8              `json:"bar,required"`
-	Baz      map[int32]struct{}  `json:"baz,omitempty"`
-	Bazbaz   map[string]struct{} `json:"bazbaz,omitempty"`
+	Name     string   `json:"name,required"`
+	UserUUID *string  `json:"userUUID,omitempty"`
+	Foo      []string `json:"foo,omitempty"`
+	Bar      []int8   `json:"bar,required"`
 }
 
 type _List_Byte_ValueList []int8
@@ -7128,58 +7724,6 @@ func (_List_Byte_ValueList) ValueType() wire.Type {
 
 func (_List_Byte_ValueList) Close() {}
 
-type _Set_I32_mapType_ValueList map[int32]struct{}
-
-func (v _Set_I32_mapType_ValueList) ForEach(f func(wire.Value) error) error {
-	for x := range v {
-		w, err := wire.NewValueI32(x), error(nil)
-		if err != nil {
-			return err
-		}
-
-		if err := f(w); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v _Set_I32_mapType_ValueList) Size() int {
-	return len(v)
-}
-
-func (_Set_I32_mapType_ValueList) ValueType() wire.Type {
-	return wire.TI32
-}
-
-func (_Set_I32_mapType_ValueList) Close() {}
-
-type _Set_String_mapType_ValueList map[string]struct{}
-
-func (v _Set_String_mapType_ValueList) ForEach(f func(wire.Value) error) error {
-	for x := range v {
-		w, err := wire.NewValueString(x), error(nil)
-		if err != nil {
-			return err
-		}
-
-		if err := f(w); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v _Set_String_mapType_ValueList) Size() int {
-	return len(v)
-}
-
-func (_Set_String_mapType_ValueList) ValueType() wire.Type {
-	return wire.TBinary
-}
-
-func (_Set_String_mapType_ValueList) Close() {}
-
 // ToWire translates a Bar_ArgWithQueryParams_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
@@ -7197,7 +7741,7 @@ func (_Set_String_mapType_ValueList) Close() {}
 //   }
 func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [6]wire.Field
+		fields [4]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -7234,22 +7778,6 @@ func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 4, Value: w}
 	i++
-	if v.Baz != nil {
-		w, err = wire.NewValueSet(_Set_I32_mapType_ValueList(v.Baz)), error(nil)
-		if err != nil {
-			return w, err
-		}
-		fields[i] = wire.Field{ID: 5, Value: w}
-		i++
-	}
-	if v.Bazbaz != nil {
-		w, err = wire.NewValueSet(_Set_String_mapType_ValueList(v.Bazbaz)), error(nil)
-		if err != nil {
-			return w, err
-		}
-		fields[i] = wire.Field{ID: 6, Value: w}
-		i++
-	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -7269,44 +7797,6 @@ func _List_Byte_Read(l wire.ValueList) ([]int8, error) {
 		return nil
 	})
 	l.Close()
-	return o, err
-}
-
-func _Set_I32_mapType_Read(s wire.ValueList) (map[int32]struct{}, error) {
-	if s.ValueType() != wire.TI32 {
-		return nil, nil
-	}
-
-	o := make(map[int32]struct{}, s.Size())
-	err := s.ForEach(func(x wire.Value) error {
-		i, err := x.GetI32(), error(nil)
-		if err != nil {
-			return err
-		}
-
-		o[i] = struct{}{}
-		return nil
-	})
-	s.Close()
-	return o, err
-}
-
-func _Set_String_mapType_Read(s wire.ValueList) (map[string]struct{}, error) {
-	if s.ValueType() != wire.TBinary {
-		return nil, nil
-	}
-
-	o := make(map[string]struct{}, s.Size())
-	err := s.ForEach(func(x wire.Value) error {
-		i, err := x.GetString(), error(nil)
-		if err != nil {
-			return err
-		}
-
-		o[i] = struct{}{}
-		return nil
-	})
-	s.Close()
 	return o, err
 }
 
@@ -7370,22 +7860,6 @@ func (v *Bar_ArgWithQueryParams_Args) FromWire(w wire.Value) error {
 				}
 				barIsSet = true
 			}
-		case 5:
-			if field.Value.Type() == wire.TSet {
-				v.Baz, err = _Set_I32_mapType_Read(field.Value.GetSet())
-				if err != nil {
-					return err
-				}
-
-			}
-		case 6:
-			if field.Value.Type() == wire.TSet {
-				v.Bazbaz, err = _Set_String_mapType_Read(field.Value.GetSet())
-				if err != nil {
-					return err
-				}
-
-			}
 		}
 	}
 
@@ -7407,7 +7881,7 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [6]string
+	var fields [4]string
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
@@ -7421,14 +7895,6 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 	}
 	fields[i] = fmt.Sprintf("Bar: %v", v.Bar)
 	i++
-	if v.Baz != nil {
-		fields[i] = fmt.Sprintf("Baz: %v", v.Baz)
-		i++
-	}
-	if v.Bazbaz != nil {
-		fields[i] = fmt.Sprintf("Bazbaz: %v", v.Bazbaz)
-		i++
-	}
 
 	return fmt.Sprintf("Bar_ArgWithQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
 }
@@ -7441,34 +7907,6 @@ func _List_Byte_Equals(lhs, rhs []int8) bool {
 	for i, lv := range lhs {
 		rv := rhs[i]
 		if !(lv == rv) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func _Set_I32_mapType_Equals(lhs, rhs map[int32]struct{}) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-
-	for x := range rhs {
-		if _, ok := lhs[x]; !ok {
-			return false
-		}
-	}
-
-	return true
-}
-
-func _Set_String_mapType_Equals(lhs, rhs map[string]struct{}) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-
-	for x := range rhs {
-		if _, ok := lhs[x]; !ok {
 			return false
 		}
 	}
@@ -7498,12 +7936,6 @@ func (v *Bar_ArgWithQueryParams_Args) Equals(rhs *Bar_ArgWithQueryParams_Args) b
 	if !_List_Byte_Equals(v.Bar, rhs.Bar) {
 		return false
 	}
-	if !((v.Baz == nil && rhs.Baz == nil) || (v.Baz != nil && rhs.Baz != nil && _Set_I32_mapType_Equals(v.Baz, rhs.Baz))) {
-		return false
-	}
-	if !((v.Bazbaz == nil && rhs.Bazbaz == nil) || (v.Bazbaz != nil && rhs.Bazbaz != nil && _Set_String_mapType_Equals(v.Bazbaz, rhs.Bazbaz))) {
-		return false
-	}
 
 	return true
 }
@@ -7515,28 +7947,6 @@ type _List_Byte_Zapper []int8
 func (l _List_Byte_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
 	for _, v := range l {
 		enc.AppendInt8(v)
-	}
-	return err
-}
-
-type _Set_I32_mapType_Zapper map[int32]struct{}
-
-// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
-// fast logging of _Set_I32_mapType_Zapper.
-func (s _Set_I32_mapType_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
-	for v := range s {
-		enc.AppendInt32(v)
-	}
-	return err
-}
-
-type _Set_String_mapType_Zapper map[string]struct{}
-
-// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
-// fast logging of _Set_String_mapType_Zapper.
-func (s _Set_String_mapType_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
-	for v := range s {
-		enc.AppendString(v)
 	}
 	return err
 }
@@ -7555,12 +7965,6 @@ func (v *Bar_ArgWithQueryParams_Args) MarshalLogObject(enc zapcore.ObjectEncoder
 		err = multierr.Append(err, enc.AddArray("foo", (_List_String_Zapper)(v.Foo)))
 	}
 	err = multierr.Append(err, enc.AddArray("bar", (_List_Byte_Zapper)(v.Bar)))
-	if v.Baz != nil {
-		err = multierr.Append(err, enc.AddArray("baz", (_Set_I32_mapType_Zapper)(v.Baz)))
-	}
-	if v.Bazbaz != nil {
-		err = multierr.Append(err, enc.AddArray("bazbaz", (_Set_String_mapType_Zapper)(v.Bazbaz)))
-	}
 	return err
 }
 
@@ -7617,36 +8021,6 @@ func (v *Bar_ArgWithQueryParams_Args) IsSetBar() bool {
 	return v != nil && v.Bar != nil
 }
 
-// GetBaz returns the value of Baz if it is set or its
-// zero value if it is unset.
-func (v *Bar_ArgWithQueryParams_Args) GetBaz() (o map[int32]struct{}) {
-	if v != nil && v.Baz != nil {
-		return v.Baz
-	}
-
-	return
-}
-
-// IsSetBaz returns true if Baz is not nil.
-func (v *Bar_ArgWithQueryParams_Args) IsSetBaz() bool {
-	return v != nil && v.Baz != nil
-}
-
-// GetBazbaz returns the value of Bazbaz if it is set or its
-// zero value if it is unset.
-func (v *Bar_ArgWithQueryParams_Args) GetBazbaz() (o map[string]struct{}) {
-	if v != nil && v.Bazbaz != nil {
-		return v.Bazbaz
-	}
-
-	return
-}
-
-// IsSetBazbaz returns true if Bazbaz is not nil.
-func (v *Bar_ArgWithQueryParams_Args) IsSetBazbaz() bool {
-	return v != nil && v.Bazbaz != nil
-}
-
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -7673,8 +8047,6 @@ var Bar_ArgWithQueryParams_Helper = struct {
 		userUUID *string,
 		foo []string,
 		bar []int8,
-		baz map[int32]struct{},
-		bazbaz map[string]struct{},
 	) *Bar_ArgWithQueryParams_Args
 
 	// IsException returns true if the given error can be thrown
@@ -7718,16 +8090,12 @@ func init() {
 		userUUID *string,
 		foo []string,
 		bar []int8,
-		baz map[int32]struct{},
-		bazbaz map[string]struct{},
 	) *Bar_ArgWithQueryParams_Args {
 		return &Bar_ArgWithQueryParams_Args{
 			Name:     name,
 			UserUUID: userUUID,
 			Foo:      foo,
 			Bar:      bar,
-			Baz:      baz,
-			Bazbaz:   bazbaz,
 		}
 	}
 
@@ -7927,11 +8295,474 @@ func (v *Bar_ArgWithQueryParams_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
 
+// Bar_ArgWithUntaggedNestedQueryParams_Args represents the arguments for the Bar.argWithUntaggedNestedQueryParams function.
+//
+// The arguments for argWithUntaggedNestedQueryParams are sent and received over the wire as this struct.
+type Bar_ArgWithUntaggedNestedQueryParams_Args struct {
+	Request *QueryParamsUntaggedStruct    `json:"request,required"`
+	Opt     *QueryParamsUntaggedOptStruct `json:"opt,omitempty"`
+}
+
+// ToWire translates a Bar_ArgWithUntaggedNestedQueryParams_Args struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Request == nil {
+		return w, errors.New("field Request of Bar_ArgWithUntaggedNestedQueryParams_Args is required")
+	}
+	w, err = v.Request.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Opt != nil {
+		w, err = v.Opt.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _QueryParamsUntaggedStruct_Read(w wire.Value) (*QueryParamsUntaggedStruct, error) {
+	var v QueryParamsUntaggedStruct
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _QueryParamsUntaggedOptStruct_Read(w wire.Value) (*QueryParamsUntaggedOptStruct, error) {
+	var v QueryParamsUntaggedOptStruct
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a Bar_ArgWithUntaggedNestedQueryParams_Args struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Bar_ArgWithUntaggedNestedQueryParams_Args struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Bar_ArgWithUntaggedNestedQueryParams_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) FromWire(w wire.Value) error {
+	var err error
+
+	requestIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.Request, err = _QueryParamsUntaggedStruct_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				requestIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Opt, err = _QueryParamsUntaggedOptStruct_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !requestIsSet {
+		return errors.New("field Request of Bar_ArgWithUntaggedNestedQueryParams_Args is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Bar_ArgWithUntaggedNestedQueryParams_Args
+// struct.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Request: %v", v.Request)
+	i++
+	if v.Opt != nil {
+		fields[i] = fmt.Sprintf("Opt: %v", v.Opt)
+		i++
+	}
+
+	return fmt.Sprintf("Bar_ArgWithUntaggedNestedQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Bar_ArgWithUntaggedNestedQueryParams_Args match the
+// provided Bar_ArgWithUntaggedNestedQueryParams_Args.
+//
+// This function performs a deep comparison.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) Equals(rhs *Bar_ArgWithUntaggedNestedQueryParams_Args) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !v.Request.Equals(rhs.Request) {
+		return false
+	}
+	if !((v.Opt == nil && rhs.Opt == nil) || (v.Opt != nil && rhs.Opt != nil && v.Opt.Equals(rhs.Opt))) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Bar_ArgWithUntaggedNestedQueryParams_Args.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	err = multierr.Append(err, enc.AddObject("request", v.Request))
+	if v.Opt != nil {
+		err = multierr.Append(err, enc.AddObject("opt", v.Opt))
+	}
+	return err
+}
+
+// GetRequest returns the value of Request if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) GetRequest() (o *QueryParamsUntaggedStruct) {
+	if v != nil {
+		o = v.Request
+	}
+	return
+}
+
+// IsSetRequest returns true if Request is not nil.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) IsSetRequest() bool {
+	return v != nil && v.Request != nil
+}
+
+// GetOpt returns the value of Opt if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) GetOpt() (o *QueryParamsUntaggedOptStruct) {
+	if v != nil && v.Opt != nil {
+		return v.Opt
+	}
+
+	return
+}
+
+// IsSetOpt returns true if Opt is not nil.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) IsSetOpt() bool {
+	return v != nil && v.Opt != nil
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the arguments.
+//
+// This will always be "argWithUntaggedNestedQueryParams" for this struct.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) MethodName() string {
+	return "argWithUntaggedNestedQueryParams"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Call for this struct.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Args) EnvelopeType() wire.EnvelopeType {
+	return wire.Call
+}
+
+// Bar_ArgWithUntaggedNestedQueryParams_Helper provides functions that aid in handling the
+// parameters and return values of the Bar.argWithUntaggedNestedQueryParams
+// function.
+var Bar_ArgWithUntaggedNestedQueryParams_Helper = struct {
+	// Args accepts the parameters of argWithUntaggedNestedQueryParams in-order and returns
+	// the arguments struct for the function.
+	Args func(
+		request *QueryParamsUntaggedStruct,
+		opt *QueryParamsUntaggedOptStruct,
+	) *Bar_ArgWithUntaggedNestedQueryParams_Args
+
+	// IsException returns true if the given error can be thrown
+	// by argWithUntaggedNestedQueryParams.
+	//
+	// An error can be thrown by argWithUntaggedNestedQueryParams only if the
+	// corresponding exception type was mentioned in the 'throws'
+	// section for it in the Thrift file.
+	IsException func(error) bool
+
+	// WrapResponse returns the result struct for argWithUntaggedNestedQueryParams
+	// given its return value and error.
+	//
+	// This allows mapping values and errors returned by
+	// argWithUntaggedNestedQueryParams into a serializable result struct.
+	// WrapResponse returns a non-nil error if the provided
+	// error cannot be thrown by argWithUntaggedNestedQueryParams
+	//
+	//   value, err := argWithUntaggedNestedQueryParams(args)
+	//   result, err := Bar_ArgWithUntaggedNestedQueryParams_Helper.WrapResponse(value, err)
+	//   if err != nil {
+	//     return fmt.Errorf("unexpected error from argWithUntaggedNestedQueryParams: %v", err)
+	//   }
+	//   serialize(result)
+	WrapResponse func(*BarResponse, error) (*Bar_ArgWithUntaggedNestedQueryParams_Result, error)
+
+	// UnwrapResponse takes the result struct for argWithUntaggedNestedQueryParams
+	// and returns the value or error returned by it.
+	//
+	// The error is non-nil only if argWithUntaggedNestedQueryParams threw an
+	// exception.
+	//
+	//   result := deserialize(bytes)
+	//   value, err := Bar_ArgWithUntaggedNestedQueryParams_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*Bar_ArgWithUntaggedNestedQueryParams_Result) (*BarResponse, error)
+}{}
+
+func init() {
+	Bar_ArgWithUntaggedNestedQueryParams_Helper.Args = func(
+		request *QueryParamsUntaggedStruct,
+		opt *QueryParamsUntaggedOptStruct,
+	) *Bar_ArgWithUntaggedNestedQueryParams_Args {
+		return &Bar_ArgWithUntaggedNestedQueryParams_Args{
+			Request: request,
+			Opt:     opt,
+		}
+	}
+
+	Bar_ArgWithUntaggedNestedQueryParams_Helper.IsException = func(err error) bool {
+		switch err.(type) {
+		default:
+			return false
+		}
+	}
+
+	Bar_ArgWithUntaggedNestedQueryParams_Helper.WrapResponse = func(success *BarResponse, err error) (*Bar_ArgWithUntaggedNestedQueryParams_Result, error) {
+		if err == nil {
+			return &Bar_ArgWithUntaggedNestedQueryParams_Result{Success: success}, nil
+		}
+
+		return nil, err
+	}
+	Bar_ArgWithUntaggedNestedQueryParams_Helper.UnwrapResponse = func(result *Bar_ArgWithUntaggedNestedQueryParams_Result) (success *BarResponse, err error) {
+
+		if result.Success != nil {
+			success = result.Success
+			return
+		}
+
+		err = errors.New("expected a non-void result")
+		return
+	}
+
+}
+
+// Bar_ArgWithUntaggedNestedQueryParams_Result represents the result of a Bar.argWithUntaggedNestedQueryParams function call.
+//
+// The result of a argWithUntaggedNestedQueryParams execution is sent and received over the wire as this struct.
+//
+// Success is set only if the function did not throw an exception.
+type Bar_ArgWithUntaggedNestedQueryParams_Result struct {
+	// Value returned by argWithUntaggedNestedQueryParams after a successful execution.
+	Success *BarResponse `json:"success,omitempty"`
+}
+
+// ToWire translates a Bar_ArgWithUntaggedNestedQueryParams_Result struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Success != nil {
+		w, err = v.Success.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 0, Value: w}
+		i++
+	}
+
+	if i != 1 {
+		return wire.Value{}, fmt.Errorf("Bar_ArgWithUntaggedNestedQueryParams_Result should have exactly one field: got %v fields", i)
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Bar_ArgWithUntaggedNestedQueryParams_Result struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Bar_ArgWithUntaggedNestedQueryParams_Result struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Bar_ArgWithUntaggedNestedQueryParams_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) FromWire(w wire.Value) error {
+	var err error
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 0:
+			if field.Value.Type() == wire.TStruct {
+				v.Success, err = _BarResponse_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	count := 0
+	if v.Success != nil {
+		count++
+	}
+	if count != 1 {
+		return fmt.Errorf("Bar_ArgWithUntaggedNestedQueryParams_Result should have exactly one field: got %v fields", count)
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Bar_ArgWithUntaggedNestedQueryParams_Result
+// struct.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	if v.Success != nil {
+		fields[i] = fmt.Sprintf("Success: %v", v.Success)
+		i++
+	}
+
+	return fmt.Sprintf("Bar_ArgWithUntaggedNestedQueryParams_Result{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Bar_ArgWithUntaggedNestedQueryParams_Result match the
+// provided Bar_ArgWithUntaggedNestedQueryParams_Result.
+//
+// This function performs a deep comparison.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) Equals(rhs *Bar_ArgWithUntaggedNestedQueryParams_Result) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !((v.Success == nil && rhs.Success == nil) || (v.Success != nil && rhs.Success != nil && v.Success.Equals(rhs.Success))) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Bar_ArgWithUntaggedNestedQueryParams_Result.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	if v.Success != nil {
+		err = multierr.Append(err, enc.AddObject("success", v.Success))
+	}
+	return err
+}
+
+// GetSuccess returns the value of Success if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) GetSuccess() (o *BarResponse) {
+	if v != nil && v.Success != nil {
+		return v.Success
+	}
+
+	return
+}
+
+// IsSetSuccess returns true if Success is not nil.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) IsSetSuccess() bool {
+	return v != nil && v.Success != nil
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the result.
+//
+// This will always be "argWithUntaggedNestedQueryParams" for this struct.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) MethodName() string {
+	return "argWithUntaggedNestedQueryParams"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Reply for this struct.
+func (v *Bar_ArgWithUntaggedNestedQueryParams_Result) EnvelopeType() wire.EnvelopeType {
+	return wire.Reply
+}
+
 // Bar_DeleteFoo_Args represents the arguments for the Bar.deleteFoo function.
 //
 // The arguments for deleteFoo are sent and received over the wire as this struct.
 type Bar_DeleteFoo_Args struct {
-	Request *BarRequest `json:"request,required"`
+	UserUUID string `json:"userUUID,required"`
 }
 
 // ToWire translates a Bar_DeleteFoo_Args struct into a Thrift-level intermediate
@@ -7957,10 +8788,7 @@ func (v *Bar_DeleteFoo_Args) ToWire() (wire.Value, error) {
 		err    error
 	)
 
-	if v.Request == nil {
-		return w, errors.New("field Request of Bar_DeleteFoo_Args is required")
-	}
-	w, err = v.Request.ToWire()
+	w, err = wire.NewValueString(v.UserUUID), error(nil)
 	if err != nil {
 		return w, err
 	}
@@ -7990,23 +8818,23 @@ func (v *Bar_DeleteFoo_Args) ToWire() (wire.Value, error) {
 func (v *Bar_DeleteFoo_Args) FromWire(w wire.Value) error {
 	var err error
 
-	requestIsSet := false
+	userUUIDIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
 		case 1:
-			if field.Value.Type() == wire.TStruct {
-				v.Request, err = _BarRequest_Read(field.Value)
+			if field.Value.Type() == wire.TBinary {
+				v.UserUUID, err = field.Value.GetString(), error(nil)
 				if err != nil {
 					return err
 				}
-				requestIsSet = true
+				userUUIDIsSet = true
 			}
 		}
 	}
 
-	if !requestIsSet {
-		return errors.New("field Request of Bar_DeleteFoo_Args is required")
+	if !userUUIDIsSet {
+		return errors.New("field UserUUID of Bar_DeleteFoo_Args is required")
 	}
 
 	return nil
@@ -8021,7 +8849,7 @@ func (v *Bar_DeleteFoo_Args) String() string {
 
 	var fields [1]string
 	i := 0
-	fields[i] = fmt.Sprintf("Request: %v", v.Request)
+	fields[i] = fmt.Sprintf("UserUUID: %v", v.UserUUID)
 	i++
 
 	return fmt.Sprintf("Bar_DeleteFoo_Args{%v}", strings.Join(fields[:i], ", "))
@@ -8037,7 +8865,7 @@ func (v *Bar_DeleteFoo_Args) Equals(rhs *Bar_DeleteFoo_Args) bool {
 	} else if rhs == nil {
 		return false
 	}
-	if !v.Request.Equals(rhs.Request) {
+	if !(v.UserUUID == rhs.UserUUID) {
 		return false
 	}
 
@@ -8050,22 +8878,17 @@ func (v *Bar_DeleteFoo_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err er
 	if v == nil {
 		return nil
 	}
-	err = multierr.Append(err, enc.AddObject("request", v.Request))
+	enc.AddString("userUUID", v.UserUUID)
 	return err
 }
 
-// GetRequest returns the value of Request if it is set or its
+// GetUserUUID returns the value of UserUUID if it is set or its
 // zero value if it is unset.
-func (v *Bar_DeleteFoo_Args) GetRequest() (o *BarRequest) {
+func (v *Bar_DeleteFoo_Args) GetUserUUID() (o string) {
 	if v != nil {
-		o = v.Request
+		o = v.UserUUID
 	}
 	return
-}
-
-// IsSetRequest returns true if Request is not nil.
-func (v *Bar_DeleteFoo_Args) IsSetRequest() bool {
-	return v != nil && v.Request != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in
@@ -8090,7 +8913,7 @@ var Bar_DeleteFoo_Helper = struct {
 	// Args accepts the parameters of deleteFoo in-order and returns
 	// the arguments struct for the function.
 	Args func(
-		request *BarRequest,
+		userUUID string,
 	) *Bar_DeleteFoo_Args
 
 	// IsException returns true if the given error can be thrown
@@ -8131,10 +8954,10 @@ var Bar_DeleteFoo_Helper = struct {
 
 func init() {
 	Bar_DeleteFoo_Helper.Args = func(
-		request *BarRequest,
+		userUUID string,
 	) *Bar_DeleteFoo_Args {
 		return &Bar_DeleteFoo_Args{
-			Request: request,
+			UserUUID: userUUID,
 		}
 	}
 
@@ -8263,6 +9086,384 @@ func (v *Bar_DeleteFoo_Result) MethodName() string {
 //
 // This will always be Reply for this struct.
 func (v *Bar_DeleteFoo_Result) EnvelopeType() wire.EnvelopeType {
+	return wire.Reply
+}
+
+// Bar_DeleteWithQueryParams_Args represents the arguments for the Bar.deleteWithQueryParams function.
+//
+// The arguments for deleteWithQueryParams are sent and received over the wire as this struct.
+type Bar_DeleteWithQueryParams_Args struct {
+	Filter string `json:"filter,required"`
+	Count  *int32 `json:"count,omitempty"`
+}
+
+// ToWire translates a Bar_DeleteWithQueryParams_Args struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Bar_DeleteWithQueryParams_Args) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Filter), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 2, Value: w}
+	i++
+	if v.Count != nil {
+		w, err = wire.NewValueI32(*(v.Count)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Bar_DeleteWithQueryParams_Args struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Bar_DeleteWithQueryParams_Args struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Bar_DeleteWithQueryParams_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Bar_DeleteWithQueryParams_Args) FromWire(w wire.Value) error {
+	var err error
+
+	filterIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				v.Filter, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				filterIsSet = true
+			}
+		case 3:
+			if field.Value.Type() == wire.TI32 {
+				var x int32
+				x, err = field.Value.GetI32(), error(nil)
+				v.Count = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !filterIsSet {
+		return errors.New("field Filter of Bar_DeleteWithQueryParams_Args is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Bar_DeleteWithQueryParams_Args
+// struct.
+func (v *Bar_DeleteWithQueryParams_Args) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Filter: %v", v.Filter)
+	i++
+	if v.Count != nil {
+		fields[i] = fmt.Sprintf("Count: %v", *(v.Count))
+		i++
+	}
+
+	return fmt.Sprintf("Bar_DeleteWithQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Bar_DeleteWithQueryParams_Args match the
+// provided Bar_DeleteWithQueryParams_Args.
+//
+// This function performs a deep comparison.
+func (v *Bar_DeleteWithQueryParams_Args) Equals(rhs *Bar_DeleteWithQueryParams_Args) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !(v.Filter == rhs.Filter) {
+		return false
+	}
+	if !_I32_EqualsPtr(v.Count, rhs.Count) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Bar_DeleteWithQueryParams_Args.
+func (v *Bar_DeleteWithQueryParams_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	enc.AddString("filter", v.Filter)
+	if v.Count != nil {
+		enc.AddInt32("count", *v.Count)
+	}
+	return err
+}
+
+// GetFilter returns the value of Filter if it is set or its
+// zero value if it is unset.
+func (v *Bar_DeleteWithQueryParams_Args) GetFilter() (o string) {
+	if v != nil {
+		o = v.Filter
+	}
+	return
+}
+
+// GetCount returns the value of Count if it is set or its
+// zero value if it is unset.
+func (v *Bar_DeleteWithQueryParams_Args) GetCount() (o int32) {
+	if v != nil && v.Count != nil {
+		return *v.Count
+	}
+
+	return
+}
+
+// IsSetCount returns true if Count is not nil.
+func (v *Bar_DeleteWithQueryParams_Args) IsSetCount() bool {
+	return v != nil && v.Count != nil
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the arguments.
+//
+// This will always be "deleteWithQueryParams" for this struct.
+func (v *Bar_DeleteWithQueryParams_Args) MethodName() string {
+	return "deleteWithQueryParams"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Call for this struct.
+func (v *Bar_DeleteWithQueryParams_Args) EnvelopeType() wire.EnvelopeType {
+	return wire.Call
+}
+
+// Bar_DeleteWithQueryParams_Helper provides functions that aid in handling the
+// parameters and return values of the Bar.deleteWithQueryParams
+// function.
+var Bar_DeleteWithQueryParams_Helper = struct {
+	// Args accepts the parameters of deleteWithQueryParams in-order and returns
+	// the arguments struct for the function.
+	Args func(
+		filter string,
+		count *int32,
+	) *Bar_DeleteWithQueryParams_Args
+
+	// IsException returns true if the given error can be thrown
+	// by deleteWithQueryParams.
+	//
+	// An error can be thrown by deleteWithQueryParams only if the
+	// corresponding exception type was mentioned in the 'throws'
+	// section for it in the Thrift file.
+	IsException func(error) bool
+
+	// WrapResponse returns the result struct for deleteWithQueryParams
+	// given the error returned by it. The provided error may
+	// be nil if deleteWithQueryParams did not fail.
+	//
+	// This allows mapping errors returned by deleteWithQueryParams into a
+	// serializable result struct. WrapResponse returns a
+	// non-nil error if the provided error cannot be thrown by
+	// deleteWithQueryParams
+	//
+	//   err := deleteWithQueryParams(args)
+	//   result, err := Bar_DeleteWithQueryParams_Helper.WrapResponse(err)
+	//   if err != nil {
+	//     return fmt.Errorf("unexpected error from deleteWithQueryParams: %v", err)
+	//   }
+	//   serialize(result)
+	WrapResponse func(error) (*Bar_DeleteWithQueryParams_Result, error)
+
+	// UnwrapResponse takes the result struct for deleteWithQueryParams
+	// and returns the erorr returned by it (if any).
+	//
+	// The error is non-nil only if deleteWithQueryParams threw an
+	// exception.
+	//
+	//   result := deserialize(bytes)
+	//   err := Bar_DeleteWithQueryParams_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*Bar_DeleteWithQueryParams_Result) error
+}{}
+
+func init() {
+	Bar_DeleteWithQueryParams_Helper.Args = func(
+		filter string,
+		count *int32,
+	) *Bar_DeleteWithQueryParams_Args {
+		return &Bar_DeleteWithQueryParams_Args{
+			Filter: filter,
+			Count:  count,
+		}
+	}
+
+	Bar_DeleteWithQueryParams_Helper.IsException = func(err error) bool {
+		switch err.(type) {
+		default:
+			return false
+		}
+	}
+
+	Bar_DeleteWithQueryParams_Helper.WrapResponse = func(err error) (*Bar_DeleteWithQueryParams_Result, error) {
+		if err == nil {
+			return &Bar_DeleteWithQueryParams_Result{}, nil
+		}
+
+		return nil, err
+	}
+	Bar_DeleteWithQueryParams_Helper.UnwrapResponse = func(result *Bar_DeleteWithQueryParams_Result) (err error) {
+		return
+	}
+
+}
+
+// Bar_DeleteWithQueryParams_Result represents the result of a Bar.deleteWithQueryParams function call.
+//
+// The result of a deleteWithQueryParams execution is sent and received over the wire as this struct.
+type Bar_DeleteWithQueryParams_Result struct {
+}
+
+// ToWire translates a Bar_DeleteWithQueryParams_Result struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Bar_DeleteWithQueryParams_Result) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Bar_DeleteWithQueryParams_Result struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Bar_DeleteWithQueryParams_Result struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Bar_DeleteWithQueryParams_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Bar_DeleteWithQueryParams_Result) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Bar_DeleteWithQueryParams_Result
+// struct.
+func (v *Bar_DeleteWithQueryParams_Result) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("Bar_DeleteWithQueryParams_Result{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Bar_DeleteWithQueryParams_Result match the
+// provided Bar_DeleteWithQueryParams_Result.
+//
+// This function performs a deep comparison.
+func (v *Bar_DeleteWithQueryParams_Result) Equals(rhs *Bar_DeleteWithQueryParams_Result) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Bar_DeleteWithQueryParams_Result.
+func (v *Bar_DeleteWithQueryParams_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	return err
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the result.
+//
+// This will always be "deleteWithQueryParams" for this struct.
+func (v *Bar_DeleteWithQueryParams_Result) MethodName() string {
+	return "deleteWithQueryParams"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Reply for this struct.
+func (v *Bar_DeleteWithQueryParams_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
 
@@ -16606,6 +17807,32 @@ type Echo_EchoStringSet_Args struct {
 	Arg map[string]struct{} `json:"arg,required"`
 }
 
+type _Set_String_mapType_ValueList map[string]struct{}
+
+func (v _Set_String_mapType_ValueList) ForEach(f func(wire.Value) error) error {
+	for x := range v {
+		w, err := wire.NewValueString(x), error(nil)
+		if err != nil {
+			return err
+		}
+
+		if err := f(w); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _Set_String_mapType_ValueList) Size() int {
+	return len(v)
+}
+
+func (_Set_String_mapType_ValueList) ValueType() wire.Type {
+	return wire.TBinary
+}
+
+func (_Set_String_mapType_ValueList) Close() {}
+
 // ToWire translates a Echo_EchoStringSet_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
@@ -16640,6 +17867,25 @@ func (v *Echo_EchoStringSet_Args) ToWire() (wire.Value, error) {
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Set_String_mapType_Read(s wire.ValueList) (map[string]struct{}, error) {
+	if s.ValueType() != wire.TBinary {
+		return nil, nil
+	}
+
+	o := make(map[string]struct{}, s.Size())
+	err := s.ForEach(func(x wire.Value) error {
+		i, err := x.GetString(), error(nil)
+		if err != nil {
+			return err
+		}
+
+		o[i] = struct{}{}
+		return nil
+	})
+	s.Close()
+	return o, err
 }
 
 // FromWire deserializes a Echo_EchoStringSet_Args struct from its Thrift-level
@@ -16699,6 +17945,20 @@ func (v *Echo_EchoStringSet_Args) String() string {
 	return fmt.Sprintf("Echo_EchoStringSet_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
+func _Set_String_mapType_Equals(lhs, rhs map[string]struct{}) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for x := range rhs {
+		if _, ok := lhs[x]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Equals returns true if all the fields of this Echo_EchoStringSet_Args match the
 // provided Echo_EchoStringSet_Args.
 //
@@ -16714,6 +17974,17 @@ func (v *Echo_EchoStringSet_Args) Equals(rhs *Echo_EchoStringSet_Args) bool {
 	}
 
 	return true
+}
+
+type _Set_String_mapType_Zapper map[string]struct{}
+
+// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
+// fast logging of _Set_String_mapType_Zapper.
+func (s _Set_String_mapType_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
+	for v := range s {
+		enc.AppendString(v)
+	}
+	return err
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling

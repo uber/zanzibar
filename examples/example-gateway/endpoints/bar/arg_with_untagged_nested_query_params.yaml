@@ -1,0 +1,13 @@
+clientId: bar
+clientMethod: ArgWithUntaggedNestedQueryParams
+endpointId: bar
+endpointType: http
+handleId: argWithUntaggedNestedQueryParams
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::argWithUntaggedNestedQueryParams
+workflowType: httpClient

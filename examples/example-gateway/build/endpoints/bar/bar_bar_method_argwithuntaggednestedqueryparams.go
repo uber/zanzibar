@@ -46,20 +46,20 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// BarArgWithQueryParamsHandler is the handler for "/bar/argWithQueryParams"
-type BarArgWithQueryParamsHandler struct {
+// BarArgWithUntaggedNestedQueryParamsHandler is the handler for "/bar/argWithUntaggedNestedQueryParams"
+type BarArgWithUntaggedNestedQueryParamsHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewBarArgWithQueryParamsHandler creates a handler
-func NewBarArgWithQueryParamsHandler(deps *module.Dependencies) *BarArgWithQueryParamsHandler {
-	handler := &BarArgWithQueryParamsHandler{
+// NewBarArgWithUntaggedNestedQueryParamsHandler creates a handler
+func NewBarArgWithUntaggedNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWithUntaggedNestedQueryParamsHandler {
+	handler := &BarArgWithUntaggedNestedQueryParamsHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"bar", "argWithQueryParams",
+		"bar", "argWithUntaggedNestedQueryParams",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -74,15 +74,15 @@ func NewBarArgWithQueryParamsHandler(deps *module.Dependencies) *BarArgWithQuery
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *BarArgWithQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgWithUntaggedNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"GET", "/bar/argWithQueryParams",
+		"GET", "/bar/argWithUntaggedNestedQueryParams",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/bar/argWithQueryParams".
-func (h *BarArgWithQueryParamsHandler) HandleRequest(
+// HandleRequest handles "/bar/argWithUntaggedNestedQueryParams".
+func (h *BarArgWithUntaggedNestedQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -103,45 +103,112 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithQueryParams_Args
+	var requestBody endpointsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args
 
-	nameOk := req.CheckQueryValue("name")
-	if !nameOk {
+	if requestBody.Request == nil {
+		requestBody.Request = &endpointsBarBar.QueryParamsUntaggedStruct{}
+	}
+	requestNameOk := req.CheckQueryValue("request.name")
+	if !requestNameOk {
 		return
 	}
-	nameQuery, ok := req.GetQueryValue("name")
+	requestNameQuery, ok := req.GetQueryValue("request.name")
 	if !ok {
 		return
 	}
-	requestBody.Name = nameQuery
+	requestBody.Request.Name = requestNameQuery
 
-	userUUIDOk := req.HasQueryValue("userUUID")
-	if userUUIDOk {
-		userUUIDQuery, ok := req.GetQueryValue("userUUID")
+	requestUserUUIDOk := req.HasQueryValue("request.userUUID")
+	if requestUserUUIDOk {
+		requestUserUUIDQuery, ok := req.GetQueryValue("request.userUUID")
 		if !ok {
 			return
 		}
-		requestBody.UserUUID = ptr.String(userUUIDQuery)
+		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
 	}
 
-	fooOk := req.HasQueryValue("foo")
-	if fooOk {
-		fooQuery, ok := req.GetQueryValueList("foo")
-		if !ok {
-			return
-		}
-		requestBody.Foo = fooQuery
-	}
-
-	barOk := req.CheckQueryValue("bar")
-	if !barOk {
+	requestCountOk := req.CheckQueryValue("request.count")
+	if !requestCountOk {
 		return
 	}
-	barQuery, ok := req.GetQueryInt8List("bar")
+	requestCountQuery, ok := req.GetQueryInt32("request.count")
 	if !ok {
 		return
 	}
-	requestBody.Bar = barQuery
+	requestBody.Request.Count = requestCountQuery
+
+	requestOptCountOk := req.HasQueryValue("request.optCount")
+	if requestOptCountOk {
+		requestOptCountQuery, ok := req.GetQueryInt32("request.optCount")
+		if !ok {
+			return
+		}
+		requestBody.Request.OptCount = ptr.Int32(requestOptCountQuery)
+	}
+
+	requestFoosOk := req.CheckQueryValue("request.foos")
+	if !requestFoosOk {
+		return
+	}
+	requestFoosQuery, ok := req.GetQueryValueList("request.foos")
+	if !ok {
+		return
+	}
+	requestBody.Request.Foos = requestFoosQuery
+
+	if req.HasQueryPrefix("opt") || requestBody.Opt != nil {
+		if requestBody.Opt == nil {
+			requestBody.Opt = &endpointsBarBar.QueryParamsUntaggedOptStruct{}
+		}
+		optNameOk := req.CheckQueryValue("opt.name")
+		if !optNameOk {
+			return
+		}
+		optNameQuery, ok := req.GetQueryValue("opt.name")
+		if !ok {
+			return
+		}
+		requestBody.Opt.Name = optNameQuery
+
+		optUserUUIDOk := req.HasQueryValue("opt.userUUID")
+		if optUserUUIDOk {
+			optUserUUIDQuery, ok := req.GetQueryValue("opt.userUUID")
+			if !ok {
+				return
+			}
+			requestBody.Opt.UserUUID = ptr.String(optUserUUIDQuery)
+		}
+
+		optCountOk := req.CheckQueryValue("opt.count")
+		if !optCountOk {
+			return
+		}
+		optCountQuery, ok := req.GetQueryInt32("opt.count")
+		if !ok {
+			return
+		}
+		requestBody.Opt.Count = optCountQuery
+
+		optOptCountOk := req.HasQueryValue("opt.optCount")
+		if optOptCountOk {
+			optOptCountQuery, ok := req.GetQueryInt32("opt.optCount")
+			if !ok {
+				return
+			}
+			requestBody.Opt.OptCount = ptr.Int32(optOptCountQuery)
+		}
+
+		optFoosOk := req.CheckQueryValue("opt.foos")
+		if !optFoosOk {
+			return
+		}
+		optFoosQuery, ok := req.GetQueryValueList("opt.foos")
+		if !ok {
+			return
+		}
+		requestBody.Opt.Foos = optFoosQuery
+
+	}
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -157,7 +224,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgWithQueryParamsWorkflow(h.Dependencies)
+	w := workflow.NewBarArgWithUntaggedNestedQueryParamsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

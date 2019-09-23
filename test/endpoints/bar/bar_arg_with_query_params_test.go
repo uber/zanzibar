@@ -95,7 +95,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
+	assert.Equal(t, compactStr(barResponseBytes), string(respBytes))
 }
 
 func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
@@ -944,6 +944,61 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 		"/bar/argWithNestedQueryParams?"+
 			"request.name=a-name&request.userUUID=a-uuid&request.foo=hi",
 		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 1, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
+}
+
+func TestBarWithUntaggedNestedQueryParams(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/argWithUntaggedNestedQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t,
+				"opt.count=33&opt.foos=coffee&opt.name=b-name&opt.optCount=99&"+
+					"request.count=3&request.foos=hi&request.foos=world&request.name=a-name&request.optCount=4&request.userUUID=a-uuid",
+				r.URL.RawQuery,
+			)
+
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithUntaggedNestedQueryParams?"+
+			"request.name=a-name&request.userUUID=a-uuid&request.count=3&request.optCount=4&request.foos=hi&request.foos=world&"+
+			"opt.name=b-name&opt.count=33&opt.optCount=99&opt.foos=coffee",
+		map[string]string{
+			"x-uuid":  "auth-uuid",
+			"x-uuid2": "auth-uuid2",
+		}, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

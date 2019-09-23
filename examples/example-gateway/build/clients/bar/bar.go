@@ -83,10 +83,20 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_ArgWithQueryParams_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithUntaggedNestedQueryParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
 	DeleteFoo(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_DeleteFoo_Args,
+	) (map[string]string, error)
+	DeleteWithQueryParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_DeleteWithQueryParams_Args,
 	) (map[string]string, error)
 	Hello(
 		ctx context.Context,
@@ -237,38 +247,40 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"bar",
 			map[string]string{
-				"ArgNotStruct":                    "Bar::argNotStruct",
-				"ArgWithHeaders":                  "Bar::argWithHeaders",
-				"ArgWithManyQueryParams":          "Bar::argWithManyQueryParams",
-				"ArgWithNestedQueryParams":        "Bar::argWithNestedQueryParams",
-				"ArgWithParams":                   "Bar::argWithParams",
-				"ArgWithParamsAndDuplicateFields": "Bar::argWithParamsAndDuplicateFields",
-				"ArgWithQueryHeader":              "Bar::argWithQueryHeader",
-				"ArgWithQueryParams":              "Bar::argWithQueryParams",
-				"DeleteFoo":                       "Bar::deleteFoo",
-				"Hello":                           "Bar::helloWorld",
-				"ListAndEnum":                     "Bar::listAndEnum",
-				"MissingArg":                      "Bar::missingArg",
-				"NoRequest":                       "Bar::noRequest",
-				"Normal":                          "Bar::normal",
-				"NormalRecur":                     "Bar::normalRecur",
-				"TooManyArgs":                     "Bar::tooManyArgs",
-				"EchoBinary":                      "Echo::echoBinary",
-				"EchoBool":                        "Echo::echoBool",
-				"EchoDouble":                      "Echo::echoDouble",
-				"EchoEnum":                        "Echo::echoEnum",
-				"EchoI16":                         "Echo::echoI16",
-				"EchoI32":                         "Echo::echoI32",
-				"EchoI32Map":                      "Echo::echoI32Map",
-				"EchoI64":                         "Echo::echoI64",
-				"EchoI8":                          "Echo::echoI8",
-				"EchoString":                      "Echo::echoString",
-				"EchoStringList":                  "Echo::echoStringList",
-				"EchoStringMap":                   "Echo::echoStringMap",
-				"EchoStringSet":                   "Echo::echoStringSet",
-				"EchoStructList":                  "Echo::echoStructList",
-				"EchoStructSet":                   "Echo::echoStructSet",
-				"EchoTypedef":                     "Echo::echoTypedef",
+				"ArgNotStruct":                     "Bar::argNotStruct",
+				"ArgWithHeaders":                   "Bar::argWithHeaders",
+				"ArgWithManyQueryParams":           "Bar::argWithManyQueryParams",
+				"ArgWithNestedQueryParams":         "Bar::argWithNestedQueryParams",
+				"ArgWithParams":                    "Bar::argWithParams",
+				"ArgWithParamsAndDuplicateFields":  "Bar::argWithParamsAndDuplicateFields",
+				"ArgWithQueryHeader":               "Bar::argWithQueryHeader",
+				"ArgWithQueryParams":               "Bar::argWithQueryParams",
+				"ArgWithUntaggedNestedQueryParams": "Bar::argWithUntaggedNestedQueryParams",
+				"DeleteFoo":                        "Bar::deleteFoo",
+				"DeleteWithQueryParams":            "Bar::deleteWithQueryParams",
+				"Hello":                            "Bar::helloWorld",
+				"ListAndEnum":                      "Bar::listAndEnum",
+				"MissingArg":                       "Bar::missingArg",
+				"NoRequest":                        "Bar::noRequest",
+				"Normal":                           "Bar::normal",
+				"NormalRecur":                      "Bar::normalRecur",
+				"TooManyArgs":                      "Bar::tooManyArgs",
+				"EchoBinary":                       "Echo::echoBinary",
+				"EchoBool":                         "Echo::echoBool",
+				"EchoDouble":                       "Echo::echoDouble",
+				"EchoEnum":                         "Echo::echoEnum",
+				"EchoI16":                          "Echo::echoI16",
+				"EchoI32":                          "Echo::echoI32",
+				"EchoI32Map":                       "Echo::echoI32Map",
+				"EchoI64":                          "Echo::echoI64",
+				"EchoI8":                           "Echo::echoI8",
+				"EchoString":                       "Echo::echoString",
+				"EchoStringList":                   "Echo::echoStringList",
+				"EchoStringMap":                    "Echo::echoStringMap",
+				"EchoStringSet":                    "Echo::echoStringSet",
+				"EchoStructList":                   "Echo::echoStructList",
+				"EchoStructSet":                    "Echo::echoStructSet",
+				"EchoTypedef":                      "Echo::echoTypedef",
 			},
 			baseURL,
 			defaultHeaders,
@@ -757,9 +769,6 @@ func (c *barClient) ArgWithParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParams" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
 
-	if r.Params != nil {
-	}
-
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
@@ -979,14 +988,112 @@ func (c *barClient) ArgWithQueryParams(
 	for _, value := range r.Bar {
 		queryValues.Add("bar", strconv.Itoa(int(value)))
 	}
-	if r.Baz != nil {
-		for value := range r.Baz {
-			queryValues.Add("baz", strconv.Itoa(int(value)))
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		// TODO(jakev): read response headers and put them in body
+
+		return &responseBody, respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
 		}
 	}
-	if r.Bazbaz != nil {
-		for value := range r.Bazbaz {
-			queryValues.Add("bazbaz", value)
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// ArgWithUntaggedNestedQueryParams calls "/bar/argWithUntaggedNestedQueryParams" endpoint.
+func (c *barClient) ArgWithUntaggedNestedQueryParams(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
+	var defaultRes *clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithUntaggedNestedQueryParams", "Bar::argWithUntaggedNestedQueryParams", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithUntaggedNestedQueryParams"
+
+	if r.Request == nil {
+		return nil, nil, errors.New(
+			"The field .Request is required",
+		)
+	}
+	queryValues := &url.Values{}
+	requestNameQuery := r.Request.Name
+	queryValues.Set("request.name", requestNameQuery)
+	if r.Request.UserUUID != nil {
+		requestUserUUIDQuery := *r.Request.UserUUID
+		queryValues.Set("request.userUUID", requestUserUUIDQuery)
+	}
+	requestCountQuery := strconv.Itoa(int(r.Request.Count))
+	queryValues.Set("request.count", requestCountQuery)
+	if r.Request.OptCount != nil {
+		requestOptCountQuery := strconv.Itoa(int(*r.Request.OptCount))
+		queryValues.Set("request.optCount", requestOptCountQuery)
+	}
+	for _, value := range r.Request.Foos {
+		queryValues.Add("request.foos", value)
+	}
+	if r.Opt != nil {
+		optNameQuery := r.Opt.Name
+		queryValues.Set("opt.name", optNameQuery)
+		if r.Opt.UserUUID != nil {
+			optUserUUIDQuery := *r.Opt.UserUUID
+			queryValues.Set("opt.userUUID", optUserUUIDQuery)
+		}
+		optCountQuery := strconv.Itoa(int(r.Opt.Count))
+		queryValues.Set("opt.count", optCountQuery)
+		if r.Opt.OptCount != nil {
+			optOptCountQuery := strconv.Itoa(int(*r.Opt.OptCount))
+			queryValues.Set("opt.optCount", optOptCountQuery)
+		}
+		for _, value := range r.Opt.Foos {
+			queryValues.Add("opt.foos", value)
 		}
 	}
 	fullURL += "?" + queryValues.Encode()
@@ -1055,8 +1162,88 @@ func (c *barClient) DeleteFoo(
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteFoo", "Bar::deleteFoo", c.httpClient)
 
+	headers["x-uuid"] = string(r.UserUUID)
+
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/foo"
+
+	err := req.WriteJSON("DELETE", fullURL, headers, r)
+	if err != nil {
+		return nil, err
+	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return nil, headerErr
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+	}
+
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// DeleteWithQueryParams calls "/bar/withQueryParams" endpoint.
+func (c *barClient) DeleteWithQueryParams(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_DeleteWithQueryParams_Args,
+) (map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithQueryParams", "Bar::deleteWithQueryParams", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/withQueryParams"
+
+	queryValues := &url.Values{}
+	filterQuery := r.Filter
+	queryValues.Set("filter", filterQuery)
+	if r.Count != nil {
+		countQuery := strconv.Itoa(int(*r.Count))
+		queryValues.Set("count", countQuery)
+	}
+	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
