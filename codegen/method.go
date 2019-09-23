@@ -1108,6 +1108,10 @@ func getQueryEncodeExpression(typeSpec compile.TypeSpec, valueName string) strin
 	return fmt.Sprintf(encodeExpression, valueName)
 }
 
+// hasQueryParams - checks to see if either this field has a query-param annotation
+// or if this is a struct, some field in it has.
+// Caveat is that unannotated fields are considered Query Params IF the REST method
+// should not have a body (GET, DELETE).  This is an existing convenience afforded to callers
 func (ms *MethodSpec) hasQueryParams(field *compile.FieldSpec, defaultIsQuery bool) bool {
 
 	httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
@@ -1140,8 +1144,6 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		// Skip if there are no query params in the field or its components
-		// However, if by definition there is no request body, untagged fields are mapped to query-params
-		// because "existing behavior" && cannot easily change that
 		if !ms.hasQueryParams(field, hasNoBody) {
 			return false
 		}
@@ -1257,8 +1259,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 
 		// Skip if there are no query params in the field or its components
-		// However, if by definition there is no request body, untagged fields are mapped to query-params
-		// because "existing behavior" && cannot easily change that
 		if !ms.hasQueryParams(field, hasNoBody) {
 			return false
 		}
