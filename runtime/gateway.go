@@ -293,11 +293,13 @@ func (gateway *Gateway) Bootstrap() error {
 	}
 
 	gateway.RootScope.Counter("startup.success").Inc(1)
-
-	err = gateway.GRPCClientDispatcher.Start()
-	if err != nil {
-		gateway.Logger.Error("error starting gRPC client dispatcher", zap.Error(err))
-		return err
+	
+	if gateway.GRPCClientDispatcher != nil {
+		err = gateway.GRPCClientDispatcher.Start()
+		if err != nil {
+			gateway.Logger.Error("error starting gRPC client dispatcher", zap.Error(err))
+			return err
+		}
 	}
 
 	return nil
