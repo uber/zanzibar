@@ -69,24 +69,18 @@ tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false
 clients.baz.alternates:
   routingConfigs:
-    - headerName: x-api-environment
-      headerValue: "\\*"
-      serviceName: presentation-sandbox
-    - headerName: RTAPI-Container
-      headerValue: test\*
-      serviceName: mpx-prism
+    - headerName: x-container
+      headerValue: ^sandbox$
+      serviceName: sandbox
+    - headerName: x-test-Env
+      headerValue: test.*
+      serviceName: prism
   servicesDetail:
-    presentation-sandbox:
+    sandbox:
       ip: 127.0.0.1
       port: 8113
-    mpx-prism:
+    prism:
       ip: 127.0.0.1
       port: 8114
-clients.bar.alternates: {"routingConfigs":[{"headerName":"x-api-environment","headerValue":"\\*",
-                                            "serviceName":"presentation-sandbox"},{"headerName":"RTAPI-Container",
-                                                                                   "headerValue":"test\\*",
-                                                                                   "serviceName":"mpx-prism"}],
-                         "servicesDetail":{"presentation-sandbox":{"ip":"127.0.0.1","port":8113},
-                                           "mpx-prism":{"ip":"127.0.0.1","port":8114}}}
 grpc.clientServiceNameMapping:
   echo: echo

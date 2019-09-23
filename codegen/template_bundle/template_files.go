@@ -726,6 +726,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -747,87 +749,112 @@ import (
 {{range $testName, $testFixture := $.TestFixtures}}
 func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKResponse(t *testing.T) {
 
+	confFiles := util.DefaultConfigFiles("{{$testFixture.TestServiceName}}")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.{{$clientName}}.alternates") {
+		staticConf.MustGetStruct("clients.{{$clientName}}.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
+
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		{{/* the serviceName here is service discovery name, therefore is ok to be arbitrary */ -}}
 		"clients.{{$clientName}}.serviceName": "{{$clientName}}Service",
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
 		TestBinary:            util.DefaultMainFile("{{$testFixture.TestServiceName}}"),
-		ConfigFiles:           util.DefaultConfigFiles("{{$testFixture.TestServiceName}}"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	for i := 0; i < 3; i++ {
+	{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
+	{{$clientFunc := printf "fake%s" (title $clientCallFixture.ClientMethod) -}}
+	{{$clientFunc}} := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if $clientMethod.RequestType -}}
+		args {{$clientMethodRequestType}},
+		{{end -}}
+	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
 
-		{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
-		{{$clientFunc := printf "fake%s" (title $clientCallFixture.ClientMethod) -}}
-		{{$clientFunc}} := func(
-			ctx context.Context,
-			reqHeaders map[string]string,
-			{{if $clientMethod.RequestType -}}
-			args {{$clientMethodRequestType}},
-			{{end -}}
-		) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
+		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
+		assert.Equal(
+			t,
+			"{{$v}}",
+			reqHeaders["{{$k}}"])
+		{{end -}}
 
-			{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
-			assert.Equal(
-				t,
-				"{{$v}}",
-				reqHeaders["{{$k}}"])
-			{{end -}}
-
-			var resHeaders map[string]string
-			{{if (len $clientCallFixture.ClientResHeaders) -}}
-			resHeaders = map[string]string{}
-			{{end -}}
-			{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
-			resHeaders["{{$k}}"] = "{{$v}}"
-			{{end}}
-
-			{{if $clientMethod.ResponseType -}}
-			var res {{unref $clientMethod.ResponseType}}
-
-			clientResponse := []byte({{printf "` + "`" + `%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
-			err := json.Unmarshal(clientResponse, &res)
-			if err!= nil {
-				t.Fatal("cant't unmarshal client response json to client response struct")
-				return nil, resHeaders, err
-			}
-			return &res, resHeaders, nil
-			{{else -}}
-			return resHeaders, nil
-			{{end -}}
-		}
-
-		headers := map[string]string{}
-		if i == 0 {
-			err = gateway.TChannelBackends()["{{$clientName}}"].Register(
-						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
-						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
-					)
-		} else if gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)] != nil {
-			err = gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)].Register(
-						"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
-						{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
-					)
-			if i == 1 {
-				headers["x-api-environment"] = "sandbox"
-			} else if i == 2 {
-				headers["RTAPI-Container"] = "test1"
-			}
-		}
-		assert.NoError(t, err)
-		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, i, headers)
+		var resHeaders map[string]string
+		{{if (len $clientCallFixture.ClientResHeaders) -}}
+		resHeaders = map[string]string{}
+		{{end -}}
+		{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
+		resHeaders["{{$k}}"] = "{{$v}}"
 		{{end}}
+
+		{{if $clientMethod.ResponseType -}}
+		var res {{unref $clientMethod.ResponseType}}
+
+		clientResponse := []byte({{printf "` + "`" + `%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
+		err := json.Unmarshal(clientResponse, &res)
+		if err!= nil {
+			t.Fatal("cant't unmarshal client response json to client response struct")
+			return nil, resHeaders, err
+		}
+		return &res, resHeaders, nil
+		{{else -}}
+		return resHeaders, nil
+		{{end -}}
 	}
 
+	headers := map[string]string{}
+	err = gateway.TChannelBackends()["{{$clientName}}"].Register(
+			"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
+				{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
+		)
+	assert.NoError(t, err)
+	makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, headers)
 
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		headers := map[string]string{}
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if i == 1 {
+				headers["x-container"] = "sandbox"
+			} else if i == 2 {
+				headers["x-test-Env"] = "test1"
+			}
+			err = gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)].Register(
+				"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
+				{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
+			)
+		}
+
+		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, headers)
+		i++
+	}
+	{{end}}
 }
 
-func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
+func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 	{{ if $headers -}}
 	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
 	headers["{{$k}}"] = "{{$v}}"
@@ -884,7 +911,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 5331, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6284, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2403,6 +2430,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"net/textproto"
 
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
@@ -2556,9 +2584,10 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 
 		ruleWrapper := ruleengine.RuleWrapper{}
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			rawRule := ruleengine.RawRule{Patterns: []string{routingConfig.HeaderName, routingConfig.HeaderValue},
+			rawRule := ruleengine.RawRule{Patterns: []string{textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName),
+			 strings.ToLower(routingConfig.HeaderValue)},
 				Value: routingConfig.ServiceName}
-			headerPatterns = append(headerPatterns, routingConfig.HeaderName)
+			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 
 			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
@@ -2706,7 +2735,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10545, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10651, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3203,7 +3232,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, routingConfig.HeaderName)
+			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 		}
 	}
 
@@ -3267,10 +3296,9 @@ func (w {{$workflowStruct}}) Handle(
 	}
 	{{- end}}
 	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
-		transformedHeaderName := textproto.CanonicalMIMEHeaderKey(whitelistedHeader)
-		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		headerVal, ok := reqHeaders.Get(whitelistedHeader)
 		if ok {
-			clientHeaders[transformedHeaderName] = headerVal
+			clientHeaders[whitelistedHeader] = headerVal
 		}
 	}
 
@@ -3409,7 +3437,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8365, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8312, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

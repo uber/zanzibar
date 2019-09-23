@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -224,7 +225,6 @@ func (c *TChannelClient) call(
 		call.resHeaders, call.success = nil, false
 
 		sc := c.getDynamicChannelWithFallback(reqHeaders, c.sc)
-
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
@@ -273,10 +273,12 @@ func (c *TChannelClient) call(
 	return call.success, call.resHeaders, err
 }
 
+// first rule match, would be the choosen channel. if nothing matches fallback to default channel
 func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
 	sc *tchannel.SubChannel) *tchannel.SubChannel {
+	ch := sc
 	if c.ruleEngine == nil {
-		return sc
+		return ch
 	}
 	for _, headerPattern := range c.headerPatterns {
 		// this header is not present, so can't match a rule
@@ -284,21 +286,16 @@ func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]str
 		if !ok {
 			continue
 		}
-		val, match := c.ruleEngine.GetValue(headerPattern, headerPatternVal)
+		val, match := c.ruleEngine.GetValue(headerPattern, strings.ToLower(headerPatternVal))
 		// if rule doesn't match, continue with a next input
 		if !match {
 			continue
 		}
-		serviceName, ok := val.(string)
-		// if a wrong value type, continue with next input
-		if !ok {
-			continue
-		}
+		serviceName := val.(string)
 		// we know service has a channel, as this was constructed in c'tor
-		sc = c.altChannelMap[serviceName]
-		return sc
-
+		ch = c.altChannelMap[serviceName]
+		return ch
 	}
 	// if nothing matches return the default channel/**/
-	return sc
+	return ch
 }

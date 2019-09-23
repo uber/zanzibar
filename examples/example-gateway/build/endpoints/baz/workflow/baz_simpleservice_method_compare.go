@@ -55,7 +55,7 @@ func NewSimpleServiceCompareWorkflow(deps *module.Dependencies) SimpleServiceCom
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, routingConfig.HeaderName)
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 		}
 	}
 
@@ -90,10 +90,9 @@ func (w simpleServiceCompareWorkflow) Handle(
 		clientHeaders["X-Deputy-Forwarded"] = h
 	}
 	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
-		transformedHeaderName := textproto.CanonicalMIMEHeaderKey(whitelistedHeader)
-		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		headerVal, ok := reqHeaders.Get(whitelistedHeader)
 		if ok {
-			clientHeaders[transformedHeaderName] = headerVal
+			clientHeaders[whitelistedHeader] = headerVal
 		}
 	}
 

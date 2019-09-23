@@ -81,7 +81,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, routingConfig.HeaderName)
+			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 		}
 	}
 
@@ -145,10 +145,9 @@ func (w {{$workflowStruct}}) Handle(
 	}
 	{{- end}}
 	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
-		transformedHeaderName := textproto.CanonicalMIMEHeaderKey(whitelistedHeader)
-		headerVal, ok := reqHeaders.Get(transformedHeaderName)
+		headerVal, ok := reqHeaders.Get(whitelistedHeader)
 		if ok {
-			clientHeaders[transformedHeaderName] = headerVal
+			clientHeaders[whitelistedHeader] = headerVal
 		}
 	}
 

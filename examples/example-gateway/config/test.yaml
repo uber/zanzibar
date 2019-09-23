@@ -67,17 +67,17 @@ tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false
-clients.baz.alternates: {"routingConfigs":[{"headerName":"x-api-environment","headerValue":"\\*",
-                                            "serviceName":"presentation-sandbox"},{"headerName":"RTAPI-Container",
-                                                                                   "headerValue":"test\\*",
-                                                                                   "serviceName":"mpx-prism"}],
-                         "servicesDetail":{"presentation-sandbox":{"ip":"127.0.0.1","port":8111},
-                                           "mpx-prism":{"ip":"127.0.0.1","port":8112}}}
-clients.bar.alternates: {"routingConfigs":[{"headerName":"x-api-environment","headerValue":"\\*",
-                                            "serviceName":"presentation-sandbox"},{"headerName":"RTAPI-Container",
-                                                                                   "headerValue":"test\\*",
-                                                                                   "serviceName":"mpx-prism"}],
-                         "servicesDetail":{"presentation-sandbox":{"ip":"127.0.0.1","port":8113},
-                                           "mpx-prism":{"ip":"127.0.0.1","port":8114}}}
+clients.baz.alternates:
+  routingConfigs:
+    - headerName: x-container
+      headerValue: ^sandbox$
+      serviceName: basicSandbox
+  servicesDetail:
+    basicSandbox:
+      ip: 127.0.0.1
+      port: 8113
+clients.bar.alternates: {"routingConfigs":[{"headerName":"x-container","headerValue":"^test$",
+                                            "serviceName":"nomatch"}],
+                         "servicesDetail":{"nomatch":{"ip":"127.0.0.1","port":8113}}}
 grpc.clientServiceNameMapping:
   echo: echo

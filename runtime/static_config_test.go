@@ -102,6 +102,7 @@ func TestPanicGetWrongTypes(t *testing.T) {
 			"bool":  true,
 			"int":   int64(1),
 			"float": float64(1.2),
+			"json":  `"{a":"b"}`,
 		},
 	)
 
@@ -123,6 +124,11 @@ func TestPanicGetWrongTypes(t *testing.T) {
 
 	assert.Panics(t, func() {
 		config.MustGetString("bool")
+	})
+
+	assert.Panics(t, func() {
+		var x bool
+		config.MustGetStruct("json", &x)
 	})
 }
 

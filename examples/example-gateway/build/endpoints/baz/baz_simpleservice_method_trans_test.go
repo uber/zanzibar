@@ -32,6 +32,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
@@ -42,64 +44,90 @@ import (
 
 func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 
+	confFiles := util.DefaultConfigFiles("example-gateway")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.baz.alternates") {
+		staticConf.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
+
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
-		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	for i := 0; i < 3; i++ {
+	fakeTrans := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_Trans_Args,
+	) (*clientsBazBase.TransStruct, map[string]string, error) {
 
-		fakeTrans := func(
-			ctx context.Context,
-			reqHeaders map[string]string,
-			args *clientsBazBaz.SimpleService_Trans_Args,
-		) (*clientsBazBase.TransStruct, map[string]string, error) {
+		var resHeaders map[string]string
 
-			var resHeaders map[string]string
+		var res clientsBazBase.TransStruct
 
-			var res clientsBazBase.TransStruct
-
-			clientResponse := []byte(`{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
-			err := json.Unmarshal(clientResponse, &res)
-			if err != nil {
-				t.Fatal("cant't unmarshal client response json to client response struct")
-				return nil, resHeaders, err
-			}
-			return &res, resHeaders, nil
+		clientResponse := []byte(`{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
+		err := json.Unmarshal(clientResponse, &res)
+		if err != nil {
+			t.Fatal("cant't unmarshal client response json to client response struct")
+			return nil, resHeaders, err
 		}
+		return &res, resHeaders, nil
+	}
 
+	headers := map[string]string{}
+	err = gateway.TChannelBackends()["baz"].Register(
+		"baz", "trans", "SimpleService::trans",
+		bazclient.NewSimpleServiceTransHandler(fakeTrans),
+	)
+	assert.NoError(t, err)
+	makeRequestAndValidateTransSuccessfulRequest(t, gateway, headers)
+
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
 		headers := map[string]string{}
-		if i == 0 {
-			err = gateway.TChannelBackends()["baz"].Register(
-				"baz", "trans", "SimpleService::trans",
-				bazclient.NewSimpleServiceTransHandler(fakeTrans),
-			)
-		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if i == 1 {
+				headers["x-container"] = "sandbox"
+			} else if i == 2 {
+				headers["x-test-Env"] = "test1"
+			}
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "trans", "SimpleService::trans",
 				bazclient.NewSimpleServiceTransHandler(fakeTrans),
 			)
-			if i == 1 {
-				headers["x-api-environment"] = "sandbox"
-			} else if i == 2 {
-				headers["RTAPI-Container"] = "test1"
-			}
 		}
-		assert.NoError(t, err)
-		makeRequestAndValidateTransSuccessfulRequest(t, gateway, i, headers)
 
+		makeRequestAndValidateTransSuccessfulRequest(t, gateway, headers)
+		i++
 	}
 
 }
 
-func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
+func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 
 	endpointRequest := []byte(`{"arg1":{"driver":{"check":2,"msg":"arg1_driver_msg"},"message":"msg_arg1","rider":{"check":1,"msg":"arg1_rider_msg"}},"arg2":{"driver":{"check":4,"msg":"arg2_driver_msg"},"message":"msg_arg2","rider":{"check":3,"msg":"arg2_rider_msg"}},"message":"message"}`)
 

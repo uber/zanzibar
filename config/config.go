@@ -44,8 +44,8 @@ type ServiceRouting struct {
 }
 
 type AlternateServiceDetail struct {
-	RoutingConfigs    []RoutingConfig           `yaml:"routingConfigs" json:"routingConfigs"`
-	ServicesDetailMap map[string]ServiceRouting `yaml:"servicesDetail" json:"servicesDetail"`
+	RoutingConfigs    []RoutingConfig            `yaml:"routingConfigs" json:"routingConfigs"`
+	ServicesDetailMap map[string]*ServiceRouting `yaml:"servicesDetail" json:"servicesDetail"`
 }
 
 // NewRuntimeConfigOrDie returns a static config struct

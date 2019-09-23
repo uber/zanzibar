@@ -21,7 +21,6 @@
 package ruleengine
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,6 +49,7 @@ func TestRuleEngine(t *testing.T) {
 		{patternValues: []string{"x-container", "sandbox"}, matchValue: "dummy-sandbox"},
 		{patternValues: []string{"x-test-env", "test1"}, matchValue: "test-staging"},
 		{patternValues: []string{"x-container", "sandbox123"}, noMatch: true},
+		{patternValues: []string{"x-container"}, noMatch: true},
 	}
 	for _, tt := range tests {
 		t.Run("tests", func(t *testing.T) {
@@ -58,8 +58,6 @@ func TestRuleEngine(t *testing.T) {
 				assert.Equal(t, val, tt.matchValue)
 				assert.True(t, exists)
 			} else {
-				fmt.Println(tt.patternValues[1])
-				fmt.Println(val)
 				assert.False(t, exists)
 			}
 		})

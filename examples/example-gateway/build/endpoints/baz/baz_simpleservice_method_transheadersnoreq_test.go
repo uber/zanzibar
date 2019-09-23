@@ -32,6 +32,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
@@ -42,64 +44,90 @@ import (
 
 func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 
+	confFiles := util.DefaultConfigFiles("example-gateway")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.baz.alternates") {
+		staticConf.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
+
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
-		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	for i := 0; i < 3; i++ {
+	fakeTransHeadersType := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+	) (*clientsBazBase.TransHeaders, map[string]string, error) {
 
-		fakeTransHeadersType := func(
-			ctx context.Context,
-			reqHeaders map[string]string,
-			args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-		) (*clientsBazBase.TransHeaders, map[string]string, error) {
+		var resHeaders map[string]string
 
-			var resHeaders map[string]string
+		var res clientsBazBase.TransHeaders
 
-			var res clientsBazBase.TransHeaders
-
-			clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
-			err := json.Unmarshal(clientResponse, &res)
-			if err != nil {
-				t.Fatal("cant't unmarshal client response json to client response struct")
-				return nil, resHeaders, err
-			}
-			return &res, resHeaders, nil
+		clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
+		err := json.Unmarshal(clientResponse, &res)
+		if err != nil {
+			t.Fatal("cant't unmarshal client response json to client response struct")
+			return nil, resHeaders, err
 		}
+		return &res, resHeaders, nil
+	}
 
+	headers := map[string]string{}
+	err = gateway.TChannelBackends()["baz"].Register(
+		"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
+		bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
+	)
+	assert.NoError(t, err)
+	makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, headers)
+
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
 		headers := map[string]string{}
-		if i == 0 {
-			err = gateway.TChannelBackends()["baz"].Register(
-				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
-				bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
-			)
-		} else if gateway.TChannelBackends()["baz:"+strconv.Itoa(i)] != nil {
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if i == 1 {
+				headers["x-container"] = "sandbox"
+			} else if i == 2 {
+				headers["x-test-Env"] = "test1"
+			}
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
 				bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
 			)
-			if i == 1 {
-				headers["x-api-environment"] = "sandbox"
-			} else if i == 2 {
-				headers["RTAPI-Container"] = "test1"
-			}
 		}
-		assert.NoError(t, err)
-		makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, i, headers)
 
+		makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, headers)
+		i++
 	}
 
 }
 
-func makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, clientIndex int, headers map[string]string) {
+func makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 	headers["b3"] = "true"
 	headers["i2"] = "321"
 	headers["s1"] = "string"

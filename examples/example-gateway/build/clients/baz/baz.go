@@ -26,7 +26,9 @@ package bazclient
 import (
 	"context"
 	"errors"
+	"net/textproto"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
@@ -300,9 +302,10 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 
 		ruleWrapper := ruleengine.RuleWrapper{}
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			rawRule := ruleengine.RawRule{Patterns: []string{routingConfig.HeaderName, routingConfig.HeaderValue},
+			rawRule := ruleengine.RawRule{Patterns: []string{textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName),
+				strings.ToLower(routingConfig.HeaderValue)},
 				Value: routingConfig.ServiceName}
-			headerPatterns = append(headerPatterns, routingConfig.HeaderName)
+			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 
 			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
