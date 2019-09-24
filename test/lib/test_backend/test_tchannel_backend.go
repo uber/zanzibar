@@ -22,7 +22,6 @@ package testbackend
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"os"
 	"strconv"
@@ -84,8 +83,6 @@ func BuildTChannelBackends(
 
 		initializeAlternateBackends(result, clientID, tChannelBackends, cfg, staticConfig)
 	}
-
-	fmt.Printf("initing all backends %+v -->\n", result)
 
 	return result, nil
 }
