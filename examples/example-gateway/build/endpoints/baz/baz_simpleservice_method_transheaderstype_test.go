@@ -120,6 +120,7 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "transHeadersType", "SimpleService::transHeadersType",
 				bazclient.NewSimpleServiceTransHeadersTypeHandler(fakeTransHeadersType),
 			)
+			assert.NoError(t, err)
 			i++
 		}
 

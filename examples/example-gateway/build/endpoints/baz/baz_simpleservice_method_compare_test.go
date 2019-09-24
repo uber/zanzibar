@@ -121,6 +121,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "compare", "SimpleService::compare",
 				bazclient.NewSimpleServiceCompareHandler(fakeCompare),
 			)
+			assert.NoError(t, err)
 			i++
 		}
 

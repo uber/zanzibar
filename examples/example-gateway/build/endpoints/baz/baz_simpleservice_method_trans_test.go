@@ -121,6 +121,7 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "trans", "SimpleService::trans",
 				bazclient.NewSimpleServiceTransHandler(fakeTrans),
 			)
+			assert.NoError(t, err)
 			i++
 		}
 

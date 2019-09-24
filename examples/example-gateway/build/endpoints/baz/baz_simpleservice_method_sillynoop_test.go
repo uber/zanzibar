@@ -108,6 +108,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "sillyNoop", "SimpleService::sillyNoop",
 				bazclient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 			)
+			assert.NoError(t, err)
 			i++
 		}
 

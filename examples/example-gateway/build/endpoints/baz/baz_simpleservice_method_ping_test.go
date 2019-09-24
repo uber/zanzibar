@@ -119,6 +119,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "ping", "SimpleService::ping",
 				bazclient.NewSimpleServicePingHandler(fakePing),
 			)
+			assert.NoError(t, err)
 			i++
 		}
 

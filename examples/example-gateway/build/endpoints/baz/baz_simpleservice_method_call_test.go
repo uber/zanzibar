@@ -110,6 +110,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 				"baz", "call", "SimpleService::call",
 				bazclient.NewSimpleServiceCallHandler(fakeCall),
 			)
+			assert.NoError(t, err)
 			i++
 		}
 
