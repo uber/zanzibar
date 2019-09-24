@@ -102,6 +102,7 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 	assert.NoError(t, err)
 	makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, headers)
 
+	isSet := true
 	i := 1
 	for serviceName := range alternateServiceDetail.ServicesDetailMap {
 		headers := map[string]string{}
@@ -110,19 +111,20 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 			headers["x-container"] = "randomstr"
 			headers["x-test-Env"] = "randomstr"
 		} else {
-			if i == 1 {
+			if isSet {
 				headers["x-container"] = "sandbox"
-			} else if i == 2 {
+				isSet = false
+			} else {
 				headers["x-test-Env"] = "test1"
 			}
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "transHeadersNoReq", "SimpleService::transHeadersNoReq",
 				bazclient.NewSimpleServiceTransHeadersNoReqHandler(fakeTransHeadersType),
 			)
+			i++
 		}
 
 		makeRequestAndValidateTransHeadersNoReqSuccessfulRequest(t, gateway, headers)
-		i++
 	}
 
 }

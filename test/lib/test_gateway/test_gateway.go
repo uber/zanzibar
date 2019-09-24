@@ -411,12 +411,6 @@ func (gateway *ChildProcessGateway) Close() {
 		_ = gateway.cmd.Wait()
 	}
 
-	if gateway != nil && gateway.backendsTChannel != nil {
-		for _, backend := range gateway.backendsTChannel {
-			backend.Close()
-		}
-	}
-
 	if gateway.binaryFileInfo != nil {
 		gateway.binaryFileInfo.Cleanup()
 	}

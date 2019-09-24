@@ -102,6 +102,7 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 	assert.NoError(t, err)
 	makeRequestAndValidateTransSuccessfulRequest(t, gateway, headers)
 
+	isSet := true
 	i := 1
 	for serviceName := range alternateServiceDetail.ServicesDetailMap {
 		headers := map[string]string{}
@@ -110,19 +111,20 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 			headers["x-container"] = "randomstr"
 			headers["x-test-Env"] = "randomstr"
 		} else {
-			if i == 1 {
+			if isSet {
 				headers["x-container"] = "sandbox"
-			} else if i == 2 {
+				isSet = false
+			} else {
 				headers["x-test-Env"] = "test1"
 			}
 			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
 				"baz", "trans", "SimpleService::trans",
 				bazclient.NewSimpleServiceTransHandler(fakeTrans),
 			)
+			i++
 		}
 
 		makeRequestAndValidateTransSuccessfulRequest(t, gateway, headers)
-		i++
 	}
 
 }

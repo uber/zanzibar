@@ -829,6 +829,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	assert.NoError(t, err)
 	makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, headers)
 
+	isSet := true
 	i := 1
 	for serviceName := range alternateServiceDetail.ServicesDetailMap {
 		headers := map[string]string{}
@@ -837,19 +838,20 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 			headers["x-container"] = "randomstr"
 			headers["x-test-Env"] = "randomstr"
 		} else {
-			if i == 1 {
+			if isSet {
 				headers["x-container"] = "sandbox"
-			} else if i == 2 {
+				isSet = false
+			} else {
 				headers["x-test-Env"] = "test1"
 			}
 			err = gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)].Register(
 				"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 				{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 			)
+			i++
 		}
 
 		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, headers)
-		i++
 	}
 	{{end}}
 }
@@ -911,7 +913,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6284, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6307, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
