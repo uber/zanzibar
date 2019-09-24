@@ -24,10 +24,12 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/uber-go/tally/m3"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -128,7 +130,7 @@ func TestHealthMetrics(t *testing.T) {
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 10 metrics")
+	assert.Equal(t, numMetrics, len(metrics))
 	tags := map[string]string{
 		"env":           "test",
 		"service":       "test-gateway",
@@ -141,21 +143,22 @@ func TestHealthMetrics(t *testing.T) {
 		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "health",
-		"handlerid":     "health",
-		"status":        "200",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"protocol":      "HTTP",
+		"status": "200",
+	}
+	for k, v := range tags {
+		statusTags[k] = v
+	}
+	histogramTags := map[string]string{
+		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): There must be a better way than this hard-coding
+		m3.DefaultHistogramBucketIDName: "0000",
+	}
+	for k, v := range statusTags {
+		histogramTags[k] = v
 	}
 
 	key := tally.KeyForPrefixedStringMap("endpoint.request", tags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 
 	statusKey := tally.KeyForPrefixedStringMap(
@@ -164,23 +167,22 @@ func TestHealthMetrics(t *testing.T) {
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", statusTags,
+		"endpoint.latency", histogramTags,
 	)]
-	value := *latencyMetric.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+	value := *latencyMetric.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value)
 
 	recvdMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.request", tags,
 	)]
 	value = *recvdMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
+	assert.Equal(t, int64(1), value)
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
 	)]
 	value = *statusMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
+	assert.Equal(t, int64(1), value)
 }
 
 func TestRuntimeMetrics(t *testing.T) {
@@ -209,8 +211,9 @@ func TestRuntimeMetrics(t *testing.T) {
 		"runtime.memory.stack",
 
 		"runtime.memory.num-gc",
-		"runtime.memory.gc-pause-ms",
 	}
+	histogramName := "runtime.memory.gc-pause-ms"
+
 	// this is a shame because first GC takes 20s to kick in
 	// only then gc stats can be collected
 	// oh and the magic number 2 are 2 other stats produced
@@ -229,4 +232,12 @@ func TestRuntimeMetrics(t *testing.T) {
 		key := tally.KeyForPrefixedStringMap(name, tags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
+	histogramTags := map[string]string{
+		m3.DefaultHistogramBucketName:   "-infinity-10ms",
+		m3.DefaultHistogramBucketIDName: "0000",
+	}
+	for k, v := range tags {
+		histogramTags[k] = v
+	}
+	assert.Contains(t, metrics, tally.KeyForPrefixedStringMap(histogramName, histogramTags))
 }

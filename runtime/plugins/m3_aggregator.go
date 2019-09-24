@@ -89,13 +89,16 @@ func (g *M3Collector) incrementCounterMetric(prefix string, i float64) {
 	if i == 0 {
 		return
 	}
-	c := g.scope.Counter(prefix)
-	c.Inc(int64(i))
+	g.scope.Counter(prefix).Inc(int64(i))
 }
 
-func (g *M3Collector) updateTimerMetric(prefix string, dur time.Duration) {
-	c := g.scope.Timer(prefix)
-	c.Record(dur)
+// @deprecated in favor of Histogram. Reopen ONLY if there is a need to
+//func (g *M3Collector) updateTimerMetric(prefix string, dur time.Duration) {
+//	g.scope.Timer(prefix).Record(dur)
+//}
+
+func (g *M3Collector) updateHistogramMetric(prefix string, dur time.Duration) {
+	g.scope.Histogram(prefix, tally.DefaultBuckets).RecordDuration(dur)
 }
 
 // Update is a callback by hystrix lib to relay the metrics to m3
@@ -109,8 +112,8 @@ func (g *M3Collector) Update(r metricCollector.MetricResult) {
 	g.incrementCounterMetric(g.timeoutsPrefix, r.Timeouts)
 	g.incrementCounterMetric(g.fallbackSuccessesPrefix, r.FallbackSuccesses)
 	g.incrementCounterMetric(g.fallbackFailuresPrefix, r.FallbackFailures)
-	g.updateTimerMetric(g.totalDurationPrefix, r.TotalDuration)
-	g.updateTimerMetric(g.runDurationPrefix, r.RunDuration)
+	g.updateHistogramMetric(g.totalDurationPrefix, r.TotalDuration)
+	g.updateHistogramMetric(g.runDurationPrefix, r.RunDuration)
 }
 
 // Reset is a noop operation in this collector.

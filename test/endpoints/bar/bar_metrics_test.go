@@ -28,6 +28,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
+	"github.com/uber-go/tally/m3"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -108,33 +109,32 @@ func TestCallMetrics(t *testing.T) {
 		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"status":        "200",
-		"endpointid":    "bar",
-		"handlerid":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"protocol":      "HTTP",
+		"status": "200",
+	}
+	for k, v := range endpointTags {
+		statusTags[k] = v
+	}
+	histogramTags := map[string]string{
+		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0000",
+	}
+	for k, v := range statusTags {
+		histogramTags[k] = v
 	}
 	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 
 	inboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", statusTags,
+		"endpoint.latency", histogramTags,
 	)]
-	value := *inboundLatency.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+	assert.Equal(t, int64(1), *inboundLatency.MetricValue.Count.I64Value)
 
 	inboundRecvd := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.request", endpointTags,
 	)]
-	value = *inboundRecvd.MetricValue.Count.I64Value
+	value := *inboundRecvd.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value)
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
@@ -143,10 +143,6 @@ func TestCallMetrics(t *testing.T) {
 	value = *inboundStatus.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	httpClientNames := []string{
-		"client.latency",
-		"client.request",
-	}
 	httpClientTags := map[string]string{
 		"env":            "test",
 		"service":        "test-gateway",
@@ -162,45 +158,30 @@ func TestCallMetrics(t *testing.T) {
 		"protocol":       "HTTP",
 	}
 	cStatusTags := map[string]string{
-		"env":            "test",
-		"service":        "test-gateway",
-		"clientid":       "bar",
-		"clientmethod":   "Normal",
-		"targetendpoint": "Bar--normal",
-		"status":         "200",
-		"dc":             "unknown",
-		"endpointid":     "bar",
-		"handlerid":      "normal",
-		"regionname":     "san_francisco",
-		"device":         "ios",
-		"deviceversion":  "carbon",
-		"protocol":       "HTTP",
+		"status": "200",
+	}
+	for k, v := range httpClientTags {
+		cStatusTags[k] = v
+	}
+	cHistogramTags := map[string]string{
+		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0000",
+	}
+	for k, v := range httpClientTags {
+		cHistogramTags[k] = v
 	}
 
-	for _, name := range httpClientNames {
-		key := tally.KeyForPrefixedStringMap(name, httpClientTags)
-		assert.Contains(t, metrics, key, "expected metric: %s", key)
-	}
+	key = tally.KeyForPrefixedStringMap("client.request", httpClientTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
 
-	outboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"client.latency", httpClientTags,
-	)]
-	value = *outboundLatency.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+	key = tally.KeyForPrefixedStringMap("client.status", cStatusTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
 
-	outboundSent := metrics[tally.KeyForPrefixedStringMap(
-		"client.request", httpClientTags,
-	)]
-	value = *outboundSent.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
-
-	statusSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"client.status",
-		cStatusTags,
-	)]
-	value = *statusSuccess.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
+	key = tally.KeyForPrefixedStringMap("client.latency", cHistogramTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 
 	allLogs := gateway.AllLogs()
 

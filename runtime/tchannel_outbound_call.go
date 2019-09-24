@@ -64,7 +64,7 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	} else {
 		c.metrics.IncCounter(ctx, clientSuccess, 1)
 	}
-	c.metrics.RecordTimer(ctx, clientLatency, c.finishTime.Sub(c.startTime))
+	c.metrics.RecordHistogramDuration(ctx, clientLatency, c.finishTime.Sub(c.startTime))
 
 	// write logs
 	fields := c.logFields(ctx)
