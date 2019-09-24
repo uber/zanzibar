@@ -2561,14 +2561,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
-			ServiceName:		  serviceName,
-			ClientID:			 "{{$clientID}}",
-			MethodNames:		  methodNames,
-			Timeout:			  timeout,
-			TimeoutPerAttempt:	  timeoutPerAttempt,
-			RoutingKey:		      &routingKey,
-			RuleEngine:		      re,
-			HeaderPatterns:	      headerPatterns,
+			ServiceName:          serviceName,
+			ClientID:             "{{$clientID}}",
+			MethodNames:          methodNames,
+			Timeout:              timeout,
+			TimeoutPerAttempt:    timeoutPerAttempt,
+			RoutingKey:           &routingKey,
+			RuleEngine:           re,
+			HeaderPatterns:       headerPatterns,
 			RequestUUIDHeaderKey: requestUUIDHeaderKey,
 			AltChannelMap:        altChannelMap,
 		},
@@ -2738,7 +2738,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10651, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10688, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

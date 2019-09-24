@@ -215,9 +215,9 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:			sleepWindowInMilliseconds,
+			SleepWindow:            sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:				timeoutVal,
+			Timeout:                timeoutVal,
 		})
 	}
 	return circuitBreakerDisabled
