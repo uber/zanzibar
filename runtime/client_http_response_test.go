@@ -89,9 +89,6 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	var resp string
 	assert.NoError(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "foo", resp)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
@@ -152,7 +149,6 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 
 	logs := bgateway.AllLogs()
 	assert.Len(t, logs["Could not parse response json"], 1)
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestUnknownStatusCode(t *testing.T) {

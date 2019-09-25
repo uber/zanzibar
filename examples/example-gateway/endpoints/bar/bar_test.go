@@ -79,7 +79,4 @@ func TestBarListAndEnumClient(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, body)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
