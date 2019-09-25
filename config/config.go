@@ -23,13 +23,29 @@ package config
 import (
 	"os"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // EnvConfig map from environment variable to config key and data type
 type EnvConfig map[string]struct {
 	Key      string `json:"key"`
 	DataType string `json:"dataType"`
+}
+
+type RoutingConfig struct {
+	HeaderName  string `yaml:"headerName" json:"headerName"`
+	HeaderValue string `yaml:"headerValue" json:"headerValue"`
+	ServiceName string `yaml:"serviceName" json:"serviceName"`
+}
+
+type ServiceRouting struct {
+	IP   string `yaml:"ip" json:"ip"`
+	Port int    `yaml:"port" json:"port"`
+}
+
+type AlternateServiceDetail struct {
+	RoutingConfigs    []RoutingConfig            `yaml:"routingConfigs" json:"routingConfigs"`
+	ServicesDetailMap map[string]*ServiceRouting `yaml:"servicesDetail" json:"servicesDetail"`
 }
 
 // NewRuntimeConfigOrDie returns a static config struct

@@ -96,5 +96,5 @@ func (r *RawTChannelClient) Call(
 		call.metrics = r.metrics
 	}
 
-	return r.tc.call(ctx, call, reqHeaders, req, resp, false)
+	return r.tc.call(ctx, call, reqHeaders, req, resp)
 }

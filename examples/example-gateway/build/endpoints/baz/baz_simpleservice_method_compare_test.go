@@ -28,9 +28,12 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
@@ -40,14 +43,32 @@ import (
 )
 
 func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
-	testcompareCounter := 0
+
+	confFiles := util.DefaultConfigFiles("example-gateway")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.baz.alternates") {
+		staticConf.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
-		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -59,7 +80,6 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
 	) (*clientsBazBase.BazResponse, map[string]string, error) {
-		testcompareCounter++
 
 		var resHeaders map[string]string
 
@@ -74,13 +94,43 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		return &res, resHeaders, nil
 	}
 
+	headers := map[string]string{}
 	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "compare", "SimpleService::compare",
 		bazclient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
 	assert.NoError(t, err)
+	makeRequestAndValidateCompareSuccessfulRequest(t, gateway, headers)
 
-	headers := map[string]string{}
+	isSet := true
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		headers := map[string]string{}
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if isSet {
+				headers["x-container"] = "sandbox"
+				isSet = false
+			} else {
+				headers["x-test-Env"] = "test1"
+			}
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "compare", "SimpleService::compare",
+				bazclient.NewSimpleServiceCompareHandler(fakeCompare),
+			)
+			assert.NoError(t, err)
+			i++
+		}
+
+		makeRequestAndValidateCompareSuccessfulRequest(t, gateway, headers)
+	}
+
+}
+
+func makeRequestAndValidateCompareSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 
 	endpointRequest := []byte(`{"arg1":{"b1":true,"i3":42,"s2":"hello"},"arg2":{"b1":true,"i3":42,"s2":"hola"}}`)
 
@@ -100,7 +150,6 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testcompareCounter)
 	assert.Equal(t, 200, res.StatusCode)
 	assert.JSONEq(t, `{"message":"different"}`, string(data))
 }

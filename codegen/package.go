@@ -53,8 +53,6 @@ type PackageHelper struct {
 	middlewareSpecs map[string]*MiddlewareSpec
 	// The default middlewares for all endpoints
 	defaultMiddlewareSpecs map[string]*MiddlewareSpec
-	// Use staging client when this header is set as "true"
-	stagingReqHeader string
 	// Use deputy client when this header is set
 	deputyReqHeader string
 	// traceKey is the key for unique trace id that identifies request / response pair
@@ -145,13 +143,6 @@ func (p *PackageHelperOptions) copyrightHeader() string {
 	return ""
 }
 
-func (p *PackageHelperOptions) stagingReqHeader() string {
-	if p.StagingReqHeader != "" {
-		return p.StagingReqHeader
-	}
-	return "X-Zanzibar-Use-Staging"
-}
-
 func (p *PackageHelperOptions) deputyReqHeader() string {
 	if p.DeputyReqHeader != "" {
 		return p.DeputyReqHeader
@@ -210,7 +201,6 @@ func NewPackageHelper(
 		middlewareSpecs:        middlewareSpecs,
 		defaultMiddlewareSpecs: defaultMiddlewareSpecs,
 		annotationPrefix:       options.annotationPrefix(),
-		stagingReqHeader:       options.stagingReqHeader(),
 		deputyReqHeader:        options.deputyReqHeader(),
 		traceKey:               options.traceKey(),
 		moduleSearchPaths:      options.ModuleSearchPaths,
@@ -338,12 +328,6 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 		return "", nil
 	}
 	return GoType(p, typeSpec)
-}
-
-// StagingReqHeader returns the header name that will be checked to determine
-// if a request should go to the staging downstream client
-func (p PackageHelper) StagingReqHeader() string {
-	return p.stagingReqHeader
 }
 
 // DeputyReqHeader returns the header name that will be checked to determine

@@ -28,9 +28,12 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
@@ -39,14 +42,32 @@ import (
 )
 
 func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
-	testtransHeadersTypeCounter := 0
+
+	confFiles := util.DefaultConfigFiles("example-gateway")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.baz.alternates") {
+		staticConf.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
-		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -58,7 +79,6 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_TransHeadersType_Args,
 	) (*clientsBazBaz.TransHeaderType, map[string]string, error) {
-		testtransHeadersTypeCounter++
 
 		var resHeaders map[string]string
 
@@ -73,13 +93,43 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 		return &res, resHeaders, nil
 	}
 
+	headers := map[string]string{}
 	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "transHeadersType", "SimpleService::transHeadersType",
 		bazclient.NewSimpleServiceTransHeadersTypeHandler(fakeTransHeadersType),
 	)
 	assert.NoError(t, err)
+	makeRequestAndValidateTransHeadersTypeSuccessfulRequest(t, gateway, headers)
 
-	headers := map[string]string{}
+	isSet := true
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		headers := map[string]string{}
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if isSet {
+				headers["x-container"] = "sandbox"
+				isSet = false
+			} else {
+				headers["x-test-Env"] = "test1"
+			}
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "transHeadersType", "SimpleService::transHeadersType",
+				bazclient.NewSimpleServiceTransHeadersTypeHandler(fakeTransHeadersType),
+			)
+			assert.NoError(t, err)
+			i++
+		}
+
+		makeRequestAndValidateTransHeadersTypeSuccessfulRequest(t, gateway, headers)
+	}
+
+}
+
+func makeRequestAndValidateTransHeadersTypeSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 	headers["x-boolean"] = "true"
 	headers["x-float"] = "3.14"
 	headers["x-int"] = "3"
@@ -103,7 +153,6 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testtransHeadersTypeCounter)
 	assert.Equal(t, 200, res.StatusCode)
 	assert.JSONEq(t, `{}`, string(data))
 }

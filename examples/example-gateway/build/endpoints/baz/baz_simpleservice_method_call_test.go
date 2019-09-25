@@ -26,9 +26,12 @@ package bazendpoint
 import (
 	"bytes"
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
@@ -37,14 +40,32 @@ import (
 )
 
 func TestCallSuccessfulRequestOKResponse(t *testing.T) {
-	testcallCounter := 0
+
+	confFiles := util.DefaultConfigFiles("example-gateway")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.baz.alternates") {
+		staticConf.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
-		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -56,20 +77,49 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Call_Args,
 	) (map[string]string, error) {
-		testcallCounter++
 
 		var resHeaders map[string]string
 
 		return resHeaders, nil
 	}
 
+	headers := map[string]string{}
 	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazclient.NewSimpleServiceCallHandler(fakeCall),
 	)
 	assert.NoError(t, err)
+	makeRequestAndValidateCallSuccessfulRequest(t, gateway, headers)
 
-	headers := map[string]string{}
+	isSet := true
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		headers := map[string]string{}
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if isSet {
+				headers["x-container"] = "sandbox"
+				isSet = false
+			} else {
+				headers["x-test-Env"] = "test1"
+			}
+			err = gateway.TChannelBackends()["baz:"+strconv.Itoa(i)].Register(
+				"baz", "call", "SimpleService::call",
+				bazclient.NewSimpleServiceCallHandler(fakeCall),
+			)
+			assert.NoError(t, err)
+			i++
+		}
+
+		makeRequestAndValidateCallSuccessfulRequest(t, gateway, headers)
+	}
+
+}
+
+func makeRequestAndValidateCallSuccessfulRequest(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
@@ -85,6 +135,5 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testcallCounter)
 	assert.Equal(t, 204, res.StatusCode)
 }

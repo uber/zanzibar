@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,6 +30,8 @@ import (
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	netContext "golang.org/x/net/context"
+
+	"github.com/uber/zanzibar/runtime/ruleengine"
 )
 
 const (
@@ -57,14 +60,19 @@ type TChannelClientOption struct {
 	// `FooClient.Bar()` to issue a RPC to Thrift service `Foo`'s `bar` method.
 	MethodNames map[string]string
 
-	// An alternate subchannel that can optionally be used to make a TChannel call
-	// instead; e.g. can allow the service to be overridden when a "X-Zanzibar-Use-Staging"
-	// header is present
-	AltSubchannelName string
+	// Dynamically determine which alternate channel to call dynamically based on ruleEngine,
+	// else fallback to default routing
+	RuleEngine ruleengine.RuleEngine
+
+	// list of headers which would be looked for matching a request with ruleEngine
+	HeaderPatterns []string
 
 	// the header key that is used together with the request uuid on context to
 	// form a header when sending the request to downstream, e.g. "x-request-uuid"
 	RequestUUIDHeaderKey string
+
+	// AltChannelMap is a map for dynamic lookup of alternative channels
+	AltChannelMap map[string]*tchannel.SubChannel
 }
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
@@ -85,6 +93,9 @@ type TChannelClient struct {
 	contextExtractor  ContextExtractor
 
 	requestUUIDHeaderKey string
+	ruleEngine           ruleengine.RuleEngine
+	headerPatterns       []string
+	altChannelMap        map[string]*tchannel.SubChannel
 }
 
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
@@ -125,24 +136,22 @@ func NewTChannelClientContext(
 	}
 
 	client := &TChannelClient{
-		ch:                ch,
-		sc:                ch.GetSubChannel(opt.ServiceName),
-		serviceName:       opt.ServiceName,
-		ClientID:          opt.ClientID,
-		methodNames:       opt.MethodNames,
-		timeout:           opt.Timeout,
-		timeoutPerAttempt: opt.TimeoutPerAttempt,
-		routingKey:        opt.RoutingKey,
-		Loggers:           loggers,
-		metrics:           metrics,
-		contextExtractor:  contextExtractor,
-
+		ch:                   ch,
+		sc:                   ch.GetSubChannel(opt.ServiceName),
+		serviceName:          opt.ServiceName,
+		ClientID:             opt.ClientID,
+		methodNames:          opt.MethodNames,
+		timeout:              opt.Timeout,
+		timeoutPerAttempt:    opt.TimeoutPerAttempt,
+		routingKey:           opt.RoutingKey,
+		Loggers:              loggers,
+		metrics:              metrics,
+		contextExtractor:     contextExtractor,
 		requestUUIDHeaderKey: opt.RequestUUIDHeaderKey,
+		ruleEngine:           opt.RuleEngine,
+		headerPatterns:       opt.HeaderPatterns,
+		altChannelMap:        opt.AltChannelMap,
 	}
-	if opt.AltSubchannelName != "" {
-		client.scAlt = ch.GetSubChannel(opt.AltSubchannelName)
-	}
-
 	return client
 }
 
@@ -170,35 +179,7 @@ func (c *TChannelClient) Call(
 		metrics:       c.metrics,
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp, false)
-}
-
-// CallThruAltChannel makes a RPC call using a configured alternate channel
-func (c *TChannelClient) CallThruAltChannel(
-	ctx context.Context,
-	thriftService, methodName string,
-	reqHeaders map[string]string,
-	req, resp RWTStruct,
-) (success bool, resHeaders map[string]string, err error) {
-	serviceMethod := thriftService + "::" + methodName
-	scopeTags := map[string]string{
-		scopeTagClient:          c.ClientID,
-		scopeTagClientMethod:    methodName,
-		scopeTagsTargetService:  c.serviceName,
-		scopeTagsTargetEndpoint: serviceMethod,
-	}
-
-	ctx = WithScopeTags(ctx, scopeTags)
-	call := &tchannelOutboundCall{
-		client:        c,
-		methodName:    c.methodNames[serviceMethod],
-		serviceMethod: serviceMethod,
-		reqHeaders:    reqHeaders,
-		logger:        c.Loggers[serviceMethod],
-		metrics:       c.metrics,
-	}
-
-	return c.call(ctx, call, reqHeaders, req, resp, true)
+	return c.call(ctx, call, reqHeaders, req, resp)
 }
 
 func (c *TChannelClient) call(
@@ -206,7 +187,6 @@ func (c *TChannelClient) call(
 	call *tchannelOutboundCall,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
-	useAltSubchannel bool,
 ) (success bool, resHeaders map[string]string, err error) {
 	defer func() { call.finish(ctx, err) }()
 	call.start()
@@ -244,14 +224,7 @@ func (c *TChannelClient) call(
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
 		call.resHeaders, call.success = nil, false
 
-		sc := c.sc
-		if useAltSubchannel {
-			if c.scAlt == nil {
-				return errors.Errorf("alternate subchannel not configured for %s", call.client.ClientID)
-			}
-			sc = c.scAlt
-		}
-
+		sc := c.getDynamicChannelWithFallback(reqHeaders, c.sc)
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
@@ -298,4 +271,31 @@ func (c *TChannelClient) call(
 	}
 
 	return call.success, call.resHeaders, err
+}
+
+// first rule match, would be the choosen channel. if nothing matches fallback to default channel
+func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
+	sc *tchannel.SubChannel) *tchannel.SubChannel {
+	ch := sc
+	if c.ruleEngine == nil {
+		return ch
+	}
+	for _, headerPattern := range c.headerPatterns {
+		// this header is not present, so can't match a rule
+		headerPatternVal, ok := reqHeaders[headerPattern]
+		if !ok {
+			continue
+		}
+		val, match := c.ruleEngine.GetValue(headerPattern, strings.ToLower(headerPatternVal))
+		// if rule doesn't match, continue with a next input
+		if !match {
+			continue
+		}
+		serviceName := val.(string)
+		// we know service has a channel, as this was constructed in c'tor
+		ch = c.altChannelMap[serviceName]
+		return ch
+	}
+	// if nothing matches return the default channel/**/
+	return ch
 }

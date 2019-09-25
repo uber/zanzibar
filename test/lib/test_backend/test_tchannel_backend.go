@@ -28,30 +28,34 @@ import (
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/uber/zanzibar/config"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
-	Channel  *tchannel.Channel
-	Router   *zanzibar.TChannelRouter
-	IP       string
-	Port     int32
-	RealPort int32
-	RealAddr string
+	Channel     *tchannel.Channel
+	Router      *zanzibar.TChannelRouter
+	IP          string
+	Port        int32
+	RealPort    int32
+	RealAddr    string
+	ServiceName string
 }
 
 // BuildTChannelBackends returns a map of TChannel backends based on config
 func BuildTChannelBackends(
-	cfg map[string]interface{}, knownTChannelBackends []string,
+	cfg map[string]interface{}, knownTChannelBackends []string, staticConfig *zanzibar.StaticConfig,
+	tChannelBackends []*TestTChannelBackend,
 ) (map[string]*TestTChannelBackend, error) {
 	n := len(knownTChannelBackends)
 	result := make(map[string]*TestTChannelBackend, n)
 
-	for i := 0; i < n; i++ {
-		clientID := knownTChannelBackends[i]
+	for clientIndex := 0; clientIndex < n; clientIndex++ {
+		clientID := knownTChannelBackends[clientIndex]
 
 		val, ok := cfg["clients."+clientID+".serviceName"]
 		var serviceName string
@@ -61,25 +65,46 @@ func BuildTChannelBackends(
 		} else {
 			serviceName = val.(string)
 		}
+		cfg["clients."+clientID+".ip"] = "127.0.0.1"
+		cfg["clients."+clientID+".timeout"] = int64(10000)
+		cfg["clients."+clientID+".timeoutPerAttempt"] = int64(10000)
 
-		backend, err := CreateTChannelBackend(0, serviceName)
+		backend, err := CreateTChannelBackend(int32(0), serviceName)
 		if err != nil {
 			return nil, err
 		}
-
 		err = backend.Bootstrap()
 		if err != nil {
 			return nil, err
 		}
-
 		result[clientID] = backend
-		cfg["clients."+clientID+".ip"] = "127.0.0.1"
+
 		cfg["clients."+clientID+".port"] = int64(backend.RealPort)
-		cfg["clients."+clientID+".timeout"] = int64(10000)
-		cfg["clients."+clientID+".timeoutPerAttempt"] = int64(10000)
+
+		initializeAlternateBackends(result, clientID, tChannelBackends, cfg, staticConfig)
 	}
 
 	return result, nil
+}
+
+func initializeAlternateBackends(result map[string]*TestTChannelBackend, clientID string,
+	backends []*TestTChannelBackend, cfg map[string]interface{}, staticConfig *zanzibar.StaticConfig) {
+
+	if backends == nil {
+		return
+	}
+
+	var altServiceDetail config.AlternateServiceDetail
+	staticConfig.MustGetStruct("clients."+clientID+".alternates", &altServiceDetail)
+	cfg["clients."+clientID+".alternates"] = &altServiceDetail
+
+	// create backends for the same client for dynamic routing
+	for backendIndex := 0; backendIndex < len(backends); backendIndex++ {
+		backend := backends[backendIndex]
+		altServiceDetail.ServicesDetailMap[backend.ServiceName].Port = int(backend.RealPort)
+		transformedClientID := clientID + ":" + strconv.Itoa(backendIndex+1)
+		result[transformedClientID] = backend
+	}
 }
 
 // Bootstrap creates a backend for testing
@@ -119,8 +144,9 @@ func (backend *TestTChannelBackend) Close() {
 // "serviceName" is the service discovery name, not necessarily same as the thrift service name.
 func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend, error) {
 	backend := &TestTChannelBackend{
-		IP:   "127.0.0.1",
-		Port: port,
+		IP:          "127.0.0.1",
+		Port:        port,
+		ServiceName: serviceName,
 	}
 
 	testLogger := zap.New(
@@ -166,6 +192,5 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 
 	backend.Channel = channel
 	backend.Router = zanzibar.NewTChannelRouter(channel, &gateway)
-
 	return backend, nil
 }

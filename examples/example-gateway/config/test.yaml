@@ -67,6 +67,20 @@ tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false
-
+clients.baz.alternates:
+  routingConfigs:
+    - headerName: x-container
+      headerValue: ^sandbox$
+      serviceName: basicSandbox
+    - headerName: x-test-env
+      headerValue: ^sandbox$
+      serviceName: nomatch
+  servicesDetail:
+    basicSandbox:
+      ip: 127.0.0.1
+      port: 8113
+    nomatch:
+      ip: 127.0.0.1
+      port: 8114
 grpc.clientServiceNameMapping:
   echo: echo

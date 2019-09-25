@@ -718,6 +718,7 @@ import (
 	{{end -}}
 	"path/filepath"
 	"testing"
+	"strconv"
 	{{if ne .Method.ResponseType "" -}}
 	"io/ioutil"
 	{{end}}
@@ -725,6 +726,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/uber/zanzibar/config"
+	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -742,11 +745,27 @@ import (
 {{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $testName, $testFixture := $.TestFixtures}}
 func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKResponse(t *testing.T) {
-	{{$counter}} := 0
+
+	confFiles := util.DefaultConfigFiles("{{$testFixture.TestServiceName}}")
+	staticConf := config.NewRuntimeConfigOrDie(confFiles, map[string]interface{}{})
+	var alternateServiceDetail config.AlternateServiceDetail
+	if staticConf.ContainsKey("clients.{{$clientName}}.alternates") {
+		staticConf.MustGetStruct("clients.{{$clientName}}.alternates", &alternateServiceDetail)
+	}
+	var backends []*testbackend.TestTChannelBackend
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		if serviceName == "nomatch" {
+			continue
+		}
+		backend, err := testbackend.CreateTChannelBackend(int32(0), serviceName)
+		assert.NoError(t, err)
+		err = backend.Bootstrap()
+		assert.NoError(t, err)
+		backends = append(backends, backend)
+	}
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		{{/* the serviceName here is service discovery name, therefore is ok to be arbitrary */ -}}
@@ -754,7 +773,8 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
 		TestBinary:            util.DefaultMainFile("{{$testFixture.TestServiceName}}"),
-		ConfigFiles:           util.DefaultConfigFiles("{{$testFixture.TestServiceName}}"),
+		ConfigFiles:           confFiles,
+		Backends:              backends,
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -770,7 +790,6 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		args {{$clientMethodRequestType}},
 		{{end -}}
 	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
-		{{$counter}}++
 
 		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
 		assert.Equal(
@@ -802,14 +821,43 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		{{end -}}
 	}
 
-	err = gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
-		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
-	)
-	assert.NoError(t, err)
-	{{end}}
-
 	headers := map[string]string{}
+	err = gateway.TChannelBackends()["{{$clientName}}"].Register(
+			"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
+				{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
+		)
+	assert.NoError(t, err)
+	makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, headers)
+
+	isSet := true
+	i := 1
+	for serviceName := range alternateServiceDetail.ServicesDetailMap {
+		headers := map[string]string{}
+
+		if serviceName == "nomatch" {
+			headers["x-container"] = "randomstr"
+			headers["x-test-Env"] = "randomstr"
+		} else {
+			if isSet {
+				headers["x-container"] = "sandbox"
+				isSet = false
+			} else {
+				headers["x-test-Env"] = "test1"
+			}
+			err = gateway.TChannelBackends()["{{$clientName}}:"+strconv.Itoa(i)].Register(
+				"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
+				{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
+			)
+			assert.NoError(t, err)
+			i++
+		}
+
+		makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t, gateway, headers)
+	}
+	{{end}}
+}
+
+func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.TestName}}(t *testing.T, gateway testGateway.TestGateway, headers map[string]string) {
 	{{ if $headers -}}
 	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
 	headers["{{$k}}"] = "{{$v}}"
@@ -840,7 +888,6 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	}
 	{{end}}
 
-	assert.Equal(t, 1, {{$counter}})
 	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
 	{{range $k, $v := $testFixture.EndpointResHeaders -}}
 	assert.Equal(
@@ -867,7 +914,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4542, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6333, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2383,15 +2430,21 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"errors"
-	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"strings"
 	"time"
+	"net/textproto"
+
+	"github.com/afex/hystrix-go/hystrix"
+	"github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/runtime/ruleengine"
+
 
 	"go.uber.org/zap"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-	tchannel "github.com/uber/tchannel-go"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -2404,7 +2457,6 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
-{{- $stagingReqHeader := .StagingReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2448,22 +2500,37 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.{{$clientID}}.staging.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
-
-		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	}
+	/*Ex:
+	{
+	  "clients.rider-presentation.alternates": {
+		"routingConfigs": [
+		  {
+			"headerName": "x-test-env",
+			"headerValue": "*",
+			"serviceName": "testservice"
+		  },
+		  {
+			"headerName": "x-container",
+			"headerValue": "container*",
+			"serviceName": "relayer"
+		  }
+		],
+		"servicesDetail": {
+		  "testservice": {
+			"ip": "127.0.0.1",
+			"port": 5000
+		  },
+		  "relayer": {
+			"ip": "127.0.0.1",
+			"port": 12000
+		  }
+		}
+	  }
+	}*/
+	var re ruleengine.RuleEngine
+	var headerPatterns []string
+	altChannelMap  := make(map[string]*tchannel.SubChannel)
+	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
@@ -2500,8 +2567,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			Timeout:              timeout,
 			TimeoutPerAttempt:    timeoutPerAttempt,
 			RoutingKey:           &routingKey,
-			AltSubchannelName:    scAltName,
+			RuleEngine:           re,
+			HeaderPatterns:       headerPatterns,
 			RequestUUIDHeaderKey: requestUUIDHeaderKey,
+			AltChannelMap:        altChannelMap,
 		},
 	)
 
@@ -2509,6 +2578,33 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+
+		ruleWrapper := ruleengine.RuleWrapper{}
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			rawRule := ruleengine.RawRule{Patterns: []string{textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName),
+			 strings.ToLower(routingConfig.HeaderValue)},
+				Value: routingConfig.ServiceName}
+			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
+			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
+
+			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
+			if !ok {
+				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
+			}
+			scAlt.Peers().Add(serviceRouting.IP + ":" + strconv.Itoa(serviceRouting.Port))
+			altChannelMap[routingConfig.ServiceName] = scAlt
+		}
+
+		re = ruleengine.NewRuleEngine(ruleWrapper)
+	}
+	return headerPatterns, re
 }
 
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
@@ -2581,21 +2677,16 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
-			caller = c.client.CallThruAltChannel
-		}
-
 		var success bool
 		var respHeaders map[string]string
 		var err error
 		if (c.circuitBreakerDisabled) {
-			success, respHeaders, err = caller(
+			success, respHeaders, err = c.client.Call(
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-				success, respHeaders, err = caller(
+				success, respHeaders, err = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
 				return err
@@ -2647,7 +2738,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 9572, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10709, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3071,6 +3162,7 @@ package workflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
@@ -3079,6 +3171,8 @@ package workflow
 
 import (
 	"context"
+	"net/textproto"
+	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -3136,9 +3230,19 @@ Handle(
 
 // New{{$workflowInterface}} creates a workflow
 func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
+		}
+	}
+
 	return &{{$workflowStruct}}{
 		Clients: deps.Client,
 		Logger:  deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
@@ -3146,6 +3250,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 type {{$workflowStruct}} struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -3193,6 +3298,13 @@ func (w {{$workflowStruct}}) Handle(
 		clientHeaders["{{$typedHeader.TransformTo}}"] = h
 	}
 	{{- end}}
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		headerVal, ok := reqHeaders.Get(whitelistedHeader)
+		if ok {
+			clientHeaders[whitelistedHeader] = headerVal
+		}
+	}
+
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
@@ -3328,7 +3440,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7478, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8312, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

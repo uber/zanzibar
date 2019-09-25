@@ -25,6 +25,9 @@ package workflow
 
 import (
 	"context"
+	"net/textproto"
+
+	"github.com/uber/zanzibar/config"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -46,16 +49,27 @@ type BarArgWithParamsWorkflow interface {
 
 // NewBarArgWithParamsWorkflow creates a workflow
 func NewBarArgWithParamsWorkflow(deps *module.Dependencies) BarArgWithParamsWorkflow {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.bar.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.bar.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append(whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
+		}
+	}
+
 	return &barArgWithParamsWorkflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:                   deps.Client,
+		Logger:                    deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // barArgWithParamsWorkflow calls thrift client Bar.ArgWithParams
 type barArgWithParamsWorkflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients                   *module.ClientDependencies
+	Logger                    *zap.Logger
+	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
@@ -74,9 +88,11 @@ func (w barArgWithParamsWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
+	for _, whitelistedHeader := range w.whitelistedDynamicHeaders {
+		headerVal, ok := reqHeaders.Get(whitelistedHeader)
+		if ok {
+			clientHeaders[whitelistedHeader] = headerVal
+		}
 	}
 
 	clientRespBody, _, err := w.Clients.Bar.ArgWithParams(

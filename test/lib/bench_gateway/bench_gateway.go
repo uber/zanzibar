@@ -33,7 +33,7 @@ import (
 	"time"
 
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"go.uber.org/zap/zapcore"
@@ -51,6 +51,7 @@ type BenchGateway struct {
 	logMessages      map[string][]testGateway.LogMessage
 	httpClient       *http.Client
 	tchannelClient   zanzibar.TChannelCaller
+	staticConfig     *zanzibar.StaticConfig
 }
 
 func getDirName() string {
@@ -87,7 +88,8 @@ func CreateGateway(
 		return nil, err
 	}
 
-	backendsTChannel, err := testBackend.BuildTChannelBackends(seedConfig, opts.KnownTChannelBackends)
+	staticConf := config.NewRuntimeConfigOrDie(opts.ConfigFiles, seedConfig)
+	backendsTChannel, err := testBackend.BuildTChannelBackends(seedConfig, opts.KnownTChannelBackends, staticConf, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +135,9 @@ func CreateGateway(
 		backendsTChannel: backendsTChannel,
 		logBytes:         bytes.NewBuffer(nil),
 
-		readLogs:    false,
-		logMessages: map[string][]testGateway.LogMessage{},
+		readLogs:     false,
+		logMessages:  map[string][]testGateway.LogMessage{},
+		staticConfig: staticConf,
 	}
 
 	config := config.NewRuntimeConfigOrDie(opts.ConfigFiles, seedConfig)
@@ -176,6 +179,11 @@ func CreateGateway(
 	}
 
 	return benchGateway, nil
+}
+
+// Config returns static config loaded from file + seed config
+func (gateway *BenchGateway) Config() *zanzibar.StaticConfig {
+	return gateway.staticConfig
 }
 
 // HTTPPort ...
@@ -289,6 +297,13 @@ func (gateway *BenchGateway) MakeTChannelRequest(
 
 // Close test gateway
 func (gateway *BenchGateway) Close() {
+
+	if gateway != nil && gateway.backendsTChannel != nil {
+		for _, backend := range gateway.backendsTChannel {
+			backend.Close()
+		}
+	}
+
 	gateway.ActualGateway.Close()
 	gateway.ActualGateway.Wait()
 }

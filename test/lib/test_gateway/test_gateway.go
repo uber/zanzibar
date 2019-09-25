@@ -34,12 +34,14 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/jaeger-client-go/testutils"
-	tchannel "github.com/uber/tchannel-go"
+	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
+
+	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testM3Server "github.com/uber/zanzibar/test/lib/test_m3_server"
-	"go.uber.org/zap"
 )
 
 // TestGateway interface
@@ -65,6 +67,7 @@ type TestGateway interface {
 	AllLogs() map[string][]LogMessage
 
 	Close()
+	Config() *zanzibar.StaticConfig
 }
 
 // LogMessage is a json log record parsed into map.
@@ -99,6 +102,7 @@ type ChildProcessGateway struct {
 	RealTChannelPort int
 	ContextExtractor zanzibar.ContextExtractor
 	ContextMetrics   zanzibar.ContextMetrics
+	staticConfig     *zanzibar.StaticConfig
 }
 
 // Options used to create TestGateway
@@ -116,6 +120,7 @@ type Options struct {
 	JaegerDisable         bool
 	JaegerFlushMillis     int64
 	TChannelClientMethods map[string]string
+	Backends              []*testBackend.TestTChannelBackend
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -147,14 +152,14 @@ func (gateway *ChildProcessGateway) setupTracing() {
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
 	t *testing.T,
-	config map[string]interface{},
+	conf map[string]interface{},
 	opts *Options,
 ) (TestGateway, error) {
 	startTime := time.Now()
 
 	composedConfig := map[string]interface{}{}
 
-	for k, v := range config {
+	for k, v := range conf {
 		composedConfig[k] = v
 	}
 
@@ -170,7 +175,9 @@ func CreateGateway(
 		return nil, err
 	}
 
-	backendsTChannel, err := testBackend.BuildTChannelBackends(composedConfig, opts.KnownTChannelBackends)
+	staticConf := config.NewRuntimeConfigOrDie(opts.ConfigFiles, map[string]interface{}{})
+	backendsTChannel, err := testBackend.BuildTChannelBackends(composedConfig, opts.KnownTChannelBackends,
+		staticConf, opts.Backends)
 	if err != nil {
 		return nil, err
 	}
@@ -187,10 +194,10 @@ func CreateGateway(
 
 	timeout := time.Duration(10000) * time.Millisecond
 	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
-	if t, ok := config["tchannel.client.timeout"]; ok {
+	if t, ok := conf["tchannel.client.timeout"]; ok {
 		timeout = time.Duration(t.(int)) * time.Millisecond
 	}
-	if t, ok := config["tchannel.client.timeoutPerAttempt"]; ok {
+	if t, ok := conf["tchannel.client.timeoutPerAttempt"]; ok {
 		timeoutPerAttempt = time.Duration(t.(int)) * time.Millisecond
 	}
 
@@ -252,6 +259,7 @@ func CreateGateway(
 		MetricsWaitGroup: lib.WaitAtLeast{},
 		ContextExtractor: extractors,
 		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
+		staticConfig:     staticConf,
 	}
 
 	testGateway.setupMetrics(t, opts)
@@ -305,6 +313,11 @@ func CreateGateway(
 	}
 
 	return testGateway, nil
+}
+
+// Config returns static config loaded from file + seed config
+func (gateway *ChildProcessGateway) Config() *zanzibar.StaticConfig {
+	return gateway.staticConfig
 }
 
 // MakeRequest helper

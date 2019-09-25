@@ -606,7 +606,6 @@ func (g *TChannelClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
 		SidecarRouter:    clientSpec.SidecarRouter,
-		StagingReqHeader: g.packageHelper.StagingReqHeader(),
 		DeputyReqHeader:  g.packageHelper.DeputyReqHeader(),
 	}
 
@@ -1147,13 +1146,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	if reqHeaders == nil {
 		reqHeaders = make(map[string]*TypedHeader)
 	}
-	shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.StagingReqHeader())
-	reqHeaders[shk] = &TypedHeader{
-		Name:        shk,
-		TransformTo: shk,
-		Field:       &compile.FieldSpec{Required: false},
-	}
-	shk = textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
+	shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
 	reqHeaders[shk] = &TypedHeader{
 		Name:        shk,
 		TransformTo: shk,
@@ -1539,7 +1532,6 @@ type ClientMeta struct {
 	ExposedMethods   map[string]string
 	SidecarRouter    string
 	Fixture          *Fixture
-	StagingReqHeader string
 	DeputyReqHeader  string
 	GenPkg           string
 }

@@ -67,6 +67,5 @@
 	"tchannel.processName": "example-gateway",
 	"tchannel.serviceName": "example-gateway",
 	"tchannel.clients.requestUUIDHeaderKey": "x-request-uuid",
-	"useDatacenter": false,
-
+	"useDatacenter": false
 }
