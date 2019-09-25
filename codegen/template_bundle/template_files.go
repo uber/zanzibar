@@ -2640,9 +2640,9 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:			sleepWindowInMilliseconds,
+			SleepWindow:            sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:				timeoutVal,
+			Timeout:                timeoutVal,
 		})
 	}
 	return circuitBreakerDisabled
@@ -2738,7 +2738,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10688, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10709, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
