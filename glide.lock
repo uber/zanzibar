@@ -1,5 +1,5 @@
-hash: 88d305204a739687702bbb8e6e1395eb0b3496bd67541e187f36d9d64dc7b590
-updated: 2019-08-23T00:40:19.337162-07:00
+hash: 1faa09ee25a64c5d02eca31bd378542c15338a145edbbc40a882984b6e9d3c0c
+updated: 2019-09-26T15:31:01.379292-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -98,7 +98,7 @@ imports:
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: b2ccc519800e761ac8000b95e5d57c80a897ff9e
+  version: 1b2b06f5f209fea48ff5922d8bfb2b9ed5d8f00b
   subpackages:
   - bootstrap
   - buffer
@@ -173,7 +173,7 @@ imports:
   - m3/thrift
   - m3/thriftudp
 - name: github.com/uber/jaeger-client-go
-  version: 2f47546e3facd43297739439600bcf43f44cce5d
+  version: d4d621cd6ed9aa5f1fc91eb0d0211d336bd6b79d
   subpackages:
   - config
   - internal/baggage
@@ -193,16 +193,17 @@ imports:
   - transport
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 0e30338a695636fe5bcf7301e8030ce8dd2a8530
+  version: a87ae9d84fb038a8d79266298970720be7c80fcd
   subpackages:
   - metrics
   - metrics/tally
 - name: github.com/uber/tchannel-go
-  version: 58b01ae38cfff68102223e374c580a40c1d91dda
+  version: 5ee9e351d45f66dc690528cbf014fe5b64b23bc9
   subpackages:
   - internal/argreader
   - relay
   - testutils/testreader
+  - thrift/arg2
   - thrift/thrift-gen
   - tnet
   - tos
@@ -227,9 +228,9 @@ imports:
   - internal/fxreflect
   - internal/lifecycle
 - name: go.uber.org/multierr
-  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+  version: 71e610a0e48dbda460d9c18adca8b5f2de04a7c1
 - name: go.uber.org/net/metrics
-  version: 0327310766f9da183152db859680ae0345c31957
+  version: 05a053b545cba614bf12635803f4749dab7bd0d0
   subpackages:
   - bucket
   - push
@@ -266,7 +267,7 @@ imports:
   subpackages:
   - update-license
 - name: go.uber.org/yarpc
-  version: 32f8a122a940ef0bd42bef358ea46c7d91b14f4c
+  version: 719d4248bd626e9fe9b79d2ac5b637dad79740f7
   subpackages:
   - api/backoff
   - api/encoding
@@ -313,7 +314,7 @@ imports:
   subpackages:
   - golint
 - name: golang.org/x/net
-  version: 74dc4d7220e7acc4e100824340f3e66577424772
+  version: c00fd9afed17cfdca9b3e1e3b8de7ef2b3f0347b
   subpackages:
   - bpf
   - context
@@ -328,7 +329,7 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: fde4db37ae7ad8191b03d30d27f258b5291ae4e3
+  version: 855e68c8590b0d6a9d08863d2982eb8aeddd98d3
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -339,7 +340,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: 65e3620a7ae7ac25e8494a60f0e5ef4e4fba03b3
+  version: a8d5d34286bd3ab7c348812aa4699f674c05245b
   subpackages:
   - cmd/goimports
   - cmd/stringer
@@ -360,7 +361,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 6eaf6f47437a6b4e2153a190160ef39a92c7eceb
+  version: f6d0f9ee430895e87ef1ceb5ac8f39725bafceef
   repo: https://github.com/grpc/grpc-go
   subpackages:
   - balancer
@@ -396,7 +397,7 @@ imports:
   - status
   - tap
 - name: gopkg.in/validator.v2
-  version: 135c24b11c19e52befcae2ec3fca5d9b78c4e98e
+  version: 1a84e0480e5b570eb3c8366596e2d5e9befe33fc
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: honnef.co/go/tools
