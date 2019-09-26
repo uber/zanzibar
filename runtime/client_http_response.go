@@ -172,7 +172,7 @@ func (res *ClientHTTPResponse) finish() {
 	logFn := res.req.ContextLogger.Info
 
 	// emit metrics
-	res.req.metrics.RecordTimer(res.req.ctx, clientLatency, res.finishTime.Sub(res.req.startTime))
+	res.req.metrics.RecordHistogramDuration(res.req.ctx, clientLatency, res.finishTime.Sub(res.req.startTime))
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
 		res.req.Logger.Error(

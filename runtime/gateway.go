@@ -549,6 +549,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		tally.ScopeOptions{
 			Tags:            defaultTags,
 			CachedReporter:  gateway.metricsBackend,
+			DefaultBuckets:  tally.MustMakeExponentialDurationBuckets(10*time.Millisecond, 4, 6), // Range: 10ms - 10s
 			Separator:       tally.DefaultSeparator,
 			SanitizeOptions: &m3.DefaultSanitizerOpts,
 		},

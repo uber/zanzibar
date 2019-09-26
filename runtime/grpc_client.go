@@ -124,7 +124,7 @@ func (c *callHelper) Start() {
 // This method emits latency and error metric as well as logging in case of error.
 func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 	c.finishTime = time.Now()
-	c.metrics.RecordTimer(ctx, clientLatency, c.finishTime.Sub(c.startTime))
+	c.metrics.RecordHistogramDuration(ctx, clientLatency, c.finishTime.Sub(c.startTime))
 	fields := []zapcore.Field{
 		zap.Time(logFieldRequestStartTime, c.startTime),
 		zap.Time(logFieldRequestFinishedTime, c.finishTime),

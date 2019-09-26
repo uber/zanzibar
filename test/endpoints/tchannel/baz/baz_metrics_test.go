@@ -25,6 +25,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/uber-go/tally/m3"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -119,7 +121,6 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, numMetrics, len(metrics))
 
 	endpointNames := []string{
-		"endpoint.latency",
 		"endpoint.request",
 		"endpoint.success",
 	}
@@ -139,26 +140,19 @@ func TestCallMetrics(t *testing.T) {
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
+		assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 	}
 
-	inboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", endpointTags,
-	)]
-	value := *inboundLatency.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
-
-	inboundRecvd := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.request", endpointTags,
-	)]
-	value = *inboundRecvd.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	inboundSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.success", endpointTags,
-	)]
-	value = *inboundSuccess.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
+	histogramTags := map[string]string{
+		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0000",
+	}
+	for k, v := range endpointTags {
+		histogramTags[k] = v
+	}
+	key := tally.KeyForPrefixedStringMap("endpoint.latency", histogramTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 
 	tchannelOutboundNames := []string{
 		"outbound.calls.per-attempt.latency",
@@ -183,12 +177,11 @@ func TestCallMetrics(t *testing.T) {
 		"outbound.calls.per-attempt.latency",
 		tchannelOutboundTags,
 	)]
-	value = *outboundLatency.MetricValue.Timer.I64Value
+	value := *outboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	clientNames := []string{
-		"client.latency",
 		"client.request",
 		"client.success",
 	}
@@ -212,24 +205,17 @@ func TestCallMetrics(t *testing.T) {
 	for _, name := range clientNames {
 		key := tally.KeyForPrefixedStringMap(name, clientTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
+		assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
 	}
 
-	outboundLatency = metrics[tally.KeyForPrefixedStringMap(
-		"client.latency", clientTags,
-	)]
-	value = *outboundLatency.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
-
-	outboundSent := metrics[tally.KeyForPrefixedStringMap(
-		"client.request", clientTags,
-	)]
-	value = *outboundSent.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	outboundSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"client.success", clientTags,
-	)]
-	value = *outboundSuccess.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
+	cHistogramTags := map[string]string{
+		m3.DefaultHistogramBucketName:   "-infinity-10ms",
+		m3.DefaultHistogramBucketIDName: "0000",
+	}
+	for k, v := range clientTags {
+		cHistogramTags[k] = v
+	}
+	key = tally.KeyForPrefixedStringMap("client.latency", cHistogramTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 }
