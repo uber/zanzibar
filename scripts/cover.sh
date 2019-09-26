@@ -34,7 +34,7 @@ echo "Starting coverage tests:"
 
 for file in "${FILES_ARR[@]}"; do
 
-	if grep -q -v $file <<<$REAL_TEST_FILES; then
+	if ! grep -q $file <<<$REAL_TEST_FILES; then
 		continue
 	fi
 
