@@ -92,11 +92,6 @@ func (g *M3Collector) incrementCounterMetric(prefix string, i float64) {
 	g.scope.Counter(prefix).Inc(int64(i))
 }
 
-// @deprecated in favor of Histogram. Reopen ONLY if there is a need to
-//func (g *M3Collector) updateTimerMetric(prefix string, dur time.Duration) {
-//	g.scope.Timer(prefix).Record(dur)
-//}
-
 func (g *M3Collector) updateHistogramMetric(prefix string, dur time.Duration) {
 	g.scope.Histogram(prefix, tally.DefaultBuckets).RecordDuration(dur)
 }

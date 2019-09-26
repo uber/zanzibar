@@ -303,8 +303,6 @@ type Logger interface {
 // ContextMetrics emit metrics with tags extracted from context.
 type ContextMetrics interface {
 	IncCounter(ctx context.Context, name string, value int64)
-	// @deprecated -- use Histogram instead
-	// RecordTimer(ctx context.Context, name string, d time.Duration)
 	RecordHistogramDuration(ctx context.Context, name string, d time.Duration)
 }
 
@@ -323,12 +321,6 @@ func NewContextMetrics(scope tally.Scope) ContextMetrics {
 func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int64) {
 	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Counter(name).Inc(value)
 }
-
-// @deprecated
-// RecordTimer records the duration with current tags from context
-//func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Duration) {
-//	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Timer(name).Record(d)
-//}
 
 // RecordHistogram records the duration with current tags from context
 func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name string, d time.Duration) {
