@@ -322,7 +322,7 @@ func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int6
 	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Counter(name).Inc(value)
 }
 
-// RecordHistogram records the duration with current tags from context
+// RecordHistogramDuration records the duration with current tags from context
 func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name string, d time.Duration) {
 	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
 }
