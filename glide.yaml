@@ -60,6 +60,38 @@ import:
   version: ^1.37.4
 - package: github.com/ghodss/yaml
   version: master
+- package: github.com/gogo/protobuf
+  version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
+  subpackages:
+    - gogoproto
+    - jsonpb
+    - plugin/compare
+    - plugin/defaultcheck
+    - plugin/description
+    - plugin/embedcheck
+    - plugin/enumstringer
+    - plugin/equal
+    - plugin/face
+    - plugin/gostring
+    - plugin/marshalto
+    - plugin/oneofcheck
+    - plugin/populate
+    - plugin/size
+    - plugin/stringer
+    - plugin/testgen
+    - plugin/union
+    - plugin/unmarshal
+    - proto
+    - protoc-gen-gogo/descriptor
+    - protoc-gen-gogo/generator
+    - protoc-gen-gogo/generator/internal/remap
+    - protoc-gen-gogo/grpc
+    - protoc-gen-gogo/plugin
+    - protoc-gen-gogoslick
+    - sortkeys
+    - types
+    - vanity
+    - vanity/command
 
 # https://github.com/uber/zanzibar/issues/583
 - package: honnef.co/go/tools/cmd/staticcheck

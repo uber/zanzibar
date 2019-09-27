@@ -246,21 +246,20 @@ func NewDefaultModuleSystemWithMockHook(
 		if err != nil {
 			return nil, errors.Wrap(err, "error creating client mock gen hook")
 		}
+		hooks = append(hooks, clientMockGenHook)
 	}
 
 	if workflowMock {
 		workflowMockGenHook = WorkflowMockGenHook(h, t)
-	}
-	if serviceMock {
-		serviceMockGenHook = ServiceMockGenHook(h, t)
+		hooks = append(hooks, workflowMockGenHook)
 	}
 
-	allHooks := append([]PostGenHook{
-		clientMockGenHook,
-		workflowMockGenHook,
-		serviceMockGenHook,
-	}, hooks...)
-	return NewDefaultModuleSystem(h, allHooks...)
+	if serviceMock {
+		serviceMockGenHook = ServiceMockGenHook(h, t)
+		hooks = append(hooks, serviceMockGenHook)
+	}
+
+	return NewDefaultModuleSystem(h, hooks...)
 }
 
 // NewDefaultModuleSystem creates a fresh instance of the default zanzibar
