@@ -396,7 +396,6 @@ func TestEchoBinary(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
 	arg := []byte{97} // "a"
-	marshaled, err := json.Marshal(arg)
 	assert.NoError(t, err)
 
 	bgateway.HTTPBackends()["bar"].HandleFunc(
@@ -414,7 +413,7 @@ func TestEchoBinary(t *testing.T) {
 			assert.Equal(t, req.Arg, arg)
 
 			w.WriteHeader(200)
-			_, err = w.Write(marshaled)
+			_, err = w.Write(arg)
 			assert.NoError(t, err)
 		},
 	)

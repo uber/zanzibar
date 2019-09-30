@@ -202,6 +202,7 @@ func (c *corgeHTTPClient) EchoString(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -209,6 +210,7 @@ func (c *corgeHTTPClient) EchoString(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
