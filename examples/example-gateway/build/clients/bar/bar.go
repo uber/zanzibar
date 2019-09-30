@@ -476,8 +476,8 @@ func (c *barClient) ArgWithHeaders(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -625,8 +625,8 @@ func (c *barClient) ArgWithManyQueryParams(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -734,8 +734,8 @@ func (c *barClient) ArgWithNestedQueryParams(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -802,8 +802,8 @@ func (c *barClient) ArgWithParams(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -870,8 +870,8 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -938,8 +938,8 @@ func (c *barClient) ArgWithQueryHeader(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1023,8 +1023,8 @@ func (c *barClient) ArgWithQueryParams(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1131,8 +1131,8 @@ func (c *barClient) ArgWithUntaggedNestedQueryParams(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1341,8 +1341,8 @@ func (c *barClient) Hello(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1428,8 +1428,8 @@ func (c *barClient) ListAndEnum(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1505,8 +1505,8 @@ func (c *barClient) MissingArg(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1582,8 +1582,8 @@ func (c *barClient) NoRequest(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1660,8 +1660,8 @@ func (c *barClient) Normal(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1737,8 +1737,8 @@ func (c *barClient) NormalRecur(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1815,8 +1815,8 @@ func (c *barClient) TooManyArgs(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1906,7 +1906,6 @@ func (c *barClient) EchoBinary(
 			return defaultRes, respHeaders, err
 		}
 		return responseBody, respHeaders, nil
-
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1977,8 +1976,8 @@ func (c *barClient) EchoBool(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2049,8 +2048,8 @@ func (c *barClient) EchoDouble(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2121,8 +2120,8 @@ func (c *barClient) EchoEnum(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2193,8 +2192,8 @@ func (c *barClient) EchoI16(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2265,8 +2264,8 @@ func (c *barClient) EchoI32(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2337,8 +2336,8 @@ func (c *barClient) EchoI32Map(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2409,8 +2408,8 @@ func (c *barClient) EchoI64(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2481,8 +2480,8 @@ func (c *barClient) EchoI8(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2553,8 +2552,8 @@ func (c *barClient) EchoString(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2625,8 +2624,8 @@ func (c *barClient) EchoStringList(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2697,8 +2696,8 @@ func (c *barClient) EchoStringMap(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2769,8 +2768,8 @@ func (c *barClient) EchoStringSet(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2841,8 +2840,8 @@ func (c *barClient) EchoStructList(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2913,8 +2912,8 @@ func (c *barClient) EchoStructSet(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2985,8 +2984,8 @@ func (c *barClient) EchoTypedef(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {

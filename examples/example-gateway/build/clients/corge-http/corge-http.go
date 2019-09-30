@@ -207,8 +207,8 @@ func (c *corgeHTTPClient) EchoString(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {

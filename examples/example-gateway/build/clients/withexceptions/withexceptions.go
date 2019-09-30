@@ -188,8 +188,8 @@ func (c *withexceptionsClient) Func1(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	case 401:
 		allOptions := []interface{}{
 			&clientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsWithexceptionsWithexceptions.ExceptionType2{},
