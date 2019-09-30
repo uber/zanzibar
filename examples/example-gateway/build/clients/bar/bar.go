@@ -470,6 +470,7 @@ func (c *barClient) ArgWithHeaders(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -478,6 +479,7 @@ func (c *barClient) ArgWithHeaders(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -619,6 +621,7 @@ func (c *barClient) ArgWithManyQueryParams(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -627,6 +630,7 @@ func (c *barClient) ArgWithManyQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -728,6 +732,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -736,6 +741,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -796,6 +802,7 @@ func (c *barClient) ArgWithParams(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -804,6 +811,7 @@ func (c *barClient) ArgWithParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -864,6 +872,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -872,6 +881,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -932,6 +942,7 @@ func (c *barClient) ArgWithQueryHeader(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -940,6 +951,7 @@ func (c *barClient) ArgWithQueryHeader(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1017,6 +1029,7 @@ func (c *barClient) ArgWithQueryParams(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1025,6 +1038,7 @@ func (c *barClient) ArgWithQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1125,6 +1139,7 @@ func (c *barClient) ArgWithUntaggedNestedQueryParams(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1133,6 +1148,7 @@ func (c *barClient) ArgWithUntaggedNestedQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1336,6 +1352,7 @@ func (c *barClient) Hello(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1343,6 +1360,7 @@ func (c *barClient) Hello(
 		}
 
 		return responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1423,6 +1441,7 @@ func (c *barClient) ListAndEnum(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1430,6 +1449,7 @@ func (c *barClient) ListAndEnum(
 		}
 
 		return responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1499,6 +1519,7 @@ func (c *barClient) MissingArg(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1507,6 +1528,7 @@ func (c *barClient) MissingArg(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1576,6 +1598,7 @@ func (c *barClient) NoRequest(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1584,6 +1607,7 @@ func (c *barClient) NoRequest(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1654,6 +1678,7 @@ func (c *barClient) Normal(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1662,6 +1687,7 @@ func (c *barClient) Normal(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1732,6 +1758,7 @@ func (c *barClient) NormalRecur(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponseRecur
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1739,6 +1766,7 @@ func (c *barClient) NormalRecur(
 		}
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1809,6 +1837,7 @@ func (c *barClient) TooManyArgs(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1817,6 +1846,7 @@ func (c *barClient) TooManyArgs(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1901,13 +1931,13 @@ func (c *barClient) EchoBinary(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody []byte
-		err = res.ReadAndUnmarshalBody(&responseBody)
+
+		responseBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -1973,6 +2003,7 @@ func (c *barClient) EchoBool(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody bool
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1980,6 +2011,7 @@ func (c *barClient) EchoBool(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2045,6 +2077,7 @@ func (c *barClient) EchoDouble(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody float64
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2052,6 +2085,7 @@ func (c *barClient) EchoDouble(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2117,6 +2151,7 @@ func (c *barClient) EchoEnum(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.Fruit
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2124,6 +2159,7 @@ func (c *barClient) EchoEnum(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2189,6 +2225,7 @@ func (c *barClient) EchoI16(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody int16
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2196,6 +2233,7 @@ func (c *barClient) EchoI16(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2261,6 +2299,7 @@ func (c *barClient) EchoI32(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody int32
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2268,6 +2307,7 @@ func (c *barClient) EchoI32(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2333,6 +2373,7 @@ func (c *barClient) EchoI32Map(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody map[int32]*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2340,6 +2381,7 @@ func (c *barClient) EchoI32Map(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2405,6 +2447,7 @@ func (c *barClient) EchoI64(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody int64
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2412,6 +2455,7 @@ func (c *barClient) EchoI64(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2477,6 +2521,7 @@ func (c *barClient) EchoI8(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody int8
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2484,6 +2529,7 @@ func (c *barClient) EchoI8(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2549,6 +2595,7 @@ func (c *barClient) EchoString(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2556,6 +2603,7 @@ func (c *barClient) EchoString(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2621,6 +2669,7 @@ func (c *barClient) EchoStringList(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody []string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2628,6 +2677,7 @@ func (c *barClient) EchoStringList(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2693,6 +2743,7 @@ func (c *barClient) EchoStringMap(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody map[string]*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2700,6 +2751,7 @@ func (c *barClient) EchoStringMap(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2765,6 +2817,7 @@ func (c *barClient) EchoStringSet(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody map[string]struct{}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2772,6 +2825,7 @@ func (c *barClient) EchoStringSet(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2837,6 +2891,7 @@ func (c *barClient) EchoStructList(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody []*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2844,6 +2899,7 @@ func (c *barClient) EchoStructList(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2909,6 +2965,7 @@ func (c *barClient) EchoStructSet(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody []*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2916,6 +2973,7 @@ func (c *barClient) EchoStructSet(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -2981,6 +3039,7 @@ func (c *barClient) EchoTypedef(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsBarBar.UUID
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -2988,6 +3047,7 @@ func (c *barClient) EchoTypedef(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {

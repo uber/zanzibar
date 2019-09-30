@@ -1445,17 +1445,27 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			var responseBody {{unref .ResponseType}}
-			err = res.ReadAndUnmarshalBody(&responseBody)
-			if err != nil {
-				return defaultRes, respHeaders, err
-			}
+		{{- if eq .ResponseType "[]byte"}}
 
-			{{- if .ResHeaderFields }}
+		responseBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return responseBody, respHeaders, nil
+		{{ else }}
+
+		var responseBody {{unref .ResponseType}}
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
-			{{- end}}
+		{{- end}}
 
-			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		{{end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
@@ -1493,17 +1503,27 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			var responseBody {{unref .ResponseType}}
-			err = res.ReadAndUnmarshalBody(&responseBody)
-			if err != nil {
-				return defaultRes, respHeaders, err
-			}
+		{{- if eq .ResponseType "[]byte"}}
 
-			{{- if .ResHeaderFields }}
+		responseBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return responseBody, respHeaders, nil
+		{{ else }}
+
+		var responseBody {{unref .ResponseType}}
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
-			{{- end}}
+		{{- end}}
 
-			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			allOptions := []interface{}{
@@ -1545,7 +1565,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11527, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11911, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

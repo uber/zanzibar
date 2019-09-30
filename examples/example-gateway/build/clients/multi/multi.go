@@ -187,6 +187,7 @@ func (c *multiClient) HelloA(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -194,6 +195,7 @@ func (c *multiClient) HelloA(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -253,6 +255,7 @@ func (c *multiClient) HelloB(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -260,6 +263,7 @@ func (c *multiClient) HelloB(
 		}
 
 		return responseBody, respHeaders, nil
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {

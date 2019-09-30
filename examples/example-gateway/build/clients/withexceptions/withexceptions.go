@@ -183,6 +183,7 @@ func (c *withexceptionsClient) Func1(
 
 	switch res.StatusCode {
 	case 200:
+
 		var responseBody clientsWithexceptionsWithexceptions.Response
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -190,6 +191,7 @@ func (c *withexceptionsClient) Func1(
 		}
 
 		return &responseBody, respHeaders, nil
+
 	case 401:
 		allOptions := []interface{}{
 			&clientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsWithexceptionsWithexceptions.ExceptionType2{},
