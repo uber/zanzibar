@@ -277,14 +277,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if eq .ResponseType "[]byte"}}
-
 		responseBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		return responseBody, respHeaders, nil
 		{{ else }}
-
 		var responseBody {{unref .ResponseType}}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -294,7 +292,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
-
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end}}
 		default:
@@ -335,14 +332,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if eq .ResponseType "[]byte"}}
-
 		responseBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		return responseBody, respHeaders, nil
 		{{ else }}
-
 		var responseBody {{unref .ResponseType}}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -352,7 +347,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
-
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
