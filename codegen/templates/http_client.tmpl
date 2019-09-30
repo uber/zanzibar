@@ -292,8 +292,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
+
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
-		{{end}}
+		{{end -}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
@@ -347,8 +348,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
+
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
-		{{end}}
+		{{end -}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			allOptions := []interface{}{

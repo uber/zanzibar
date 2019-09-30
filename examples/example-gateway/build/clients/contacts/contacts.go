@@ -195,8 +195,8 @@ func (c *contactsClient) SaveContacts(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return &responseBody, respHeaders, nil
 
+		return &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -261,8 +261,8 @@ func (c *contactsClient) TestURLURL(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {

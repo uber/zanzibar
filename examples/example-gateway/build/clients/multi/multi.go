@@ -192,8 +192,8 @@ func (c *multiClient) HelloA(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
@@ -258,8 +258,8 @@ func (c *multiClient) HelloB(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
 
+		return responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
