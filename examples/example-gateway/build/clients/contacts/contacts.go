@@ -190,13 +190,11 @@ func (c *contactsClient) SaveContacts(
 
 	switch res.StatusCode {
 	case 202:
-
 		var responseBody clientsContactsContacts.SaveContactsResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -258,13 +256,11 @@ func (c *contactsClient) TestURLURL(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:

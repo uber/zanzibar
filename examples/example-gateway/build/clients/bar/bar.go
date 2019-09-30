@@ -470,14 +470,12 @@ func (c *barClient) ArgWithHeaders(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -621,14 +619,12 @@ func (c *barClient) ArgWithManyQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -732,14 +728,12 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -802,14 +796,12 @@ func (c *barClient) ArgWithParams(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -872,14 +864,12 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -942,14 +932,12 @@ func (c *barClient) ArgWithQueryHeader(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -1029,14 +1017,12 @@ func (c *barClient) ArgWithQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -1139,14 +1125,12 @@ func (c *barClient) ArgWithUntaggedNestedQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	default:
@@ -1352,13 +1336,11 @@ func (c *barClient) Hello(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	case 403:
@@ -1441,13 +1423,11 @@ func (c *barClient) ListAndEnum(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	case 403:
@@ -1519,14 +1499,12 @@ func (c *barClient) MissingArg(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	case 403:
@@ -1598,14 +1576,12 @@ func (c *barClient) NoRequest(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	case 403:
@@ -1678,14 +1654,12 @@ func (c *barClient) Normal(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	case 403:
@@ -1758,13 +1732,11 @@ func (c *barClient) NormalRecur(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponseRecur
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return &responseBody, respHeaders, nil
 
 	case 403:
@@ -1837,14 +1809,12 @@ func (c *barClient) TooManyArgs(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
-
 		return &responseBody, respHeaders, nil
 
 	case 403:
@@ -1931,7 +1901,6 @@ func (c *barClient) EchoBinary(
 
 	switch res.StatusCode {
 	case 200:
-
 		responseBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -2003,13 +1972,11 @@ func (c *barClient) EchoBool(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody bool
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2077,13 +2044,11 @@ func (c *barClient) EchoDouble(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody float64
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2151,13 +2116,11 @@ func (c *barClient) EchoEnum(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.Fruit
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2225,13 +2188,11 @@ func (c *barClient) EchoI16(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody int16
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2299,13 +2260,11 @@ func (c *barClient) EchoI32(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody int32
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2373,13 +2332,11 @@ func (c *barClient) EchoI32Map(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody map[int32]*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2447,13 +2404,11 @@ func (c *barClient) EchoI64(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody int64
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2521,13 +2476,11 @@ func (c *barClient) EchoI8(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody int8
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2595,13 +2548,11 @@ func (c *barClient) EchoString(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2669,13 +2620,11 @@ func (c *barClient) EchoStringList(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody []string
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2743,13 +2692,11 @@ func (c *barClient) EchoStringMap(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody map[string]*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2817,13 +2764,11 @@ func (c *barClient) EchoStringSet(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody map[string]struct{}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2891,13 +2836,11 @@ func (c *barClient) EchoStructList(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody []*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -2965,13 +2908,11 @@ func (c *barClient) EchoStructSet(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody []*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:
@@ -3039,13 +2980,11 @@ func (c *barClient) EchoTypedef(
 
 	switch res.StatusCode {
 	case 200:
-
 		var responseBody clientsBarBar.UUID
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-
 		return responseBody, respHeaders, nil
 
 	default:

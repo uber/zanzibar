@@ -1446,14 +1446,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if eq .ResponseType "[]byte"}}
-
 		responseBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		return responseBody, respHeaders, nil
 		{{ else }}
-
 		var responseBody {{unref .ResponseType}}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1463,7 +1461,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
-
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end}}
 		default:
@@ -1504,14 +1501,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if eq .ResponseType "[]byte"}}
-
 		responseBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 		return responseBody, respHeaders, nil
 		{{ else }}
-
 		var responseBody {{unref .ResponseType}}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
@@ -1521,7 +1516,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
-
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
@@ -1565,7 +1559,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11911, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11905, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
