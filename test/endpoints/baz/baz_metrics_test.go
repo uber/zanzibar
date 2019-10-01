@@ -99,14 +99,14 @@ func TestCallMetrics(t *testing.T) {
 			cbKeys = append(cbKeys, key)
 		}
 	}
-	assert.Equal(t, 6, len(cbKeys))  // ARGO: number off because of the histogram
+	assert.Equal(t, 6, len(cbKeys)) // number off because of the histogram
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
 		if strings.HasPrefix(key, "jaeger") {
 			delete(metrics, key)
 		}
 	}
-	assert.Equal(t, numMetrics + 4, len(metrics))  // ARGO: magic number here because there are histogram entries
+	assert.Equal(t, numMetrics+4, len(metrics)) // magic number here because there are histogram entries
 
 	endpointTags := map[string]string{
 		"env":           "test",

@@ -89,13 +89,13 @@ func TestCallMetrics(t *testing.T) {
 			cbKeys = append(cbKeys, key)
 		}
 	}
-	assert.Equal(t, 6, len(cbKeys))  // argo: number off because of gratuitous histogram metric
+	assert.Equal(t, 6, len(cbKeys)) // number off because of gratuitous histogram metric
 	for key := range metrics {
 		if strings.HasPrefix(key, "jaeger") {
 			delete(metrics, key)
 		}
 	}
-	assert.Equal(t, numMetrics + 4, len(metrics))
+	assert.Equal(t, numMetrics+4, len(metrics))
 
 	endpointTags := map[string]string{
 		"env":           "test",
