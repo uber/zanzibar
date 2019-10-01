@@ -94,7 +94,9 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	// no need to put this tag on the context because this is the end of response life cycle
 	statusTag := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
 	tagged := res.scope.Tagged(statusTag)
-	tagged.Histogram(endpointLatency, tally.DefaultBuckets).RecordDuration(res.finishTime.Sub(res.Request.startTime))
+	delta := res.finishTime.Sub(res.Request.startTime)
+	tagged.Timer(endpointLatency).Record(delta)
+	tagged.Histogram(endpointLatencyHist, tally.DefaultBuckets).RecordDuration(delta)
 	if !known {
 		res.logger.Error(
 			"Unknown status code",

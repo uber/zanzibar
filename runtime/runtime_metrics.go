@@ -65,7 +65,8 @@ type runtimeMetrics struct {
 	// number of completed GC cycles
 	numGC tally.Counter
 	// GC pause time
-	gcPauseMs tally.Histogram
+	gcPauseMs     tally.Timer
+	gcPauseMsHist tally.Histogram
 }
 
 // runtimeCollector keeps the current state of runtime metrics
@@ -122,8 +123,9 @@ func NewRuntimeMetricsCollector(
 			stackInuse: scope.Gauge("memory.stack"),
 
 			// GC
-			numGC:     scope.Counter("memory.num-gc"),
-			gcPauseMs: scope.Histogram("memory.gc-pause-ms", tally.DefaultBuckets),
+			numGC:         scope.Counter("memory.num-gc"),
+			gcPauseMs:     scope.Timer("memory.gc-pause-ms"),
+			gcPauseMsHist: scope.Histogram("memory.gc-pause-ms-hist", tally.DefaultBuckets),
 		},
 		running:   false,
 		stop:      make(chan struct{}),
@@ -217,7 +219,8 @@ func (r *runtimeCollector) collectGCMetrics(memStats *runtime.MemStats) {
 
 		for i := lastNum; i != num; i++ {
 			pause := memStats.PauseNs[i%uint32(len(memStats.PauseNs))]
-			r.metrics.gcPauseMs.RecordDuration(time.Duration(pause))
+			r.metrics.gcPauseMs.Record(time.Duration(pause))
+			r.metrics.gcPauseMsHist.RecordDuration(time.Duration(pause))
 		}
 	}
 
