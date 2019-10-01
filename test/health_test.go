@@ -158,7 +158,9 @@ func TestHealthMetrics(t *testing.T) {
 
 	key := tally.KeyForPrefixedStringMap("endpoint.request", tags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	key = tally.KeyForPrefixedStringMap("endpoint.latency", histogramTags)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 
 	statusKey := tally.KeyForPrefixedStringMap(
@@ -166,10 +168,13 @@ func TestHealthMetrics(t *testing.T) {
 	)
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
-	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", histogramTags,
-	)]
-	value := *latencyMetric.MetricValue.Count.I64Value
+	latencyMetric := metrics[tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)]
+	value := *latencyMetric.MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 10*1000*1000, "expected timer to be <10 milli seconds")
+
+	latencyHistMetric := metrics[tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)]
+	value = *latencyHistMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value)
 
 	recvdMetric := metrics[tally.KeyForPrefixedStringMap(
@@ -211,8 +216,9 @@ func TestRuntimeMetrics(t *testing.T) {
 		"runtime.memory.stack",
 
 		"runtime.memory.num-gc",
+		"runtime.memory.gc-pause-ms",
 	}
-	histogramName := "runtime.memory.gc-pause-ms"
+	histogramName := "runtime.memory.gc-pause-ms-hist"
 
 	// this is a shame because first GC takes 20s to kick in
 	// only then gc stats can be collected

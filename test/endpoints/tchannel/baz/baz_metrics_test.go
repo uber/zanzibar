@@ -118,7 +118,7 @@ func TestCallMetrics(t *testing.T) {
 			delete(metrics, key)
 		}
 	}
-	assert.Equal(t, numMetrics, len(metrics))
+	assert.Equal(t, numMetrics, len(metrics)-2) // number to go away after we remove the gratuitous histograms for timer metrics
 
 	endpointNames := []string{
 		"endpoint.request",
@@ -143,14 +143,20 @@ func TestCallMetrics(t *testing.T) {
 		assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 	}
 
+	key := tally.KeyForPrefixedStringMap("endpoint.latency", endpointTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	value := *metrics[key].MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
+
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO: Remove the ugly hardcoding
 		m3.DefaultHistogramBucketIDName: "0000",
 	}
 	for k, v := range endpointTags {
 		histogramTags[k] = v
 	}
-	key := tally.KeyForPrefixedStringMap("endpoint.latency", histogramTags)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 
@@ -177,9 +183,9 @@ func TestCallMetrics(t *testing.T) {
 		"outbound.calls.per-attempt.latency",
 		tchannelOutboundTags,
 	)]
-	value := *outboundLatency.MetricValue.Timer.I64Value
+	value = *outboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+	assert.True(t, value < 10*1000*1000, "expected timer to be 10 milli second")
 
 	clientNames := []string{
 		"client.request",
@@ -208,6 +214,12 @@ func TestCallMetrics(t *testing.T) {
 		assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
 	}
 
+	key = tally.KeyForPrefixedStringMap("client.latency", clientTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	value = *metrics[key].MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
+
 	cHistogramTags := map[string]string{
 		m3.DefaultHistogramBucketName:   "-infinity-10ms",
 		m3.DefaultHistogramBucketIDName: "0000",
@@ -215,7 +227,7 @@ func TestCallMetrics(t *testing.T) {
 	for k, v := range clientTags {
 		cHistogramTags[k] = v
 	}
-	key = tally.KeyForPrefixedStringMap("client.latency", cHistogramTags)
+	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 }

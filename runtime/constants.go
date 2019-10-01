@@ -28,6 +28,7 @@ const (
 	endpointStatus       = "endpoint.status"
 	endpointSystemErrors = "endpoint.system-errors"
 	endpointLatency      = "endpoint.latency"
+	endpointLatencyHist  = "endpoint.latency-hist"
 
 	// MetricEndpointPanics is endpoint level panic counter
 	MetricEndpointPanics = "endpoint.panic"
@@ -44,6 +45,7 @@ const (
 	clientAppErrors    = "client.app-errors"
 	clientSystemErrors = "client.system-errors"
 	clientLatency      = "client.latency"
+	clientLatencyHist  = "client.latency-hist"
 )
 
 var knownMetrics = []string{

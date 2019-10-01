@@ -99,14 +99,14 @@ func TestCallMetrics(t *testing.T) {
 			cbKeys = append(cbKeys, key)
 		}
 	}
-	assert.Equal(t, 4, len(cbKeys))
+	assert.Equal(t, 6, len(cbKeys)) // number off because of the histogram
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
 		if strings.HasPrefix(key, "jaeger") {
 			delete(metrics, key)
 		}
 	}
-	assert.Equal(t, numMetrics, len(metrics))
+	assert.Equal(t, numMetrics+4, len(metrics)) // magic number here because there are histogram entries
 
 	endpointTags := map[string]string{
 		"env":           "test",
@@ -138,10 +138,17 @@ func TestCallMetrics(t *testing.T) {
 	value := *recvdMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	key = tally.KeyForPrefixedStringMap("endpoint.latency", histogramTags)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	latencyMetric := metrics[key]
-	assert.Equal(t, int64(1), *latencyMetric.MetricValue.Count.I64Value)
+	value = *latencyMetric.MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
+
+	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	latencyHistMetric := metrics[key]
+	assert.Equal(t, int64(1), *latencyHistMetric.MetricValue.Count.I64Value)
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
@@ -200,6 +207,12 @@ func TestCallMetrics(t *testing.T) {
 		assert.Equal(t, int64(1), *value.MetricValue.Count.I64Value, "expected counter to be 1")
 	}
 
+	key = tally.KeyForPrefixedStringMap("client.latency", clientTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	value = *metrics[key].MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
+
 	cHistogramTags := map[string]string{
 		m3.DefaultHistogramBucketName:   "-infinity-10ms",
 		m3.DefaultHistogramBucketIDName: "0000",
@@ -207,7 +220,7 @@ func TestCallMetrics(t *testing.T) {
 	for k, v := range clientTags {
 		cHistogramTags[k] = v
 	}
-	key = tally.KeyForPrefixedStringMap("client.latency", cHistogramTags)
+	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
 }

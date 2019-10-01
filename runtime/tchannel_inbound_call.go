@@ -66,7 +66,9 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 	} else {
 		c.scope.Counter(endpointSuccess).Inc(1)
 	}
-	c.scope.Histogram(endpointLatency, tally.DefaultBuckets).RecordDuration(c.finishTime.Sub(c.startTime))
+	delta := c.finishTime.Sub(c.startTime)
+	c.scope.Timer(endpointLatency).Record(delta)
+	c.scope.Histogram(endpointLatencyHist, tally.DefaultBuckets).RecordDuration(delta)
 	c.scope.Counter(endpointRequest).Inc(1)
 
 	fields := c.logFields(ctx)

@@ -45,7 +45,9 @@ type M3Collector struct {
 	fallbackSuccessesPrefix string
 	fallbackFailuresPrefix  string
 	totalDurationPrefix     string
+	totalDurationHistPrefix string
 	runDurationPrefix       string
+	runDurationHistPrefix   string
 }
 
 // M3CollectorClient provides configuration that the m3 client will need.
@@ -81,7 +83,9 @@ func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCo
 		fallbackSuccessesPrefix: "circuitbreaker.fallbackSuccesses",
 		fallbackFailuresPrefix:  "circuitbreaker.fallbackFailures",
 		totalDurationPrefix:     "circuitbreaker.totalDuration",
+		totalDurationHistPrefix: "circuitbreaker.totalDurationHist",
 		runDurationPrefix:       "circuitbreaker.runDuration",
+		runDurationHistPrefix:   "circuitbreaker.runDurationHist",
 	}
 }
 
@@ -90,6 +94,10 @@ func (g *M3Collector) incrementCounterMetric(prefix string, i float64) {
 		return
 	}
 	g.scope.Counter(prefix).Inc(int64(i))
+}
+
+func (g *M3Collector) updateTimerMetric(prefix string, dur time.Duration) {
+	g.scope.Timer(prefix).Record(dur)
 }
 
 func (g *M3Collector) updateHistogramMetric(prefix string, dur time.Duration) {
@@ -107,8 +115,10 @@ func (g *M3Collector) Update(r metricCollector.MetricResult) {
 	g.incrementCounterMetric(g.timeoutsPrefix, r.Timeouts)
 	g.incrementCounterMetric(g.fallbackSuccessesPrefix, r.FallbackSuccesses)
 	g.incrementCounterMetric(g.fallbackFailuresPrefix, r.FallbackFailures)
-	g.updateHistogramMetric(g.totalDurationPrefix, r.TotalDuration)
-	g.updateHistogramMetric(g.runDurationPrefix, r.RunDuration)
+	g.updateTimerMetric(g.totalDurationPrefix, r.TotalDuration)
+	g.updateHistogramMetric(g.totalDurationHistPrefix, r.TotalDuration)
+	g.updateTimerMetric(g.runDurationPrefix, r.RunDuration)
+	g.updateHistogramMetric(g.runDurationHistPrefix, r.RunDuration)
 }
 
 // Reset is a noop operation in this collector.
