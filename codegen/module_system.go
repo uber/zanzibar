@@ -233,6 +233,7 @@ func NewDefaultModuleSystemWithMockHook(
 	clientsMock bool,
 	workflowMock bool,
 	serviceMock bool,
+	configFile string,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
 	t, err := NewDefaultTemplate()
@@ -255,7 +256,7 @@ func NewDefaultModuleSystemWithMockHook(
 	}
 
 	if serviceMock {
-		serviceMockGenHook = ServiceMockGenHook(h, t)
+		serviceMockGenHook = ServiceMockGenHook(h, t, configFile)
 		hooks = append(hooks, serviceMockGenHook)
 	}
 
