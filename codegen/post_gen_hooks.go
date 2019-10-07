@@ -223,7 +223,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 }
 
 // ServiceMockGenHook returns a PostGenHook to generate service mocks
-func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
+func ServiceMockGenHook(h *PackageHelper, t *Template, configFile string) PostGenHook {
 	return func(instances map[string][]*ModuleInstance) error {
 		mockCount := len(instances["service"])
 		fmt.Printf("Generating %d service mocks:\n", mockCount)
@@ -250,7 +250,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				}
 				files.Store(filepath.Join(genDir, "mock_init.go"), mockInit)
 
-				mockService, err := generateServiceMock(instance, h, t)
+				mockService, err := generateServiceMock(instance, h, t, configFile)
 				if err != nil {
 					ec <- errors.Wrapf(
 						err,
@@ -314,8 +314,8 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 }
 
 // generateServiceMock generates mock service
-func generateServiceMock(instance *ModuleInstance, h *PackageHelper, t *Template) ([]byte, error) {
-	configPath := path.Join(strings.Replace(instance.Directory, "services", "config", 1), "test.yaml")
+func generateServiceMock(instance *ModuleInstance, h *PackageHelper, t *Template, configFile string) ([]byte, error) {
+	configPath := path.Join(strings.Replace(instance.Directory, "services", "config", 1), configFile)
 	if _, err := os.Stat(filepath.Join(h.ConfigRoot(), configPath)); err != nil {
 		if os.IsNotExist(err) {
 			configPath = "config/test.yaml"
