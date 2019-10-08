@@ -53,19 +53,19 @@ struct BarResponseRecur {
 }
 
 struct QueryParamsStruct {
-    1: required string name	(zanzibar.http.ref = "query.name")
-    2: optional string userUUID	(zanzibar.http.ref = "query.userUUID")
+    1: required string name
+    2: optional string userUUID
     // TODO: support header annotation
-    3: optional string authUUID	(zanzibar.http.ref = "query.authUUID")
+    3: optional string authUUID
     4: optional string authUUID2 (zanzibar.http.ref = "query.myuuid")
-    5: required list<string> foo	(zanzibar.http.ref = "query.foo")
+    5: required list<string> foo
 }
 
 struct QueryParamsOptsStruct {
-    1: required string name	(zanzibar.http.ref = "query.name")
-    2: optional string userUUID	(zanzibar.http.ref = "query.userUUID")
-    3: optional string authUUID	(zanzibar.http.ref = "query.authUUID")
-    4: optional string authUUID2	(zanzibar.http.ref = "query.authUUID2")
+    1: required string name
+    2: optional string userUUID
+    3: optional string authUUID
+    4: optional string authUUID2
 }
 
 struct QueryParamsUntaggedStruct {
