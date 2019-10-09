@@ -1132,6 +1132,27 @@ func (ms *MethodSpec) hasQueryParams(field *compile.FieldSpec, defaultIsQuery bo
 	return httpRefAnnotation == "" && defaultIsQuery
 }
 
+// getContainedQueryParams - finds all query params of interest in this field
+// In the case of structs, it recursively drills down
+func (ms *MethodSpec) getContainedQueryParams(
+	field *compile.FieldSpec, defaultIsQuery bool, defaultPrefix string) []string {
+	rval := []string{}
+	myDefaultParam := defaultPrefix + strings.ToLower(field.Name)
+	annotation := field.Annotations[ms.annotations.HTTPRef]
+	if strings.HasPrefix(annotation, queryAnnotationPrefix) {
+		rval = append(rval, strings.TrimPrefix(annotation, queryAnnotationPrefix))
+	} else if defaultIsQuery && annotation == "" {
+		rval = append(rval, myDefaultParam)
+	}
+	// If it is a struct, look to see if any of the fields are query params
+	if container, ok := compile.RootTypeSpec(field.Type).(*compile.StructSpec); ok {
+		for _, subField := range container.Fields {
+			rval = append(rval, ms.getContainedQueryParams(subField, defaultIsQuery, myDefaultParam+".")...)
+		}
+	}
+	return rval
+}
+
 func (ms *MethodSpec) setWriteQueryParamStatements(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper, hasNoBody bool,
 ) error {
@@ -1181,7 +1202,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 			return false
 		}
 
-		longQueryName := ms.getLongQueryName(field, thriftPrefix)
+		longQueryName, shortQueryParam := ms.getQueryParamInfo(field, thriftPrefix)
 		identifierName := CamelCase(longQueryName) + "Query"
 		_, isList := realType.(*compile.ListSpec)
 		_, isSet := realType.(*compile.SetSpec)
@@ -1195,34 +1216,34 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 			if isList {
 				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for _, value := range %s {", "r"+longFieldName)
-				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", shortQueryParam, encodeExpr)
 				statements.append("}")
 			} else if isSet {
 				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for value := range %s {", "r"+longFieldName)
-				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", shortQueryParam, encodeExpr)
 				statements.append("}")
 			} else {
 				encodeExpr := getQueryEncodeExpression(field.Type, "r"+longFieldName)
 				statements.appendf("%s := %s", identifierName, encodeExpr)
-				statements.appendf("queryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+				statements.appendf("queryValues.Set(\"%s\", %s)", shortQueryParam, identifierName)
 			}
 		} else {
 			statements.appendf("if r%s != nil {", longFieldName)
 			if isList {
 				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for _, value := range %s {", "r"+longFieldName)
-				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", shortQueryParam, encodeExpr)
 				statements.append("}")
 			} else if isSet {
 				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for value := range %s {", "r"+longFieldName)
-				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", shortQueryParam, encodeExpr)
 				statements.append("}")
 			} else {
 				encodeExpr := getQueryEncodeExpression(field.Type, "*r"+longFieldName)
 				statements.appendf("\t%s := %s", identifierName, encodeExpr)
-				statements.appendf("\tqueryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+				statements.appendf("\tqueryValues.Set(\"%s\", %s)", shortQueryParam, identifierName)
 			}
 			statements.append("}")
 		}
@@ -1256,7 +1277,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
 		longFieldName := goPrefix + "." + PascalCase(field.Name)
-		longQueryName := ms.getLongQueryName(field, thriftPrefix)
+		longQueryName, shortQueryParam := ms.getQueryParamInfo(field, thriftPrefix)
 
 		// Skip if there are no query params in the field or its components
 		if !ms.hasQueryParams(field, hasNoBody) {
@@ -1310,8 +1331,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 				}
 			}
 		case *compile.StructSpec:
-			// If the type is a struct then we cannot really do anything
-
 			typeName, err := GoType(packageHelper, realType)
 			if err != nil {
 				finalError = err
@@ -1320,18 +1339,19 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 			if !field.Required {
 				stack = append(stack, longFieldName)
+				applicableQueryParams := ms.getContainedQueryParams(field, hasNoBody, "")
 
-				statements.appendf(
-					"if req.HasQueryPrefix(%q) || requestBody%s != nil {",
-					longQueryName,
-					longFieldName,
-				)
+				statements.append("var _queryNeeded bool")
+				statements.appendf("for _, _pfx := range %#v {", applicableQueryParams)
+				statements.append("\tif _queryNeeded = req.HasQueryPrefix(_pfx); _queryNeeded {")
+				statements.append("\t\tbreak")
+				statements.append("\t}")
+				statements.append("}")
+				statements.append("if _queryNeeded {")
 			}
 
 			statements.appendf("if requestBody%s == nil {", longFieldName)
-			statements.appendf("\trequestBody%s = &%s{}",
-				longFieldName, typeName,
-			)
+			statements.appendf("\trequestBody%s = &%s{}", longFieldName, typeName)
 			statements.append("}")
 
 			return false
@@ -1341,14 +1361,14 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		okIdentifierName := CamelCase(longQueryName) + "Ok"
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)",
-				okIdentifierName, longQueryName,
+				okIdentifierName, shortQueryParam,
 			)
 			statements.appendf("if !%s {", okIdentifierName)
 			statements.append("\treturn")
 			statements.append("}")
 		} else {
 			statements.appendf("%s := req.HasQueryValue(%q)",
-				okIdentifierName, longQueryName,
+				okIdentifierName, shortQueryParam,
 			)
 			statements.appendf("if %s {", okIdentifierName)
 		}
@@ -1356,7 +1376,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		queryMethodName := getQueryMethodForType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
-			identifierName, queryMethodName, longQueryName,
+			identifierName, queryMethodName, shortQueryParam,
 		)
 
 		statements.append("if !ok {")
@@ -1430,32 +1450,28 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 	return nil
 }
 
-func (ms *MethodSpec) getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
-	var longQueryName string
+// getQueryParamInfo -- returns the fully-qualified query name and the query param
+// The query param is what is specified in the annotation if present, otherwise it is the same as the long query name
+func (ms *MethodSpec) getQueryParamInfo(field *compile.FieldSpec, thriftPrefix string) (string, string) {
+	var longQueryName, queryParam string
 
 	queryName := field.Name
 	queryAnnotation := field.Annotations[ms.annotations.HTTPRef]
 	if strings.HasPrefix(queryAnnotation, queryAnnotationPrefix) {
 		queryName = strings.TrimPrefix(queryAnnotation, queryAnnotationPrefix)
+		queryParam = queryName
 	}
-
-	if thriftPrefix == "" {
-		longQueryName = queryName
-	} else if thriftPrefix[0] == '.' {
-		longQueryName = thriftPrefix[1:] + "." + queryName
-	} else {
-		longQueryName = thriftPrefix + "." + queryName
+	longQueryName = strings.TrimPrefix(thriftPrefix+"."+queryName, ".")
+	// default the short query param to the fully qualified long path
+	if queryParam == "" {
+		queryParam = longQueryName
 	}
-
-	return longQueryName
+	return longQueryName, queryParam
 }
 
 func (ms *MethodSpec) isRequestBoxed(f *compile.FunctionSpec) bool {
 	boxed, ok := f.Annotations[ms.annotations.HTTPReqDefBoxed]
-	if ok && boxed == "true" {
-		return true
-	}
-	return false
+	return ok && boxed == "true"
 }
 
 func headers(annotation string) []string {

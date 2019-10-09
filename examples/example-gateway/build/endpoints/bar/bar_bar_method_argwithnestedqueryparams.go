@@ -149,7 +149,13 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	}
 	requestBody.Request.Foo = requestFooQuery
 
-	if req.HasQueryPrefix("opt") || requestBody.Opt != nil {
+	var _queryNeeded bool
+	for _, _pfx := range []string{"opt", "opt.name", "opt.useruuid", "opt.authuuid", "opt.authuuid2"} {
+		if _queryNeeded = req.HasQueryPrefix(_pfx); _queryNeeded {
+			break
+		}
+	}
+	if _queryNeeded {
 		if requestBody.Opt == nil {
 			requestBody.Opt = &endpointsBarBar.QueryParamsOptsStruct{}
 		}
