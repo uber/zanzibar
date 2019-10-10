@@ -990,7 +990,6 @@ func fixture_typesTmpl() (*asset, error) {
 
 var _grpc_clientTmpl = []byte(`{{- /* template to render gateway gRPC client code */ -}}
 {{- $instance := .Instance }}
-{{- $genPkg := .GenPkg }}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
@@ -1167,7 +1166,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6107, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6081, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
