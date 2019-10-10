@@ -29,6 +29,11 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
+const (
+	_thriftSuffix = ".thrift"
+	_protoSuffix  = ".proto"
+)
+
 // PackageHelper manages the mapping from thrift file to generated type code and service code.
 type PackageHelper struct {
 	// The project package name
@@ -236,20 +241,29 @@ func (p PackageHelper) GenCodePackage() string {
 
 // TypeImportPath returns the Go import path for types defined in a thrift file.
 func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, ".thrift") {
-		return "", errors.Errorf("file %s is not .thrift", thrift)
+	if !strings.HasSuffix(thrift, _thriftSuffix) && !strings.HasSuffix(thrift, _protoSuffix) {
+		return "", errors.Errorf("file %s is not %s or %s", thrift, _thriftSuffix, _protoSuffix)
+	}
+	var suffix string
+	// for a filepath: a/b/c.(thrift|proto)
+	// - thrift generates code in path: a/b/c/c.go
+	// - proto generates code in path: a/b/c.go
+	if strings.HasSuffix(thrift, _thriftSuffix) {
+		suffix = strings.TrimSuffix(thrift, _thriftSuffix)
+	} else {
+		suffix = filepath.Dir(thrift)
 	}
 
 	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
-			"file %s is not in thrift dir (%s)",
+			"file %s is not in IDL dir (%s)",
 			thrift, p.thriftRootDir,
 		)
 	}
 	return path.Join(
 		p.genCodePackage,
-		thrift[idx+len(p.thriftRootDir):len(thrift)-7],
+		thrift[idx+len(p.thriftRootDir):len(suffix)],
 	), nil
 }
 
@@ -271,32 +285,38 @@ func (p PackageHelper) CodeGenTargetPath() string {
 
 // TypePackageName returns the package name that defines the type.
 func (p PackageHelper) TypePackageName(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, ".thrift") {
-		return "", errors.Errorf("file %s is not .thrift", thrift)
+	if !strings.HasSuffix(thrift, _thriftSuffix) && !strings.HasSuffix(thrift, _protoSuffix) {
+		return "", errors.Errorf("file %s is not %s or %s", thrift, _thriftSuffix, _protoSuffix)
 	}
 	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
-			"file %s is not in thrift dir (%s)",
+			"file %s is not in IDL dir (%s)",
 			thrift, p.thriftRootDir,
 		)
 	}
+	var suffix string
+	if strings.HasSuffix(thrift, _thriftSuffix) {
+		suffix = strings.TrimSuffix(thrift, _thriftSuffix)
+	} else {
+		suffix = strings.TrimSuffix(thrift, _protoSuffix)
+	}
 
 	// Strip the leading / and strip the .thrift on the end.
-	thriftSegment := thrift[idx+len(p.thriftRootDir)+1 : len(thrift)-7]
+	thriftSegment := thrift[idx+len(p.thriftRootDir)+1 : len(suffix)]
 
 	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
 	return CamelCase(thriftPackageName), nil
 }
 
 func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, ".thrift") {
-		return "", errors.Errorf("file %s is not .thrift", thrift)
+	if !strings.HasSuffix(thrift, _thriftSuffix) && !strings.HasSuffix(thrift, _protoSuffix) {
+		return "", errors.Errorf("file %s is not %s or %s", thrift, _thriftSuffix, _protoSuffix)
 	}
 	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
-			"file %s is not in thrift dir (%s)",
+			"file %s is not in IDL dir (%s)",
 			thrift, p.thriftRootDir,
 		)
 	}

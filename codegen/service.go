@@ -23,7 +23,6 @@ package codegen
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -78,7 +77,7 @@ type ServiceSpec struct {
 }
 
 // NewProtoModuleSpec returns a specification for a proto module.
-func NewProtoModuleSpec(protoFile string, isEndpoint bool) (*ModuleSpec, error) {
+func NewProtoModuleSpec(protoFile string, isEndpoint bool, h *PackageHelper) (*ModuleSpec, error) {
 	reader, err := os.Open(protoFile)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed reading proto file")
@@ -90,16 +89,22 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool) (*ModuleSpec, error) 
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parsing proto file")
 	}
-	protoServices := newVisitor().Visit(protoModules)
+	pModule := newVisitor().Visit(protoModules)
 
 	moduleSpec := &ModuleSpec{
 		ProtoModule:   protoModules,
-		ProtoServices: protoServices,
+		ProtoServices: pModule.Services,
 		ThriftFile:    protoFile,
 		WantAnnot:     false,
 		IsEndpoint:    isEndpoint,
-		PackageName:   packageName(filepath.Base(protoModules.Filename)),
+		PackageName:   pModule.PackageName,
 	}
+
+	newPkg, _ := h.TypeImportPath(protoFile)
+	moduleSpec.IncludedPackages = []GoPackageImport{{
+		PackageName: newPkg,
+		AliasName:   "gen",
+	}}
 	return moduleSpec, nil
 }
 

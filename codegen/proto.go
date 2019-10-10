@@ -24,6 +24,14 @@ import (
 	"github.com/emicklei/proto"
 )
 
+// ProtoModule is an internal representation of a parsed Proto file.
+type ProtoModule struct {
+	PackageName string
+	FilePath    string
+	Imports     []string
+	Services    []*ProtoService
+}
+
 // ProtoService is an internal representation of Proto service and methods in that service.
 type ProtoService struct {
 	Name string
@@ -43,24 +51,29 @@ type ProtoMessage struct {
 }
 
 type visitor struct {
-	protoServices []*ProtoService
+	Module *ProtoModule
 }
 
 func newVisitor() *visitor {
 	return &visitor{
-		protoServices: make([]*ProtoService, 0),
+		Module: new(ProtoModule),
 	}
 }
 
-func (v *visitor) Visit(proto *proto.Proto) []*ProtoService {
+func (v *visitor) Visit(proto *proto.Proto) *ProtoModule {
+	v.Module = &ProtoModule{
+		FilePath: proto.Filename,
+		Services: make([]*ProtoService, 0),
+		Imports:  make([]string, 0),
+	}
 	for _, e := range proto.Elements {
 		e.Accept(v)
 	}
-	return v.protoServices
+	return v.Module
 }
 
 func (v *visitor) VisitService(e *proto.Service) {
-	v.protoServices = append(v.protoServices, &ProtoService{
+	v.Module.Services = append(v.Module.Services, &ProtoService{
 		Name: e.Name,
 		RPC:  make([]*ProtoRPC, 0),
 	})
@@ -70,12 +83,20 @@ func (v *visitor) VisitService(e *proto.Service) {
 }
 
 func (v *visitor) VisitRPC(r *proto.RPC) {
-	s := v.protoServices[len(v.protoServices)-1]
+	s := v.Module.Services[len(v.Module.Services)-1]
 	s.RPC = append(s.RPC, &ProtoRPC{
 		Name:     r.Name,
 		Request:  &ProtoMessage{Name: r.RequestType},
 		Response: &ProtoMessage{Name: r.ReturnsType},
 	})
+}
+
+func (v *visitor) VisitPackage(e *proto.Package) {
+	v.Module.PackageName = e.Name
+}
+
+func (v *visitor) VisitImport(e *proto.Import) {
+	v.Module.Imports = append(v.Module.Imports, e.Filename)
 }
 
 // From the current use case, the following visits are no-op
@@ -84,9 +105,7 @@ func (v *visitor) VisitRPC(r *proto.RPC) {
 
 func (v *visitor) VisitMessage(e *proto.Message)         {}
 func (v *visitor) VisitSyntax(e *proto.Syntax)           {}
-func (v *visitor) VisitPackage(e *proto.Package)         {}
 func (v *visitor) VisitOption(e *proto.Option)           {}
-func (v *visitor) VisitImport(e *proto.Import)           {}
 func (v *visitor) VisitNormalField(e *proto.NormalField) {}
 func (v *visitor) VisitEnumField(e *proto.EnumField)     {}
 func (v *visitor) VisitEnum(e *proto.Enum)               {}

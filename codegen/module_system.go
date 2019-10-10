@@ -871,12 +871,6 @@ func (g *GRPCClientGenerator) Generate(
 		return nil, err
 	}
 
-	parts := strings.Split(clientSpec.ThriftFile, "/")
-	genDir := strings.Join(parts[len(parts)-3:len(parts)-1], "/")
-	genPkg := filepath.Join(
-		g.packageHelper.GenCodePackage(),
-		genDir,
-	)
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
 		ProtoServices:    clientSpec.ModuleSpec.ProtoServices,
@@ -884,10 +878,9 @@ func (g *GRPCClientGenerator) Generate(
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
 		Services:         nil,
-		IncludedPackages: nil,
+		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   reversedMethods,
-		GenPkg:           genPkg,
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -1533,7 +1526,6 @@ type ClientMeta struct {
 	SidecarRouter    string
 	Fixture          *Fixture
 	DeputyReqHeader  string
-	GenPkg           string
 }
 
 func findMethod(

@@ -38,7 +38,7 @@ func TestModuleSpec(t *testing.T) {
 
 func TestProtoModuleSpec(t *testing.T) {
 	echoProto := "../examples/example-gateway/idl/clients/echo/echo.proto"
-	_, err := codegen.NewProtoModuleSpec(echoProto, false)
+	_, err := codegen.NewProtoModuleSpec(echoProto, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the proto file")
 }
 
@@ -49,7 +49,7 @@ func TestProtoModuleSpecParseError(t *testing.T) {
 	_, err = tmpFile.WriteString("test")
 	assert.NoError(t, err, "failed writing to temp file")
 
-	_, err = codegen.NewProtoModuleSpec(tmpFile.Name(), false)
+	_, err = codegen.NewProtoModuleSpec(tmpFile.Name(), false, newPackageHelper(t))
 	assert.Error(t, err, "failed parsing proto file")
 }
 

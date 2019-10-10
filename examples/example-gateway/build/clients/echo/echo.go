@@ -31,6 +31,7 @@ import (
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
 	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -71,8 +72,8 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
 			methodNames,
-			"echo", // user serviceName
 			"echo",
+			"Echo",
 			routingKey,
 			requestUUIDHeaderKey,
 			configureCicruitBreaker(deps, timeoutInMS),

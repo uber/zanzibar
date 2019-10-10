@@ -86,71 +86,85 @@ const (
 )
 
 var (
-	singleServiceSpecList = []*ProtoService{{
-		Name: "EchoService",
-		RPC: []*ProtoRPC{
-			{
-				Name: "EchoMethod",
-				Request: &ProtoMessage{
-					Name: "Request",
-				},
-				Response: &ProtoMessage{
-					Name: "Response",
-				},
-			},
-		},
-	}}
-	multiServiceSpecList = []*ProtoService{{
-		Name: "EchoService",
-		RPC: []*ProtoRPC{
-			{
-				Name: "EchoMethod1",
-				Request: &ProtoMessage{
-					Name: "Request1",
-				},
-				Response: &ProtoMessage{
-					Name: "Response1",
+	singleServiceSpecList = &ProtoModule{
+		PackageName: "echo",
+		Services: []*ProtoService{{
+			Name: "EchoService",
+			RPC: []*ProtoRPC{
+				{
+					Name: "EchoMethod",
+					Request: &ProtoMessage{
+						Name: "Request",
+					},
+					Response: &ProtoMessage{
+						Name: "Response",
+					},
 				},
 			},
-			{
-				Name: "EchoMethod2",
-				Request: &ProtoMessage{
-					Name: "Request2",
+		}},
+	}
+	multiServiceSpecList = &ProtoModule{
+		PackageName: "echo",
+		Services: []*ProtoService{{
+			Name: "EchoService",
+			RPC: []*ProtoRPC{
+				{
+					Name: "EchoMethod1",
+					Request: &ProtoMessage{
+						Name: "Request1",
+					},
+					Response: &ProtoMessage{
+						Name: "Response1",
+					},
 				},
-				Response: &ProtoMessage{
-					Name: "Response2",
-				},
-			},
-		},
-	}}
-	mixedServiceSpecList = []*ProtoService{{
-		Name: "EchoService",
-		RPC: []*ProtoRPC{
-			{
-				Name: "EchoMethod1",
-				Request: &ProtoMessage{
-					Name: "Request1",
-				},
-				Response: &ProtoMessage{
-					Name: "Response1",
-				},
-			},
-			{
-				Name: "EchoMethod2",
-				Request: &ProtoMessage{
-					Name: "Request1",
-				},
-				Response: &ProtoMessage{
-					Name: "Response2",
+				{
+					Name: "EchoMethod2",
+					Request: &ProtoMessage{
+						Name: "Request2",
+					},
+					Response: &ProtoMessage{
+						Name: "Response2",
+					},
 				},
 			},
-		},
-	}}
-	noServiceSpecList    = make([]*ProtoService, 0)
-	emptyServiceSpecList = []*ProtoService{{
-		Name: "EchoService",
-		RPC:  make([]*ProtoRPC, 0),
-	}}
+		}},
+	}
+	mixedServiceSpecList = &ProtoModule{
+		PackageName: "echo",
+		Services: []*ProtoService{{
+			Name: "EchoService",
+			RPC: []*ProtoRPC{
+				{
+					Name: "EchoMethod1",
+					Request: &ProtoMessage{
+						Name: "Request1",
+					},
+					Response: &ProtoMessage{
+						Name: "Response1",
+					},
+				},
+				{
+					Name: "EchoMethod2",
+					Request: &ProtoMessage{
+						Name: "Request1",
+					},
+					Response: &ProtoMessage{
+						Name: "Response2",
+					},
+				},
+			},
+		}},
+	}
+	noServiceSpecList = &ProtoModule{
+		PackageName: "echo",
+	}
+	emptyServiceSpecList = &ProtoModule{
+		PackageName: "echo",
+		Services: []*ProtoService{{
+			Name: "EchoService",
+			RPC:  make([]*ProtoRPC, 0),
+		}},
+	}
 )
 
 func TestRunner(t *testing.T) {
@@ -161,12 +175,13 @@ func TestRunner(t *testing.T) {
 	assertElementMatch(t, emptyServiceSpec, emptyServiceSpecList)
 }
 
-func assertElementMatch(t *testing.T, specRaw string, specParsed []*ProtoService) {
+func assertElementMatch(t *testing.T, specRaw string, specParsed *ProtoModule) {
 	r := strings.NewReader(specRaw)
 	parser := proto.NewParser(r)
 	protoSpec, err := parser.Parse()
 	assert.NoErrorf(t, err, "proto spec parsing failed")
 
 	v := newVisitor().Visit(protoSpec)
-	assert.ElementsMatch(t, v, specParsed)
+	assert.Equal(t, specParsed.PackageName, v.PackageName)
+	assert.ElementsMatch(t, specParsed.Services, v.Services)
 }

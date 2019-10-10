@@ -1002,7 +1002,9 @@ import (
 	"go.uber.org/yarpc"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
-	gen "{{$genPkg}}"
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -1014,21 +1016,22 @@ import (
 // Client defines {{$clientID}} client interface.
 type Client interface {
 {{range $i, $svc := .ProtoServices -}}
-	{{range $j, $method := $svc.RPC -}}
+	{{range $j, $method := $svc.RPC}}
 		{{title $method.Name}} (
-			ctx context.Context,
-			request *gen.{{$method.Request.Name}},
-			opts ...yarpc.CallOption,
+		ctx context.Context,
+		request *gen.{{$method.Request.Name}},
+		opts ...yarpc.CallOption,
 		) (*gen.{{$method.Response.Name}}, error)
-	{{- end -}}
-{{- end}}
+	{{ end -}}
 }
 
 // {{$clientName}} is the gRPC client for downstream service.
 type {{$clientName}} struct {
-	client gen.{{pascal $clientID}}YARPCClient
+	client gen.{{pascal $svc.Name}}YARPCClient
 	opts   *zanzibar.GRPCClientOpts
 }
+
+{{- end}}
 
 // NewClient returns a new gRPC client for service {{$clientID}}
 func {{$exportName}}(deps *module.Dependencies) Client {
@@ -1049,21 +1052,23 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{- end -}}
 		{{- end}}
 	}
+	{{range $i, $svc := .ProtoServices -}}
 	return &{{$clientName}}{
-		client: gen.New{{pascal $clientID}}YARPCClient(oc),
+		client: gen.New{{pascal $svc.Name}}YARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
-			deps.Default.Logger,
-			deps.Default.ContextMetrics,
-			deps.Default.ContextExtractor,
-			methodNames,
-			"{{$clientID}}", // user serviceName
-			"{{$clientID}}",
-			routingKey,
-			requestUUIDHeaderKey,
-			configureCicruitBreaker(deps, timeoutInMS),
-			timeoutInMS,
+		deps.Default.Logger,
+		deps.Default.ContextMetrics,
+		deps.Default.ContextExtractor,
+		methodNames,
+		"{{$clientID}}",
+		"{{$svc.Name}}",
+		routingKey,
+		requestUUIDHeaderKey,
+		configureCicruitBreaker(deps, timeoutInMS),
+		timeoutInMS,
 		),
 	}
+	{{- end}}
 }
 
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
@@ -1164,7 +1169,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6013, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6107, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
