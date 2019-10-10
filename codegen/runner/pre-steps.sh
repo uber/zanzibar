@@ -68,9 +68,34 @@ for tfile in ${THRIFTRW_SRCS}; do
 		--thrift-root="$IDL_DIR" "$tfile"
 done
 
-echo "Generating Go code from Proto files"
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
+
+echo "Generating Go code from Proto files"
+found_protos=$(find "$IDL_DIR" -name "*.proto")
+for proto_file in ${found_protos}; do
+  # We are not generating clients here, just (de)serializers.
+  proto_path="$ABS_IDL_DIR"
+  gencode_path="$ABS_GENCODE_DIR"
+  mkdir -p "$gencode_path"
+  proto_file="$PWD/$proto_file"
+  protoc --proto_path="$proto_path" \
+        --proto_path=./vendor/github.com/gogo/protobuf/protobuf \
+        --gogoslick_out=\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,:"$gencode_path" \
+        "$proto_file"
+done
+
+echo "Generating YARPC clients from Proto files"
 config_files=$(find "$CONFIG_DIR" -name "*-config.json" -o -name "*-config.yaml" | sort)
 found_protos=""
 for config_file in ${config_files}; do
@@ -94,13 +119,25 @@ for config_file in ${config_files}; do
 		proto_file=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".proto"))' "$yaml_file")
 		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
 			found_protos+=" $proto_file"
-			proto_dir=$(dirname "$proto_file")
-			proto_path="$ABS_IDL_DIR/$proto_dir"
-			gencode_path="$ABS_GENCODE_DIR/$proto_dir"
+			proto_path="$ABS_IDL_DIR"
+			gencode_path="$ABS_GENCODE_DIR"
 			mkdir -p "$gencode_path"
 			proto_file="$ABS_IDL_DIR/$proto_file"
-			protoc --proto_path="$proto_path" --gogoslick_out="$gencode_path" \
-                   --yarpc-go_out="$gencode_path" "$proto_file"
+			protoc --proto_path="$proto_path" \
+            --proto_path=./vendor/github.com/gogo/protobuf/protobuf \
+            --gogoslick_out=\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,:"$gencode_path" \
+            --yarpc-go_out="$gencode_path" \
+            "$proto_file"
 		fi
 	done
 done
@@ -145,15 +182,6 @@ for config_file in ${config_files}; do
 
 		thrift_file=$(${processor} -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
 		thrift_file+=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".thrift"))' "$yaml_file")
-
-		# process .proto files
-		proto_file=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".proto"))' "$yaml_file")
-		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
-			found_protos+=" $proto_file"
-			proto_file="$IDL_DIR/$proto_file"
-			protoc --proto_path=
-
-		fi
 
 		[[ -z ${thrift_file} ]] && continue
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue

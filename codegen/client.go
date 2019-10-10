@@ -258,7 +258,7 @@ func newGRPCClientSpec(
 	h *PackageHelper,
 ) (*ClientSpec, error) {
 	protoFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
-	protoSpec, err := NewProtoModuleSpec(protoFile, false)
+	protoSpec, err := NewProtoModuleSpec(protoFile, false, h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "could not build proto spec for proto file %s: ", protoFile,
