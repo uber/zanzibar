@@ -1,5 +1,5 @@
-hash: 1faa09ee25a64c5d02eca31bd378542c15338a145edbbc40a882984b6e9d3c0c
-updated: 2019-09-26T15:31:01.379292-07:00
+hash: 3f062f8bb36e98ab5f0e2d01fb79a28fe3fc681ee4ce2ad6d1b7f666c41f14fe
+updated: 2019-10-10T17:56:44.748006-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -14,7 +14,7 @@ imports:
   subpackages:
   - lib/go/thrift
 - name: github.com/beorn7/perks
-  version: 4b2b341e8d7715fae06375aa633dbb6e91b3fb46
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
   - quantile
 - name: github.com/buger/jsonparser
@@ -26,7 +26,7 @@ imports:
 - name: github.com/emicklei/proto
   version: 81cafc1ff2e77b4342b32f8824cfb5b722bfd79c
 - name: github.com/fatih/structtag
-  version: 76ae1d6d2117609598c7d4e8f3e938145f204e8f
+  version: 3878f9fb88e63e26ea1e6c97ab985cb55452fee5
 - name: github.com/ghodss/yaml
   version: 25d852aebe32c875e9c044af3eef9c7dc6bc777f
 - name: github.com/gogo/googleapis
@@ -98,7 +98,7 @@ imports:
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: 1b2b06f5f209fea48ff5922d8bfb2b9ed5d8f00b
+  version: b2ccc519800e761ac8000b95e5d57c80a897ff9e
   subpackages:
   - bootstrap
   - buffer
@@ -138,15 +138,18 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 1ba88736f028e37bc17328369e94a537ae9e0234
+  version: 1ab4d74fc89940cfbc3c2b3a89821336cdefa119
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 5867b95ac084bbfee6ea16595c4e05ab009021da
+  version: 55ae3d9d557340b5bc24cd8aa5f6fa2c2ab31352
   subpackages:
-  - internal/fs
+  - internal/util
+  - iostats
+  - nfs
+  - xfs
 - name: github.com/samuel/go-thrift
   version: e8b6b52668fe9c972220addc130edf46a9b466b1
   subpackages:
@@ -267,7 +270,7 @@ imports:
   subpackages:
   - update-license
 - name: go.uber.org/yarpc
-  version: 719d4248bd626e9fe9b79d2ac5b637dad79740f7
+  version: 4add280eca04125a9d23833de579a00f5760db1a
   subpackages:
   - api/backoff
   - api/encoding
@@ -314,7 +317,7 @@ imports:
   subpackages:
   - golint
 - name: golang.org/x/net
-  version: c00fd9afed17cfdca9b3e1e3b8de7ef2b3f0347b
+  version: 74dc4d7220e7acc4e100824340f3e66577424772
   subpackages:
   - bpf
   - context
@@ -329,7 +332,7 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: 855e68c8590b0d6a9d08863d2982eb8aeddd98d3
+  version: fde4db37ae7ad8191b03d30d27f258b5291ae4e3
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -340,7 +343,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: a8d5d34286bd3ab7c348812aa4699f674c05245b
+  version: 65e3620a7ae7ac25e8494a60f0e5ef4e4fba03b3
   subpackages:
   - cmd/goimports
   - cmd/stringer
@@ -357,7 +360,7 @@ imports:
   - internal/gopathwalk
   - internal/semver
 - name: google.golang.org/genproto
-  version: 54afdca5d873f7b529e2ce3def1a99df16feda90
+  version: d831d65fe17df2e52bcc4316d4a9f7a418701f43
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
@@ -397,7 +400,7 @@ imports:
   - status
   - tap
 - name: gopkg.in/validator.v2
-  version: 1a84e0480e5b570eb3c8366596e2d5e9befe33fc
+  version: 135c24b11c19e52befcae2ec3fca5d9b78c4e98e
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: honnef.co/go/tools
