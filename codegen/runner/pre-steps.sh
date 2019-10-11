@@ -71,6 +71,19 @@ done
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 
+GOGO_WKT_COMPATIBILITY="\\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\\
+"
+
 echo "Generating Go code from Proto files"
 found_protos=$(find "$IDL_DIR" -name "*.proto")
 for proto_file in ${found_protos}; do
@@ -81,17 +94,7 @@ for proto_file in ${found_protos}; do
   proto_file="$PWD/$proto_file"
   protoc --proto_path="$proto_path" \
         --proto_path=./vendor/github.com/gogo/protobuf/protobuf \
-        --gogoslick_out=\
-Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,:"$gencode_path" \
+        --gogoslick_out="$GOGO_WKT_COMPATIBILITY":"$gencode_path" \
         "$proto_file"
 done
 
@@ -125,17 +128,7 @@ for config_file in ${config_files}; do
 			proto_file="$ABS_IDL_DIR/$proto_file"
 			protoc --proto_path="$proto_path" \
             --proto_path=./vendor/github.com/gogo/protobuf/protobuf \
-            --gogoslick_out=\
-Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,:"$gencode_path" \
+            --gogoslick_out="$GOGO_WKT_COMPATIBILITY":"$gencode_path" \
             --yarpc-go_out="$gencode_path" \
             "$proto_file"
 		fi
