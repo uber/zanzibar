@@ -57,7 +57,7 @@ import:
 - package: go.uber.org/multierr
   version: ^1
 - package: go.uber.org/yarpc
-  version: ^1.37.4
+  version: ^1.41.0
 - package: github.com/ghodss/yaml
   version: master
 - package: github.com/gogo/protobuf
