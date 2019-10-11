@@ -2603,9 +2603,13 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 
 		ruleWrapper := ruleengine.RuleWrapper{}
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			ruleValue := []string{routingConfig.ServiceName}
+			rd := routingConfig.RoutingDelegate
+			if rd != nil {
+				ruleValue = append(ruleValue, *rd)
+			}
 			rawRule := ruleengine.RawRule{Patterns: []string{textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName),
-			 strings.ToLower(routingConfig.HeaderValue)},
-				Value: routingConfig.ServiceName}
+				strings.ToLower(routingConfig.HeaderValue)}, Value: ruleValue}
 			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 
@@ -2754,7 +2758,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10709, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10842, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

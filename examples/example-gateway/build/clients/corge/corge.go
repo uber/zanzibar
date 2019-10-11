@@ -147,9 +147,13 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 
 		ruleWrapper := ruleengine.RuleWrapper{}
 		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			ruleValue := []string{routingConfig.ServiceName}
+			rd := routingConfig.RoutingDelegate
+			if rd != nil {
+				ruleValue = append(ruleValue, *rd)
+			}
 			rawRule := ruleengine.RawRule{Patterns: []string{textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName),
-				strings.ToLower(routingConfig.HeaderValue)},
-				Value: routingConfig.ServiceName}
+				strings.ToLower(routingConfig.HeaderValue)}, Value: ruleValue}
 			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 

@@ -33,9 +33,10 @@ type EnvConfig map[string]struct {
 }
 
 type RoutingConfig struct {
-	HeaderName  string `yaml:"headerName" json:"headerName"`
-	HeaderValue string `yaml:"headerValue" json:"headerValue"`
-	ServiceName string `yaml:"serviceName" json:"serviceName"`
+	HeaderName      string  `yaml:"headerName" json:"headerName"`
+	HeaderValue     string  `yaml:"headerValue" json:"headerValue"`
+	ServiceName     string  `yaml:"serviceName" json:"serviceName"`
+	RoutingDelegate *string `yaml:"rd,omitempty" json:"rd,omitempty"`
 }
 
 type ServiceRouting struct {
