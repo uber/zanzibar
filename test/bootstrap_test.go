@@ -66,14 +66,15 @@ func TestBootstrapError(t *testing.T) {
 	}
 }
 
-// TODO(argo): Let us redo this test later
-// func TestBootstrapWithBadLogLevel(t *testing.T) {
-//	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
-//		"logger.level": "invalid",
-//	}, &testGateway.Options{
-//		TestBinary:  util.DefaultMainFile("example-gateway"),
-//		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
-//	})
-//	assert.Error(t, err, "got bootstrap err")
-//	assert.Nil(t, gateway)
-//}
+// TODO(argo): Let us redo this test to actually verify other invalid keys in config
+func TestBootstrapWithBadLogLevel(t *testing.T) {
+	t.Skip("Skip for now to redo test to be more inclusive of other bad config keys")
+	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
+		"logger.level": "invalid",
+	}, &testGateway.Options{
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
+	})
+	assert.Error(t, err, "got bootstrap err")
+	assert.Nil(t, gateway)
+}
