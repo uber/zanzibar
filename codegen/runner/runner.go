@@ -142,7 +142,7 @@ func main() {
 	}
 	var moduleSystem *codegen.ModuleSystem
 	if genMock {
-		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.json")
+		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.yaml")
 	} else {
 		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper)
 	}

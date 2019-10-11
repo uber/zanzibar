@@ -318,7 +318,7 @@ func generateServiceMock(instance *ModuleInstance, h *PackageHelper, t *Template
 	configPath := path.Join(strings.Replace(instance.Directory, "services", "config", 1), configFile)
 	if _, err := os.Stat(filepath.Join(h.ConfigRoot(), configPath)); err != nil {
 		if os.IsNotExist(err) {
-			configPath = "config/test.yaml"
+			configPath = filepath.Join("config", configFile)
 		}
 	}
 	data := map[string]interface{}{
