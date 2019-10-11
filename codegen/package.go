@@ -239,31 +239,31 @@ func (p PackageHelper) GenCodePackage() string {
 	return p.genCodePackage
 }
 
-// TypeImportPath returns the Go import path for types defined in a thrift file.
-func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, _thriftSuffix) && !strings.HasSuffix(thrift, _protoSuffix) {
-		return "", errors.Errorf("file %s is not %s or %s", thrift, _thriftSuffix, _protoSuffix)
+// TypeImportPath returns the Go import path for types defined in a idlFile file.
+func (p PackageHelper) TypeImportPath(idlFile string) (string, error) {
+	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
+		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
 	}
 	var suffix string
 	// for a filepath: a/b/c.(thrift|proto)
 	// - thrift generates code in path: a/b/c/c.go
 	// - proto generates code in path: a/b/c.go
-	if strings.HasSuffix(thrift, _thriftSuffix) {
-		suffix = strings.TrimSuffix(thrift, _thriftSuffix)
+	if strings.HasSuffix(idlFile, _thriftSuffix) {
+		suffix = strings.TrimSuffix(idlFile, _thriftSuffix)
 	} else {
-		suffix = filepath.Dir(thrift)
+		suffix = filepath.Dir(idlFile)
 	}
 
-	idx := strings.Index(thrift, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			thrift, p.thriftRootDir,
+			idlFile, p.thriftRootDir,
 		)
 	}
 	return path.Join(
 		p.genCodePackage,
-		thrift[idx+len(p.thriftRootDir):len(suffix)],
+		idlFile[idx+len(p.thriftRootDir):len(suffix)],
 	), nil
 }
 
@@ -284,43 +284,43 @@ func (p PackageHelper) CodeGenTargetPath() string {
 }
 
 // TypePackageName returns the package name that defines the type.
-func (p PackageHelper) TypePackageName(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, _thriftSuffix) && !strings.HasSuffix(thrift, _protoSuffix) {
-		return "", errors.Errorf("file %s is not %s or %s", thrift, _thriftSuffix, _protoSuffix)
+func (p PackageHelper) TypePackageName(idlFile string) (string, error) {
+	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
+		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
 	}
-	idx := strings.Index(thrift, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			thrift, p.thriftRootDir,
+			idlFile, p.thriftRootDir,
 		)
 	}
-	var suffix string
-	if strings.HasSuffix(thrift, _thriftSuffix) {
-		suffix = strings.TrimSuffix(thrift, _thriftSuffix)
+	var prefix string
+	if strings.HasSuffix(idlFile, _thriftSuffix) {
+		prefix = strings.TrimSuffix(idlFile, _thriftSuffix)
 	} else {
-		suffix = strings.TrimSuffix(thrift, _protoSuffix)
+		prefix = strings.TrimSuffix(idlFile, _protoSuffix)
 	}
 
 	// Strip the leading / and strip the .thrift on the end.
-	thriftSegment := thrift[idx+len(p.thriftRootDir)+1 : len(suffix)]
+	thriftSegment := idlFile[idx+len(p.thriftRootDir)+1 : len(prefix)]
 
 	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
 	return CamelCase(thriftPackageName), nil
 }
 
-func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, _thriftSuffix) && !strings.HasSuffix(thrift, _protoSuffix) {
-		return "", errors.Errorf("file %s is not %s or %s", thrift, _thriftSuffix, _protoSuffix)
+func (p PackageHelper) getRelativeFileName(idlFile string) (string, error) {
+	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
+		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
 	}
-	idx := strings.Index(thrift, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			thrift, p.thriftRootDir,
+			idlFile, p.thriftRootDir,
 		)
 	}
-	return thrift[idx+len(p.thriftRootDir):], nil
+	return idlFile[idx+len(p.thriftRootDir):], nil
 }
 
 // TargetClientsInitPath returns where the clients init should go
