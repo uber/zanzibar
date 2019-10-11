@@ -43,7 +43,7 @@ func main() {
 		zapcore.NewCore(
 			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 			os.Stderr,
-			zap.InfoLevel,
+			zap.DebugLevel,
 		),
 	)
 

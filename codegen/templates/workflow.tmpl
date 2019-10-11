@@ -229,7 +229,9 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
-	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
+	if cliRespHeaders != nil {
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
+	}
 	{{- end}}
 
 	{{if eq .ResponseType "" -}}

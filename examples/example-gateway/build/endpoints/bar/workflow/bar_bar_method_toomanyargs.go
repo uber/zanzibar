@@ -140,8 +140,12 @@ func (w barTooManyArgsWorkflow) Handle(
 
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
-	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
-	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+	if cliRespHeaders != nil {
+		resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
+	}
+	if cliRespHeaders != nil {
+		resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+	}
 
 	response := convertBarTooManyArgsClientResponse(clientRespBody)
 	return response, resHeaders, nil

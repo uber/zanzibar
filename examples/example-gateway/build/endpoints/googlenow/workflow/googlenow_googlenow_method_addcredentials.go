@@ -123,7 +123,9 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
-	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+	if cliRespHeaders != nil {
+		resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+	}
 
 	return resHeaders, nil
 }

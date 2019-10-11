@@ -145,9 +145,11 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 		if body, err := json.Marshal(response); err == nil {
 			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
 		}
-		for _, k := range cliRespHeaders.Keys() {
-			if val, ok := cliRespHeaders.Get(k); ok {
-				zfields = append(zfields, zap.String(k, val))
+		if cliRespHeaders != nil {
+			for _, k := range cliRespHeaders.Keys() {
+				if val, ok := cliRespHeaders.Get(k); ok {
+					zfields = append(zfields, zap.String(k, val))
+				}
 			}
 		}
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
