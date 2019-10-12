@@ -211,7 +211,7 @@ func TestCallMetrics(t *testing.T) {
 	}
 	expectedValues := map[string]interface{}{
 		"env":                            "test",
-		"level":                          "info",
+		"level":                          "debug",
 		"msg":                            "Finished an outgoing client HTTP request",
 		"statusCode":                     float64(200),
 		"clientID":                       "bar",

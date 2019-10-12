@@ -81,7 +81,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	if res.finished {
 		/* coverage ignore next line */
 		res.logger.Error(
-			"Finished an server response twice",
+			"Finished a server response multiple times",
 			append(logFields, zap.String("path", res.Request.URL.Path))...,
 		)
 		/* coverage ignore next line */
@@ -106,7 +106,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
 
-	logFn := res.logger.Info
+	logFn := res.logger.Debug
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		tagged.Counter(endpointAppErrors).Inc(1)
 		logFn = res.logger.Warn
@@ -267,7 +267,7 @@ func (res *ServerHTTPResponse) flush(ctx context.Context) {
 	if res.flushed {
 		/* coverage ignore next line */
 		res.logger.Error(
-			"Flushed a server response twice",
+			"Flushed a server response multiple times",
 			zap.String("path", res.Request.URL.Path),
 		)
 		/* coverage ignore next line */

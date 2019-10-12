@@ -126,7 +126,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	expectedValues := map[string]string{
-		"level":                "info",
+		"level":                "debug",
 		"msg":                  "Finished an incoming server TChannel request",
 		"env":                  "test",
 		"service":              "example-gateway",
@@ -169,7 +169,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	expectedValues = map[string]string{
 		"msg":     "Finished an outgoing client TChannel request",
 		"env":     "test",
-		"level":   "info",
+		"level":   "debug",
 		"zone":    "unknown",
 		"service": "example-gateway",
 

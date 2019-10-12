@@ -49,6 +49,7 @@ http.port: 0
 http.clients.requestUUIDHeaderKey: x-request-uuid
 logger.fileName: /tmp/example-gateway.log
 logger.output: disk
+logger.level: debug
 metrics.serviceName: example-gateway
 metrics.m3.includeHost: false
 service.env.config: {}

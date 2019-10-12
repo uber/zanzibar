@@ -423,9 +423,11 @@ func (h *{{$handlerName}}) HandleRequest(
 			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
 		}
 		{{- end}}
-		for _, k := range cliRespHeaders.Keys() {
-			if val, ok := cliRespHeaders.Get(k); ok {
-				zfields = append(zfields, zap.String(k, val))
+		if cliRespHeaders != nil {
+			for _, k := range cliRespHeaders.Keys() {
+				if val, ok := cliRespHeaders.Get(k); ok {
+					zfields = append(zfields, zap.String(k, val))
+				}
 			}
 		}
 		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
@@ -482,7 +484,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7001, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7039, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1736,7 +1738,7 @@ func TestStartGateway(t *testing.T) {
 		zapcore.NewCore(
 			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 			os.Stderr,
-			zap.InfoLevel,
+			zap.DebugLevel,
 		),
 	)
 
@@ -1772,7 +1774,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1347, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1348, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3399,7 +3401,9 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
-	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
+	if cliRespHeaders != nil {
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
+	}
 	{{- end}}
 
 	{{if eq .ResponseType "" -}}
@@ -3456,7 +3460,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8312, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8344, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

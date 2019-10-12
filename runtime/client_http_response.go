@@ -162,14 +162,14 @@ func (res *ClientHTTPResponse) finish() {
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.req.Logger.Error("Finished a client response twice")
+		res.req.Logger.Error("Finished a client response multiple times")
 		/* coverage ignore next line */
 		return
 	}
 	res.finished = true
 	res.finishTime = time.Now()
 
-	logFn := res.req.ContextLogger.Info
+	logFn := res.req.ContextLogger.Debug
 
 	// emit metrics
 	delta := res.finishTime.Sub(res.req.startTime)

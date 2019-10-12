@@ -130,7 +130,9 @@ func (w simpleServiceCallWorkflow) Handle(
 
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
-	resHeaders.Set("Some-Res-Header", cliRespHeaders["Some-Res-Header"])
+	if cliRespHeaders != nil {
+		resHeaders.Set("Some-Res-Header", cliRespHeaders["Some-Res-Header"])
+	}
 
 	return resHeaders, nil
 }

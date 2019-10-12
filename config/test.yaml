@@ -6,6 +6,7 @@ jaeger.reporter.flush.milliseconds: 10000
 jaeger.reporter.hostport: localhost:6831
 jaeger.sampler.param: 0.001
 jaeger.sampler.type: remote
+logger.level: debug
 metrics.flushInterval: 1000
 metrics.m3.hostPort: 127.0.0.1:9052
 metrics.m3.includeHost: false

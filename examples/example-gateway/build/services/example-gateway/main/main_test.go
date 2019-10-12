@@ -67,7 +67,7 @@ func TestStartGateway(t *testing.T) {
 		zapcore.NewCore(
 			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 			os.Stderr,
-			zap.InfoLevel,
+			zap.DebugLevel,
 		),
 	)
 
