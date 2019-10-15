@@ -71,17 +71,17 @@ done
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 
-GOGO_WKT_COMPATIBILITY="\\
-Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\\
-Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\\
+GOGO_WKT_COMPATIBILITY="\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/source_context.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/type.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
 "
 
 echo "Generating Go code from Proto files"
