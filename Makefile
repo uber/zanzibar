@@ -81,7 +81,7 @@ cyclo-check:
 lint: check-licence eclint-check
 	@rm -f lint.log
 	@echo "Checking formatting..."
-	@gofmt -d -s $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Installing test dependencies for vet..."
 	@go test -i $(PKGS)
 	@echo "Checking printf statements..."
@@ -115,7 +115,7 @@ generate:
 	@$(GOBINDATA)/go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.gen.go $(ENV_CONFIG)
 	@./node_modules/.bin/uber-licence --file "production.gen.go" --dir "config" > /dev/null
 	@$(GOBINDATA)/go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
-	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
+	@goimports -w -e "codegen/template_bundle/template_files.go"
 	@PATH=$(GOGOSLICK):$(YARPCGO):$(GOIMPORTS):$(GOMOCK):$(PATH) bash ./scripts/generate.sh
 
 .PHONY: check-generate

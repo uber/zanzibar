@@ -29,7 +29,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 type stackTracer interface {

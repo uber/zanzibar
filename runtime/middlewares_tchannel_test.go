@@ -29,8 +29,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
-	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
-	"github.com/uber/zanzibar/runtime"
+	exampletchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 )
 

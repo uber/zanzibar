@@ -23,11 +23,10 @@ package bazhandler
 import (
 	"context"
 
-	"github.com/uber/zanzibar/runtime"
-
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
 	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // NewSimpleServiceEchoWorkflow ...

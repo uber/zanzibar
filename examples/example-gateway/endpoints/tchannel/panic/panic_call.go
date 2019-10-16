@@ -26,7 +26,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
 	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"go.uber.org/zap"
 )

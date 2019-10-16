@@ -22,9 +22,10 @@ package defaultexampletchannel
 
 import (
 	"context"
+
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 )
 

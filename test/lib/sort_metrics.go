@@ -22,7 +22,7 @@ package lib
 
 import (
 	"github.com/uber-go/tally"
-	"github.com/uber-go/tally/m3/thrift"
+	m3 "github.com/uber-go/tally/m3/thrift"
 )
 
 // SortMetricsByNameAndTags ...

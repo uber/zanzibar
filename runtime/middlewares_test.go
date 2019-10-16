@@ -31,7 +31,7 @@ import (
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	exampleReader "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 )
 

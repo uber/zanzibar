@@ -212,6 +212,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		}
 
 		files.Range(func(p, data interface{}) bool {
+			fmt.Println("Calling WriteAndFormat")
 			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
 				return false
 			}

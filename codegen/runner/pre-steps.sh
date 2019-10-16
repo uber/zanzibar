@@ -135,7 +135,7 @@ for config_file in ${config_files}; do
 	done
 done
 
-gofmt -w -s "$BUILD_DIR/gen-code/"
+goimports -w "$BUILD_DIR/gen-code/"
 
 end=$(date +%s)
 runtime=$((end-start))

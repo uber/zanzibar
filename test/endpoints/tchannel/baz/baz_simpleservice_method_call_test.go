@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"strings"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
@@ -34,7 +36,6 @@ import (
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-	"strings"
 )
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
