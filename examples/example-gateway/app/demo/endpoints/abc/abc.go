@@ -2,7 +2,8 @@ package abc
 
 import (
 	"context"
-	"github.com/uber/zanzibar/runtime"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/workflow"

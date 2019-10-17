@@ -29,7 +29,7 @@ import (
 	tmpl "text/template"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/codegen/template_bundle"
+	templates "github.com/uber/zanzibar/codegen/template_bundle"
 )
 
 // AssetProvider provides access to template assets

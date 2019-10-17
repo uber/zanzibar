@@ -6,9 +6,10 @@ package corge
 import (
 	errors "errors"
 	fmt "fmt"
+	strings "strings"
+
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	strings "strings"
 )
 
 // Corge_EchoBool_Args represents the arguments for the Corge.echoBool function.

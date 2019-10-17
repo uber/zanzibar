@@ -34,8 +34,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
 	metrics "github.com/uber-go/tally/m3"
-	"github.com/uber-go/tally/m3/customtransports"
-	"github.com/uber-go/tally/m3/thrift"
+	customtransport "github.com/uber-go/tally/m3/customtransports"
+	m3 "github.com/uber-go/tally/m3/thrift"
 	"github.com/uber/zanzibar/test/lib"
 )
 

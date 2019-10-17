@@ -1307,14 +1307,6 @@ func PrintGenLine(
 
 // FormatGoFile reformat the go file imports
 func FormatGoFile(filePath string) error {
-	gofmtCmd := exec.Command("gofmt", "-s", "-w", "-e", filePath)
-	gofmtCmd.Stdout = os.Stdout
-	gofmtCmd.Stderr = os.Stderr
-
-	if err := gofmtCmd.Run(); err != nil {
-		return errors.Wrapf(err, "failed to gofmt file: %q", filePath)
-	}
-
 	goimportsCmd := exec.Command("goimports", "-w", "-e", filePath)
 	goimportsCmd.Stdout = os.Stdout
 	goimportsCmd.Stderr = os.Stderr
@@ -1322,7 +1314,6 @@ func FormatGoFile(filePath string) error {
 	if err := goimportsCmd.Run(); err != nil {
 		return errors.Wrapf(err, "failed to goimports file: %q", filePath)
 	}
-
 	return nil
 }
 

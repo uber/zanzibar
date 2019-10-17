@@ -9,13 +9,14 @@ import (
 	json "encoding/json"
 	errors "errors"
 	fmt "fmt"
+	math "math"
+	strconv "strconv"
+	strings "strings"
+
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	multierr "go.uber.org/multierr"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	math "math"
-	strconv "strconv"
-	strings "strings"
 )
 
 type AuthErr struct {

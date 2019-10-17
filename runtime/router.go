@@ -25,13 +25,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"net/url"
+
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
-	"net/url"
 )
 
 const (

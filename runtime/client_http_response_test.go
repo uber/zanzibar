@@ -28,7 +28,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"

@@ -26,7 +26,8 @@ import (
 	"go.uber.org/zap"
 
 	"context"
-	"github.com/uber/zanzibar/runtime"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // AppOptions defines the custom application func

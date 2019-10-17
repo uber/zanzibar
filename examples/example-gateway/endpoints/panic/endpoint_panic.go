@@ -5,7 +5,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // NewServiceCFrontHelloWorkflow ...

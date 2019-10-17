@@ -23,12 +23,12 @@ package bounce
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
+	echoclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/workflow"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bounce/bounce"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // NewBounceBounceWorkflow ...

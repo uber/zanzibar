@@ -2,9 +2,10 @@ package panic_test
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )

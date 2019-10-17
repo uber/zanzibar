@@ -135,8 +135,6 @@ for config_file in ${config_files}; do
 	done
 done
 
-gofmt -w -s "$BUILD_DIR/gen-code/"
-
 end=$(date +%s)
 runtime=$((end-start))
 echo "Generated structs : +$runtime"
@@ -199,6 +197,8 @@ $(find "${target_dirs[@]}" -name "*.go" | \
 	grep -v "easyjson.go" | sort)
 )
 "$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
+
+goimports -w "$BUILD_DIR/gen-code/"
 
 end=$(date +%s)
 runtime=$((end-start))
