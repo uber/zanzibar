@@ -124,7 +124,7 @@ check-generate:
 	rm -rf ./examples/example-gateway/build
 	make generate
 	git status --porcelain > git-status.log
-#	@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
+	@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
 test-all:
