@@ -1,5 +1,5 @@
 hash: 3f062f8bb36e98ab5f0e2d01fb79a28fe3fc681ee4ce2ad6d1b7f666c41f14fe
-updated: 2019-10-10T17:56:44.748006-07:00
+updated: 2019-10-17T20:09:20.670266-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -98,7 +98,7 @@ imports:
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: b2ccc519800e761ac8000b95e5d57c80a897ff9e
+  version: 1ea4449da9834f4d333f1cc461c374aea217d249
   subpackages:
   - bootstrap
   - buffer
@@ -201,7 +201,7 @@ imports:
   - metrics
   - metrics/tally
 - name: github.com/uber/tchannel-go
-  version: 5ee9e351d45f66dc690528cbf014fe5b64b23bc9
+  version: e6bc214d794a9d6062045dd672de210cf211994d
   subpackages:
   - internal/argreader
   - relay
@@ -239,7 +239,7 @@ imports:
   - push
   - tallypush
 - name: go.uber.org/thriftrw
-  version: 8cb9e79c2118f1eb873714e2d02747d6ecc62954
+  version: 3934cedb5d52491fd98e0203eb2a61b00b7da282
   subpackages:
   - ast
   - compile
@@ -317,7 +317,7 @@ imports:
   subpackages:
   - golint
 - name: golang.org/x/net
-  version: 74dc4d7220e7acc4e100824340f3e66577424772
+  version: b5b0513f8c1bb7c1e3e6f168fba117131fe2614a
   subpackages:
   - bpf
   - context
@@ -332,7 +332,7 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: fde4db37ae7ad8191b03d30d27f258b5291ae4e3
+  version: 93c9922d18aeb82498a065f07aec7ad7fa60dfb7
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -343,7 +343,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: 65e3620a7ae7ac25e8494a60f0e5ef4e4fba03b3
+  version: ed0dc450797fdfbe6a9ee6bf3381a02099b897f9
   subpackages:
   - cmd/goimports
   - cmd/stringer
