@@ -224,7 +224,7 @@ func (c *TChannelClient) call(
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
 		call.resHeaders, call.success = nil, false
 
-		sc := c.getDynamicChannelWithFallback(reqHeaders, c.sc)
+		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
@@ -275,10 +275,10 @@ func (c *TChannelClient) call(
 
 // first rule match, would be the choosen channel. if nothing matches fallback to default channel
 func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
-	sc *tchannel.SubChannel) *tchannel.SubChannel {
+	sc *tchannel.SubChannel, ctx netContext.Context) (*tchannel.SubChannel, netContext.Context) {
 	ch := sc
 	if c.ruleEngine == nil {
-		return ch
+		return ch, ctx
 	}
 	for _, headerPattern := range c.headerPatterns {
 		// this header is not present, so can't match a rule
@@ -291,11 +291,14 @@ func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]str
 		if !match {
 			continue
 		}
-		serviceName := val.(string)
+		serviceDetails := val.([]string)
 		// we know service has a channel, as this was constructed in c'tor
-		ch = c.altChannelMap[serviceName]
-		return ch
+		ch = c.altChannelMap[serviceDetails[0]]
+		if len(serviceDetails) > 1 {
+			ctx = WithRoutingDelegate(ctx, serviceDetails[1])
+		}
+		return ch, ctx
 	}
 	// if nothing matches return the default channel/**/
-	return ch
+	return ch, ctx
 }

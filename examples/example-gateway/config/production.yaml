@@ -72,6 +72,7 @@ clients.baz.alternates:
     - headerName: x-container
       headerValue: ^sandbox$
       serviceName: basicSandbox
+      rd: reverse-proxy
     - headerName: x-test-env
       headerValue: ^sandbox$
       serviceName: nomatch
