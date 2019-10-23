@@ -474,6 +474,98 @@ func TestConvertStructRequiredToOptional(t *testing.T) {
 	`), lines)
 }
 
+func TestConvertStructRequiredTransformWithFromPrefix(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	//  Missing  Five.One transform
+	fieldMap["TargetLocation"] = codegen.FieldMapperEntry{
+		QualifiedName: "Request.RequestLocation",
+		Override:      true,
+	}
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Location {
+			1: optional double latitude,
+			2: optional double longitude
+		}
+		
+		struct Request {
+			1: required Location requestLocation
+		}
+
+		struct Foo {
+			1: required Request request
+		}
+
+		struct Bar {
+			1: required Location targetLocation
+		}`,
+		nil,
+		fieldMap,
+	)
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+		if in.Request.RequestLocation != nil {
+			out.TargetLocation = &structs.Location{}
+			if in.Request != nil && in.Request.RequestLocation != nil {
+				out.TargetLocation.Latitude = (*float64)(in.Request.RequestLocation.Latitude)
+			}
+			if in.Request != nil && in.Request.RequestLocation != nil {
+				out.TargetLocation.Longitude = (*float64)(in.Request.RequestLocation.Longitude)
+			}
+		} else {
+			out.TargetLocation = nil
+		}
+	`), lines)
+}
+
+func TestConvertStructRequiredTransformWithMultiLevelFromPrefix(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	//  Missing  Five.One transform
+	fieldMap["TargetLocation"] = codegen.FieldMapperEntry{
+		QualifiedName: "Request.Loc.RequestLocation",
+		Override:      true,
+	}
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Location {
+			1: optional double latitude,
+			2: optional double longitude
+		}
+		
+		struct Request {
+			1: required Loc loc
+		}
+
+		struct Loc {
+			1: required Location requestLocation
+		}
+
+		struct Foo {
+			1: required Request request
+		}
+
+		struct Bar {
+			1: required Location targetLocation
+		}`,
+		nil,
+		fieldMap,
+	)
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+		if in.Request.Loc.RequestLocation != nil {
+			out.TargetLocation = &structs.Location{}
+			if in.Request != nil && in.Request.Loc != nil && in.Request.Loc.RequestLocation != nil {
+				out.TargetLocation.Latitude = (*float64)(in.Request.Loc.RequestLocation.Latitude)
+			}
+			if in.Request != nil && in.Request.Loc != nil && in.Request.Loc.RequestLocation != nil {
+				out.TargetLocation.Longitude = (*float64)(in.Request.Loc.RequestLocation.Longitude)
+			}
+		} else {
+			out.TargetLocation = nil
+		}
+	`), lines)
+}
+
 func TestConvertStructOptionalToRequired(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",

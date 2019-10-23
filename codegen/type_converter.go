@@ -818,8 +818,15 @@ func (c *TypeConverter) genStructConverter(
 			)
 			if fromField != nil {
 				stFromType = fromField.Type
+				if fieldMap != nil && fromPrefix == "" {
+					// grab the fromPrefix until fromField
+					for _, v := range fieldMap {
+						if index := strings.LastIndex(v.QualifiedName, PascalCase(fromField.Name)); index != -1 {
+							fromPrefix = string(v.QualifiedName[0:index])
+						}
+					}
+				}
 				stFromPrefix = fromPrefix + PascalCase(fromField.Name)
-
 				fromTypeName, _ = c.getIdentifierName(stFromType)
 			}
 
