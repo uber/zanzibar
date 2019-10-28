@@ -38,17 +38,17 @@ import (
 	"go.uber.org/zap"
 )
 
-// BarArgWithUntaggedNestedQueryParamsWorkflow defines the interface for BarArgWithUntaggedNestedQueryParams workflow
-type BarArgWithUntaggedNestedQueryParamsWorkflow interface {
+// BarArgWithNearDupQueryParamsWorkflow defines the interface for BarArgWithNearDupQueryParams workflow
+type BarArgWithNearDupQueryParamsWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args,
+		r *endpointsBarBar.Bar_ArgWithNearDupQueryParams_Args,
 	) (*endpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
-// NewBarArgWithUntaggedNestedQueryParamsWorkflow creates a workflow
-func NewBarArgWithUntaggedNestedQueryParamsWorkflow(deps *module.Dependencies) BarArgWithUntaggedNestedQueryParamsWorkflow {
+// NewBarArgWithNearDupQueryParamsWorkflow creates a workflow
+func NewBarArgWithNearDupQueryParamsWorkflow(deps *module.Dependencies) BarArgWithNearDupQueryParamsWorkflow {
 	var whitelistedDynamicHeaders []string
 	if deps.Default.Config.ContainsKey("clients.bar.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
@@ -58,27 +58,27 @@ func NewBarArgWithUntaggedNestedQueryParamsWorkflow(deps *module.Dependencies) B
 		}
 	}
 
-	return &barArgWithUntaggedNestedQueryParamsWorkflow{
+	return &barArgWithNearDupQueryParamsWorkflow{
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
-// barArgWithUntaggedNestedQueryParamsWorkflow calls thrift client Bar.ArgWithUntaggedNestedQueryParams
-type barArgWithUntaggedNestedQueryParamsWorkflow struct {
+// barArgWithNearDupQueryParamsWorkflow calls thrift client Bar.ArgWithNearDupQueryParams
+type barArgWithNearDupQueryParamsWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 }
 
 // Handle calls thrift client.
-func (w barArgWithUntaggedNestedQueryParamsWorkflow) Handle(
+func (w barArgWithNearDupQueryParamsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args,
+	r *endpointsBarBar.Bar_ArgWithNearDupQueryParams_Args,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
-	clientRequest := convertToArgWithUntaggedNestedQueryParamsClientRequest(r)
+	clientRequest := convertToArgWithNearDupQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
 
@@ -95,7 +95,7 @@ func (w barArgWithUntaggedNestedQueryParamsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithUntaggedNestedQueryParams(
+	clientRespBody, _, err := w.Clients.Bar.ArgWithNearDupQueryParams(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -116,44 +116,22 @@ func (w barArgWithUntaggedNestedQueryParamsWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertBarArgWithUntaggedNestedQueryParamsClientResponse(clientRespBody)
+	response := convertBarArgWithNearDupQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
-func convertToArgWithUntaggedNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args {
-	out := &clientsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args{}
+func convertToArgWithNearDupQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNearDupQueryParams_Args) *clientsBarBar.Bar_ArgWithNearDupQueryParams_Args {
+	out := &clientsBarBar.Bar_ArgWithNearDupQueryParams_Args{}
 
-	if in.Request != nil {
-		out.Request = &clientsBarBar.QueryParamsUntaggedStruct{}
-		out.Request.Name = string(in.Request.Name)
-		out.Request.UserUUID = (*string)(in.Request.UserUUID)
-		out.Request.Count = int32(in.Request.Count)
-		out.Request.OptCount = (*int32)(in.Request.OptCount)
-		out.Request.Foos = make([]string, len(in.Request.Foos))
-		for index1, value2 := range in.Request.Foos {
-			out.Request.Foos[index1] = string(value2)
-		}
-	} else {
-		out.Request = nil
-	}
-	if in.Opt != nil {
-		out.Opt = &clientsBarBar.QueryParamsUntaggedOptStruct{}
-		out.Opt.Name = string(in.Opt.Name)
-		out.Opt.UserUUID = (*string)(in.Opt.UserUUID)
-		out.Opt.Count = int32(in.Opt.Count)
-		out.Opt.OptCount = (*int32)(in.Opt.OptCount)
-		out.Opt.Foos = make([]string, len(in.Opt.Foos))
-		for index3, value4 := range in.Opt.Foos {
-			out.Opt.Foos[index3] = string(value4)
-		}
-	} else {
-		out.Opt = nil
-	}
+	out.One = string(in.One)
+	out.Two = (*int32)(in.Two)
+	out.Three = (*string)(in.Three)
+	out.Four = (*string)(in.Four)
 
 	return out
 }
 
-func convertBarArgWithUntaggedNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarArgWithNearDupQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

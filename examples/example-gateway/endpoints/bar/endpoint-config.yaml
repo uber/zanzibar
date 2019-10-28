@@ -4,7 +4,7 @@ config:
   - arg_with_headers.yaml
   - arg_with_query_params.yaml
   - arg_with_nested_query_params.yaml
-  - arg_with_untagged_nested_query_params.yaml
+  - arg_with_near_dup_query_params.yaml
   - arg_with_query_header.yaml
   - arg_with_params.yaml
   - arg_with_many_query_params.yaml

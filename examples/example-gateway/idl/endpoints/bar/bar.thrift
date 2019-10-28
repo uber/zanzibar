@@ -58,22 +58,6 @@ struct QueryParamsOptsStruct {
     4: optional string authUUID2
 }
 
-struct QueryParamsUntaggedStruct {
-    1: required string name
-    2: optional string userUUID
-    3: required i32 count
-    4: optional i32 optCount
-    5: required list<string> foos
-}
-
-struct QueryParamsUntaggedOptStruct {
-    1: required string name
-    2: optional string userUUID
-    3: required i32 count
-    4: optional i32 optCount
-    5: required list<string> foos
-}
-
 struct ParamsStruct {
     1: required string userUUID (
         zanzibar.http.ref = "params.user-uuid"
@@ -195,15 +179,6 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
-    BarResponse argWithUntaggedNestedQueryParams(
-        1: required QueryParamsUntaggedStruct request (zanzibar.http.ref = "query.request")
-        2: optional QueryParamsUntaggedOptStruct opt (zanzibar.http.ref = "query.opt")
-    ) (
-        zanzibar.http.method = "GET"
-        zanzibar.http.path = "/bar/argWithUntaggedNestedQueryParams"
-        zanzibar.http.status = "200"
-    )
-
     BarResponse argWithQueryHeader(
         1: optional string userUUID (
             zanzibar.http.ref = "headers.x-uuid"
@@ -263,6 +238,17 @@ service Bar {
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar/argWithParamsAndDuplicateFields/:uuid/segment"
+        zanzibar.http.status = "200"
+    )
+
+    BarResponse argWithNearDupQueryParams(
+        1: required string one   (zanzibar.http.ref = "query.oneName")
+        2: optional i32 two      (zanzibar.http.ref = "query.one_name")
+        3: string three          (zanzibar.http.ref = "query.One_NamE")
+        4: optional string four  (zanzibar.http.ref = "query.one-Name")
+    ) (
+        zanzibar.http.method = "GET"
+        zanzibar.http.path = "/bar/argWithNearDupQueryParams"
         zanzibar.http.status = "200"
     )
 

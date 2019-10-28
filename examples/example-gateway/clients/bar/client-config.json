@@ -14,7 +14,7 @@
 			"ArgWithHeaders": "Bar::argWithHeaders",
 			"ArgWithQueryParams": "Bar::argWithQueryParams",
 			"ArgWithNestedQueryParams": "Bar::argWithNestedQueryParams",
-			"ArgWithUntaggedNestedQueryParams": "Bar::argWithUntaggedNestedQueryParams",
+			"ArgWithNearDupQueryParams": "Bar::argWithNearDupQueryParams",
 			"ArgWithQueryHeader": "Bar::argWithQueryHeader",
 			"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
 			"ArgWithParams": "Bar::argWithParams",

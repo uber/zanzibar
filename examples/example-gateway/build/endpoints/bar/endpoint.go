@@ -37,41 +37,41 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		BarArgNotStructHandler:                     NewBarArgNotStructHandler(deps),
-		BarArgWithHeadersHandler:                   NewBarArgWithHeadersHandler(deps),
-		BarArgWithQueryParamsHandler:               NewBarArgWithQueryParamsHandler(deps),
-		BarArgWithNestedQueryParamsHandler:         NewBarArgWithNestedQueryParamsHandler(deps),
-		BarArgWithUntaggedNestedQueryParamsHandler: NewBarArgWithUntaggedNestedQueryParamsHandler(deps),
-		BarArgWithQueryHeaderHandler:               NewBarArgWithQueryHeaderHandler(deps),
-		BarArgWithParamsHandler:                    NewBarArgWithParamsHandler(deps),
-		BarArgWithManyQueryParamsHandler:           NewBarArgWithManyQueryParamsHandler(deps),
-		BarMissingArgHandler:                       NewBarMissingArgHandler(deps),
-		BarNoRequestHandler:                        NewBarNoRequestHandler(deps),
-		BarNormalHandler:                           NewBarNormalHandler(deps),
-		BarTooManyArgsHandler:                      NewBarTooManyArgsHandler(deps),
-		BarHelloWorldHandler:                       NewBarHelloWorldHandler(deps),
-		BarListAndEnumHandler:                      NewBarListAndEnumHandler(deps),
-		BarArgWithParamsAndDuplicateFieldsHandler:  NewBarArgWithParamsAndDuplicateFieldsHandler(deps),
+		BarArgNotStructHandler:                    NewBarArgNotStructHandler(deps),
+		BarArgWithHeadersHandler:                  NewBarArgWithHeadersHandler(deps),
+		BarArgWithQueryParamsHandler:              NewBarArgWithQueryParamsHandler(deps),
+		BarArgWithNestedQueryParamsHandler:        NewBarArgWithNestedQueryParamsHandler(deps),
+		BarArgWithNearDupQueryParamsHandler:       NewBarArgWithNearDupQueryParamsHandler(deps),
+		BarArgWithQueryHeaderHandler:              NewBarArgWithQueryHeaderHandler(deps),
+		BarArgWithParamsHandler:                   NewBarArgWithParamsHandler(deps),
+		BarArgWithManyQueryParamsHandler:          NewBarArgWithManyQueryParamsHandler(deps),
+		BarMissingArgHandler:                      NewBarMissingArgHandler(deps),
+		BarNoRequestHandler:                       NewBarNoRequestHandler(deps),
+		BarNormalHandler:                          NewBarNormalHandler(deps),
+		BarTooManyArgsHandler:                     NewBarTooManyArgsHandler(deps),
+		BarHelloWorldHandler:                      NewBarHelloWorldHandler(deps),
+		BarListAndEnumHandler:                     NewBarListAndEnumHandler(deps),
+		BarArgWithParamsAndDuplicateFieldsHandler: NewBarArgWithParamsAndDuplicateFieldsHandler(deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	BarArgNotStructHandler                     *BarArgNotStructHandler
-	BarArgWithHeadersHandler                   *BarArgWithHeadersHandler
-	BarArgWithQueryParamsHandler               *BarArgWithQueryParamsHandler
-	BarArgWithNestedQueryParamsHandler         *BarArgWithNestedQueryParamsHandler
-	BarArgWithUntaggedNestedQueryParamsHandler *BarArgWithUntaggedNestedQueryParamsHandler
-	BarArgWithQueryHeaderHandler               *BarArgWithQueryHeaderHandler
-	BarArgWithParamsHandler                    *BarArgWithParamsHandler
-	BarArgWithManyQueryParamsHandler           *BarArgWithManyQueryParamsHandler
-	BarMissingArgHandler                       *BarMissingArgHandler
-	BarNoRequestHandler                        *BarNoRequestHandler
-	BarNormalHandler                           *BarNormalHandler
-	BarTooManyArgsHandler                      *BarTooManyArgsHandler
-	BarHelloWorldHandler                       *BarHelloWorldHandler
-	BarListAndEnumHandler                      *BarListAndEnumHandler
-	BarArgWithParamsAndDuplicateFieldsHandler  *BarArgWithParamsAndDuplicateFieldsHandler
+	BarArgNotStructHandler                    *BarArgNotStructHandler
+	BarArgWithHeadersHandler                  *BarArgWithHeadersHandler
+	BarArgWithQueryParamsHandler              *BarArgWithQueryParamsHandler
+	BarArgWithNestedQueryParamsHandler        *BarArgWithNestedQueryParamsHandler
+	BarArgWithNearDupQueryParamsHandler       *BarArgWithNearDupQueryParamsHandler
+	BarArgWithQueryHeaderHandler              *BarArgWithQueryHeaderHandler
+	BarArgWithParamsHandler                   *BarArgWithParamsHandler
+	BarArgWithManyQueryParamsHandler          *BarArgWithManyQueryParamsHandler
+	BarMissingArgHandler                      *BarMissingArgHandler
+	BarNoRequestHandler                       *BarNoRequestHandler
+	BarNormalHandler                          *BarNormalHandler
+	BarTooManyArgsHandler                     *BarTooManyArgsHandler
+	BarHelloWorldHandler                      *BarHelloWorldHandler
+	BarListAndEnumHandler                     *BarListAndEnumHandler
+	BarArgWithParamsAndDuplicateFieldsHandler *BarArgWithParamsAndDuplicateFieldsHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -92,7 +92,7 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	if err3 != nil {
 		return err3
 	}
-	err4 := handlers.BarArgWithUntaggedNestedQueryParamsHandler.Register(gateway)
+	err4 := handlers.BarArgWithNearDupQueryParamsHandler.Register(gateway)
 	if err4 != nil {
 		return err4
 	}

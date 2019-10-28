@@ -959,7 +959,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
 }
 
-func TestBarWithUntaggedNestedQueryParams(t *testing.T) {
+func TestBarWithNearDupQueryParams(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -973,11 +973,10 @@ func TestBarWithUntaggedNestedQueryParams(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"GET", "/bar/argWithUntaggedNestedQueryParams",
+		"GET", "/bar/clientArgWithNearDupQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"opt.count=33&opt.foos=coffee&opt.name=b-name&opt.optCount=99&"+
-					"request.count=3&request.foos=hi&request.foos=world&request.name=a-name&request.optCount=4&request.userUUID=a-uuid",
+				"One_NamE=three&one=one&one-Name=four&two=22",
 				r.URL.RawQuery,
 			)
 
@@ -991,13 +990,10 @@ func TestBarWithUntaggedNestedQueryParams(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/bar/argWithUntaggedNestedQueryParams?"+
-			"request.name=a-name&request.userUUID=a-uuid&request.count=3&request.optCount=4&request.foos=hi&request.foos=world&"+
-			"opt.name=b-name&opt.count=33&opt.optCount=99&opt.foos=coffee",
-		map[string]string{
-			"x-uuid":  "auth-uuid",
-			"x-uuid2": "auth-uuid2",
-		}, nil,
+		"/bar/argWithNearDupQueryParams?"+
+			"oneName=one&one_name=22&One_NamE=three&one-Name=four",
+		map[string]string{},
+		nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

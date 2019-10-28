@@ -46,20 +46,20 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// BarArgWithUntaggedNestedQueryParamsHandler is the handler for "/bar/argWithUntaggedNestedQueryParams"
-type BarArgWithUntaggedNestedQueryParamsHandler struct {
+// BarArgWithNearDupQueryParamsHandler is the handler for "/bar/argWithNearDupQueryParams"
+type BarArgWithNearDupQueryParamsHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewBarArgWithUntaggedNestedQueryParamsHandler creates a handler
-func NewBarArgWithUntaggedNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWithUntaggedNestedQueryParamsHandler {
-	handler := &BarArgWithUntaggedNestedQueryParamsHandler{
+// NewBarArgWithNearDupQueryParamsHandler creates a handler
+func NewBarArgWithNearDupQueryParamsHandler(deps *module.Dependencies) *BarArgWithNearDupQueryParamsHandler {
+	handler := &BarArgWithNearDupQueryParamsHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"bar", "argWithUntaggedNestedQueryParams",
+		"bar", "argWithNearDupQueryParams",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -74,15 +74,15 @@ func NewBarArgWithUntaggedNestedQueryParamsHandler(deps *module.Dependencies) *B
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *BarArgWithUntaggedNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgWithNearDupQueryParamsHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"GET", "/bar/argWithUntaggedNestedQueryParams",
+		"GET", "/bar/argWithNearDupQueryParams",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/bar/argWithUntaggedNestedQueryParams".
-func (h *BarArgWithUntaggedNestedQueryParamsHandler) HandleRequest(
+// HandleRequest handles "/bar/argWithNearDupQueryParams".
+func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -103,117 +103,43 @@ func (h *BarArgWithUntaggedNestedQueryParamsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithUntaggedNestedQueryParams_Args
+	var requestBody endpointsBarBar.Bar_ArgWithNearDupQueryParams_Args
 
-	if requestBody.Request == nil {
-		requestBody.Request = &endpointsBarBar.QueryParamsUntaggedStruct{}
-	}
-	requestNameOk := req.CheckQueryValue("request.name")
-	if !requestNameOk {
+	oneNameOk := req.CheckQueryValue("oneName")
+	if !oneNameOk {
 		return
 	}
-	requestNameQuery, ok := req.GetQueryValue("request.name")
+	oneNameQuery, ok := req.GetQueryValue("oneName")
 	if !ok {
 		return
 	}
-	requestBody.Request.Name = requestNameQuery
+	requestBody.One = oneNameQuery
 
-	requestUserUUIDOk := req.HasQueryValue("request.userUUID")
-	if requestUserUUIDOk {
-		requestUserUUIDQuery, ok := req.GetQueryValue("request.userUUID")
+	oneName1Ok := req.HasQueryValue("one_name")
+	if oneName1Ok {
+		oneName1Query, ok := req.GetQueryInt32("one_name")
 		if !ok {
 			return
 		}
-		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
+		requestBody.Two = ptr.Int32(oneName1Query)
 	}
 
-	requestCountOk := req.CheckQueryValue("request.count")
-	if !requestCountOk {
-		return
-	}
-	requestCountQuery, ok := req.GetQueryInt32("request.count")
-	if !ok {
-		return
-	}
-	requestBody.Request.Count = requestCountQuery
-
-	requestOptCountOk := req.HasQueryValue("request.optCount")
-	if requestOptCountOk {
-		requestOptCountQuery, ok := req.GetQueryInt32("request.optCount")
+	oneNamEOk := req.HasQueryValue("One_NamE")
+	if oneNamEOk {
+		oneNamEQuery, ok := req.GetQueryValue("One_NamE")
 		if !ok {
 			return
 		}
-		requestBody.Request.OptCount = ptr.Int32(requestOptCountQuery)
+		requestBody.Three = ptr.String(oneNamEQuery)
 	}
 
-	requestFoosOk := req.CheckQueryValue("request.foos")
-	if !requestFoosOk {
-		return
-	}
-	requestFoosQuery, ok := req.GetQueryValueList("request.foos")
-	if !ok {
-		return
-	}
-	requestBody.Request.Foos = requestFoosQuery
-
-	var _queryNeeded bool
-	for _, _pfx := range []string{"opt", "opt.name", "opt.useruuid", "opt.count", "opt.optcount", "opt.foos"} {
-		if _queryNeeded = req.HasQueryPrefix(_pfx); _queryNeeded {
-			break
-		}
-	}
-	if _queryNeeded {
-		if requestBody.Opt == nil {
-			requestBody.Opt = &endpointsBarBar.QueryParamsUntaggedOptStruct{}
-		}
-		optNameOk := req.CheckQueryValue("opt.name")
-		if !optNameOk {
-			return
-		}
-		optNameQuery, ok := req.GetQueryValue("opt.name")
+	oneName2Ok := req.HasQueryValue("one-Name")
+	if oneName2Ok {
+		oneName2Query, ok := req.GetQueryValue("one-Name")
 		if !ok {
 			return
 		}
-		requestBody.Opt.Name = optNameQuery
-
-		optUserUUIDOk := req.HasQueryValue("opt.userUUID")
-		if optUserUUIDOk {
-			optUserUUIDQuery, ok := req.GetQueryValue("opt.userUUID")
-			if !ok {
-				return
-			}
-			requestBody.Opt.UserUUID = ptr.String(optUserUUIDQuery)
-		}
-
-		optCountOk := req.CheckQueryValue("opt.count")
-		if !optCountOk {
-			return
-		}
-		optCountQuery, ok := req.GetQueryInt32("opt.count")
-		if !ok {
-			return
-		}
-		requestBody.Opt.Count = optCountQuery
-
-		optOptCountOk := req.HasQueryValue("opt.optCount")
-		if optOptCountOk {
-			optOptCountQuery, ok := req.GetQueryInt32("opt.optCount")
-			if !ok {
-				return
-			}
-			requestBody.Opt.OptCount = ptr.Int32(optOptCountQuery)
-		}
-
-		optFoosOk := req.CheckQueryValue("opt.foos")
-		if !optFoosOk {
-			return
-		}
-		optFoosQuery, ok := req.GetQueryValueList("opt.foos")
-		if !ok {
-			return
-		}
-		requestBody.Opt.Foos = optFoosQuery
-
+		requestBody.Four = ptr.String(oneName2Query)
 	}
 
 	// log endpoint request to downstream services
@@ -230,7 +156,7 @@ func (h *BarArgWithUntaggedNestedQueryParamsHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgWithUntaggedNestedQueryParamsWorkflow(h.Dependencies)
+	w := workflow.NewBarArgWithNearDupQueryParamsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
