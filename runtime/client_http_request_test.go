@@ -284,6 +284,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"clientHTTPMethod":                 "POST",
 		"Client-Req-Header-X-Client-Id":    "bar",
 		"Client-Req-Header-Content-Type":   "application/json",
+		"Client-Req-Header-Accept":         "application/json",
 		"Client-Res-Header-Example-Header": "Example-Value",
 		"Client-Res-Header-Content-Type":   "text/plain; charset=utf-8",
 	}

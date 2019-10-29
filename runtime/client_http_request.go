@@ -160,7 +160,11 @@ func (req *ClientHTTPRequest) WriteJSON(
 		httpReq.Header.Set(headerKey, headerValue)
 	}
 
+	acceptTypePresent := false
 	for k := range headers {
+		if k == "Accept" {
+			acceptTypePresent = true
+		}
 		httpReq.Header.Set(k, headers[k])
 	}
 
@@ -168,6 +172,10 @@ func (req *ClientHTTPRequest) WriteJSON(
 		httpReq.Header.Set("Content-Type", "application/json")
 	}
 
+	/* Only unmarshal JSON today so set this as default if none present */
+	if !acceptTypePresent {
+		httpReq.Header.Set("Accept", "application/json")
+	}
 	req.httpReq = httpReq
 	req.ctx = WithLogFields(req.ctx,
 		zap.String(logFieldClientHTTPMethod, method),
