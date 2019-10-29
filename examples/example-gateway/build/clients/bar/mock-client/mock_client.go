@@ -83,6 +83,22 @@ func (mr *MockClientMockRecorder) ArgWithManyQueryParams(arg0, arg1, arg2 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithManyQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithManyQueryParams), arg0, arg1, arg2)
 }
 
+// ArgWithNearDupQueryParams mocks base method
+func (m *MockClient) ArgWithNearDupQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNearDupQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ArgWithNearDupQueryParams", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*bar.BarResponse)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ArgWithNearDupQueryParams indicates an expected call of ArgWithNearDupQueryParams
+func (mr *MockClientMockRecorder) ArgWithNearDupQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithNearDupQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithNearDupQueryParams), arg0, arg1, arg2)
+}
+
 // ArgWithNestedQueryParams mocks base method
 func (m *MockClient) ArgWithNestedQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNestedQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
@@ -161,22 +177,6 @@ func (m *MockClient) ArgWithQueryParams(arg0 context.Context, arg1 map[string]st
 func (mr *MockClientMockRecorder) ArgWithQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithQueryParams), arg0, arg1, arg2)
-}
-
-// ArgWithUntaggedNestedQueryParams mocks base method
-func (m *MockClient) ArgWithUntaggedNestedQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithUntaggedNestedQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ArgWithUntaggedNestedQueryParams", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*bar.BarResponse)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// ArgWithUntaggedNestedQueryParams indicates an expected call of ArgWithUntaggedNestedQueryParams
-func (mr *MockClientMockRecorder) ArgWithUntaggedNestedQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithUntaggedNestedQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithUntaggedNestedQueryParams), arg0, arg1, arg2)
 }
 
 // DeleteFoo mocks base method

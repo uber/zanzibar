@@ -1,13 +1,13 @@
 clientId: bar
-clientMethod: ArgWithUntaggedNestedQueryParams
+clientMethod: ArgWithNearDupQueryParams
 endpointId: bar
 endpointType: http
-handleId: argWithUntaggedNestedQueryParams
+handleId: argWithNearDupQueryParams
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}
 thriftFile: endpoints/bar/bar.thrift
 thriftFileSha: '{{placeholder}}'
-thriftMethodName: Bar::argWithUntaggedNestedQueryParams
+thriftMethodName: Bar::argWithNearDupQueryParams
 workflowType: httpClient

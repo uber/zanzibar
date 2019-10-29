@@ -1262,6 +1262,17 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 	return nil
 }
 
+// makeUniqIdent appends an integer to the identifier name if there is duplication already
+// The reason for this is to disambiguate a query param "deviceID" from "device_ID" - yes people did do that
+func makeUniqIdent(identifier string, seen map[string]int) string {
+	count := seen[identifier]
+	seen[identifier] = count + 1
+	if count > 0 {
+		return identifier + strconv.Itoa(count)
+	}
+	return identifier
+}
+
 func (ms *MethodSpec) setParseQueryParamStatements(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper, hasNoBody bool,
 ) error {
@@ -1271,6 +1282,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 	var finalError error
 	var stack = []string{}
+	seenIdents := map[string]int{}
 
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
@@ -1356,9 +1368,10 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 			return false
 		}
-		identifierName := CamelCase(longQueryName) + "Query"
+		baseIdent := makeUniqIdent(CamelCase(longQueryName), seenIdents)
+		identifierName := baseIdent + "Query"
+		okIdentifierName := baseIdent + "Ok"
 
-		okIdentifierName := CamelCase(longQueryName) + "Ok"
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)",
 				okIdentifierName, shortQueryParam,
