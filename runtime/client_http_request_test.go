@@ -145,6 +145,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 			_, _ = w.Write([]byte(r.Header.Get("Example-Header")))
 			// Check that the default header got set and actually sent to the server.
 			assert.Equal(t, r.Header.Get("X-Client-ID"), "bar")
+			assert.Equal(t, r.Header.Get("Accept"), "application/test+json")
 		},
 	)
 
@@ -160,6 +161,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 		client.BaseURL+"/bar-path",
 		map[string]string{
 			"Example-Header": "Example-Value",
+			"Accept": "application/test+json",
 		},
 		nil,
 	)
