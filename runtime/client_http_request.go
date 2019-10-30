@@ -35,9 +35,9 @@ import (
 )
 
 const (
-	acceptHeader =           "Accept"
-	contentTypeHeader =      "Content-Type"
-	acceptHeaderValue =      "application/json"
+	acceptHeader           = "Accept"
+	contentTypeHeader      = "Content-Type"
+	acceptHeaderValue      = "application/json"
 	contentTypeHeaderValue = "application/json"
 )
 
