@@ -161,7 +161,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 		client.BaseURL+"/bar-path",
 		map[string]string{
 			"Example-Header": "Example-Value",
-			"Accept": "application/test+json",
+			"Accept":         "application/test+json",
 		},
 		nil,
 	)

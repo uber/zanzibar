@@ -34,6 +34,13 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	acceptHeader = "Accept"
+	contentTypeHeader = "Content-Type"
+	acceptHeaderValue = "application/json"
+	contentTypeHeaderValue = "application/json"
+)
+
 var metricNormalizer = strings.NewReplacer("::", "--")
 
 // ClientHTTPRequest is the struct for making a single client request using an outbound http client.
@@ -160,22 +167,19 @@ func (req *ClientHTTPRequest) WriteJSON(
 		httpReq.Header.Set(headerKey, headerValue)
 	}
 
-	acceptTypePresent := false
 	for k := range headers {
-		if k == "Accept" {
-			acceptTypePresent = true
-		}
 		httpReq.Header.Set(k, headers[k])
 	}
 
 	if body != nil {
-		httpReq.Header.Set("Content-Type", "application/json")
+		httpReq.Header.Set(http.CanonicalHeaderKey(contentTypeHeader), contentTypeHeaderValue)
 	}
 
-	/* Only unmarshal JSON today so set this as default if none present */
-	if !acceptTypePresent {
-		httpReq.Header.Set("Accept", "application/json")
+	/* Only unmarshal JSON is supported today so set this as default if none present */
+	if _, ok := headers[http.CanonicalHeaderKey(acceptHeader)]; !ok{
+		httpReq.Header.Set(acceptHeader, acceptHeaderValue)
 	}
+
 	req.httpReq = httpReq
 	req.ctx = WithLogFields(req.ctx,
 		zap.String(logFieldClientHTTPMethod, method),
