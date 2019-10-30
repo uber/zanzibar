@@ -35,9 +35,9 @@ import (
 )
 
 const (
-	acceptHeader = "Accept"
-	contentTypeHeader = "Content-Type"
-	acceptHeaderValue = "application/json"
+	acceptHeader =           "Accept"
+	contentTypeHeader =      "Content-Type"
+	acceptHeaderValue =      "application/json"
 	contentTypeHeaderValue = "application/json"
 )
 
@@ -176,7 +176,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 	}
 
 	/* Only unmarshal JSON is supported today so set this as default if none present */
-	if _, ok := headers[http.CanonicalHeaderKey(acceptHeader)]; !ok{
+	if _, ok := headers[http.CanonicalHeaderKey(acceptHeader)]; !ok {
 		httpReq.Header.Set(acceptHeader, acceptHeaderValue)
 	}
 
