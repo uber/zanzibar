@@ -1304,7 +1304,8 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		if len(stack) > 0 {
 			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
 				stack = stack[:len(stack)-1]
-				statements.append("}")
+				indent = indent[:len(indent)-1]
+				statements.append(indent, "}")
 			}
 		}
 
@@ -1428,7 +1429,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 					statements.append(indent, "}")
 					valVar = tmpVar
 				}
-				statements.appendf("%s\t%s[i] = %s(%s)", indent, target, customElemType, valVar)
+				statements.appendf("%s%s[i] = %s(%s)", indent, target, customElemType, valVar)
 				indent = indent[:len(indent)-1]
 				statements.append(indent, "}")
 			} else if isSet {
@@ -1449,7 +1450,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 					statements.append(indent, "}")
 					valVar = tmpVar
 				}
-				statements.appendf("%s\t%s[%s(%s)] = struct{}{}", indent, target, customElemType, valVar)
+				statements.appendf("%s%s[%s(%s)] = struct{}{}", indent, target, customElemType, valVar)
 				indent = indent[:len(indent)-1]
 				statements.append(indent, "}")
 			}
@@ -1470,7 +1471,8 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		statements.appendf("%srequestBody%s = %s", indent, longFieldName, target)
 
 		if !field.Required {
-			statements.append("}")
+			indent = indent[:len(indent)-1]
+			statements.append(indent, "}")
 		}
 
 		// new line after block.
