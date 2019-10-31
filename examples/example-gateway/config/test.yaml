@@ -45,6 +45,9 @@ clients.withexceptions.maxConcurrentRequests: 1000
 clients.withexceptions.errorPercentThreshold: 20
 env: test
 envVarsToTagInRootScope: []
+http.defaultHeaders:
+  Accept: application/json
+  Content-Type: application/json
 http.port: 0
 http.clients.requestUUIDHeaderKey: x-request-uuid
 logger.fileName: /tmp/example-gateway.log
@@ -67,9 +70,6 @@ tchannel.port: 0
 tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
-http.defaultHeaders:
-  Accept: application/json
-  Content-Type: application/json
 useDatacenter: false
 clients.baz.alternates:
   routingConfigs:
