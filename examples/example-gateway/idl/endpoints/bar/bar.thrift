@@ -85,8 +85,9 @@ service Bar {
     )
 
     string listAndEnum (
-        1: required list<string> demoIds (zanzibar.http.ref = "query.demoIds")
-        2: optional DemoType demoType (zanzibar.http.ref = "query.demoType")
+        1: required list<string> demoIds
+        2: optional DemoType demoType
+        3: optional list<DemoType> demos
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")
     ) (
@@ -158,10 +159,10 @@ service Bar {
     )
 
     BarResponse argWithQueryParams(
-        1: required string name		(zanzibar.http.ref = "query.name")
-        2: optional string userUUID	(zanzibar.http.ref = "query.userUUID")
-        3: optional list<string> foo	(zanzibar.http.ref = "query.foo")
-        4: required list<i8> bar	(zanzibar.http.ref = "query.bar")
+        1: required string name
+        2: optional string userUUID
+        3: optional list<string> foo
+        4: required list<i8> bar
         // TODO: actually use sets here
     ) (
         zanzibar.http.method = "GET"
@@ -226,6 +227,10 @@ service Bar {
         22: optional UUIDList anOptUUIDList	(zanzibar.http.ref = "query.anOptUUIDList")
         23: required Timestamp aTs	(zanzibar.http.ref = "query.aTs")
         24: optional Timestamp anOptTs	(zanzibar.http.ref = "query.anOptTs")
+        25: required DemoType aReqDemo
+        26: optional Fruit anOptFruit
+        27: required list<Fruit> aReqFruits
+        28: optional list<DemoType> anOptDemos
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithManyQueryParams"

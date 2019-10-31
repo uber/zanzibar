@@ -246,7 +246,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.AUUID = endpointsBarBar.UUID(aUUIDQuery)
+	requestBody.AUUID = (endpointsBarBar.UUID)(aUUIDQuery)
 
 	anOptUUIDOk := req.HasQueryValue("anOptUUID")
 	if anOptUUIDOk {
@@ -254,7 +254,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptUUID = (*endpointsBarBar.UUID)(ptr.String(anOptUUIDQuery))
+		requestBody.AnOptUUID = (*endpointsBarBar.UUID)(ptr.String(string(anOptUUIDQuery)))
 	}
 
 	aListUUIDOk := req.CheckQueryValue("aListUUID")
@@ -292,7 +292,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.AStringList = endpointsBarBar.StringList(aStringListQuery)
+	requestBody.AStringList = (endpointsBarBar.StringList)(aStringListQuery)
 
 	anOptStringListOk := req.HasQueryValue("anOptStringList")
 	if anOptStringListOk {
@@ -300,7 +300,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptStringList = endpointsBarBar.StringList(anOptStringListQuery)
+		requestBody.AnOptStringList = (endpointsBarBar.StringList)(anOptStringListQuery)
 	}
 
 	aUUIDListOk := req.CheckQueryValue("aUUIDList")
@@ -315,7 +315,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	for i, v := range aUUIDListQuery {
 		aUUIDListQueryFinal[i] = endpointsBarBar.UUID(v)
 	}
-	requestBody.AUUIDList = endpointsBarBar.UUIDList(aUUIDListQueryFinal)
+	requestBody.AUUIDList = (endpointsBarBar.UUIDList)(aUUIDListQueryFinal)
 
 	anOptUUIDListOk := req.HasQueryValue("anOptUUIDList")
 	if anOptUUIDListOk {
@@ -327,7 +327,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		for i, v := range anOptUUIDListQuery {
 			anOptUUIDListQueryFinal[i] = endpointsBarBar.UUID(v)
 		}
-		requestBody.AnOptUUIDList = endpointsBarBar.UUIDList(anOptUUIDListQueryFinal)
+		requestBody.AnOptUUIDList = (endpointsBarBar.UUIDList)(anOptUUIDListQueryFinal)
 	}
 
 	aTsOk := req.CheckQueryValue("aTs")
@@ -338,7 +338,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.ATs = endpointsBarBar.Timestamp(aTsQuery)
+	requestBody.ATs = (endpointsBarBar.Timestamp)(aTsQuery)
 
 	anOptTsOk := req.HasQueryValue("anOptTs")
 	if anOptTsOk {
@@ -346,7 +346,77 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptTs = (*endpointsBarBar.Timestamp)(ptr.Int64(anOptTsQuery))
+		requestBody.AnOptTs = (*endpointsBarBar.Timestamp)(ptr.Int64(int64(anOptTsQuery)))
+	}
+
+	aReqDemoOk := req.CheckQueryValue("aReqDemo")
+	if !aReqDemoOk {
+		return
+	}
+	var aReqDemoQuery endpointsBarBar.DemoType
+	_tmpaReqDemoQuery, ok := req.GetQueryValue("aReqDemo")
+	if ok {
+		if err := aReqDemoQuery.UnmarshalText([]byte(_tmpaReqDemoQuery)); err != nil {
+			req.LogAndSendQueryError(err, "enum", "aReqDemo", _tmpaReqDemoQuery)
+			ok = false
+		}
+	}
+	if !ok {
+		return
+	}
+	requestBody.AReqDemo = (endpointsBarBar.DemoType)(aReqDemoQuery)
+
+	anOptFruitOk := req.HasQueryValue("anOptFruit")
+	if anOptFruitOk {
+		var anOptFruitQuery endpointsBarBar.Fruit
+		_tmpanOptFruitQuery, ok := req.GetQueryValue("anOptFruit")
+		if ok {
+			if err := anOptFruitQuery.UnmarshalText([]byte(_tmpanOptFruitQuery)); err != nil {
+				req.LogAndSendQueryError(err, "enum", "anOptFruit", _tmpanOptFruitQuery)
+				ok = false
+			}
+		}
+		if !ok {
+			return
+		}
+		requestBody.AnOptFruit = (*endpointsBarBar.Fruit)(ptr.Int32(int32(anOptFruitQuery)))
+	}
+
+	aReqFruitsOk := req.CheckQueryValue("aReqFruits")
+	if !aReqFruitsOk {
+		return
+	}
+	aReqFruitsQuery, ok := req.GetQueryValueList("aReqFruits")
+	if !ok {
+		return
+	}
+	aReqFruitsQueryFinal := make([]endpointsBarBar.Fruit, len(aReqFruitsQuery))
+	for i, v := range aReqFruitsQuery {
+		var _tmpv endpointsBarBar.Fruit
+		if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
+			req.LogAndSendQueryError(err, "enum", "aReqFruits", v)
+			return
+		}
+		aReqFruitsQueryFinal[i] = endpointsBarBar.Fruit(_tmpv)
+	}
+	requestBody.AReqFruits = aReqFruitsQueryFinal
+
+	anOptDemosOk := req.HasQueryValue("anOptDemos")
+	if anOptDemosOk {
+		anOptDemosQuery, ok := req.GetQueryValueList("anOptDemos")
+		if !ok {
+			return
+		}
+		anOptDemosQueryFinal := make([]endpointsBarBar.DemoType, len(anOptDemosQuery))
+		for i, v := range anOptDemosQuery {
+			var _tmpv endpointsBarBar.DemoType
+			if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
+				req.LogAndSendQueryError(err, "enum", "anOptDemos", v)
+				return
+			}
+			anOptDemosQueryFinal[i] = endpointsBarBar.DemoType(_tmpv)
+		}
+		requestBody.AnOptDemos = anOptDemosQueryFinal
 	}
 
 	// log endpoint request to downstream services

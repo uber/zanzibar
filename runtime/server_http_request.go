@@ -273,16 +273,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 		Err:  strconv.ErrSyntax,
 	}
 
-	req.logger.Warn("Got request with invalid query string types",
-		zap.String("expected", "bool"),
-		zap.String("actual", value),
-		zap.String("key", key),
-		zap.Error(err),
-	)
-	if !req.parseFailed {
-		req.res.SendError(400, "Could not parse query string", err)
-		req.parseFailed = true
-	}
+	req.LogAndSendQueryError(err, "bool", key, value)
 	return false, false
 }
 
@@ -296,16 +287,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 8)
 	if err != nil {
-		req.logger.Warn("Got request with invalid query string types",
-			zap.String("expected", "int8"),
-			zap.String("actual", value),
-			zap.String("key", key),
-			zap.Error(err),
-		)
-		if !req.parseFailed {
-			req.res.SendError(400, "Could not parse query string", err)
-			req.parseFailed = true
-		}
+		req.LogAndSendQueryError(err, "int8", key, value)
 		return 0, false
 	}
 
@@ -322,16 +304,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
-		req.logger.Warn("Got request with invalid query string types",
-			zap.String("expected", "int16"),
-			zap.String("actual", value),
-			zap.String("key", key),
-			zap.Error(err),
-		)
-		if !req.parseFailed {
-			req.res.SendError(400, "Could not parse query string", err)
-			req.parseFailed = true
-		}
+		req.LogAndSendQueryError(err, "int16", key, value)
 		return 0, false
 	}
 
@@ -348,18 +321,7 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
-		req.logger.Warn("Got request with invalid query string types",
-			zap.String("expected", "int32"),
-			zap.String("actual", value),
-			zap.String("key", key),
-			zap.Error(err),
-		)
-		if !req.parseFailed {
-			req.res.SendError(
-				400, "Could not parse query string", err,
-			)
-			req.parseFailed = true
-		}
+		req.LogAndSendQueryError(err, "int32", key, value)
 		return 0, false
 	}
 
@@ -376,16 +338,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		req.logger.Warn("Got request with invalid query string types",
-			zap.String("expected", "int64"),
-			zap.String("actual", value),
-			zap.String("key", key),
-			zap.Error(err),
-		)
-		if !req.parseFailed {
-			req.res.SendError(400, "Could not parse query string", err)
-			req.parseFailed = true
-		}
+		req.LogAndSendQueryError(err, "int64", key, value)
 		return 0, false
 	}
 
@@ -402,16 +355,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		req.logger.Warn("Got request with invalid query string types",
-			zap.String("expected", "float64"),
-			zap.String("actual", value),
-			zap.String("key", key),
-			zap.Error(err),
-		)
-		if !req.parseFailed {
-			req.res.SendError(400, "Could not parse query string", err)
-			req.parseFailed = true
-		}
+		req.LogAndSendQueryError(err, "float64", key, value)
 		return 0, false
 	}
 
@@ -440,7 +384,7 @@ func (req *ServerHTTPRequest) GetQueryBoolList(key string) ([]bool, bool) {
 				Num:  value,
 				Err:  strconv.ErrSyntax,
 			}
-			req.logAndSendQueryError(err, "bool", key, value)
+			req.LogAndSendQueryError(err, "bool", key, value)
 			return nil, false
 		}
 	}
@@ -460,7 +404,7 @@ func (req *ServerHTTPRequest) GetQueryInt8List(key string) ([]int8, bool) {
 	for i, value := range values {
 		number, err := strconv.ParseInt(value, 10, 8)
 		if err != nil {
-			req.logAndSendQueryError(err, "int8", key, value)
+			req.LogAndSendQueryError(err, "int8", key, value)
 			return nil, false
 		}
 		ret[i] = int8(number)
@@ -480,7 +424,7 @@ func (req *ServerHTTPRequest) GetQueryInt16List(key string) ([]int16, bool) {
 	for i, value := range values {
 		number, err := strconv.ParseInt(value, 10, 16)
 		if err != nil {
-			req.logAndSendQueryError(err, "int16", key, value)
+			req.LogAndSendQueryError(err, "int16", key, value)
 			return nil, false
 		}
 		ret[i] = int16(number)
@@ -500,7 +444,7 @@ func (req *ServerHTTPRequest) GetQueryInt32List(key string) ([]int32, bool) {
 	for i, value := range values {
 		number, err := strconv.ParseInt(value, 10, 32)
 		if err != nil {
-			req.logAndSendQueryError(err, "int32", key, value)
+			req.LogAndSendQueryError(err, "int32", key, value)
 			return nil, false
 		}
 		ret[i] = int32(number)
@@ -520,7 +464,7 @@ func (req *ServerHTTPRequest) GetQueryInt64List(key string) ([]int64, bool) {
 	for i, value := range values {
 		number, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			req.logAndSendQueryError(err, "int64", key, value)
+			req.LogAndSendQueryError(err, "int64", key, value)
 			return nil, false
 		}
 		ret[i] = number
@@ -540,7 +484,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64List(key string) ([]float64, bool) 
 	for i, value := range values {
 		number, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			req.logAndSendQueryError(err, "float64", key, value)
+			req.LogAndSendQueryError(err, "float64", key, value)
 			return nil, false
 		}
 		ret[i] = number
@@ -589,7 +533,7 @@ func (req *ServerHTTPRequest) GetQueryBoolSet(key string) (map[bool]struct{}, bo
 				Num:  value,
 				Err:  strconv.ErrSyntax,
 			}
-			req.logAndSendQueryError(err, "bool", key, value)
+			req.LogAndSendQueryError(err, "bool", key, value)
 			return nil, false
 		}
 	}
@@ -609,7 +553,7 @@ func (req *ServerHTTPRequest) GetQueryInt8Set(key string) (map[int8]struct{}, bo
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 8)
 		if err != nil {
-			req.logAndSendQueryError(err, "int8", key, value)
+			req.LogAndSendQueryError(err, "int8", key, value)
 			return nil, false
 		}
 		ret[int8(number)] = _nullVal
@@ -629,7 +573,7 @@ func (req *ServerHTTPRequest) GetQueryInt16Set(key string) (map[int16]struct{}, 
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 16)
 		if err != nil {
-			req.logAndSendQueryError(err, "int16", key, value)
+			req.LogAndSendQueryError(err, "int16", key, value)
 			return nil, false
 		}
 		ret[int16(number)] = _nullVal
@@ -649,7 +593,7 @@ func (req *ServerHTTPRequest) GetQueryInt32Set(key string) (map[int32]struct{}, 
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 32)
 		if err != nil {
-			req.logAndSendQueryError(err, "int32", key, value)
+			req.LogAndSendQueryError(err, "int32", key, value)
 			return nil, false
 		}
 		ret[int32(number)] = _nullVal
@@ -669,7 +613,7 @@ func (req *ServerHTTPRequest) GetQueryInt64Set(key string) (map[int64]struct{}, 
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			req.logAndSendQueryError(err, "int64", key, value)
+			req.LogAndSendQueryError(err, "int64", key, value)
 			return nil, false
 		}
 		ret[number] = _nullVal
@@ -689,7 +633,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64Set(key string) (map[float64]struct
 	for _, value := range values {
 		number, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			req.logAndSendQueryError(err, "float64", key, value)
+			req.LogAndSendQueryError(err, "float64", key, value)
 			return nil, false
 		}
 		ret[number] = _nullVal
@@ -833,7 +777,8 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 	return req.span
 }
 
-func (req *ServerHTTPRequest) logAndSendQueryError(err error, expected, key, value string) {
+// LogAndSendQueryError handles parse failure of query params by logging the issue and returning a 400 to the requestor
+func (req *ServerHTTPRequest) LogAndSendQueryError(err error, expected, key, value string) {
 	req.logger.Warn("Got request with invalid query string types",
 		zap.String("expected", expected),
 		zap.String("actual", value),

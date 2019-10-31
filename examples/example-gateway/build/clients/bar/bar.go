@@ -524,28 +524,28 @@ func (c *barClient) ArgWithManyQueryParams(
 		anOptBoolQuery := strconv.FormatBool(*r.AnOptBool)
 		queryValues.Set("anOptBool", anOptBoolQuery)
 	}
-	aInt8Query := strconv.Itoa(int(r.AInt8))
+	aInt8Query := strconv.FormatInt(int64(r.AInt8), 10)
 	queryValues.Set("aInt8", aInt8Query)
 	if r.AnOptInt8 != nil {
-		anOptInt8Query := strconv.Itoa(int(*r.AnOptInt8))
+		anOptInt8Query := strconv.FormatInt(int64(*r.AnOptInt8), 10)
 		queryValues.Set("anOptInt8", anOptInt8Query)
 	}
-	aInt16Query := strconv.Itoa(int(r.AInt16))
+	aInt16Query := strconv.FormatInt(int64(r.AInt16), 10)
 	queryValues.Set("aInt16", aInt16Query)
 	if r.AnOptInt16 != nil {
-		anOptInt16Query := strconv.Itoa(int(*r.AnOptInt16))
+		anOptInt16Query := strconv.FormatInt(int64(*r.AnOptInt16), 10)
 		queryValues.Set("anOptInt16", anOptInt16Query)
 	}
-	aInt32Query := strconv.Itoa(int(r.AInt32))
+	aInt32Query := strconv.FormatInt(int64(r.AInt32), 10)
 	queryValues.Set("aInt32", aInt32Query)
 	if r.AnOptInt32 != nil {
-		anOptInt32Query := strconv.Itoa(int(*r.AnOptInt32))
+		anOptInt32Query := strconv.FormatInt(int64(*r.AnOptInt32), 10)
 		queryValues.Set("anOptInt32", anOptInt32Query)
 	}
-	aInt64Query := strconv.FormatInt(r.AInt64, 10)
+	aInt64Query := strconv.FormatInt(int64(r.AInt64), 10)
 	queryValues.Set("aInt64", aInt64Query)
 	if r.AnOptInt64 != nil {
-		anOptInt64Query := strconv.FormatInt(*r.AnOptInt64, 10)
+		anOptInt64Query := strconv.FormatInt(int64(*r.AnOptInt64), 10)
 		queryValues.Set("anOptInt64", anOptInt64Query)
 	}
 	aFloat64Query := strconv.FormatFloat(r.AFloat64, 'G', -1, 64)
@@ -589,6 +589,20 @@ func (c *barClient) ArgWithManyQueryParams(
 	if r.AnOptTs != nil {
 		anOptTsQuery := strconv.FormatInt(int64(*r.AnOptTs), 10)
 		queryValues.Set("anOptTs", anOptTsQuery)
+	}
+	aReqDemoQuery := (r.AReqDemo).String()
+	queryValues.Set("aReqDemo", aReqDemoQuery)
+	if r.AnOptFruit != nil {
+		anOptFruitQuery := (*r.AnOptFruit).String()
+		queryValues.Set("anOptFruit", anOptFruitQuery)
+	}
+	for _, value := range r.AReqFruits {
+		queryValues.Add("aReqFruits", (value).String())
+	}
+	if r.AnOptDemos != nil {
+		for _, value := range r.AnOptDemos {
+			queryValues.Add("anOptDemos", (value).String())
+		}
 	}
 	fullURL += "?" + queryValues.Encode()
 
@@ -664,7 +678,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	oneQuery := r.One
 	queryValues.Set("one", oneQuery)
 	if r.Two != nil {
-		twoQuery := strconv.Itoa(int(*r.Two))
+		twoQuery := strconv.FormatInt(int64(*r.Two), 10)
 		queryValues.Set("two", twoQuery)
 	}
 	if r.Three != nil {
@@ -1071,7 +1085,7 @@ func (c *barClient) ArgWithQueryParams(
 		}
 	}
 	for _, value := range r.Bar {
-		queryValues.Add("bar", strconv.Itoa(int(value)))
+		queryValues.Add("bar", strconv.FormatInt(int64(value), 10))
 	}
 	fullURL += "?" + queryValues.Encode()
 
@@ -1217,7 +1231,7 @@ func (c *barClient) DeleteWithQueryParams(
 	filterQuery := r.Filter
 	queryValues.Set("filter", filterQuery)
 	if r.Count != nil {
-		countQuery := strconv.Itoa(int(*r.Count))
+		countQuery := strconv.FormatInt(int64(*r.Count), 10)
 		queryValues.Set("count", countQuery)
 	}
 	fullURL += "?" + queryValues.Encode()
@@ -1368,8 +1382,13 @@ func (c *barClient) ListAndEnum(
 		queryValues.Add("demoIds", value)
 	}
 	if r.DemoType != nil {
-		demoTypeQuery := strconv.Itoa(int(*r.DemoType))
+		demoTypeQuery := (*r.DemoType).String()
 		queryValues.Set("demoType", demoTypeQuery)
+	}
+	if r.Demos != nil {
+		for _, value := range r.Demos {
+			queryValues.Add("demos", (value).String())
+		}
 	}
 	fullURL += "?" + queryValues.Encode()
 
