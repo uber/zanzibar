@@ -1399,9 +1399,9 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			statements.appendf("%s%s, ok := %s", indent, identifierName, queryRValue)
 		}
 
-		statements.append("if !ok {")
-		statements.append("\treturn")
-		statements.append("}")
+		statements.append(indent, "if !ok {")
+		statements.append(indent, "\treturn")
+		statements.append(indent, "}")
 
 		target := identifierName
 
@@ -1424,7 +1424,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 						indent, tmpVar, valVar)
 					statements.appendf("%s\treq.LogAndSendQueryError(err, %q, %q, %s)",
 						indent, "enum", shortQueryParam, valVar)
-					// TODO: @argo: we should ideally log a warning here
 					statements.append(indent, "\treturn")
 					statements.append(indent, "}")
 					valVar = tmpVar
