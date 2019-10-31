@@ -171,15 +171,6 @@ func (req *ClientHTTPRequest) WriteJSON(
 		httpReq.Header.Set(k, headers[k])
 	}
 
-	if body != nil {
-		httpReq.Header.Set(http.CanonicalHeaderKey(contentTypeHeader), contentTypeHeaderValue)
-	}
-
-	/* Only unmarshal JSON is supported today so set this as default if none present */
-	if _, ok := headers[http.CanonicalHeaderKey(acceptHeader)]; !ok {
-		httpReq.Header.Set(acceptHeader, acceptHeaderValue)
-	}
-
 	req.httpReq = httpReq
 	req.ctx = WithLogFields(req.ctx,
 		zap.String(logFieldClientHTTPMethod, method),

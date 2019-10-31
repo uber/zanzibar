@@ -1253,6 +1253,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		timeoutVal,
 	)
 	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("http.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("http.defaultHeaders", &defaultHeaders)
+	}
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
@@ -1567,7 +1570,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11911, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 12051, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -67,6 +67,9 @@ tchannel.port: 0
 tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
+http.defaultHeaders:
+  Accept: application/json
+  Content-Type: application/json
 useDatacenter: false
 clients.baz.alternates:
   routingConfigs:

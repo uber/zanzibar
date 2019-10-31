@@ -68,6 +68,9 @@ func NewClient(deps *module.Dependencies) Client {
 		timeoutVal,
 	)
 	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("http.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("http.defaultHeaders", &defaultHeaders)
+	}
 	if deps.Default.Config.ContainsKey("clients.contacts.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.contacts.defaultHeaders", &defaultHeaders)
 	}
