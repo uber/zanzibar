@@ -34,13 +34,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	acceptHeader           = "Accept"
-	contentTypeHeader      = "Content-Type"
-	acceptHeaderValue      = "application/json"
-	contentTypeHeaderValue = "application/json"
-)
-
 var metricNormalizer = strings.NewReplacer("::", "--")
 
 // ClientHTTPRequest is the struct for making a single client request using an outbound http client.
