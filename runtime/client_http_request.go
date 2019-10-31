@@ -164,10 +164,6 @@ func (req *ClientHTTPRequest) WriteJSON(
 		httpReq.Header.Set(k, headers[k])
 	}
 
-	if body != nil {
-		httpReq.Header.Set("Content-Type", "application/json")
-	}
-
 	req.httpReq = httpReq
 	req.ctx = WithLogFields(req.ctx,
 		zap.String(logFieldClientHTTPMethod, method),

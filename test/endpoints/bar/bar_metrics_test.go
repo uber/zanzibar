@@ -220,6 +220,7 @@ func TestCallMetrics(t *testing.T) {
 		"clientHTTPMethod":               "POST",
 		"Client-Req-Header-X-Client-Id":  "bar",
 		"Client-Req-Header-Content-Type": "application/json",
+		"Client-Req-Header-Accept":       "application/json",
 		"Client-Res-Header-Content-Type": "text/plain; charset=utf-8",
 
 		"zone":            "unknown",
