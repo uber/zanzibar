@@ -135,6 +135,10 @@ func convertToListAndEnumClientRequest(in *endpointsBarBar.Bar_ListAndEnum_Args)
 		out.DemoIds[index1] = string(value2)
 	}
 	out.DemoType = (*clientsBarBar.DemoType)(in.DemoType)
+	out.Demos = make([]clientsBarBar.DemoType, len(in.Demos))
+	for index3, value4 := range in.Demos {
+		out.Demos[index3] = clientsBarBar.DemoType(value4)
+	}
 
 	return out
 }

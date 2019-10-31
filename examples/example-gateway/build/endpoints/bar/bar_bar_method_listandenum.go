@@ -117,11 +117,36 @@ func (h *BarListAndEnumHandler) HandleRequest(
 
 	demoTypeOk := req.HasQueryValue("demoType")
 	if demoTypeOk {
-		demoTypeQuery, ok := req.GetQueryInt32("demoType")
+		var demoTypeQuery endpointsBarBar.DemoType
+		_tmpdemoTypeQuery, ok := req.GetQueryValue("demoType")
+		if ok {
+			if err := demoTypeQuery.UnmarshalText([]byte(_tmpdemoTypeQuery)); err != nil {
+				req.LogAndSendQueryError(err, "enum", "demoType", _tmpdemoTypeQuery)
+				ok = false
+			}
+		}
 		if !ok {
 			return
 		}
-		requestBody.DemoType = (*endpointsBarBar.DemoType)(ptr.Int32(demoTypeQuery))
+		requestBody.DemoType = (*endpointsBarBar.DemoType)(ptr.Int32(int32(demoTypeQuery)))
+	}
+
+	demosOk := req.HasQueryValue("demos")
+	if demosOk {
+		demosQuery, ok := req.GetQueryValueList("demos")
+		if !ok {
+			return
+		}
+		demosQueryFinal := make([]endpointsBarBar.DemoType, len(demosQuery))
+		for i, v := range demosQuery {
+			var _tmpv endpointsBarBar.DemoType
+			if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
+				req.LogAndSendQueryError(err, "enum", "demos", v)
+				return
+			}
+			demosQueryFinal[i] = endpointsBarBar.DemoType(_tmpv)
+		}
+		requestBody.Demos = demosQueryFinal
 	}
 
 	// log endpoint request to downstream services

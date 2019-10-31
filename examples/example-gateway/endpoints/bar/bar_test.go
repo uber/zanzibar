@@ -1,4 +1,4 @@
-package contacts_test
+package bar_test
 
 import (
 	"context"
@@ -34,11 +34,15 @@ func TestBarListAndEnumEndpoint(t *testing.T) {
 	defer ms.Stop()
 
 	demoType := bar.DemoTypeFirst
-	var args interface{} = &bar.Bar_ListAndEnum_Args{DemoIds: []string{"abc", "def"}, DemoType: &demoType}
+	var args interface{} = &bar.Bar_ListAndEnum_Args{
+		DemoIds:  []string{"abc", "def"},
+		DemoType: &demoType,
+		Demos:    []bar.DemoType{bar.DemoTypeFirst, bar.DemoTypeSecond},
+	}
 	ms.MockClients().Bar.EXPECT().ListAndEnum(gomock.Any(), gomock.Any(), args).Return("demo", nil, nil).AnyTimes()
 
 	res, err := ms.MakeHTTPRequest(
-		"GET", "/bar/list-and-enum?demoIds=abc&demoIds=def&demoType=0", nil, nil,
+		"GET", "/bar/list-and-enum?demoIds=abc&demoIds=def&demoType=FIRST&demos=FIRST&demos=SECOND", nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -64,7 +68,7 @@ func TestBarListAndEnumClient(t *testing.T) {
 		"GET", "/bar/list-and-enum",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, []string{"abc", "def"}, r.URL.Query()["demoIds"])
-			assert.Equal(t, "0", r.URL.Query().Get("demoType"))
+			assert.Equal(t, "FIRST", r.URL.Query().Get("demoType"))
 			w.WriteHeader(200)
 			_, _ = w.Write([]byte(`"test-response"`))
 		},
@@ -74,8 +78,15 @@ func TestBarListAndEnumClient(t *testing.T) {
 	bClient := deps.Client.Bar
 
 	demoType := bar.DemoTypeFirst
+	demos := []bar.DemoType{bar.DemoTypeFirst, bar.DemoTypeSecond}
 	body, _, err := bClient.ListAndEnum(
-		context.Background(), nil, &clientsBarBar.Bar_ListAndEnum_Args{DemoIds: []string{"abc", "def"}, DemoType: &demoType},
+		context.Background(),
+		nil,
+		&clientsBarBar.Bar_ListAndEnum_Args{
+			DemoIds:  []string{"abc", "def"},
+			DemoType: &demoType,
+			Demos:    demos,
+		},
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, body)

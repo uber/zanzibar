@@ -165,6 +165,16 @@ func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWit
 	}
 	out.ATs = clientsBarBar.Timestamp(in.ATs)
 	out.AnOptTs = (*clientsBarBar.Timestamp)(in.AnOptTs)
+	out.AReqDemo = clientsBarBar.DemoType(in.AReqDemo)
+	out.AnOptFruit = (*clientsBarBar.Fruit)(in.AnOptFruit)
+	out.AReqFruits = make([]clientsBarBar.Fruit, len(in.AReqFruits))
+	for index13, value14 := range in.AReqFruits {
+		out.AReqFruits[index13] = clientsBarBar.Fruit(value14)
+	}
+	out.AnOptDemos = make([]clientsBarBar.DemoType, len(in.AnOptDemos))
+	for index15, value16 := range in.AnOptDemos {
+		out.AnOptDemos[index15] = clientsBarBar.DemoType(value16)
+	}
 
 	return out
 }

@@ -3489,7 +3489,63 @@ type Bar_ArgWithManyQueryParams_Args struct {
 	AnOptUUIDList   UUIDList   `json:"anOptUUIDList,omitempty"`
 	ATs             Timestamp  `json:"aTs,required"`
 	AnOptTs         *Timestamp `json:"anOptTs,omitempty"`
+	AReqDemo        DemoType   `json:"aReqDemo,required"`
+	AnOptFruit      *Fruit     `json:"anOptFruit,omitempty"`
+	AReqFruits      []Fruit    `json:"aReqFruits,required"`
+	AnOptDemos      []DemoType `json:"anOptDemos,omitempty"`
 }
+
+type _List_Fruit_ValueList []Fruit
+
+func (v _List_Fruit_ValueList) ForEach(f func(wire.Value) error) error {
+	for _, x := range v {
+		w, err := x.ToWire()
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_Fruit_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_Fruit_ValueList) ValueType() wire.Type {
+	return wire.TI32
+}
+
+func (_List_Fruit_ValueList) Close() {}
+
+type _List_DemoType_ValueList []DemoType
+
+func (v _List_DemoType_ValueList) ForEach(f func(wire.Value) error) error {
+	for _, x := range v {
+		w, err := x.ToWire()
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_DemoType_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_DemoType_ValueList) ValueType() wire.Type {
+	return wire.TI32
+}
+
+func (_List_DemoType_ValueList) Close() {}
 
 // ToWire translates a Bar_ArgWithManyQueryParams_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
@@ -3508,7 +3564,7 @@ type Bar_ArgWithManyQueryParams_Args struct {
 //   }
 func (v *Bar_ArgWithManyQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [24]wire.Field
+		fields [28]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -3700,6 +3756,38 @@ func (v *Bar_ArgWithManyQueryParams_Args) ToWire() (wire.Value, error) {
 		i++
 	}
 
+	w, err = v.AReqDemo.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 25, Value: w}
+	i++
+	if v.AnOptFruit != nil {
+		w, err = v.AnOptFruit.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 26, Value: w}
+		i++
+	}
+	if v.AReqFruits == nil {
+		return w, errors.New("field AReqFruits of Bar_ArgWithManyQueryParams_Args is required")
+	}
+	w, err = wire.NewValueList(_List_Fruit_ValueList(v.AReqFruits)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 27, Value: w}
+	i++
+	if v.AnOptDemos != nil {
+		w, err = wire.NewValueList(_List_DemoType_ValueList(v.AnOptDemos)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 28, Value: w}
+		i++
+	}
+
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
@@ -3713,6 +3801,48 @@ func _UUIDList_Read(w wire.Value) (UUIDList, error) {
 	var x UUIDList
 	err := x.FromWire(w)
 	return x, err
+}
+
+func _DemoType_Read(w wire.Value) (DemoType, error) {
+	var v DemoType
+	err := v.FromWire(w)
+	return v, err
+}
+
+func _List_Fruit_Read(l wire.ValueList) ([]Fruit, error) {
+	if l.ValueType() != wire.TI32 {
+		return nil, nil
+	}
+
+	o := make([]Fruit, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := _Fruit_Read(x)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
+}
+
+func _List_DemoType_Read(l wire.ValueList) ([]DemoType, error) {
+	if l.ValueType() != wire.TI32 {
+		return nil, nil
+	}
+
+	o := make([]DemoType, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := _DemoType_Read(x)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
 }
 
 // FromWire deserializes a Bar_ArgWithManyQueryParams_Args struct from its Thrift-level
@@ -3758,6 +3888,10 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 	aUUIDListIsSet := false
 
 	aTsIsSet := false
+
+	aReqDemoIsSet := false
+
+	aReqFruitsIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -3971,6 +4105,40 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 25:
+			if field.Value.Type() == wire.TI32 {
+				v.AReqDemo, err = _DemoType_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				aReqDemoIsSet = true
+			}
+		case 26:
+			if field.Value.Type() == wire.TI32 {
+				var x Fruit
+				x, err = _Fruit_Read(field.Value)
+				v.AnOptFruit = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 27:
+			if field.Value.Type() == wire.TList {
+				v.AReqFruits, err = _List_Fruit_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				aReqFruitsIsSet = true
+			}
+		case 28:
+			if field.Value.Type() == wire.TList {
+				v.AnOptDemos, err = _List_DemoType_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -4022,6 +4190,14 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 		return errors.New("field ATs of Bar_ArgWithManyQueryParams_Args is required")
 	}
 
+	if !aReqDemoIsSet {
+		return errors.New("field AReqDemo of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
+	if !aReqFruitsIsSet {
+		return errors.New("field AReqFruits of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
 	return nil
 }
 
@@ -4032,7 +4208,7 @@ func (v *Bar_ArgWithManyQueryParams_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [24]string
+	var fields [28]string
 	i := 0
 	fields[i] = fmt.Sprintf("AStr: %v", v.AStr)
 	i++
@@ -4104,6 +4280,18 @@ func (v *Bar_ArgWithManyQueryParams_Args) String() string {
 	i++
 	if v.AnOptTs != nil {
 		fields[i] = fmt.Sprintf("AnOptTs: %v", *(v.AnOptTs))
+		i++
+	}
+	fields[i] = fmt.Sprintf("AReqDemo: %v", v.AReqDemo)
+	i++
+	if v.AnOptFruit != nil {
+		fields[i] = fmt.Sprintf("AnOptFruit: %v", *(v.AnOptFruit))
+		i++
+	}
+	fields[i] = fmt.Sprintf("AReqFruits: %v", v.AReqFruits)
+	i++
+	if v.AnOptDemos != nil {
+		fields[i] = fmt.Sprintf("AnOptDemos: %v", v.AnOptDemos)
 		i++
 	}
 
@@ -4190,6 +4378,46 @@ func _Timestamp_EqualsPtr(lhs, rhs *Timestamp) bool {
 	return lhs == nil && rhs == nil
 }
 
+func _Fruit_EqualsPtr(lhs, rhs *Fruit) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return x.Equals(y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _List_Fruit_Equals(lhs, rhs []Fruit) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func _List_DemoType_Equals(lhs, rhs []DemoType) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Equals returns true if all the fields of this Bar_ArgWithManyQueryParams_Args match the
 // provided Bar_ArgWithManyQueryParams_Args.
 //
@@ -4272,8 +4500,42 @@ func (v *Bar_ArgWithManyQueryParams_Args) Equals(rhs *Bar_ArgWithManyQueryParams
 	if !_Timestamp_EqualsPtr(v.AnOptTs, rhs.AnOptTs) {
 		return false
 	}
+	if !v.AReqDemo.Equals(rhs.AReqDemo) {
+		return false
+	}
+	if !_Fruit_EqualsPtr(v.AnOptFruit, rhs.AnOptFruit) {
+		return false
+	}
+	if !_List_Fruit_Equals(v.AReqFruits, rhs.AReqFruits) {
+		return false
+	}
+	if !((v.AnOptDemos == nil && rhs.AnOptDemos == nil) || (v.AnOptDemos != nil && rhs.AnOptDemos != nil && _List_DemoType_Equals(v.AnOptDemos, rhs.AnOptDemos))) {
+		return false
+	}
 
 	return true
+}
+
+type _List_Fruit_Zapper []Fruit
+
+// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
+// fast logging of _List_Fruit_Zapper.
+func (l _List_Fruit_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
+	for _, v := range l {
+		err = multierr.Append(err, enc.AppendObject(v))
+	}
+	return err
+}
+
+type _List_DemoType_Zapper []DemoType
+
+// MarshalLogArray implements zapcore.ArrayMarshaler, enabling
+// fast logging of _List_DemoType_Zapper.
+func (l _List_DemoType_Zapper) MarshalLogArray(enc zapcore.ArrayEncoder) (err error) {
+	for _, v := range l {
+		err = multierr.Append(err, enc.AppendObject(v))
+	}
+	return err
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling
@@ -4329,6 +4591,14 @@ func (v *Bar_ArgWithManyQueryParams_Args) MarshalLogObject(enc zapcore.ObjectEnc
 	enc.AddInt64("aTs", (int64)(v.ATs))
 	if v.AnOptTs != nil {
 		enc.AddInt64("anOptTs", (int64)(*v.AnOptTs))
+	}
+	err = multierr.Append(err, enc.AddObject("aReqDemo", v.AReqDemo))
+	if v.AnOptFruit != nil {
+		err = multierr.Append(err, enc.AddObject("anOptFruit", *v.AnOptFruit))
+	}
+	err = multierr.Append(err, enc.AddArray("aReqFruits", (_List_Fruit_Zapper)(v.AReqFruits)))
+	if v.AnOptDemos != nil {
+		err = multierr.Append(err, enc.AddArray("anOptDemos", (_List_DemoType_Zapper)(v.AnOptDemos)))
 	}
 	return err
 }
@@ -4636,6 +4906,59 @@ func (v *Bar_ArgWithManyQueryParams_Args) IsSetAnOptTs() bool {
 	return v != nil && v.AnOptTs != nil
 }
 
+// GetAReqDemo returns the value of AReqDemo if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithManyQueryParams_Args) GetAReqDemo() (o DemoType) {
+	if v != nil {
+		o = v.AReqDemo
+	}
+	return
+}
+
+// GetAnOptFruit returns the value of AnOptFruit if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithManyQueryParams_Args) GetAnOptFruit() (o Fruit) {
+	if v != nil && v.AnOptFruit != nil {
+		return *v.AnOptFruit
+	}
+
+	return
+}
+
+// IsSetAnOptFruit returns true if AnOptFruit is not nil.
+func (v *Bar_ArgWithManyQueryParams_Args) IsSetAnOptFruit() bool {
+	return v != nil && v.AnOptFruit != nil
+}
+
+// GetAReqFruits returns the value of AReqFruits if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithManyQueryParams_Args) GetAReqFruits() (o []Fruit) {
+	if v != nil {
+		o = v.AReqFruits
+	}
+	return
+}
+
+// IsSetAReqFruits returns true if AReqFruits is not nil.
+func (v *Bar_ArgWithManyQueryParams_Args) IsSetAReqFruits() bool {
+	return v != nil && v.AReqFruits != nil
+}
+
+// GetAnOptDemos returns the value of AnOptDemos if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithManyQueryParams_Args) GetAnOptDemos() (o []DemoType) {
+	if v != nil && v.AnOptDemos != nil {
+		return v.AnOptDemos
+	}
+
+	return
+}
+
+// IsSetAnOptDemos returns true if AnOptDemos is not nil.
+func (v *Bar_ArgWithManyQueryParams_Args) IsSetAnOptDemos() bool {
+	return v != nil && v.AnOptDemos != nil
+}
+
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -4682,6 +5005,10 @@ var Bar_ArgWithManyQueryParams_Helper = struct {
 		anOptUUIDList UUIDList,
 		aTs Timestamp,
 		anOptTs *Timestamp,
+		aReqDemo DemoType,
+		anOptFruit *Fruit,
+		aReqFruits []Fruit,
+		anOptDemos []DemoType,
 	) *Bar_ArgWithManyQueryParams_Args
 
 	// IsException returns true if the given error can be thrown
@@ -4745,6 +5072,10 @@ func init() {
 		anOptUUIDList UUIDList,
 		aTs Timestamp,
 		anOptTs *Timestamp,
+		aReqDemo DemoType,
+		anOptFruit *Fruit,
+		aReqFruits []Fruit,
+		anOptDemos []DemoType,
 	) *Bar_ArgWithManyQueryParams_Args {
 		return &Bar_ArgWithManyQueryParams_Args{
 			AStr:            aStr,
@@ -4771,6 +5102,10 @@ func init() {
 			AnOptUUIDList:   anOptUUIDList,
 			ATs:             aTs,
 			AnOptTs:         anOptTs,
+			AReqDemo:        aReqDemo,
+			AnOptFruit:      anOptFruit,
+			AReqFruits:      aReqFruits,
+			AnOptDemos:      anOptDemos,
 		}
 	}
 
@@ -8680,8 +9015,9 @@ func (v *Bar_HelloWorld_Result) EnvelopeType() wire.EnvelopeType {
 //
 // The arguments for listAndEnum are sent and received over the wire as this struct.
 type Bar_ListAndEnum_Args struct {
-	DemoIds  []string  `json:"demoIds,required"`
-	DemoType *DemoType `json:"demoType,omitempty"`
+	DemoIds  []string   `json:"demoIds,required"`
+	DemoType *DemoType  `json:"demoType,omitempty"`
+	Demos    []DemoType `json:"demos,omitempty"`
 }
 
 // ToWire translates a Bar_ListAndEnum_Args struct into a Thrift-level intermediate
@@ -8701,7 +9037,7 @@ type Bar_ListAndEnum_Args struct {
 //   }
 func (v *Bar_ListAndEnum_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -8724,14 +9060,16 @@ func (v *Bar_ListAndEnum_Args) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 2, Value: w}
 		i++
 	}
+	if v.Demos != nil {
+		w, err = wire.NewValueList(_List_DemoType_ValueList(v.Demos)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _DemoType_Read(w wire.Value) (DemoType, error) {
-	var v DemoType
-	err := v.FromWire(w)
-	return v, err
 }
 
 // FromWire deserializes a Bar_ListAndEnum_Args struct from its Thrift-level
@@ -8776,6 +9114,14 @@ func (v *Bar_ListAndEnum_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 3:
+			if field.Value.Type() == wire.TList {
+				v.Demos, err = _List_DemoType_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -8793,12 +9139,16 @@ func (v *Bar_ListAndEnum_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	fields[i] = fmt.Sprintf("DemoIds: %v", v.DemoIds)
 	i++
 	if v.DemoType != nil {
 		fields[i] = fmt.Sprintf("DemoType: %v", *(v.DemoType))
+		i++
+	}
+	if v.Demos != nil {
+		fields[i] = fmt.Sprintf("Demos: %v", v.Demos)
 		i++
 	}
 
@@ -8831,6 +9181,9 @@ func (v *Bar_ListAndEnum_Args) Equals(rhs *Bar_ListAndEnum_Args) bool {
 	if !_DemoType_EqualsPtr(v.DemoType, rhs.DemoType) {
 		return false
 	}
+	if !((v.Demos == nil && rhs.Demos == nil) || (v.Demos != nil && rhs.Demos != nil && _List_DemoType_Equals(v.Demos, rhs.Demos))) {
+		return false
+	}
 
 	return true
 }
@@ -8844,6 +9197,9 @@ func (v *Bar_ListAndEnum_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err 
 	err = multierr.Append(err, enc.AddArray("demoIds", (_List_String_Zapper)(v.DemoIds)))
 	if v.DemoType != nil {
 		err = multierr.Append(err, enc.AddObject("demoType", *v.DemoType))
+	}
+	if v.Demos != nil {
+		err = multierr.Append(err, enc.AddArray("demos", (_List_DemoType_Zapper)(v.Demos)))
 	}
 	return err
 }
@@ -8877,6 +9233,21 @@ func (v *Bar_ListAndEnum_Args) IsSetDemoType() bool {
 	return v != nil && v.DemoType != nil
 }
 
+// GetDemos returns the value of Demos if it is set or its
+// zero value if it is unset.
+func (v *Bar_ListAndEnum_Args) GetDemos() (o []DemoType) {
+	if v != nil && v.Demos != nil {
+		return v.Demos
+	}
+
+	return
+}
+
+// IsSetDemos returns true if Demos is not nil.
+func (v *Bar_ListAndEnum_Args) IsSetDemos() bool {
+	return v != nil && v.Demos != nil
+}
+
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -8901,6 +9272,7 @@ var Bar_ListAndEnum_Helper = struct {
 	Args func(
 		demoIds []string,
 		demoType *DemoType,
+		demos []DemoType,
 	) *Bar_ListAndEnum_Args
 
 	// IsException returns true if the given error can be thrown
@@ -8942,10 +9314,12 @@ func init() {
 	Bar_ListAndEnum_Helper.Args = func(
 		demoIds []string,
 		demoType *DemoType,
+		demos []DemoType,
 	) *Bar_ListAndEnum_Args {
 		return &Bar_ListAndEnum_Args{
 			DemoIds:  demoIds,
 			DemoType: demoType,
+			Demos:    demos,
 		}
 	}
 
