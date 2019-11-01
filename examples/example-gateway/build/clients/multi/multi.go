@@ -174,6 +174,9 @@ func (c *multiClient) HelloA(
 	} else {
 		err = hystrix.DoC(ctx, "multi", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -240,6 +243,9 @@ func (c *multiClient) HelloB(
 	} else {
 		err = hystrix.DoC(ctx, "multi", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}

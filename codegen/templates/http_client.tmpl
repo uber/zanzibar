@@ -240,6 +240,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 	} else {
 		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}

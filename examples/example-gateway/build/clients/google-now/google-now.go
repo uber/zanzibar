@@ -181,6 +181,9 @@ func (c *googleNowClient) AddCredentials(
 	} else {
 		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -250,6 +253,9 @@ func (c *googleNowClient) CheckCredentials(
 	} else {
 		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}

@@ -177,6 +177,9 @@ func (c *contactsClient) SaveContacts(
 	} else {
 		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -243,6 +246,9 @@ func (c *contactsClient) TestURLURL(
 	} else {
 		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}

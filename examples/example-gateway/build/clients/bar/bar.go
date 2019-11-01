@@ -371,6 +371,9 @@ func (c *barClient) ArgNotStruct(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -457,6 +460,9 @@ func (c *barClient) ArgWithHeaders(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -620,6 +626,9 @@ func (c *barClient) ArgWithManyQueryParams(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -705,6 +714,9 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -814,6 +826,9 @@ func (c *barClient) ArgWithNestedQueryParams(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -882,6 +897,9 @@ func (c *barClient) ArgWithParams(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -950,6 +968,9 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1018,6 +1039,9 @@ func (c *barClient) ArgWithQueryHeader(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1103,6 +1127,9 @@ func (c *barClient) ArgWithQueryParams(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1177,6 +1204,9 @@ func (c *barClient) DeleteFoo(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1250,6 +1280,9 @@ func (c *barClient) DeleteWithQueryParams(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1314,6 +1347,9 @@ func (c *barClient) Hello(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1406,6 +1442,9 @@ func (c *barClient) ListAndEnum(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1482,6 +1521,9 @@ func (c *barClient) MissingArg(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1559,6 +1601,9 @@ func (c *barClient) NoRequest(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1637,6 +1682,9 @@ func (c *barClient) Normal(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1715,6 +1763,9 @@ func (c *barClient) NormalRecur(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1792,6 +1843,9 @@ func (c *barClient) TooManyArgs(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1884,6 +1938,9 @@ func (c *barClient) EchoBinary(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1954,6 +2011,9 @@ func (c *barClient) EchoBool(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2026,6 +2086,9 @@ func (c *barClient) EchoDouble(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2098,6 +2161,9 @@ func (c *barClient) EchoEnum(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2170,6 +2236,9 @@ func (c *barClient) EchoI16(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2242,6 +2311,9 @@ func (c *barClient) EchoI32(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2314,6 +2386,9 @@ func (c *barClient) EchoI32Map(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2386,6 +2461,9 @@ func (c *barClient) EchoI64(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2458,6 +2536,9 @@ func (c *barClient) EchoI8(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2530,6 +2611,9 @@ func (c *barClient) EchoString(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2602,6 +2686,9 @@ func (c *barClient) EchoStringList(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2674,6 +2761,9 @@ func (c *barClient) EchoStringMap(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2746,6 +2836,9 @@ func (c *barClient) EchoStringSet(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2818,6 +2911,9 @@ func (c *barClient) EchoStructList(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2890,6 +2986,9 @@ func (c *barClient) EchoStructSet(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -2962,6 +3061,9 @@ func (c *barClient) EchoTypedef(
 	} else {
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}

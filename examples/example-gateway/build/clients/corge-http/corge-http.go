@@ -189,6 +189,9 @@ func (c *corgeHTTPClient) EchoString(
 	} else {
 		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}

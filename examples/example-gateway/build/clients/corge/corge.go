@@ -241,6 +241,9 @@ func (c *corgeClient) EchoString(
 			success, respHeaders, err = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}

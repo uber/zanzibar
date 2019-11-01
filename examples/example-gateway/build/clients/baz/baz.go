@@ -396,6 +396,9 @@ func (c *bazClient) EchoBinary(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -441,6 +444,9 @@ func (c *bazClient) EchoBool(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -486,6 +492,9 @@ func (c *bazClient) EchoDouble(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -531,6 +540,9 @@ func (c *bazClient) EchoEnum(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -576,6 +588,9 @@ func (c *bazClient) EchoI16(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -621,6 +636,9 @@ func (c *bazClient) EchoI32(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -666,6 +684,9 @@ func (c *bazClient) EchoI64(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -711,6 +732,9 @@ func (c *bazClient) EchoI8(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -756,6 +780,9 @@ func (c *bazClient) EchoString(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoString", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -801,6 +828,9 @@ func (c *bazClient) EchoStringList(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -846,6 +876,9 @@ func (c *bazClient) EchoStringMap(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -891,6 +924,9 @@ func (c *bazClient) EchoStringSet(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -936,6 +972,9 @@ func (c *bazClient) EchoStructList(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -981,6 +1020,9 @@ func (c *bazClient) EchoStructSet(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1026,6 +1068,9 @@ func (c *bazClient) EchoTypedef(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1070,6 +1115,9 @@ func (c *bazClient) Call(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "call", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1113,6 +1161,9 @@ func (c *bazClient) Compare(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "compare", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1162,6 +1213,9 @@ func (c *bazClient) GetProfile(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1209,6 +1263,9 @@ func (c *bazClient) HeaderSchema(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1258,6 +1315,9 @@ func (c *bazClient) Ping(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "ping", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1302,6 +1362,9 @@ func (c *bazClient) DeliberateDiffNoop(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1346,6 +1409,9 @@ func (c *bazClient) TestUUID(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1387,6 +1453,9 @@ func (c *bazClient) Trans(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "trans", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1436,6 +1505,9 @@ func (c *bazClient) TransHeaders(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1485,6 +1557,9 @@ func (c *bazClient) TransHeadersNoReq(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1532,6 +1607,9 @@ func (c *bazClient) TransHeadersType(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}
@@ -1580,6 +1658,9 @@ func (c *bazClient) URLTest(
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 			)
+			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+				return nil
+			}
 			return err
 		}, nil)
 	}

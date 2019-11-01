@@ -170,6 +170,9 @@ func (c *withexceptionsClient) Func1(
 	} else {
 		err = hystrix.DoC(ctx, "withexceptions", func(ctx context.Context) error {
 			res, err = req.Do()
+			if res.StatusCode < 500 {
+				return nil
+			}
 			return err
 		}, nil)
 	}
