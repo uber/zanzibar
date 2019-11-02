@@ -1413,7 +1413,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	if (c.circuitBreakerDisabled) {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil
@@ -1573,7 +1573,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 12100, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 12094, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2717,7 +2717,7 @@ type {{$clientName}} struct {
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
-			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				success, respHeaders, err = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
@@ -2773,7 +2773,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10926, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10920, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

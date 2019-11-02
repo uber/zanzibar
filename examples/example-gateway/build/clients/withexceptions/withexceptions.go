@@ -168,7 +168,7 @@ func (c *withexceptionsClient) Func1(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "withexceptions", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "withexceptions", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil

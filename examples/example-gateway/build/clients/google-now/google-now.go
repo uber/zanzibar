@@ -179,7 +179,7 @@ func (c *googleNowClient) AddCredentials(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil
@@ -251,7 +251,7 @@ func (c *googleNowClient) CheckCredentials(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil

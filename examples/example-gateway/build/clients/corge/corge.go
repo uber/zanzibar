@@ -237,7 +237,7 @@ func (c *corgeClient) EchoString(
 			ctx, "Corge", "echoString", reqHeaders, args, &result,
 		)
 	} else {
-		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)

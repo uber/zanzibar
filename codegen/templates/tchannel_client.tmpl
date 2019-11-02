@@ -264,7 +264,7 @@ type {{$clientName}} struct {
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
-			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				success, respHeaders, err = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)

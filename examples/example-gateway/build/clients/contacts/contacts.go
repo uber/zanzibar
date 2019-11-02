@@ -175,7 +175,7 @@ func (c *contactsClient) SaveContacts(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil
@@ -244,7 +244,7 @@ func (c *contactsClient) TestURLURL(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil

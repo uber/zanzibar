@@ -187,7 +187,7 @@ func (c *corgeHTTPClient) EchoString(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
-		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
+		hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
 			res, err = req.Do()
 			if res.StatusCode < 500 {
 				return nil
