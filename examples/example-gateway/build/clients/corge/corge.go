@@ -237,7 +237,8 @@ func (c *corgeClient) EchoString(
 			ctx, "Corge", "echoString", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)
@@ -246,6 +247,10 @@ func (c *corgeClient) EchoString(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {

@@ -1413,13 +1413,18 @@ func (c *{{$clientName}}) {{$methodName}}(
 	if (c.circuitBreakerDisabled) {
 		res, err = req.Do()
 	} else {
-		hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-			res, err = req.Do()
+		var realErr error
+		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			res, realErr = req.Do()
 			if res.StatusCode < 500 {
 				return nil
 			}
-			return err
+			return realErr
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
@@ -1573,7 +1578,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 12094, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 12219, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2717,7 +2722,8 @@ type {{$clientName}} struct {
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
-			hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			var realErr error
+			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				success, respHeaders, err = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
@@ -2726,6 +2732,10 @@ type {{$clientName}} struct {
 				}
 				return err
 			}, nil)
+			if err == nil {
+				// Bad request or equivalent error, bubble it up
+				err = realErr
+			}
 		}
 
 
@@ -2773,7 +2783,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10920, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

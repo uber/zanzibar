@@ -392,7 +392,8 @@ func (c *bazClient) EchoBinary(
 			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 			)
@@ -401,6 +402,10 @@ func (c *bazClient) EchoBinary(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -440,7 +445,8 @@ func (c *bazClient) EchoBool(
 			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 			)
@@ -449,6 +455,10 @@ func (c *bazClient) EchoBool(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -488,7 +498,8 @@ func (c *bazClient) EchoDouble(
 			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 			)
@@ -497,6 +508,10 @@ func (c *bazClient) EchoDouble(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -536,7 +551,8 @@ func (c *bazClient) EchoEnum(
 			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 			)
@@ -545,6 +561,10 @@ func (c *bazClient) EchoEnum(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -584,7 +604,8 @@ func (c *bazClient) EchoI16(
 			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 			)
@@ -593,6 +614,10 @@ func (c *bazClient) EchoI16(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -632,7 +657,8 @@ func (c *bazClient) EchoI32(
 			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 			)
@@ -641,6 +667,10 @@ func (c *bazClient) EchoI32(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -680,7 +710,8 @@ func (c *bazClient) EchoI64(
 			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 			)
@@ -689,6 +720,10 @@ func (c *bazClient) EchoI64(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -728,7 +763,8 @@ func (c *bazClient) EchoI8(
 			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 			)
@@ -737,6 +773,10 @@ func (c *bazClient) EchoI8(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -776,7 +816,8 @@ func (c *bazClient) EchoString(
 			ctx, "SecondService", "echoString", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoString", reqHeaders, args, &result,
 			)
@@ -785,6 +826,10 @@ func (c *bazClient) EchoString(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -824,7 +869,8 @@ func (c *bazClient) EchoStringList(
 			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 			)
@@ -833,6 +879,10 @@ func (c *bazClient) EchoStringList(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -872,7 +922,8 @@ func (c *bazClient) EchoStringMap(
 			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 			)
@@ -881,6 +932,10 @@ func (c *bazClient) EchoStringMap(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -920,7 +975,8 @@ func (c *bazClient) EchoStringSet(
 			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 			)
@@ -929,6 +985,10 @@ func (c *bazClient) EchoStringSet(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -968,7 +1028,8 @@ func (c *bazClient) EchoStructList(
 			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 			)
@@ -977,6 +1038,10 @@ func (c *bazClient) EchoStructList(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1016,7 +1081,8 @@ func (c *bazClient) EchoStructSet(
 			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 			)
@@ -1025,6 +1091,10 @@ func (c *bazClient) EchoStructSet(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1064,7 +1134,8 @@ func (c *bazClient) EchoTypedef(
 			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 			)
@@ -1073,6 +1144,10 @@ func (c *bazClient) EchoTypedef(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1111,7 +1186,8 @@ func (c *bazClient) Call(
 			ctx, "SimpleService", "call", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "call", reqHeaders, args, &result,
 			)
@@ -1120,6 +1196,10 @@ func (c *bazClient) Call(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1157,7 +1237,8 @@ func (c *bazClient) Compare(
 			ctx, "SimpleService", "compare", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "compare", reqHeaders, args, &result,
 			)
@@ -1166,6 +1247,10 @@ func (c *bazClient) Compare(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1209,7 +1294,8 @@ func (c *bazClient) GetProfile(
 			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 			)
@@ -1218,6 +1304,10 @@ func (c *bazClient) GetProfile(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1259,7 +1349,8 @@ func (c *bazClient) HeaderSchema(
 			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 			)
@@ -1268,6 +1359,10 @@ func (c *bazClient) HeaderSchema(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1311,7 +1406,8 @@ func (c *bazClient) Ping(
 			ctx, "SimpleService", "ping", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "ping", reqHeaders, args, &result,
 			)
@@ -1320,6 +1416,10 @@ func (c *bazClient) Ping(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1358,7 +1458,8 @@ func (c *bazClient) DeliberateDiffNoop(
 			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 			)
@@ -1367,6 +1468,10 @@ func (c *bazClient) DeliberateDiffNoop(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1405,7 +1510,8 @@ func (c *bazClient) TestUUID(
 			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 			)
@@ -1414,6 +1520,10 @@ func (c *bazClient) TestUUID(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1449,7 +1559,8 @@ func (c *bazClient) Trans(
 			ctx, "SimpleService", "trans", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "trans", reqHeaders, args, &result,
 			)
@@ -1458,6 +1569,10 @@ func (c *bazClient) Trans(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1501,7 +1616,8 @@ func (c *bazClient) TransHeaders(
 			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 			)
@@ -1510,6 +1626,10 @@ func (c *bazClient) TransHeaders(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1553,7 +1673,8 @@ func (c *bazClient) TransHeadersNoReq(
 			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 			)
@@ -1562,6 +1683,10 @@ func (c *bazClient) TransHeadersNoReq(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1603,7 +1728,8 @@ func (c *bazClient) TransHeadersType(
 			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 			)
@@ -1612,6 +1738,10 @@ func (c *bazClient) TransHeadersType(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1654,7 +1784,8 @@ func (c *bazClient) URLTest(
 			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 		)
 	} else {
-		hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		var realErr error
+		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
 			success, respHeaders, err = c.client.Call(
 				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 			)
@@ -1663,6 +1794,10 @@ func (c *bazClient) URLTest(
 			}
 			return err
 		}, nil)
+		if err == nil {
+			// Bad request or equivalent error, bubble it up
+			err = realErr
+		}
 	}
 
 	if err == nil && !success {
