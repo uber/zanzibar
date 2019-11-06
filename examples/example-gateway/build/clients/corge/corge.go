@@ -237,19 +237,21 @@ func (c *corgeClient) EchoString(
 			ctx, "Corge", "echoString", reqHeaders, args, &result,
 		)
 	} else {
-		var realErr error
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)
-			if _, isSysErr := err.(tchannel.SystemError); !isSysErr {
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
 				return nil
 			}
-			return err
+			return clientErr
 		}, nil)
 		if err == nil {
-			// Bad request or equivalent error, bubble it up
-			err = realErr
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
 		}
 	}
 
