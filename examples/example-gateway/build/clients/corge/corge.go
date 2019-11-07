@@ -230,7 +230,7 @@ func (c *corgeClient) EchoString(
 	logger := c.client.Loggers["Corge::echoString"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(

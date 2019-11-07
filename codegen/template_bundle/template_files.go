@@ -1432,7 +1432,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1580,7 +1580,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 12343, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 12347, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2717,7 +2717,7 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		var success bool
-		respHeaders := map[string]string{}
+		respHeaders := make(map[string]string)
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = c.client.Call(
@@ -2786,7 +2786,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11204, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11208, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -257,7 +257,7 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		var success bool
-		respHeaders := map[string]string{}
+		respHeaders := make(map[string]string)
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = c.client.Call(

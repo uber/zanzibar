@@ -385,7 +385,7 @@ func (c *bazClient) EchoBinary(
 	logger := c.client.Loggers["SecondService::echoBinary"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -440,7 +440,7 @@ func (c *bazClient) EchoBool(
 	logger := c.client.Loggers["SecondService::echoBool"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -495,7 +495,7 @@ func (c *bazClient) EchoDouble(
 	logger := c.client.Loggers["SecondService::echoDouble"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -550,7 +550,7 @@ func (c *bazClient) EchoEnum(
 	logger := c.client.Loggers["SecondService::echoEnum"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -605,7 +605,7 @@ func (c *bazClient) EchoI16(
 	logger := c.client.Loggers["SecondService::echoI16"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -660,7 +660,7 @@ func (c *bazClient) EchoI32(
 	logger := c.client.Loggers["SecondService::echoI32"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -715,7 +715,7 @@ func (c *bazClient) EchoI64(
 	logger := c.client.Loggers["SecondService::echoI64"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -770,7 +770,7 @@ func (c *bazClient) EchoI8(
 	logger := c.client.Loggers["SecondService::echoI8"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -825,7 +825,7 @@ func (c *bazClient) EchoString(
 	logger := c.client.Loggers["SecondService::echoString"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -880,7 +880,7 @@ func (c *bazClient) EchoStringList(
 	logger := c.client.Loggers["SecondService::echoStringList"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -935,7 +935,7 @@ func (c *bazClient) EchoStringMap(
 	logger := c.client.Loggers["SecondService::echoStringMap"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -990,7 +990,7 @@ func (c *bazClient) EchoStringSet(
 	logger := c.client.Loggers["SecondService::echoStringSet"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1045,7 +1045,7 @@ func (c *bazClient) EchoStructList(
 	logger := c.client.Loggers["SecondService::echoStructList"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1100,7 +1100,7 @@ func (c *bazClient) EchoStructSet(
 	logger := c.client.Loggers["SecondService::echoStructSet"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1155,7 +1155,7 @@ func (c *bazClient) EchoTypedef(
 	logger := c.client.Loggers["SecondService::echoTypedef"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1209,7 +1209,7 @@ func (c *bazClient) Call(
 	logger := c.client.Loggers["SimpleService::call"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1262,7 +1262,7 @@ func (c *bazClient) Compare(
 	logger := c.client.Loggers["SimpleService::compare"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1321,7 +1321,7 @@ func (c *bazClient) GetProfile(
 	logger := c.client.Loggers["SimpleService::getProfile"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1378,7 +1378,7 @@ func (c *bazClient) HeaderSchema(
 	logger := c.client.Loggers["SimpleService::headerSchema"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1437,7 +1437,7 @@ func (c *bazClient) Ping(
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1491,7 +1491,7 @@ func (c *bazClient) DeliberateDiffNoop(
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1545,7 +1545,7 @@ func (c *bazClient) TestUUID(
 
 	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1596,7 +1596,7 @@ func (c *bazClient) Trans(
 	logger := c.client.Loggers["SimpleService::trans"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1655,7 +1655,7 @@ func (c *bazClient) TransHeaders(
 	logger := c.client.Loggers["SimpleService::transHeaders"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1714,7 +1714,7 @@ func (c *bazClient) TransHeadersNoReq(
 	logger := c.client.Loggers["SimpleService::transHeadersNoReq"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1771,7 +1771,7 @@ func (c *bazClient) TransHeadersType(
 	logger := c.client.Loggers["SimpleService::transHeadersType"]
 
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -1829,7 +1829,7 @@ func (c *bazClient) URLTest(
 
 	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
 	var success bool
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
