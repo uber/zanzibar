@@ -1,6 +1,9 @@
 config:
   exposedMethods:
     EchoString: Corge::echoString
+    NoContent: Corge::noContent
+    NoContentNoException: Corge::noContentNoException
+    CorgeNoContentOnException: Corge::noContentOnException
   sidecarRouter: default
   idlFile: clients/corge/corge.thrift
   idlFileSha: '{{placeholder}}'
