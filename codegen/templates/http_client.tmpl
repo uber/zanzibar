@@ -257,7 +257,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}

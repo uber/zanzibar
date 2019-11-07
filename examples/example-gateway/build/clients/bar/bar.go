@@ -388,7 +388,7 @@ func (c *barClient) ArgNotStruct(
 		return nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -484,7 +484,7 @@ func (c *barClient) ArgWithHeaders(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -657,7 +657,7 @@ func (c *barClient) ArgWithManyQueryParams(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -752,7 +752,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -871,7 +871,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -949,7 +949,7 @@ func (c *barClient) ArgWithParams(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1027,7 +1027,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1105,7 +1105,7 @@ func (c *barClient) ArgWithQueryHeader(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1200,7 +1200,7 @@ func (c *barClient) ArgWithQueryParams(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1284,7 +1284,7 @@ func (c *barClient) DeleteFoo(
 		return nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1367,7 +1367,7 @@ func (c *barClient) DeleteWithQueryParams(
 		return nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1441,7 +1441,7 @@ func (c *barClient) Hello(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1543,7 +1543,7 @@ func (c *barClient) ListAndEnum(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1629,7 +1629,7 @@ func (c *barClient) MissingArg(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1716,7 +1716,7 @@ func (c *barClient) NoRequest(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1804,7 +1804,7 @@ func (c *barClient) Normal(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1892,7 +1892,7 @@ func (c *barClient) NormalRecur(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -1979,7 +1979,7 @@ func (c *barClient) TooManyArgs(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2081,7 +2081,7 @@ func (c *barClient) EchoBinary(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2161,7 +2161,7 @@ func (c *barClient) EchoBool(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2243,7 +2243,7 @@ func (c *barClient) EchoDouble(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2325,7 +2325,7 @@ func (c *barClient) EchoEnum(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2407,7 +2407,7 @@ func (c *barClient) EchoI16(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2489,7 +2489,7 @@ func (c *barClient) EchoI32(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2571,7 +2571,7 @@ func (c *barClient) EchoI32Map(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2653,7 +2653,7 @@ func (c *barClient) EchoI64(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2735,7 +2735,7 @@ func (c *barClient) EchoI8(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2817,7 +2817,7 @@ func (c *barClient) EchoString(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2899,7 +2899,7 @@ func (c *barClient) EchoStringList(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -2981,7 +2981,7 @@ func (c *barClient) EchoStringMap(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -3063,7 +3063,7 @@ func (c *barClient) EchoStringSet(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -3145,7 +3145,7 @@ func (c *barClient) EchoStructList(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -3227,7 +3227,7 @@ func (c *barClient) EchoStructSet(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -3309,7 +3309,7 @@ func (c *barClient) EchoTypedef(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}

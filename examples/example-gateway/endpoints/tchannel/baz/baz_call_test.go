@@ -63,12 +63,11 @@ func TestBazCall(t *testing.T) {
 	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
-	success, resHeaders, err = ms.MakeTChannelRequest(
+	success, _, err = ms.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 	if !assert.Error(t, err, "got tchannel error") {
 		return
 	}
 	assert.False(t, success)
-	assert.Nil(t, resHeaders)
 }

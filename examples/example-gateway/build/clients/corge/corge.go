@@ -230,7 +230,7 @@ func (c *corgeClient) EchoString(
 	logger := c.client.Loggers["Corge::echoString"]
 
 	var success bool
-	var respHeaders map[string]string
+	respHeaders := make(map[string]string)
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
@@ -263,7 +263,7 @@ func (c *corgeClient) EchoString(
 	}
 	if err != nil {
 		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
-		return resp, nil, err
+		return resp, respHeaders, err
 	}
 
 	resp, err = clientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)

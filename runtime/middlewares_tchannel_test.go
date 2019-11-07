@@ -89,7 +89,7 @@ func TestTchannelHandlers(t *testing.T) {
 
 	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
-	success, resHeaders, err = ms.MakeTChannelRequest(
+	success, _, err = ms.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 	if !assert.Error(t, err, "got tchannel error") {
@@ -97,7 +97,6 @@ func TestTchannelHandlers(t *testing.T) {
 	}
 
 	assert.False(t, success)
-	assert.Nil(t, resHeaders)
 }
 
 // Ensures that a tchannel middleware can read state from a tchannel middeware earlier in the stack.

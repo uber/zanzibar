@@ -198,7 +198,7 @@ func (c *googleNowClient) AddCredentials(
 		return nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
@@ -277,7 +277,7 @@ func (c *googleNowClient) CheckCredentials(
 		return nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}

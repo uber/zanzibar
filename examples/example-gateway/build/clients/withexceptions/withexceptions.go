@@ -187,7 +187,7 @@ func (c *withexceptionsClient) Func1(
 		return defaultRes, nil, err
 	}
 
-	respHeaders := map[string]string{}
+	respHeaders := make(map[string]string)
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}

@@ -267,11 +267,10 @@ func TestCallTChannelTimeout(t *testing.T) {
 	}
 	var result endpointsBaz.SimpleService_Call_Result
 
-	success, resHeaders, err := gateway.MakeTChannelRequest(
+	success, _, err := gateway.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 	assert.Error(t, err, "excepting tchannel error")
-	assert.Nil(t, resHeaders)
 	assert.False(t, success)
 
 	assert.Len(t, gateway.Logs("info", "Started Example-gateway"), 1)
