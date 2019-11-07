@@ -1413,10 +1413,20 @@ func (c *{{$clientName}}) {{$methodName}}(
 	if (c.circuitBreakerDisabled) {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
@@ -1570,7 +1580,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 12051, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 12343, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2714,14 +2724,23 @@ type {{$clientName}} struct {
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
 		} else {
+			// We want hystrix ckt-breaker to count errors only for system issues
+			var clientErr error
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-				success, respHeaders, err = c.client.Call(
+				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
-				return err
+				if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+					// Declare ok if it is not a system-error
+					return nil
+				}
+				return clientErr
 			}, nil)
+			if err == nil {
+				// ckt-breaker was ok, bubble up client error if set
+				err = clientErr
+			}
 		}
-
 
 		if err == nil && !success {
 			switch {
@@ -2767,7 +2786,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 10842, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11187, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

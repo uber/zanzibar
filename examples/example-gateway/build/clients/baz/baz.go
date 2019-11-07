@@ -392,12 +392,22 @@ func (c *bazClient) EchoBinary(
 			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -437,12 +447,22 @@ func (c *bazClient) EchoBool(
 			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -482,12 +502,22 @@ func (c *bazClient) EchoDouble(
 			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -527,12 +557,22 @@ func (c *bazClient) EchoEnum(
 			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -572,12 +612,22 @@ func (c *bazClient) EchoI16(
 			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -617,12 +667,22 @@ func (c *bazClient) EchoI32(
 			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -662,12 +722,22 @@ func (c *bazClient) EchoI64(
 			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -707,12 +777,22 @@ func (c *bazClient) EchoI8(
 			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -752,12 +832,22 @@ func (c *bazClient) EchoString(
 			ctx, "SecondService", "echoString", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoString", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -797,12 +887,22 @@ func (c *bazClient) EchoStringList(
 			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -842,12 +942,22 @@ func (c *bazClient) EchoStringMap(
 			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -887,12 +997,22 @@ func (c *bazClient) EchoStringSet(
 			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -932,12 +1052,22 @@ func (c *bazClient) EchoStructList(
 			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -977,12 +1107,22 @@ func (c *bazClient) EchoStructSet(
 			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1022,12 +1162,22 @@ func (c *bazClient) EchoTypedef(
 			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1066,12 +1216,22 @@ func (c *bazClient) Call(
 			ctx, "SimpleService", "call", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "call", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1109,12 +1269,22 @@ func (c *bazClient) Compare(
 			ctx, "SimpleService", "compare", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "compare", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1158,12 +1328,22 @@ func (c *bazClient) GetProfile(
 			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1205,12 +1385,22 @@ func (c *bazClient) HeaderSchema(
 			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1254,12 +1444,22 @@ func (c *bazClient) Ping(
 			ctx, "SimpleService", "ping", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "ping", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1298,12 +1498,22 @@ func (c *bazClient) DeliberateDiffNoop(
 			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1342,12 +1552,22 @@ func (c *bazClient) TestUUID(
 			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1383,12 +1603,22 @@ func (c *bazClient) Trans(
 			ctx, "SimpleService", "trans", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "trans", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1432,12 +1662,22 @@ func (c *bazClient) TransHeaders(
 			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1481,12 +1721,22 @@ func (c *bazClient) TransHeadersNoReq(
 			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1528,12 +1778,22 @@ func (c *bazClient) TransHeadersType(
 			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {
@@ -1576,12 +1836,22 @@ func (c *bazClient) URLTest(
 			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 		)
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 			)
-			return err
+			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				// Declare ok if it is not a system-error
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 
 	if err == nil && !success {

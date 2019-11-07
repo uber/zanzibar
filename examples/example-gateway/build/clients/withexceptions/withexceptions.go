@@ -168,10 +168,20 @@ func (c *withexceptionsClient) Func1(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "withexceptions", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err

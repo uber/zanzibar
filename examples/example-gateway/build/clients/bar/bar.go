@@ -369,10 +369,20 @@ func (c *barClient) ArgNotStruct(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return nil, err
@@ -455,10 +465,20 @@ func (c *barClient) ArgWithHeaders(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -618,10 +638,20 @@ func (c *barClient) ArgWithManyQueryParams(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -703,10 +733,20 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -812,10 +852,20 @@ func (c *barClient) ArgWithNestedQueryParams(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -880,10 +930,20 @@ func (c *barClient) ArgWithParams(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -948,10 +1008,20 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1016,10 +1086,20 @@ func (c *barClient) ArgWithQueryHeader(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1101,10 +1181,20 @@ func (c *barClient) ArgWithQueryParams(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1175,10 +1265,20 @@ func (c *barClient) DeleteFoo(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return nil, err
@@ -1248,10 +1348,20 @@ func (c *barClient) DeleteWithQueryParams(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return nil, err
@@ -1312,10 +1422,20 @@ func (c *barClient) Hello(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1404,10 +1524,20 @@ func (c *barClient) ListAndEnum(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1480,10 +1610,20 @@ func (c *barClient) MissingArg(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1557,10 +1697,20 @@ func (c *barClient) NoRequest(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1635,10 +1785,20 @@ func (c *barClient) Normal(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1713,10 +1873,20 @@ func (c *barClient) NormalRecur(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1790,10 +1960,20 @@ func (c *barClient) TooManyArgs(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1882,10 +2062,20 @@ func (c *barClient) EchoBinary(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -1952,10 +2142,20 @@ func (c *barClient) EchoBool(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2024,10 +2224,20 @@ func (c *barClient) EchoDouble(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2096,10 +2306,20 @@ func (c *barClient) EchoEnum(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2168,10 +2388,20 @@ func (c *barClient) EchoI16(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2240,10 +2470,20 @@ func (c *barClient) EchoI32(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2312,10 +2552,20 @@ func (c *barClient) EchoI32Map(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2384,10 +2634,20 @@ func (c *barClient) EchoI64(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2456,10 +2716,20 @@ func (c *barClient) EchoI8(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2528,10 +2798,20 @@ func (c *barClient) EchoString(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2600,10 +2880,20 @@ func (c *barClient) EchoStringList(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2672,10 +2962,20 @@ func (c *barClient) EchoStringMap(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2744,10 +3044,20 @@ func (c *barClient) EchoStringSet(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2816,10 +3126,20 @@ func (c *barClient) EchoStructList(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2888,10 +3208,20 @@ func (c *barClient) EchoStructSet(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
@@ -2960,10 +3290,20 @@ func (c *barClient) EchoTypedef(
 	if c.circuitBreakerDisabled {
 		res, err = req.Do()
 	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
-			res, err = req.Do()
-			return err
+			res, clientErr = req.Do()
+			if res.StatusCode < 500 {
+				// This is not a system error/issue
+				return nil
+			}
+			return clientErr
 		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
 	}
 	if err != nil {
 		return defaultRes, nil, err
