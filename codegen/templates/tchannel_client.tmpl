@@ -257,7 +257,7 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		var success bool
-		var respHeaders map[string]string
+		respHeaders := map[string]string{}
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = c.client.Call(
@@ -295,9 +295,9 @@ type {{$clientName}} struct {
 		if err != nil {
 			logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
-			return nil, err
+			return respHeaders, err
 		{{else -}}
-			return resp, nil, err
+			return resp, respHeaders, err
 		{{end -}}
 		}
 

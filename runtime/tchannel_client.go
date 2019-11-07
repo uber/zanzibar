@@ -222,7 +222,8 @@ func (c *TChannelClient) call(
 	defer cancel()
 
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
-		call.resHeaders, call.success = nil, false
+		call.resHeaders = map[string]string{}
+		call.success = false
 
 		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
@@ -262,7 +263,7 @@ func (c *TChannelClient) call(
 	if err != nil {
 		// Do not wrap system errors.
 		if _, ok := err.(tchannel.SystemError); ok {
-			return call.success, nil, err
+			return call.success, call.resHeaders, err
 		}
 		return call.success, nil, errors.Wrapf(
 			err, "Could not make outbound %s.%s (%s %s) response",
