@@ -1512,12 +1512,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{$val := true -}}
 			{{range $idx, $exception := $exceptions -}}
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
-                {{/* so we'll just return the first exception that has 204/304 status code set. */}}
+				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{if $val -}}
 				return respHeaders, &{{$exception.Type}}{}
-                {{$val = false -}}
+				{{$val = false -}}
 				{{end -}}
-            {{end -}}
+			{{end -}}
 			{{else}}
 			allOptions := []interface{}{
 			{{range $idx, $exception := $exceptions -}}
@@ -1616,7 +1616,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 13597, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 13564, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
