@@ -1530,7 +1530,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			return respHeaders, v.(error)
 			{{end}}
-		{{- end -}}
+		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
@@ -1616,7 +1616,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 13564, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 13562, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

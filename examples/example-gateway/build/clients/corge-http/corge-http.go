@@ -307,6 +307,7 @@ func (c *corgeHTTPClient) NoContent(
 	case 304:
 
 		return respHeaders, &clientsCorgeCorge.NotModified{}
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
