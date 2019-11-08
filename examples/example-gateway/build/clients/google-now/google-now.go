@@ -183,8 +183,8 @@ func (c *googleNowClient) AddCredentials(
 		var clientErr error
 		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -262,8 +262,8 @@ func (c *googleNowClient) CheckCredentials(
 		var clientErr error
 		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr

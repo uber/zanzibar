@@ -373,8 +373,8 @@ func (c *barClient) ArgNotStruct(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -469,8 +469,8 @@ func (c *barClient) ArgWithHeaders(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -642,8 +642,8 @@ func (c *barClient) ArgWithManyQueryParams(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -737,8 +737,8 @@ func (c *barClient) ArgWithNearDupQueryParams(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -856,8 +856,8 @@ func (c *barClient) ArgWithNestedQueryParams(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -934,8 +934,8 @@ func (c *barClient) ArgWithParams(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1012,8 +1012,8 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1090,8 +1090,8 @@ func (c *barClient) ArgWithQueryHeader(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1185,8 +1185,8 @@ func (c *barClient) ArgWithQueryParams(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1269,8 +1269,8 @@ func (c *barClient) DeleteFoo(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1352,8 +1352,8 @@ func (c *barClient) DeleteWithQueryParams(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1426,8 +1426,8 @@ func (c *barClient) Hello(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1529,8 +1529,8 @@ func (c *barClient) ListAndEnum(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1616,8 +1616,8 @@ func (c *barClient) MissingArg(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1704,8 +1704,8 @@ func (c *barClient) NoRequest(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1793,8 +1793,8 @@ func (c *barClient) Normal(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1882,8 +1882,8 @@ func (c *barClient) NormalRecur(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1970,8 +1970,8 @@ func (c *barClient) TooManyArgs(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2073,8 +2073,8 @@ func (c *barClient) EchoBinary(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2153,8 +2153,8 @@ func (c *barClient) EchoBool(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2235,8 +2235,8 @@ func (c *barClient) EchoDouble(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2317,8 +2317,8 @@ func (c *barClient) EchoEnum(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2399,8 +2399,8 @@ func (c *barClient) EchoI16(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2481,8 +2481,8 @@ func (c *barClient) EchoI32(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2563,8 +2563,8 @@ func (c *barClient) EchoI32Map(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2645,8 +2645,8 @@ func (c *barClient) EchoI64(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2727,8 +2727,8 @@ func (c *barClient) EchoI8(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2809,8 +2809,8 @@ func (c *barClient) EchoString(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2891,8 +2891,8 @@ func (c *barClient) EchoStringList(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -2973,8 +2973,8 @@ func (c *barClient) EchoStringMap(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -3055,8 +3055,8 @@ func (c *barClient) EchoStringSet(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -3137,8 +3137,8 @@ func (c *barClient) EchoStructList(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -3219,8 +3219,8 @@ func (c *barClient) EchoStructSet(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -3301,8 +3301,8 @@ func (c *barClient) EchoTypedef(
 		var clientErr error
 		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr

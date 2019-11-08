@@ -1417,8 +1417,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var clientErr error
 		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -1616,7 +1616,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 13860, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 13872, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
