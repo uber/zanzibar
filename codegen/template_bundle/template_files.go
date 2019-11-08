@@ -1509,15 +1509,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			{{- if or (eq $code 204) (eq $code 304) -}}
-			{{$val := true -}}
-			{{range $idx, $exception := $exceptions -}}
-				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
-				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
-				{{if $val -}}
-				return respHeaders, &{{$exception.Type}}{}
-				{{$val = false -}}
-				{{end -}}
-			{{end -}}
+				{{$val := index $exceptions 0}}
+				return respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 			{{range $idx, $exception := $exceptions -}}
@@ -1566,15 +1559,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			{{- if or (eq $code 204) (eq $code 304) -}}
-				{{$val := true -}}
-				{{range $idx, $exception := $exceptions -}}
-					{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
-					{{/* so we'll just return the first exception that has 204/304 status code set. */}}
-					{{if $val -}}
-						return defaultRes, respHeaders, &{{$exception.Type}}{}
-						{{$val = false -}}
-					{{end -}}
-				{{end -}}
+				{{$val := index $exceptions 0}}
+				return defaultRes, respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 				{{range $idx, $exception := $exceptions -}}
@@ -1616,7 +1602,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 13872, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 13243, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
