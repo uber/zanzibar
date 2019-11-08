@@ -203,6 +203,7 @@ func (c *withexceptionsClient) Func1(
 		}
 
 		return &responseBody, respHeaders, nil
+
 	case 401:
 		allOptions := []interface{}{
 			&clientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsWithexceptionsWithexceptions.ExceptionType2{},

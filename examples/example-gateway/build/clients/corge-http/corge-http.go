@@ -471,6 +471,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		}
 
 		return &responseBody, respHeaders, nil
+
 	case 304:
 
 		return defaultRes, respHeaders, &clientsCorgeCorge.NotModified{}

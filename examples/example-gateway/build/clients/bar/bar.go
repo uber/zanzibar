@@ -1457,6 +1457,7 @@ func (c *barClient) Hello(
 		}
 
 		return responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1559,6 +1560,7 @@ func (c *barClient) ListAndEnum(
 		}
 
 		return responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1646,6 +1648,7 @@ func (c *barClient) MissingArg(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1733,6 +1736,7 @@ func (c *barClient) NoRequest(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1821,6 +1825,7 @@ func (c *barClient) Normal(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1908,6 +1913,7 @@ func (c *barClient) NormalRecur(
 		}
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
@@ -1996,6 +2002,7 @@ func (c *barClient) TooManyArgs(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
