@@ -1467,7 +1467,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) -}}
-			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
@@ -1541,7 +1541,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) -}}
-			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
@@ -1562,7 +1562,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 
 		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end -}}
-		{{end -}}
+		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			{{- if or (eq $code 204) (eq $code 304) -}}
@@ -1616,7 +1616,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 13858, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 13860, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
