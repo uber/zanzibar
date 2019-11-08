@@ -355,7 +355,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			return respHeaders, v.(error)
 			{{end}}
-		{{- end -}}
+		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {

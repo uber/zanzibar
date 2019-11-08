@@ -412,6 +412,7 @@ func (c *barClient) ArgNotStruct(
 			return respHeaders, err
 		}
 		return respHeaders, v.(error)
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
