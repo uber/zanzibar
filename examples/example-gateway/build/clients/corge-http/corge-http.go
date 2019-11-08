@@ -209,8 +209,8 @@ func (c *corgeHTTPClient) EchoString(
 		var clientErr error
 		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -288,8 +288,8 @@ func (c *corgeHTTPClient) NoContent(
 		var clientErr error
 		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -366,8 +366,8 @@ func (c *corgeHTTPClient) NoContentNoException(
 		var clientErr error
 		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
@@ -440,8 +440,8 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		var clientErr error
 		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
 			res, clientErr = req.Do()
-			if res.StatusCode < 500 {
-				// This is not a system error/issue
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
 				return nil
 			}
 			return clientErr
