@@ -1,5 +1,5 @@
 hash: 3f062f8bb36e98ab5f0e2d01fb79a28fe3fc681ee4ce2ad6d1b7f666c41f14fe
-updated: 2019-10-17T20:09:20.670266-07:00
+updated: 2019-11-13T22:22:58.446697-08:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -18,7 +18,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/buger/jsonparser
-  version: bf1c66bbce23153d89b23f8960071a680dbef54b
+  version: ee4c978eae7efe2344eb024dd7d77918d3f7c55c
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
@@ -98,7 +98,7 @@ imports:
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: 1ea4449da9834f4d333f1cc461c374aea217d249
+  version: 6c0755d89d1e153c9986ad90e886a626bd66aad0
   subpackages:
   - bootstrap
   - buffer
@@ -176,7 +176,7 @@ imports:
   - m3/thrift
   - m3/thriftudp
 - name: github.com/uber/jaeger-client-go
-  version: d4d621cd6ed9aa5f1fc91eb0d0211d336bd6b79d
+  version: 5b163d27fabddbb0e7fae4548c8933c379210610
   subpackages:
   - config
   - internal/baggage
@@ -213,7 +213,7 @@ imports:
   - trand
   - typed
 - name: go.uber.org/atomic
-  version: df976f2515e274675050de7b3f42545de80594fd
+  version: 9dc4df04d0d1c39369750a9f6c32c39560672089
 - name: go.uber.org/automaxprocs
   version: 946a8391268aea0a60a86403988ff3ab4b604a83
   subpackages:
@@ -231,7 +231,7 @@ imports:
   - internal/fxreflect
   - internal/lifecycle
 - name: go.uber.org/multierr
-  version: 71e610a0e48dbda460d9c18adca8b5f2de04a7c1
+  version: 824d08f79702fe5f54aca8400aa0d754318786e7
 - name: go.uber.org/net/metrics
   version: 05a053b545cba614bf12635803f4749dab7bd0d0
   subpackages:
@@ -266,11 +266,11 @@ imports:
   - version
   - wire
 - name: go.uber.org/tools
-  version: 422a61c266e12d86fe775edb822dce48a1e7b979
+  version: ce2550dad7144b81ae2f67dc5e55597643f6902b
   subpackages:
   - update-license
 - name: go.uber.org/yarpc
-  version: 4add280eca04125a9d23833de579a00f5760db1a
+  version: eedd6ccf057b7ab8276cf3583acb518eb641a6ad
   subpackages:
   - api/backoff
   - api/encoding
@@ -304,7 +304,7 @@ imports:
   - yarpcconfig
   - yarpcerrors
 - name: go.uber.org/zap
-  version: 27376062155ad36be76b0f12cf1572a221d3a48c
+  version: 33e58d4d0120aa28d4df84cd244838c490846c9d
   subpackages:
   - buffer
   - internal/bufferpool
@@ -313,11 +313,11 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/lint
-  version: 959b441ac422379a43da2230f62be024250818b0
+  version: d0100b6bd8b389f0385611eb39152c4d7c3a7905
   subpackages:
   - golint
 - name: golang.org/x/net
-  version: b5b0513f8c1bb7c1e3e6f168fba117131fe2614a
+  version: 2180aed2234323691e9fd264fb1d32d20ff04b27
   subpackages:
   - bpf
   - context
@@ -332,7 +332,7 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: 93c9922d18aeb82498a065f07aec7ad7fa60dfb7
+  version: 4c7a9d0fe056d9d1de37e1409ca8a5c17accb46a
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -343,7 +343,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: ed0dc450797fdfbe6a9ee6bf3381a02099b897f9
+  version: e2727e816f5aa0f0179e2ee7ec02d5546cd1c5ba
   subpackages:
   - cmd/goimports
   - cmd/stringer
@@ -359,14 +359,16 @@ imports:
   - internal/fastwalk
   - internal/gopathwalk
   - internal/semver
+  - internal/span
 - name: google.golang.org/genproto
   version: d831d65fe17df2e52bcc4316d4a9f7a418701f43
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: f6d0f9ee430895e87ef1ceb5ac8f39725bafceef
+  version: 1a3960e4bd028ac0cec0a2afd27d7d8e67c11514
   repo: https://github.com/grpc/grpc-go
   subpackages:
+  - backoff
   - balancer
   - balancer/base
   - balancer/roundrobin
@@ -382,10 +384,13 @@ imports:
   - internal/backoff
   - internal/balancerload
   - internal/binarylog
+  - internal/buffer
   - internal/channelz
   - internal/envconfig
   - internal/grpcrand
   - internal/grpcsync
+  - internal/resolver/dns
+  - internal/resolver/passthrough
   - internal/syscall
   - internal/transport
   - keepalive
@@ -393,16 +398,14 @@ imports:
   - naming
   - peer
   - resolver
-  - resolver/dns
-  - resolver/passthrough
   - serviceconfig
   - stats
   - status
   - tap
 - name: gopkg.in/validator.v2
-  version: 135c24b11c19e52befcae2ec3fca5d9b78c4e98e
+  version: c3144fdedc21c005c4ba9c3ab3ecb86419dd39f3
 - name: gopkg.in/yaml.v2
-  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+  version: f90ceb4f409096b60e2e9076b38b304b8246e5fa
 - name: honnef.co/go/tools
   version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
   subpackages:
