@@ -71,22 +71,12 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"Key\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Int32(int32(in.Key))
 	}
 	{
 		const prefix string = ",\"Value\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Value == nil {
 			out.RawString("null")
 		} else {
@@ -166,12 +156,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"Key\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Key == nil {
 			out.RawString("null")
 		} else {
@@ -180,12 +165,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"Value\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Value))
 	}
 	out.RawByte('}')
@@ -269,12 +249,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Request1 != nil {
 		const prefix string = ",\"request1\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Request1).MarshalEasyJSON(out)
 	}
 	if in.Request2 != nil {
@@ -413,52 +389,27 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.UserUUID != nil {
 		const prefix string = ",\"userUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.UserUUID))
 	}
 	if in.AuthUUID != nil {
 		const prefix string = ",\"authUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.AuthUUID))
 	}
 	if in.AuthUUID2 != nil {
 		const prefix string = ",\"authUUID2\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.AuthUUID2))
 	}
 	{
 		const prefix string = ",\"foo\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Foo == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -570,42 +521,22 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.UserUUID != nil {
 		const prefix string = ",\"userUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.UserUUID))
 	}
 	if in.AuthUUID != nil {
 		const prefix string = ",\"authUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.AuthUUID))
 	}
 	if in.AuthUUID2 != nil {
 		const prefix string = ",\"authUUID2\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.AuthUUID2))
 	}
 	out.RawByte('}')
@@ -676,12 +607,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"userUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.UserUUID))
 	}
 	out.RawByte('}')
@@ -755,12 +681,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(*in.Success))
 	}
 	out.RawByte('}')
@@ -831,12 +753,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Arg))
 	}
 	out.RawByte('}')
@@ -931,12 +848,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
 			for v5, v6 := range in.Success {
@@ -1049,12 +962,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -1165,12 +1073,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
 			for v11, v12 := range in.Success {
@@ -1261,12 +1165,7 @@ func easyjson4347b5c1Encode(out *jwriter.Writer, in struct {
 	_ = first
 	{
 		const prefix string = ",\"Key\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Key == nil {
 			out.RawString("null")
 		} else {
@@ -1275,12 +1174,7 @@ func easyjson4347b5c1Encode(out *jwriter.Writer, in struct {
 	}
 	{
 		const prefix string = ",\"Value\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Value))
 	}
 	out.RawByte('}')
@@ -1357,12 +1251,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -1468,12 +1357,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
 			for v17, v18 := range in.Success {
@@ -1586,12 +1471,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -1680,12 +1560,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(*in.Success))
 	}
 	out.RawByte('}')
@@ -1756,12 +1632,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Arg))
 	}
 	out.RawByte('}')
@@ -1845,12 +1716,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('{')
 			v23First := true
@@ -1988,12 +1855,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
@@ -2101,12 +1963,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('{')
 			v27First := true
@@ -2221,12 +2079,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
@@ -2333,12 +2186,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
 			for v31, v32 := range in.Success {
@@ -2439,12 +2288,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -2529,12 +2373,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Int8(int8(*in.Success))
 	}
 	out.RawByte('}')
@@ -2605,12 +2445,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Int8(int8(in.Arg))
 	}
 	out.RawByte('}')
@@ -2684,12 +2519,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Int64(int64(*in.Success))
 	}
 	out.RawByte('}')
@@ -2760,12 +2591,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Int64(int64(in.Arg))
 	}
 	out.RawByte('}')
@@ -2839,12 +2665,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Int32(int32(*in.Success))
 	}
 	out.RawByte('}')
@@ -2915,12 +2737,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Int32(int32(in.Arg))
 	}
 	out.RawByte('}')
@@ -3012,12 +2829,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		{
 			out.RawByte('{')
 			v37First := true
@@ -3132,12 +2945,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Arg == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
@@ -3231,12 +3039,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Int16(int16(*in.Success))
 	}
 	out.RawByte('}')
@@ -3307,12 +3111,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Int16(int16(in.Arg))
 	}
 	out.RawByte('}')
@@ -3388,12 +3187,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Raw((*in.Success).MarshalJSON())
 	}
 	out.RawByte('}')
@@ -3469,12 +3264,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Arg != nil {
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Raw((*in.Arg).MarshalJSON())
 	}
 	out.RawByte('}')
@@ -3548,12 +3339,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Float64(float64(*in.Success))
 	}
 	out.RawByte('}')
@@ -3624,12 +3411,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Float64(float64(in.Arg))
 	}
 	out.RawByte('}')
@@ -3703,12 +3485,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Bool(bool(*in.Success))
 	}
 	out.RawByte('}')
@@ -3779,12 +3557,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Bool(bool(in.Arg))
 	}
 	out.RawByte('}')
@@ -3855,12 +3628,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Success) != 0 {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Base64Bytes(in.Success)
 	}
 	out.RawByte('}')
@@ -3936,12 +3705,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Base64Bytes(in.Arg)
 	}
 	out.RawByte('}')
@@ -4035,12 +3799,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.BarException != nil {
@@ -4131,12 +3891,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"teapot\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Teapot))
 	}
 	out.RawByte('}')
@@ -4201,12 +3956,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"request\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
@@ -4215,12 +3965,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if in.Foo != nil {
 		const prefix string = ",\"foo\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo1(out, *in.Foo)
 	}
 	out.RawByte('}')
@@ -4361,62 +4106,32 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"fooString\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.FooString))
 	}
 	if in.FooI32 != nil {
 		const prefix string = ",\"fooI32\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(*in.FooI32))
 	}
 	if in.FooI16 != nil {
 		const prefix string = ",\"fooI16\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int16(int16(*in.FooI16))
 	}
 	if in.FooDouble != nil {
 		const prefix string = ",\"fooDouble\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(*in.FooDouble))
 	}
 	if in.FooBool != nil {
 		const prefix string = ",\"fooBool\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(*in.FooBool))
 	}
 	if len(in.FooMap) != 0 {
 		const prefix string = ",\"fooMap\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('{')
 			v47First := true
@@ -4435,12 +4150,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if in.Message != nil {
 		const prefix string = ",\"message\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(out, *in.Message)
 	}
 	out.RawByte('}')
@@ -4487,12 +4197,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"body\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Body))
 	}
 	out.RawByte('}')
@@ -4552,12 +4257,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.BarException != nil {
@@ -4646,12 +4347,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"request\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
@@ -4739,12 +4435,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.BarException != nil {
@@ -4833,12 +4525,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"request\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
@@ -4926,12 +4613,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.BarException != nil {
@@ -5084,12 +4767,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.BarException != nil {
@@ -5242,12 +4921,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(*in.Success))
 	}
 	if in.BarException != nil {
@@ -5386,12 +5061,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"demoIds\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.DemoIds == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -5407,22 +5077,12 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if in.DemoType != nil {
 		const prefix string = ",\"demoType\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((*in.DemoType).MarshalJSON())
 	}
 	if len(in.Demos) != 0 {
 		const prefix string = ",\"demos\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v52, v53 := range in.Demos {
@@ -5515,12 +5175,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(*in.Success))
 	}
 	if in.BarException != nil {
@@ -5729,22 +5385,12 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"filter\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Filter))
 	}
 	if in.Count != nil {
 		const prefix string = ",\"count\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(*in.Count))
 	}
 	out.RawByte('}')
@@ -5874,12 +5520,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"userUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.UserUUID))
 	}
 	out.RawByte('}')
@@ -5953,12 +5594,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6090,32 +5727,17 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.UserUUID != nil {
 		const prefix string = ",\"userUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.UserUUID))
 	}
 	if len(in.Foo) != 0 {
 		const prefix string = ",\"foo\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v56, v57 := range in.Foo {
@@ -6129,12 +5751,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"bar\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Bar == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -6219,12 +5836,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6298,12 +5911,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.UserUUID != nil {
 		const prefix string = ",\"userUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(*in.UserUUID))
 	}
 	out.RawByte('}')
@@ -6377,12 +5986,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6463,22 +6068,12 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"uuid\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.UUID))
 	}
 	if in.Params != nil {
 		const prefix string = ",\"params\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.Params).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6552,12 +6147,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6643,12 +6234,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"request\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
@@ -6657,12 +6243,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"entityUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.EntityUUID))
 	}
 	out.RawByte('}')
@@ -6736,12 +6317,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6830,12 +6407,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"request\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
@@ -6844,12 +6416,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if in.Opt != nil {
 		const prefix string = ",\"opt\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.Opt).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -6923,12 +6490,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -7029,42 +6592,22 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"one\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.One))
 	}
 	if in.Two != nil {
 		const prefix string = ",\"two\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(*in.Two))
 	}
 	if in.Three != nil {
 		const prefix string = ",\"three\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.Three))
 	}
 	if in.Four != nil {
 		const prefix string = ",\"four\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.Four))
 	}
 	out.RawByte('}')
@@ -7138,12 +6681,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -7593,172 +7132,87 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"aStr\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.AStr))
 	}
 	if in.AnOptStr != nil {
 		const prefix string = ",\"anOptStr\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.AnOptStr))
 	}
 	{
 		const prefix string = ",\"aBool\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.ABool))
 	}
 	if in.AnOptBool != nil {
 		const prefix string = ",\"anOptBool\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(*in.AnOptBool))
 	}
 	{
 		const prefix string = ",\"aInt8\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int8(int8(in.AInt8))
 	}
 	if in.AnOptInt8 != nil {
 		const prefix string = ",\"anOptInt8\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int8(int8(*in.AnOptInt8))
 	}
 	{
 		const prefix string = ",\"aInt16\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int16(int16(in.AInt16))
 	}
 	if in.AnOptInt16 != nil {
 		const prefix string = ",\"anOptInt16\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int16(int16(*in.AnOptInt16))
 	}
 	{
 		const prefix string = ",\"aInt32\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(in.AInt32))
 	}
 	if in.AnOptInt32 != nil {
 		const prefix string = ",\"anOptInt32\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(*in.AnOptInt32))
 	}
 	{
 		const prefix string = ",\"aInt64\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(in.AInt64))
 	}
 	if in.AnOptInt64 != nil {
 		const prefix string = ",\"anOptInt64\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(*in.AnOptInt64))
 	}
 	{
 		const prefix string = ",\"aFloat64\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.AFloat64))
 	}
 	if in.AnOptFloat64 != nil {
 		const prefix string = ",\"anOptFloat64\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(*in.AnOptFloat64))
 	}
 	{
 		const prefix string = ",\"aUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.AUUID))
 	}
 	if in.AnOptUUID != nil {
 		const prefix string = ",\"anOptUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(*in.AnOptUUID))
 	}
 	{
 		const prefix string = ",\"aListUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.AListUUID == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -7774,12 +7228,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if len(in.AnOptListUUID) != 0 {
 		const prefix string = ",\"anOptListUUID\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v70, v71 := range in.AnOptListUUID {
@@ -7793,12 +7242,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"aStringList\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.AStringList == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -7814,12 +7258,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if len(in.AnOptStringList) != 0 {
 		const prefix string = ",\"anOptStringList\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v74, v75 := range in.AnOptStringList {
@@ -7833,12 +7272,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"aUUIDList\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.AUUIDList == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -7854,12 +7288,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if len(in.AnOptUUIDList) != 0 {
 		const prefix string = ",\"anOptUUIDList\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v78, v79 := range in.AnOptUUIDList {
@@ -7873,52 +7302,27 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"aTs\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((in.ATs).MarshalJSON())
 	}
 	if in.AnOptTs != nil {
 		const prefix string = ",\"anOptTs\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((*in.AnOptTs).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"aReqDemo\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((in.AReqDemo).MarshalJSON())
 	}
 	if in.AnOptFruit != nil {
 		const prefix string = ",\"anOptFruit\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((*in.AnOptFruit).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"aReqFruits\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.AReqFruits == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -7934,12 +7338,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if len(in.AnOptDemos) != 0 {
 		const prefix string = ",\"anOptDemos\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
 			for v82, v83 := range in.AnOptDemos {
@@ -8022,12 +7421,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -8160,12 +7555,8 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.BarException != nil {
 		const prefix string = ",\"barException\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.BarException).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -8236,12 +7627,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"request\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Request))
 	}
 	out.RawByte('}')
@@ -8340,12 +7726,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"nodes\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		if in.Nodes == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -8361,12 +7742,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"height\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(in.Height))
 	}
 	out.RawByte('}')
@@ -8523,42 +7899,22 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"stringField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.StringField))
 	}
 	{
 		const prefix string = ",\"intWithRange\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(in.IntWithRange))
 	}
 	{
 		const prefix string = ",\"intWithoutRange\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int32(int32(in.IntWithoutRange))
 	}
 	{
 		const prefix string = ",\"mapIntWithRange\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.MapIntWithRange == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
@@ -8579,12 +7935,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"mapIntWithoutRange\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.MapIntWithoutRange == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
@@ -8605,22 +7956,12 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	{
 		const prefix string = ",\"binaryField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Base64Bytes(in.BinaryField)
 	}
 	if in.NextResponse != nil {
 		const prefix string = ",\"nextResponse\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.NextResponse).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -8701,22 +8042,12 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.Recur != nil {
 		const prefix string = ",\"recur\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.Recur).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -8833,62 +8164,32 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"stringField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.StringField))
 	}
 	{
 		const prefix string = ",\"boolField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.BoolField))
 	}
 	{
 		const prefix string = ",\"binaryField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Base64Bytes(in.BinaryField)
 	}
 	{
 		const prefix string = ",\"timestamp\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((in.Timestamp).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"enumField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((in.EnumField).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"longField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Raw((in.LongField).MarshalJSON())
 	}
 	out.RawByte('}')
@@ -8959,12 +8260,7 @@ func easyjson4347b5c1EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"stringField\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.StringField))
 	}
 	out.RawByte('}')
