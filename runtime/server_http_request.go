@@ -130,6 +130,11 @@ func (req *ServerHTTPRequest) Context() context.Context {
 	return req.httpRequest.Context()
 }
 
+// StartTime returns the request's start time.
+func (req *ServerHTTPRequest) StartTime() time.Time {
+	return req.startTime
+}
+
 // start the request, emit metrics etc
 func (req *ServerHTTPRequest) start() {
 	if req.started {
