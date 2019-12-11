@@ -1,0 +1,7 @@
+config:
+  endpoints:
+    - ./serverless.yaml
+  rateLimit: 100
+dependencies:
+name: serverless
+type: http

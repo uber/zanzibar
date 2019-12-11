@@ -16,6 +16,7 @@
 // codegen/templates/module_class_initializer.tmpl
 // codegen/templates/module_initializer.tmpl
 // codegen/templates/module_mock_initializer.tmpl
+// codegen/templates/self-serving-workflow.tmpl
 // codegen/templates/service.tmpl
 // codegen/templates/service_mock.tmpl
 // codegen/templates/structs.tmpl
@@ -245,6 +246,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $dummyEndpoint := .DummyEndpoint}}
 {{- $handlerName := printf "%sHandler" $serviceMethod }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
@@ -252,6 +254,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $dummyWorkflowInterface := printf "%sDummyWorkflow" $serviceMethod }}
 {{- $traceKey := .TraceKey }}
 
 import (
@@ -399,12 +402,18 @@ func (h *{{$handlerName}}) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
+    {{if eq $dummyEndpoint true}}
+    w := {{$workflowPkg}}.New{{$dummyWorkflowInterface}}(h.Dependencies)
+    {{else}}
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
+	{{ end -}}
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	{{if and (eq .RequestType "") (eq .ResponseType "")}}
+    {{if eq $dummyEndpoint true}}
+    response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
+	{{else if and (eq .RequestType "") (eq .ResponseType "")}}
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
@@ -484,7 +493,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7039, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7405, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2162,6 +2171,168 @@ func module_mock_initializerTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _selfServingWorkflowTmpl = []byte(`{{/* template to render gateway workflow interface code */ -}}
+{{- $instance := .Instance }}
+package workflow
+
+{{- $endpointType := .Spec.EndpointType }}
+{{- $reqHeaderMap := .ReqHeaders }}
+{{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
+{{- $resHeaderMap := .ResHeaders }}
+{{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $dummyEndpoint := .DummyEndpoint }}
+{{- $clientID := .ClientID }}
+{{- $clientName := title .ClientName }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $workflowInterface := printf "%sDummyWorkflow" $serviceMethod }}
+{{- $workflowStruct := camel $workflowInterface }}
+{{- $method := .Method }}
+
+import (
+	"context"
+	"net/textproto"
+	"github.com/uber/zanzibar/config"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end -}}
+
+	{{if .Method.Downstream }}
+	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
+	{{$file := basePath $pkg.PackageName -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+	{{- end}}
+
+	"go.uber.org/zap"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+{{with .Method -}}
+// {{$workflowInterface}} defines the interface for {{$serviceMethod}} workflow
+type {{$workflowInterface}} interface {
+HandleDummy(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error)
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error)
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{- end}}
+}
+
+{{end -}}
+
+
+{{- with .Method -}}
+{{- $methodName := title .Name }}
+
+
+// New{{$workflowInterface}} creates a workflow
+func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
+	var whitelistedDynamicHeaders []string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
+			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
+		}
+	}
+
+	return &{{$workflowStruct}}{
+		Logger:  deps.Default.Logger,
+		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
+	}
+}
+
+// {{$workflowStruct}} calls thrift client {{$clientName}}.{{$clientMethodName}}
+type {{$workflowStruct}} struct {
+	Logger  *zap.Logger
+	whitelistedDynamicHeaders []string
+}
+
+// HandleDummy calls thrift client.
+func (w {{$workflowStruct}}) HandleDummy(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error) {
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error) {
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error) {
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error) {
+{{- end}}
+
+    response := convert{{$methodName}}DummyResponse(r)
+
+    // Filter and map response headers from client to server response.
+   	{{if eq $endpointType "tchannel" -}}
+   	resHeaders := zanzibar.ServerTChannelHeader{}
+   	{{- else -}}
+   	resHeaders := zanzibar.ServerHTTPHeader{}
+   	{{- end -}}
+   	{{range $i, $k := $resHeaderMapKeys}}
+   	{{- $resHeaderVal := index $resHeaderMap $k}}
+   	h, ok = reqHeaders.Get("{{$k}}")
+   	if ok {
+   		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
+   	}
+   	{{- end}}
+
+	return response, resHeaders, nil
+	{{- end -}}
+}
+
+{{if eq $dummyEndpoint true -}}
+{{ range $key, $line := $method.ConvertDummyRequestGoStatements -}}
+{{$line}}
+{{ end }}
+{{end -}}
+
+
+`)
+
+func selfServingWorkflowTmplBytes() ([]byte, error) {
+	return _selfServingWorkflowTmpl, nil
+}
+
+func selfServingWorkflowTmpl() (*asset, error) {
+	bytes, err := selfServingWorkflowTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "self-serving-workflow.tmpl", size: 4267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _serviceTmpl = []byte(`{{- /* template to render gateway main.go */ -}}
 {{- $instance := . -}}
 
@@ -3767,6 +3938,7 @@ var _bindata = map[string]func() (*asset, error){
 	"module_class_initializer.tmpl":      module_class_initializerTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
 	"module_mock_initializer.tmpl":       module_mock_initializerTmpl,
+	"self-serving-workflow.tmpl":         selfServingWorkflowTmpl,
 	"service.tmpl":                       serviceTmpl,
 	"service_mock.tmpl":                  service_mockTmpl,
 	"structs.tmpl":                       structsTmpl,
@@ -3835,6 +4007,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"module_class_initializer.tmpl":      &bintree{module_class_initializerTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            &bintree{module_initializerTmpl, map[string]*bintree{}},
 	"module_mock_initializer.tmpl":       &bintree{module_mock_initializerTmpl, map[string]*bintree{}},
+	"self-serving-workflow.tmpl":         &bintree{selfServingWorkflowTmpl, map[string]*bintree{}},
 	"service.tmpl":                       &bintree{serviceTmpl, map[string]*bintree{}},
 	"service_mock.tmpl":                  &bintree{service_mockTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       &bintree{structsTmpl, map[string]*bintree{}},

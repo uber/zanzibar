@@ -1,0 +1,21 @@
+clientId:
+clientMethod:
+endpointId: serverless
+endpointType: http
+handleId: beta
+middlewares:
+  - name: transformDummyReq
+    options:
+      transforms:
+        - from: Request.FirstName
+          override: true
+          to: FirstName
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/serverless-endpoint/serverless.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Serverless::beta
+type: http
+workflowType: self-serving
+

@@ -47,7 +47,7 @@ func (fs dummyFS) Read(filename string) ([]byte, error) {
 }
 
 // Abs returns the absolute path for the specified file.
-// The dummy implementation always returns the original path.
+// The serverless implementation always returns the original path.
 func (dummyFS) Abs(filename string) (string, error) {
 	return filename, nil
 }
