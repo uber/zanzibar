@@ -18,7 +18,7 @@ clients.contacts.timeout: 10000
 clients.contacts.maxConcurrentRequests: 1000
 clients.contacts.errorPercentThreshold: 20
 clients.serverless.ip: 127.0.0.1
-clients.serverless.port: 4000
+clients.serverless.port: 4010
 clients.serverless.timeout: 10000
 clients.serverless.maxConcurrentRequests: 1000
 clients.serverless.errorPercentThreshold: 20
