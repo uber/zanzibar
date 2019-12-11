@@ -44,6 +44,7 @@ type EndpointMeta struct {
 	ClientMethodName       string
 	WorkflowPkg            string
 	ReqHeaders             map[string]*TypedHeader
+	DummyEndpoint          bool
 	ReqHeadersKeys         []string
 	ReqRequiredHeadersKeys []string
 	ResHeaders             map[string]*TypedHeader
@@ -305,7 +306,7 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("client", "custom", &CustomClientGenerator{
+	if err := system.RegisterClassType("client",  "custom", &CustomClientGenerator{
 		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {
@@ -1116,7 +1117,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		PackageName: instance.PackageInfo.GeneratedPackagePath + "/workflow",
 		AliasName:   "workflow",
 	})
-	if e.WorkflowImportPath != "" {
+	if e.WorkflowType == "custom" {
 		includedPackages = append(includedPackages, GoPackageImport{
 			PackageName: e.WorkflowImportPath,
 			AliasName:   "custom" + strings.Title(m.PackageName),
@@ -1124,7 +1125,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	}
 
 	workflowPkg := "workflow"
-	if method.Downstream == nil {
+	if method.Downstream == nil && e.WorkflowType == "custom" {
 		workflowPkg = "custom" + strings.Title(m.PackageName)
 	}
 
@@ -1153,6 +1154,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		IncludedPackages:       includedPackages,
 		Method:                 method,
 		ReqHeaders:             reqHeaders,
+		DummyEndpoint:          e.DummyEndpoint,
 		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
 		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
@@ -1190,7 +1192,14 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	out[endpointFilePath] = endpoint
 
-	workflow, err := g.templates.ExecTemplate("workflow.tmpl", meta, g.packageHelper)
+	tmpl := ""
+	if e.DummyEndpoint {
+		tmpl = "self-serving-workflow.tmpl"
+	} else {
+		tmpl = "workflow.tmpl"
+	}
+
+	workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error executing workflow template")
 	}

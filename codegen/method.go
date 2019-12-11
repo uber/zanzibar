@@ -137,6 +137,9 @@ type MethodSpec struct {
 	// Statements for converting response types
 	ConvertResponseGoStatements []string
 
+	// Statements for converting Dummy request types
+	ConvertDummyRequestGoStatements []string
+
 	// Statements for propagating headers to client requests
 	PropagateHeadersGoStatements []string
 
@@ -1000,6 +1003,55 @@ func (ms *MethodSpec) setTypeConverters(
 	return nil
 }
 
+func (ms *MethodSpec) setDummyTypeConverters(
+	funcSpec *compile.FunctionSpec,
+	reqTransforms map[string]FieldMapperEntry,
+	headersPropagate map[string]FieldMapperEntry,
+	respTransforms map[string]FieldMapperEntry,
+	reqrespTransforms map[string]FieldMapperEntry,
+	h *PackageHelper,
+) error {
+
+	dummyConverter := NewTypeConverter(h, nil)
+
+	respType := funcSpec.ResultSpec.ReturnType
+
+	dummyConverter.append(
+		"func convert",
+		PascalCase(ms.Name),
+		"DummyResponse(in ",ms.RequestType, ") ", ms.ResponseType, "{")
+
+	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+
+	switch respType.(type) {
+	case
+			*compile.BoolSpec,
+			*compile.I8Spec,
+			*compile.I16Spec,
+			*compile.I32Spec,
+			*compile.EnumSpec,
+			*compile.I64Spec,
+			*compile.DoubleSpec,
+			*compile.StringSpec:
+
+		dummyConverter.append("out", " := in\t\n")
+	default:
+		// default as struct
+		respFields := respType.(*compile.StructSpec).Fields
+		dummyConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
+		err := dummyConverter.GenStructConverter(structType, respFields, reqrespTransforms)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	dummyConverter.append("\nreturn out \t}")
+	ms.ConvertDummyRequestGoStatements = dummyConverter.GetLines()
+
+	return nil
+}
+
 func getQueryMethodForPrimitiveType(typeSpec compile.TypeSpec) string {
 	var queryMethod string
 
@@ -1029,6 +1081,7 @@ func getQueryMethodForPrimitiveType(typeSpec compile.TypeSpec) string {
 
 	return queryMethod
 }
+
 
 func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	var queryMethod string

@@ -368,7 +368,7 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		for _, instance := range instances["endpoint"] {
 			endpointSpecs := instance.genSpec.([]*EndpointSpec)
 			for _, endpointSpec := range endpointSpecs {
-				if endpointSpec.WorkflowType == "custom" {
+				 if endpointSpec.WorkflowType == "custom" {
 					shouldGenMap[instance] = endpointSpecs
 					errChanSize += len(endpointSpecs)
 					break

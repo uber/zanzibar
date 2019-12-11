@@ -10,6 +10,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $dummyEndpoint := .DummyEndpoint}}
 {{- $handlerName := printf "%sHandler" $serviceMethod }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
@@ -17,6 +18,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $dummyWorkflowInterface := printf "%sDummyWorkflow" $serviceMethod }}
 {{- $traceKey := .TraceKey }}
 
 import (
@@ -164,12 +166,18 @@ func (h *{{$handlerName}}) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
+    {{if eq $dummyEndpoint true}}
+    w := {{$workflowPkg}}.New{{$dummyWorkflowInterface}}(h.Dependencies)
+    {{else}}
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
+	{{ end -}}
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	{{if and (eq .RequestType "") (eq .ResponseType "")}}
+    {{if eq $dummyEndpoint true}}
+    response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
+	{{else if and (eq .RequestType "") (eq .ResponseType "")}}
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)

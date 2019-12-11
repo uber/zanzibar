@@ -18,48 +18,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package ruleengine
+package serverless_endpoint_test
 
 import (
+	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
-func TestRuleEngine(t *testing.T) {
+func TestServerlessField(t *testing.T) {
+	var counter int = 0
 
-	rule1 := RawRule{
-		Patterns: []string{"x-test-env", `test.*`},
-		Value:    "test-staging",
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
 	}
-	rule2 := RawRule{
-		Patterns: []string{"x-container", `^sandbox$`},
-		Value:    "serverless-sandbox",
-	}
-	rw := RuleWrapper{
-		Rules: []RawRule{rule1, rule2},
-	}
-	re := NewRuleEngine(rw)
+	defer gateway.Close()
 
-	var tests = []struct {
-		patternValues []string
-		matchValue    string
-		noMatch       bool
-	}{
-		{patternValues: []string{"x-container", "sandbox"}, matchValue: "serverless-sandbox"},
-		{patternValues: []string{"x-test-env", "test1"}, matchValue: "test-staging"},
-		{patternValues: []string{"x-container", "sandbox123"}, noMatch: true},
-		{patternValues: []string{"x-container"}, noMatch: true},
+
+	res, err := gateway.MakeRequest(
+		"POST",
+		"/serverless/post-request",
+		nil, nil,
+	)
+
+	if !assert.NoError(t, err, "got http error") {
+		return
 	}
-	for _, tt := range tests {
-		t.Run("tests", func(t *testing.T) {
-			val, exists := re.GetValue(tt.patternValues...)
-			if !tt.noMatch {
-				assert.Equal(t, val, tt.matchValue)
-				assert.True(t, exists)
-			} else {
-				assert.False(t, exists)
-			}
-		})
+
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 1, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
 	}
+
+	assert.Equal(t, `"hello"`, string(respBytes))
 }
