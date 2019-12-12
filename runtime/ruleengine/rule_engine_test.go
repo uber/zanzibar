@@ -34,7 +34,7 @@ func TestRuleEngine(t *testing.T) {
 	}
 	rule2 := RawRule{
 		Patterns: []string{"x-container", `^sandbox$`},
-		Value:    "serverless-sandbox",
+		Value:    "dummy-sandbox",
 	}
 	rw := RuleWrapper{
 		Rules: []RawRule{rule1, rule2},
@@ -46,7 +46,7 @@ func TestRuleEngine(t *testing.T) {
 		matchValue    string
 		noMatch       bool
 	}{
-		{patternValues: []string{"x-container", "sandbox"}, matchValue: "serverless-sandbox"},
+		{patternValues: []string{"x-container", "sandbox"}, matchValue: "dummy-sandbox"},
 		{patternValues: []string{"x-test-env", "test1"}, matchValue: "test-staging"},
 		{patternValues: []string{"x-container", "sandbox123"}, noMatch: true},
 		{patternValues: []string{"x-container"}, noMatch: true},
