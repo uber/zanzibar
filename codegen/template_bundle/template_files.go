@@ -402,17 +402,17 @@ func (h *{{$handlerName}}) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-    {{if eq $dummyEndpoint true}}
-    w := {{$workflowPkg}}.New{{$dummyWorkflowInterface}}(h.Dependencies)
-    {{else}}
+	{{if eq $dummyEndpoint true}}
+	w := {{$workflowPkg}}.New{{$dummyWorkflowInterface}}(h.Dependencies)
+	{{else}}
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
 	{{ end -}}
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-    {{if eq $dummyEndpoint true}}
-    response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
+	{{if eq $dummyEndpoint true}}
+	response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
 	{{else if and (eq .RequestType "") (eq .ResponseType "")}}
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
@@ -493,7 +493,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7405, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7390, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2289,21 +2289,21 @@ func (w {{$workflowStruct}}) HandleDummy(
 ) ({{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 
-    response := convert{{$methodName}}DummyResponse(r)
+	response := convert{{$methodName}}DummyResponse(r)
 
-    // Filter and map response headers from client to server response.
-   	{{if eq $endpointType "tchannel" -}}
-   	resHeaders := zanzibar.ServerTChannelHeader{}
-   	{{- else -}}
-   	resHeaders := zanzibar.ServerHTTPHeader{}
-   	{{- end -}}
-   	{{range $i, $k := $resHeaderMapKeys}}
-   	{{- $resHeaderVal := index $resHeaderMap $k}}
-   	h, ok = reqHeaders.Get("{{$k}}")
-   	if ok {
-   		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
-   	}
-   	{{- end}}
+	// Filter and map response headers from client to server response.
+	{{if eq $endpointType "tchannel" -}}
+	resHeaders := zanzibar.ServerTChannelHeader{}
+	{{- else -}}
+	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{- end -}}
+	{{range $i, $k := $resHeaderMapKeys}}
+	{{- $resHeaderVal := index $resHeaderMap $k}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
+	}
+	{{- end}}
 
 	return response, resHeaders, nil
 	{{- end -}}
@@ -2328,7 +2328,7 @@ func selfServingWorkflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "self-serving-workflow.tmpl", size: 4267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "self-serving-workflow.tmpl", size: 4225, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -36,7 +36,7 @@ func TestSaveContactsCall(t *testing.T) {
 	rawBody2, _ := endpointReqeust1.MarshalJSON()
 
 	res, err = ms.MakeHTTPRequest(
-		"POST", "/serverless-endpoint/serverless/post-request", nil, bytes.NewReader(rawBody2),
+		"POST", "/serverless/serverless/post-request", nil, bytes.NewReader(rawBody2),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
