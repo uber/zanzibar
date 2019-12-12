@@ -306,7 +306,7 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("client",  "custom", &CustomClientGenerator{
+	if err := system.RegisterClassType("client", "custom", &CustomClientGenerator{
 		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {

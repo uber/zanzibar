@@ -9,7 +9,6 @@ import (
 
 	mockcontactsworkflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/mock-workflow"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
-	serverlessendpoint "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless-endpoint/serverless"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
@@ -29,15 +28,6 @@ func TestSaveContactsCall(t *testing.T) {
 		"POST", "/contacts/foo/contacts", nil, bytes.NewReader(rawBody),
 	)
 
-	var a = "Tejaswi"
-	endpointReqeust1 := &serverlessendpoint.Request{
-		FirstName: &a,
-	}
-	rawBody2, _ := endpointReqeust1.MarshalJSON()
-
-	res, err = ms.MakeHTTPRequest(
-		"POST", "/serverless/serverless/post-request", nil, bytes.NewReader(rawBody2),
-	)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}

@@ -221,10 +221,10 @@ func (ms *ModuleSpec) SetDownstream(
 		clientMethod = e.ClientMethod
 
 		// TODO: move generated middlewares out of zanzibar
-		headersPropagate   = e.HeadersPropagate
-		reqTransforms      = e.ReqTransforms
-		respTransforms     = e.RespTransforms
-		reqrespTransforms  = e.DummyReqTransforms
+		headersPropagate  = e.HeadersPropagate
+		reqTransforms     = e.ReqTransforms
+		respTransforms    = e.RespTransforms
+		reqrespTransforms = e.DummyReqTransforms
 	)
 	for _, v := range ms.Services {
 		if v.Name == serviceName {

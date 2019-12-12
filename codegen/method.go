@@ -1019,20 +1019,20 @@ func (ms *MethodSpec) setDummyTypeConverters(
 	dummyConverter.append(
 		"func convert",
 		PascalCase(ms.Name),
-		"DummyResponse(in ",ms.RequestType, ") ", ms.ResponseType, "{")
+		"DummyResponse(in ", ms.RequestType, ") ", ms.ResponseType, "{")
 
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 
 	switch respType.(type) {
 	case
-			*compile.BoolSpec,
-			*compile.I8Spec,
-			*compile.I16Spec,
-			*compile.I32Spec,
-			*compile.EnumSpec,
-			*compile.I64Spec,
-			*compile.DoubleSpec,
-			*compile.StringSpec:
+		*compile.BoolSpec,
+		*compile.I8Spec,
+		*compile.I16Spec,
+		*compile.I32Spec,
+		*compile.EnumSpec,
+		*compile.I64Spec,
+		*compile.DoubleSpec,
+		*compile.StringSpec:
 
 		dummyConverter.append("out", " := in\t\n")
 	default:
@@ -1081,7 +1081,6 @@ func getQueryMethodForPrimitiveType(typeSpec compile.TypeSpec) string {
 
 	return queryMethod
 }
-
 
 func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	var queryMethod string
