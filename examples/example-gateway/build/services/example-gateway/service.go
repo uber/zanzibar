@@ -80,6 +80,10 @@ func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err != nil {
 		return err
 	}
+	err = deps.Endpoint.Serverless.Register(g)
+	if err != nil {
+		return err
+	}
 	err = deps.Endpoint.BazTChannel.Register(g)
 	if err != nil {
 		return err

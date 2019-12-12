@@ -30,6 +30,7 @@ import (
 	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
 	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
+	serverlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	quuxendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux"
@@ -52,6 +53,7 @@ type EndpointDependencies struct {
 	Googlenow      googlenowendpointgenerated.Endpoint
 	Multi          multiendpointgenerated.Endpoint
 	Panic          panicendpointgenerated.Endpoint
+	Serverless     serverlessendpointgenerated.Endpoint
 	BazTChannel    baztchannelendpointgenerated.Endpoint
 	PanicTChannel  panictchannelendpointgenerated.Endpoint
 	Quux           quuxendpointgenerated.Endpoint

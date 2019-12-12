@@ -49,6 +49,8 @@ import (
 	multiendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
 	panicendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
+	serverlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless"
+	serverlessendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
@@ -107,6 +109,7 @@ type EndpointDependenciesNodes struct {
 	Googlenow      googlenowendpointgenerated.Endpoint
 	Multi          multiendpointgenerated.Endpoint
 	Panic          panicendpointgenerated.Endpoint
+	Serverless     serverlessendpointgenerated.Endpoint
 	BazTChannel    baztchannelendpointgenerated.Endpoint
 	PanicTChannel  panictchannelendpointgenerated.Endpoint
 	Quux           quuxendpointgenerated.Endpoint
@@ -253,6 +256,14 @@ func InitializeDependencies(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Serverless = serverlessendpointgenerated.NewEndpoint(&serverlessendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Middleware: &serverlessendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &baztchannelendpointmodule.ClientDependencies{
@@ -309,6 +320,7 @@ func InitializeDependencies(
 			Googlenow:      initializedEndpointDependencies.Googlenow,
 			Multi:          initializedEndpointDependencies.Multi,
 			Panic:          initializedEndpointDependencies.Panic,
+			Serverless:     initializedEndpointDependencies.Serverless,
 			BazTChannel:    initializedEndpointDependencies.BazTChannel,
 			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
 			Quux:           initializedEndpointDependencies.Quux,
