@@ -10,11 +10,11 @@ struct Response {
 
 service Serverless {
 	Response beta(
-		1: required  Request request
+		1: optional Request request
 	) throws (
 	) (
 		zanzibar.http.method = "POST"
-		zanzibar.http.path = "/serverless/post-request/"
+		zanzibar.http.path = "/serverless/post-request"
 		zanzibar.http.status = "200"
 	)
 } (

@@ -116,21 +116,21 @@ func (w {{$workflowStruct}}) HandleDummy(
 ) ({{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 
-    response := convert{{$methodName}}DummyResponse(r)
+	response := convert{{$methodName}}DummyResponse(r)
 
-    // Filter and map response headers from client to server response.
-   	{{if eq $endpointType "tchannel" -}}
-   	resHeaders := zanzibar.ServerTChannelHeader{}
-   	{{- else -}}
-   	resHeaders := zanzibar.ServerHTTPHeader{}
-   	{{- end -}}
-   	{{range $i, $k := $resHeaderMapKeys}}
-   	{{- $resHeaderVal := index $resHeaderMap $k}}
-   	h, ok = reqHeaders.Get("{{$k}}")
-   	if ok {
-   		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
-   	}
-   	{{- end}}
+	// Filter and map response headers from client to server response.
+	{{if eq $endpointType "tchannel" -}}
+	resHeaders := zanzibar.ServerTChannelHeader{}
+	{{- else -}}
+	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{- end -}}
+	{{range $i, $k := $resHeaderMapKeys}}
+	{{- $resHeaderVal := index $resHeaderMap $k}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
+	}
+	{{- end}}
 
 	return response, resHeaders, nil
 	{{- end -}}

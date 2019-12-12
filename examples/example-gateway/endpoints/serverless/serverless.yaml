@@ -13,7 +13,7 @@ middlewares:
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}
-thriftFile: endpoints/serverless-endpoint/serverless.thrift
+thriftFile: endpoints/serverless/serverless.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Serverless::beta
 type: http

@@ -303,7 +303,7 @@ func (v *Response) IsSetFirstName() bool {
 //
 // The arguments for beta are sent and received over the wire as this struct.
 type Serverless_Beta_Args struct {
-	Request *Request `json:"request,required"`
+	Request *Request `json:"request,omitempty"`
 }
 
 // ToWire translates a Serverless_Beta_Args struct into a Thrift-level intermediate
@@ -329,15 +329,14 @@ func (v *Serverless_Beta_Args) ToWire() (wire.Value, error) {
 		err    error
 	)
 
-	if v.Request == nil {
-		return w, errors.New("field Request of Serverless_Beta_Args is required")
+	if v.Request != nil {
+		w, err = v.Request.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
 	}
-	w, err = v.Request.ToWire()
-	if err != nil {
-		return w, err
-	}
-	fields[i] = wire.Field{ID: 1, Value: w}
-	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -368,8 +367,6 @@ func _Request_Read(w wire.Value) (*Request, error) {
 func (v *Serverless_Beta_Args) FromWire(w wire.Value) error {
 	var err error
 
-	requestIsSet := false
-
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
 		case 1:
@@ -378,13 +375,9 @@ func (v *Serverless_Beta_Args) FromWire(w wire.Value) error {
 				if err != nil {
 					return err
 				}
-				requestIsSet = true
+
 			}
 		}
-	}
-
-	if !requestIsSet {
-		return errors.New("field Request of Serverless_Beta_Args is required")
 	}
 
 	return nil
@@ -399,8 +392,10 @@ func (v *Serverless_Beta_Args) String() string {
 
 	var fields [1]string
 	i := 0
-	fields[i] = fmt.Sprintf("Request: %v", v.Request)
-	i++
+	if v.Request != nil {
+		fields[i] = fmt.Sprintf("Request: %v", v.Request)
+		i++
+	}
 
 	return fmt.Sprintf("Serverless_Beta_Args{%v}", strings.Join(fields[:i], ", "))
 }
@@ -415,7 +410,7 @@ func (v *Serverless_Beta_Args) Equals(rhs *Serverless_Beta_Args) bool {
 	} else if rhs == nil {
 		return false
 	}
-	if !v.Request.Equals(rhs.Request) {
+	if !((v.Request == nil && rhs.Request == nil) || (v.Request != nil && rhs.Request != nil && v.Request.Equals(rhs.Request))) {
 		return false
 	}
 
@@ -428,16 +423,19 @@ func (v *Serverless_Beta_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err 
 	if v == nil {
 		return nil
 	}
-	err = multierr.Append(err, enc.AddObject("request", v.Request))
+	if v.Request != nil {
+		err = multierr.Append(err, enc.AddObject("request", v.Request))
+	}
 	return err
 }
 
 // GetRequest returns the value of Request if it is set or its
 // zero value if it is unset.
 func (v *Serverless_Beta_Args) GetRequest() (o *Request) {
-	if v != nil {
-		o = v.Request
+	if v != nil && v.Request != nil {
+		return v.Request
 	}
+
 	return
 }
 

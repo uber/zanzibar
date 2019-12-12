@@ -31,7 +31,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsServerlessEndpointServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless-endpoint/serverless"
+	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
 	"go.uber.org/zap"
@@ -42,8 +42,8 @@ type ServerlessBetaDummyWorkflow interface {
 	HandleDummy(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsServerlessEndpointServerless.Serverless_Beta_Args,
-	) (*endpointsServerlessEndpointServerless.Response, zanzibar.Header, error)
+		r *endpointsServerlessServerless.Serverless_Beta_Args,
+	) (*endpointsServerlessServerless.Response, zanzibar.Header, error)
 }
 
 // NewServerlessBetaDummyWorkflow creates a workflow
@@ -73,8 +73,8 @@ type serverlessBetaDummyWorkflow struct {
 func (w serverlessBetaDummyWorkflow) HandleDummy(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsServerlessEndpointServerless.Serverless_Beta_Args,
-) (*endpointsServerlessEndpointServerless.Response, zanzibar.Header, error) {
+	r *endpointsServerlessServerless.Serverless_Beta_Args,
+) (*endpointsServerlessServerless.Response, zanzibar.Header, error) {
 
 	response := convertBetaDummyResponse(r)
 
@@ -84,8 +84,8 @@ func (w serverlessBetaDummyWorkflow) HandleDummy(
 	return response, resHeaders, nil
 }
 
-func convertBetaDummyResponse(in *endpointsServerlessEndpointServerless.Serverless_Beta_Args) *endpointsServerlessEndpointServerless.Response {
-	out := &endpointsServerlessEndpointServerless.Response{}
+func convertBetaDummyResponse(in *endpointsServerlessServerless.Serverless_Beta_Args) *endpointsServerlessServerless.Response {
+	out := &endpointsServerlessServerless.Response{}
 
 	if in.Request != nil {
 		out.FirstName = (*string)(in.Request.FirstName)

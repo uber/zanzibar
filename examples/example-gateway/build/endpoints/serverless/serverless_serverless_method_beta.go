@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/workflow"
-	endpointsServerlessEndpointServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless-endpoint/serverless"
+	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -44,7 +44,7 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
 )
 
-// ServerlessBetaHandler is the handler for "/serverless/post-request/"
+// ServerlessBetaHandler is the handler for "/serverless/post-request"
 type ServerlessBetaHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
@@ -74,12 +74,12 @@ func NewServerlessBetaHandler(deps *module.Dependencies) *ServerlessBetaHandler 
 // Register adds the http handler to the gateway's http router
 func (h *ServerlessBetaHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"POST", "/serverless/post-request/",
+		"POST", "/serverless/post-request",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/serverless/post-request/".
+// HandleRequest handles "/serverless/post-request".
 func (h *ServerlessBetaHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
@@ -101,7 +101,7 @@ func (h *ServerlessBetaHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsServerlessEndpointServerless.Serverless_Beta_Args
+	var requestBody endpointsServerlessServerless.Serverless_Beta_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
