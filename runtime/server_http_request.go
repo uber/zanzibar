@@ -130,6 +130,11 @@ func (req *ServerHTTPRequest) Context() context.Context {
 	return req.httpRequest.Context()
 }
 
+// StartTime returns the request's start time.
+func (req *ServerHTTPRequest) StartTime() time.Time {
+	return req.startTime
+}
+
 // start the request, emit metrics etc
 func (req *ServerHTTPRequest) start() {
 	if req.started {
@@ -748,17 +753,16 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 func (req *ServerHTTPRequest) UnmarshalBody(
 	body json.Unmarshaler, rawBody []byte,
 ) bool {
-	if len(rawBody) > 0 {
-		err := body.UnmarshalJSON(rawBody)
-		if err != nil {
-			req.logger.Warn("Could not parse json", zap.Error(err))
-			if !req.parseFailed {
-				req.res.SendError(400, "Could not parse json: "+err.Error(), err)
-				req.parseFailed = true
-			}
-			return false
+	err := body.UnmarshalJSON(rawBody)
+	if err != nil {
+		req.logger.Warn("Could not parse json", zap.Error(err))
+		if !req.parseFailed {
+			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
+			req.parseFailed = true
 		}
+		return false
 	}
+
 	return true
 }
 
