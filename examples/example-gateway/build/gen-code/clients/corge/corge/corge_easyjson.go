@@ -185,8 +185,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.NotModified != nil {
 		const prefix string = ",\"notModified\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		(*in.NotModified).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -257,7 +261,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Bool(bool(in.Arg))
 	}
 	out.RawByte('}')
@@ -341,8 +350,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.NotModified != nil {
@@ -423,7 +436,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Bool(bool(in.Arg))
 	}
 	out.RawByte('}')
@@ -553,7 +571,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Bool(bool(in.Arg))
 	}
 	out.RawByte('}')
@@ -627,8 +650,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(*in.Success))
 	}
 	out.RawByte('}')
@@ -699,7 +726,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Arg))
 	}
 	out.RawByte('}')
@@ -773,8 +805,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Bool(bool(*in.Success))
 	}
 	out.RawByte('}')
@@ -845,7 +881,12 @@ func easyjsonAbe23ddeEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"arg\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Bool(bool(in.Arg))
 	}
 	out.RawByte('}')
