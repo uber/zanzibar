@@ -1489,7 +1489,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 					"%s%s := make(map[%s]struct{}, len(%s))",
 					indent, target, customElemType, identifierName,
 				)
-				statements.appendf("%sfor _, v := range %s {", indent, identifierName)
+				statements.appendf("%sfor %s := range %s {", indent, valVar, identifierName)
 				indent += "\t"
 				if isEnumElem {
 					tmpVar := "_tmp" + valVar

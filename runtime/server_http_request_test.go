@@ -2323,6 +2323,7 @@ func TestSpanCreated(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
+				assert.NotEmpty(t, req.StartTime(), "startTime is not initialized")
 				span := req.GetSpan()
 				assert.NotNil(t, span)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))

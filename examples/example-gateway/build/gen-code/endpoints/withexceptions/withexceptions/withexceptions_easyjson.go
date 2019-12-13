@@ -87,12 +87,8 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.E1 != nil {
@@ -301,12 +297,7 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"message2\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Message2))
 	}
 	out.RawByte('}')
@@ -377,12 +368,7 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"message1\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Message1))
 	}
 	out.RawByte('}')
