@@ -34,36 +34,36 @@ import (
 	"go.uber.org/zap"
 )
 
-// ServerlessBetaDummyWorkflow defines the interface for ServerlessBeta workflow
-type ServerlessBetaDummyWorkflow interface {
+// ServerlessServerlessArgWithHeadersDummyWorkflow defines the interface for ServerlessServerlessArgWithHeaders workflow
+type ServerlessServerlessArgWithHeadersDummyWorkflow interface {
 	HandleDummy(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsServerlessServerless.Serverless_Beta_Args,
+		r *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args,
 	) (*endpointsServerlessServerless.Response, zanzibar.Header, error)
 }
 
-// NewServerlessBetaDummyWorkflow creates a workflow
-func NewServerlessBetaDummyWorkflow(deps *module.Dependencies) ServerlessBetaDummyWorkflow {
+// NewServerlessServerlessArgWithHeadersDummyWorkflow creates a workflow
+func NewServerlessServerlessArgWithHeadersDummyWorkflow(deps *module.Dependencies) ServerlessServerlessArgWithHeadersDummyWorkflow {
 
-	return &serverlessBetaDummyWorkflow{
+	return &serverlessServerlessArgWithHeadersDummyWorkflow{
 		Logger: deps.Default.Logger,
 	}
 }
 
-// serverlessBetaDummyWorkflow calls thrift client .
-type serverlessBetaDummyWorkflow struct {
+// serverlessServerlessArgWithHeadersDummyWorkflow calls thrift client .
+type serverlessServerlessArgWithHeadersDummyWorkflow struct {
 	Logger *zap.Logger
 }
 
 // HandleDummy calls thrift client.
-func (w serverlessBetaDummyWorkflow) HandleDummy(
+func (w serverlessServerlessArgWithHeadersDummyWorkflow) HandleDummy(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsServerlessServerless.Serverless_Beta_Args,
+	r *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args,
 ) (*endpointsServerlessServerless.Response, zanzibar.Header, error) {
 
-	response := convertBetaDummyResponse(r)
+	response := convertServerlessArgWithHeadersDummyResponse(r)
 
 	serverlessHeaders := map[string]string{}
 
@@ -73,22 +73,27 @@ func (w serverlessBetaDummyWorkflow) HandleDummy(
 	if ok {
 		serverlessHeaders["X-Deputy-Forwarded"] = h
 	}
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		serverlessHeaders["X-Uuid"] = h
+	}
 
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
+	h, ok = serverlessHeaders["X-Token"]
+	if ok {
+		resHeaders.Set("X-Token", h)
+	}
+	h, ok = serverlessHeaders["X-Uuid"]
+	if ok {
+		resHeaders.Set("X-Uuid", h)
+	}
 
 	return response, resHeaders, nil
 }
 
-func convertBetaDummyResponse(in *endpointsServerlessServerless.Serverless_Beta_Args) *endpointsServerlessServerless.Response {
+func convertServerlessArgWithHeadersDummyResponse(in *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args) *endpointsServerlessServerless.Response {
 	out := &endpointsServerlessServerless.Response{}
-
-	if in.Request != nil {
-		out.FirstName = (*string)(in.Request.FirstName)
-	}
-	if in.Request != nil {
-		out.LastName1 = (*string)(in.Request.LastName)
-	}
 
 	return out
 }

@@ -249,11 +249,10 @@ func (ms *ModuleSpec) SetDownstream(
 		)
 	}
 
-	if e.DummyEndpoint {
+	if e.IsDummyEndpoint {
 		funcSpec := method.CompiledThriftSpec
 		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, reqrespTransforms, h)
 		if err != nil {
-			fmt.Println("Coming to error")
 			return err
 		}
 		return nil

@@ -36,8 +36,10 @@ import (
 )
 
 const (
-	reqHeaders = "reqHeaderMap"
-	resHeaders = "resHeaderMap"
+	reqHeaders         = "reqHeaderMap"
+	resHeaders         = "resHeaderMap"
+	customWorkflow     = "custom"
+	serverlessWorkflow = "serverless"
 )
 
 var mandatoryEndpointFields = []string{
@@ -278,7 +280,7 @@ type EndpointSpec struct {
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
 	// DummyEndpoint checks if the endpoint is serverless
-	DummyEndpoint bool `yaml:"-"`
+	IsDummyEndpoint bool `yaml:"-"`
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {
@@ -372,7 +374,7 @@ func NewEndpointSpec(
 		if iclientMethod != nil {
 			clientMethod = iclientMethod.(string)
 		}
-	} else if workflowType == "custom" {
+	} else if workflowType == customWorkflow {
 		iworkflowImportPath, ok := endpointConfigObj["workflowImportPath"]
 		if !ok {
 			return nil, errors.Errorf(
@@ -381,7 +383,7 @@ func NewEndpointSpec(
 			)
 		}
 		workflowImportPath = iworkflowImportPath.(string)
-	} else if workflowType == "self-serving" {
+	} else if workflowType == serverlessWorkflow {
 		isDummyEndpoint = true
 	} else {
 		return nil, errors.Errorf(
@@ -428,7 +430,7 @@ func NewEndpointSpec(
 		ThriftMethodName:   parts[1],
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
-		DummyEndpoint:      isDummyEndpoint,
+		IsDummyEndpoint:    isDummyEndpoint,
 		ClientID:           clientID,
 		ClientMethod:       clientMethod,
 	}
@@ -931,11 +933,11 @@ func (e *EndpointSpec) SetDownstream(
 	clientModules []*ClientSpec,
 	h *PackageHelper,
 ) error {
-	if e.WorkflowType == "custom" {
+	if e.WorkflowType == customWorkflow {
 		return nil
 	}
 
-	if e.WorkflowType == "self-serving" {
+	if e.WorkflowType == serverlessWorkflow {
 		return e.ModuleSpec.SetDownstream(e, h)
 	}
 

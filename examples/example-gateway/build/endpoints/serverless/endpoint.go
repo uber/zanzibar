@@ -37,13 +37,15 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		ServerlessBetaHandler: NewServerlessBetaHandler(deps),
+		ServerlessBetaHandler:                     NewServerlessBetaHandler(deps),
+		ServerlessServerlessArgWithHeadersHandler: NewServerlessServerlessArgWithHeadersHandler(deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	ServerlessBetaHandler *ServerlessBetaHandler
+	ServerlessBetaHandler                     *ServerlessBetaHandler
+	ServerlessServerlessArgWithHeadersHandler *ServerlessServerlessArgWithHeadersHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -51,6 +53,10 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	err0 := handlers.ServerlessBetaHandler.Register(gateway)
 	if err0 != nil {
 		return err0
+	}
+	err1 := handlers.ServerlessServerlessArgWithHeadersHandler.Register(gateway)
+	if err1 != nil {
+		return err1
 	}
 	return nil
 }

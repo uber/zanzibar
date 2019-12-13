@@ -8,7 +8,7 @@ package workflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
-{{- $dummyEndpoint := .DummyEndpoint }}
+{{- $dummyEndpoint := .IsDummyEndpoint }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
@@ -73,25 +73,15 @@ HandleDummy(
 
 // New{{$workflowInterface}} creates a workflow
 func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
-	var whitelistedDynamicHeaders []string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
-		var alternateServiceDetail config.AlternateServiceDetail
-		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
-		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
-		}
-	}
 
 	return &{{$workflowStruct}}{
 		Logger:  deps.Default.Logger,
-		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // {{$workflowStruct}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflowStruct}} struct {
 	Logger  *zap.Logger
-	whitelistedDynamicHeaders []string
 }
 
 // HandleDummy calls thrift client.
@@ -118,6 +108,19 @@ func (w {{$workflowStruct}}) HandleDummy(
 
 	response := convert{{$methodName}}DummyResponse(r)
 
+	serverlessHeaders := map[string]string{}
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	var ok bool
+	var h string
+	{{- end -}}
+	{{range $i, $k := $reqHeaderMapKeys}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		{{- $typedHeader := index $reqHeaderMap $k -}}
+		serverlessHeaders["{{$typedHeader.TransformTo}}"] = h
+	}
+	{{- end}}
+
 	// Filter and map response headers from client to server response.
 	{{if eq $endpointType "tchannel" -}}
 	resHeaders := zanzibar.ServerTChannelHeader{}
@@ -126,9 +129,9 @@ func (w {{$workflowStruct}}) HandleDummy(
 	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
-	h, ok = reqHeaders.Get("{{$k}}")
+	h, ok = serverlessHeaders["{{$k}}"]
 	if ok {
-		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", h)
 	}
 	{{- end}}
 
