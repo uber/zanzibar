@@ -1,6 +1,7 @@
 config:
   endpoints:
     - ./serverless.yaml
+    - ./serverless-headers.yaml
   rateLimit: 100
 dependencies:
 name: serverless

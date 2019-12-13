@@ -10,6 +10,9 @@ middlewares:
         - from: Request.FirstName
           override: true
           to: FirstName
+        - from: Request.LastName
+          override: true
+          to: LastName1
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}
@@ -17,5 +20,5 @@ thriftFile: endpoints/serverless/serverless.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Serverless::beta
 type: http
-workflowType: self-serving
+workflowType: serverless
 

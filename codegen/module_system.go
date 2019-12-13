@@ -44,7 +44,7 @@ type EndpointMeta struct {
 	ClientMethodName       string
 	WorkflowPkg            string
 	ReqHeaders             map[string]*TypedHeader
-	DummyEndpoint          bool
+	IsDummyEndpoint        bool
 	ReqHeadersKeys         []string
 	ReqRequiredHeadersKeys []string
 	ResHeaders             map[string]*TypedHeader
@@ -1154,7 +1154,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		IncludedPackages:       includedPackages,
 		Method:                 method,
 		ReqHeaders:             reqHeaders,
-		DummyEndpoint:          e.DummyEndpoint,
+		IsDummyEndpoint:        e.IsDummyEndpoint,
 		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
 		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
@@ -1193,8 +1193,8 @@ func (g *EndpointGenerator) generateEndpointFile(
 	out[endpointFilePath] = endpoint
 
 	tmpl := ""
-	if e.DummyEndpoint {
-		tmpl = "self-serving-workflow.tmpl"
+	if e.IsDummyEndpoint {
+		tmpl = "serverless-workflow.tmpl"
 	} else {
 		tmpl = "workflow.tmpl"
 	}

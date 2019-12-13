@@ -16,7 +16,7 @@
 // codegen/templates/module_class_initializer.tmpl
 // codegen/templates/module_initializer.tmpl
 // codegen/templates/module_mock_initializer.tmpl
-// codegen/templates/self-serving-workflow.tmpl
+// codegen/templates/serverless-workflow.tmpl
 // codegen/templates/service.tmpl
 // codegen/templates/service_mock.tmpl
 // codegen/templates/structs.tmpl
@@ -246,7 +246,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
-{{- $dummyEndpoint := .DummyEndpoint}}
+{{- $dummyEndpoint := .IsDummyEndpoint}}
 {{- $handlerName := printf "%sHandler" $serviceMethod }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
@@ -493,7 +493,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7390, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7392, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2171,7 +2171,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _selfServingWorkflowTmpl = []byte(`{{/* template to render gateway workflow interface code */ -}}
+var _serverlessWorkflowTmpl = []byte(`{{/* template to render gateway workflow interface code */ -}}
 {{- $instance := .Instance }}
 package workflow
 
@@ -2181,7 +2181,7 @@ package workflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
-{{- $dummyEndpoint := .DummyEndpoint }}
+{{- $dummyEndpoint := .IsDummyEndpoint }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
@@ -2246,25 +2246,15 @@ HandleDummy(
 
 // New{{$workflowInterface}} creates a workflow
 func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
-	var whitelistedDynamicHeaders []string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
-		var alternateServiceDetail config.AlternateServiceDetail
-		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
-		for _, routingConfig := range alternateServiceDetail.RoutingConfigs {
-			whitelistedDynamicHeaders = append( whitelistedDynamicHeaders, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
-		}
-	}
 
 	return &{{$workflowStruct}}{
 		Logger:  deps.Default.Logger,
-		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 	}
 }
 
 // {{$workflowStruct}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflowStruct}} struct {
 	Logger  *zap.Logger
-	whitelistedDynamicHeaders []string
 }
 
 // HandleDummy calls thrift client.
@@ -2291,6 +2281,19 @@ func (w {{$workflowStruct}}) HandleDummy(
 
 	response := convert{{$methodName}}DummyResponse(r)
 
+	serverlessHeaders := map[string]string{}
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	var ok bool
+	var h string
+	{{- end -}}
+	{{range $i, $k := $reqHeaderMapKeys}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		{{- $typedHeader := index $reqHeaderMap $k -}}
+		serverlessHeaders["{{$typedHeader.TransformTo}}"] = h
+	}
+	{{- end}}
+
 	// Filter and map response headers from client to server response.
 	{{if eq $endpointType "tchannel" -}}
 	resHeaders := zanzibar.ServerTChannelHeader{}
@@ -2299,9 +2302,9 @@ func (w {{$workflowStruct}}) HandleDummy(
 	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
-	h, ok = reqHeaders.Get("{{$k}}")
+	h, ok = serverlessHeaders["{{$k}}"]
 	if ok {
-		resHeaders.Set("{{$resHeaderVal.TransformTo}}", reqHeaders.Get("{{$k}}"))
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", h)
 	}
 	{{- end}}
 
@@ -2318,17 +2321,17 @@ func (w {{$workflowStruct}}) HandleDummy(
 
 `)
 
-func selfServingWorkflowTmplBytes() ([]byte, error) {
-	return _selfServingWorkflowTmpl, nil
+func serverlessWorkflowTmplBytes() ([]byte, error) {
+	return _serverlessWorkflowTmpl, nil
 }
 
-func selfServingWorkflowTmpl() (*asset, error) {
-	bytes, err := selfServingWorkflowTmplBytes()
+func serverlessWorkflowTmpl() (*asset, error) {
+	bytes, err := serverlessWorkflowTmplBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "self-serving-workflow.tmpl", size: 4225, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "serverless-workflow.tmpl", size: 3964, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3938,7 +3941,7 @@ var _bindata = map[string]func() (*asset, error){
 	"module_class_initializer.tmpl":      module_class_initializerTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
 	"module_mock_initializer.tmpl":       module_mock_initializerTmpl,
-	"self-serving-workflow.tmpl":         selfServingWorkflowTmpl,
+	"serverless-workflow.tmpl":           serverlessWorkflowTmpl,
 	"service.tmpl":                       serviceTmpl,
 	"service_mock.tmpl":                  service_mockTmpl,
 	"structs.tmpl":                       structsTmpl,
@@ -4007,7 +4010,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"module_class_initializer.tmpl":      &bintree{module_class_initializerTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            &bintree{module_initializerTmpl, map[string]*bintree{}},
 	"module_mock_initializer.tmpl":       &bintree{module_mock_initializerTmpl, map[string]*bintree{}},
-	"self-serving-workflow.tmpl":         &bintree{selfServingWorkflowTmpl, map[string]*bintree{}},
+	"serverless-workflow.tmpl":           &bintree{serverlessWorkflowTmpl, map[string]*bintree{}},
 	"service.tmpl":                       &bintree{serviceTmpl, map[string]*bintree{}},
 	"service_mock.tmpl":                  &bintree{service_mockTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       &bintree{structsTmpl, map[string]*bintree{}},
