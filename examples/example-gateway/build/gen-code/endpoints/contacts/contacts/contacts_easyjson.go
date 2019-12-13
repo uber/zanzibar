@@ -159,12 +159,22 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"userUUID\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.UserUUID))
 	}
 	{
 		const prefix string = ",\"contacts\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		if in.Contacts == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -253,8 +263,12 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(*in.Success))
 	}
 	out.RawByte('}')
@@ -387,8 +401,12 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Success != nil {
 		const prefix string = ",\"success\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		(*in.Success).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -467,7 +485,12 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"saveContactsRequest\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		if in.SaveContactsRequest == nil {
 			out.RawString("null")
 		} else {
@@ -555,8 +578,12 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Type != nil {
 		const prefix string = ",\"type\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(*in.Type))
 	}
 	if in.Text != nil {
@@ -760,8 +787,12 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.FirstName != nil {
 		const prefix string = ",\"firstName\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(*in.FirstName))
 	}
 	if in.LastName != nil {
@@ -986,8 +1017,12 @@ func easyjson4ee781cfEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if len(in.Fragments) != 0 {
 		const prefix string = ",\"fragments\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		{
 			out.RawByte('[')
 			for v5, v6 := range in.Fragments {

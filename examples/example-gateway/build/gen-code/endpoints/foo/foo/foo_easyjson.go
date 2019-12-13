@@ -135,32 +135,62 @@ func easyjsonE4de407aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"fooString\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.FooString))
 	}
 	if in.FooI32 != nil {
 		const prefix string = ",\"fooI32\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int32(int32(*in.FooI32))
 	}
 	if in.FooI16 != nil {
 		const prefix string = ",\"fooI16\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int16(int16(*in.FooI16))
 	}
 	if in.FooDouble != nil {
 		const prefix string = ",\"fooDouble\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Float64(float64(*in.FooDouble))
 	}
 	if in.FooBool != nil {
 		const prefix string = ",\"fooBool\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Bool(bool(*in.FooBool))
 	}
 	if len(in.FooMap) != 0 {
 		const prefix string = ",\"fooMap\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		{
 			out.RawByte('{')
 			v2First := true
@@ -179,7 +209,12 @@ func easyjsonE4de407aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if in.Message != nil {
 		const prefix string = ",\"message\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		(*in.Message).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -253,8 +288,12 @@ func easyjsonE4de407aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	if in.Name != nil {
 		const prefix string = ",\"name\":"
-		first = false
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(*in.Name))
 	}
 	out.RawByte('}')
@@ -325,7 +364,12 @@ func easyjsonE4de407aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	_ = first
 	{
 		const prefix string = ",\"teapot\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Teapot))
 	}
 	out.RawByte('}')
