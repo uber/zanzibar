@@ -221,10 +221,10 @@ func (ms *ModuleSpec) SetDownstream(
 		clientMethod = e.ClientMethod
 
 		// TODO: move generated middlewares out of zanzibar
-		headersPropagate  = e.HeadersPropagate
-		reqTransforms     = e.ReqTransforms
-		respTransforms    = e.RespTransforms
-		reqrespTransforms = e.DummyReqTransforms
+		headersPropagate   = e.HeadersPropagate
+		reqTransforms      = e.ReqTransforms
+		respTransforms     = e.RespTransforms
+		dummyReqTransforms = e.DummyReqTransforms
 	)
 	for _, v := range ms.Services {
 		if v.Name == serviceName {
@@ -251,7 +251,7 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if e.IsDummyEndpoint {
 		funcSpec := method.CompiledThriftSpec
-		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, reqrespTransforms, h)
+		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
 		if err != nil {
 			return err
 		}

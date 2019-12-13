@@ -257,7 +257,7 @@ type EndpointSpec struct {
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
 	RespTransforms map[string]FieldMapperEntry `yaml:"-"`
-	// DummyReqTransforms is used to transform a request to response mapping
+	// DummyReqTransforms is used to transform a serverless request to response mapping
 	DummyReqTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ErrTransforms is a map from endpoint exception fields to client exception fields
 	// that should override their values
