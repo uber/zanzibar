@@ -1008,7 +1008,7 @@ func (ms *MethodSpec) setDummyTypeConverters(
 	reqTransforms map[string]FieldMapperEntry,
 	headersPropagate map[string]FieldMapperEntry,
 	respTransforms map[string]FieldMapperEntry,
-	reqrespTransforms map[string]FieldMapperEntry,
+	dummyReqTransforms map[string]FieldMapperEntry,
 	h *PackageHelper,
 ) error {
 
@@ -1039,7 +1039,7 @@ func (ms *MethodSpec) setDummyTypeConverters(
 		// default as struct
 		respFields := respType.(*compile.StructSpec).Fields
 		dummyConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
-		err := dummyConverter.GenStructConverter(structType, respFields, reqrespTransforms)
+		err := dummyConverter.GenStructConverter(structType, respFields, dummyReqTransforms)
 		if err != nil {
 			return err
 		}
