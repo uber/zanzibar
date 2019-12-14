@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 package serverless_test
 
 import (
@@ -36,8 +35,8 @@ import (
 func TestServerlessEndpointCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		TestBinary:        util.DefaultMainFile("example-gateway"),
-		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -69,8 +68,8 @@ func TestServerlessEndpointCall(t *testing.T) {
 func TestServerlessHeadersCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		TestBinary:        util.DefaultMainFile("example-gateway"),
-		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
