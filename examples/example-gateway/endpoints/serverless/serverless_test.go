@@ -1,4 +1,4 @@
-package serverless
+package serverless_test
 
 import (
 	"bytes"
