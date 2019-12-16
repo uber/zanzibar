@@ -1820,11 +1820,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Arg = make(map[string]struct{})
-				} else {
-					out.Arg = nil
-				}
+				out.Arg = make(map[string]struct{})
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
@@ -2036,11 +2032,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Arg = make(map[string]*BarResponse)
-				} else {
-					out.Arg = nil
-				}
+				out.Arg = make(map[string]*BarResponse)
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
@@ -2902,11 +2894,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Arg = make(map[int32]*BarResponse)
-				} else {
-					out.Arg = nil
-				}
+				out.Arg = make(map[int32]*BarResponse)
 				for !in.IsDelim('}') {
 					key := int32(in.Int32Str())
 					in.WantColon()
@@ -7810,11 +7798,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.MapIntWithRange = make(map[UUID]int32)
-				} else {
-					out.MapIntWithRange = nil
-				}
+				out.MapIntWithRange = make(map[UUID]int32)
 				for !in.IsDelim('}') {
 					key := UUID(in.String())
 					in.WantColon()
@@ -7831,11 +7815,7 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.MapIntWithoutRange = make(map[string]int32)
-				} else {
-					out.MapIntWithoutRange = nil
-				}
+				out.MapIntWithoutRange = make(map[string]int32)
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
