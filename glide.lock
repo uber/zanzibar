@@ -1,5 +1,5 @@
 hash: 3f062f8bb36e98ab5f0e2d01fb79a28fe3fc681ee4ce2ad6d1b7f666c41f14fe
-updated: 2019-11-13T22:22:58.446697-08:00
+updated: 2019-12-16T13:39:57.012116-08:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -18,7 +18,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/buger/jsonparser
-  version: ee4c978eae7efe2344eb024dd7d77918d3f7c55c
+  version: 1a29609e0929ccd5666069e2e7213c2c69fa4ac2
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
@@ -26,7 +26,7 @@ imports:
 - name: github.com/emicklei/proto
   version: 81cafc1ff2e77b4342b32f8824cfb5b722bfd79c
 - name: github.com/fatih/structtag
-  version: 3878f9fb88e63e26ea1e6c97ab985cb55452fee5
+  version: 72c94723f1e6825195e0d8e9857fca28cd23d835
 - name: github.com/ghodss/yaml
   version: 25d852aebe32c875e9c044af3eef9c7dc6bc777f
 - name: github.com/gogo/googleapis
@@ -98,7 +98,7 @@ imports:
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: 6c0755d89d1e153c9986ad90e886a626bd66aad0
+  version: 4a28c93cedfd643c29df9591ffc9b54761e23f6d
   subpackages:
   - bootstrap
   - buffer
@@ -213,14 +213,14 @@ imports:
   - trand
   - typed
 - name: go.uber.org/atomic
-  version: 9dc4df04d0d1c39369750a9f6c32c39560672089
+  version: 40ae6a40a970ef4cdbffa7b24b280e316db8accc
 - name: go.uber.org/automaxprocs
   version: 946a8391268aea0a60a86403988ff3ab4b604a83
   subpackages:
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
-  version: 7ff117f761a3f1b3eb521945c17a1091438eb6de
+  version: be3040509ed2f4075ec55f1f6632596608477a23
   subpackages:
   - internal/digreflect
   - internal/dot
@@ -270,7 +270,7 @@ imports:
   subpackages:
   - update-license
 - name: go.uber.org/yarpc
-  version: eedd6ccf057b7ab8276cf3583acb518eb641a6ad
+  version: a471b8ec71047ae92683262313a0b04fa847f27c
   subpackages:
   - api/backoff
   - api/encoding
@@ -295,6 +295,7 @@ imports:
   - internal/request
   - internal/yarpcerrors
   - peer
+  - peer/abstractpeer
   - peer/hostport
   - pkg/encoding
   - pkg/errors
@@ -317,7 +318,7 @@ imports:
   subpackages:
   - golint
 - name: golang.org/x/net
-  version: 2180aed2234323691e9fd264fb1d32d20ff04b27
+  version: c0dbc17a35534bf2e581d7a942408dc936316da4
   subpackages:
   - bpf
   - context
@@ -332,7 +333,7 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: 4c7a9d0fe056d9d1de37e1409ca8a5c17accb46a
+  version: ac6580df4449443a05718fd7858c1f91ad5f8d20
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -343,7 +344,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: e2727e816f5aa0f0179e2ee7ec02d5546cd1c5ba
+  version: a0e659d5136104039ac16d1718b6ef26f458e22c
   subpackages:
   - cmd/goimports
   - cmd/stringer
@@ -359,7 +360,6 @@ imports:
   - internal/fastwalk
   - internal/gopathwalk
   - internal/semver
-  - internal/span
 - name: google.golang.org/genproto
   version: d831d65fe17df2e52bcc4316d4a9f7a418701f43
   subpackages:
@@ -405,7 +405,7 @@ imports:
 - name: gopkg.in/validator.v2
   version: c3144fdedc21c005c4ba9c3ab3ecb86419dd39f3
 - name: gopkg.in/yaml.v2
-  version: f90ceb4f409096b60e2e9076b38b304b8246e5fa
+  version: 1f64d6156d11335c3f22d9330b0ad14fc1e789ce
 - name: honnef.co/go/tools
   version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
   subpackages:
