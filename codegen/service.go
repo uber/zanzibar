@@ -253,7 +253,8 @@ func (ms *ModuleSpec) SetDownstream(
 		funcSpec := method.CompiledThriftSpec
 		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
 		if err != nil {
-			return err
+			return errors.Errorf(
+				"unable to set dummy type convertors for dummy endpoint")
 		}
 		return nil
 	}

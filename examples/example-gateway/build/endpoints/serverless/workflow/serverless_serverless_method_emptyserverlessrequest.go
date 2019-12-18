@@ -34,35 +34,34 @@ import (
 	"go.uber.org/zap"
 )
 
-// ServerlessServerlessArgWithHeadersDummyWorkflow defines the interface for ServerlessServerlessArgWithHeaders workflow
-type ServerlessServerlessArgWithHeadersDummyWorkflow interface {
+// ServerlessEmptyServerlessRequestDummyWorkflow defines the interface for ServerlessEmptyServerlessRequest workflow
+type ServerlessEmptyServerlessRequestDummyWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args,
-	) (*endpointsServerlessServerless.Response, zanzibar.Header, error)
+		r *endpointsServerlessServerless.Serverless_EmptyServerlessRequest_Args,
+	) (zanzibar.Header, error)
 }
 
-// NewServerlessServerlessArgWithHeadersDummyWorkflow creates a workflow
-func NewServerlessServerlessArgWithHeadersDummyWorkflow(deps *module.Dependencies) ServerlessServerlessArgWithHeadersDummyWorkflow {
+// NewServerlessEmptyServerlessRequestDummyWorkflow creates a workflow
+func NewServerlessEmptyServerlessRequestDummyWorkflow(deps *module.Dependencies) ServerlessEmptyServerlessRequestDummyWorkflow {
 
-	return &serverlessServerlessArgWithHeadersDummyWorkflow{
+	return &serverlessEmptyServerlessRequestDummyWorkflow{
 		Logger: deps.Default.Logger,
 	}
 }
 
-// serverlessServerlessArgWithHeadersDummyWorkflow calls thrift client .
-type serverlessServerlessArgWithHeadersDummyWorkflow struct {
+// serverlessEmptyServerlessRequestDummyWorkflow calls thrift client .
+type serverlessEmptyServerlessRequestDummyWorkflow struct {
 	Logger *zap.Logger
 }
 
 // Handle processes the request without a downstream
-func (w serverlessServerlessArgWithHeadersDummyWorkflow) Handle(
+func (w serverlessEmptyServerlessRequestDummyWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args,
-) (*endpointsServerlessServerless.Response, zanzibar.Header, error) {
-	response := convertServerlessArgWithHeadersDummyResponse(r)
+	r *endpointsServerlessServerless.Serverless_EmptyServerlessRequest_Args,
+) (zanzibar.Header, error) {
 
 	serverlessHeaders := map[string]string{}
 
@@ -72,27 +71,9 @@ func (w serverlessServerlessArgWithHeadersDummyWorkflow) Handle(
 	if ok {
 		serverlessHeaders["X-Deputy-Forwarded"] = h
 	}
-	h, ok = reqHeaders.Get("X-Uuid")
-	if ok {
-		serverlessHeaders["X-Uuid"] = h
-	}
 
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
-	h, ok = serverlessHeaders["X-Token"]
-	if ok {
-		resHeaders.Set("X-Token", h)
-	}
-	h, ok = serverlessHeaders["X-Uuid"]
-	if ok {
-		resHeaders.Set("X-Uuid", h)
-	}
 
-	return response, resHeaders, nil
-}
-
-func convertServerlessArgWithHeadersDummyResponse(in *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args) *endpointsServerlessServerless.Response {
-	out := &endpointsServerlessServerless.Response{}
-
-	return out
+	return resHeaders, nil
 }

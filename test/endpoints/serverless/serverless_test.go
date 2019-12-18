@@ -89,3 +89,24 @@ func TestServerlessHeadersCall(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, "a-uuid", res.Header.Get("X-Uuid"))
 }
+
+func TestServerlessEmptyCall(t *testing.T) {
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	res, err := gateway.MakeRequest(
+		"GET", "/serverless/emptyServerlessRequest", nil, nil)
+
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "200 OK", res.Status)
+}

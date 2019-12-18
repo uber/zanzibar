@@ -25,7 +25,6 @@ package serverlessendpoint
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -33,6 +32,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -45,20 +45,20 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
 )
 
-// ServerlessBetaHandler is the handler for "/serverless/post-request"
-type ServerlessBetaHandler struct {
+// ServerlessEmptyServerlessRequestHandler is the handler for "/serverless/emptyServerlessRequest"
+type ServerlessEmptyServerlessRequestHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewServerlessBetaHandler creates a handler
-func NewServerlessBetaHandler(deps *module.Dependencies) *ServerlessBetaHandler {
-	handler := &ServerlessBetaHandler{
+// NewServerlessEmptyServerlessRequestHandler creates a handler
+func NewServerlessEmptyServerlessRequestHandler(deps *module.Dependencies) *ServerlessEmptyServerlessRequestHandler {
+	handler := &ServerlessEmptyServerlessRequestHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"serverless", "beta",
+		"serverless", "emptyServerlessRequest",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -73,15 +73,15 @@ func NewServerlessBetaHandler(deps *module.Dependencies) *ServerlessBetaHandler 
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *ServerlessBetaHandler) Register(g *zanzibar.Gateway) error {
+func (h *ServerlessEmptyServerlessRequestHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"POST", "/serverless/post-request",
+		"GET", "/serverless/emptyServerlessRequest",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/serverless/post-request".
-func (h *ServerlessBetaHandler) HandleRequest(
+// HandleRequest handles "/serverless/emptyServerlessRequest".
+func (h *ServerlessEmptyServerlessRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -102,9 +102,15 @@ func (h *ServerlessBetaHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsServerlessServerless.Serverless_Beta_Args
-	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+	var requestBody endpointsServerlessServerless.Serverless_EmptyServerlessRequest_Args
+
+	testStringOk := req.HasQueryValue("testString")
+	if testStringOk {
+		testStringQuery, ok := req.GetQueryValue("testString")
+		if !ok {
+			return
+		}
+		requestBody.TestString = ptr.String(testStringQuery)
 	}
 
 	// log endpoint request to downstream services
@@ -121,39 +127,17 @@ func (h *ServerlessBetaHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewServerlessBetaDummyWorkflow(h.Dependencies)
+	w := workflow.NewServerlessEmptyServerlessRequestDummyWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
-
-	// log downstream response to endpoint
-	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
-		zfields := []zapcore.Field{
-			zap.String("endpoint", h.endpoint.EndpointName),
-		}
-		if body, err := json.Marshal(response); err == nil {
-			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
-		}
-		if cliRespHeaders != nil {
-			for _, k := range cliRespHeaders.Keys() {
-				if val, ok := cliRespHeaders.Get(k); ok {
-					zfields = append(zfields, zap.String(k, val))
-				}
-			}
-		}
-		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
-			zfields = append(zfields, zap.String("x-trace-id", traceKey))
-		}
-		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
-	}
-
+	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return
 
 	}
 
-	res.WriteJSON(200, cliRespHeaders, response)
+	res.WriteJSONBytes(200, cliRespHeaders, nil)
 }

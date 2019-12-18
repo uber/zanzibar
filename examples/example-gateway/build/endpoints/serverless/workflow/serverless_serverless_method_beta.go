@@ -36,7 +36,7 @@ import (
 
 // ServerlessBetaDummyWorkflow defines the interface for ServerlessBeta workflow
 type ServerlessBetaDummyWorkflow interface {
-	HandleDummy(
+	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsServerlessServerless.Serverless_Beta_Args,
@@ -56,13 +56,12 @@ type serverlessBetaDummyWorkflow struct {
 	Logger *zap.Logger
 }
 
-// HandleDummy calls thrift client.
-func (w serverlessBetaDummyWorkflow) HandleDummy(
+// Handle processes the request without a downstream
+func (w serverlessBetaDummyWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsServerlessServerless.Serverless_Beta_Args,
 ) (*endpointsServerlessServerless.Response, zanzibar.Header, error) {
-
 	response := convertBetaDummyResponse(r)
 
 	serverlessHeaders := map[string]string{}

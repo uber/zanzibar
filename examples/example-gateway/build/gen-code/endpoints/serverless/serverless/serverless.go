@@ -392,6 +392,7 @@ func (v *Response) IsSetLastName1() bool {
 // The arguments for beta are sent and received over the wire as this struct.
 type Serverless_Beta_Args struct {
 	Request *Request `json:"request,omitempty"`
+	Alpha   *string  `json:"alpha,omitempty"`
 }
 
 // ToWire translates a Serverless_Beta_Args struct into a Thrift-level intermediate
@@ -411,7 +412,7 @@ type Serverless_Beta_Args struct {
 //   }
 func (v *Serverless_Beta_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [1]wire.Field
+		fields [2]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -423,6 +424,14 @@ func (v *Serverless_Beta_Args) ToWire() (wire.Value, error) {
 			return w, err
 		}
 		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
+	}
+	if v.Alpha != nil {
+		w, err = wire.NewValueString(*(v.Alpha)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
 		i++
 	}
 
@@ -465,6 +474,16 @@ func (v *Serverless_Beta_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.Alpha = &x
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -478,10 +497,14 @@ func (v *Serverless_Beta_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [1]string
+	var fields [2]string
 	i := 0
 	if v.Request != nil {
 		fields[i] = fmt.Sprintf("Request: %v", v.Request)
+		i++
+	}
+	if v.Alpha != nil {
+		fields[i] = fmt.Sprintf("Alpha: %v", *(v.Alpha))
 		i++
 	}
 
@@ -501,6 +524,9 @@ func (v *Serverless_Beta_Args) Equals(rhs *Serverless_Beta_Args) bool {
 	if !((v.Request == nil && rhs.Request == nil) || (v.Request != nil && rhs.Request != nil && v.Request.Equals(rhs.Request))) {
 		return false
 	}
+	if !_String_EqualsPtr(v.Alpha, rhs.Alpha) {
+		return false
+	}
 
 	return true
 }
@@ -513,6 +539,9 @@ func (v *Serverless_Beta_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err 
 	}
 	if v.Request != nil {
 		err = multierr.Append(err, enc.AddObject("request", v.Request))
+	}
+	if v.Alpha != nil {
+		enc.AddString("alpha", *v.Alpha)
 	}
 	return err
 }
@@ -530,6 +559,21 @@ func (v *Serverless_Beta_Args) GetRequest() (o *Request) {
 // IsSetRequest returns true if Request is not nil.
 func (v *Serverless_Beta_Args) IsSetRequest() bool {
 	return v != nil && v.Request != nil
+}
+
+// GetAlpha returns the value of Alpha if it is set or its
+// zero value if it is unset.
+func (v *Serverless_Beta_Args) GetAlpha() (o string) {
+	if v != nil && v.Alpha != nil {
+		return *v.Alpha
+	}
+
+	return
+}
+
+// IsSetAlpha returns true if Alpha is not nil.
+func (v *Serverless_Beta_Args) IsSetAlpha() bool {
+	return v != nil && v.Alpha != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in
@@ -555,6 +599,7 @@ var Serverless_Beta_Helper = struct {
 	// the arguments struct for the function.
 	Args func(
 		request *Request,
+		alpha *string,
 	) *Serverless_Beta_Args
 
 	// IsException returns true if the given error can be thrown
@@ -595,9 +640,11 @@ var Serverless_Beta_Helper = struct {
 func init() {
 	Serverless_Beta_Helper.Args = func(
 		request *Request,
+		alpha *string,
 	) *Serverless_Beta_Args {
 		return &Serverless_Beta_Args{
 			Request: request,
+			Alpha:   alpha,
 		}
 	}
 
@@ -800,6 +847,345 @@ func (v *Serverless_Beta_Result) MethodName() string {
 //
 // This will always be Reply for this struct.
 func (v *Serverless_Beta_Result) EnvelopeType() wire.EnvelopeType {
+	return wire.Reply
+}
+
+// Serverless_EmptyServerlessRequest_Args represents the arguments for the Serverless.emptyServerlessRequest function.
+//
+// The arguments for emptyServerlessRequest are sent and received over the wire as this struct.
+type Serverless_EmptyServerlessRequest_Args struct {
+	TestString *string `json:"testString,omitempty"`
+}
+
+// ToWire translates a Serverless_EmptyServerlessRequest_Args struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Serverless_EmptyServerlessRequest_Args) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.TestString != nil {
+		w, err = wire.NewValueString(*(v.TestString)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Serverless_EmptyServerlessRequest_Args struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Serverless_EmptyServerlessRequest_Args struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Serverless_EmptyServerlessRequest_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Serverless_EmptyServerlessRequest_Args) FromWire(w wire.Value) error {
+	var err error
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.TestString = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Serverless_EmptyServerlessRequest_Args
+// struct.
+func (v *Serverless_EmptyServerlessRequest_Args) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	if v.TestString != nil {
+		fields[i] = fmt.Sprintf("TestString: %v", *(v.TestString))
+		i++
+	}
+
+	return fmt.Sprintf("Serverless_EmptyServerlessRequest_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Serverless_EmptyServerlessRequest_Args match the
+// provided Serverless_EmptyServerlessRequest_Args.
+//
+// This function performs a deep comparison.
+func (v *Serverless_EmptyServerlessRequest_Args) Equals(rhs *Serverless_EmptyServerlessRequest_Args) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !_String_EqualsPtr(v.TestString, rhs.TestString) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Serverless_EmptyServerlessRequest_Args.
+func (v *Serverless_EmptyServerlessRequest_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	if v.TestString != nil {
+		enc.AddString("testString", *v.TestString)
+	}
+	return err
+}
+
+// GetTestString returns the value of TestString if it is set or its
+// zero value if it is unset.
+func (v *Serverless_EmptyServerlessRequest_Args) GetTestString() (o string) {
+	if v != nil && v.TestString != nil {
+		return *v.TestString
+	}
+
+	return
+}
+
+// IsSetTestString returns true if TestString is not nil.
+func (v *Serverless_EmptyServerlessRequest_Args) IsSetTestString() bool {
+	return v != nil && v.TestString != nil
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the arguments.
+//
+// This will always be "emptyServerlessRequest" for this struct.
+func (v *Serverless_EmptyServerlessRequest_Args) MethodName() string {
+	return "emptyServerlessRequest"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Call for this struct.
+func (v *Serverless_EmptyServerlessRequest_Args) EnvelopeType() wire.EnvelopeType {
+	return wire.Call
+}
+
+// Serverless_EmptyServerlessRequest_Helper provides functions that aid in handling the
+// parameters and return values of the Serverless.emptyServerlessRequest
+// function.
+var Serverless_EmptyServerlessRequest_Helper = struct {
+	// Args accepts the parameters of emptyServerlessRequest in-order and returns
+	// the arguments struct for the function.
+	Args func(
+		testString *string,
+	) *Serverless_EmptyServerlessRequest_Args
+
+	// IsException returns true if the given error can be thrown
+	// by emptyServerlessRequest.
+	//
+	// An error can be thrown by emptyServerlessRequest only if the
+	// corresponding exception type was mentioned in the 'throws'
+	// section for it in the Thrift file.
+	IsException func(error) bool
+
+	// WrapResponse returns the result struct for emptyServerlessRequest
+	// given the error returned by it. The provided error may
+	// be nil if emptyServerlessRequest did not fail.
+	//
+	// This allows mapping errors returned by emptyServerlessRequest into a
+	// serializable result struct. WrapResponse returns a
+	// non-nil error if the provided error cannot be thrown by
+	// emptyServerlessRequest
+	//
+	//   err := emptyServerlessRequest(args)
+	//   result, err := Serverless_EmptyServerlessRequest_Helper.WrapResponse(err)
+	//   if err != nil {
+	//     return fmt.Errorf("unexpected error from emptyServerlessRequest: %v", err)
+	//   }
+	//   serialize(result)
+	WrapResponse func(error) (*Serverless_EmptyServerlessRequest_Result, error)
+
+	// UnwrapResponse takes the result struct for emptyServerlessRequest
+	// and returns the erorr returned by it (if any).
+	//
+	// The error is non-nil only if emptyServerlessRequest threw an
+	// exception.
+	//
+	//   result := deserialize(bytes)
+	//   err := Serverless_EmptyServerlessRequest_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*Serverless_EmptyServerlessRequest_Result) error
+}{}
+
+func init() {
+	Serverless_EmptyServerlessRequest_Helper.Args = func(
+		testString *string,
+	) *Serverless_EmptyServerlessRequest_Args {
+		return &Serverless_EmptyServerlessRequest_Args{
+			TestString: testString,
+		}
+	}
+
+	Serverless_EmptyServerlessRequest_Helper.IsException = func(err error) bool {
+		switch err.(type) {
+		default:
+			return false
+		}
+	}
+
+	Serverless_EmptyServerlessRequest_Helper.WrapResponse = func(err error) (*Serverless_EmptyServerlessRequest_Result, error) {
+		if err == nil {
+			return &Serverless_EmptyServerlessRequest_Result{}, nil
+		}
+
+		return nil, err
+	}
+	Serverless_EmptyServerlessRequest_Helper.UnwrapResponse = func(result *Serverless_EmptyServerlessRequest_Result) (err error) {
+		return
+	}
+
+}
+
+// Serverless_EmptyServerlessRequest_Result represents the result of a Serverless.emptyServerlessRequest function call.
+//
+// The result of a emptyServerlessRequest execution is sent and received over the wire as this struct.
+type Serverless_EmptyServerlessRequest_Result struct {
+}
+
+// ToWire translates a Serverless_EmptyServerlessRequest_Result struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Serverless_EmptyServerlessRequest_Result) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Serverless_EmptyServerlessRequest_Result struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Serverless_EmptyServerlessRequest_Result struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Serverless_EmptyServerlessRequest_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Serverless_EmptyServerlessRequest_Result) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Serverless_EmptyServerlessRequest_Result
+// struct.
+func (v *Serverless_EmptyServerlessRequest_Result) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("Serverless_EmptyServerlessRequest_Result{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Serverless_EmptyServerlessRequest_Result match the
+// provided Serverless_EmptyServerlessRequest_Result.
+//
+// This function performs a deep comparison.
+func (v *Serverless_EmptyServerlessRequest_Result) Equals(rhs *Serverless_EmptyServerlessRequest_Result) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Serverless_EmptyServerlessRequest_Result.
+func (v *Serverless_EmptyServerlessRequest_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	return err
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the result.
+//
+// This will always be "emptyServerlessRequest" for this struct.
+func (v *Serverless_EmptyServerlessRequest_Result) MethodName() string {
+	return "emptyServerlessRequest"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Reply for this struct.
+func (v *Serverless_EmptyServerlessRequest_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
 

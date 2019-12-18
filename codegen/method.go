@@ -1023,6 +1023,10 @@ func (ms *MethodSpec) setDummyTypeConverters(
 
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 
+	if respType == nil {
+		return nil
+	}
+
 	switch respType.(type) {
 	case
 		*compile.BoolSpec,
@@ -1034,7 +1038,9 @@ func (ms *MethodSpec) setDummyTypeConverters(
 		*compile.DoubleSpec,
 		*compile.StringSpec:
 
-		dummyConverter.append("out", " := in\t\n")
+		// TODO: Add support for primitive type by mapping the first field from request to response
+		return errors.Errorf(
+			"serverless endpoints need a complex return type")
 	default:
 		// default as struct
 		respFields := respType.(*compile.StructSpec).Fields

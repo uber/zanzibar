@@ -25,6 +25,7 @@ package serverlessendpoint
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -136,7 +137,29 @@ func (h *ServerlessServerlessArgWithHeadersHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+
+	// log downstream response to endpoint
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		if body, err := json.Marshal(response); err == nil {
+			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
+		}
+		if cliRespHeaders != nil {
+			for _, k := range cliRespHeaders.Keys() {
+				if val, ok := cliRespHeaders.Get(k); ok {
+					zfields = append(zfields, zap.String(k, val))
+				}
+			}
+		}
+		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
+			zfields = append(zfields, zap.String("x-trace-id", traceKey))
+		}
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
+	}
+
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return

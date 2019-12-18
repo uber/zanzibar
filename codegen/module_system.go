@@ -1117,7 +1117,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		PackageName: instance.PackageInfo.GeneratedPackagePath + "/workflow",
 		AliasName:   "workflow",
 	})
-	if e.WorkflowType == "custom" {
+	if e.WorkflowType == customWorkflow {
 		includedPackages = append(includedPackages, GoPackageImport{
 			PackageName: e.WorkflowImportPath,
 			AliasName:   "custom" + strings.Title(m.PackageName),

@@ -175,9 +175,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	{{if eq $dummyEndpoint true}}
-	response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
-	{{else if and (eq .RequestType "") (eq .ResponseType "")}}
+	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)

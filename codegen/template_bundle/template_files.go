@@ -411,9 +411,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	{{if eq $dummyEndpoint true}}
-	response, cliRespHeaders, err := w.HandleDummy(ctx, req.Header, &requestBody)
-	{{else if and (eq .RequestType "") (eq .ResponseType "")}}
+	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
@@ -493,7 +491,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7392, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7277, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2215,7 +2213,7 @@ import (
 {{with .Method -}}
 // {{$workflowInterface}} defines the interface for {{$serviceMethod}} workflow
 type {{$workflowInterface}} interface {
-HandleDummy(
+Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
@@ -2257,8 +2255,8 @@ type {{$workflowStruct}} struct {
 	Logger  *zap.Logger
 }
 
-// HandleDummy calls thrift client.
-func (w {{$workflowStruct}}) HandleDummy(
+// Handle processes the request without a downstream
+func (w {{$workflowStruct}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
@@ -2279,7 +2277,9 @@ func (w {{$workflowStruct}}) HandleDummy(
 ) ({{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 
+	{{- if ne .ResponseType "" -}}
 	response := convert{{$methodName}}DummyResponse(r)
+	{{end}}
 
 	serverlessHeaders := map[string]string{}
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
@@ -2308,7 +2308,12 @@ func (w {{$workflowStruct}}) HandleDummy(
 	}
 	{{- end}}
 
+	{{if eq .ResponseType "" -}}
+	return resHeaders, nil
+	{{- else -}}
 	return response, resHeaders, nil
+	{{end}}
+
 	{{- end -}}
 }
 
@@ -2317,7 +2322,6 @@ func (w {{$workflowStruct}}) HandleDummy(
 {{$line}}
 {{ end }}
 {{end -}}
-
 
 `)
 
@@ -2331,7 +2335,7 @@ func serverlessWorkflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "serverless-workflow.tmpl", size: 3964, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "serverless-workflow.tmpl", size: 4089, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
