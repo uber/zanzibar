@@ -102,7 +102,7 @@ func TestClientlessEmptyCall(t *testing.T) {
 	defer gateway.Close()
 
 	res, err := gateway.MakeRequest(
-		"GET", "/clientless/emptyClientlessRequest", nil, nil)
+		"GET", "/clientless/emptyclientlessRequest", nil, nil)
 
 	if !assert.NoError(t, err, "got http error") {
 		return
