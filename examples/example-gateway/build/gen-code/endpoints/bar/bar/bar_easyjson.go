@@ -4112,7 +4112,11 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				out.MapIntWithRange = make(map[UUID]int32)
+				if !in.IsDelim('}') {
+					out.MapIntWithRange = make(map[UUID]int32)
+				} else {
+					out.MapIntWithRange = nil
+				}
 				for !in.IsDelim('}') {
 					key := UUID(in.String())
 					in.WantColon()
@@ -4129,7 +4133,11 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				out.MapIntWithoutRange = make(map[string]int32)
+				if !in.IsDelim('}') {
+					out.MapIntWithoutRange = make(map[string]int32)
+				} else {
+					out.MapIntWithoutRange = nil
+				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
