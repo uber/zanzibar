@@ -2726,11 +2726,7 @@ func easyjson1bcb5839DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Field1 = make(map[UUID]*Recur2)
-				} else {
-					out.Field1 = nil
-				}
+				out.Field1 = make(map[UUID]*Recur2)
 				for !in.IsDelim('}') {
 					key := UUID(in.String())
 					in.WantColon()
