@@ -1,0 +1,154 @@
+{{/* template to render gateway workflow interface code */ -}}
+{{- $instance := .Instance }}
+package clientlessworkflow
+
+{{- $endpointType := .Spec.EndpointType }}
+{{- $reqHeaderMap := .ReqHeaders }}
+{{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
+{{- $resHeaderMap := .ResHeaders }}
+{{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $dummyEndpoint := .IsDummyEndpoint }}
+{{- $clientID := .ClientID }}
+{{- $clientName := title .ClientName }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $workflowStruct := camel $workflowInterface }}
+{{- $method := .Method }}
+
+import (
+	"context"
+	"net/textproto"
+	"github.com/uber/zanzibar/config"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end -}}
+
+	{{if .Method.Downstream }}
+	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
+	{{$file := basePath $pkg.PackageName -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+	{{- end}}
+
+	"go.uber.org/zap"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+{{with .Method -}}
+// {{$workflowInterface}} defines the interface for {{$serviceMethod}} workflow
+type {{$workflowInterface}} interface {
+Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error)
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error)
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{- end}}
+}
+
+{{end -}}
+
+
+{{- with .Method -}}
+{{- $methodName := title .Name }}
+
+
+// New{{$workflowInterface}} creates a workflow
+func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
+
+	return &{{$workflowStruct}}{
+		Logger:  deps.Default.Logger,
+	}
+}
+
+// {{$workflowStruct}} calls thrift client {{$clientName}}.{{$clientMethodName}}
+type {{$workflowStruct}} struct {
+	Logger  *zap.Logger
+}
+
+// Handle processes the request without a downstream
+func (w {{$workflowStruct}}) Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error) {
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error) {
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error) {
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error) {
+{{- end}}
+
+	{{- if ne .ResponseType "" -}}
+	response := convert{{$methodName}}DummyResponse(r)
+	{{end}}
+
+	clientlessHeaders := map[string]string{}
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	var ok bool
+	var h string
+	{{- end -}}
+	{{range $i, $k := $reqHeaderMapKeys}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		{{- $typedHeader := index $reqHeaderMap $k -}}
+		clientlessHeaders["{{$typedHeader.TransformTo}}"] = h
+	}
+	{{- end}}
+
+	// Filter and map response headers from client to server response.
+	{{if eq $endpointType "tchannel" -}}
+	resHeaders := zanzibar.ServerTChannelHeader{}
+	{{- else -}}
+	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{- end -}}
+	{{range $i, $k := $resHeaderMapKeys}}
+	{{- $resHeaderVal := index $resHeaderMap $k}}
+	h, ok = clientlessHeaders["{{$k}}"]
+	if ok {
+		resHeaders.Set("{{$resHeaderVal.TransformTo}}", h)
+	}
+	{{- end}}
+
+	{{if eq .ResponseType "" -}}
+	return resHeaders, nil
+	{{- else -}}
+	return response, resHeaders, nil
+	{{end}}
+
+	{{- end -}}
+}
+
+{{if eq $dummyEndpoint true -}}
+{{ range $key, $line := $method.ConvertDummyRequestGoStatements -}}
+{{$line}}
+{{ end }}
+{{end -}}
+

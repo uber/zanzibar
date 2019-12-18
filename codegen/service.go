@@ -221,9 +221,10 @@ func (ms *ModuleSpec) SetDownstream(
 		clientMethod = e.ClientMethod
 
 		// TODO: move generated middlewares out of zanzibar
-		headersPropagate = e.HeadersPropagate
-		reqTransforms    = e.ReqTransforms
-		respTransforms   = e.RespTransforms
+		headersPropagate   = e.HeadersPropagate
+		reqTransforms      = e.ReqTransforms
+		respTransforms     = e.RespTransforms
+		dummyReqTransforms = e.DummyReqTransforms
 	)
 	for _, v := range ms.Services {
 		if v.Name == serviceName {
@@ -247,6 +248,17 @@ func (ms *ModuleSpec) SetDownstream(
 			"Service %q does not have method %q\n", serviceName, methodName,
 		)
 	}
+
+	if e.IsDummyEndpoint {
+		funcSpec := method.CompiledThriftSpec
+		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
+		if err != nil {
+			return errors.Errorf(
+				"unable to set dummy type convertors for dummy endpoint")
+		}
+		return nil
+	}
+
 	serviceMethod, ok := clientSpec.ExposedMethods[clientMethod]
 	if !ok {
 		return errors.Errorf("Client %q does not expose method %q", clientSpec.ClientName, clientMethod)

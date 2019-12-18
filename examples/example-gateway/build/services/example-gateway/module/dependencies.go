@@ -26,6 +26,7 @@ package module
 import (
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
+	clientlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless"
 	contactsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
@@ -48,6 +49,7 @@ type Dependencies struct {
 type EndpointDependencies struct {
 	Bar            barendpointgenerated.Endpoint
 	Baz            bazendpointgenerated.Endpoint
+	Clientless     clientlessendpointgenerated.Endpoint
 	Contacts       contactsendpointgenerated.Endpoint
 	Googlenow      googlenowendpointgenerated.Endpoint
 	Multi          multiendpointgenerated.Endpoint

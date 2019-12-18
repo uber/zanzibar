@@ -36,8 +36,10 @@ import (
 )
 
 const (
-	reqHeaders = "reqHeaderMap"
-	resHeaders = "resHeaderMap"
+	reqHeaders         = "reqHeaderMap"
+	resHeaders         = "resHeaderMap"
+	customWorkflow     = "custom"
+	clientlessWorkflow = "clientless"
 )
 
 var mandatoryEndpointFields = []string{
@@ -255,6 +257,8 @@ type EndpointSpec struct {
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
 	RespTransforms map[string]FieldMapperEntry `yaml:"-"`
+	// DummyReqTransforms is used to transform a clientless request to response mapping
+	DummyReqTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ErrTransforms is a map from endpoint exception fields to client exception fields
 	// that should override their values
 	// Note that this feature is not yet fully implemented in the stand-alone Zanzibar codebase
@@ -275,6 +279,8 @@ type EndpointSpec struct {
 	ClientMethod string `yaml:"clientMethod,omitempty"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
+	// DummyEndpoint checks if the endpoint is clientless
+	IsDummyEndpoint bool `yaml:"-"`
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {
@@ -346,6 +352,7 @@ func NewEndpointSpec(
 	var workflowImportPath string
 	var clientID string
 	var clientMethod string
+	var isDummyEndpoint bool
 
 	workflowType := endpointConfigObj["workflowType"].(string)
 	if workflowType == "httpClient" || workflowType == "tchannelClient" {
@@ -355,16 +362,19 @@ func NewEndpointSpec(
 				"endpoint config %q must have clientName field", yamlFile,
 			)
 		}
-		clientID = iclientID.(string)
-
+		if iclientID != nil {
+			clientID = iclientID.(string)
+		}
 		iclientMethod, ok := endpointConfigObj["clientMethod"]
 		if !ok {
 			return nil, errors.Errorf(
 				"endpoint config %q must have clientMethod field", yamlFile,
 			)
 		}
-		clientMethod = iclientMethod.(string)
-	} else if workflowType == "custom" {
+		if iclientMethod != nil {
+			clientMethod = iclientMethod.(string)
+		}
+	} else if workflowType == customWorkflow {
 		iworkflowImportPath, ok := endpointConfigObj["workflowImportPath"]
 		if !ok {
 			return nil, errors.Errorf(
@@ -373,6 +383,8 @@ func NewEndpointSpec(
 			)
 		}
 		workflowImportPath = iworkflowImportPath.(string)
+	} else if workflowType == clientlessWorkflow {
+		isDummyEndpoint = true
 	} else {
 		return nil, errors.Errorf(
 			"Invalid workflowType %q for endpoint %q",
@@ -418,6 +430,7 @@ func NewEndpointSpec(
 		ThriftMethodName:   parts[1],
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
+		IsDummyEndpoint:    isDummyEndpoint,
 		ClientID:           clientID,
 		ClientMethod:       clientMethod,
 	}
@@ -711,6 +724,14 @@ func augmentEndpointSpec(
 				espec.RespTransforms = resTransforms
 				continue
 			}
+			if name == "transformDummyReq" {
+				dummyResTransforms, err := setTransformMiddleware(middlewareObj)
+				if err != nil {
+					return nil, err
+				}
+				espec.DummyReqTransforms = dummyResTransforms
+				continue
+			}
 			if name == "transformError" {
 				errTransforms, err := setTransformMiddleware(middlewareObj)
 				if err != nil {
@@ -912,8 +933,12 @@ func (e *EndpointSpec) SetDownstream(
 	clientModules []*ClientSpec,
 	h *PackageHelper,
 ) error {
-	if e.WorkflowType == "custom" {
+	if e.WorkflowType == customWorkflow {
 		return nil
+	}
+
+	if e.WorkflowType == clientlessWorkflow {
+		return e.ModuleSpec.SetDownstream(e, h)
 	}
 
 	var clientSpec *ClientSpec

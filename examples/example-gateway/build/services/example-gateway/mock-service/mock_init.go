@@ -39,6 +39,8 @@ import (
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	bazendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
+	clientlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless"
+	clientlessendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	contactsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	contactsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
@@ -171,6 +173,14 @@ func InitializeDependenciesMock(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Clientless = clientlessendpointgenerated.NewEndpoint(&clientlessendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Middleware: &clientlessendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsendpointmodule.ClientDependencies{
@@ -267,6 +277,7 @@ func InitializeDependenciesMock(
 		Endpoint: &module.EndpointDependencies{
 			Bar:            initializedEndpointDependencies.Bar,
 			Baz:            initializedEndpointDependencies.Baz,
+			Clientless:     initializedEndpointDependencies.Clientless,
 			Contacts:       initializedEndpointDependencies.Contacts,
 			Googlenow:      initializedEndpointDependencies.Googlenow,
 			Multi:          initializedEndpointDependencies.Multi,

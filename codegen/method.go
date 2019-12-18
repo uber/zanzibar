@@ -137,6 +137,9 @@ type MethodSpec struct {
 	// Statements for converting response types
 	ConvertResponseGoStatements []string
 
+	// Statements for converting Dummy request types
+	ConvertDummyRequestGoStatements []string
+
 	// Statements for propagating headers to client requests
 	PropagateHeadersGoStatements []string
 
@@ -996,6 +999,61 @@ func (ms *MethodSpec) setTypeConverters(
 	}
 	respConverter.append("\nreturn out \t}")
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
+
+	return nil
+}
+
+func (ms *MethodSpec) setDummyTypeConverters(
+	funcSpec *compile.FunctionSpec,
+	reqTransforms map[string]FieldMapperEntry,
+	headersPropagate map[string]FieldMapperEntry,
+	respTransforms map[string]FieldMapperEntry,
+	dummyReqTransforms map[string]FieldMapperEntry,
+	h *PackageHelper,
+) error {
+
+	dummyConverter := NewTypeConverter(h, nil)
+
+	respType := funcSpec.ResultSpec.ReturnType
+
+	dummyConverter.append(
+		"func convert",
+		PascalCase(ms.Name),
+		"DummyResponse(in ", ms.RequestType, ") ", ms.ResponseType, "{")
+
+	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+
+	if respType == nil {
+		return nil
+	}
+
+	switch respType.(type) {
+	case
+		*compile.BoolSpec,
+		*compile.I8Spec,
+		*compile.I16Spec,
+		*compile.I32Spec,
+		*compile.EnumSpec,
+		*compile.I64Spec,
+		*compile.DoubleSpec,
+		*compile.StringSpec:
+
+		// TODO: Add support for primitive type by mapping the first field from request to response
+		return errors.Errorf(
+			"clientless endpoints need a complex return type")
+	default:
+		// default as struct
+		respFields := respType.(*compile.StructSpec).Fields
+		dummyConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
+		err := dummyConverter.GenStructConverter(structType, respFields, dummyReqTransforms)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	dummyConverter.append("\nreturn out \t}")
+	ms.ConvertDummyRequestGoStatements = dummyConverter.GetLines()
 
 	return nil
 }

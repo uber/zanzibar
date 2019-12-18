@@ -1,0 +1,9 @@
+config:
+  endpoints:
+    - ./clientless.yaml
+    - ./clientless-headers.yaml
+    - ./clientless-empty.yaml
+  rateLimit: 100
+dependencies:
+name: clientless
+type: http

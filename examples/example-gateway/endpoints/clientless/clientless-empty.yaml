@@ -1,0 +1,15 @@
+clientId:
+clientMethod:
+endpointId: clientless
+endpointType: http
+handleId: emptyclientlessRequest
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/clientless/clientless.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Clientless::emptyclientlessRequest
+type: http
+workflowType: clientless
+

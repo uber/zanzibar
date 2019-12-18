@@ -27,6 +27,7 @@ func TestSaveContactsCall(t *testing.T) {
 	res, err := ms.MakeHTTPRequest(
 		"POST", "/contacts/foo/contacts", nil, bytes.NewReader(rawBody),
 	)
+
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}

@@ -64,6 +64,10 @@ func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err != nil {
 		return err
 	}
+	err = deps.Endpoint.Clientless.Register(g)
+	if err != nil {
+		return err
+	}
 	err = deps.Endpoint.Contacts.Register(g)
 	if err != nil {
 		return err
