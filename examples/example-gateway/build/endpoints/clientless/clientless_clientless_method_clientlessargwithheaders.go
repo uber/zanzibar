@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package serverlessendpoint
+package clientlessendpoint
 
 import (
 	"context"
@@ -37,29 +37,29 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/workflow"
-	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/workflow"
+	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 )
 
-// ServerlessServerlessArgWithHeadersHandler is the handler for "/serverless/argWithHeaders"
-type ServerlessServerlessArgWithHeadersHandler struct {
+// ClientlessClientlessArgWithHeadersHandler is the handler for "/clientless/argWithHeaders"
+type ClientlessClientlessArgWithHeadersHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewServerlessServerlessArgWithHeadersHandler creates a handler
-func NewServerlessServerlessArgWithHeadersHandler(deps *module.Dependencies) *ServerlessServerlessArgWithHeadersHandler {
-	handler := &ServerlessServerlessArgWithHeadersHandler{
+// NewClientlessClientlessArgWithHeadersHandler creates a handler
+func NewClientlessClientlessArgWithHeadersHandler(deps *module.Dependencies) *ClientlessClientlessArgWithHeadersHandler {
+	handler := &ClientlessClientlessArgWithHeadersHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"serverless", "serverlessArgWithHeaders",
+		"clientless", "clientlessArgWithHeaders",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -74,15 +74,15 @@ func NewServerlessServerlessArgWithHeadersHandler(deps *module.Dependencies) *Se
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *ServerlessServerlessArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
+func (h *ClientlessClientlessArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"POST", "/serverless/argWithHeaders",
+		"POST", "/clientless/argWithHeaders",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/serverless/argWithHeaders".
-func (h *ServerlessServerlessArgWithHeadersHandler) HandleRequest(
+// HandleRequest handles "/clientless/argWithHeaders".
+func (h *ClientlessClientlessArgWithHeadersHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -106,7 +106,7 @@ func (h *ServerlessServerlessArgWithHeadersHandler) HandleRequest(
 	if !req.CheckHeaders([]string{"X-Uuid"}) {
 		return
 	}
-	var requestBody endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args
+	var requestBody endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -132,7 +132,7 @@ func (h *ServerlessServerlessArgWithHeadersHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewServerlessServerlessArgWithHeadersDummyWorkflow(h.Dependencies)
+	w := workflow.NewClientlessClientlessArgWithHeadersWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

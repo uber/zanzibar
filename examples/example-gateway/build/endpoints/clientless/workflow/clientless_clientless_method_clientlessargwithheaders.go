@@ -21,69 +21,69 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package workflow
+package clientlessworkflow
 
 import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
 )
 
-// ServerlessServerlessArgWithHeadersDummyWorkflow defines the interface for ServerlessServerlessArgWithHeaders workflow
-type ServerlessServerlessArgWithHeadersDummyWorkflow interface {
+// ClientlessClientlessArgWithHeadersWorkflow defines the interface for ClientlessClientlessArgWithHeaders workflow
+type ClientlessClientlessArgWithHeadersWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args,
-	) (*endpointsServerlessServerless.Response, zanzibar.Header, error)
+		r *endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
+	) (*endpointsClientlessClientless.Response, zanzibar.Header, error)
 }
 
-// NewServerlessServerlessArgWithHeadersDummyWorkflow creates a workflow
-func NewServerlessServerlessArgWithHeadersDummyWorkflow(deps *module.Dependencies) ServerlessServerlessArgWithHeadersDummyWorkflow {
+// NewClientlessClientlessArgWithHeadersWorkflow creates a workflow
+func NewClientlessClientlessArgWithHeadersWorkflow(deps *module.Dependencies) ClientlessClientlessArgWithHeadersWorkflow {
 
-	return &serverlessServerlessArgWithHeadersDummyWorkflow{
+	return &clientlessClientlessArgWithHeadersWorkflow{
 		Logger: deps.Default.Logger,
 	}
 }
 
-// serverlessServerlessArgWithHeadersDummyWorkflow calls thrift client .
-type serverlessServerlessArgWithHeadersDummyWorkflow struct {
+// clientlessClientlessArgWithHeadersWorkflow calls thrift client .
+type clientlessClientlessArgWithHeadersWorkflow struct {
 	Logger *zap.Logger
 }
 
 // Handle processes the request without a downstream
-func (w serverlessServerlessArgWithHeadersDummyWorkflow) Handle(
+func (w clientlessClientlessArgWithHeadersWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args,
-) (*endpointsServerlessServerless.Response, zanzibar.Header, error) {
-	response := convertServerlessArgWithHeadersDummyResponse(r)
+	r *endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
+) (*endpointsClientlessClientless.Response, zanzibar.Header, error) {
+	response := convertClientlessArgWithHeadersDummyResponse(r)
 
-	serverlessHeaders := map[string]string{}
+	clientlessHeaders := map[string]string{}
 
 	var ok bool
 	var h string
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
-		serverlessHeaders["X-Deputy-Forwarded"] = h
+		clientlessHeaders["X-Deputy-Forwarded"] = h
 	}
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
-		serverlessHeaders["X-Uuid"] = h
+		clientlessHeaders["X-Uuid"] = h
 	}
 
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
-	h, ok = serverlessHeaders["X-Token"]
+	h, ok = clientlessHeaders["X-Token"]
 	if ok {
 		resHeaders.Set("X-Token", h)
 	}
-	h, ok = serverlessHeaders["X-Uuid"]
+	h, ok = clientlessHeaders["X-Uuid"]
 	if ok {
 		resHeaders.Set("X-Uuid", h)
 	}
@@ -91,8 +91,8 @@ func (w serverlessServerlessArgWithHeadersDummyWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertServerlessArgWithHeadersDummyResponse(in *endpointsServerlessServerless.Serverless_ServerlessArgWithHeaders_Args) *endpointsServerlessServerless.Response {
-	out := &endpointsServerlessServerless.Response{}
+func convertClientlessArgWithHeadersDummyResponse(in *endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args) *endpointsClientlessClientless.Response {
+	out := &endpointsClientlessClientless.Response{}
 
 	return out
 }

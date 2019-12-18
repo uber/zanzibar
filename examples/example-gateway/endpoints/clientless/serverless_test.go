@@ -1,4 +1,4 @@
-package serverless_test
+package clientless_test
 
 import (
 	"bytes"
@@ -7,26 +7,26 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	endpointServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	endpointClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
-func TestServerlessEndpointCall(t *testing.T) {
+func TestClientlessEndpointCall(t *testing.T) {
 	ms := ms.MustCreateTestService(t)
 	ms.Start()
 	defer ms.Stop()
 
 	var fn = "FirstName"
 	var ln = "LastName"
-	endpointRequest := &endpointServerless.Serverless_Beta_Args{
-		Request: &endpointServerless.Request{
+	endpointRequest := &endpointClientless.Clientless_Beta_Args{
+		Request: &endpointClientless.Request{
 			FirstName: &fn,
 			LastName:  &ln,
 		},
 	}
 	rawBody, _ := endpointRequest.MarshalJSON()
 	res, err := ms.MakeHTTPRequest(
-		"POST", "/serverless/post-request", nil, bytes.NewReader(rawBody),
+		"POST", "/clientless/post-request", nil, bytes.NewReader(rawBody),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -37,14 +37,14 @@ func TestServerlessEndpointCall(t *testing.T) {
 	assert.Equal(t, string("{\"firstName\":\"FirstName\",\"lastName1\":\"LastName\"}"), string(respBytes))
 }
 
-func TestServerlessHeadersCall(t *testing.T) {
+func TestClientlessHeadersCall(t *testing.T) {
 
 	ms := ms.MustCreateTestService(t)
 	ms.Start()
 	defer ms.Stop()
 
 	res, err := ms.MakeHTTPRequest(
-		"POST", "/serverless/argWithHeaders", map[string]string{
+		"POST", "/clientless/argWithHeaders", map[string]string{
 			"x-uuid": "a-uuid",
 		},
 		bytes.NewReader([]byte(`{"name": "foo"}`)),

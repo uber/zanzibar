@@ -21,56 +21,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package workflow
+package clientlessworkflow
 
 import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
 )
 
-// ServerlessBetaDummyWorkflow defines the interface for ServerlessBeta workflow
-type ServerlessBetaDummyWorkflow interface {
+// ClientlessBetaWorkflow defines the interface for ClientlessBeta workflow
+type ClientlessBetaWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsServerlessServerless.Serverless_Beta_Args,
-	) (*endpointsServerlessServerless.Response, zanzibar.Header, error)
+		r *endpointsClientlessClientless.Clientless_Beta_Args,
+	) (*endpointsClientlessClientless.Response, zanzibar.Header, error)
 }
 
-// NewServerlessBetaDummyWorkflow creates a workflow
-func NewServerlessBetaDummyWorkflow(deps *module.Dependencies) ServerlessBetaDummyWorkflow {
+// NewClientlessBetaWorkflow creates a workflow
+func NewClientlessBetaWorkflow(deps *module.Dependencies) ClientlessBetaWorkflow {
 
-	return &serverlessBetaDummyWorkflow{
+	return &clientlessBetaWorkflow{
 		Logger: deps.Default.Logger,
 	}
 }
 
-// serverlessBetaDummyWorkflow calls thrift client .
-type serverlessBetaDummyWorkflow struct {
+// clientlessBetaWorkflow calls thrift client .
+type clientlessBetaWorkflow struct {
 	Logger *zap.Logger
 }
 
 // Handle processes the request without a downstream
-func (w serverlessBetaDummyWorkflow) Handle(
+func (w clientlessBetaWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsServerlessServerless.Serverless_Beta_Args,
-) (*endpointsServerlessServerless.Response, zanzibar.Header, error) {
+	r *endpointsClientlessClientless.Clientless_Beta_Args,
+) (*endpointsClientlessClientless.Response, zanzibar.Header, error) {
 	response := convertBetaDummyResponse(r)
 
-	serverlessHeaders := map[string]string{}
+	clientlessHeaders := map[string]string{}
 
 	var ok bool
 	var h string
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
-		serverlessHeaders["X-Deputy-Forwarded"] = h
+		clientlessHeaders["X-Deputy-Forwarded"] = h
 	}
 
 	// Filter and map response headers from client to server response.
@@ -79,8 +79,8 @@ func (w serverlessBetaDummyWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertBetaDummyResponse(in *endpointsServerlessServerless.Serverless_Beta_Args) *endpointsServerlessServerless.Response {
-	out := &endpointsServerlessServerless.Response{}
+func convertBetaDummyResponse(in *endpointsClientlessClientless.Clientless_Beta_Args) *endpointsClientlessClientless.Response {
+	out := &endpointsClientlessClientless.Response{}
 
 	if in.Request != nil {
 		out.FirstName = (*string)(in.Request.FirstName)

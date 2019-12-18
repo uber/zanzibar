@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package serverlessendpoint
+package clientlessendpoint
 
 import (
 	"context"
@@ -36,29 +36,29 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/workflow"
-	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/workflow"
+	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 )
 
-// ServerlessEmptyServerlessRequestHandler is the handler for "/serverless/emptyServerlessRequest"
-type ServerlessEmptyServerlessRequestHandler struct {
+// ClientlessEmptyclientlessRequestHandler is the handler for "/clientless/emptyclientlessRequest"
+type ClientlessEmptyclientlessRequestHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewServerlessEmptyServerlessRequestHandler creates a handler
-func NewServerlessEmptyServerlessRequestHandler(deps *module.Dependencies) *ServerlessEmptyServerlessRequestHandler {
-	handler := &ServerlessEmptyServerlessRequestHandler{
+// NewClientlessEmptyclientlessRequestHandler creates a handler
+func NewClientlessEmptyclientlessRequestHandler(deps *module.Dependencies) *ClientlessEmptyclientlessRequestHandler {
+	handler := &ClientlessEmptyclientlessRequestHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"serverless", "emptyServerlessRequest",
+		"clientless", "emptyclientlessRequest",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -73,15 +73,15 @@ func NewServerlessEmptyServerlessRequestHandler(deps *module.Dependencies) *Serv
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *ServerlessEmptyServerlessRequestHandler) Register(g *zanzibar.Gateway) error {
+func (h *ClientlessEmptyclientlessRequestHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"GET", "/serverless/emptyServerlessRequest",
+		"GET", "/clientless/emptyclientlessRequest",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/serverless/emptyServerlessRequest".
-func (h *ServerlessEmptyServerlessRequestHandler) HandleRequest(
+// HandleRequest handles "/clientless/emptyclientlessRequest".
+func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -102,7 +102,7 @@ func (h *ServerlessEmptyServerlessRequestHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsServerlessServerless.Serverless_EmptyServerlessRequest_Args
+	var requestBody endpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args
 
 	testStringOk := req.HasQueryValue("testString")
 	if testStringOk {
@@ -127,7 +127,7 @@ func (h *ServerlessEmptyServerlessRequestHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewServerlessEmptyServerlessRequestDummyWorkflow(h.Dependencies)
+	w := workflow.NewClientlessEmptyclientlessRequestWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

@@ -1,6 +1,6 @@
 {{/* template to render gateway workflow interface code */ -}}
 {{- $instance := .Instance }}
-package workflow
+package clientlessworkflow
 
 {{- $endpointType := .Spec.EndpointType }}
 {{- $reqHeaderMap := .ReqHeaders }}
@@ -13,7 +13,7 @@ package workflow
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
-{{- $workflowInterface := printf "%sDummyWorkflow" $serviceMethod }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 {{- $workflowStruct := camel $workflowInterface }}
 {{- $method := .Method }}
 
@@ -110,7 +110,7 @@ func (w {{$workflowStruct}}) Handle(
 	response := convert{{$methodName}}DummyResponse(r)
 	{{end}}
 
-	serverlessHeaders := map[string]string{}
+	clientlessHeaders := map[string]string{}
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
 	var h string
@@ -119,7 +119,7 @@ func (w {{$workflowStruct}}) Handle(
 	h, ok = reqHeaders.Get("{{$k}}")
 	if ok {
 		{{- $typedHeader := index $reqHeaderMap $k -}}
-		serverlessHeaders["{{$typedHeader.TransformTo}}"] = h
+		clientlessHeaders["{{$typedHeader.TransformTo}}"] = h
 	}
 	{{- end}}
 
@@ -131,7 +131,7 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
-	h, ok = serverlessHeaders["{{$k}}"]
+	h, ok = clientlessHeaders["{{$k}}"]
 	if ok {
 		resHeaders.Set("{{$resHeaderVal.TransformTo}}", h)
 	}

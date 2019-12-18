@@ -13,4 +13,4 @@ dependencies:
   - tchannel/panic
   - tchannel/quux
   - withexceptions
-  - serverless
+  - clientless

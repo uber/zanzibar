@@ -31,7 +31,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the serverless endpoint module
+// Dependencies contains dependencies for the clientless endpoint module
 type Dependencies struct {
 	Default    *zanzibar.DefaultDependencies
 	Middleware *MiddlewareDependencies

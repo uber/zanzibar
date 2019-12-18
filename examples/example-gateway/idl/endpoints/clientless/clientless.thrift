@@ -1,4 +1,4 @@
-namespace java com.uber.zanzibar.serverless
+namespace java com.uber.zanzibar.clientless
 
 include "../models/meta.thrift"
 
@@ -12,7 +12,7 @@ struct Response {
 	2: optional string lastName1
 }
 
-service Serverless {
+service Clientless {
 	Response beta(
 		1: optional Request request
 		2: optional string alpha
@@ -20,12 +20,12 @@ service Serverless {
 	) (
 		zanzibar.http.method = "POST"
 		zanzibar.http.reqHeaders = "x-uuid"
-		zanzibar.http.path = "/serverless/post-request"
+		zanzibar.http.path = "/clientless/post-request"
 		zanzibar.http.status = "200"
 		zanzibar.http.resHeaders = "x-uuid"
 	)
 	 // TODO: support headers annotation
-     Response serverlessArgWithHeaders (
+     Response clientlessArgWithHeaders (
          1: required string name (
          zanzibar.http.ref = "headers.name"
             go.tag = "json:\"-\""
@@ -37,17 +37,17 @@ service Serverless {
      ) (
          zanzibar.http.method = "POST"
          zanzibar.http.reqHeaders = "x-uuid"
-         zanzibar.http.path = "/serverless/argWithHeaders"
+         zanzibar.http.path = "/clientless/argWithHeaders"
          zanzibar.http.req.metadata = "meta.UUIDOnly"
          zanzibar.http.res.metadata = "meta.Grault"
          zanzibar.http.status = "200"
      )
 
-     void emptyServerlessRequest(
+     void emptyclientlessRequest(
         1: optional string testString
      ) (
          zanzibar.http.method = "GET"
-         zanzibar.http.path = "/serverless/emptyServerlessRequest"
+         zanzibar.http.path = "/clientless/emptyclientlessRequest"
          zanzibar.http.status = "200"
      )
 } (

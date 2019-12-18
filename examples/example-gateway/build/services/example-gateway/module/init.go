@@ -41,6 +41,8 @@ import (
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	bazendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
+	clientlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless"
+	clientlessendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	contactsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	contactsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
@@ -49,8 +51,6 @@ import (
 	multiendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
 	panicendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
-	serverlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless"
-	serverlessendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
@@ -105,11 +105,11 @@ type MiddlewareDependenciesNodes struct {
 type EndpointDependenciesNodes struct {
 	Bar            barendpointgenerated.Endpoint
 	Baz            bazendpointgenerated.Endpoint
+	Clientless     clientlessendpointgenerated.Endpoint
 	Contacts       contactsendpointgenerated.Endpoint
 	Googlenow      googlenowendpointgenerated.Endpoint
 	Multi          multiendpointgenerated.Endpoint
 	Panic          panicendpointgenerated.Endpoint
-	Serverless     serverlessendpointgenerated.Endpoint
 	BazTChannel    baztchannelendpointgenerated.Endpoint
 	PanicTChannel  panictchannelendpointgenerated.Endpoint
 	Quux           quuxendpointgenerated.Endpoint
@@ -212,6 +212,14 @@ func InitializeDependencies(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Clientless = clientlessendpointgenerated.NewEndpoint(&clientlessendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Middleware: &clientlessendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsendpointmodule.ClientDependencies{
@@ -251,14 +259,6 @@ func InitializeDependencies(
 			Multi: initializedClientDependencies.Multi,
 		},
 		Middleware: &panicendpointmodule.MiddlewareDependencies{
-			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
-			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
-			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
-		},
-	})
-	initializedEndpointDependencies.Serverless = serverlessendpointgenerated.NewEndpoint(&serverlessendpointmodule.Dependencies{
-		Default: initializedDefaultDependencies,
-		Middleware: &serverlessendpointmodule.MiddlewareDependencies{
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
@@ -316,11 +316,11 @@ func InitializeDependencies(
 		Endpoint: &EndpointDependencies{
 			Bar:            initializedEndpointDependencies.Bar,
 			Baz:            initializedEndpointDependencies.Baz,
+			Clientless:     initializedEndpointDependencies.Clientless,
 			Contacts:       initializedEndpointDependencies.Contacts,
 			Googlenow:      initializedEndpointDependencies.Googlenow,
 			Multi:          initializedEndpointDependencies.Multi,
 			Panic:          initializedEndpointDependencies.Panic,
-			Serverless:     initializedEndpointDependencies.Serverless,
 			BazTChannel:    initializedEndpointDependencies.BazTChannel,
 			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
 			Quux:           initializedEndpointDependencies.Quux,

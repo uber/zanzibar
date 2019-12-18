@@ -1040,7 +1040,7 @@ func (ms *MethodSpec) setDummyTypeConverters(
 
 		// TODO: Add support for primitive type by mapping the first field from request to response
 		return errors.Errorf(
-			"serverless endpoints need a complex return type")
+			"clientless endpoints need a complex return type")
 	default:
 		// default as struct
 		respFields := respType.(*compile.StructSpec).Fields

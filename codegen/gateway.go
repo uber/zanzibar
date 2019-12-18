@@ -39,7 +39,7 @@ const (
 	reqHeaders         = "reqHeaderMap"
 	resHeaders         = "resHeaderMap"
 	customWorkflow     = "custom"
-	serverlessWorkflow = "serverless"
+	clientlessWorkflow = "clientless"
 )
 
 var mandatoryEndpointFields = []string{
@@ -257,7 +257,7 @@ type EndpointSpec struct {
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
 	RespTransforms map[string]FieldMapperEntry `yaml:"-"`
-	// DummyReqTransforms is used to transform a serverless request to response mapping
+	// DummyReqTransforms is used to transform a clientless request to response mapping
 	DummyReqTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ErrTransforms is a map from endpoint exception fields to client exception fields
 	// that should override their values
@@ -279,7 +279,7 @@ type EndpointSpec struct {
 	ClientMethod string `yaml:"clientMethod,omitempty"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
-	// DummyEndpoint checks if the endpoint is serverless
+	// DummyEndpoint checks if the endpoint is clientless
 	IsDummyEndpoint bool `yaml:"-"`
 }
 
@@ -383,7 +383,7 @@ func NewEndpointSpec(
 			)
 		}
 		workflowImportPath = iworkflowImportPath.(string)
-	} else if workflowType == serverlessWorkflow {
+	} else if workflowType == clientlessWorkflow {
 		isDummyEndpoint = true
 	} else {
 		return nil, errors.Errorf(
@@ -937,7 +937,7 @@ func (e *EndpointSpec) SetDownstream(
 		return nil
 	}
 
-	if e.WorkflowType == serverlessWorkflow {
+	if e.WorkflowType == clientlessWorkflow {
 		return e.ModuleSpec.SetDownstream(e, h)
 	}
 

@@ -21,10 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package serverlessendpoint
+package clientlessendpoint
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -37,30 +37,30 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		ServerlessBetaHandler:                     NewServerlessBetaHandler(deps),
-		ServerlessServerlessArgWithHeadersHandler: NewServerlessServerlessArgWithHeadersHandler(deps),
-		ServerlessEmptyServerlessRequestHandler:   NewServerlessEmptyServerlessRequestHandler(deps),
+		ClientlessBetaHandler:                     NewClientlessBetaHandler(deps),
+		ClientlessClientlessArgWithHeadersHandler: NewClientlessClientlessArgWithHeadersHandler(deps),
+		ClientlessEmptyclientlessRequestHandler:   NewClientlessEmptyclientlessRequestHandler(deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	ServerlessBetaHandler                     *ServerlessBetaHandler
-	ServerlessServerlessArgWithHeadersHandler *ServerlessServerlessArgWithHeadersHandler
-	ServerlessEmptyServerlessRequestHandler   *ServerlessEmptyServerlessRequestHandler
+	ClientlessBetaHandler                     *ClientlessBetaHandler
+	ClientlessClientlessArgWithHeadersHandler *ClientlessClientlessArgWithHeadersHandler
+	ClientlessEmptyclientlessRequestHandler   *ClientlessEmptyclientlessRequestHandler
 }
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	err0 := handlers.ServerlessBetaHandler.Register(gateway)
+	err0 := handlers.ClientlessBetaHandler.Register(gateway)
 	if err0 != nil {
 		return err0
 	}
-	err1 := handlers.ServerlessServerlessArgWithHeadersHandler.Register(gateway)
+	err1 := handlers.ClientlessClientlessArgWithHeadersHandler.Register(gateway)
 	if err1 != nil {
 		return err1
 	}
-	err2 := handlers.ServerlessEmptyServerlessRequestHandler.Register(gateway)
+	err2 := handlers.ClientlessEmptyclientlessRequestHandler.Register(gateway)
 	if err2 != nil {
 		return err2
 	}

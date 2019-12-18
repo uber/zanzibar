@@ -21,55 +21,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package workflow
+package clientlessworkflow
 
 import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
 )
 
-// ServerlessEmptyServerlessRequestDummyWorkflow defines the interface for ServerlessEmptyServerlessRequest workflow
-type ServerlessEmptyServerlessRequestDummyWorkflow interface {
+// ClientlessEmptyclientlessRequestWorkflow defines the interface for ClientlessEmptyclientlessRequest workflow
+type ClientlessEmptyclientlessRequestWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsServerlessServerless.Serverless_EmptyServerlessRequest_Args,
+		r *endpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
 	) (zanzibar.Header, error)
 }
 
-// NewServerlessEmptyServerlessRequestDummyWorkflow creates a workflow
-func NewServerlessEmptyServerlessRequestDummyWorkflow(deps *module.Dependencies) ServerlessEmptyServerlessRequestDummyWorkflow {
+// NewClientlessEmptyclientlessRequestWorkflow creates a workflow
+func NewClientlessEmptyclientlessRequestWorkflow(deps *module.Dependencies) ClientlessEmptyclientlessRequestWorkflow {
 
-	return &serverlessEmptyServerlessRequestDummyWorkflow{
+	return &clientlessEmptyclientlessRequestWorkflow{
 		Logger: deps.Default.Logger,
 	}
 }
 
-// serverlessEmptyServerlessRequestDummyWorkflow calls thrift client .
-type serverlessEmptyServerlessRequestDummyWorkflow struct {
+// clientlessEmptyclientlessRequestWorkflow calls thrift client .
+type clientlessEmptyclientlessRequestWorkflow struct {
 	Logger *zap.Logger
 }
 
 // Handle processes the request without a downstream
-func (w serverlessEmptyServerlessRequestDummyWorkflow) Handle(
+func (w clientlessEmptyclientlessRequestWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsServerlessServerless.Serverless_EmptyServerlessRequest_Args,
+	r *endpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
 ) (zanzibar.Header, error) {
 
-	serverlessHeaders := map[string]string{}
+	clientlessHeaders := map[string]string{}
 
 	var ok bool
 	var h string
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
-		serverlessHeaders["X-Deputy-Forwarded"] = h
+		clientlessHeaders["X-Deputy-Forwarded"] = h
 	}
 
 	// Filter and map response headers from client to server response.

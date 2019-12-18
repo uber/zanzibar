@@ -1,6 +1,4 @@
-clientId:
-clientMethod:
-endpointId: serverless
+endpointId: clientless
 endpointType: http
 handleId: beta
 middlewares:
@@ -16,9 +14,9 @@ middlewares:
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}
-thriftFile: endpoints/serverless/serverless.thrift
+thriftFile: endpoints/clientless/clientless.thrift
 thriftFileSha: '{{placeholder}}'
-thriftMethodName: Serverless::beta
+thriftMethodName: Clientless::beta
 type: http
-workflowType: serverless
+workflowType: clientless
 

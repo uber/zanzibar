@@ -54,7 +54,7 @@ func TestServerlessEndpointCall(t *testing.T) {
 
 	rawBody, _ := endpointRequest.MarshalJSON()
 	res, err := gateway.MakeRequest(
-		"POST", "/serverless/post-request", nil, bytes.NewReader(rawBody),
+		"POST", "/clientless/post-request", nil, bytes.NewReader(rawBody),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -77,7 +77,7 @@ func TestServerlessHeadersCall(t *testing.T) {
 	defer gateway.Close()
 
 	res, err := gateway.MakeRequest(
-		"POST", "/serverless/argWithHeaders", map[string]string{
+		"POST", "/clientless/argWithHeaders", map[string]string{
 			"x-uuid": "a-uuid",
 		},
 		bytes.NewReader([]byte(`{"name": "foo"}`)),
@@ -102,7 +102,7 @@ func TestServerlessEmptyCall(t *testing.T) {
 	defer gateway.Close()
 
 	res, err := gateway.MakeRequest(
-		"GET", "/serverless/emptyServerlessRequest", nil, nil)
+		"GET", "/clientless/emptyServerlessRequest", nil, nil)
 
 	if !assert.NoError(t, err, "got http error") {
 		return

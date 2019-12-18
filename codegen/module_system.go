@@ -1194,7 +1194,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	tmpl := ""
 	if e.IsDummyEndpoint {
-		tmpl = "serverless-workflow.tmpl"
+		tmpl = "clientless-workflow.tmpl"
 	} else {
 		tmpl = "workflow.tmpl"
 	}

@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package serverlessendpoint
+package clientlessendpoint
 
 import (
 	"context"
@@ -36,29 +36,29 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/workflow"
-	endpointsServerlessServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/workflow"
+	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/serverless/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 )
 
-// ServerlessBetaHandler is the handler for "/serverless/post-request"
-type ServerlessBetaHandler struct {
+// ClientlessBetaHandler is the handler for "/clientless/post-request"
+type ClientlessBetaHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewServerlessBetaHandler creates a handler
-func NewServerlessBetaHandler(deps *module.Dependencies) *ServerlessBetaHandler {
-	handler := &ServerlessBetaHandler{
+// NewClientlessBetaHandler creates a handler
+func NewClientlessBetaHandler(deps *module.Dependencies) *ClientlessBetaHandler {
+	handler := &ClientlessBetaHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"serverless", "beta",
+		"clientless", "beta",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -73,15 +73,15 @@ func NewServerlessBetaHandler(deps *module.Dependencies) *ServerlessBetaHandler 
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *ServerlessBetaHandler) Register(g *zanzibar.Gateway) error {
+func (h *ClientlessBetaHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"POST", "/serverless/post-request",
+		"POST", "/clientless/post-request",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/serverless/post-request".
-func (h *ServerlessBetaHandler) HandleRequest(
+// HandleRequest handles "/clientless/post-request".
+func (h *ClientlessBetaHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -102,7 +102,7 @@ func (h *ServerlessBetaHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsServerlessServerless.Serverless_Beta_Args
+	var requestBody endpointsClientlessClientless.Clientless_Beta_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -121,7 +121,7 @@ func (h *ServerlessBetaHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewServerlessBetaDummyWorkflow(h.Dependencies)
+	w := workflow.NewClientlessBetaWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
