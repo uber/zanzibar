@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package serverless_test
+package clientless_test
 
 import (
 	"bytes"
@@ -27,12 +27,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	endpointServerless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/serverless/serverless"
+	endpointClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
 
-func TestServerlessEndpointCall(t *testing.T) {
+func TestClientlessEndpointCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		TestBinary:  util.DefaultMainFile("example-gateway"),
@@ -45,8 +45,8 @@ func TestServerlessEndpointCall(t *testing.T) {
 
 	var fn = "FirstName"
 	var ln = "LastName"
-	endpointRequest := &endpointServerless.Serverless_Beta_Args{
-		Request: &endpointServerless.Request{
+	endpointRequest := &endpointClientless.Clientless_Beta_Args{
+		Request: &endpointClientless.Request{
 			FirstName: &fn,
 			LastName:  &ln,
 		},
@@ -65,7 +65,7 @@ func TestServerlessEndpointCall(t *testing.T) {
 	assert.Equal(t, string("{\"firstName\":\"FirstName\",\"lastName1\":\"LastName\"}"), string(respBytes))
 }
 
-func TestServerlessHeadersCall(t *testing.T) {
+func TestClientlessHeadersCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		TestBinary:  util.DefaultMainFile("example-gateway"),
@@ -90,7 +90,7 @@ func TestServerlessHeadersCall(t *testing.T) {
 	assert.Equal(t, "a-uuid", res.Header.Get("X-Uuid"))
 }
 
-func TestServerlessEmptyCall(t *testing.T) {
+func TestClientlessEmptyCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		TestBinary:  util.DefaultMainFile("example-gateway"),
@@ -102,7 +102,7 @@ func TestServerlessEmptyCall(t *testing.T) {
 	defer gateway.Close()
 
 	res, err := gateway.MakeRequest(
-		"GET", "/clientless/emptyServerlessRequest", nil, nil)
+		"GET", "/clientless/emptyClientlessRequest", nil, nil)
 
 	if !assert.NoError(t, err, "got http error") {
 		return
