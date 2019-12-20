@@ -724,7 +724,7 @@ func augmentEndpointSpec(
 				espec.RespTransforms = resTransforms
 				continue
 			}
-			if name == "transformDummyReq" {
+			if name == "transformClientlessReq" {
 				dummyResTransforms, err := setTransformMiddleware(middlewareObj)
 				if err != nil {
 					return nil, err
