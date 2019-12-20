@@ -2,7 +2,7 @@ endpointId: clientless
 endpointType: http
 handleId: beta
 middlewares:
-  - name: transformDummyReq
+  - name: transformClientlessReq
     options:
       transforms:
         - from: Request.FirstName
