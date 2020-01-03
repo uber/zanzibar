@@ -249,9 +249,9 @@ func (ms *ModuleSpec) SetDownstream(
 		)
 	}
 
-	if e.IsDummyEndpoint {
+	if e.IsClientlessEndpoint {
 		funcSpec := method.CompiledThriftSpec
-		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
+		err := method.setClientlessTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
 		if err != nil {
 			return errors.Errorf(
 				"unable to set dummy type convertors for dummy endpoint")
