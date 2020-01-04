@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ type EndpointMeta struct {
 	ClientMethodName       string
 	WorkflowPkg            string
 	ReqHeaders             map[string]*TypedHeader
-	IsDummyEndpoint        bool
+	IsClientlessEndpoint   bool
 	ReqHeadersKeys         []string
 	ReqRequiredHeadersKeys []string
 	ResHeaders             map[string]*TypedHeader
@@ -1154,7 +1154,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		IncludedPackages:       includedPackages,
 		Method:                 method,
 		ReqHeaders:             reqHeaders,
-		IsDummyEndpoint:        e.IsDummyEndpoint,
+		IsClientlessEndpoint:   e.IsClientlessEndpoint,
 		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
 		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
@@ -1193,7 +1193,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	out[endpointFilePath] = endpoint
 
 	tmpl := ""
-	if e.IsDummyEndpoint {
+	if e.IsClientlessEndpoint {
 		tmpl = "clientless-workflow.tmpl"
 	} else {
 		tmpl = "workflow.tmpl"

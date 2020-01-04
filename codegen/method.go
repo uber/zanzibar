@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -137,8 +137,8 @@ type MethodSpec struct {
 	// Statements for converting response types
 	ConvertResponseGoStatements []string
 
-	// Statements for converting Dummy request types
-	ConvertDummyRequestGoStatements []string
+	// Statements for converting Clientless request types
+	ConvertClientlessRequestGoStatements []string
 
 	// Statements for propagating headers to client requests
 	PropagateHeadersGoStatements []string
@@ -1003,7 +1003,7 @@ func (ms *MethodSpec) setTypeConverters(
 	return nil
 }
 
-func (ms *MethodSpec) setDummyTypeConverters(
+func (ms *MethodSpec) setClientlessTypeConverters(
 	funcSpec *compile.FunctionSpec,
 	reqTransforms map[string]FieldMapperEntry,
 	headersPropagate map[string]FieldMapperEntry,
@@ -1012,11 +1012,11 @@ func (ms *MethodSpec) setDummyTypeConverters(
 	h *PackageHelper,
 ) error {
 
-	dummyConverter := NewTypeConverter(h, nil)
+	clientlessConverter := NewTypeConverter(h, nil)
 
 	respType := funcSpec.ResultSpec.ReturnType
 
-	dummyConverter.append(
+	clientlessConverter.append(
 		"func convert",
 		PascalCase(ms.Name),
 		"DummyResponse(in ", ms.RequestType, ") ", ms.ResponseType, "{")
@@ -1044,16 +1044,16 @@ func (ms *MethodSpec) setDummyTypeConverters(
 	default:
 		// default as struct
 		respFields := respType.(*compile.StructSpec).Fields
-		dummyConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
-		err := dummyConverter.GenStructConverter(structType, respFields, dummyReqTransforms)
+		clientlessConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
+		err := clientlessConverter.GenStructConverter(structType, respFields, dummyReqTransforms)
 		if err != nil {
 			return err
 		}
 
 	}
 
-	dummyConverter.append("\nreturn out \t}")
-	ms.ConvertDummyRequestGoStatements = dummyConverter.GetLines()
+	clientlessConverter.append("\nreturn out \t}")
+	ms.ConvertClientlessRequestGoStatements = clientlessConverter.GetLines()
 
 	return nil
 }

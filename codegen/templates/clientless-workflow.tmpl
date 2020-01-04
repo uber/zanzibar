@@ -8,7 +8,7 @@ package clientlessworkflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
-{{- $dummyEndpoint := .IsDummyEndpoint }}
+{{- $clientlessEndpoint := .IsClientlessEndpoint }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
@@ -146,8 +146,8 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end -}}
 }
 
-{{if eq $dummyEndpoint true -}}
-{{ range $key, $line := $method.ConvertDummyRequestGoStatements -}}
+{{if eq $clientlessEndpoint true -}}
+{{ range $key, $line := $method.ConvertClientlessRequestGoStatements -}}
 {{$line}}
 {{ end }}
 {{end -}}

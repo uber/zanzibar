@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -249,9 +249,9 @@ func (ms *ModuleSpec) SetDownstream(
 		)
 	}
 
-	if e.IsDummyEndpoint {
+	if e.IsClientlessEndpoint {
 		funcSpec := method.CompiledThriftSpec
-		err := method.setDummyTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
+		err := method.setClientlessTypeConverters(funcSpec, reqTransforms, headersPropagate, respTransforms, dummyReqTransforms, h)
 		if err != nil {
 			return errors.Errorf(
 				"unable to set dummy type convertors for dummy endpoint")

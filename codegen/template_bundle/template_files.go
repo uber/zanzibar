@@ -197,7 +197,7 @@ package clientlessworkflow
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
-{{- $dummyEndpoint := .IsDummyEndpoint }}
+{{- $clientlessEndpoint := .IsClientlessEndpoint }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
 {{- $clientMethodName := title .ClientMethodName }}
@@ -335,8 +335,8 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end -}}
 }
 
-{{if eq $dummyEndpoint true -}}
-{{ range $key, $line := $method.ConvertDummyRequestGoStatements -}}
+{{if eq $clientlessEndpoint true -}}
+{{ range $key, $line := $method.ConvertClientlessRequestGoStatements -}}
 {{$line}}
 {{ end }}
 {{end -}}
@@ -353,7 +353,7 @@ func clientlessWorkflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4094, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4114, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -417,7 +417,6 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
-{{- $dummyEndpoint := .IsDummyEndpoint}}
 {{- $handlerName := printf "%sHandler" $serviceMethod }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
@@ -425,7 +424,6 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
-{{- $dummyWorkflowInterface := printf "%sDummyWorkflow" $serviceMethod }}
 {{- $traceKey := .TraceKey }}
 
 import (
@@ -658,7 +656,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7154, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7039, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

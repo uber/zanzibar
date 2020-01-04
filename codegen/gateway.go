@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -279,8 +279,8 @@ type EndpointSpec struct {
 	ClientMethod string `yaml:"clientMethod,omitempty"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
-	// DummyEndpoint checks if the endpoint is clientless
-	IsDummyEndpoint bool `yaml:"-"`
+	// IsClientlessEndpoint checks if the endpoint is clientless
+	IsClientlessEndpoint bool `yaml:"-"`
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {
@@ -352,7 +352,7 @@ func NewEndpointSpec(
 	var workflowImportPath string
 	var clientID string
 	var clientMethod string
-	var isDummyEndpoint bool
+	var isClientlessEndpoint bool
 
 	workflowType := endpointConfigObj["workflowType"].(string)
 	if workflowType == "httpClient" || workflowType == "tchannelClient" {
@@ -384,7 +384,7 @@ func NewEndpointSpec(
 		}
 		workflowImportPath = iworkflowImportPath.(string)
 	} else if workflowType == clientlessWorkflow {
-		isDummyEndpoint = true
+		isClientlessEndpoint = true
 	} else {
 		return nil, errors.Errorf(
 			"Invalid workflowType %q for endpoint %q",
@@ -417,22 +417,22 @@ func NewEndpointSpec(
 	}
 
 	espec := &EndpointSpec{
-		ModuleSpec:         mspec,
-		YAMLFile:           yamlFile,
-		GoStructsFileName:  goStructsFileName,
-		GoFolderName:       goFolderName,
-		GoPackageName:      goPackageName,
-		EndpointType:       endpointConfigObj["endpointType"].(string),
-		EndpointID:         endpointConfigObj["endpointId"].(string),
-		HandleID:           endpointConfigObj["handleId"].(string),
-		ThriftFile:         thriftFile,
-		ThriftServiceName:  parts[0],
-		ThriftMethodName:   parts[1],
-		WorkflowType:       workflowType,
-		WorkflowImportPath: workflowImportPath,
-		IsDummyEndpoint:    isDummyEndpoint,
-		ClientID:           clientID,
-		ClientMethod:       clientMethod,
+		ModuleSpec:           mspec,
+		YAMLFile:             yamlFile,
+		GoStructsFileName:    goStructsFileName,
+		GoFolderName:         goFolderName,
+		GoPackageName:        goPackageName,
+		EndpointType:         endpointConfigObj["endpointType"].(string),
+		EndpointID:           endpointConfigObj["endpointId"].(string),
+		HandleID:             endpointConfigObj["handleId"].(string),
+		ThriftFile:           thriftFile,
+		ThriftServiceName:    parts[0],
+		ThriftMethodName:     parts[1],
+		WorkflowType:         workflowType,
+		WorkflowImportPath:   workflowImportPath,
+		IsClientlessEndpoint: isClientlessEndpoint,
+		ClientID:             clientID,
+		ClientMethod:         clientMethod,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(
