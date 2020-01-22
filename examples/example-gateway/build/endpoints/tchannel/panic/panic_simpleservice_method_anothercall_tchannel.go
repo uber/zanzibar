@@ -208,10 +208,14 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 		"SimpleService::AnotherCall": "AnotherCall",
 	}
 
-	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
-	sub.Peers().Add(hostPort)
+	deputyChannel, err := tchannel.NewChannel(serviceName, nil)
+	if err != nil {
+		h.Deps.Default.ContextLogger.Error(ctx, "Deputy Failure", zap.Error(err))
+	}
+	defer deputyChannel.Close()
+	deputyChannel.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
-		h.Deps.Default.Channel,
+		deputyChannel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
 		h.Deps.Default.ContextExtractor,
@@ -226,9 +230,5 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res)
-	// hostPort is added above, so there should not be any error returned for the
-	// following line
-	// nolint
-	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
