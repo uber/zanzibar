@@ -185,10 +185,18 @@ func CreateGateway(
 		LogFieldsExtractors: logFieldsExtractors,
 	}
 
+	var service string
+	if config.ContainsKey("serviceNameEnvKey") {
+		serviceEnvKey := config.MustGetString("serviceNameEnvKey")
+		service = os.Getenv(serviceEnvKey)
+	} else {
+		service = config.MustGetString("serviceName")
+	}
+
 	gateway := &Gateway{
 		HTTPPort:         int32(config.MustGetInt("http.port")),
 		TChannelPort:     int32(config.MustGetInt("tchannel.port")),
-		ServiceName:      config.MustGetString("serviceName"),
+		ServiceName:      service,
 		WaitGroup:        &sync.WaitGroup{},
 		Config:           config,
 		ContextExtractor: extractors,
@@ -507,7 +515,15 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 
 func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	metricsType := config.MustGetString("metrics.type")
-	service := config.MustGetString("metrics.serviceName")
+
+	var service string
+	if config.ContainsKey("serviceNameEnvKey") {
+		serviceEnvKey := config.MustGetString("serviceNameEnvKey")
+		service = os.Getenv(serviceEnvKey)
+	} else {
+		service = config.MustGetString("metrics.serviceName")
+	}
+
 	env := config.MustGetString("env")
 
 	if metricsType == "m3" {
@@ -655,12 +671,20 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	gateway.logEncoder = logEncoder
 	gateway.logWriteSyncer = output
 
+	var service string
+	if config.ContainsKey("serviceNameEnvKey") {
+		serviceEnvKey := config.MustGetString("serviceNameEnvKey")
+		service = os.Getenv(serviceEnvKey)
+	} else {
+		service = config.MustGetString("serviceName")
+	}
+
 	// Default to a STDOUT logger
 	gateway.Logger = zapLogger.With(
 		zap.String("zone", gateway.Config.MustGetString("datacenter")),
 		zap.String("env", gateway.Config.MustGetString("env")),
 		zap.String("hostname", GetHostname()),
-		zap.String("service", gateway.Config.MustGetString("serviceName")),
+		zap.String("service", service),
 		zap.Int("pid", os.Getpid()),
 	)
 
@@ -686,8 +710,16 @@ func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger 
 }
 
 func (gateway *Gateway) initJaegerConfig(config *StaticConfig) *jaegerConfig.Configuration {
+	var service string
+	if config.ContainsKey("serviceNameEnvKey") {
+		serviceEnvKey := config.MustGetString("serviceNameEnvKey")
+		service = os.Getenv(serviceEnvKey)
+	} else {
+		service = config.MustGetString("serviceName")
+	}
+
 	return &jaegerConfig.Configuration{
-		ServiceName: config.MustGetString("serviceName"),
+		ServiceName: service,
 		Disabled:    config.MustGetBoolean("jaeger.disabled"),
 		Reporter: &jaegerConfig.ReporterConfig{
 			LocalAgentHostPort:  config.MustGetString("jaeger.reporter.hostport"),
@@ -816,8 +848,16 @@ func (gateway *Gateway) setupGRPCClientDispatcher(config *StaticConfig) error {
 		}
 	}
 
+	var service string
+	if config.ContainsKey("serviceNameEnvKey") {
+		serviceEnvKey := config.MustGetString("serviceNameEnvKey")
+		service = os.Getenv(serviceEnvKey)
+	} else {
+		service = config.MustGetString("serviceName")
+	}
+
 	dispatcher := yarpc.NewDispatcher(yarpc.Config{
-		Name:      config.MustGetString("serviceName"),
+		Name:      service,
 		Outbounds: outbounds,
 		Logging: yarpc.LoggingConfig{
 			Zap: gateway.Logger,
