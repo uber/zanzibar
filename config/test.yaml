@@ -25,7 +25,7 @@ service.env.config:
     dataType: number
     key: tchannel.port
 serviceName: my-gateway
-serviceNameEnv: UDEPLOY_SERVICE_NAME
+serviceNameEnvKey: ENV_SERVICE_NAME_KEY
 subLoggerLevel.http: info
 subLoggerLevel.jaeger: info
 subLoggerLevel.tchannel: info
