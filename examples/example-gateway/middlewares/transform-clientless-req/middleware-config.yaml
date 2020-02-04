@@ -2,5 +2,5 @@ config:
   path: github.com/uber/zanzibar/codegen
   schema: ./middlewares/transform-clientless-req/transform_clientless_req_schema.yaml
 dependencies: {}
-name: transform-clientless-req
+name: transformClientlessReq
 type: default
