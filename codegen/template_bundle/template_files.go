@@ -2342,7 +2342,6 @@ package {{$instance.PackageInfo.GeneratedPackageAlias}}
 import (
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
@@ -2399,7 +2398,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1447, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
