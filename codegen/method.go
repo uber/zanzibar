@@ -1345,7 +1345,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 	var finalError error
 	var stack = []string{}
 	seenIdents := map[string]int{}
-	indent := ""
 
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
@@ -1362,8 +1361,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		if len(stack) > 0 {
 			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
 				stack = stack[:len(stack)-1]
-				indent = indent[:len(indent)-1]
-				statements.append(indent, "}")
+				statements.append("}")
 			}
 		}
 
@@ -1407,16 +1405,16 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 				statements.append("var _queryNeeded bool")
 				statements.appendf("for _, _pfx := range %#v {", applicableQueryParams)
-				statements.append("\tif _queryNeeded = req.HasQueryPrefix(_pfx); _queryNeeded {")
-				statements.append("\t\tbreak")
-				statements.append("\t}")
+				statements.append("if _queryNeeded = req.HasQueryPrefix(_pfx); _queryNeeded {")
+				statements.append("break")
+				statements.append("}")
 				statements.append("}")
 				statements.append("if _queryNeeded {")
 			}
 
-			statements.appendf("%sif requestBody%s == nil {", indent, longFieldName)
-			statements.appendf("%s\trequestBody%s = &%s{}", indent, longFieldName, typeName)
-			statements.append(indent, "}")
+			statements.appendf("if requestBody%s == nil {", longFieldName)
+			statements.appendf("requestBody%s = &%s{}", longFieldName, typeName)
+			statements.append("}")
 
 			return false
 		}
@@ -1429,14 +1427,13 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 		// make sure value is present
 		if field.Required {
-			statements.appendf("%s%s := req.CheckQueryValue(%q)", indent, okIdentifierName, shortQueryParam)
-			statements.appendf("%sif !%s {", indent, okIdentifierName)
-			statements.append(indent, "\treturn")
-			statements.append(indent, "}")
+			statements.appendf("%s := req.CheckQueryValue(%q)", okIdentifierName, shortQueryParam)
+			statements.appendf("if !%s {", okIdentifierName)
+			statements.append("return")
+			statements.append("}")
 		} else {
-			statements.appendf("%s%s := req.HasQueryValue(%q)", indent, okIdentifierName, shortQueryParam)
-			statements.appendf("%sif %s {", indent, okIdentifierName)
-			indent += "\t"
+			statements.appendf("%s := req.HasQueryValue(%q)", okIdentifierName, shortQueryParam)
+			statements.appendf("if %s {", okIdentifierName)
 		}
 
 		queryRValue := fmt.Sprintf("req.%s(%q)", getQueryMethodForType(realType), shortQueryParam)
@@ -1445,22 +1442,22 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		if _, isEnumType := field.Type.(*compile.EnumSpec); isEnumType {
 			statements.appendf("var %s %s", identifierName, customType)
 			tmpVar := "_tmp" + identifierName
-			statements.appendf("%s%s, ok := %s", indent, tmpVar, queryRValue)
-			statements.append(indent, "if ok {")
-			statements.appendf("%s\tif err := %s.UnmarshalText([]byte(%s)); err != nil {",
-				indent, identifierName, tmpVar)
-			statements.appendf("%s\t\treq.LogAndSendQueryError(err, %q, %q, %s)",
-				indent, "enum", shortQueryParam, tmpVar)
-			statements.append(indent, "\t\tok = false")
-			statements.append(indent, "\t}")
-			statements.append(indent, "}")
+			statements.appendf("%s, ok := %s", tmpVar, queryRValue)
+			statements.append("if ok {")
+			statements.appendf("if err := %s.UnmarshalText([]byte(%s)); err != nil {",
+				identifierName, tmpVar)
+			statements.appendf("req.LogAndSendQueryError(err, %q, %q, %s)",
+				"enum", shortQueryParam, tmpVar)
+			statements.append("ok = false")
+			statements.append("}")
+			statements.append("}")
 		} else {
-			statements.appendf("%s%s, ok := %s", indent, identifierName, queryRValue)
+			statements.appendf("%s, ok := %s", identifierName, queryRValue)
 		}
 
-		statements.append(indent, "if !ok {")
-		statements.append(indent, "\treturn")
-		statements.append(indent, "}")
+		statements.append("if !ok {")
+		statements.append("return")
+		statements.append("}")
 
 		target := identifierName
 
@@ -1471,46 +1468,42 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			valVar := "v"
 			if isList {
 				statements.appendf(
-					"%s%s := make([]%s, len(%s))",
-					indent, target, customElemType, identifierName,
+					"%s := make([]%s, len(%s))",
+					target, customElemType, identifierName,
 				)
-				statements.appendf("%sfor i, %s := range %s {", indent, valVar, identifierName)
-				indent += "\t"
+				statements.appendf("for i, %s := range %s {", valVar, identifierName)
 				if isEnumElem {
 					tmpVar := "_tmp" + valVar
-					statements.appendf("%svar %s %s", indent, tmpVar, customElemType)
-					statements.appendf("%sif err := %s.UnmarshalText([]byte(%s)); err != nil {",
-						indent, tmpVar, valVar)
-					statements.appendf("%s\treq.LogAndSendQueryError(err, %q, %q, %s)",
-						indent, "enum", shortQueryParam, valVar)
-					statements.append(indent, "\treturn")
-					statements.append(indent, "}")
+					statements.appendf("var %s %s", tmpVar, customElemType)
+					statements.appendf("if err := %s.UnmarshalText([]byte(%s)); err != nil {",
+						tmpVar, valVar)
+					statements.appendf("req.LogAndSendQueryError(err, %q, %q, %s)",
+						"enum", shortQueryParam, valVar)
+					statements.append("return")
+					statements.append("}")
 					valVar = tmpVar
 				}
-				statements.appendf("%s%s[i] = %s(%s)", indent, target, customElemType, valVar)
-				indent = indent[:len(indent)-1]
-				statements.append(indent, "}")
+				statements.appendf("%s[i] = %s(%s)", target, customElemType, valVar)
+				statements.append("}")
 			} else if isSet {
 				statements.appendf(
-					"%s%s := make(map[%s]struct{}, len(%s))",
-					indent, target, customElemType, identifierName,
+					"%s := make(map[%s]struct{}, len(%s))",
+					target, customElemType, identifierName,
 				)
-				statements.appendf("%sfor %s := range %s {", indent, valVar, identifierName)
-				indent += "\t"
+				statements.appendf("for %s := range %s {", valVar, identifierName)
 				if isEnumElem {
 					tmpVar := "_tmp" + valVar
-					statements.appendf("%svar %s %s", indent, tmpVar, customElemType)
-					statements.appendf("%sif err := %s.UnmarshalText([]byte(%s)); err != nil {",
-						indent, tmpVar, valVar)
-					statements.appendf("%s\treq.LogAndSendQueryError(err, %q, %q, %s)",
-						indent, "enum", shortQueryParam, valVar)
-					statements.append(indent, "\treturn")
-					statements.append(indent, "}")
+					statements.appendf("var %s %s", tmpVar, customElemType)
+					statements.appendf("if err := %s.UnmarshalText([]byte(%s)); err != nil {",
+						tmpVar, valVar)
+					statements.appendf("req.LogAndSendQueryError(err, %q, %q, %s)",
+						"enum", shortQueryParam, valVar)
+					statements.append("return")
+					statements.append("}")
 					valVar = tmpVar
 				}
-				statements.appendf("%s%s[%s(%s)] = struct{}{}", indent, target, customElemType, valVar)
-				indent = indent[:len(indent)-1]
-				statements.append(indent, "}")
+				statements.appendf("%s[%s(%s)] = struct{}{}", target, customElemType, valVar)
+				statements.append("}")
 			}
 		}
 
@@ -1526,11 +1519,10 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		if customType != "" {
 			target = fmt.Sprintf("(%s%s)(%s)", deref, customType, target)
 		}
-		statements.appendf("%srequestBody%s = %s", indent, longFieldName, target)
+		statements.appendf("requestBody%s = %s", longFieldName, target)
 
 		if !field.Required {
-			indent = indent[:len(indent)-1]
-			statements.append(indent, "}")
+			statements.append("}")
 		}
 
 		// new line after block.
