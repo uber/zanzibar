@@ -72,6 +72,10 @@ struct ParamsStruct {
     1: required string userUUID (zanzibar.http.ref = "params.user-uuid")
 }
 
+struct OptionalParamsStruct {
+    1: optional string userID (zanzibar.http.ref = "headers.user-id")
+}
+
 
 enum DemoType {
     FIRST,
@@ -171,6 +175,7 @@ service Bar {
         zanzibar.http.ref = "headers.x-uuid"
             go.tag = "json:\"-\""
         )
+        3: optional OptionalParamsStruct paramsStruct
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"

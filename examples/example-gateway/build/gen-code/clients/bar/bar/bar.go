@@ -1855,6 +1855,154 @@ func (lhs Long) Equals(rhs Long) bool {
 	return ((int64)(lhs) == (int64)(rhs))
 }
 
+type OptionalParamsStruct struct {
+	UserID *string `json:"userID,omitempty"`
+}
+
+// ToWire translates a OptionalParamsStruct struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *OptionalParamsStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.UserID != nil {
+		w, err = wire.NewValueString(*(v.UserID)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a OptionalParamsStruct struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a OptionalParamsStruct struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v OptionalParamsStruct
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *OptionalParamsStruct) FromWire(w wire.Value) error {
+	var err error
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.UserID = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a OptionalParamsStruct
+// struct.
+func (v *OptionalParamsStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	if v.UserID != nil {
+		fields[i] = fmt.Sprintf("UserID: %v", *(v.UserID))
+		i++
+	}
+
+	return fmt.Sprintf("OptionalParamsStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _String_EqualsPtr(lhs, rhs *string) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+// Equals returns true if all the fields of this OptionalParamsStruct match the
+// provided OptionalParamsStruct.
+//
+// This function performs a deep comparison.
+func (v *OptionalParamsStruct) Equals(rhs *OptionalParamsStruct) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !_String_EqualsPtr(v.UserID, rhs.UserID) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of OptionalParamsStruct.
+func (v *OptionalParamsStruct) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	if v.UserID != nil {
+		enc.AddString("userID", *v.UserID)
+	}
+	return err
+}
+
+// GetUserID returns the value of UserID if it is set or its
+// zero value if it is unset.
+func (v *OptionalParamsStruct) GetUserID() (o string) {
+	if v != nil && v.UserID != nil {
+		return *v.UserID
+	}
+
+	return
+}
+
+// IsSetUserID returns true if UserID is not nil.
+func (v *OptionalParamsStruct) IsSetUserID() bool {
+	return v != nil && v.UserID != nil
+}
+
 type ParamsStruct struct {
 	UserUUID string `json:"userUUID,required"`
 }
@@ -2146,16 +2294,6 @@ func (v *QueryParamsOptsStruct) String() string {
 	}
 
 	return fmt.Sprintf("QueryParamsOptsStruct{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _String_EqualsPtr(lhs, rhs *string) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
 }
 
 // Equals returns true if all the fields of this QueryParamsOptsStruct match the
@@ -3372,8 +3510,9 @@ func (v *Bar_ArgNotStruct_Result) EnvelopeType() wire.EnvelopeType {
 //
 // The arguments for argWithHeaders are sent and received over the wire as this struct.
 type Bar_ArgWithHeaders_Args struct {
-	Name     string  `json:"-"`
-	UserUUID *string `json:"-"`
+	Name         string                `json:"-"`
+	UserUUID     *string               `json:"-"`
+	ParamsStruct *OptionalParamsStruct `json:"paramsStruct,omitempty"`
 }
 
 // ToWire translates a Bar_ArgWithHeaders_Args struct into a Thrift-level intermediate
@@ -3393,7 +3532,7 @@ type Bar_ArgWithHeaders_Args struct {
 //   }
 func (v *Bar_ArgWithHeaders_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -3413,8 +3552,22 @@ func (v *Bar_ArgWithHeaders_Args) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 2, Value: w}
 		i++
 	}
+	if v.ParamsStruct != nil {
+		w, err = v.ParamsStruct.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _OptionalParamsStruct_Read(w wire.Value) (*OptionalParamsStruct, error) {
+	var v OptionalParamsStruct
+	err := v.FromWire(w)
+	return &v, err
 }
 
 // FromWire deserializes a Bar_ArgWithHeaders_Args struct from its Thrift-level
@@ -3459,6 +3612,14 @@ func (v *Bar_ArgWithHeaders_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 3:
+			if field.Value.Type() == wire.TStruct {
+				v.ParamsStruct, err = _OptionalParamsStruct_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -3476,12 +3637,16 @@ func (v *Bar_ArgWithHeaders_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
 	if v.UserUUID != nil {
 		fields[i] = fmt.Sprintf("UserUUID: %v", *(v.UserUUID))
+		i++
+	}
+	if v.ParamsStruct != nil {
+		fields[i] = fmt.Sprintf("ParamsStruct: %v", v.ParamsStruct)
 		i++
 	}
 
@@ -3504,6 +3669,9 @@ func (v *Bar_ArgWithHeaders_Args) Equals(rhs *Bar_ArgWithHeaders_Args) bool {
 	if !_String_EqualsPtr(v.UserUUID, rhs.UserUUID) {
 		return false
 	}
+	if !((v.ParamsStruct == nil && rhs.ParamsStruct == nil) || (v.ParamsStruct != nil && rhs.ParamsStruct != nil && v.ParamsStruct.Equals(rhs.ParamsStruct))) {
+		return false
+	}
 
 	return true
 }
@@ -3517,6 +3685,9 @@ func (v *Bar_ArgWithHeaders_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (e
 	enc.AddString("name", v.Name)
 	if v.UserUUID != nil {
 		enc.AddString("userUUID", *v.UserUUID)
+	}
+	if v.ParamsStruct != nil {
+		err = multierr.Append(err, enc.AddObject("paramsStruct", v.ParamsStruct))
 	}
 	return err
 }
@@ -3545,6 +3716,21 @@ func (v *Bar_ArgWithHeaders_Args) IsSetUserUUID() bool {
 	return v != nil && v.UserUUID != nil
 }
 
+// GetParamsStruct returns the value of ParamsStruct if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithHeaders_Args) GetParamsStruct() (o *OptionalParamsStruct) {
+	if v != nil && v.ParamsStruct != nil {
+		return v.ParamsStruct
+	}
+
+	return
+}
+
+// IsSetParamsStruct returns true if ParamsStruct is not nil.
+func (v *Bar_ArgWithHeaders_Args) IsSetParamsStruct() bool {
+	return v != nil && v.ParamsStruct != nil
+}
+
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -3569,6 +3755,7 @@ var Bar_ArgWithHeaders_Helper = struct {
 	Args func(
 		name string,
 		userUUID *string,
+		paramsStruct *OptionalParamsStruct,
 	) *Bar_ArgWithHeaders_Args
 
 	// IsException returns true if the given error can be thrown
@@ -3610,10 +3797,12 @@ func init() {
 	Bar_ArgWithHeaders_Helper.Args = func(
 		name string,
 		userUUID *string,
+		paramsStruct *OptionalParamsStruct,
 	) *Bar_ArgWithHeaders_Args {
 		return &Bar_ArgWithHeaders_Args{
-			Name:     name,
-			UserUUID: userUUID,
+			Name:         name,
+			UserUUID:     userUUID,
+			ParamsStruct: paramsStruct,
 		}
 	}
 

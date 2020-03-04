@@ -491,7 +491,7 @@ func (ms *MethodSpec) setRequestParamFields(
 ) error {
 	statements := LineBuilder{}
 
-	seenStructs, err := findStructs(funcSpec, packageHelper)
+	seenStructs, itrOrder, err := findStructs(funcSpec, packageHelper)
 	if err != nil {
 		return err
 	}
@@ -501,13 +501,13 @@ func (ms *MethodSpec) setRequestParamFields(
 			continue
 		}
 
-		for seenStruct, typeName := range seenStructs {
+		for _, seenStruct := range itrOrder {
 			if strings.HasPrefix(segment.BodyIdentifier, seenStruct) {
 				statements.appendf("if requestBody%s == nil {",
 					seenStruct,
 				)
 				statements.appendf("\trequestBody%s = &%s{}",
-					seenStruct, typeName,
+					seenStruct, seenStructs[seenStruct],
 				)
 				statements.append("}")
 			}
@@ -533,9 +533,10 @@ func (ms *MethodSpec) setRequestParamFields(
 
 func findStructs(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
-) (map[string]string, error) {
+) (map[string]string, []string, error) {
 	fields := compile.FieldGroup(funcSpec.ArgsSpec)
-	var seenStructs = map[string]string{}
+	seenStructs := make(map[string]string)
+	itrOrder := make([]string, 0)
 	var finalError error
 
 	visitor := func(
@@ -552,6 +553,7 @@ func findStructs(
 			}
 
 			seenStructs[longFieldName] = typeName
+			itrOrder = append(itrOrder, longFieldName)
 		}
 
 		return false
@@ -559,10 +561,10 @@ func findStructs(
 	walkFieldGroups(fields, visitor)
 
 	if finalError != nil {
-		return nil, finalError
+		return nil, nil, finalError
 	}
 
-	return seenStructs, nil
+	return seenStructs, itrOrder, nil
 }
 
 func (ms *MethodSpec) setEndpointRequestHeaderFields(
@@ -755,7 +757,8 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 
 	statements := LineBuilder{}
 	var finalError error
-	var seenOptStructs = map[string]string{}
+	seenOptStructs := make(map[string]string)
+	itrOrder := make([]string, 0)
 
 	// Scan for all annotations
 	visitor := func(
@@ -773,6 +776,7 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 				return true
 			}
 			seenOptStructs[longFieldName] = typeName
+			itrOrder = append(itrOrder, longFieldName)
 			return false
 		}
 
@@ -787,24 +791,24 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 				} else {
 					headerNameValuePair = "headers[%q]= string(*r%s)"
 				}
-				if len(seenOptStructs) != 0 {
+				if !field.Required {
 					closeFunction := ""
-					for seenStruct := range seenOptStructs {
+					for _, seenStruct := range itrOrder {
 						if strings.HasPrefix(longFieldName, seenStruct) {
 							statements.appendf("if r%s != nil {", seenStruct)
 							closeFunction = closeFunction + "}"
 						}
 					}
-					statements.append(closeFunction)
-				}
-				if field.Required {
-					statements.appendf(headerNameValuePair,
-						headerName, bodyIdentifier,
-					)
-				} else {
+
 					statements.appendf("if r%s != nil {", bodyIdentifier)
 					statements.appendf(headerNameValuePair, headerName, bodyIdentifier)
 					statements.append("}")
+
+					statements.append(closeFunction)
+				} else {
+					statements.appendf(headerNameValuePair,
+						headerName, bodyIdentifier,
+					)
 				}
 			}
 		}

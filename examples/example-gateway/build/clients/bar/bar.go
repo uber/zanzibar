@@ -448,6 +448,12 @@ func (c *barClient) ArgWithHeaders(
 		headers["x-uuid"] = string(*r.UserUUID)
 	}
 
+	if r.ParamsStruct != nil {
+		if r.ParamsStruct.UserID != nil {
+			headers["user-id"] = string(*r.ParamsStruct.UserID)
+		}
+	}
+
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithHeaders"
 
