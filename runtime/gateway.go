@@ -46,6 +46,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const (
+	localhost = "127.0.0.1"
+)
+
 var levelMap = map[string]zapcore.Level{
 	"debug":  zapcore.DebugLevel,
 	"info":   zapcore.InfoLevel,
@@ -221,11 +225,13 @@ func (gateway *Gateway) Bootstrap() error {
 	}
 
 	// start TChannel server
-	tchannelIP, err := tchannel.ListenIP()
+	// tchannelIP, err := tchannel.ListenIP()
+	//hack for tenancy routing for SR
+	tchannelIP := localhost
 	if err != nil {
 		return errors.Wrap(err, "error finding the best IP for tchannel")
 	}
-	tchannelAddr := tchannelIP.String() + ":" + strconv.Itoa(int(gateway.TChannelPort))
+	tchannelAddr := tchannelIP + ":" + strconv.Itoa(int(gateway.TChannelPort))
 	ln, err := net.Listen("tcp", tchannelAddr)
 	if err != nil {
 		gateway.Logger.Error("Error listening tchannel port", zap.Error(err))
