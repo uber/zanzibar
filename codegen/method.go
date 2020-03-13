@@ -114,6 +114,11 @@ type MethodSpec struct {
 	ExceptionsByStatusCode map[int][]ExceptionSpec
 	ExceptionsIndex        map[string]ExceptionSpec
 	ValidStatusCodes       []int
+
+	// Fully qualified field type of the unboxed field
+	BoxedRequestType string
+	// Unboxed field name
+	BoxedRequestName string
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed bool
 	// Thrift service name the method belongs to.
@@ -297,20 +302,18 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	var err error
 	if ms.isRequestBoxed(funcSpec) {
 		ms.RequestBoxed = true
-		ms.RequestType, err = packageHelper.TypeFullName(funcSpec.ArgsSpec[0].Type)
+		ms.BoxedRequestType, err = packageHelper.TypeFullName(funcSpec.ArgsSpec[0].Type)
+		ms.BoxedRequestName = PascalCase(funcSpec.ArgsSpec[0].Name)
 		if err == nil && IsStructType(funcSpec.ArgsSpec[0].Type) {
-			ms.ShortRequestType = ms.RequestType
-			ms.RequestType = "*" + ms.RequestType
+			ms.BoxedRequestType = "*" + ms.BoxedRequestType
 		}
-	} else {
-		ms.RequestBoxed = false
+	}
 
-		goPackageName, err := packageHelper.TypePackageName(curThriftFile)
-		if err == nil {
-			ms.ShortRequestType = goPackageName + "." +
-				ms.ThriftService + "_" + strings.Title(ms.Name) + "_Args"
-			ms.RequestType = "*" + ms.ShortRequestType
-		}
+	goPackageName, err := packageHelper.TypePackageName(curThriftFile)
+	if err == nil {
+		ms.ShortRequestType = goPackageName + "." +
+			ms.ThriftService + "_" + strings.Title(ms.Name) + "_Args"
+		ms.RequestType = "*" + ms.ShortRequestType
 	}
 	if err != nil {
 		return errors.Wrap(err, "failed to set request type")
@@ -840,17 +843,10 @@ func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpe
 			var fieldSelect string
 			var required bool
 			var ok bool
-			if ms.RequestBoxed {
-				// Boxed requests mean first arg is struct
-				structType := funcSpec.ArgsSpec[0].Type.(*compile.StructSpec)
-				fieldSelect, required, ok = ms.findParamsAnnotation(
-					structType.Fields, segment,
-				)
-			} else {
-				fieldSelect, required, ok = ms.findParamsAnnotation(
-					compile.FieldGroup(funcSpec.ArgsSpec), segment,
-				)
-			}
+
+			fieldSelect, required, ok = ms.findParamsAnnotation(
+				compile.FieldGroup(funcSpec.ArgsSpec), segment,
+			)
 
 			if !ok {
 				panic(fmt.Sprintf("cannot find params: %s for http path %s", segment, httpPath))

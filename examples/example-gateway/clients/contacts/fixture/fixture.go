@@ -9,8 +9,10 @@ var saveContactsFixtures = &mc.SaveContactsScenarios{
 	Success: &mc.SaveContactsFixture{
 		Arg0Any: true,
 		Arg1Any: true,
-		Arg2: &gen.SaveContactsRequest{
-			UserUUID: "foo",
+		Arg2: &gen.Contacts_SaveContacts_Args{
+			SaveContactsRequest: &gen.SaveContactsRequest{
+				UserUUID: "foo",
+			},
 		},
 
 		Ret0: &gen.SaveContactsResponse{},

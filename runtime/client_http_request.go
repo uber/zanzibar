@@ -129,10 +129,10 @@ func (req *ClientHTTPRequest) WriteJSON(
 	headers map[string]string,
 	body interface{},
 ) error {
-	var httpReq *http.Request
-	var httpErr error
+	var rawBody []byte
 	if body != nil {
-		rawBody, err := json.Marshal(body)
+		var err error
+		rawBody, err = json.Marshal(body)
 		if err != nil {
 			req.Logger.Error("Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(
@@ -140,6 +140,22 @@ func (req *ClientHTTPRequest) WriteJSON(
 				req.ClientID, req.MethodName,
 			)
 		}
+	}
+
+	return req.WriteBytes(method, url, headers, rawBody)
+}
+
+// WriteBytes materialize the HTTP request with given method, url, headers and body.
+// Body is assumed to be a byte array.s
+func (req *ClientHTTPRequest) WriteBytes(
+	method, url string,
+	headers map[string]string,
+	rawBody []byte,
+) error {
+	var httpReq *http.Request
+	var httpErr error
+
+	if rawBody != nil {
 		req.rawBody = rawBody
 		httpReq, httpErr = http.NewRequest(method, url, bytes.NewReader(rawBody))
 	} else {

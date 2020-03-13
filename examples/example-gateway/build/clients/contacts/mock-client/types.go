@@ -43,7 +43,7 @@ type SaveContactsScenarios struct {
 type SaveContactsFixture struct {
 	Arg0 context.Context
 	Arg1 map[string]string
-	Arg2 *contacts.SaveContactsRequest
+	Arg2 *contacts.Contacts_SaveContacts_Args
 
 	// Arg{n}Any indicates the nth argument could be gomock.Any
 	Arg0Any bool

@@ -19,10 +19,12 @@ func TestSaveContactsCall(t *testing.T) {
 
 	ms.MockClients().Contacts.ExpectSaveContacts().Success()
 
-	endpointReqeust := &endpointContacts.SaveContactsRequest{
-		Contacts: []*endpointContacts.Contact{},
+	endpointRequest := &endpointContacts.Contacts_SaveContacts_Args{
+		SaveContactsRequest: &endpointContacts.SaveContactsRequest{
+			Contacts: []*endpointContacts.Contact{},
+		},
 	}
-	rawBody, _ := endpointReqeust.MarshalJSON()
+	rawBody, _ := endpointRequest.MarshalJSON()
 
 	res, err := ms.MakeHTTPRequest(
 		"POST", "/contacts/foo/contacts", nil, bytes.NewReader(rawBody),
@@ -40,12 +42,14 @@ func TestSaveContactsCallWorkflow(t *testing.T) {
 
 	mc.Contacts.ExpectSaveContacts().Success()
 
-	endpointReqeust := &endpointContacts.SaveContactsRequest{
-		UserUUID: "foo",
-		Contacts: []*endpointContacts.Contact{},
+	endpointRequest := &endpointContacts.Contacts_SaveContacts_Args{
+		SaveContactsRequest: &endpointContacts.SaveContactsRequest{
+			UserUUID: "foo",
+			Contacts: []*endpointContacts.Contact{},
+		},
 	}
 
-	res, resHeaders, err := mh.Handle(context.Background(), nil, endpointReqeust)
+	res, resHeaders, err := mh.Handle(context.Background(), nil, endpointRequest)
 
 	if !assert.NoError(t, err, "got error") {
 		return

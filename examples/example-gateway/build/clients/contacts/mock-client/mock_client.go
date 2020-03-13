@@ -51,7 +51,7 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // SaveContacts mocks base method
-func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.SaveContactsRequest) (*contacts.SaveContactsResponse, map[string]string, error) {
+func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.Contacts_SaveContacts_Args) (*contacts.SaveContactsResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveContacts", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*contacts.SaveContactsResponse)
