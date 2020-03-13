@@ -113,8 +113,10 @@ func TestSaveContactsCall(t *testing.T) {
 		},
 	)
 
-	saveContacts := &endpointContacts.SaveContactsRequest{
-		Contacts: []*endpointContacts.Contact{},
+	saveContacts := &endpointContacts.Contacts_SaveContacts_Args{
+		SaveContactsRequest: &endpointContacts.SaveContactsRequest{
+			Contacts: []*endpointContacts.Contact{},
+		},
 	}
 	rawBody, _ := saveContacts.MarshalJSON()
 

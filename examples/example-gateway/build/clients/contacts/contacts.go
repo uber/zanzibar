@@ -42,7 +42,7 @@ type Client interface {
 	SaveContacts(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsContactsContacts.SaveContactsRequest,
+		args *clientsContactsContacts.Contacts_SaveContacts_Args,
 	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
 	TestURLURL(
 		ctx context.Context,
@@ -150,7 +150,7 @@ func (c *contactsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsContactsContacts.SaveContactsRequest,
+	r *clientsContactsContacts.Contacts_SaveContacts_Args,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
@@ -164,7 +164,7 @@ func (c *contactsClient) SaveContacts(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient)
 
 	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
+	fullURL := c.httpClient.BaseURL + "/" + string(r.SaveContactsRequest.UserUUID) + "/contacts"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {

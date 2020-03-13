@@ -33,7 +33,7 @@ type SaveContactsEndpoint struct {
 func (w SaveContactsEndpoint) Handle(
 	ctx context.Context,
 	headers zanzibar.Header,
-	r *endpointContacts.SaveContactsRequest,
+	r *endpointContacts.Contacts_SaveContacts_Args,
 ) (*endpointContacts.SaveContactsResponse, zanzibar.Header, error) {
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
@@ -58,12 +58,12 @@ func convertToResponse(
 }
 
 func convertToClient(
-	body *endpointContacts.SaveContactsRequest,
-) *contactsClientStructs.SaveContactsRequest {
+	body *endpointContacts.Contacts_SaveContacts_Args,
+) *contactsClientStructs.Contacts_SaveContacts_Args {
+	ret := &contactsClientStructs.Contacts_SaveContacts_Args{}
 	clientBody := &contactsClientStructs.SaveContactsRequest{}
-	clientBody.UserUUID = body.UserUUID
 
-	for _, contact := range body.Contacts {
+	for _, contact := range body.SaveContactsRequest.Contacts {
 		clientContact := &contactsClientStructs.Contact{}
 		clientAttributes := &contactsClientStructs.ContactAttributes{}
 		attributes := contact.Attributes
@@ -98,5 +98,7 @@ func convertToClient(
 		clientBody.Contacts = append(clientBody.Contacts, clientContact)
 	}
 
-	return clientBody
+	ret.SaveContactsRequest = clientBody
+	ret.SaveContactsRequest.UserUUID = body.SaveContactsRequest.UserUUID
+	return ret
 }

@@ -102,12 +102,15 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsContactsContacts.SaveContactsRequest
+	var requestBody endpointsContactsContacts.Contacts_SaveContacts_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
 
-	requestBody.UserUUID = req.Params.Get("userUUID")
+	if requestBody.SaveContactsRequest == nil {
+		requestBody.SaveContactsRequest = &endpointsContactsContacts.SaveContactsRequest{}
+	}
+	requestBody.SaveContactsRequest.UserUUID = req.Params.Get("userUUID")
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
