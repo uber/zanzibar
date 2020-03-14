@@ -120,6 +120,7 @@ func (h *BarNoRequestHandler) HandleRequest(
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBarBar.BarException:

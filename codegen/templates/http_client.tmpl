@@ -342,6 +342,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
 				return respHeaders, &{{$val.Type}}{}
+			{{- else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+				{{$val := index $exceptions 0}}
+				return respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 			{{range $idx, $exception := $exceptions -}}
@@ -392,6 +395,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if or (eq $code 204) (eq $code 304) -}}
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
+				{{$val := index $exceptions 0}}
+				return defaultRes, respHeaders, &{{$val.Type}}{}
+			{{- else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
 				return defaultRes, respHeaders, &{{$val.Type}}{}
 			{{else}}

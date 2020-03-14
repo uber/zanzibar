@@ -153,6 +153,7 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	}
 
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBazBaz.AuthErr:

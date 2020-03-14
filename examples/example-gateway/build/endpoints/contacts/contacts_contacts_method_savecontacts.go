@@ -155,8 +155,21 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	}
 
 	if err != nil {
-		res.SendError(500, "Unexpected server error", err)
-		return
+
+		switch err.(type) {
+
+		case *endpointsContactsContacts.BadRequest:
+			res.WriteJSONBytes(400, cliRespHeaders, nil)
+			return
+
+		case *endpointsContactsContacts.NotFound:
+			res.WriteJSONBytes(404, cliRespHeaders, nil)
+			return
+
+		default:
+			res.SendError(500, "Unexpected server error", err)
+			return
+		}
 
 	}
 

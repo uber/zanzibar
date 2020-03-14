@@ -199,7 +199,7 @@ func (c *contactsClient) SaveContacts(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{202})
+	res.CheckOKResponse([]int{202, 400, 404})
 
 	switch res.StatusCode {
 	case 202:
@@ -210,6 +210,12 @@ func (c *contactsClient) SaveContacts(
 		}
 
 		return &responseBody, respHeaders, nil
+
+	case 400:
+		return defaultRes, respHeaders, &clientsContactsContacts.BadRequest{}
+	case 404:
+		return defaultRes, respHeaders, &clientsContactsContacts.NotFound{}
+
 	default:
 		_, err = res.ReadAll()
 		if err != nil {

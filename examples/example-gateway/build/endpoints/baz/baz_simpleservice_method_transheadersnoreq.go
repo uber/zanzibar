@@ -124,6 +124,7 @@ func (h *SimpleServiceTransHeadersNoReqHandler) HandleRequest(
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBazBaz.AuthErr:

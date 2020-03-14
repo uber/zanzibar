@@ -13,6 +13,100 @@ import (
 	zapcore "go.uber.org/zap/zapcore"
 )
 
+type BadRequest struct {
+}
+
+// ToWire translates a BadRequest struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *BadRequest) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a BadRequest struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a BadRequest struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v BadRequest
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *BadRequest) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a BadRequest
+// struct.
+func (v *BadRequest) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("BadRequest{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this BadRequest match the
+// provided BadRequest.
+//
+// This function performs a deep comparison.
+func (v *BadRequest) Equals(rhs *BadRequest) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of BadRequest.
+func (v *BadRequest) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	return err
+}
+
+func (v *BadRequest) Error() string {
+	return v.String()
+}
+
 type Contact struct {
 	Fragments  []*ContactFragment `json:"fragments,omitempty"`
 	Attributes *ContactAttributes `json:"attributes,omitempty"`
@@ -1206,6 +1300,100 @@ func (lhs ContactFragmentType) Equals(rhs ContactFragmentType) bool {
 	return ((string)(lhs) == (string)(rhs))
 }
 
+type NotFound struct {
+}
+
+// ToWire translates a NotFound struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *NotFound) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a NotFound struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a NotFound struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v NotFound
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *NotFound) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a NotFound
+// struct.
+func (v *NotFound) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("NotFound{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this NotFound match the
+// provided NotFound.
+//
+// This function performs a deep comparison.
+func (v *NotFound) Equals(rhs *NotFound) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of NotFound.
+func (v *NotFound) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	return err
+}
+
+func (v *NotFound) Error() string {
+	return v.String()
+}
+
 type SaveContactsRequest struct {
 	UserUUID string     `json:"userUUID,required"`
 	Contacts []*Contact `json:"contacts,required"`
@@ -1802,6 +1990,10 @@ func init() {
 
 	Contacts_SaveContacts_Helper.IsException = func(err error) bool {
 		switch err.(type) {
+		case *BadRequest:
+			return true
+		case *NotFound:
+			return true
 		default:
 			return false
 		}
@@ -1812,9 +2004,30 @@ func init() {
 			return &Contacts_SaveContacts_Result{Success: success}, nil
 		}
 
+		switch e := err.(type) {
+		case *BadRequest:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for Contacts_SaveContacts_Result.BadRequest")
+			}
+			return &Contacts_SaveContacts_Result{BadRequest: e}, nil
+		case *NotFound:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for Contacts_SaveContacts_Result.NotFound")
+			}
+			return &Contacts_SaveContacts_Result{NotFound: e}, nil
+		}
+
 		return nil, err
 	}
 	Contacts_SaveContacts_Helper.UnwrapResponse = func(result *Contacts_SaveContacts_Result) (success *SaveContactsResponse, err error) {
+		if result.BadRequest != nil {
+			err = result.BadRequest
+			return
+		}
+		if result.NotFound != nil {
+			err = result.NotFound
+			return
+		}
 
 		if result.Success != nil {
 			success = result.Success
@@ -1834,7 +2047,9 @@ func init() {
 // Success is set only if the function did not throw an exception.
 type Contacts_SaveContacts_Result struct {
 	// Value returned by saveContacts after a successful execution.
-	Success *SaveContactsResponse `json:"success,omitempty"`
+	Success    *SaveContactsResponse `json:"success,omitempty"`
+	BadRequest *BadRequest           `json:"badRequest,omitempty"`
+	NotFound   *NotFound             `json:"notFound,omitempty"`
 }
 
 // ToWire translates a Contacts_SaveContacts_Result struct into a Thrift-level intermediate
@@ -1854,7 +2069,7 @@ type Contacts_SaveContacts_Result struct {
 //   }
 func (v *Contacts_SaveContacts_Result) ToWire() (wire.Value, error) {
 	var (
-		fields [1]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -1868,6 +2083,22 @@ func (v *Contacts_SaveContacts_Result) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 0, Value: w}
 		i++
 	}
+	if v.BadRequest != nil {
+		w, err = v.BadRequest.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
+	}
+	if v.NotFound != nil {
+		w, err = v.NotFound.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 
 	if i != 1 {
 		return wire.Value{}, fmt.Errorf("Contacts_SaveContacts_Result should have exactly one field: got %v fields", i)
@@ -1878,6 +2109,18 @@ func (v *Contacts_SaveContacts_Result) ToWire() (wire.Value, error) {
 
 func _SaveContactsResponse_Read(w wire.Value) (*SaveContactsResponse, error) {
 	var v SaveContactsResponse
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _BadRequest_Read(w wire.Value) (*BadRequest, error) {
+	var v BadRequest
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _NotFound_Read(w wire.Value) (*NotFound, error) {
+	var v NotFound
 	err := v.FromWire(w)
 	return &v, err
 }
@@ -1912,11 +2155,33 @@ func (v *Contacts_SaveContacts_Result) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.BadRequest, err = _BadRequest_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.NotFound, err = _NotFound_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
 	count := 0
 	if v.Success != nil {
+		count++
+	}
+	if v.BadRequest != nil {
+		count++
+	}
+	if v.NotFound != nil {
 		count++
 	}
 	if count != 1 {
@@ -1933,10 +2198,18 @@ func (v *Contacts_SaveContacts_Result) String() string {
 		return "<nil>"
 	}
 
-	var fields [1]string
+	var fields [3]string
 	i := 0
 	if v.Success != nil {
 		fields[i] = fmt.Sprintf("Success: %v", v.Success)
+		i++
+	}
+	if v.BadRequest != nil {
+		fields[i] = fmt.Sprintf("BadRequest: %v", v.BadRequest)
+		i++
+	}
+	if v.NotFound != nil {
+		fields[i] = fmt.Sprintf("NotFound: %v", v.NotFound)
 		i++
 	}
 
@@ -1956,6 +2229,12 @@ func (v *Contacts_SaveContacts_Result) Equals(rhs *Contacts_SaveContacts_Result)
 	if !((v.Success == nil && rhs.Success == nil) || (v.Success != nil && rhs.Success != nil && v.Success.Equals(rhs.Success))) {
 		return false
 	}
+	if !((v.BadRequest == nil && rhs.BadRequest == nil) || (v.BadRequest != nil && rhs.BadRequest != nil && v.BadRequest.Equals(rhs.BadRequest))) {
+		return false
+	}
+	if !((v.NotFound == nil && rhs.NotFound == nil) || (v.NotFound != nil && rhs.NotFound != nil && v.NotFound.Equals(rhs.NotFound))) {
+		return false
+	}
 
 	return true
 }
@@ -1968,6 +2247,12 @@ func (v *Contacts_SaveContacts_Result) MarshalLogObject(enc zapcore.ObjectEncode
 	}
 	if v.Success != nil {
 		err = multierr.Append(err, enc.AddObject("success", v.Success))
+	}
+	if v.BadRequest != nil {
+		err = multierr.Append(err, enc.AddObject("badRequest", v.BadRequest))
+	}
+	if v.NotFound != nil {
+		err = multierr.Append(err, enc.AddObject("notFound", v.NotFound))
 	}
 	return err
 }
@@ -1985,6 +2270,36 @@ func (v *Contacts_SaveContacts_Result) GetSuccess() (o *SaveContactsResponse) {
 // IsSetSuccess returns true if Success is not nil.
 func (v *Contacts_SaveContacts_Result) IsSetSuccess() bool {
 	return v != nil && v.Success != nil
+}
+
+// GetBadRequest returns the value of BadRequest if it is set or its
+// zero value if it is unset.
+func (v *Contacts_SaveContacts_Result) GetBadRequest() (o *BadRequest) {
+	if v != nil && v.BadRequest != nil {
+		return v.BadRequest
+	}
+
+	return
+}
+
+// IsSetBadRequest returns true if BadRequest is not nil.
+func (v *Contacts_SaveContacts_Result) IsSetBadRequest() bool {
+	return v != nil && v.BadRequest != nil
+}
+
+// GetNotFound returns the value of NotFound if it is set or its
+// zero value if it is unset.
+func (v *Contacts_SaveContacts_Result) GetNotFound() (o *NotFound) {
+	if v != nil && v.NotFound != nil {
+		return v.NotFound
+	}
+
+	return
+}
+
+// IsSetNotFound returns true if NotFound is not nil.
+func (v *Contacts_SaveContacts_Result) IsSetNotFound() bool {
+	return v != nil && v.NotFound != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in

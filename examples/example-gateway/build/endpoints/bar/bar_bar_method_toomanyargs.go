@@ -151,6 +151,7 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	}
 
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBarBar.BarException:

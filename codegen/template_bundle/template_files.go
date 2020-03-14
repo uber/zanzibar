@@ -614,12 +614,26 @@ func (h *{{$handlerName}}) HandleRequest(
 		res.SendError(500, "Unexpected server error", err)
 		return
 		{{ else }}
+		{{$val := false}}
+		{{range $idx, $exception := .Exceptions}}
+			{{if not $exception.IsBodyDisallowed}}
+				{{$val = true}}
+			{{ end}}
+		{{end}}
+		{{ if $val -}}
 		switch errValue := err.(type) {
+		{{else -}}
+		switch err.(type) {
+		{{end -}}
 		{{range $idx, $exception := .Exceptions}}
 		case *{{$exception.Type}}:
+			{{if $exception.IsBodyDisallowed -}}
+			res.WriteJSONBytes({{$exception.StatusCode.Code}}, cliRespHeaders, nil)
+			{{else -}}
 			res.WriteJSON(
 				{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
 			)
+			{{end -}}
 			return
 		{{end}}
 		  default:
@@ -656,7 +670,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7039, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7393, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1689,6 +1703,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
 				return respHeaders, &{{$val.Type}}{}
+			{{- else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+				{{$val := index $exceptions 0}}
+				return respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 			{{range $idx, $exception := $exceptions -}}
@@ -1741,6 +1758,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
 				return defaultRes, respHeaders, &{{$val.Type}}{}
+			{{- else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+				{{$val := index $exceptions 0}}
+				return defaultRes, respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 				{{range $idx, $exception := $exceptions -}}
@@ -1782,7 +1802,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 13815, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 14177, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
