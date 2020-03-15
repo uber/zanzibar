@@ -135,10 +135,10 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/:b", value: "baz", errMsg: errExist.Error()},
 		// test "/*" collides with "/a"
 		{op: set, path: "/*", value: "baz", errMsg: errExist.Error()},
-		// test "/:" collides with "/a"
-		{op: set, path: "/:x", value: "baz", errMsg: errExist.Error()},
-		// test "/:/b" collides with "/a/*"
-		{op: set, path: "/:x/b", value: "baz", errMsg: errExist.Error()},
+		// test "/:" should not collide with "/a"
+		{op: set, path: "/:x", value: "bar"},
+		// test "/:/b" should not collide with "/a/*"
+		{op: set, path: "/:x/b", value: "bar"},
 	}
 	runTrieTests(t, trie, tests)
 
@@ -198,8 +198,9 @@ func TestTriePathsWithPatten(t *testing.T) {
 	tests = []ts{
 		// test "/:" collides with "/b"
 		{op: set, path: "/b", value: "foo"},
-		{op: set, path: "/:a", errMsg: errExist.Error()},
+		{op: set, path: "/:a", value: "bar"},
 		{op: get, path: "/b/", expectedValue: "foo"},
+		{op: get, path: "/a/", expectedValue: "bar", expectedParams: []Param{{"a", "a"}}},
 	}
 	runTrieTests(t, trie, tests)
 
@@ -212,7 +213,7 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/b/c/x", value: "2.1"},
 		{op: set, path: "/a/b/:cc/:d/e", value: "3"},
 		{op: set, path: "/a/b/c/d/f", value: "4"},
-		{op: set, path: "/a/:b/c/d", errMsg: errExist.Error()},
+		{op: set, path: "/a/:b/c/d", value:"5"},
 		{op: get, path: "/a/b/some/d", expectedValue: "2", expectedParams: []Param{{"cc", "some"}}},
 		{op: get, path: "/a/b/c/x", expectedValue: "2.1"},
 		{op: get, path: "/a/b/other/data/e", expectedValue: "3",
@@ -221,6 +222,7 @@ func TestTriePathsWithPatten(t *testing.T) {
 				{"d", "data"},
 			}},
 		{op: get, path: "/a/b/c/d/f", expectedValue: "4"},
+		{op: get, path: "/a/some/c/d", expectedValue:"5", expectedParams: []Param{{"b", "some"}}},
 	}
 	runTrieTests(t, trie, tests)
 
@@ -230,10 +232,18 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/b", value: "1"},
 		{op: set, path: "/a/b/ccc/x", value: "2"},
 		{op: set, path: "/a/b/c/dope/f", value: "3"},
-		{op: set, path: "/a/b/ccc/:", errMsg: errExist.Error()},
-		{op: set, path: "/a/b/c/:/:/", errMsg: errExist.Error()},
+		{op: set, path: "/a/b/ccc/:", value: "4"},
+		{op: set, path: "/a/b/c/:/:/", value: "5"},
 		{op: get, path: "/a/b/ccc", errMsg: errNotFound.Error()},
 		{op: get, path: "/a/b/:", errMsg: errNotFound.Error()},
+		{op: get, path: "/a/b/ccc/x", expectedValue: "2"},
+		{op: get, path: "/a/b/ccc/y", expectedValue: "4", expectedParams: []Param{{"", "y"}}},
+		{op: get, path: "/a/b/c/dope/f", expectedValue: "3"},
+		{op: get, path: "/a/b/c/dope/g", expectedValue: "5",
+			expectedParams: []Param{
+				{"", "dope"},
+				{"", "g"},
+			}},
 	}
 	runTrieTests(t, trie, tests)
 

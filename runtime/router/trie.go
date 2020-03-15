@@ -140,8 +140,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// is immediately after slash, e.g. "/:foo", "/x/:y". "/a:b" is not a colon wildcard segment.
 	var keyMatchIdx, pathMatchIdx int
 	for keyMatchIdx < keyLength && pathMatchIdx < pathLength {
-		if (t.key[keyMatchIdx] == ':' && lastKeyCharSlash) ||
-			(path[pathMatchIdx] == ':' && lastPathCharSlash) {
+		if t.key[keyMatchIdx] == ':' && lastKeyCharSlash {
 			keyStartIdx, pathStartIdx := keyMatchIdx, pathMatchIdx
 			same := t.key[keyMatchIdx] == path[pathMatchIdx]
 			for keyMatchIdx < keyLength && t.key[keyMatchIdx] != '/' {
@@ -171,7 +170,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// already exists for the path.
 	if keyMatchIdx == keyLength {
 		for _, c := range t.children {
-			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, true); err == nil {
+			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {
 				return errExist
 			}
 		}
