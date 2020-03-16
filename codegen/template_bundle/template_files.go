@@ -1698,12 +1698,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 			return respHeaders, nil
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
-			{{- if or (eq $code 204) (eq $code 304) -}}
+			{{- if or (eq $code 204) (eq $code 304) }}
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
 				return respHeaders, &{{$val.Type}}{}
-			{{- else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
 				return respHeaders, &{{$val.Type}}{}
 			{{else}}
@@ -1728,7 +1728,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) -}}
+		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}
 			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
@@ -1753,12 +1753,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
-			{{- if or (eq $code 204) (eq $code 304) -}}
+			{{- if or (eq $code 204) (eq $code 304) }}
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
 				return defaultRes, respHeaders, &{{$val.Type}}{}
-			{{- else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
 				return defaultRes, respHeaders, &{{$val.Type}}{}
 			{{else}}
@@ -1802,7 +1802,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 14177, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 14172, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
