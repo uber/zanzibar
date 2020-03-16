@@ -157,6 +157,7 @@ func (h *BarNormalHandler) HandleRequest(
 	}
 
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBarBar.BarException:

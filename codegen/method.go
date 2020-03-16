@@ -44,6 +44,7 @@ const (
 	// generated argument directly instead of a struct that warps the argument.
 	// The annotated method should have one and only one argument.
 	AntHTTPReqDefBoxed = "%s.http.req.def"
+	antHTTPResNoBody   = "%s.http.res.body.disallow"
 )
 
 const queryAnnotationPrefix = "query."
@@ -62,7 +63,8 @@ type PathSegment struct {
 type ExceptionSpec struct {
 	StructSpec
 
-	StatusCode StatusCode
+	StatusCode       StatusCode
+	IsBodyDisallowed bool
 }
 
 // HeaderFieldInfo contains information about where to store
@@ -162,6 +164,7 @@ type annotations struct {
 	Meta            string
 	Handler         string
 	HTTPReqDefBoxed string
+	HTTPResNoBody   string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -207,6 +210,7 @@ func NewMethod(
 		Meta:            fmt.Sprintf(antMeta, ant),
 		Handler:         fmt.Sprintf(antHandler, ant),
 		HTTPReqDefBoxed: fmt.Sprintf(AntHTTPReqDefBoxed, ant),
+		HTTPResNoBody:   fmt.Sprintf(antHTTPResNoBody, ant),
 	}
 
 	method.GenCodePkgName, err = packageHelper.TypePackageName(thriftFile)
@@ -411,12 +415,14 @@ func (ms *MethodSpec) setExceptions(
 			)
 		}
 
+		bodyDisallowed := ms.isBodyDisallowed(e)
 		if !ms.WantAnnot {
 			exception := ExceptionSpec{
 				StructSpec: StructSpec{
 					Type: typeName,
 					Name: e.Name,
 				},
+				IsBodyDisallowed: bodyDisallowed,
 			}
 			ms.Exceptions[i] = exception
 			ms.ExceptionsIndex[e.Name] = exception
@@ -448,6 +454,7 @@ func (ms *MethodSpec) setExceptions(
 				Code:    code,
 				Message: e.Name,
 			},
+			IsBodyDisallowed: bodyDisallowed,
 		}
 		ms.Exceptions[i] = exception
 		ms.ExceptionsIndex[e.Name] = exception
@@ -1565,6 +1572,11 @@ func (ms *MethodSpec) getQueryParamInfo(field *compile.FieldSpec, thriftPrefix s
 func (ms *MethodSpec) isRequestBoxed(f *compile.FunctionSpec) bool {
 	boxed, ok := f.Annotations[ms.annotations.HTTPReqDefBoxed]
 	return ok && boxed == "true"
+}
+
+func (ms *MethodSpec) isBodyDisallowed(f *compile.FieldSpec) bool {
+	val, ok := f.Annotations[ms.annotations.HTTPResNoBody]
+	return ok && val == "true"
 }
 
 func headers(annotation string) []string {

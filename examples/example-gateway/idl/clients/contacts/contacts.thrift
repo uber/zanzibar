@@ -37,9 +37,15 @@ struct SaveContactsRequest {
 struct SaveContactsResponse {
 }
 
+exception BadRequest{}
+exception NotFound {}
+
 service Contacts {
 	SaveContactsResponse saveContacts(
         1: required SaveContactsRequest saveContactsRequest
+    ) throws (
+        1: BadRequest badRequest (zanzibar.http.status = "400", zanzibar.http.res.body.disallow = "true")
+        2: NotFound notFound (zanzibar.http.status = "404", zanzibar.http.res.body.disallow = "true")
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/:userUUID/contacts"

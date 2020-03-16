@@ -150,6 +150,7 @@ func (h *SimpleServiceTransHandler) HandleRequest(
 	}
 
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBazBaz.AuthErr:

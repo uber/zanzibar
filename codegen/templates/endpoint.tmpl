@@ -207,12 +207,26 @@ func (h *{{$handlerName}}) HandleRequest(
 		res.SendError(500, "Unexpected server error", err)
 		return
 		{{ else }}
+		{{$val := false}}
+		{{range $idx, $exception := .Exceptions}}
+			{{if not $exception.IsBodyDisallowed}}
+				{{$val = true}}
+			{{ end}}
+		{{end}}
+		{{ if $val -}}
 		switch errValue := err.(type) {
+		{{else -}}
+		switch err.(type) {
+		{{end -}}
 		{{range $idx, $exception := .Exceptions}}
 		case *{{$exception.Type}}:
+			{{if $exception.IsBodyDisallowed -}}
+			res.WriteJSONBytes({{$exception.StatusCode.Code}}, cliRespHeaders, nil)
+			{{else -}}
 			res.WriteJSON(
 				{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
 			)
+			{{end -}}
 			return
 		{{end}}
 		  default:

@@ -192,6 +192,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 	}
 
 	if err != nil {
+
 		switch errValue := err.(type) {
 
 		case *endpointsBarBar.BarException:
