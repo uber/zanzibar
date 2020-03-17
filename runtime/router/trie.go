@@ -114,7 +114,7 @@ func (t *Trie) Get(path string) (http.Handler, []Param, error) {
 	}
 	// ignore trailing slash
 	path = strings.TrimSuffix(path, "/")
-	return t.root.get(path, false, false, false)
+	return t.root.get(path, false, false)
 }
 
 // set sets the handler for given path, creates new child node if necessary
@@ -140,7 +140,8 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// is immediately after slash, e.g. "/:foo", "/x/:y". "/a:b" is not a colon wildcard segment.
 	var keyMatchIdx, pathMatchIdx int
 	for keyMatchIdx < keyLength && pathMatchIdx < pathLength {
-		if t.key[keyMatchIdx] == ':' && lastKeyCharSlash {
+		if (t.key[keyMatchIdx] == ':' && lastKeyCharSlash) &&
+			(path[pathMatchIdx] == ':' && lastPathCharSlash) {
 			keyStartIdx, pathStartIdx := keyMatchIdx, pathMatchIdx
 			same := t.key[keyMatchIdx] == path[pathMatchIdx]
 			for keyMatchIdx < keyLength && t.key[keyMatchIdx] != '/' {
@@ -170,7 +171,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// already exists for the path.
 	if keyMatchIdx == keyLength {
 		for _, c := range t.children {
-			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {
+			if _, params, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash); err == nil && len(params) == 0 {
 				return errExist
 			}
 		}
@@ -204,7 +205,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 				key:   path[i:],
 				value: value,
 			}
-			t.children = append(t.children, newNode)
+			t.addChildren(newNode, lastPathCharSlash)
 		}
 	}
 
@@ -234,14 +235,24 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 				key:   path[i:],
 				value: value,
 			}
-			t.children = append(t.children, newNode)
+			t.addChildren(newNode, lastPathCharSlash)
 		}
 	}
 
 	return nil
 }
 
-func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPattern bool) (http.Handler, []Param, error) {
+func (t *tnode) addChildren(child *tnode, lastPathCharSlash bool) {
+	if lastPathCharSlash && child.key[0] != ':' {
+		// Prepending if child is not a pattern of :var
+		t.children = append([]*tnode{child}, t.children...)
+	} else {
+		// Appending if the child is of pattern :var
+		t.children = append(t.children, child)
+	}
+}
+
+func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash bool) (http.Handler, []Param, error) {
 	keyLength, pathLength := len(t.key), len(path)
 	var params []Param
 
@@ -258,14 +269,6 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 				pathIdx++
 			}
 			params = append(params, Param{t.key[keyStartIdx:keyIdx], path[pathStartIdx:pathIdx]})
-		} else if path[pathIdx] == ':' && lastPathCharSlash && colonAsPattern {
-			// necessary for conflict check used in set call
-			for keyIdx < keyLength && t.key[keyIdx] != '/' {
-				keyIdx++
-			}
-			for pathIdx < pathLength && path[pathIdx] != '/' {
-				pathIdx++
-			}
 		} else if t.key[keyIdx] == path[pathIdx] {
 			keyIdx++
 			pathIdx++
@@ -300,7 +303,7 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 
 	// longest matched prefix matches up to node key length but not path length
 	for _, c := range t.children {
-		if v, ps, err := c.get(path[pathIdx:], lastKeyCharSlash, lastPathCharSlash, colonAsPattern); err == nil {
+		if v, ps, err := c.get(path[pathIdx:], lastKeyCharSlash, lastPathCharSlash); err == nil {
 			return v, append(params, ps...), nil
 		}
 	}

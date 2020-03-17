@@ -187,16 +187,17 @@ func TestTriePathsWithPatten(t *testing.T) {
 
 	trie = NewTrie()
 	tests = []ts{
-		// test "/b" collides with "/:"
+		// test "/b" does not collides with "/:"
 		{op: set, path: "/:a", value: "foo"},
-		{op: set, path: "/b", errMsg: errExist.Error()},
+		{op: set, path: "/b", value: "bar"},
 		{op: get, path: "/a/", expectedValue: "foo", expectedParams: []Param{{"a", "a"}}},
+		{op: get, path: "/b/", expectedValue: "bar"},
 	}
 	runTrieTests(t, trie, tests)
 
 	trie = NewTrie()
 	tests = []ts{
-		// test "/:" collides with "/b"
+		// test "/:" does not collides with "/b"
 		{op: set, path: "/b", value: "foo"},
 		{op: set, path: "/:a", value: "bar"},
 		{op: get, path: "/b/", expectedValue: "foo"},
@@ -252,8 +253,12 @@ func TestTriePathsWithPatten(t *testing.T) {
 		// more ":" tests
 		{op: set, path: "/a/:b/c", value: "1"},
 		{op: set, path: "/a/:b/d", value: "2"},
-		{op: get, path: "/a/b/c", expectedValue: "1", expectedParams: []Param{{"b", "b"}}},
-		{op: get, path: "/a/b/d", expectedValue: "2", expectedParams: []Param{{"b", "b"}}},
+		{op: set, path: "/a/b/:c", value: "3"},
+		{op: set, path: "/a/b/c", value: "4"},
+		{op: get, path: "/a/x/c", expectedValue: "1", expectedParams: []Param{{"b", "x"}}},
+		{op: get, path: "/a/x/d", expectedValue: "2", expectedParams: []Param{{"b", "x"}}},
+		{op: get, path: "/a/b/d", expectedValue: "3", expectedParams: []Param{{"c", "d"}}},
+		{op: get, path: "/a/b/c", expectedValue: "4"},
 	}
 	runTrieTests(t, trie, tests)
 }
