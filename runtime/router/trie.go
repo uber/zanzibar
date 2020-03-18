@@ -298,11 +298,6 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 		return nil, nil, errNotFound
 	}
 
-	// ':' in path matches '*' in node key
-	if keyIdx > 0 && t.key[keyIdx-1] == '*' {
-		return t.value, params, nil
-	}
-
 	// longest matched prefix matches up to node key length and path length
 	if pathIdx == pathLength {
 		if t.value != nil {
