@@ -114,7 +114,7 @@ func (t *Trie) Get(path string) (http.Handler, []Param, error) {
 	}
 	// ignore trailing slash
 	path = strings.TrimSuffix(path, "/")
-	return t.root.get(path, false, false)
+	return t.root.get(path, false, false, true)
 }
 
 // set sets the handler for given path, creates new child node if necessary
@@ -171,7 +171,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// already exists for the path.
 	if keyMatchIdx == keyLength {
 		for _, c := range t.children {
-			if _, params, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash); err == nil && len(params) == 0 {
+			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {//} && len(params) == 0 {
 				return errExist
 			}
 		}
@@ -252,15 +252,25 @@ func (t *tnode) addChildren(child *tnode, lastPathCharSlash bool) {
 	}
 }
 
-func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash bool) (http.Handler, []Param, error) {
+func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPattern bool) (http.Handler, []Param, error) {
 	keyLength, pathLength := len(t.key), len(path)
 	var params []Param
 
 	// find the longest matched prefix
 	var keyIdx, pathIdx int
 	for keyIdx < keyLength && pathIdx < pathLength {
-		if t.key[keyIdx] == ':' && lastKeyCharSlash {
-			// wildcard starts - match until next slash
+		if t.key[keyIdx] == ':' && lastKeyCharSlash &&
+			path[pathIdx] == ':' && lastPathCharSlash {
+			keyStartIdx, pathStartIdx := keyIdx+1, pathIdx+1
+			for keyIdx < keyLength && t.key[keyIdx] != '/' {
+				keyIdx++
+			}
+			for pathIdx < pathLength && path[pathIdx] != '/' {
+				pathIdx++
+			}
+			params = append(params, Param{t.key[keyStartIdx:keyIdx], path[pathStartIdx:pathIdx]})
+		} else if t.key[keyIdx] == ':' && lastKeyCharSlash && colonAsPattern {
+		// wildcard starts - match until next slash
 			keyStartIdx, pathStartIdx := keyIdx+1, pathIdx
 			for keyIdx < keyLength && t.key[keyIdx] != '/' {
 				keyIdx++
@@ -303,7 +313,7 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash bool) (http
 
 	// longest matched prefix matches up to node key length but not path length
 	for _, c := range t.children {
-		if v, ps, err := c.get(path[pathIdx:], lastKeyCharSlash, lastPathCharSlash); err == nil {
+		if v, ps, err := c.get(path[pathIdx:], lastKeyCharSlash, lastPathCharSlash, colonAsPattern); err == nil {
 			return v, append(params, ps...), nil
 		}
 	}
