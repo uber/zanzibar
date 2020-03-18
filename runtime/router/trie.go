@@ -171,7 +171,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// already exists for the path.
 	if keyMatchIdx == keyLength {
 		for _, c := range t.children {
-			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {//} && len(params) == 0 {
+			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {
 				return errExist
 			}
 		}
@@ -270,7 +270,7 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 			}
 			params = append(params, Param{t.key[keyStartIdx:keyIdx], path[pathStartIdx:pathIdx]})
 		} else if t.key[keyIdx] == ':' && lastKeyCharSlash && colonAsPattern {
-		// wildcard starts - match until next slash
+			// wildcard starts - match until next slash
 			keyStartIdx, pathStartIdx := keyIdx+1, pathIdx
 			for keyIdx < keyLength && t.key[keyIdx] != '/' {
 				keyIdx++

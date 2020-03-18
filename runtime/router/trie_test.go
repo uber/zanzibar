@@ -222,7 +222,7 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/b/c/x", value: "2.1"},
 		{op: set, path: "/a/b/:cc/:d/e", value: "3"},
 		{op: set, path: "/a/b/c/d/f", value: "4"},
-		{op: set, path: "/a/:b/c/d", value:"5"},
+		{op: set, path: "/a/:b/c/d", value: "5"},
 		{op: get, path: "/a/b/some/d", expectedValue: "2", expectedParams: []Param{{"cc", "some"}}},
 		{op: get, path: "/a/b/c/x", expectedValue: "2.1"},
 		{op: get, path: "/a/b/other/data/e", expectedValue: "3",
@@ -231,7 +231,7 @@ func TestTriePathsWithPatten(t *testing.T) {
 				{"d", "data"},
 			}},
 		{op: get, path: "/a/b/c/d/f", expectedValue: "4"},
-		{op: get, path: "/a/some/c/d", expectedValue:"5", expectedParams: []Param{{"b", "some"}}},
+		{op: get, path: "/a/some/c/d", expectedValue: "5", expectedParams: []Param{{"b", "some"}}},
 	}
 	runTrieTests(t, trie, tests)
 
