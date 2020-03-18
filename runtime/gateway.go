@@ -48,6 +48,7 @@ import (
 
 const (
 	localhost = "127.0.0.1"
+	INADDR_ANY = "0.0.0.0"
 )
 
 var levelMap = map[string]zapcore.Level{
@@ -214,7 +215,7 @@ func (gateway *Gateway) Bootstrap() error {
 		gateway.httpServer = gateway.localHTTPServer
 	}
 	gateway.RealHTTPPort = gateway.httpServer.RealPort
-	gateway.RealHTTPAddr = gateway.httpServer.RealAddr
+	gateway.RealHTTPAddr = INADDR_ANY
 
 	gateway.WaitGroup.Add(1)
 	go gateway.httpServer.JustServe(gateway.WaitGroup)
@@ -227,7 +228,7 @@ func (gateway *Gateway) Bootstrap() error {
 	// start TChannel server
 	// tchannelIP, err := tchannel.ListenIP()
 	//hack for tenancy routing for SR
-	tchannelIP := localhost
+	tchannelIP := INADDR_ANY
 	if err != nil {
 		return errors.Wrap(err, "error finding the best IP for tchannel")
 	}
