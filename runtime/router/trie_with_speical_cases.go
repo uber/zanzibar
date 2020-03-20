@@ -1,138 +1,33 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-
 package router
 
 import (
-	"errors"
-	"fmt"
-	zanzibar "github.com/uber/zanzibar/runtime"
 	"net/http"
 	"strings"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-var (
-	errPath     = errors.New("bad path")
-	errExist    = errors.New("path value already set")
-	errNotFound = errors.New("not found")
-)
-
-type paramMismatch struct {
-	expected, actual string
-	existingPath     string
-}
-
-// Error returns the error string
-func (e *paramMismatch) Error() string {
-	return fmt.Sprintf("param key mismatch: expected is %s but got %s", e.expected, e.actual)
-}
-
-// Param is a url parameter where key is the url segment pattern (without :) and
-// value is the actual segment of a matched url.
-// e.g. url /foo/123 matches /foo/:id, the url param has key "id" and value "123"
-type Param struct {
-	Key, Value string
-}
-
-// Trie is a radix trie to store string value at given url path,
-// a trie node corresponds to an arbitrary path substring.
-type Trie struct {
-	root *tnode
-}
-
-type tnode struct {
-	key      string
-	value    http.Handler
-	children []*tnode
-}
-
-// NewTrie creates a new trie.
-func NewTrie() *Trie {
-	return &Trie{
-		root: &tnode{
-			key: "",
-		},
+func (t *Trie) isWhitelistedPath(path string, config *zanzibar.StaticConfig) bool {
+	if config == nil {
+		return false
 	}
-}
-
-// Set sets the value for given path, returns error if path already set.
-// When a http.Handler is registered for a given path, a subsequent Get returns the registered
-// handler if the url passed to Get call matches the set path. Match in this context could mean either
-// equality (e.g. url is "/foo" and path is "/foo") or url matches path pattern, which has two forms:
-// - path ends with "/*", e.g. url "/foo" and "/foo/bar" both matches path "/*"
-// - path contains colon wildcard ("/:"), e.g. url "/a/b" and "/a/c" bot matches path "/a/:var"
-func (t *Trie) Set(path string, value http.Handler, config *zanzibar.StaticConfig) error {
-	if path == "" || strings.Contains(path, "//") {
-		return errPath
+	var whitelistedPaths []string
+	config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
+	if len(whitelistedPaths) > 0 {
+		for _, whitelistedPath := range whitelistedPaths {
+			if strings.HasPrefix(whitelistedPath, path) {
+				return true;
+			}
+		}
 	}
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-	// ignore trailing slash
-	path = strings.TrimSuffix(path, "/")
-
-	// validate "*"
-	if strings.Contains(path, "*") && !strings.HasSuffix(path, "/*") {
-		return errors.New("/* must be the last path segment")
-	}
-	if strings.Count(path, "*") > 1 {
-		return errors.New("path can not contain more than one *")
-	}
-
-	var err error
-	if t.isWhitelistedPath(path, config) {
-		err = t.root.set(path, value, false, false)
-	} else {
-		err = t.root.set(path, value, false, false)
-	}
-
-	if e, ok := err.(*paramMismatch); ok {
-		return fmt.Errorf("path %q has a different param key %q, it should be the same key %q as in existing path %q", path, e.actual, e.expected, e.existingPath)
-	}
-	return err
-}
-
-// Get returns the http.Handler for given path, returns error if not found.
-// It also returns the url params if given path contains any, e.g. if a handler is registered for
-// "/:foo/bar", then calling Get with path "/xyz/bar" returns a param whose key is "foo" and value is "xyz".
-func (t *Trie) Get(path string, config *zanzibar.StaticConfig) (http.Handler, []Param, error) {
-	if path == "" || strings.Contains(path, "//") {
-		return nil, nil, errPath
-	}
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-	// ignore trailing slash
-	path = strings.TrimSuffix(path, "/")
-
-	if t.isWhitelistedPath(path, config) {
-		return t.root.getForWhitelistedPath(path, false, false, true)
-	}
-	return t.root.get(path, false, false, false)
+	return false;
 }
 
 // set sets the handler for given path, creates new child node if necessary
 // lastKeyCharSlash tracks whether the previous key char is a '/', used to decide it is a pattern or not
 // when the current key char is ':'. lastPathCharSlash tracks whether the previous path char is a '/',
 // used to decide it is a pattern or not when the current path char is ':'.
-func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathCharSlash bool) error {
+func (t *tnode) setForWhitelistedPath(path string, value http.Handler, lastKeyCharSlash, lastPathCharSlash bool) error {
 	// find the longest common prefix
 	var shorterLength, i int
 	keyLength, pathLength := len(t.key), len(path)
@@ -151,7 +46,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// is immediately after slash, e.g. "/:foo", "/x/:y". "/a:b" is not a colon wildcard segment.
 	var keyMatchIdx, pathMatchIdx int
 	for keyMatchIdx < keyLength && pathMatchIdx < pathLength {
-		if (t.key[keyMatchIdx] == ':' && lastKeyCharSlash) ||
+		if (t.key[keyMatchIdx] == ':' && lastKeyCharSlash) &&
 			(path[pathMatchIdx] == ':' && lastPathCharSlash) {
 			keyStartIdx, pathStartIdx := keyMatchIdx, pathMatchIdx
 			same := t.key[keyMatchIdx] == path[pathMatchIdx]
@@ -182,7 +77,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// already exists for the path.
 	if keyMatchIdx == keyLength {
 		for _, c := range t.children {
-			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, true); err == nil {
+			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {
 				return errExist
 			}
 		}
@@ -216,7 +111,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 				key:   path[i:],
 				value: value,
 			}
-			t.children = append(t.children, newNode)
+			t.addChildren(newNode, lastPathCharSlash)
 		}
 	}
 
@@ -246,21 +141,41 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 				key:   path[i:],
 				value: value,
 			}
-			t.children = append(t.children, newNode)
+			t.addChildren(newNode, lastPathCharSlash)
 		}
 	}
 
 	return nil
 }
 
-func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPattern bool) (http.Handler, []Param, error) {
+func (t *tnode) addChildren(child *tnode, lastPathCharSlash bool) {
+	if lastPathCharSlash && child.key[0] != ':' {
+		// Prepending if child is not a pattern of :var
+		t.children = append([]*tnode{child}, t.children...)
+	} else {
+		// Appending if the child is of pattern :var
+		t.children = append(t.children, child)
+	}
+}
+
+func (t *tnode) getForWhitelistedPath(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPattern bool) (http.Handler, []Param, error) {
 	keyLength, pathLength := len(t.key), len(path)
 	var params []Param
 
 	// find the longest matched prefix
 	var keyIdx, pathIdx int
 	for keyIdx < keyLength && pathIdx < pathLength {
-		if t.key[keyIdx] == ':' && lastKeyCharSlash {
+		if t.key[keyIdx] == ':' && lastKeyCharSlash &&
+			path[pathIdx] == ':' && lastPathCharSlash {
+			keyStartIdx, pathStartIdx := keyIdx+1, pathIdx+1
+			for keyIdx < keyLength && t.key[keyIdx] != '/' {
+				keyIdx++
+			}
+			for pathIdx < pathLength && path[pathIdx] != '/' {
+				pathIdx++
+			}
+			params = append(params, Param{t.key[keyStartIdx:keyIdx], path[pathStartIdx:pathIdx]})
+		} else if t.key[keyIdx] == ':' && lastKeyCharSlash && colonAsPattern {
 			// wildcard starts - match until next slash
 			keyStartIdx, pathStartIdx := keyIdx+1, pathIdx
 			for keyIdx < keyLength && t.key[keyIdx] != '/' {
@@ -270,14 +185,6 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 				pathIdx++
 			}
 			params = append(params, Param{t.key[keyStartIdx:keyIdx], path[pathStartIdx:pathIdx]})
-		} else if path[pathIdx] == ':' && lastPathCharSlash && colonAsPattern {
-			// necessary for conflict check used in set call
-			for keyIdx < keyLength && t.key[keyIdx] != '/' {
-				keyIdx++
-			}
-			for pathIdx < pathLength && path[pathIdx] != '/' {
-				pathIdx++
-			}
 		} else if t.key[keyIdx] == path[pathIdx] {
 			keyIdx++
 			pathIdx++
@@ -295,11 +202,6 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 			return t.value, params, nil
 		}
 		return nil, nil, errNotFound
-	}
-
-	// ':' in path matches '*' in node key
-	if keyIdx > 0 && t.key[keyIdx-1] == '*' {
-		return t.value, params, nil
 	}
 
 	// longest matched prefix matches up to node key length and path length

@@ -28,6 +28,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 const (
@@ -51,9 +52,13 @@ type namedHandler struct {
 func (n namedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {}
 
 func runTrieTests(t *testing.T, trie *Trie, tests []ts) {
+	runTrieTestsWithConfig(t, trie, tests, nil)
+}
+
+func runTrieTestsWithConfig(t *testing.T, trie *Trie, tests []ts, config *zanzibar.StaticConfig) {
 	for _, test := range tests {
 		if test.op == set {
-			err := trie.Set(test.path, namedHandler{id: test.value})
+			err := trie.Set(test.path, namedHandler{id: test.value}, config)
 			if test.errMsg == "" {
 				assert.NoError(t, err)
 			} else {
@@ -61,7 +66,7 @@ func runTrieTests(t *testing.T, trie *Trie, tests []ts) {
 			}
 		}
 		if test.op == get {
-			v, ps, err := trie.Get(test.path)
+			v, ps, err := trie.Get(test.path, config)
 			if test.errMsg == "" {
 				assert.NoError(t, err, test.path)
 				assert.Equal(t, test.expectedValue, v.(namedHandler).id)
@@ -248,6 +253,40 @@ func TestTriePathsWithPatten(t *testing.T) {
 	runTrieTests(t, trie, tests)
 }
 
+func TestTrieForWhitelistedPaths(t *testing.T) {
+	trie := NewTrie()
+	config := zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+		"router.whitelistedPaths": []string {
+			"/a/b",
+			"/x/y",
+		},
+	})
+
+	tests := []ts{
+		// more ":" tests
+		{op: set, path: "/p", value: "1"},
+		{op: set, path: "/:q", errMsg: errExist.Error()},
+		{op: get, path: "/p/", expectedValue: "1"},
+	}
+	runTrieTestsWithConfig(t, trie, tests, config)
+
+	tests = []ts{
+		// more ":" tests
+		{op: set, path: "/:p", value: "1"},
+		{op: set, path: "/q", errMsg: errExist.Error()},
+		{op: get, path: "/p/", expectedValue: "1", expectedParams: []Param{{"p", "p"}}},
+	}
+	runTrieTestsWithConfig(t, trie, tests, config)
+
+	tests = []ts{
+		// more ":" tests
+		{op: set, path: "/a/b/c", value: "1"},
+		{op: set, path: "/a/b/:d", value: "2"},
+		{op: get, path: "/a/b/c/", expectedValue: "1"},
+		{op: get, path: "/a/b/e/", expectedValue: "2", expectedParams: []Param{{"d", "e"}}},
+	}
+	runTrieTestsWithConfig(t, trie, tests, config)
+}
 // simple test for coverage
 func TestParamMismatch(t *testing.T) {
 	pm := paramMismatch{

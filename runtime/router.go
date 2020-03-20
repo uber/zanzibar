@@ -173,6 +173,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		NotFound:               http.HandlerFunc(router.handleNotFound),
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
 		PanicHandler:           router.handlePanic,
+		Config: gateway.Config,
 	}
 	return router
 }

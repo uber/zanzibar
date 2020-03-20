@@ -25,6 +25,8 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Router dispatches http requests to a registered http.Handler.
@@ -64,6 +66,10 @@ type Router struct {
 	// unrecovered panics.
 	PanicHandler func(http.ResponseWriter, *http.Request, interface{})
 
+	// Using config endpoints can be whitelisted for special behavior using which
+	// different handlers can configured for such as /a and /:b in router
+	Config *zanzibar.StaticConfig
+
 	// TODO: (clu) maybe support OPTIONS
 }
 
@@ -90,7 +96,7 @@ func (r *Router) Handle(method, path string, handler http.Handler) error {
 		trie = NewTrie()
 		r.tries[method] = trie
 	}
-	return trie.Set(path, handler)
+	return trie.Set(path, handler, r.Config)
 }
 
 // ServeHTTP dispatches the request to a register handler to handle.
@@ -105,7 +111,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	reqPath := req.URL.Path
 	if trie, ok := r.tries[req.Method]; ok {
-		if handler, params, err := trie.Get(reqPath); err == nil {
+		if handler, params, err := trie.Get(reqPath, r.Config); err == nil {
 			ctx := context.WithValue(req.Context(), urlParamsKey, params)
 			req = req.WithContext(ctx)
 			handler.ServeHTTP(w, req)
@@ -143,7 +149,7 @@ func (r *Router) allowed(path, reqMethod string) string {
 			continue
 		}
 
-		if _, _, err := trie.Get(path); err == nil {
+		if _, _, err := trie.Get(path, r.Config); err == nil {
 			allow = append(allow, method)
 		}
 	}

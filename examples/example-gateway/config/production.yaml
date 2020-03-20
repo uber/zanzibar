@@ -88,3 +88,5 @@ clients.baz.alternates:
       port: 8114
 grpc.clientServiceNameMapping:
   echo: echo
+router.whitelistedPaths:
+  - /path/whitelisted
