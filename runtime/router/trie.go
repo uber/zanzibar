@@ -23,7 +23,6 @@ package router
 import (
 	"errors"
 	"fmt"
-	zanzibar "github.com/uber/zanzibar/runtime"
 	"net/http"
 	"strings"
 )
@@ -78,7 +77,8 @@ func NewTrie() *Trie {
 // equality (e.g. url is "/foo" and path is "/foo") or url matches path pattern, which has two forms:
 // - path ends with "/*", e.g. url "/foo" and "/foo/bar" both matches path "/*"
 // - path contains colon wildcard ("/:"), e.g. url "/a/b" and "/a/c" bot matches path "/a/:var"
-func (t *Trie) Set(path string, value http.Handler, config *zanzibar.StaticConfig) error {
+// isWhitelisted - Used for special behavior using which different handlers can configured for paths such as /a and /:b in router
+func (t *Trie) Set(path string, value http.Handler, isWhitelisted bool) error {
 	if path == "" || strings.Contains(path, "//") {
 		return errPath
 	}
@@ -97,8 +97,8 @@ func (t *Trie) Set(path string, value http.Handler, config *zanzibar.StaticConfi
 	}
 
 	var err error
-	if t.isWhitelistedPath(path, config) {
-		err = t.root.set(path, value, false, false)
+	if isWhitelisted {
+		err = t.root.setForWhitelistedPath(path, value, false, false)
 	} else {
 		err = t.root.set(path, value, false, false)
 	}
@@ -112,7 +112,8 @@ func (t *Trie) Set(path string, value http.Handler, config *zanzibar.StaticConfi
 // Get returns the http.Handler for given path, returns error if not found.
 // It also returns the url params if given path contains any, e.g. if a handler is registered for
 // "/:foo/bar", then calling Get with path "/xyz/bar" returns a param whose key is "foo" and value is "xyz".
-func (t *Trie) Get(path string, config *zanzibar.StaticConfig) (http.Handler, []Param, error) {
+// isWhitelisted - Used for special behavior using which different handlers can configured for paths such as /a and /:b in router
+func (t *Trie) Get(path string, isWhitelisted bool) (http.Handler, []Param, error) {
 	if path == "" || strings.Contains(path, "//") {
 		return nil, nil, errPath
 	}
@@ -122,7 +123,7 @@ func (t *Trie) Get(path string, config *zanzibar.StaticConfig) (http.Handler, []
 	// ignore trailing slash
 	path = strings.TrimSuffix(path, "/")
 
-	if t.isWhitelistedPath(path, config) {
+	if isWhitelisted {
 		return t.root.getForWhitelistedPath(path, false, false, true)
 	}
 	return t.root.get(path, false, false, false)

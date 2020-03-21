@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"net/url"
 
@@ -173,7 +174,6 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		NotFound:               http.HandlerFunc(router.handleNotFound),
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
 		PanicHandler:           router.handlePanic,
-		Config: gateway.Config,
 	}
 	return router
 }
@@ -191,12 +191,12 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 		handler.ServeHTTP(w, r)
 	}
 
-	return router.httpRouter.Handle(method, prefix, http.HandlerFunc(h))
+	return router.httpRouter.Handle(method, prefix, http.HandlerFunc(h), router.isWhitelistedPath(prefix))
 }
 
 // ServeHTTP implements the http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
 func (router *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	router.httpRouter.ServeHTTP(w, r)
+	router.httpRouter.ServeHTTP(w, r, router.isWhitelistedPath(r.URL.Path))
 }
 
 func (router *httpRouter) handlePanic(
@@ -263,4 +263,17 @@ func (router *httpRouter) handleMethodNotAllowed(
 	)
 	req.res.StatusCode = http.StatusMethodNotAllowed
 	req.res.finish(ctx)
+}
+
+func (router *httpRouter) isWhitelistedPath(path string) bool {
+	var whitelistedPaths []string
+	router.gateway.Config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
+	if len(whitelistedPaths) > 0 {
+		for _, whitelistedPath := range whitelistedPaths {
+			if strings.HasPrefix(whitelistedPath, path) {
+				return true
+			}
+		}
+	}
+	return false
 }

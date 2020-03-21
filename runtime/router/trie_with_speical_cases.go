@@ -2,26 +2,7 @@ package router
 
 import (
 	"net/http"
-	"strings"
-
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
-
-func (t *Trie) isWhitelistedPath(path string, config *zanzibar.StaticConfig) bool {
-	if config == nil {
-		return false
-	}
-	var whitelistedPaths []string
-	config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
-	if len(whitelistedPaths) > 0 {
-		for _, whitelistedPath := range whitelistedPaths {
-			if strings.HasPrefix(whitelistedPath, path) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
 
 // set sets the handler for given path, creates new child node if necessary
 // lastKeyCharSlash tracks whether the previous key char is a '/', used to decide it is a pattern or not
@@ -77,7 +58,7 @@ func (t *tnode) setForWhitelistedPath(path string, value http.Handler, lastKeyCh
 	// already exists for the path.
 	if keyMatchIdx == keyLength {
 		for _, c := range t.children {
-			if _, _, err := c.get(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {
+			if _, _, err := c.getForWhitelistedPath(path[pathMatchIdx:], lastKeyCharSlash, lastPathCharSlash, false); err == nil {
 				return errExist
 			}
 		}
@@ -128,7 +109,7 @@ func (t *tnode) setForWhitelistedPath(path string, value http.Handler, lastKeyCh
 				if c.key[0] == path[i] {
 					lastKeyCharSlash = i > 0 && t.key[i-1] == '/'
 					lastPathCharSlash = i > 0 && path[i-1] == '/'
-					err := c.set(path[i:], value, lastKeyCharSlash, lastPathCharSlash)
+					err := c.setForWhitelistedPath(path[i:], value, lastKeyCharSlash, lastPathCharSlash)
 					if e, ok := err.(*paramMismatch); ok {
 						e.existingPath = t.key + e.existingPath
 						return e
@@ -214,7 +195,7 @@ func (t *tnode) getForWhitelistedPath(path string, lastKeyCharSlash, lastPathCha
 
 	// longest matched prefix matches up to node key length but not path length
 	for _, c := range t.children {
-		if v, ps, err := c.get(path[pathIdx:], lastKeyCharSlash, lastPathCharSlash, colonAsPattern); err == nil {
+		if v, ps, err := c.getForWhitelistedPath(path[pathIdx:], lastKeyCharSlash, lastPathCharSlash, colonAsPattern); err == nil {
 			return v, append(params, ps...), nil
 		}
 	}

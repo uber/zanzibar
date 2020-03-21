@@ -25,8 +25,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Router dispatches http requests to a registered http.Handler.
@@ -66,10 +64,6 @@ type Router struct {
 	// unrecovered panics.
 	PanicHandler func(http.ResponseWriter, *http.Request, interface{})
 
-	// Using config endpoints can be whitelisted for special behavior using which
-	// different handlers can configured for such as /a and /:b in router
-	Config *zanzibar.StaticConfig
-
 	// TODO: (clu) maybe support OPTIONS
 }
 
@@ -86,7 +80,8 @@ func ParamsFromContext(ctx context.Context) []Param {
 }
 
 // Handle registers a http.Handler for given method and path.
-func (r *Router) Handle(method, path string, handler http.Handler) error {
+// isWhitelisted - Used for special behavior using which different handlers can configured for paths such as /a and /:b in router
+func (r *Router) Handle(method, path string, handler http.Handler, isWhitelisted bool) error {
 	if r.tries == nil {
 		r.tries = make(map[string]*Trie)
 	}
@@ -96,11 +91,12 @@ func (r *Router) Handle(method, path string, handler http.Handler) error {
 		trie = NewTrie()
 		r.tries[method] = trie
 	}
-	return trie.Set(path, handler, r.Config)
+	return trie.Set(path, handler, isWhitelisted)
 }
 
 // ServeHTTP dispatches the request to a register handler to handle.
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+// isWhitelisted - Used for special behavior using which different handlers can configured for paths such as /a and /:b in router
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request, isWhitelisted bool) {
 	if r.PanicHandler != nil {
 		defer func(w http.ResponseWriter, req *http.Request) {
 			if recovered := recover(); recovered != nil {
@@ -111,7 +107,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	reqPath := req.URL.Path
 	if trie, ok := r.tries[req.Method]; ok {
-		if handler, params, err := trie.Get(reqPath, r.Config); err == nil {
+		if handler, params, err := trie.Get(reqPath, isWhitelisted); err == nil {
 			ctx := context.WithValue(req.Context(), urlParamsKey, params)
 			req = req.WithContext(ctx)
 			handler.ServeHTTP(w, req)
@@ -120,7 +116,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if r.HandleMethodNotAllowed {
-		if allowed := r.allowed(reqPath, req.Method); allowed != "" {
+		if allowed := r.allowed(reqPath, req.Method, isWhitelisted); allowed != "" {
 			w.Header().Set("Allow", allowed)
 			if r.MethodNotAllowed != nil {
 				r.MethodNotAllowed.ServeHTTP(w, req)
@@ -141,7 +137,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (r *Router) allowed(path, reqMethod string) string {
+func (r *Router) allowed(path, reqMethod string, isWhitelisted bool) string {
 	var allow []string
 
 	for method, trie := range r.tries {
@@ -149,7 +145,7 @@ func (r *Router) allowed(path, reqMethod string) string {
 			continue
 		}
 
-		if _, _, err := trie.Get(path, r.Config); err == nil {
+		if _, _, err := trie.Get(path, isWhitelisted); err == nil {
 			allow = append(allow, method)
 		}
 	}
