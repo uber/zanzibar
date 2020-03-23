@@ -21,64 +21,10 @@
 package router
 
 import (
-	"bytes"
-	"fmt"
-	"io"
-	"net/http"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-const (
-	get = "get"
-	set = "set"
-)
-
-type ts struct {
-	op             string
-	path           string
-	value          string
-	errMsg         string
-	expectedValue  string
-	expectedParams []Param
-}
-
-type namedHandler struct {
-	id string
-}
-
-func (n namedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {}
-
-func runTrieTests(t *testing.T, trie *Trie, tests []ts) {
-	runTrieTestsWithWhitelist(t, trie, tests, false)
-}
-
-func runTrieTestsWithWhitelist(t *testing.T, trie *Trie, tests []ts, isWhitelisted bool) {
-	for _, test := range tests {
-		if test.op == set {
-			err := trie.Set(test.path, namedHandler{id: test.value}, isWhitelisted)
-			if test.errMsg == "" {
-				assert.NoError(t, err)
-			} else {
-				assert.EqualError(t, err, test.errMsg)
-			}
-		}
-		if test.op == get {
-			v, ps, err := trie.Get(test.path, isWhitelisted)
-			if test.errMsg == "" {
-				assert.NoError(t, err, test.path)
-				assert.Equal(t, test.expectedValue, v.(namedHandler).id)
-				assert.Equal(t, test.expectedParams, ps)
-			} else {
-				assert.EqualError(t, err, test.errMsg)
-			}
-		}
-	}
-	//printTrie(trie)
-}
-
-func TestTrieLiteralPath(t *testing.T) {
+func TestTrieLiteralPathForWhitelisted(t *testing.T) {
 	tree := NewTrie()
 	tests := []ts{
 		// test blank path
@@ -115,10 +61,10 @@ func TestTrieLiteralPath(t *testing.T) {
 		{op: get, path: "/a/goto", expectedValue: "goto"},
 	}
 
-	runTrieTests(t, tree, tests)
+	runTrieTestsWithWhitelist(t, tree, tests, true)
 }
 
-func TestTriePathsWithPatten(t *testing.T) {
+func TestTriePathsWithPattenForWhitelisted(t *testing.T) {
 	trie := NewTrie()
 	tests := []ts{
 		// test setting "/*/a" is not allowed
@@ -139,12 +85,16 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/:b", value: "baz", errMsg: errExist.Error()},
 		// test "/*" collides with "/a"
 		{op: set, path: "/*", value: "baz", errMsg: errExist.Error()},
-		// test "/:" collides with "/a"
-		{op: set, path: "/:x", value: "baz", errMsg: errExist.Error()},
-		// test "/:/b" collides with "/a/*"
-		{op: set, path: "/:x/b", value: "baz", errMsg: errExist.Error()},
+		// test "/:" does not collide with "/a"
+		{op: set, path: "/:x", value: "1"},
+		// test "/:/b" does not collide with "/a/*"
+		{op: set, path: "/:x/b", value: "2"},
+
+		{op: get, path: "/x/", expectedValue: "1", expectedParams: []Param{{"x", "x"}}},
+		{op: get, path: "/a/b/", expectedValue: "bar"},
+		{op: get, path: "/x/b", expectedValue: "2", expectedParams: []Param{{"x", "x"}}},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
@@ -158,14 +108,14 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: get, path: "/ac", errMsg: errNotFound.Error()},
 		{op: get, path: "/a:", errMsg: errNotFound.Error()},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
 		{op: set, path: "/:a", value: "foo"},
 		{op: get, path: "/:a", expectedValue: "foo", expectedParams: []Param{{"a", ":a"}}},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
@@ -176,7 +126,7 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: get, path: "/x/b/", expectedValue: "foo", expectedParams: []Param{{"a", "x"}}},
 		{op: get, path: "/a/", expectedValue: "bar"},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
@@ -187,25 +137,25 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: get, path: "/x/b/", expectedValue: "foo", expectedParams: []Param{{"a", "x"}}},
 		{op: get, path: "/a/", expectedValue: "bar"},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
-		// test "/b" collides with "/:"
-		{op: set, path: "/:a", value: "foo"},
-		{op: set, path: "/b", errMsg: errExist.Error()},
-		{op: get, path: "/a/", expectedValue: "foo", expectedParams: []Param{{"a", "a"}}},
+		// more ":" tests
+		{op: set, path: "/:a", value: "1"},
+		{op: set, path: "/b", value: "2"},
+		{op: get, path: "/a/", expectedValue: "1", expectedParams: []Param{{"a", "a"}}},
+		{op: get, path: "/b/", expectedValue: "2"},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
-	trie = NewTrie()
 	tests = []ts{
-		// test "/:" collides with "/b"
-		{op: set, path: "/b", value: "foo"},
-		{op: set, path: "/:a", errMsg: errExist.Error()},
-		{op: get, path: "/b/", expectedValue: "foo"},
+		// more ":" tests
+		{op: set, path: "/a", value: "1"},
+		{op: set, path: "/:b", value: "2"},
+		{op: get, path: "/a/", expectedValue: "1"},
+		{op: get, path: "/b/", expectedValue: "2", expectedParams: []Param{{"b", "b"}}},
 	}
-	runTrieTests(t, trie, tests)
 
 	trie = NewTrie()
 	tests = []ts{
@@ -216,7 +166,7 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/b/c/x", value: "2.1"},
 		{op: set, path: "/a/b/:cc/:d/e", value: "3"},
 		{op: set, path: "/a/b/c/d/f", value: "4"},
-		{op: set, path: "/a/:b/c/d", errMsg: errExist.Error()},
+		{op: set, path: "/a/:b/c/d", value: "5"},
 		{op: get, path: "/a/b/some/d", expectedValue: "2", expectedParams: []Param{{"cc", "some"}}},
 		{op: get, path: "/a/b/c/x", expectedValue: "2.1"},
 		{op: get, path: "/a/b/other/data/e", expectedValue: "3",
@@ -225,8 +175,9 @@ func TestTriePathsWithPatten(t *testing.T) {
 				{"d", "data"},
 			}},
 		{op: get, path: "/a/b/c/d/f", expectedValue: "4"},
+		{op: get, path: "/a/x/c/d/", expectedValue: "5", expectedParams: []Param{{"b", "x"}}},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
@@ -234,73 +185,21 @@ func TestTriePathsWithPatten(t *testing.T) {
 		{op: set, path: "/a/b", value: "1"},
 		{op: set, path: "/a/b/ccc/x", value: "2"},
 		{op: set, path: "/a/b/c/dope/f", value: "3"},
-		{op: set, path: "/a/b/ccc/:", errMsg: errExist.Error()},
-		{op: set, path: "/a/b/c/:/:/", errMsg: errExist.Error()},
+		{op: set, path: "/a/b/ccc/:", value: "4"},
+		{op: set, path: "/a/b/c/:/:/", value: "5"},
 		{op: get, path: "/a/b/ccc", errMsg: errNotFound.Error()},
 		{op: get, path: "/a/b/:", errMsg: errNotFound.Error()},
 	}
-	runTrieTests(t, trie, tests)
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{
 		// more ":" tests
 		{op: set, path: "/a/:b/c", value: "1"},
 		{op: set, path: "/a/:b/d", value: "2"},
+		{op: set, path: "/a/", value: "3"},
 		{op: get, path: "/a/b/c", expectedValue: "1", expectedParams: []Param{{"b", "b"}}},
 		{op: get, path: "/a/b/d", expectedValue: "2", expectedParams: []Param{{"b", "b"}}},
 	}
-	runTrieTests(t, trie, tests)
-}
-
-// simple test for coverage
-func TestParamMismatch(t *testing.T) {
-	pm := paramMismatch{
-		expected: "foo",
-		actual:   "bar",
-	}
-	assert.Equal(t, "param key mismatch: expected is foo but got bar", pm.Error())
-}
-
-// utilities for debugging
-func printTrie(t *Trie) {
-	buf := new(bytes.Buffer)
-	var levelsEnded []int
-	printNodes(buf, t.root.children, 0, levelsEnded)
-	fmt.Println(string(buf.Bytes()))
-}
-
-func printNodes(w io.Writer, nodes []*tnode, level int, levelsEnded []int) {
-	for i, node := range nodes {
-		edge := "├──"
-		if i == len(nodes)-1 {
-			levelsEnded = append(levelsEnded, level)
-			edge = "└──"
-		}
-		printNode(w, node, level, levelsEnded, edge)
-		if len(node.children) > 0 {
-			printNodes(w, node.children, level+1, levelsEnded)
-		}
-	}
-}
-
-func printNode(w io.Writer, node *tnode, level int, levelsEnded []int, edge string) {
-	for i := 0; i < level; i++ {
-		isEnded := false
-		for _, l := range levelsEnded {
-			if l == i {
-				isEnded = true
-				break
-			}
-		}
-		if isEnded {
-			_, _ = fmt.Fprint(w, "    ")
-		} else {
-			_, _ = fmt.Fprint(w, "│   ")
-		}
-	}
-	if node.value != nil {
-		_, _ = fmt.Fprintf(w, "%s %v (%v)\n", edge, node.key, node.value)
-	} else {
-		_, _ = fmt.Fprintf(w, "%s %v\n", edge, node.key)
-	}
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 }
