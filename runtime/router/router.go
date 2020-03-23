@@ -64,6 +64,8 @@ type Router struct {
 	// unrecovered panics.
 	PanicHandler func(http.ResponseWriter, *http.Request, interface{})
 
+	// Used for special behavior using which different handlers can configured
+	// for paths such as /a and /:b in router.
 	WhitelistedPaths []string
 
 	// TODO: (clu) maybe support OPTIONS

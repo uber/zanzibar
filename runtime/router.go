@@ -267,7 +267,8 @@ func (router *httpRouter) handleMethodNotAllowed(
 
 func (router *httpRouter) getWhitelistedPaths() []string {
 	var whitelistedPaths []string
-	if router.gateway.Config != nil {
+	if router.gateway.Config != nil &&
+		router.gateway.Config.ContainsKey("router.whitelistedPaths") {
 		router.gateway.Config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
 	}
 	return whitelistedPaths
