@@ -47,6 +47,12 @@ func (s *routerSuite) SetupTest() {
 	s.gw.Logger = logger
 	s.scope = tally.NewTestScope("", nil)
 	s.gw.RootScope = s.scope
+	s.gw.Config = NewStaticConfigOrDie(
+		[]*ConfigOption{},
+		map[string]interface{}{
+			"router.whitelistedPaths": []string{"/a/b"},
+		},
+	)
 	s.router = NewHTTPRouter(s.gw).(*httpRouter)
 }
 

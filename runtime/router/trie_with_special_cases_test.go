@@ -156,6 +156,7 @@ func TestTriePathsWithPattenForWhitelisted(t *testing.T) {
 		{op: get, path: "/a/", expectedValue: "1"},
 		{op: get, path: "/b/", expectedValue: "2", expectedParams: []Param{{"b", "b"}}},
 	}
+	runTrieTestsWithWhitelist(t, trie, tests, true)
 
 	trie = NewTrie()
 	tests = []ts{

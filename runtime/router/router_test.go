@@ -47,17 +47,28 @@ func TestParamsFromContext(t *testing.T) {
 	r := &Router{}
 
 	handled := false
-	err := r.Handle("GET", "/:var",
-		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			params := ParamsFromContext(req.Context())
-			assert.Equal(t, 1, len(params))
-			assert.Equal(t, "var", params[0].Key)
-			assert.Equal(t, "foo", params[0].Value)
-			handled = true
-		}))
+	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		params := ParamsFromContext(req.Context())
+		assert.Equal(t, 1, len(params))
+		assert.Equal(t, "var", params[0].Key)
+		assert.Equal(t, "foo", params[0].Value)
+		handled = true
+	})
+	err := r.Handle("GET", "/:var", handlerFunc)
 	assert.NoError(t, err, "unexpected error")
 
 	req, _ := http.NewRequest("GET", "/foo", nil)
+	r.ServeHTTP(nil, req)
+	assert.True(t, handled)
+
+	r = &Router{}
+	r.WhitelistedPaths = []string{"/bar"}
+
+	handled = false
+	err = r.Handle("GET", "/bar/:var", handlerFunc)
+	assert.NoError(t, err, "unexpected error")
+
+	req, _ = http.NewRequest("GET", "/bar/foo", nil)
 	r.ServeHTTP(nil, req)
 	assert.True(t, handled)
 }
