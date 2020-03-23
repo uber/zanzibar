@@ -24,8 +24,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
-
 	"net/url"
 
 	"github.com/opentracing/opentracing-go"
@@ -151,6 +149,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		ContextLogger: gateway.ContextLogger,
 		Scope:         gateway.RootScope,
 		Tracer:        gateway.Tracer,
+		Config:        gateway.Config,
 	}
 
 	router := &httpRouter{
@@ -174,6 +173,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		NotFound:               http.HandlerFunc(router.handleNotFound),
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
 		PanicHandler:           router.handlePanic,
+		WhitelistedPaths:       router.getWhitelistedPaths(),
 	}
 	return router
 }
@@ -191,12 +191,12 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 		handler.ServeHTTP(w, r)
 	}
 
-	return router.httpRouter.Handle(method, prefix, http.HandlerFunc(h), router.isWhitelistedPath(prefix))
+	return router.httpRouter.Handle(method, prefix, http.HandlerFunc(h))
 }
 
 // ServeHTTP implements the http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
 func (router *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	router.httpRouter.ServeHTTP(w, r, router.isWhitelistedPath(r.URL.Path))
+	router.httpRouter.ServeHTTP(w, r)
 }
 
 func (router *httpRouter) handlePanic(
@@ -265,15 +265,10 @@ func (router *httpRouter) handleMethodNotAllowed(
 	req.res.finish(ctx)
 }
 
-func (router *httpRouter) isWhitelistedPath(path string) bool {
+func (router *httpRouter) getWhitelistedPaths() []string {
 	var whitelistedPaths []string
-	router.gateway.Config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
-	if len(whitelistedPaths) > 0 {
-		for _, whitelistedPath := range whitelistedPaths {
-			if strings.HasPrefix(whitelistedPath, path) {
-				return true
-			}
-		}
+	if router.gateway.Config != nil {
+		router.gateway.Config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
 	}
-	return false
+	return whitelistedPaths
 }

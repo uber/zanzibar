@@ -80,6 +80,7 @@ type SecondServiceEchoBoolFunc func(
 	args *clientsBazBaz.SecondService_EchoBool_Args,
 ) (bool, map[string]string, error)
 
+// NewSecondServiceEchoBoolHandler wraps a handler function so it can be registered with a thrift server.
 func NewSecondServiceEchoBoolHandler(f SecondServiceEchoBoolFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoBoolHandler{f}
 }

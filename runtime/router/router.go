@@ -64,6 +64,8 @@ type Router struct {
 	// unrecovered panics.
 	PanicHandler func(http.ResponseWriter, *http.Request, interface{})
 
+	WhitelistedPaths []string
+
 	// TODO: (clu) maybe support OPTIONS
 }
 
@@ -80,8 +82,7 @@ func ParamsFromContext(ctx context.Context) []Param {
 }
 
 // Handle registers a http.Handler for given method and path.
-// isWhitelisted - Used for special behavior using which different handlers can configured for paths such as /a and /:b in router
-func (r *Router) Handle(method, path string, handler http.Handler, isWhitelisted bool) error {
+func (r *Router) Handle(method, path string, handler http.Handler) error {
 	if r.tries == nil {
 		r.tries = make(map[string]*Trie)
 	}
@@ -91,12 +92,11 @@ func (r *Router) Handle(method, path string, handler http.Handler, isWhitelisted
 		trie = NewTrie()
 		r.tries[method] = trie
 	}
-	return trie.Set(path, handler, isWhitelisted)
+	return trie.Set(path, handler, r.isWhitelistedPath(path))
 }
 
 // ServeHTTP dispatches the request to a register handler to handle.
-// isWhitelisted - Used for special behavior using which different handlers can configured for paths such as /a and /:b in router
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request, isWhitelisted bool) {
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if r.PanicHandler != nil {
 		defer func(w http.ResponseWriter, req *http.Request) {
 			if recovered := recover(); recovered != nil {
@@ -106,6 +106,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request, isWhitelist
 	}
 
 	reqPath := req.URL.Path
+	isWhitelisted := r.isWhitelistedPath(reqPath)
 	if trie, ok := r.tries[req.Method]; ok {
 		if handler, params, err := trie.Get(reqPath, isWhitelisted); err == nil {
 			ctx := context.WithValue(req.Context(), urlParamsKey, params)
@@ -154,4 +155,15 @@ func (r *Router) allowed(path, reqMethod string, isWhitelisted bool) string {
 	})
 
 	return strings.Join(allow, ", ")
+}
+
+func (r *Router) isWhitelistedPath(path string) bool {
+	if len(r.WhitelistedPaths) > 0 {
+		for _, whitelistedPath := range r.WhitelistedPaths {
+			if strings.HasPrefix(path, whitelistedPath) {
+				return true
+			}
+		}
+	}
+	return false
 }
