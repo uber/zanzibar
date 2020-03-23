@@ -149,6 +149,7 @@ func TestTriePathsWithPattenForWhitelisted(t *testing.T) {
 	}
 	runTrieTestsWithWhitelist(t, trie, tests, true)
 
+	trie = NewTrie()
 	tests = []ts{
 		// more ":" tests
 		{op: set, path: "/a", value: "1"},
