@@ -325,7 +325,7 @@ func (t *tnode) addChildren(child *tnode, lastPathCharSlash bool) {
 }
 
 func (t *tnode) isWildCardPattern(path string, keyIdx, pathIdx int, lastKeyCharSlash, lastPathCharSlash, colonAsPattern, isWhitelistedPath bool) bool {
-	if t.key[keyIdx] == ':' && lastKeyCharSlash  && path[pathIdx] == ':' && lastPathCharSlash {
+	if t.key[keyIdx] == ':' && lastKeyCharSlash && path[pathIdx] == ':' && lastPathCharSlash {
 		return true
 	}
 
@@ -333,6 +333,6 @@ func (t *tnode) isWildCardPattern(path string, keyIdx, pathIdx int, lastKeyCharS
 		return t.key[keyIdx] == ':' && lastKeyCharSlash && colonAsPattern
 	}
 
-	return (t.key[keyIdx] == ':' && lastKeyCharSlash)  ||
+	return (t.key[keyIdx] == ':' && lastKeyCharSlash) ||
 		(path[pathIdx] == ':' && lastPathCharSlash && colonAsPattern)
 }
