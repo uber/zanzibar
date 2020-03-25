@@ -30,9 +30,10 @@ import (
 // Router dispatches http requests to a registered http.Handler.
 // It implements a similar interface to the one in github.com/julienschmidt/httprouter,
 // the main differences are:
-// 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175)
+// 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175) except for whitelisted paths
 // 2. this router does not treat "/a/:b" and "/a/:c" as different routes and therefore does not allow them to be registered at the same time (https://github.com/julienschmidt/httprouter/issues/6)
 // 3. this router does not treat "/a" and "/a/" as different routes
+// 4. this router treats "/a" and "/:b" as different paths for whitelisted paths
 // Also the `*` pattern is greedy, if a handler is register for `/a/*`, then no handler
 // can be further registered for any path that starts with `/a/`
 type Router struct {
@@ -160,12 +161,18 @@ func (r *Router) allowed(path, reqMethod string, isWhitelisted bool) string {
 }
 
 func (r *Router) isWhitelistedPath(path string) bool {
-	if len(r.WhitelistedPaths) > 0 {
-		for _, whitelistedPath := range r.WhitelistedPaths {
-			if strings.HasPrefix(path, whitelistedPath) {
-				return true
+	for _, whitelistedPath := range r.WhitelistedPaths {
+		whitelistedPathTokens := strings.Split(whitelistedPath, "/")
+		pathTokens := strings.Split(path, "/")
+		if len(whitelistedPathTokens) != len(pathTokens) {
+			continue
+		}
+		for i, token := range whitelistedPathTokens {
+			if pathTokens[i] != token && token[0] != ':' {
+				continue
 			}
 		}
+		return true
 	}
 	return false
 }

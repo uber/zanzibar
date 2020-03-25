@@ -60,17 +60,42 @@ func TestParamsFromContext(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/foo", nil)
 	r.ServeHTTP(nil, req)
 	assert.True(t, handled)
+}
 
-	r = &Router{}
-	r.WhitelistedPaths = []string{"/bar"}
+func TestParamsFromContextForWhitelistedPaths(t *testing.T) {
+	r := &Router{}
 
-	handled = false
-	err = r.Handle("GET", "/bar/:var", handlerFunc)
+	handled1 := false
+	handlerFunc1 := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		params := ParamsFromContext(req.Context())
+		assert.Equal(t, 1, len(params))
+		assert.Equal(t, "var", params[0].Key)
+		assert.Equal(t, "some", params[0].Value)
+		handled1 = true
+	})
+
+	handled2 := false
+	handlerFunc2 := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		handled2 = true
+	})
+	r.WhitelistedPaths = []string{"/bar/foo", "/bar/:var"}
+
+	err := r.Handle("GET", "/bar/:var", handlerFunc1)
 	assert.NoError(t, err, "unexpected error")
 
+	err = r.Handle("GET", "/bar/foo", handlerFunc2)
+	assert.NoError(t, err, "unexpected error")
+
+	req, _ := http.NewRequest("GET", "/bar/some", nil)
+	r.ServeHTTP(nil, req)
+	assert.True(t, handled1)
+	assert.False(t, handled2)
+
+	handled1 = false
 	req, _ = http.NewRequest("GET", "/bar/foo", nil)
 	r.ServeHTTP(nil, req)
-	assert.True(t, handled)
+	assert.False(t, handled1)
+	assert.True(t, handled2)
 }
 
 func TestPanicHandler(t *testing.T) {
