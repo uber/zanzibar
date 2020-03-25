@@ -3592,3 +3592,46 @@ func TestNestedMapOfListOfMapInvalid(t *testing.T) {
 
 	assert.Error(t, err)
 }
+
+func TestConverterMapNestedBinary(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["NestedTwo.NestedNestedTwo.Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      false,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+            1: optional string one
+			2: optional binary two
+		}
+
+        struct NestedBar {
+            1: optional NestedNestedBar nestedNestedTwo
+        }
+
+        struct NestedNestedBar {
+            1: optional binary two
+        }
+
+		struct Bar {
+            1: optional string one
+			2: optional NestedBar nestedTwo
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+		out.One = (*string)(in.One)
+		if out.NestedTwo == nil {
+			out.NestedTwo = &structs.NestedBar{}
+		}
+		if out.NestedTwo.NestedNestedTwo == nil {
+			out.NestedTwo.NestedNestedTwo = &structs.NestedNestedBar{}
+		}
+		out.NestedTwo.NestedNestedTwo.Two = []byte(in.Two)
+	`), lines)
+}
