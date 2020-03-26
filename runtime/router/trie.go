@@ -96,10 +96,7 @@ func (t *Trie) Set(path string, value http.Handler, isWhitelisted bool) error {
 		return errors.New("path can not contain more than one *")
 	}
 
-	colonAsPattern := true
-	if isWhitelisted {
-		colonAsPattern = false
-	}
+	colonAsPattern := !isWhitelisted
 	err := t.root.set(path, value, false, false, colonAsPattern, isWhitelisted)
 
 	if e, ok := err.(*paramMismatch); ok {
@@ -121,10 +118,7 @@ func (t *Trie) Get(path string, isWhitelisted bool) (http.Handler, []Param, erro
 	}
 	// ignore trailing slash
 	path = strings.TrimSuffix(path, "/")
-	colonAsPattern := false
-	if isWhitelisted {
-		colonAsPattern = true
-	}
+	colonAsPattern := isWhitelisted
 	return t.root.get(path, false, false, colonAsPattern, isWhitelisted)
 }
 
@@ -151,7 +145,7 @@ func (t *tnode) set(path string, value http.Handler, lastKeyCharSlash, lastPathC
 	// is immediately after slash, e.g. "/:foo", "/x/:y". "/a:b" is not a colon wildcard segment.
 	var keyMatchIdx, pathMatchIdx int
 	for keyMatchIdx < keyLength && pathMatchIdx < pathLength {
-		if t.isWildCardPattern(path, keyMatchIdx, pathMatchIdx, lastKeyCharSlash, lastPathCharSlash, false, isWhitelisted) {
+		if t.isSetWildCardPattern(path, keyMatchIdx, pathMatchIdx, lastKeyCharSlash, lastPathCharSlash, isWhitelisted) {
 			keyStartIdx, pathStartIdx := keyMatchIdx, pathMatchIdx
 			same := t.key[keyMatchIdx] == path[pathMatchIdx]
 			for keyMatchIdx < keyLength && t.key[keyMatchIdx] != '/' {
@@ -259,7 +253,7 @@ func (t *tnode) get(path string, lastKeyCharSlash, lastPathCharSlash, colonAsPat
 	// find the longest matched prefix
 	var keyIdx, pathIdx int
 	for keyIdx < keyLength && pathIdx < pathLength {
-		if t.isWildCardPattern(path, keyIdx, pathIdx, lastKeyCharSlash, lastPathCharSlash, colonAsPattern, isWhitelistedPath) {
+		if t.isGetWildCardPattern(path, keyIdx, pathIdx, lastKeyCharSlash, lastPathCharSlash, colonAsPattern, isWhitelistedPath) {
 			// wildcard starts - match until next slash
 			keyStartIdx, pathStartIdx := keyIdx+1, pathIdx
 			for keyIdx < keyLength && t.key[keyIdx] != '/' {
@@ -324,15 +318,24 @@ func (t *tnode) addChildren(child *tnode, lastPathCharSlash bool) {
 	}
 }
 
-func (t *tnode) isWildCardPattern(path string, keyIdx, pathIdx int, lastKeyCharSlash, lastPathCharSlash, colonAsPattern, isWhitelistedPath bool) bool {
-	if t.key[keyIdx] == ':' && lastKeyCharSlash && path[pathIdx] == ':' && lastPathCharSlash {
-		return true
-	}
-
+func (t *tnode) isSetWildCardPattern(path string, keyIdx, pathIdx int, lastKeyCharSlash, lastPathCharSlash, isWhitelistedPath bool) bool {
 	if isWhitelistedPath {
-		return t.key[keyIdx] == ':' && lastKeyCharSlash && colonAsPattern
+		// For whitelisted paths, it will treat as wild card pattern only if key and path params are :var
+		return t.key[keyIdx] == ':' && lastKeyCharSlash && path[pathIdx] == ':' && lastPathCharSlash
 	}
+	// For normal paths, tt will treat as wild card pattern either if key or path params are :var
+	return (t.key[keyIdx] == ':' && lastKeyCharSlash) || (path[pathIdx] == ':' && lastPathCharSlash)
+}
 
-	return (t.key[keyIdx] == ':' && lastKeyCharSlash) ||
-		(path[pathIdx] == ':' && lastPathCharSlash && colonAsPattern)
+func (t *tnode) isGetWildCardPattern(path string, keyIdx, pathIdx int, lastKeyCharSlash, lastPathCharSlash, colonAsPattern, isWhitelistedPath bool) bool {
+	if isWhitelistedPath {
+		// For whitelisted paths, it will treat as wild card pattern only if
+		// 1. Param is the key is of type :var and
+		// 2. Param is the path is of type :var or colonAsPattern is true
+		return t.key[keyIdx] == ':' && lastKeyCharSlash && ((path[pathIdx] == ':' && lastPathCharSlash) || colonAsPattern)
+	}
+	// For normal paths, it will treat as wild card pattern only if
+	// 1. Param is the key is of type :var or
+	// 2. Param is the path is of type :var and colonAsPattern is true
+	return (t.key[keyIdx] == ':' && lastKeyCharSlash) || (path[pathIdx] == ':' && lastPathCharSlash && colonAsPattern)
 }

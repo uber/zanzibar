@@ -91,6 +91,23 @@ func TestParamsFromContextForWhitelistedPaths(t *testing.T) {
 	assert.True(t, handled1)
 	assert.False(t, handled2)
 
+	// Test case for paths not in whitelisted paths
+	r = &Router{}
+	r.WhitelistedPaths = []string{"/test", "/bar/foo"}
+
+	handled1 = false
+	handled2 = false
+	err = r.Handle("GET", "/bar/foo", handlerFunc2)
+	assert.NoError(t, err, "unexpected error")
+
+	err = r.Handle("GET", "/bar/:var", handlerFunc1)
+	assert.Error(t, err, "path value already set")
+
+	req, _ = http.NewRequest("GET", "/bar/foo", nil)
+	r.ServeHTTP(nil, req)
+	assert.True(t, handled2)
+	assert.False(t, handled1)
+
 	// Test case with whitelisted paths
 	r = &Router{}
 	r.WhitelistedPaths = []string{"/test", "/bar/foo", "/bar/:var"}
@@ -113,7 +130,6 @@ func TestParamsFromContextForWhitelistedPaths(t *testing.T) {
 	r.ServeHTTP(nil, req)
 	assert.False(t, handled1)
 	assert.True(t, handled2)
-
 }
 
 func TestPanicHandler(t *testing.T) {

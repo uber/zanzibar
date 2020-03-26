@@ -30,7 +30,7 @@ import (
 // Router dispatches http requests to a registered http.Handler.
 // It implements a similar interface to the one in github.com/julienschmidt/httprouter,
 // the main differences are:
-// 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175) except for whitelisted paths
+// 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175)
 // 2. this router does not treat "/a/:b" and "/a/:c" as different routes and therefore does not allow them to be registered at the same time (https://github.com/julienschmidt/httprouter/issues/6)
 // 3. this router does not treat "/a" and "/a/" as different routes
 // 4. this router treats "/a" and "/:b" as different paths for whitelisted paths
@@ -167,12 +167,17 @@ func (r *Router) isWhitelistedPath(path string) bool {
 		if len(whitelistedPathTokens) != len(pathTokens) {
 			continue
 		}
+
+		isMatched := true
 		for i, token := range whitelistedPathTokens {
 			if pathTokens[i] != token && token[0] != ':' {
-				continue
+				isMatched = false
+				break
 			}
 		}
-		return true
+		if isMatched {
+			return true
+		}
 	}
 	return false
 }
