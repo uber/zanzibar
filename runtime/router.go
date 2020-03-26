@@ -24,7 +24,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
 	"net/url"
 
 	"github.com/opentracing/opentracing-go"
@@ -150,6 +149,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		ContextLogger: gateway.ContextLogger,
 		Scope:         gateway.RootScope,
 		Tracer:        gateway.Tracer,
+		Config:        gateway.Config,
 	}
 
 	router := &httpRouter{
@@ -173,6 +173,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		NotFound:               http.HandlerFunc(router.handleNotFound),
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
 		PanicHandler:           router.handlePanic,
+		WhitelistedPaths:       router.getWhitelistedPaths(),
 	}
 	return router
 }
@@ -262,4 +263,13 @@ func (router *httpRouter) handleMethodNotAllowed(
 	)
 	req.res.StatusCode = http.StatusMethodNotAllowed
 	req.res.finish(ctx)
+}
+
+func (router *httpRouter) getWhitelistedPaths() []string {
+	var whitelistedPaths []string
+	if router.gateway.Config != nil &&
+		router.gateway.Config.ContainsKey("router.whitelistedPaths") {
+		router.gateway.Config.MustGetStruct("router.whitelistedPaths", &whitelistedPaths)
+	}
+	return whitelistedPaths
 }

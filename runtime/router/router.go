@@ -33,6 +33,7 @@ import (
 // 1. this router does not treat "/a/:b" and "/a/b/c" as conflicts (https://github.com/julienschmidt/httprouter/issues/175)
 // 2. this router does not treat "/a/:b" and "/a/:c" as different routes and therefore does not allow them to be registered at the same time (https://github.com/julienschmidt/httprouter/issues/6)
 // 3. this router does not treat "/a" and "/a/" as different routes
+// 4. this router treats "/a" and "/:b" as different paths for whitelisted paths
 // Also the `*` pattern is greedy, if a handler is register for `/a/*`, then no handler
 // can be further registered for any path that starts with `/a/`
 type Router struct {
@@ -64,6 +65,10 @@ type Router struct {
 	// unrecovered panics.
 	PanicHandler func(http.ResponseWriter, *http.Request, interface{})
 
+	// Used for special behavior using which different handlers can configured
+	// for paths such as /a and /:b in router.
+	WhitelistedPaths []string
+
 	// TODO: (clu) maybe support OPTIONS
 }
 
@@ -90,7 +95,7 @@ func (r *Router) Handle(method, path string, handler http.Handler) error {
 		trie = NewTrie()
 		r.tries[method] = trie
 	}
-	return trie.Set(path, handler)
+	return trie.Set(path, handler, r.isWhitelistedPath(path))
 }
 
 // ServeHTTP dispatches the request to a register handler to handle.
@@ -104,8 +109,9 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	reqPath := req.URL.Path
+	isWhitelisted := r.isWhitelistedPath(reqPath)
 	if trie, ok := r.tries[req.Method]; ok {
-		if handler, params, err := trie.Get(reqPath); err == nil {
+		if handler, params, err := trie.Get(reqPath, isWhitelisted); err == nil {
 			ctx := context.WithValue(req.Context(), urlParamsKey, params)
 			req = req.WithContext(ctx)
 			handler.ServeHTTP(w, req)
@@ -114,7 +120,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if r.HandleMethodNotAllowed {
-		if allowed := r.allowed(reqPath, req.Method); allowed != "" {
+		if allowed := r.allowed(reqPath, req.Method, isWhitelisted); allowed != "" {
 			w.Header().Set("Allow", allowed)
 			if r.MethodNotAllowed != nil {
 				r.MethodNotAllowed.ServeHTTP(w, req)
@@ -135,7 +141,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (r *Router) allowed(path, reqMethod string) string {
+func (r *Router) allowed(path, reqMethod string, isWhitelisted bool) string {
 	var allow []string
 
 	for method, trie := range r.tries {
@@ -143,7 +149,7 @@ func (r *Router) allowed(path, reqMethod string) string {
 			continue
 		}
 
-		if _, _, err := trie.Get(path); err == nil {
+		if _, _, err := trie.Get(path, isWhitelisted); err == nil {
 			allow = append(allow, method)
 		}
 	}
@@ -152,4 +158,26 @@ func (r *Router) allowed(path, reqMethod string) string {
 	})
 
 	return strings.Join(allow, ", ")
+}
+
+func (r *Router) isWhitelistedPath(path string) bool {
+	for _, whitelistedPath := range r.WhitelistedPaths {
+		whitelistedPathTokens := strings.Split(whitelistedPath, "/")
+		pathTokens := strings.Split(path, "/")
+		if len(whitelistedPathTokens) != len(pathTokens) {
+			continue
+		}
+
+		isMatched := true
+		for i, token := range whitelistedPathTokens {
+			if pathTokens[i] != token && token[0] != ':' {
+				isMatched = false
+				break
+			}
+		}
+		if isMatched {
+			return true
+		}
+	}
+	return false
 }
