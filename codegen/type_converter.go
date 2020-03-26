@@ -807,12 +807,10 @@ func (c *TypeConverter) genStructConverter(
 				return err
 			}
 		case *compile.BinarySpec:
-			// TODO: handle override. Check if binarySpec can be optional.
 			for _, line := range checkOptionalNil(indent, c.uninitialized, toIdentifier, prevKeyPrefixes, c.useRecurGen) {
 				c.append(line)
 			}
 			c.append(toIdentifier, " = []byte(", fromIdentifier, ")")
-
 		case *compile.StructSpec:
 			var (
 				stFromPrefix = fromPrefix
