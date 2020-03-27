@@ -98,8 +98,12 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 		/* coverage ignore next line */
 		return err
 	}
+	return res.UnmarshalBody(v, rawBody)
+}
 
-	err = json.Unmarshal(rawBody, v)
+// UnmarshalBody helper to unmarshal body into struct
+func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) error {
+	err := json.Unmarshal(rawBody, v)
 	if err != nil {
 		res.req.Logger.Warn("Could not parse response json", zap.Error(err))
 		return errors.Wrapf(
@@ -107,7 +111,6 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 			res.req.ClientID, res.req.MethodName,
 		)
 	}
-
 	return nil
 }
 
