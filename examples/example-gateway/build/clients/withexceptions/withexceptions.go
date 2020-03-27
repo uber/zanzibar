@@ -197,7 +197,11 @@ func (c *withexceptionsClient) Func1(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsWithexceptionsWithexceptions.Response
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}

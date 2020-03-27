@@ -46,6 +46,9 @@ const (
 	clientSystemErrors = "client.system-errors"
 	clientLatency      = "client.latency"
 	clientLatencyHist  = "client.latency-hist"
+
+	// clientHTTPUnmarshalError is the metric for tracking errors due to unmarshalling json responses
+	clientHTTPUnmarshalError = "client.http-unmarshal-error"
 )
 
 var knownMetrics = []string{

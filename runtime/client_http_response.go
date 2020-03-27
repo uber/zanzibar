@@ -106,6 +106,7 @@ func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) erro
 	err := json.Unmarshal(rawBody, v)
 	if err != nil {
 		res.req.Logger.Warn("Could not parse response json", zap.Error(err))
+		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not parse %s.%s response json",
 			res.req.ClientID, res.req.MethodName,
