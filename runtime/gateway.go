@@ -47,7 +47,6 @@ import (
 )
 
 const (
-	localhost = "127.0.0.1"
 	INADDR_ANY = "0.0.0.0"
 )
 
@@ -215,7 +214,7 @@ func (gateway *Gateway) Bootstrap() error {
 		gateway.httpServer = gateway.localHTTPServer
 	}
 	gateway.RealHTTPPort = gateway.httpServer.RealPort
-	gateway.RealHTTPAddr = INADDR_ANY
+	gateway.RealHTTPAddr = gateway.httpServer.RealAddr
 
 	gateway.WaitGroup.Add(1)
 	go gateway.httpServer.JustServe(gateway.WaitGroup)
@@ -229,9 +228,6 @@ func (gateway *Gateway) Bootstrap() error {
 	// tchannelIP, err := tchannel.ListenIP()
 	//hack for tenancy routing for SR
 	tchannelIP := INADDR_ANY
-	if err != nil {
-		return errors.Wrap(err, "error finding the best IP for tchannel")
-	}
 	tchannelAddr := tchannelIP + ":" + strconv.Itoa(int(gateway.TChannelPort))
 	ln, err := net.Listen("tcp", tchannelAddr)
 	if err != nil {
