@@ -73,12 +73,12 @@ func NewClientHTTPRequest(
 		ClientID:             clientID,
 		MethodName:           clientMethod,
 		ClientTargetEndpoint: clientTargetEndpoint,
+		Metrics:              client.contextMetrics,
 		client:               client,
 		Logger:               client.loggers[clientMethod],
 		ContextLogger:        NewContextLogger(client.loggers[clientMethod]),
 		defaultHeaders:       client.DefaultHeaders,
 		ctx:                  ctx,
-		metrics:              client.contextMetrics,
 	}
 	req.res = NewClientHTTPResponse(req)
 	req.start()
@@ -212,7 +212,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	}
 
 	// emit metrics
-	req.metrics.IncCounter(req.ctx, clientRequest, 1)
+	req.Metrics.IncCounter(req.ctx, clientRequest, 1)
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil
