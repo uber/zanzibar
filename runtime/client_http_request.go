@@ -41,6 +41,7 @@ type ClientHTTPRequest struct {
 	ClientID             string
 	ClientTargetEndpoint string
 	MethodName           string
+	Metrics              ContextMetrics
 	client               *HTTPClient
 	httpReq              *http.Request
 	res                  *ClientHTTPResponse
@@ -51,7 +52,6 @@ type ClientHTTPRequest struct {
 	rawBody              []byte
 	defaultHeaders       map[string]string
 	ctx                  context.Context
-	metrics              ContextMetrics
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
