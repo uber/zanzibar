@@ -306,7 +306,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 		return responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -378,7 +382,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 		return responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}

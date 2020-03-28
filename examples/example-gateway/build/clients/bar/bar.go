@@ -500,7 +500,11 @@ func (c *barClient) ArgWithHeaders(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -673,7 +677,11 @@ func (c *barClient) ArgWithManyQueryParams(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -768,7 +776,11 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -887,7 +899,11 @@ func (c *barClient) ArgWithNestedQueryParams(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -965,7 +981,11 @@ func (c *barClient) ArgWithParams(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1043,7 +1063,11 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1121,7 +1145,11 @@ func (c *barClient) ArgWithQueryHeader(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1216,7 +1244,11 @@ func (c *barClient) ArgWithQueryParams(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1457,7 +1489,11 @@ func (c *barClient) Hello(
 	switch res.StatusCode {
 	case 200:
 		var responseBody string
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1560,7 +1596,11 @@ func (c *barClient) ListAndEnum(
 	switch res.StatusCode {
 	case 200:
 		var responseBody string
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1647,7 +1687,11 @@ func (c *barClient) MissingArg(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1735,7 +1779,11 @@ func (c *barClient) NoRequest(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1824,7 +1872,11 @@ func (c *barClient) Normal(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1913,7 +1965,11 @@ func (c *barClient) NormalRecur(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponseRecur
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2001,7 +2057,11 @@ func (c *barClient) TooManyArgs(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2184,7 +2244,11 @@ func (c *barClient) EchoBool(
 	switch res.StatusCode {
 	case 200:
 		var responseBody bool
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2266,7 +2330,11 @@ func (c *barClient) EchoDouble(
 	switch res.StatusCode {
 	case 200:
 		var responseBody float64
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2348,7 +2416,11 @@ func (c *barClient) EchoEnum(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.Fruit
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2430,7 +2502,11 @@ func (c *barClient) EchoI16(
 	switch res.StatusCode {
 	case 200:
 		var responseBody int16
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2512,7 +2588,11 @@ func (c *barClient) EchoI32(
 	switch res.StatusCode {
 	case 200:
 		var responseBody int32
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2594,7 +2674,11 @@ func (c *barClient) EchoI32Map(
 	switch res.StatusCode {
 	case 200:
 		var responseBody map[int32]*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2676,7 +2760,11 @@ func (c *barClient) EchoI64(
 	switch res.StatusCode {
 	case 200:
 		var responseBody int64
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2758,7 +2846,11 @@ func (c *barClient) EchoI8(
 	switch res.StatusCode {
 	case 200:
 		var responseBody int8
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2840,7 +2932,11 @@ func (c *barClient) EchoString(
 	switch res.StatusCode {
 	case 200:
 		var responseBody string
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -2922,7 +3018,11 @@ func (c *barClient) EchoStringList(
 	switch res.StatusCode {
 	case 200:
 		var responseBody []string
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -3004,7 +3104,11 @@ func (c *barClient) EchoStringMap(
 	switch res.StatusCode {
 	case 200:
 		var responseBody map[string]*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -3086,7 +3190,11 @@ func (c *barClient) EchoStringSet(
 	switch res.StatusCode {
 	case 200:
 		var responseBody map[string]struct{}
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -3168,7 +3276,11 @@ func (c *barClient) EchoStructList(
 	switch res.StatusCode {
 	case 200:
 		var responseBody []*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -3250,7 +3362,11 @@ func (c *barClient) EchoStructSet(
 	switch res.StatusCode {
 	case 200:
 		var responseBody []*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -3332,7 +3448,11 @@ func (c *barClient) EchoTypedef(
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsBarBar.UUID
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}

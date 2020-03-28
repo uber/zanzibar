@@ -1667,7 +1667,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 		return responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1739,7 +1743,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 		return responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
-		err = res.ReadAndUnmarshalBody(&responseBody)
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
@@ -1802,7 +1810,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 14172, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 14362, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -106,6 +106,7 @@ func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) erro
 	err := json.Unmarshal(rawBody, v)
 	if err != nil {
 		res.req.Logger.Warn("Could not parse response json", zap.Error(err))
+		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not parse %s.%s response json",
 			res.req.ClientID, res.req.MethodName,
@@ -176,8 +177,8 @@ func (res *ClientHTTPResponse) finish() {
 
 	// emit metrics
 	delta := res.finishTime.Sub(res.req.startTime)
-	res.req.metrics.RecordTimer(res.req.ctx, clientLatency, delta)
-	res.req.metrics.RecordHistogramDuration(res.req.ctx, clientLatencyHist, delta)
+	res.req.Metrics.RecordTimer(res.req.ctx, clientLatency, delta)
+	res.req.Metrics.RecordHistogramDuration(res.req.ctx, clientLatencyHist, delta)
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
 		res.req.Logger.Error(
@@ -187,10 +188,10 @@ func (res *ClientHTTPResponse) finish() {
 	} else {
 		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
 		res.req.ctx = WithScopeTags(res.req.ctx, scopeTags)
-		res.req.metrics.IncCounter(res.req.ctx, clientStatus, 1)
+		res.req.Metrics.IncCounter(res.req.ctx, clientStatus, 1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
-		res.req.metrics.IncCounter(res.req.ctx, clientErrors, 1)
+		res.req.Metrics.IncCounter(res.req.ctx, clientErrors, 1)
 		logFn = res.req.ContextLogger.Warn
 	}
 
