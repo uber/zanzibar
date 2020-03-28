@@ -49,6 +49,8 @@ const (
 
 	// clientHTTPUnmarshalError is the metric for tracking errors due to unmarshalling json responses
 	clientHTTPUnmarshalError = "client.http-unmarshal-error"
+	// clientTchannelReadError is the metric for tracking errors in reading tchannel response
+	clientTchannelReadError = "client.tchannel-read-error"
 )
 
 var knownMetrics = []string{

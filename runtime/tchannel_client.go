@@ -253,7 +253,7 @@ func (c *TChannelClient) call(
 		if cerr = call.readResHeaders(response); cerr != nil {
 			return cerr
 		}
-		if cerr = call.readResBody(response, resp); cerr != nil {
+		if cerr = call.readResBody(ctx, response, resp); cerr != nil {
 			return cerr
 		}
 

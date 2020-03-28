@@ -219,8 +219,8 @@ func (c *tchannelOutboundCall) readResHeaders(response *tchannel.OutboundCallRes
 	return nil
 }
 
-// readResHeaders read response headers from arg2
-func (c *tchannelOutboundCall) readResBody(response *tchannel.OutboundCallResponse, resp RWTStruct) error {
+// readResBody read response body from arg3
+func (c *tchannelOutboundCall) readResBody(ctx context.Context, response *tchannel.OutboundCallResponse, resp RWTStruct) error {
 	treader, err := response.Arg3Reader()
 	if err != nil {
 		return errors.Wrapf(
@@ -230,6 +230,7 @@ func (c *tchannelOutboundCall) readResBody(response *tchannel.OutboundCallRespon
 	}
 	if err := ReadStruct(treader, resp); err != nil {
 		_ = treader.Close()
+		c.metrics.IncCounter(ctx, clientTchannelReadError, 1)
 		return errors.Wrapf(
 			err, "Could not read outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
