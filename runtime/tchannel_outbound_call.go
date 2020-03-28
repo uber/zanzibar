@@ -230,7 +230,7 @@ func (c *tchannelOutboundCall) readResBody(ctx context.Context, response *tchann
 	}
 	if err := ReadStruct(treader, resp); err != nil {
 		_ = treader.Close()
-		c.metrics.IncCounter(ctx, clientTchannelReadError, 1)
+		c.metrics.IncCounter(ctx, clientTchannelUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not read outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
