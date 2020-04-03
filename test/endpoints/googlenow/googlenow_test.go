@@ -22,6 +22,7 @@ package googlenow_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -30,6 +31,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -256,8 +258,8 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"{\"error\":\"Could not parse json: parse error: "+
-			"syntax error near offset 0 of 'bad bytes'\"}",
+		"{\"error\":\"Could not parse json: "+
+			"invalid character 'b' looking for beginning of value\"}",
 		string(respBytes),
 	)
 }
@@ -281,6 +283,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 
 			bytes, err := ioutil.ReadAll(r.Body)
+			fmt.Println("bytes", string(bytes))
 			if err != nil {
 				t.Fatal("Cannot read bytes")
 			}
@@ -291,6 +294,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 				if err != nil {
 					t.Fatal("cannot write response")
 				}
+				fmt.Println("Increment counter")
 				counter++
 			} else {
 				w.WriteHeader(500)
@@ -298,6 +302,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 				if err != nil {
 					t.Fatal("cannot write response")
 				}
+				fmt.Println("Increment counter 2")
 				counter++
 			}
 		},
@@ -311,8 +316,8 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "400 Bad Request", res.Status)
-	assert.Equal(t, 0, counter)
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+	assert.Equal(t, 1, counter)
 
 	res2, err2 := gateway.MakeRequest(
 		"POST", "/googlenow/add-credentials", headers,
@@ -323,7 +328,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	}
 
 	assert.Equal(t, "202 Accepted", res2.Status)
-	assert.Equal(t, 1, counter)
+	assert.Equal(t, 2, counter)
 }
 
 func TestAddCredentialsBackendDown(t *testing.T) {

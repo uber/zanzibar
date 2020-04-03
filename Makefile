@@ -208,10 +208,6 @@ run: run-example-gateway
 go-docs:
 	godoc -http=:6060
 
-.PHONY: clean-easyjson
-clean-easyjson:
-	find . -name "*.bak" -delete
-	find . -name "easyjson-bootstrap*.go" -delete
 
 .PHONY: kill-dead-benchmarks
 kill-dead-benchmarks:
@@ -265,7 +261,7 @@ clean-vendor:
 	rm -rf ./vendor
 
 .PHONY: clean
-clean: clean-easyjson clean-cover clean-vendor
+clean: clean-cover clean-vendor
 	go clean
 	rm -f $(PROGS)
 
