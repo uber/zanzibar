@@ -140,7 +140,3 @@ go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
 go build -o "$RESOLVE_I64_BINARY" "$RESOLVE_I64_FILE"
 
 goimports -w "$BUILD_DIR/gen-code/"
-
-end=$(date +%s)
-runtime=$((end-start))
-echo "Generated structs : +$runtime"

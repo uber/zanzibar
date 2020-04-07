@@ -22,7 +22,6 @@ package googlenow_test
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -283,7 +282,6 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 
 			bytes, err := ioutil.ReadAll(r.Body)
-			fmt.Println("bytes", string(bytes))
 			if err != nil {
 				t.Fatal("Cannot read bytes")
 			}
