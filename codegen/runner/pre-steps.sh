@@ -139,4 +139,47 @@ echo "Generated structs : +$runtime"
 go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
 go build -o "$RESOLVE_I64_BINARY" "$RESOLVE_I64_FILE"
 
+# find the modules that actually need JSON (un)marshallers
+target_dirs=""
+found_thrifts=""
+proto_path="$IDL_DIR"
+for config_file in ${config_files}; do
+	if [[ ${config_file} == "./vendor"* ]]; then
+		continue
+	fi
+
+	processor="$YQ"
+	if [[ ${config_file} == *.json ]]; then
+		processor="jq"
+	fi
+
+	module_type=$(${processor} -r .type "$config_file")
+	[[ ${module_type} != *"http"* ]] && continue
+	dir=$(dirname "$config_file")
+	yaml_files=$(find "$dir" -name "*.json" -o -name "*.yaml")
+	for yaml_file in ${yaml_files}; do
+		processor="$YQ"
+		if [[ ${yaml_file} == *.json ]]; then
+			processor="jq"
+		fi
+
+		thrift_file=$(${processor} -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
+		thrift_file+=$(${processor} -r '.. | .idlFile? | select(strings | endswith(".thrift"))' "$yaml_file")
+
+		[[ -z ${thrift_file} ]] && continue
+		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
+		found_thrifts+=" $thrift_file"
+
+		thrift_file="$IDL_DIR/$thrift_file"
+		gen_code_dir=$(
+		"$RESOLVE_THRIFT_BINARY" "$thrift_file" "$ANNOPREFIX" | \
+			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
+			sort | uniq | xargs
+		)
+		"$RESOLVE_I64_BINARY" "$thrift_file" "/idl/"  "json.type"
+		target_dirs+=" $gen_code_dir"
+	done
+done
+target_dirs=($(echo "$target_dirs" | tr ' ' '\n' | sort | uniq))
+
 goimports -w "$BUILD_DIR/gen-code/"
