@@ -324,6 +324,8 @@ Assuming you are using a vendor package management tool like Glide, then the min
 ```yaml
 - package: go.uber.org/thriftrw
   version: ^1.8.0
+- package: github.com/mailru/easyjson
+  version: master
 - package: github.com/uber/zanzibar
   version: master
 ```
