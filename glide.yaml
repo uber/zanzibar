@@ -119,6 +119,3 @@ import:
   - prometheus/promhttp
 
 - package: github.com/emicklei/proto
-
-- package: github.com/json-iterator/go
-  version: master
