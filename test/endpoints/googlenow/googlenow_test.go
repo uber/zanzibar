@@ -294,7 +294,6 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 				if err != nil {
 					t.Fatal("cannot write response")
 				}
-				fmt.Println("Increment counter")
 				counter++
 			} else {
 				w.WriteHeader(500)
@@ -302,7 +301,6 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 				if err != nil {
 					t.Fatal("cannot write response")
 				}
-				fmt.Println("Increment counter 2")
 				counter++
 			}
 		},
