@@ -717,7 +717,7 @@ func (req *ServerHTTPRequest) HasQueryValue(key string) bool {
 
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
 func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
-	body json.Unmarshaler,
+	body interface{},
 ) bool {
 	rawBody, success := req.ReadAll()
 	if !success {
@@ -751,9 +751,10 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 
 // UnmarshalBody helper to unmarshal body into struct
 func (req *ServerHTTPRequest) UnmarshalBody(
-	body json.Unmarshaler, rawBody []byte,
+	body interface{}, rawBody []byte,
 ) bool {
-	err := body.UnmarshalJSON(rawBody)
+
+	err := json.Unmarshal(rawBody, body)
 	if err != nil {
 		req.logger.Warn("Could not parse json", zap.Error(err))
 		if !req.parseFailed {

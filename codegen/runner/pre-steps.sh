@@ -31,10 +31,6 @@ fi
 THRIFTRW_SRCS="$(echo "$THRIFTRW_SRCS" | xargs -n1 | sort | uniq)"
 
 DIRNAME="$(dirname "$0")"
-EASY_JSON_RAW_DIR="$DIRNAME/../../scripts/easy_json"
-EASY_JSON_DIR="$(cd "$EASY_JSON_RAW_DIR";pwd)"
-EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
-EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 RESOLVE_THRIFT_FILE="$DIRNAME/../../scripts/resolve_thrift/main.go"
 RESOLVE_THRIFT_BINARY="$DIRNAME/../../scripts/resolve_thrift/resolve_thrift"
 RESOLVE_I64_FILE="$DIRNAME/../../scripts/resolve_i64/main.go"
@@ -139,10 +135,6 @@ end=$(date +%s)
 runtime=$((end-start))
 echo "Generated structs : +$runtime"
 
-go build -o "$EASY_JSON_BINARY" "$EASY_JSON_FILE"
-end=$(date +%s)
-runtime=$((end-start))
-echo "Compiled easyjson : +$runtime"
 
 go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
 go build -o "$RESOLVE_I64_BINARY" "$RESOLVE_I64_FILE"
@@ -190,16 +182,4 @@ for config_file in ${config_files}; do
 done
 target_dirs=($(echo "$target_dirs" | tr ' ' '\n' | sort | uniq))
 
-echo "Generating JSON Marshal/Unmarshal"
-thriftrw_gofiles=(
-$(find "${target_dirs[@]}" -name "*.go" | \
-	grep -v "versioncheck.go" | \
-	grep -v "easyjson.go" | sort)
-)
-"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
-
 goimports -w "$BUILD_DIR/gen-code/"
-
-end=$(date +%s)
-runtime=$((end-start))
-echo "Generated structs : +$runtime"

@@ -220,7 +220,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 
 	lineStruct := logLines[0]
 	errorText := lineStruct["error"].(string)
-	assert.Equal(t, "cannot serialize", errorText)
+	assert.Equal(t, "json: error calling MarshalJSON for type zanzibar_test.failingJsonObj: cannot serialize", errorText)
 }
 
 //easyjson:json

@@ -20,7 +20,7 @@ import:
 - package: github.com/kardianos/osext
   version: master
 - package: go.uber.org/thriftrw
-  version: ^v1.16.0
+  version: ^v1.23.0
 - package: github.com/uber/tchannel-go
   version: ^1.5.0
 - package: github.com/opentracing/opentracing-go

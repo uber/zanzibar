@@ -306,7 +306,7 @@ Zanzibar provides HTTP and TChannel runtime components for both clients and serv
 Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanzibar Thrift file semantics](https://github.com/uber/zanzibar/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/idl/endpoints/bar/bar.thrift) as specified in [hello.yaml](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/bar/hello.yaml#L5). The data types in such thrift files must have their equivalents in Go.
 
 - For tchannel clients/endpoints, network communication is Thrift over TChannel. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and thrift (de)serializers;
-- For http clients/endpoints, network communication is JSON over HTTP. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and then uses [easyjson](https://github.com/mailru/easyjson) to generate JSON (de)serializers.
+- For http clients/endpoints, network communication is JSON over HTTP. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and encoding/json for (de)serializing. 
 
 The [pre-steps.sh](https://github.com/uber/zanzibar/blob/master/codegen/runner/pre-steps.sh) script takes care of this part of the code generation, and places the generated code under `build/gen-code` directory.
 
