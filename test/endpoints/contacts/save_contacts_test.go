@@ -22,7 +22,6 @@ package save_contacts_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -119,7 +118,7 @@ func TestSaveContactsCall(t *testing.T) {
 			Contacts: []*endpointContacts.Contact{},
 		},
 	}
-	rawBody, _ := json.Marshal(saveContacts)
+	rawBody, _ := saveContacts.MarshalJSON()
 
 	res, err := gateway.MakeRequest(
 		"POST", "/contacts/foo/contacts", nil, bytes.NewReader(rawBody),
