@@ -2,7 +2,6 @@ package clientless_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -25,7 +24,7 @@ func TestClientlessEndpointCall(t *testing.T) {
 			LastName:  &ln,
 		},
 	}
-	rawBody, _ := json.Marshal(endpointRequest)
+	rawBody, _ := endpointRequest.MarshalJSON()
 	res, err := ms.MakeHTTPRequest(
 		"POST", "/clientless/post-request", nil, bytes.NewReader(rawBody),
 	)

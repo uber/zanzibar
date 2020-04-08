@@ -3,7 +3,6 @@ package contacts_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +24,7 @@ func TestSaveContactsCall(t *testing.T) {
 			Contacts: []*endpointContacts.Contact{},
 		},
 	}
-	rawBody, _ := json.Marshal(endpointRequest)
+	rawBody, _ := endpointRequest.MarshalJSON()
 
 	res, err := ms.MakeHTTPRequest(
 		"POST", "/contacts/foo/contacts", nil, bytes.NewReader(rawBody),

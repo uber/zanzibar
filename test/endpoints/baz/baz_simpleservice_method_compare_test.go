@@ -196,5 +196,5 @@ func TestCompareInvalidArgs(t *testing.T) {
 	)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 500, res.StatusCode)
+	assert.Equal(t, 400, res.StatusCode)
 }

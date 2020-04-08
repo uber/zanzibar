@@ -205,7 +205,7 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 
 // WriteJSON writes a json serializable struct to Response
 func (res *ServerHTTPResponse) WriteJSON(
-	statusCode int, headers Header, body interface{},
+	statusCode int, headers Header, body json.Marshaler,
 ) {
 	if body == nil {
 		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
@@ -213,7 +213,7 @@ func (res *ServerHTTPResponse) WriteJSON(
 		return
 	}
 
-	bytes, err := json.Marshal(body)
+	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
 		res.logger.Error("Could not serialize json response", zap.Error(err))
