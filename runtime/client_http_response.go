@@ -21,7 +21,6 @@
 package zanzibar
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -29,6 +28,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -44,6 +45,7 @@ type ClientHTTPResponse struct {
 	rawResponseBytes []byte
 	StatusCode       int
 	Header           http.Header
+	jsonWrapper      jsonwrapper.JSONWrapper
 }
 
 // NewClientHTTPResponse allocates a client http response object
@@ -52,7 +54,8 @@ func NewClientHTTPResponse(
 	req *ClientHTTPRequest,
 ) *ClientHTTPResponse {
 	return &ClientHTTPResponse{
-		req: req,
+		req:         req,
+		jsonWrapper: req.jsonWrapper,
 	}
 }
 
@@ -103,7 +106,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 
 // UnmarshalBody helper to unmarshal body into struct
 func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) error {
-	err := json.Unmarshal(rawBody, v)
+	err := res.jsonWrapper.Unmarshal(rawBody, v)
 	if err != nil {
 		res.req.Logger.Warn("Could not parse response json", zap.Error(err))
 		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
@@ -126,7 +129,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 
 	var merr error
 	for _, v := range vs {
-		err = json.Unmarshal(rawBody, v)
+		err = res.jsonWrapper.Unmarshal(rawBody, v)
 		if err == nil {
 			// All done -- successfully deserialized
 			return v, nil

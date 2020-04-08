@@ -34,6 +34,7 @@ import (
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
@@ -217,6 +218,7 @@ type Client interface {
 type barClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
+	jsonWrapper            jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey   string
 }
@@ -247,7 +249,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"bar",
 			map[string]string{
 				"ArgNotStruct":                    "Bar::argNotStruct",

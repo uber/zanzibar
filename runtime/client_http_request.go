@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -31,6 +30,8 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+
 	"go.uber.org/zap"
 )
 
@@ -52,6 +53,7 @@ type ClientHTTPRequest struct {
 	rawBody              []byte
 	defaultHeaders       map[string]string
 	ctx                  context.Context
+	jsonWrapper          jsonwrapper.JSONWrapper
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
@@ -79,6 +81,7 @@ func NewClientHTTPRequest(
 		ContextLogger:        NewContextLogger(client.loggers[clientMethod]),
 		defaultHeaders:       client.DefaultHeaders,
 		ctx:                  ctx,
+		jsonWrapper:          client.JSONWrapper,
 	}
 	req.res = NewClientHTTPResponse(req)
 	req.start()
@@ -122,8 +125,6 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 }
 
 // WriteJSON materialize the HTTP request with given method, url, headers and body.
-// Body is serialized to JSON bytes using the stdlib json.Marshal function, which
-// calls the `MarshalJSON` method if the body implements the Marshaler interface.
 func (req *ClientHTTPRequest) WriteJSON(
 	method, url string,
 	headers map[string]string,
@@ -132,7 +133,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 	var rawBody []byte
 	if body != nil {
 		var err error
-		rawBody, err = json.Marshal(body)
+		rawBody, err = req.jsonWrapper.Marshal(body)
 		if err != nil {
 			req.Logger.Error("Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(

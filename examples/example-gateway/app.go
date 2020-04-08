@@ -23,6 +23,8 @@ package app
 import (
 	"net/textproto"
 
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+
 	"go.uber.org/zap"
 
 	"context"
@@ -34,6 +36,7 @@ import (
 var AppOptions = &zanzibar.Options{
 	GetContextScopeExtractors: getContextScopeTagExtractors,
 	GetContextFieldExtractors: getContextLogFieldExtractors,
+	JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
 }
 
 func getContextScopeTagExtractors() []zanzibar.ContextScopeTagsExtractor {

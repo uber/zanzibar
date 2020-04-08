@@ -26,6 +26,8 @@ import (
 	"time"
 
 	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+
 	"go.uber.org/zap"
 )
 
@@ -34,6 +36,7 @@ type HTTPClient struct {
 	Client         *http.Client
 	BaseURL        string
 	DefaultHeaders map[string]string
+	JSONWrapper    jsonwrapper.JSONWrapper
 	loggers        map[string]*zap.Logger
 	contextMetrics ContextMetrics
 }
@@ -53,6 +56,7 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 func NewHTTPClient(
 	logger *zap.Logger,
 	scope tally.Scope,
+	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
 	methodToTargetEndpoint map[string]string,
 	baseURL string,
@@ -62,6 +66,7 @@ func NewHTTPClient(
 	return NewHTTPClientContext(
 		logger,
 		NewContextMetrics(scope),
+		jsonWrapper,
 		clientID,
 		methodToTargetEndpoint,
 		baseURL,
@@ -74,6 +79,7 @@ func NewHTTPClient(
 func NewHTTPClientContext(
 	logger *zap.Logger,
 	ContextMetrics ContextMetrics,
+	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
 	methodToTargetEndpoint map[string]string,
 	baseURL string,
@@ -102,5 +108,6 @@ func NewHTTPClientContext(
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
 		contextMetrics: ContextMetrics,
+		JSONWrapper:    jsonWrapper,
 	}
 }

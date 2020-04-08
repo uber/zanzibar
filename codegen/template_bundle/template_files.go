@@ -1372,6 +1372,7 @@ import (
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -1409,6 +1410,7 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+	jsonWrapper   jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey string
 
@@ -1462,7 +1464,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeName: calleeName,
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -1810,7 +1812,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 14362, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 14475, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2209,6 +2211,7 @@ func InitializeDependencies(
 		Channel:        g.Channel,
 
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
+		JSONWrapper:		g.JSONWrapper,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -2240,7 +2243,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2452, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2483, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2300,15 +2303,16 @@ func InitializeDependenciesMock(
 	{{ end -}}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		ContextExtractor: g.ContextExtractor,
-		ContextMetrics: g.ContextMetrics,
-		ContextLogger: g.ContextLogger,
-		Logger:  	   g.Logger,
-		Scope:         g.RootScope,
-		Config:        g.Config,
-		Channel:       g.Channel,
-		Tracer:        g.Tracer,
+		ContextExtractor:     g.ContextExtractor,
+		ContextMetrics:       g.ContextMetrics,
+		ContextLogger:        g.ContextLogger,
+		Logger:               g.Logger,
+		Scope:                g.RootScope,
+		Config:               g.Config,
+		Channel:              g.Channel,
+		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
+		JSONWrapper:          g.JSONWrapper,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -2361,7 +2365,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4372, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4465, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

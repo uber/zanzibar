@@ -31,6 +31,7 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
@@ -54,6 +55,7 @@ type Client interface {
 type googleNowClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
+	jsonWrapper            jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey   string
 }
@@ -84,7 +86,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"google-now",
 			map[string]string{
 				"AddCredentials":   "GoogleNowService::addCredentials",
