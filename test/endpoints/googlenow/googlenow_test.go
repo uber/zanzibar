@@ -256,8 +256,8 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"{\"error\":\"Could not parse json: parse error: "+
-			"syntax error near offset 0 of 'bad bytes'\"}",
+		"{\"error\":\"Could not parse json: "+
+			"invalid character 'b' looking for beginning of value\"}",
 		string(respBytes),
 	)
 }
