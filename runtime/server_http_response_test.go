@@ -31,6 +31,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
@@ -48,12 +49,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -108,12 +104,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -173,12 +164,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -220,7 +206,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 
 	lineStruct := logLines[0]
 	errorText := lineStruct["error"].(string)
-	assert.Equal(t, "cannot serialize", errorText)
+	assert.Equal(t, "json: error calling MarshalJSON for type zanzibar_test.failingJsonObj: cannot serialize", errorText)
 }
 
 //easyjson:json
@@ -247,12 +233,7 @@ func TestResponsePeekBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
@@ -319,12 +300,7 @@ func TestResponseSetHeaders(t *testing.T) {
 	headers.Set("foo", "bar")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -382,12 +358,7 @@ func TestWriteJSONWithContentType(t *testing.T) {
 	headers.Set("Content-Type", "application/test+json")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -441,12 +412,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -503,12 +469,7 @@ func TestPendingResponseBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	deps := &zanzibar.DefaultDependencies{
-		Scope:         bgateway.ActualGateway.RootScope,
-		Logger:        bgateway.ActualGateway.Logger,
-		ContextLogger: bgateway.ActualGateway.ContextLogger,
-		Tracer:        bgateway.ActualGateway.Tracer,
-	}
+	deps := createDefaultDependencies(bgateway)
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
@@ -557,4 +518,15 @@ func TestPendingResponseBody(t *testing.T) {
 		`{"Client":{"Token":"myClientToken"},"Token":"myToken"}`,
 		string(bytes),
 	)
+}
+
+func createDefaultDependencies(bgateway *benchGateway.BenchGateway) *zanzibar.DefaultDependencies {
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+		JSONWrapper:   jsonwrapper.NewDefaultJSONWrapper(),
+	}
+	return deps
 }

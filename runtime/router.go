@@ -30,6 +30,7 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
 )
@@ -82,6 +83,7 @@ type RouterEndpoint struct {
 	EndpointName string
 	HandlerName  string
 	HandlerFn    HandlerFn
+	JSONWrapper  jsonwrapper.JSONWrapper
 
 	contextExtractor ContextExtractor
 	logger           *zap.Logger
@@ -105,6 +107,7 @@ func NewRouterEndpoint(
 		logger:           deps.Logger,
 		scope:            deps.Scope,
 		tracer:           deps.Tracer,
+		JSONWrapper:      deps.JSONWrapper,
 	}
 }
 

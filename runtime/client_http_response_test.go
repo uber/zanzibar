@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -69,6 +70,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	client := zanzibar.NewHTTPClientContext(
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
+		jsonwrapper.NewDefaultJSONWrapper(),
 		"bar",
 		map[string]string{
 			"echo": "bar::echo",
@@ -129,6 +131,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	client := zanzibar.NewHTTPClientContext(
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
+		jsonwrapper.NewDefaultJSONWrapper(),
 		"bar",
 		map[string]string{
 			"echo": "bar::echo",
@@ -188,6 +191,7 @@ func TestUnknownStatusCode(t *testing.T) {
 	client := zanzibar.NewHTTPClientContext(
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
+		jsonwrapper.NewDefaultJSONWrapper(),
 		"bar",
 		map[string]string{
 			"echo": "bar::echo",

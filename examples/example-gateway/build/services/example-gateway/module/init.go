@@ -134,6 +134,7 @@ func InitializeDependencies(
 		Channel:          g.Channel,
 
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
+		JSONWrapper:          g.JSONWrapper,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}

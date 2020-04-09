@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -31,6 +30,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -49,6 +49,7 @@ type ServerHTTPResponse struct {
 	pendingStatusCode int
 	logger            Logger
 	scope             tally.Scope
+	jsonWrapper       jsonwrapper.JSONWrapper
 	err               error
 }
 
@@ -63,6 +64,7 @@ func NewServerHTTPResponse(
 		responseWriter: w,
 		logger:         req.logger,
 		scope:          req.scope,
+		jsonWrapper:    req.jsonWrapper,
 	}
 }
 
@@ -205,15 +207,14 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 
 // WriteJSON writes a json serializable struct to Response
 func (res *ServerHTTPResponse) WriteJSON(
-	statusCode int, headers Header, body json.Marshaler,
+	statusCode int, headers Header, body interface{},
 ) {
 	if body == nil {
 		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
 		res.logger.Error("Could not serialize nil pointer body")
 		return
 	}
-
-	bytes, err := body.MarshalJSON()
+	bytes, err := res.jsonWrapper.Marshal(body)
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
 		res.logger.Error("Could not serialize json response", zap.Error(err))

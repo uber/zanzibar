@@ -31,6 +31,7 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions/module"
 	clientsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/withexceptions/withexceptions"
@@ -49,6 +50,7 @@ type Client interface {
 type withexceptionsClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
+	jsonWrapper            jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey   string
 }
@@ -79,7 +81,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &withexceptionsClient{
 		clientID: "withexceptions",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"withexceptions",
 			map[string]string{
 				"Func1": "WithExceptions::Func1",

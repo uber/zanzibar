@@ -11,6 +11,7 @@ import (
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -48,6 +49,7 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+	jsonWrapper   jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey string
 
@@ -101,7 +103,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeName: calleeName,
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}

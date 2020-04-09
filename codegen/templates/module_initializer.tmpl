@@ -48,6 +48,7 @@ func InitializeDependencies(
 		Channel:        g.Channel,
 
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
+		JSONWrapper:		g.JSONWrapper,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}

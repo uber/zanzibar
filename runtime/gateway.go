@@ -43,6 +43,7 @@ import (
 	jaegerConfig "github.com/uber/jaeger-client-go/config"
 	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
 	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	"github.com/uber/zanzibar/runtime/plugins"
 	"go.uber.org/yarpc"
 	"go.uber.org/yarpc/api/transport"
@@ -75,6 +76,7 @@ type Options struct {
 	LogWriter                 zapcore.WriteSyncer
 	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 	GetContextFieldExtractors func() []ContextLogFieldsExtractor
+	JSONWrapper               jsonwrapper.JSONWrapper
 
 	// If present, request uuid is retrieved from the incoming request
 	// headers using the key, and put on the context. Otherwise, a new
@@ -102,6 +104,7 @@ type Gateway struct {
 	HTTPRouter       HTTPRouter
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
+	JSONWrapper      jsonwrapper.JSONWrapper
 
 	// gRPC client dispatcher for gRPC client lifecycle management
 	GRPCClientDispatcher *yarpc.Dispatcher
@@ -139,6 +142,9 @@ type DefaultDependencies struct {
 
 	// dispatcher for managing gRPC clients
 	GRPCClientDispatcher *yarpc.Dispatcher
+
+	// JSONWrapper provides json marshaling and unmarshaling functionality
+	JSONWrapper jsonwrapper.JSONWrapper
 }
 
 // CreateGateway func
@@ -149,6 +155,8 @@ func CreateGateway(
 	var logWriter zapcore.WriteSyncer
 	var scopeTagsExtractors []ContextScopeTagsExtractor
 	var logFieldsExtractors []ContextLogFieldsExtractor
+	var jsonWrapper jsonwrapper.JSONWrapper
+
 	if opts == nil {
 		opts = &Options{}
 	}
@@ -157,6 +165,11 @@ func CreateGateway(
 	}
 	if opts.LogWriter != nil {
 		logWriter = opts.LogWriter
+	}
+	if opts.JSONWrapper != nil {
+		jsonWrapper = opts.JSONWrapper
+	} else {
+		jsonWrapper = jsonwrapper.NewDefaultJSONWrapper()
 	}
 
 	if opts.GetContextScopeExtractors != nil {
@@ -192,6 +205,7 @@ func CreateGateway(
 		WaitGroup:        &sync.WaitGroup{},
 		Config:           config,
 		ContextExtractor: extractors,
+		JSONWrapper:      jsonWrapper,
 		logWriter:        logWriter,
 		metricsBackend:   metricsBackend,
 

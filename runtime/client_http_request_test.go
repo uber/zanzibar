@@ -31,6 +31,7 @@ import (
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -66,6 +67,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	client := zanzibar.NewHTTPClientContext(
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.ContextMetrics,
+		jsonwrapper.NewDefaultJSONWrapper(),
 		"clientID",
 		map[string]string{
 			"DoStuff": "clientID::DoStuff",
@@ -103,6 +105,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	client := zanzibar.NewHTTPClient(
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.RootScope,
+		jsonwrapper.NewDefaultJSONWrapper(),
 		"clientID",
 		map[string]string{
 			"DoStuff": "clientID::DoStuff",

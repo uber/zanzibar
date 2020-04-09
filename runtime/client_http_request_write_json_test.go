@@ -29,6 +29,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+
 	"go.uber.org/zap"
 )
 
@@ -42,6 +44,7 @@ func (wjs *writeJSONSuit) SetupSuite() {
 	client := NewHTTPClient(
 		zap.NewNop(),
 		tally.NewTestScope("", nil),
+		jsonwrapper.NewDefaultJSONWrapper(),
 		"foo",
 		map[string]string{
 			"bar": "foo::bar",

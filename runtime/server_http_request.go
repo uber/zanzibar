@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -35,6 +34,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	"go.uber.org/zap"
 )
 
@@ -60,7 +60,8 @@ type ServerHTTPRequest struct {
 	// logger logs entries with default fields that contains request meta info
 	logger Logger
 	// scope emit metrics with default tags that contains request meta info
-	scope tally.Scope
+	scope       tally.Scope
+	jsonWrapper jsonwrapper.JSONWrapper
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -118,6 +119,7 @@ func NewServerHTTPRequest(
 		Header:       NewServerHTTPHeader(r.Header),
 		logger:       logger,
 		scope:        scope,
+		jsonWrapper:  endpoint.JSONWrapper,
 	}
 
 	req.res = NewServerHTTPResponse(w, req)
@@ -717,7 +719,7 @@ func (req *ServerHTTPRequest) HasQueryValue(key string) bool {
 
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
 func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
-	body json.Unmarshaler,
+	body interface{},
 ) bool {
 	rawBody, success := req.ReadAll()
 	if !success {
@@ -751,9 +753,9 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 
 // UnmarshalBody helper to unmarshal body into struct
 func (req *ServerHTTPRequest) UnmarshalBody(
-	body json.Unmarshaler, rawBody []byte,
+	body interface{}, rawBody []byte,
 ) bool {
-	err := body.UnmarshalJSON(rawBody)
+	err := req.jsonWrapper.Unmarshal(rawBody, body)
 	if err != nil {
 		req.logger.Warn("Could not parse json", zap.Error(err))
 		if !req.parseFailed {
