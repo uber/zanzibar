@@ -20,8 +20,29 @@
 
 package jsonwrapper
 
+import "encoding/json"
+
 // JSONWrapper provides an interface for json marshaling and unmarshaling operations
 type JSONWrapper interface {
 	Unmarshal(data []byte, v interface{}) error
 	Marshal(v interface{}) ([]byte, error)
+}
+
+// defaultJSONWrapper implements the JSONWrapper interface with the golang encoding/json lib
+type defaultJSONWrapper struct {
+}
+
+// NewDefaultJSONWrapper returns an instance of defaultJSONWrapper
+func NewDefaultJSONWrapper() JSONWrapper {
+	return &defaultJSONWrapper{}
+}
+
+// Unmarshal converts a byte array into its Go representation
+func (j *defaultJSONWrapper) Unmarshal(data []byte, v interface{}) error {
+	return json.Unmarshal(data, v)
+}
+
+// Marshal serializes to a byte array
+func (j *defaultJSONWrapper) Marshal(v interface{}) ([]byte, error) {
+	return json.Marshal(v)
 }
