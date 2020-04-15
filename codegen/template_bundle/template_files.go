@@ -1451,7 +1451,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
-
+	followRedirect := true
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.followRedirect") {
+		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
+	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
@@ -1474,7 +1477,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			baseURL,
 			defaultHeaders,
 			timeout,
-			true,
+			followRedirect,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey: requestUUIDHeaderKey,
@@ -1813,7 +1816,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 14484, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 14692, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

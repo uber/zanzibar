@@ -184,7 +184,7 @@ func TestUnknownStatusCode(t *testing.T) {
 
 	// test UnknownStatusCode along with follow redirect by default
 	fakeEcho := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Location", baseURL + "/bar-path")
+		w.Header().Add("Location", baseURL+"/bar-path")
 		w.WriteHeader(303)
 		_, err := w.Write([]byte(`false`))
 		assert.NoError(t, err)
