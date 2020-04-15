@@ -78,6 +78,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 		baseURL,
 		map[string]string{},
 		time.Second,
+		true,
 	)
 	ctx := context.Background()
 
@@ -139,6 +140,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 		baseURL,
 		map[string]string{},
 		time.Second,
+		true,
 	)
 	ctx := context.Background()
 
@@ -199,6 +201,7 @@ func TestUnknownStatusCode(t *testing.T) {
 		baseURL,
 		map[string]string{},
 		time.Second,
+		true,
 	)
 
 	ctx := context.Background()

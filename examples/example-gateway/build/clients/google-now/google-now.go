@@ -95,6 +95,7 @@ func NewClient(deps *module.Dependencies) Client {
 			baseURL,
 			defaultHeaders,
 			timeout,
+			true,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey:   requestUUIDHeaderKey,

@@ -72,6 +72,7 @@ func NewHTTPClient(
 		baseURL,
 		defaultHeaders,
 		timeout,
+		true,
 	)
 }
 
@@ -85,6 +86,7 @@ func NewHTTPClientContext(
 	baseURL string,
 	defaultHeaders map[string]string,
 	timeout time.Duration,
+	followRedirect bool,
 ) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodToTargetEndpoint))
 
@@ -95,6 +97,14 @@ func NewHTTPClientContext(
 			zap.String(logFieldClientThriftMethod, targetEndpointName),
 		)
 	}
+
+	var checkRedirect func(req *http.Request, via []*http.Request) error
+	if !followRedirect {
+		checkRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	}
+
 	return &HTTPClient{
 		Client: &http.Client{
 			Transport: &http.Transport{
@@ -103,6 +113,7 @@ func NewHTTPClientContext(
 				MaxIdleConnsPerHost: 500,
 			},
 			Timeout: timeout,
+			CheckRedirect: checkRedirect,
 		},
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
