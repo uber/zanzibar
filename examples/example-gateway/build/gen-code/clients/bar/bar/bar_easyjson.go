@@ -3983,7 +3983,11 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var TeapotSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
+<<<<<<< HEAD
 		key := in.UnsafeFieldName(false)
+=======
+		key := in.UnsafeString()
+>>>>>>> check generate
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -4128,7 +4132,11 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var FooStringSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
+<<<<<<< HEAD
 		key := in.UnsafeFieldName(false)
+=======
+		key := in.UnsafeString()
+>>>>>>> check generate
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -4289,7 +4297,11 @@ func easyjson4347b5c1DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var BodySet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
+<<<<<<< HEAD
 		key := in.UnsafeFieldName(false)
+=======
+		key := in.UnsafeString()
+>>>>>>> check generate
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
