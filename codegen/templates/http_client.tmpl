@@ -113,6 +113,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			baseURL,
 			defaultHeaders,
 			timeout,
+			true,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey: requestUUIDHeaderKey,

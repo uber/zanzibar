@@ -75,6 +75,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		"/",
 		map[string]string{},
 		time.Second,
+		true,
 	)
 	ctx := context.Background()
 	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff", "clientID::DoStuff", client)
