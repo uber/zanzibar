@@ -1093,12 +1093,13 @@ func readPackageInfo(
 	}, nil
 }
 
-func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool, error) {
+func (system *ModuleSystem) populateSpec(instance *ModuleInstance, wg *sync.WaitGroup, ch chan error) {
+	defer wg.Done()
 	classGenerators := system.classes[instance.ClassName]
 	generator := classGenerators.types[instance.ClassType]
 
 	if generator == nil {
-		return nil, false, nil
+		return
 	}
 
 	specProvider, ok := generator.(SpecProvider)
@@ -1110,15 +1111,16 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 			instance.ClassType,
 		)
 
-		return nil, false, fmt.Errorf("%q %q generator does not implement SpecProvider interface", instance.ClassName, instance.ClassType)
+		ch <- fmt.Errorf("%q %q generator does not implement SpecProvider interface", instance.ClassName,
+			instance.ClassType)
 	}
 
 	spec, err := specProvider.ComputeSpec(instance)
 	if err != nil {
-		return nil, false, fmt.Errorf("error when running computespec: %s", err.Error())
+		ch <- fmt.Errorf("error when running computespec: %s", err.Error())
 	}
-
-	return spec, true, nil
+	instance.genSpec = spec
+	return
 }
 
 // collectTransitiveDependencies will collect every instance in resolvedModules that depends on something in initialInstances.
@@ -1208,15 +1210,23 @@ func (system *ModuleSystem) IncrementalBuild(
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
 	for _, className := range system.classOrder {
+		var wg sync.WaitGroup
+		wg.Add(len(resolvedModules[className]))
+		ch := make(chan error, len(resolvedModules[className]))
 		for _, instance := range resolvedModules[className] {
-			spec, ok, err := system.getSpec(instance)
+			go system.populateSpec(instance, &wg, ch)
+
+		}
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
+
+		for err := range ch {
 			if err != nil {
 				// if incrementalBuild fails, perform a full build.
 				fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
 				toBeBuiltModules = resolvedModules
-			}
-			if ok {
-				instance.genSpec = spec
 			}
 		}
 	}
@@ -1240,23 +1250,51 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	for _, class := range system.classOrder {
+		var wg sync.WaitGroup
+		wg.Add(len(toBeBuiltModules[class]))
+		ch := make(chan error, len(toBeBuiltModules[class]))
 		for _, moduleInstance := range toBeBuiltModules[class] {
 			moduleIndex++
 
 			physicalGenDir := filepath.Join(targetGenDir, moduleInstance.Directory)
 			prettyDir, _ := filepath.Rel(baseDirectory, physicalGenDir)
 			PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName, prettyDir, moduleIndex, moduleCount)
-			if err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange); err != nil {
+			system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange, &wg, ch)
+		}
+
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
+
+		for err := range ch {
+			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
+	var wg sync.WaitGroup
+	ch := make(chan error, len(system.postGenHook))
 	for i, hook := range system.postGenHook {
 		if hook != nil {
-			if err := hook(toBeBuiltModules); err != nil {
-				return toBeBuiltModules, errors.Wrapf(err, "error running %dth post generation hook", i)
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if err := hook(toBeBuiltModules); err != nil {
+					ch <- errors.Wrapf(err, "error running %dth post generation hook", i)
+				}
+			}()
+		}
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+	for err := range ch {
+		if err != nil {
+			return toBeBuiltModules, err
 		}
 	}
 
@@ -1264,13 +1302,9 @@ func (system *ModuleSystem) IncrementalBuild(
 }
 
 // Build invokes the generator for a module instance and optionally writes the files to disk
-func (system *ModuleSystem) Build(
-	packageRoot string,
-	baseDirectory string,
-	physicalGenDir string,
-	instance *ModuleInstance,
-	commitChange bool,
-) error {
+func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, physicalGenDir string,
+	instance *ModuleInstance, commitChange bool, wg *sync.WaitGroup, ch chan error) {
+	defer wg.Done()
 	classGenerators := system.classes[instance.ClassName]
 	generator := classGenerators.types[instance.ClassType]
 
@@ -1283,7 +1317,7 @@ func (system *ModuleSystem) Build(
 			instance.ClassName,
 			instance.ClassType,
 		)
-		return nil
+		return
 	}
 
 	buildResult, err := generator.Generate(instance)
@@ -1297,15 +1331,16 @@ func (system *ModuleSystem) Build(
 			instance.ClassType,
 			err.Error(),
 		)
-		return err
+		ch <- err
+		return
 	}
 
 	if buildResult == nil {
-		return nil
+		return
 	}
 	instance.genSpec = buildResult.Spec
 	if !commitChange {
-		return nil
+		return
 	}
 	for filePath, content := range buildResult.Files {
 		filePath = filepath.Clean(filePath)
@@ -1316,11 +1351,12 @@ func (system *ModuleSystem) Build(
 		)
 
 		if err := writeFile(resolvedPath, content); err != nil {
-			return errors.Wrapf(
+			ch <- errors.Wrapf(
 				err,
 				"Error writing to file %q",
 				resolvedPath,
 			)
+			return
 		}
 
 		// HACK: The module system writer shouldn't
@@ -1330,12 +1366,12 @@ func (system *ModuleSystem) Build(
 		// for the generators yet.
 		if filepath.Ext(filePath) == ".go" {
 			if err := FormatGoFile(resolvedPath); err != nil {
-				return err
+				ch <- err
+				return
 			}
 		}
 	}
-
-	return nil
+	return
 }
 
 // GenerateBuild will, given a module system configuration directory and a
