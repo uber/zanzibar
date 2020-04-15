@@ -30,6 +30,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -1266,7 +1267,7 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	moduleCount := 0
-	moduleIndex := 0
+	var moduleIndex int32
 	for _, moduleList := range toBeBuiltModules {
 		moduleCount += len(moduleList)
 	}
@@ -1278,10 +1279,10 @@ func (system *ModuleSystem) IncrementalBuild(
 		for _, moduleInstance := range toBeBuiltModules[class] {
 			go func(moduleInstance *ModuleInstance) {
 				defer wg.Done()
-				moduleIndex++
 				physicalGenDir := filepath.Join(targetGenDir, moduleInstance.Directory)
 				prettyDir, _ := filepath.Rel(baseDirectory, physicalGenDir)
-				PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName, prettyDir, moduleIndex, moduleCount)
+				PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName,
+					prettyDir, int(atomic.AddInt32(&moduleIndex, 1)), moduleCount)
 				if err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange); err != nil {
 					ch <- err
 				}
