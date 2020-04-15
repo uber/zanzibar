@@ -14,7 +14,6 @@ import:
   version: ^0.8.0
 - package: go.uber.org/atomic
   version: ^1.3.0
-# Version 3.3.11 has incompatibilities
 - package: github.com/uber-go/tally
   version: 3.3.10
 - package: github.com/kardianos/osext
@@ -45,8 +44,10 @@ import:
   version: master
 - package: gopkg.in/yaml.v2
   version: master
-- package: golang.org/x/tools/cmd/goimports
+- package: golang.org/x/tools
   version: master
+  subpackages:
+  - cmd/goimports
 - package: gopkg.in/validator.v2
   version: master
 - package: go.uber.org/fx
@@ -63,59 +64,51 @@ import:
 - package: github.com/gogo/protobuf
   version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
   subpackages:
-    - gogoproto
-    - jsonpb
-    - plugin/compare
-    - plugin/defaultcheck
-    - plugin/description
-    - plugin/embedcheck
-    - plugin/enumstringer
-    - plugin/equal
-    - plugin/face
-    - plugin/gostring
-    - plugin/marshalto
-    - plugin/oneofcheck
-    - plugin/populate
-    - plugin/size
-    - plugin/stringer
-    - plugin/testgen
-    - plugin/union
-    - plugin/unmarshal
-    - proto
-    - protoc-gen-gogo/descriptor
-    - protoc-gen-gogo/generator
-    - protoc-gen-gogo/generator/internal/remap
-    - protoc-gen-gogo/grpc
-    - protoc-gen-gogo/plugin
-    - protoc-gen-gogoslick
-    - sortkeys
-    - types
-    - vanity
-    - vanity/command
-
-# https://github.com/uber/zanzibar/issues/583
-- package: honnef.co/go/tools/cmd/staticcheck
+  - gogoproto
+  - jsonpb
+  - plugin/compare
+  - plugin/defaultcheck
+  - plugin/description
+  - plugin/embedcheck
+  - plugin/enumstringer
+  - plugin/equal
+  - plugin/face
+  - plugin/gostring
+  - plugin/marshalto
+  - plugin/oneofcheck
+  - plugin/populate
+  - plugin/size
+  - plugin/stringer
+  - plugin/testgen
+  - plugin/union
+  - plugin/unmarshal
+  - proto
+  - protoc-gen-gogo/descriptor
+  - protoc-gen-gogo/generator
+  - protoc-gen-gogo/generator/internal/remap
+  - protoc-gen-gogo/grpc
+  - protoc-gen-gogo/plugin
+  - protoc-gen-gogoslick
+  - sortkeys
+  - types
+  - vanity
+  - vanity/command
+- package: honnef.co/go/tools
   version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
-
-# Build tools / SDKs
+  subpackages:
+  - cmd/staticcheck
 - package: github.com/jteeuwen/go-bindata
   version: master
-
-# Transitive dependency of fx
 - package: go.uber.org/dig
-
-# Needed by vendor/golang.org/x/net/internal
 - package: golang.org/x/sys
   version: master
   subpackages:
   - unix
-
-# Added due to: https://github.com/prometheus/procfs/issues/167
 - package: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
   - prometheus/internal
   - prometheus/promhttp
-
 - package: github.com/emicklei/proto
+- package: golang.org/x/sync

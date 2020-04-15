@@ -474,8 +474,8 @@ func TestExampleService(t *testing.T) {
 				)
 			}
 
-			for i, instance := range expectedClients {
-				compareInstances(t, instance, expectedClients[i])
+			for _, instance := range expectedClients {
+				compareInstances(t, instance, expectedClients)
 			}
 		} else if className == "endpoint" {
 			if len(classInstances) != len(expectedEndpoints) {
@@ -486,8 +486,8 @@ func TestExampleService(t *testing.T) {
 				)
 			}
 
-			for i, instance := range classInstances {
-				compareInstances(t, instance, expectedEndpoints[i])
+			for _, instance := range classInstances {
+				compareInstances(t, instance, expectedEndpoints)
 
 				clientDependency := instance.ResolvedDependencies["client"][0]
 				clientSpec := clientDependency.GeneratedSpec().(*TestClientSpec)
@@ -868,8 +868,8 @@ func TestExampleServiceIncremental(t *testing.T) {
 				)
 			}
 
-			for i, instance := range expectedClients {
-				compareInstances(t, instance, expectedClients[i])
+			for _, instance := range expectedClients {
+				compareInstances(t, instance, expectedClients)
 			}
 		} else if className == "endpoint" {
 			if len(classInstances) != len(expectedEndpoints) {
@@ -880,8 +880,8 @@ func TestExampleServiceIncremental(t *testing.T) {
 				)
 			}
 
-			for i, instance := range classInstances {
-				compareInstances(t, instance, expectedEndpoints[i])
+			for _, instance := range classInstances {
+				compareInstances(t, instance, expectedEndpoints)
 
 				clientDependency := instance.ResolvedDependencies["client"][0]
 				clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
@@ -1631,8 +1631,14 @@ func getTestDirName() string {
 func compareInstances(
 	t *testing.T,
 	actual *ModuleInstance,
-	expected *ModuleInstance,
+	expectedList []*ModuleInstance,
 ) {
+	expectedMap := make(map[string]*ModuleInstance)
+	for _, expected := range expectedList {
+		expectedMap[expected.InstanceName] = expected
+	}
+	expected := expectedMap[actual.InstanceName]
+
 	if actual.ClassName != expected.ClassName {
 		t.Errorf(
 			"Expected class name of %q %q to be %q but found %q",

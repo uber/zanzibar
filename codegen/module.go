@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -161,12 +162,11 @@ func (system *ModuleSystem) RegisterClassType(
 }
 
 func (system *ModuleSystem) populateResolvedDependencies(
-	classInstances []*ModuleInstance,
-	resolvedModules map[string][]*ModuleInstance,
+	classInstances map[string]*ModuleInstance,
+	resolvedModules map[string]map[string]*ModuleInstance,
 ) error {
 	// Resolve the class dependencies
 	for _, classInstance := range classInstances {
-		dependencyClassNames := map[string]bool{}
 
 		for _, classDependency := range classInstance.Dependencies {
 			moduleClassInstances, ok :=
@@ -181,15 +181,7 @@ func (system *ModuleSystem) populateResolvedDependencies(
 				)
 			}
 
-			// TODO: We don't want to linear scan here
-			var dependencyInstance *ModuleInstance
-
-			for _, instance := range moduleClassInstances {
-				if instance.InstanceName == classDependency.InstanceName {
-					dependencyInstance = instance
-					break
-				}
-			}
+			dependencyInstance := moduleClassInstances[classDependency.InstanceName]
 
 			if dependencyInstance == nil {
 				return errors.Errorf(
@@ -209,7 +201,6 @@ func (system *ModuleSystem) populateResolvedDependencies(
 				resolvedDependencies = []*ModuleInstance{}
 			}
 
-			dependencyClassNames[classDependency.ClassName] = true
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
 				appendUniqueModule(resolvedDependencies, dependencyInstance)
 		}
@@ -245,7 +236,7 @@ func appendUniqueModule(
 }
 
 func (system *ModuleSystem) populateRecursiveDependencies(
-	instances []*ModuleInstance,
+	instances map[string]*ModuleInstance,
 ) error {
 	for _, classInstance := range instances {
 		recursiveDeps := map[string]map[string]*ModuleInstance{}
@@ -559,7 +550,7 @@ func (system *ModuleSystem) ResolveModules(
 		return nil, err
 	}
 
-	resolvedModules := map[string][]*ModuleInstance{}
+	resolvedModules := map[string]map[string]*ModuleInstance{}
 
 	// system.classOrder is important. Downstream dependencies **must** be resolved first
 	for _, className := range system.classOrder {
@@ -574,92 +565,165 @@ func (system *ModuleSystem) ResolveModules(
 			return nil, errors.Wrapf(err, "error getting default dependencies for class %s", className)
 		}
 
+		var wg sync.WaitGroup
+		ch := make(chan resolveResult)
+		wg.Add(len(system.moduleSearchPaths[className]))
+
 		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
-			moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
-			if err != nil {
-				return nil, errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)
+			go system.resolveModule(baseDirectory, moduleDirectoryGlob, className, packageRoot,
+				targetGenDir, defaultDependencies, ch, &wg, resolvedModules)
+		}
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
+
+		for ele := range ch {
+			if ele.err != nil {
+				return nil, ele.err
 			}
-
-			for _, moduleDirAbs := range moduleDirectoriesAbs {
-				stat, err := os.Stat(moduleDirAbs)
-				if err != nil {
-					return nil, errors.Wrapf(
-						err,
-						"internal error: cannot stat %q",
-						moduleDirAbs,
-					)
-				}
-
-				if !stat.IsDir() {
-					// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
-					// interested only in the containing directories.
-					continue
-				}
-
-				moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
-				if err != nil {
-					return nil, errors.Wrapf(
-						err,
-						"internal error: cannot make %q relative to %q",
-						moduleDirAbs,
-						baseDirectory,
-					)
-				}
-
-				classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
-				if classConfigPath == "" {
-					fmt.Printf("  no class config found in %s directory\n", moduleDirAbs)
-					// No class config found in this directory, skip over it
-					continue
-				}
-
-				instance, instanceErr := system.readInstance(
-					className,
-					packageRoot,
-					baseDirectory,
-					targetGenDir,
-					moduleDir,
-					moduleDirAbs,
-					defaultDependencies,
-				)
-				if instanceErr != nil {
-					return nil, errors.Wrapf(
-						instanceErr,
-						"Error reading multi instance %q",
-						moduleDir,
-					)
-				}
-
-				resolvedModules[instance.ClassName] = append(resolvedModules[instance.ClassName], instance)
-
-				if className != instance.ClassName {
-					return nil, fmt.Errorf(
-						"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
-						moduleDirectoryGlob,
-						className,
-						moduleDir,
-					)
-				}
+			if ele.module == nil {
+				continue
 			}
-
-			// Resolve dependencies for all classes
-			resolveErr := system.populateResolvedDependencies(
-				resolvedModules[className],
-				resolvedModules,
-			)
-			if resolveErr != nil {
-				return nil, resolveErr
-			}
-
-			// Resolved recursive dependencies for all classes
-			recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
-			if recursiveErr != nil {
-				return nil, recursiveErr
-			}
+			mergeResolveMap(ele.module, resolvedModules, className)
 		}
 	}
 
-	return resolvedModules, nil
+	classArrayModuleMap := map[string][]*ModuleInstance{}
+	for className, instanceMap := range resolvedModules {
+		for _, instance := range instanceMap {
+			classArrayModuleMap[className] = append(classArrayModuleMap[className], instance)
+		}
+	}
+	return classArrayModuleMap, nil
+}
+
+type resolveResult struct {
+	err    error
+	module map[string]map[string]*ModuleInstance
+}
+
+func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryGlob string, className string,
+	packageRoot string, targetGenDir string, defaultDependencies []ModuleDependency,
+	ch chan resolveResult, wg *sync.WaitGroup, parentModule map[string]map[string]*ModuleInstance) {
+	defer wg.Done()
+	curModules := map[string]map[string]*ModuleInstance{}
+	mergeResolveMap(parentModule, curModules, "")
+
+	moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
+	if err != nil {
+		ch <- resolveResult{err: errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)}
+		return
+	}
+
+	for _, moduleDirAbs := range moduleDirectoriesAbs {
+		stat, err := os.Stat(moduleDirAbs)
+		if err != nil {
+			ch <- resolveResult{
+				err: errors.Wrapf(
+					err,
+					"internal error: cannot stat %q",
+					moduleDirAbs,
+				),
+			}
+			return
+		}
+
+		if !stat.IsDir() {
+			// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
+			// interested only in the containing directories.
+			continue
+		}
+
+		moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
+		if err != nil {
+			ch <- resolveResult{err: errors.Wrapf(
+				err,
+				"internal error: cannot make %q relative to %q",
+				moduleDirAbs,
+				baseDirectory,
+			)}
+			return
+		}
+
+		classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
+		if classConfigPath == "" {
+			fmt.Printf("  no class config found in %s directory\n", moduleDirAbs)
+			// No class config found in this directory, skip over it
+			continue
+		}
+
+		instance, instanceErr := system.readInstance(
+			className,
+			packageRoot,
+			baseDirectory,
+			targetGenDir,
+			moduleDir,
+			moduleDirAbs,
+			defaultDependencies,
+		)
+		if instanceErr != nil {
+			ch <- resolveResult{err: errors.Wrapf(
+				instanceErr,
+				"Error reading multi instance %q",
+				moduleDir,
+			)}
+			return
+		}
+
+		instanceNameMap := curModules[instance.ClassName]
+		if instanceNameMap == nil {
+			instanceNameMap = map[string]*ModuleInstance{}
+			curModules[instance.ClassName] = instanceNameMap
+		}
+		instanceNameMap[instance.InstanceName] = instance
+
+		if className != instance.ClassName {
+			ch <- resolveResult{err: fmt.Errorf(
+				"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
+				moduleDirectoryGlob,
+				className,
+				moduleDir,
+			)}
+			return
+		}
+	}
+
+	// Resolve dependencies for all classes
+	resolveErr := system.populateResolvedDependencies(
+		curModules[className],
+		curModules,
+	)
+	if resolveErr != nil {
+		ch <- resolveResult{err: resolveErr}
+		return
+	}
+
+	// Resolved recursive dependencies for all classes
+	recursiveErr := system.populateRecursiveDependencies(curModules[className])
+	if recursiveErr != nil {
+		ch <- resolveResult{err: recursiveErr}
+		return
+	}
+	ch <- resolveResult{module: curModules}
+	return
+}
+
+func mergeResolveMap(srcModuleMap map[string]map[string]*ModuleInstance,
+	destModuleMap map[string]map[string]*ModuleInstance, curClassName string) {
+	for srcClassName, srcInstanceMap := range srcModuleMap {
+		if curClassName != "" && curClassName != srcClassName {
+			continue
+		}
+		destInstanceMap := destModuleMap[srcClassName]
+		if destInstanceMap == nil {
+			destInstanceMap = map[string]*ModuleInstance{}
+			destModuleMap[srcClassName] = destInstanceMap
+		}
+		for srcInstanceName, srcInstance := range srcInstanceMap {
+			destModuleMap[srcClassName][srcInstanceName] = srcInstance
+		}
+	}
 }
 
 func (system *ModuleSystem) getDefaultDependencies(
@@ -674,63 +738,98 @@ func (system *ModuleSystem) getDefaultDependencies(
 		if err != nil {
 			return nil, errors.Wrapf(err, "error globbing default dependency %q", defaultDepDirGlob)
 		}
+		ch := make(chan defaultDependencyRes, len(defaultDepDirsAbs))
+		var wg sync.WaitGroup
+		wg.Add(len(defaultDepDirsAbs))
 
 		for _, defaultDepDirAbs := range defaultDepDirsAbs {
-			dependencyClassName, err := getClassNameOfDependency(baseDirectory, defaultDepDirAbs, moduleSearchPaths)
-			if err != nil {
-				return nil, errors.Wrapf(
-					err,
-					"cannot get class name of dependency %s",
-					defaultDepDirAbs,
-				)
+			go system.getDefaultDependency(baseDirectory, defaultDepDirAbs, moduleSearchPaths,
+				className, ch, &wg)
+		}
+		wg.Wait()
+		close(ch)
+		for ele := range ch {
+			if ele.err != nil {
+				return nil, ele.err
 			}
-
-			found := false
-			for _, actualClassDependencyName := range system.classes[className].DependsOn {
-				if dependencyClassName == actualClassDependencyName {
-					found = true
-					break
-				}
-			}
-			if !found {
-				return nil, errors.Errorf(
-					"default dependency class %s is not a dependency of %s",
-					dependencyClassName,
-					className,
-				)
-			}
-
-			classConfigPath, _, _ := getConfigFilePath(defaultDepDirAbs, dependencyClassName)
-			if classConfigPath == "" {
-				// No class config found, skip over this directory
+			if ele.dep == nil {
 				continue
 			}
-
-			dependencyDir, err := filepath.Rel(baseDirectory, defaultDepDirAbs)
-			if err != nil {
-				return nil, errors.Wrapf(
-					err,
-					"cannot make %q relative to %q for default dependency",
-					defaultDepDirAbs,
-					baseDirectory,
-				)
-			}
-
-			defaultDependency, err := system.getModuleDependency(classConfigPath, dependencyDir, dependencyClassName)
-			if err != nil {
-				return nil, errors.Wrapf(
-					err,
-					"error getting default dependency module %s for class %s",
-					defaultDepDirAbs,
-					className,
-				)
-			}
-
-			defaultDependencies = append(defaultDependencies, *defaultDependency)
+			defaultDependencies = append(defaultDependencies, *ele.dep)
 		}
 	}
-
 	return defaultDependencies, nil
+}
+
+type defaultDependencyRes struct {
+	err error
+	dep *ModuleDependency
+}
+
+func (system *ModuleSystem) getDefaultDependency(baseDirectory string, defaultDepDirAbs string,
+	moduleSearchPaths map[string][]string, className string, ch chan defaultDependencyRes, wg *sync.WaitGroup) {
+	defer wg.Done()
+	dependencyClassName, err := getClassNameOfDependency(baseDirectory, defaultDepDirAbs, moduleSearchPaths)
+	if err != nil {
+		ch <- defaultDependencyRes{
+			err: errors.Wrapf(
+				err,
+				"cannot get class name of dependency %s",
+				defaultDepDirAbs,
+			),
+		}
+		return
+	}
+
+	found := false
+	for _, actualClassDependencyName := range system.classes[className].DependsOn {
+		if dependencyClassName == actualClassDependencyName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		ch <- defaultDependencyRes{err: errors.Errorf(
+			"default dependency class %s is not a dependency of %s",
+			dependencyClassName,
+			className,
+		),
+		}
+		return
+	}
+
+	classConfigPath, _, _ := getConfigFilePath(defaultDepDirAbs, dependencyClassName)
+	if classConfigPath == "" {
+		// No class config found, skip over this directory
+		ch <- defaultDependencyRes{}
+		return
+	}
+
+	dependencyDir, err := filepath.Rel(baseDirectory, defaultDepDirAbs)
+	if err != nil {
+		ch <- defaultDependencyRes{err: errors.Wrapf(
+			err,
+			"cannot make %q relative to %q for default dependency",
+			defaultDepDirAbs,
+			baseDirectory,
+		),
+		}
+		return
+	}
+
+	defaultDependency, err := system.getModuleDependency(classConfigPath, dependencyDir, dependencyClassName)
+	if err != nil {
+		ch <- defaultDependencyRes{err: errors.Wrapf(
+			err,
+			"error getting default dependency module %s for class %s",
+			defaultDepDirAbs,
+			className,
+		),
+		}
+		return
+	}
+	ch <- defaultDependencyRes{dep: defaultDependency}
+	return
 }
 
 func (system *ModuleSystem) getModuleDependency(
@@ -1444,7 +1543,7 @@ type ModuleInstance struct {
 	// YAML/JSON file
 	InstanceName string
 	// Config is a reference to the instance "config" key in the instances YAML
-	//file.
+	// file.
 	Config map[string]interface{}
 	// Dependencies is a list of dependent modules as defined in the instances
 	// YAML file
