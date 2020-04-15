@@ -80,6 +80,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	followRedirect := true
+	if deps.Default.Config.ContainsKey("clients.google-now.followRedirect") {
+		followRedirect = deps.Default.Config.MustGetBoolean("clients.google-now.followRedirect")
+	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
@@ -95,7 +99,7 @@ func NewClient(deps *module.Dependencies) Client {
 			baseURL,
 			defaultHeaders,
 			timeout,
-			true,
+			followRedirect,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey:   requestUUIDHeaderKey,
