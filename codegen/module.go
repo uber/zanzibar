@@ -569,23 +569,25 @@ func (system *ModuleSystem) ResolveModules(
 		ch := make(chan resolveResult)
 		wg.Add(len(system.moduleSearchPaths[className]))
 
+		resolvedModulesCopy := copyResolveModule(resolvedModules)
+
 		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
 			go system.resolveModule(baseDirectory, moduleDirectoryGlob, className, packageRoot,
-				targetGenDir, defaultDependencies, ch, &wg, resolvedModules)
+				targetGenDir, defaultDependencies, ch, &wg, resolvedModulesCopy)
 		}
 		go func() {
 			wg.Wait()
 			close(ch)
 		}()
 
-		for ele := range ch {
-			if ele.err != nil {
-				return nil, ele.err
+		for result := range ch {
+			if result.err != nil {
+				return nil, result.err
 			}
-			if ele.module == nil {
+			if result.module == nil {
 				continue
 			}
-			mergeResolveMap(ele.module, resolvedModules, className)
+			mergeResolveMap(result.module, resolvedModules, className)
 		}
 	}
 
@@ -596,6 +598,21 @@ func (system *ModuleSystem) ResolveModules(
 		}
 	}
 	return classArrayModuleMap, nil
+}
+
+func copyResolveModule(resolvedModules map[string]map[string]*ModuleInstance) map[string]map[string]*ModuleInstance {
+	resolvedModulesCopy := map[string]map[string]*ModuleInstance{}
+	for className, instanceMap := range resolvedModules {
+		instanceMapCopy := resolvedModulesCopy[className]
+		if instanceMapCopy == nil {
+			instanceMapCopy = map[string]*ModuleInstance{}
+			resolvedModulesCopy[className] = instanceMapCopy
+		}
+		for instanceName, instance := range instanceMap {
+			instanceMapCopy[instanceName] = instance
+		}
+	}
+	return resolvedModulesCopy
 }
 
 type resolveResult struct {
