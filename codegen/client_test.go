@@ -113,7 +113,8 @@ config:
 
 func TestNewHTTPClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
-	_, err := newHTTPClientConfig([]byte(invalidYAML))
+	validator := getExposedMethodValidator()
+	_, err := newHTTPClientConfig([]byte(invalidYAML), validator)
 	expectedErr := "Could not parse HTTP client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -121,7 +122,8 @@ func TestNewHTTPClientConfigUnmarshalFilure(t *testing.T) {
 
 func TestNewTChannelClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
-	_, err := newTChannelClientConfig([]byte(invalidYAML))
+	validator := getExposedMethodValidator()
+	_, err := newTChannelClientConfig([]byte(invalidYAML), validator)
 	expectedErr := "Could not parse TChannel client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -129,7 +131,8 @@ func TestNewTChannelClientConfigUnmarshalFilure(t *testing.T) {
 
 func TestNewGRPCClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
-	_, err := newGRPCClientConfig([]byte(invalidYAML))
+	validator := getExposedMethodValidator()
+	_, err := newGRPCClientConfig([]byte(invalidYAML), validator)
 	expectedErr := "could not parse gRPC client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -137,7 +140,8 @@ func TestNewGRPCClientConfigUnmarshalFilure(t *testing.T) {
 
 func TestNewCustomClientConfigUnmarshalFilure(t *testing.T) {
 	invalidYAML := "{{{"
-	_, err := newCustomClientConfig([]byte(invalidYAML))
+	validator := getExposedMethodValidator()
+	_, err := newCustomClientConfig([]byte(invalidYAML), validator)
 	expectedErr := "Could not parse Custom client config data: error converting YAML to JSON: yaml: line 1: did not find expected node content"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -150,7 +154,8 @@ type: %s
 # config is missing
 `, clientType)
 
-	_, err := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newClientConfig([]byte(configYAML), validator)
 	assert.Error(t, err)
 	assert.Equal(
 		t,
@@ -174,8 +179,8 @@ config:
   idlFileSha: idlFileSha
   # idlFile is missing
 `, clientType)
-
-	_, err := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newClientConfig([]byte(configYAML), validator)
 	assert.Error(t, err)
 	assert.Equal(
 		t,
@@ -198,7 +203,8 @@ config:
   idlFile: idlFile
 `, clientType)
 
-	_, err := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newClientConfig([]byte(configYAML), validator)
 	assert.NoError(t, err)
 }
 
@@ -216,7 +222,8 @@ config:
   idlFileSha: idlFileSha
   # CustomImportPath is missing
 `
-	_, err := newCustomClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newCustomClientConfig([]byte(configYAML), validator)
 	expectedErr := "custom client config validation failed: Config.CustomImportPath: zero value"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -233,8 +240,8 @@ config:
     a: method
     b: method
 `, clientType)
-
-	_, err := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newClientConfig([]byte(configYAML), validator)
 	assert.Error(t, err)
 	assert.Equal(
 		t,
@@ -276,7 +283,8 @@ config:
   idlFileSha: idlFileSha
 `
 
-	_, err := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newClientConfig([]byte(configYAML), validator)
 	expectedErr := "Could not determine client type: Could not parse client config data to determine client type: error converting YAML to JSON: yaml: line 3: mapping values are not allowed in this context"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
@@ -289,14 +297,16 @@ type: unknown
 config:
   idlFileSha: idlFileSha
 `
-	_, err := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	_, err := newClientConfig([]byte(configYAML), validator)
 	expectedErr := "Unknown client type \"unknown\""
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
 }
 
 func TestNewClientConfigGetHTTPClient(t *testing.T) {
-	client, err := newClientConfig([]byte(httpClientYAML))
+	validator := getExposedMethodValidator()
+	client, err := newClientConfig([]byte(httpClientYAML), validator)
 	expectedClient := HTTPClientConfig{
 		ClassConfigBase: ClassConfigBase{
 			Name: "test",
@@ -325,7 +335,8 @@ func TestNewClientConfigGetHTTPClient(t *testing.T) {
 }
 
 func TestNewClientConfigGetTChannelClient(t *testing.T) {
-	client, err := newClientConfig([]byte(tchannelClientYAML))
+	validator := getExposedMethodValidator()
+	client, err := newClientConfig([]byte(tchannelClientYAML), validator)
 	expectedClient := TChannelClientConfig{
 		ClassConfigBase: ClassConfigBase{
 			Name: "test",
@@ -354,7 +365,8 @@ func TestNewClientConfigGetTChannelClient(t *testing.T) {
 }
 
 func TestNewClientConfigGetGRPCClient(t *testing.T) {
-	client, err := newClientConfig([]byte(grpcClientYAML))
+	validator := getExposedMethodValidator()
+	client, err := newClientConfig([]byte(grpcClientYAML), validator)
 	expectedClient := GRPCClientConfig{
 		ClassConfigBase: ClassConfigBase{
 			Name: "test",
@@ -382,7 +394,8 @@ func TestNewClientConfigGetGRPCClient(t *testing.T) {
 }
 
 func TestNewClientConfigGetCustomClient(t *testing.T) {
-	client, err := newClientConfig([]byte(customClientYAML))
+	validator := getExposedMethodValidator()
+	client, err := newClientConfig([]byte(customClientYAML), validator)
 	expectedClient := CustomClientConfig{
 		ClassConfigBase: ClassConfigBase{
 			Name: "test",
@@ -448,7 +461,8 @@ config:
   exposedMethods:
     a: method
 `, clientType)
-	client, errClient := newClientConfig([]byte(configYAML))
+	validator := getExposedMethodValidator()
+	client, errClient := newClientConfig([]byte(configYAML), validator)
 	assert.NoError(t, errClient)
 
 	h := newTestPackageHelper(t)
@@ -459,7 +473,8 @@ config:
 
 // only for http and tchannel clients
 func doNewClientSpecTest(t *testing.T, rawConfig []byte, clientType string) {
-	client, errClient := newClientConfig(rawConfig)
+	validator := getExposedMethodValidator()
+	client, errClient := newClientConfig(rawConfig, validator)
 	assert.NoError(t, errClient)
 	instance := &ModuleInstance{
 		YAMLFileName: "YAMLFileName",
@@ -507,7 +522,8 @@ func TestTChannelClientNewClientSpec(t *testing.T) {
 }
 
 func TestGRPCClientNewClientSpec(t *testing.T) {
-	client, errClient := newClientConfig([]byte(grpcClientYAML))
+	validator := getExposedMethodValidator()
+	client, errClient := newClientConfig([]byte(grpcClientYAML), validator)
 	assert.NoError(t, errClient)
 	instance := &ModuleInstance{
 		YAMLFileName: "YAMLFileName",
@@ -546,7 +562,8 @@ func TestGRPCClientNewClientSpec(t *testing.T) {
 }
 
 func TestCustomClientNewClientSpec(t *testing.T) {
-	client, errClient := newClientConfig([]byte(customClientYAML))
+	validator := getExposedMethodValidator()
+	client, errClient := newClientConfig([]byte(customClientYAML), validator)
 	assert.NoError(t, errClient)
 	instance := &ModuleInstance{
 		YAMLFileName: "YAMLFileName",

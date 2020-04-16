@@ -25,7 +25,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"gopkg.in/validator.v2"
+	validator2 "gopkg.in/validator.v2"
 )
 
 type clientConfig interface {
@@ -90,14 +90,13 @@ type HTTPClientConfig struct {
 	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
-func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
+func newHTTPClientConfig(raw []byte, validator *validator2.Validator) (*HTTPClientConfig, error) {
 	config := &HTTPClientConfig{}
 	if errUnmarshal := yaml.Unmarshal(raw, config); errUnmarshal != nil {
 		return nil, errors.Wrap(
 			errUnmarshal, "Could not parse HTTP client config data")
 	}
 
-	validator.SetValidationFunc("exposedMethods", validateExposedMethods)
 	if errValidate := validator.Validate(config); errValidate != nil {
 		return nil, errors.Wrap(
 			errValidate, "http client config validation failed")
@@ -157,14 +156,13 @@ type TChannelClientConfig struct {
 	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
-func newTChannelClientConfig(raw []byte) (*TChannelClientConfig, error) {
+func newTChannelClientConfig(raw []byte, validator *validator2.Validator) (*TChannelClientConfig, error) {
 	config := &TChannelClientConfig{}
 	if errUnmarshal := yaml.Unmarshal(raw, config); errUnmarshal != nil {
 		return nil, errors.Wrap(
 			errUnmarshal, "Could not parse TChannel client config data")
 	}
 
-	validator.SetValidationFunc("exposedMethods", validateExposedMethods)
 	if errValidate := validator.Validate(config); errValidate != nil {
 		return nil, errors.Wrap(
 			errValidate, "tchannel client config validation failed")
@@ -191,7 +189,7 @@ type CustomClientConfig struct {
 	} `yaml:"config" json:"config" validate:"nonzero"`
 }
 
-func newCustomClientConfig(raw []byte) (*CustomClientConfig, error) {
+func newCustomClientConfig(raw []byte, validator *validator2.Validator) (*CustomClientConfig, error) {
 	config := &CustomClientConfig{}
 	if errUnmarshal := yaml.Unmarshal(raw, config); errUnmarshal != nil {
 		return nil, errors.Wrap(
@@ -235,14 +233,13 @@ type GRPCClientConfig struct {
 	Config          *ClientIDLConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
-func newGRPCClientConfig(raw []byte) (*GRPCClientConfig, error) {
+func newGRPCClientConfig(raw []byte, validator *validator2.Validator) (*GRPCClientConfig, error) {
 	config := &GRPCClientConfig{}
 	if errUnmarshal := yaml.Unmarshal(raw, config); errUnmarshal != nil {
 		return nil, errors.Wrap(
 			errUnmarshal, "could not parse gRPC client config data")
 	}
 
-	validator.SetValidationFunc("exposedMethods", validateExposedMethods)
 	if errValidate := validator.Validate(config); errValidate != nil {
 		return nil, errors.Wrap(
 			errValidate, "grpc client config validation failed")
@@ -301,7 +298,7 @@ func clientType(raw []byte) (string, error) {
 	return clientConfig.Type, nil
 }
 
-func newClientConfig(raw []byte) (clientConfig, error) {
+func newClientConfig(raw []byte, validator *validator2.Validator) (clientConfig, error) {
 	clientType, errType := clientType(raw)
 	if errType != nil {
 		return nil, errors.Wrap(
@@ -310,13 +307,13 @@ func newClientConfig(raw []byte) (clientConfig, error) {
 
 	switch clientType {
 	case "http":
-		return newHTTPClientConfig(raw)
+		return newHTTPClientConfig(raw, validator)
 	case "tchannel":
-		return newTChannelClientConfig(raw)
+		return newTChannelClientConfig(raw, validator)
 	case "grpc":
-		return newGRPCClientConfig(raw)
+		return newGRPCClientConfig(raw, validator)
 	case "custom":
-		return newCustomClientConfig(raw)
+		return newCustomClientConfig(raw, validator)
 	default:
 		return nil, errors.Errorf(
 			"Unknown client type %q", clientType)

@@ -27,6 +27,8 @@ import (
 	"sort"
 	"strings"
 
+	validator2 "gopkg.in/validator.v2"
+
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
@@ -286,40 +288,28 @@ func NewDefaultModuleSystem(
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
 
-	if err := system.RegisterClassType("client", "http", &HTTPClientGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("client", "http", newHTTPClientGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering HTTP client class type",
 		)
 	}
 
-	if err := system.RegisterClassType("client", "tchannel", &TChannelClientGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("client", "tchannel", newTChannelClientGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering TChannel client class type",
 		)
 	}
 
-	if err := system.RegisterClassType("client", "custom", &CustomClientGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("client", "custom", newCustomClientGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering custom client class type",
 		)
 	}
 
-	if err := system.RegisterClassType("client", "grpc", &GRPCClientGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("client", "grpc", newGRPCClientGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering grpc client class type",
@@ -426,18 +416,29 @@ func readEndpointConfig(rawConfig []byte) (*EndpointClassConfig, error) {
  * HTTP Client Generator
  */
 
-// HTTPClientGenerator generates an instance of a zanzibar http client
-type HTTPClientGenerator struct {
+// httpClientGenerator generates an instance of a zanzibar http client
+type httpClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+	validator     *validator2.Validator
+}
+
+// newHTTPClientGenerator generates an instance of a zanzibar http client
+func newHTTPClientGenerator(templates *Template, packageHelper *PackageHelper) *httpClientGenerator {
+	validator := getExposedMethodValidator()
+	return &httpClientGenerator{
+		templates:     templates,
+		packageHelper: packageHelper,
+		validator:     validator,
+	}
 }
 
 // ComputeSpec returns the spec for a HTTP client
-func (g *HTTPClientGenerator) ComputeSpec(
+func (g *httpClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -463,7 +464,7 @@ func (g *HTTPClientGenerator) ComputeSpec(
 
 // Generate returns the HTTP client build result, which contains the files and
 // the generated client spec
-func (g *HTTPClientGenerator) Generate(
+func (g *httpClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	clientSpecUntyped, err := g.ComputeSpec(instance)
@@ -543,18 +544,35 @@ func (g *HTTPClientGenerator) Generate(
  * TChannel Client Generator
  */
 
-// TChannelClientGenerator generates an instance of a zanzibar TChannel client
-type TChannelClientGenerator struct {
+// tchannelClientGenerator generates an instance of a zanzibar TChannel client
+type tchannelClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+	validator     *validator2.Validator
+}
+
+// newTChannelClientGenerator generates an instance of a zanzibar TChannel client
+func newTChannelClientGenerator(templates *Template, packageHelper *PackageHelper) *tchannelClientGenerator {
+	validator := getExposedMethodValidator()
+	return &tchannelClientGenerator{
+		templates:     templates,
+		packageHelper: packageHelper,
+		validator:     validator,
+	}
+}
+
+func getExposedMethodValidator() *validator2.Validator {
+	validator := validator2.NewValidator()
+	validator.SetValidationFunc("exposedMethods", validateExposedMethods)
+	return validator
 }
 
 // ComputeSpec computes the TChannel client spec
-func (g *TChannelClientGenerator) ComputeSpec(
+func (g *tchannelClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -580,7 +598,7 @@ func (g *TChannelClientGenerator) ComputeSpec(
 
 // Generate returns the TChannel client build result, which contains the files
 // and the generated client spec
-func (g *TChannelClientGenerator) Generate(
+func (g *tchannelClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	clientSpecUntyped, err := g.ComputeSpec(instance)
@@ -734,18 +752,29 @@ func hasProtoMethod(protoSpec []*ProtoService, service, method string) bool {
  * Custom Client Generator
  */
 
-// CustomClientGenerator gathers the custom client spec for future use in ClientsInitGenerator
-type CustomClientGenerator struct {
+// customClientGenerator gathers the custom client spec for future use in ClientsInitGenerator
+type customClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+	validator     *validator2.Validator
+}
+
+// newCustomClientGenerator generates custom client spec for future use in ClientsInitGenerator
+func newCustomClientGenerator(templates *Template, packageHelper *PackageHelper) *customClientGenerator {
+	validator := validator2.NewValidator()
+	return &customClientGenerator{
+		templates:     templates,
+		packageHelper: packageHelper,
+		validator:     validator,
+	}
 }
 
 // ComputeSpec computes the client spec for a custom client
-func (g *CustomClientGenerator) ComputeSpec(
+func (g *customClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -771,7 +800,7 @@ func (g *CustomClientGenerator) ComputeSpec(
 
 // Generate returns the custom client build result, which contains the
 // generated client spec and no files
-func (g *CustomClientGenerator) Generate(
+func (g *customClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	clientSpecUntyped, err := g.ComputeSpec(instance)
@@ -817,18 +846,29 @@ func (g *CustomClientGenerator) Generate(
  * gRPC client generator
  */
 
-// GRPCClientGenerator generates grpc clients.
-type GRPCClientGenerator struct {
+// gRPCClientGenerator generates grpc clients.
+type gRPCClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+	validator     *validator2.Validator
+}
+
+// NewgrpcClientGenerator generates an instance of a zanzibar grpc client
+func newGRPCClientGenerator(templates *Template, packageHelper *PackageHelper) *gRPCClientGenerator {
+	validator := getExposedMethodValidator()
+	return &gRPCClientGenerator{
+		templates:     templates,
+		packageHelper: packageHelper,
+		validator:     validator,
+	}
 }
 
 // ComputeSpec returns the spec for a gRPC client
-func (g *GRPCClientGenerator) ComputeSpec(
+func (g *gRPCClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -854,7 +894,7 @@ func (g *GRPCClientGenerator) ComputeSpec(
 
 // Generate returns the gRPC client build result, which contains the files and
 // the generated client spec
-func (g *GRPCClientGenerator) Generate(
+func (g *gRPCClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
 	clientSpecUntyped, err := g.ComputeSpec(instance)
