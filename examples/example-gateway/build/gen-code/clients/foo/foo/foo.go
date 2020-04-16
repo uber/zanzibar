@@ -6,12 +6,11 @@ package foo
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	multierr "go.uber.org/multierr"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 type FooException struct {

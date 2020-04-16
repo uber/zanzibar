@@ -6,10 +6,9 @@ package multi
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 // ServiceAFront_Hello_Args represents the arguments for the ServiceAFront.hello function.
