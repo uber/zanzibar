@@ -6,9 +6,10 @@ package echo
 import (
 	errors "errors"
 	fmt "fmt"
+	strings "strings"
+
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	strings "strings"
 )
 
 // Echo_Echo_Args represents the arguments for the Echo.echo function.
