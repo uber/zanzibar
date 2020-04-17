@@ -567,7 +567,7 @@ func (system *ModuleSystem) ResolveModules(
 		}
 
 		var wg sync.WaitGroup
-		ch := make(chan resolveResult)
+		ch := make(chan resolveResult, len(system.moduleSearchPaths[className]))
 		wg.Add(len(system.moduleSearchPaths[className]))
 
 		resolvedModulesCopy := copyResolveModule(resolvedModules)
@@ -1146,40 +1146,36 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 	allModules map[string][]*ModuleInstance,
 ) (map[string][]*ModuleInstance, error) {
 
-	toBeBuiltModules := make(map[ModuleDependency]*ModuleInstance, 0)
+	toBeBuiltModules := make(map[string][]*ModuleInstance, 0)
 
 	for _, className := range system.classOrder {
 
 		// Convert every ModuleDependency to its corresponding *ModuleInstance
-		for _, instance := range allModules[className] {
-			found := false
-
-			for _, initialInstance := range initialInstances {
+		for _, initialInstance := range initialInstances {
+			for _, instance := range allModules[className] {
 				if initialInstance.equal(instance) {
-					toBeBuiltModules[instance.AsModuleDependency()] = instance
-					found = true
+					if _, ok := toBeBuiltModules[instance.ClassName]; !ok {
+						toBeBuiltModules[instance.ClassName] = make([]*ModuleInstance, 0)
+					}
+					toBeBuiltModules[instance.ClassName] = append(toBeBuiltModules[instance.ClassName], instance)
 					break
 				}
-			}
-
-			if !found {
-				fmt.Printf(
-					"Skipping generation of %q %q class of type %q "+
-						"as not needed for incremental build\n",
-					instance.InstanceName,
-					instance.ClassName,
-					instance.ClassType,
-				)
 			}
 		}
 
 		// Collect all the ModuleInstances that depend on anything from toBeBuiltModules
-		for _, instance := range allModules[className] {
-			for _, dependentInstance := range toBeBuiltModules {
-				classInstanceTransitives := instance.RecursiveDependencies[dependentInstance.ClassName]
-				for _, classInstanceDependency := range classInstanceTransitives {
-					if classInstanceDependency.equal(dependentInstance) {
-						toBeBuiltModules[instance.AsModuleDependency()] = instance
+		for _, dependentInstances := range toBeBuiltModules {
+			for _, dependentInstance := range dependentInstances {
+				for _, instance := range allModules[className] {
+					classInstanceTransitives := instance.RecursiveDependencies[dependentInstance.ClassName]
+					for _, classInstanceDependency := range classInstanceTransitives {
+						if !classInstanceDependency.equal(dependentInstance) {
+							continue
+						}
+						if _, ok := toBeBuiltModules[instance.ClassName]; !ok {
+							toBeBuiltModules[instance.ClassName] = make([]*ModuleInstance, 0)
+						}
+						toBeBuiltModules[instance.ClassName] = append(toBeBuiltModules[instance.ClassName], instance)
 						fmt.Printf(
 							"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
 							instance.InstanceName,
@@ -1189,24 +1185,15 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 							dependentInstance.ClassName,
 							dependentInstance.ClassType,
 						)
-
 						break
 					}
 				}
 			}
 		}
+
 	}
 
-	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
-	for _, instance := range toBeBuiltModules {
-		if _, ok := toBeBuiltModulesList[instance.ClassName]; !ok {
-			toBeBuiltModulesList[instance.ClassName] = make([]*ModuleInstance, 0)
-		}
-
-		toBeBuiltModulesList[instance.ClassName] = append(toBeBuiltModulesList[instance.ClassName], instance)
-	}
-
-	return toBeBuiltModulesList, nil
+	return toBeBuiltModules, nil
 }
 
 // IncrementalBuild is like Build but filtered to only the given module instances.
@@ -1367,33 +1354,51 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 	if !commitChange {
 		return nil
 	}
+	var wg sync.WaitGroup
+	wg.Add(len(buildResult.Files))
+	ch := make(chan error, len(buildResult.Files))
 	for filePath, content := range buildResult.Files {
-		filePath = filepath.Clean(filePath)
+		go func(filePath string, content []byte) {
+			defer wg.Done()
+			filePath = filepath.Clean(filePath)
 
-		resolvedPath := filepath.Join(
-			physicalGenDir,
-			filePath,
-		)
-
-		if err := writeFile(resolvedPath, content); err != nil {
-			return errors.Wrapf(
-				err,
-				"Error writing to file %q",
-				resolvedPath,
+			resolvedPath := filepath.Join(
+				physicalGenDir,
+				filePath,
 			)
-		}
 
-		// HACK: The module system writer shouldn't
-		// assume that we want to format the files in
-		// this way, but we don't have these formatters
-		// as a library or a custom post build script
-		// for the generators yet.
-		if filepath.Ext(filePath) == ".go" {
-			if err := FormatGoFile(resolvedPath); err != nil {
-				return err
+			if err := writeFile(resolvedPath, content); err != nil {
+				ch <- errors.Wrapf(
+					err,
+					"Error writing to file %q",
+					resolvedPath,
+				)
+				return
 			}
+
+			// HACK: The module system writer shouldn't
+			// assume that we want to format the files in
+			// this way, but we don't have these formatters
+			// as a library or a custom post build script
+			// for the generators yet.
+			if filepath.Ext(filePath) == ".go" {
+				if err := FormatGoFile(resolvedPath); err != nil {
+					ch <- err
+					return
+				}
+			}
+		}(filePath, content)
+	}
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+	for err := range ch {
+		if err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 

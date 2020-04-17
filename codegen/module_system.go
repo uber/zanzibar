@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	validator2 "gopkg.in/validator.v2"
 
@@ -1006,25 +1007,40 @@ func (g *EndpointGenerator) ComputeSpec(
 			endpointYamls, filepath.Join(endpointConfigDir, fileName),
 		)
 	}
+	var wg sync.WaitGroup
+	wg.Add(len(endpointYamls))
+	ch := make(chan endpointSpecRes, len(endpointYamls))
 	for _, yamlFile := range endpointYamls {
-		espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
-		if err != nil {
-			return nil, errors.Wrapf(
-				err, "Error parsing endpoint yaml file: %s", yamlFile,
-			)
-		}
+		go func(yamlFile string) {
+			defer wg.Done()
+			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs(), clientSpecs)
+			if err != nil {
+				err = errors.Wrapf(
+					err, "Error creating endpoint spec for endpoint: %s", yamlFile,
+				)
+			}
+			ch <- endpointSpecRes{espec, err}
+		}(yamlFile)
 
-		endpointSpecs = append(endpointSpecs, espec)
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
 
-		err = espec.SetDownstream(clientSpecs, g.packageHelper)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err, "Error parsing downstream info for endpoint: %s", yamlFile,
-			)
+		for endpointSpecRes := range ch {
+			if endpointSpecRes.err != nil {
+				return nil, endpointSpecRes.err
+			}
+			endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 		}
 	}
 
 	return endpointSpecs, nil
+}
+
+type endpointSpecRes struct {
+	espec *EndpointSpec
+	err   error
 }
 
 // Generate returns the endpoint build result, which contains a file per
@@ -1032,7 +1048,8 @@ func (g *EndpointGenerator) ComputeSpec(
 func (g *EndpointGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	files := make(map[string][]byte)
+	var fileMap sync.Map
+
 	endpointMeta := make([]*EndpointMeta, 0)
 
 	endpointSpecsUntyped, err := g.ComputeSpec(instance)
@@ -1045,41 +1062,71 @@ func (g *EndpointGenerator) Generate(
 	}
 	endpointSpecs := endpointSpecsUntyped.([]*EndpointSpec)
 
+	var wg sync.WaitGroup
+	wg.Add(2*len(endpointSpecs) + 1)
+	ch := make(chan endpointMetaResult, 2*len(endpointSpecs)+1)
 	for _, espec := range endpointSpecs {
-		meta, err := g.generateEndpointFile(espec, instance, files)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error executing endpoint template %q",
-				instance.InstanceName,
-			)
-		}
-		endpointMeta = append(endpointMeta, meta)
+		go func(espec *EndpointSpec) {
+			defer wg.Done()
+			meta, err := g.generateEndpointFile(espec, instance, fileMap)
+			if err != nil {
+				err = errors.Wrapf(
+					err,
+					"Error executing endpoint template %q",
+					instance.InstanceName,
+				)
+			}
+			ch <- endpointMetaResult{meta: meta, err: err}
+		}(espec)
 
-		err = g.generateEndpointTestFile(espec, instance, files)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error executing endpoint test template %q",
-				instance.InstanceName,
-			)
-		}
+		go func(espec *EndpointSpec) {
+			defer wg.Done()
+			err = g.generateEndpointTestFile(espec, instance, fileMap)
+			if err != nil {
+				err = errors.Wrapf(
+					err,
+					"Error executing endpoint test template %q",
+					instance.InstanceName,
+				)
+			}
+			ch <- endpointMetaResult{meta: nil, err: err}
+		}(espec)
 	}
 
-	dependencies, err := GenerateDependencyStruct(
-		instance,
-		g.packageHelper,
-		g.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service dependencies for %s",
-			instance.InstanceName,
+	go func() {
+		defer wg.Done()
+		dependencies, err := GenerateDependencyStruct(
+			instance,
+			g.packageHelper,
+			g.templates,
 		)
-	}
-	if dependencies != nil {
-		files["module/dependencies.go"] = dependencies
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service dependencies for %s",
+				instance.InstanceName,
+			)
+			ch <- endpointMetaResult{meta: nil, err: err}
+			return
+		}
+		if dependencies != nil {
+			fileMap.Store("module/dependencies.go", dependencies)
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for endpointMetaResult := range ch {
+		if endpointMetaResult.err == nil {
+			return nil, endpointMetaResult.err
+		}
+		if endpointMetaResult.meta == nil {
+			continue
+		}
+		endpointMeta = append(endpointMeta, endpointMetaResult.meta)
 	}
 
 	endpointCollection, err := g.templates.ExecTemplate(
@@ -1097,7 +1144,13 @@ func (g *EndpointGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
-	files["endpoint.go"] = endpointCollection
+	fileMap.Store("endpoint.go", endpointCollection)
+
+	files := make(map[string][]byte)
+	fileMap.Range(func(key, value interface{}) bool {
+		files[key.(string)] = value.([]byte)
+		return true
+	})
 
 	return &BuildResult{
 		Files: files,
@@ -1105,9 +1158,13 @@ func (g *EndpointGenerator) Generate(
 	}, nil
 }
 
-func (g *EndpointGenerator) generateEndpointFile(
-	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
-) (*EndpointMeta, error) {
+type endpointMetaResult struct {
+	meta *EndpointMeta
+	err  error
+}
+
+func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *ModuleInstance,
+	out sync.Map) (*EndpointMeta, error) {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
 	thriftServiceName := e.ThriftServiceName
@@ -1127,7 +1184,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		if err != nil {
 			structFilePath = e.GoStructsFileName
 		}
-		if _, ok := out[structFilePath]; !ok {
+		if _, ok := out.Load(structFilePath); !ok {
 			meta := &StructMeta{
 				Instance: instance,
 				Spec:     m,
@@ -1140,7 +1197,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 			if err != nil {
 				return nil, err
 			}
-			out[structFilePath] = structs
+			out.Store(structFilePath, structs)
 		}
 	}
 
@@ -1230,7 +1287,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		endpointFilePath = targetPath
 	}
 
-	out[endpointFilePath] = endpoint
+	out.Store(endpointFilePath, endpoint)
 
 	tmpl := ""
 	if e.IsClientlessEndpoint {
@@ -1243,13 +1300,13 @@ func (g *EndpointGenerator) generateEndpointFile(
 	if err != nil {
 		return nil, errors.Wrap(err, "Error executing workflow template")
 	}
-	out["workflow/"+endpointFilePath] = workflow
+	out.Store("workflow/"+endpointFilePath, workflow)
 
 	return meta, nil
 }
 
 func (g *EndpointGenerator) generateEndpointTestFile(
-	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
+	e *EndpointSpec, instance *ModuleInstance, out sync.Map,
 ) error {
 	if len(e.TestFixtures) < 1 { // skip tests if testFixtures is missing
 		return nil
@@ -1319,7 +1376,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		return errors.Wrap(err, "Error executing endpoint test template")
 	}
 
-	out[endpointTestFilePath] = endpointTest
+	out.Store(endpointTestFilePath, endpointTest)
 
 	return nil
 }
@@ -1355,83 +1412,114 @@ func (generator *GatewayServiceGenerator) ComputeSpec(
 func (generator *GatewayServiceGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	service, err := generator.templates.ExecTemplate(
-		"service.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service service.go for %s",
-			instance.InstanceName,
+	var fileMap sync.Map
+	var wg sync.WaitGroup
+	wgSize := 5
+	wg.Add(wgSize)
+	ch := make(chan error, wgSize)
+
+	go func() {
+		defer wg.Done()
+		service, err := generator.templates.ExecTemplate(
+			"service.tmpl",
+			instance,
+			generator.packageHelper,
 		)
-	}
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service service.go for %s",
+				instance.InstanceName,
+			)
+			ch <- err
+			return
+		}
+		fileMap.Store("service.go", service)
+	}()
 
-	// generate main.go
-	main, err := generator.templates.ExecTemplate(
-		"main.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service main.go for %s",
-			instance.InstanceName,
+	go func() {
+		defer wg.Done()
+		// generate main.go
+		main, err := generator.templates.ExecTemplate(
+			"main.tmpl",
+			instance,
+			generator.packageHelper,
 		)
-	}
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service main.go for %s",
+				instance.InstanceName,
+			)
+			ch <- err
+			return
+		}
+		fileMap.Store("main/main.go", main)
+	}()
 
-	// generate main_test.go
-	mainTest, err := generator.templates.ExecTemplate(
-		"main_test.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service main_test.go for %s",
-			instance.InstanceName,
+	go func() {
+		defer wg.Done()
+		// generate main_test.go
+		mainTest, err := generator.templates.ExecTemplate(
+			"main_test.tmpl",
+			instance,
+			generator.packageHelper,
 		)
-	}
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service main_test.go for %s",
+				instance.InstanceName,
+			)
+			ch <- err
+			return
+		}
+		fileMap.Store("main/main_test.go", mainTest)
+	}()
 
-	dependencies, err := GenerateDependencyStruct(
-		instance,
-		generator.packageHelper,
-		generator.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service dependencies for %s",
-			instance.InstanceName,
+	go func() {
+		defer wg.Done()
+		dependencies, err := GenerateDependencyStruct(
+			instance,
+			generator.packageHelper,
+			generator.templates,
 		)
-	}
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service dependencies for %s",
+				instance.InstanceName,
+			)
+			ch <- err
+			return
+		}
+		fileMap.Store("module/dependencies.go", dependencies)
+	}()
 
-	initializer, err := GenerateInitializer(
-		instance,
-		generator.packageHelper,
-		generator.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service initializer for %s",
-			instance.InstanceName,
+	go func() {
+		defer wg.Done()
+		initializer, err := GenerateInitializer(
+			instance,
+			generator.packageHelper,
+			generator.templates,
 		)
-	}
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service initializer for %s",
+				instance.InstanceName,
+			)
+			ch <- err
+			return
+		}
+		fileMap.Store("module/init.go", initializer)
+	}()
 
-	files := map[string][]byte{
-		"service.go":        service,
-		"main/main.go":      main,
-		"main/main_test.go": mainTest,
-		"module/init.go":    initializer,
-	}
-
-	if dependencies != nil {
-		files["module/dependencies.go"] = dependencies
-	}
+	files := make(map[string][]byte)
+	fileMap.Range(func(key, value interface{}) bool {
+		files[key.(string)] = value.([]byte)
+		return true
+	})
 
 	return &BuildResult{
 		Files: files,

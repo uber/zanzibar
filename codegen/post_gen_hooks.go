@@ -79,38 +79,58 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		importPathMap := make(map[string]string, mockCount)
 		fixtureMap := make(map[string]*Fixture, mockCount)
-		clientInterfaceMap := make(map[string]string)
-		pathSymbolMap := make(map[string]string)
+		clientInterfaceMap := make(map[string]string, mockCount)
+		pathSymbolMap := make(map[string]string, mockCount)
+		var instanceWG sync.WaitGroup
+		var mutex sync.Mutex
+		instanceWG.Add(mockCount)
+		ch := make(chan error, mockCount)
 		for _, instance := range clientInstances {
-			key := instance.ClassType + instance.InstanceName
-			client, errClient := newMockableClient(instance.YAMLFileRaw)
-			if errClient != nil {
-				return errors.Wrapf(
-					err,
-					"error parsing client-config for client %q",
-					instance.InstanceName,
-				)
-			}
+			go func(instance *ModuleInstance) {
+				defer instanceWG.Done()
+				key := instance.ClassType + instance.InstanceName
+				client, errClient := newMockableClient(instance.YAMLFileRaw)
+				if errClient != nil {
+					ch <- errors.Wrapf(
+						err,
+						"error parsing client-config for client %q",
+						instance.InstanceName,
+					)
+					return
+				}
 
-			importPath := instance.PackageInfo.GeneratedPackagePath
-			customInterface := client.Config.CustomInterface
-			if instance.ClassType == custom {
-				importPath = client.Config.CustomImportPath
-			}
+				importPath := instance.PackageInfo.GeneratedPackagePath
+				customInterface := client.Config.CustomInterface
+				if instance.ClassType == custom {
+					importPath = client.Config.CustomImportPath
+				}
 
-			clientInterface := defaultClientInterface
-			// if an interfaces name is provided use that, else use "Client"
-			if customInterface != "" {
-				clientInterface = customInterface
-			}
-			importPathMap[key] = importPath
-			clientInterfaceMap[key] = clientInterface
+				clientInterface := defaultClientInterface
+				// if an interfaces name is provided use that, else use "Client"
+				if customInterface != "" {
+					clientInterface = customInterface
+				}
+				mutex.Lock()
+				importPathMap[key] = importPath
+				clientInterfaceMap[key] = clientInterface
+				// gather all modules that need to generate fixture types
+				f := client.Config.Fixture
+				if f != nil && f.Scenarios != nil {
+					pathSymbolMap[importPath] = clientInterface
+					fixtureMap[key] = f
+				}
+				mutex.Unlock()
 
-			// gather all modules that need to generate fixture types
-			f := client.Config.Fixture
-			if f != nil && f.Scenarios != nil {
-				pathSymbolMap[importPath] = clientInterface
-				fixtureMap[key] = f
+			}(instance)
+		}
+
+		go func() {
+			instanceWG.Wait()
+			close(ch)
+		}()
+		for err := range ch {
+			if err != nil {
+				return err
 			}
 		}
 
@@ -128,7 +148,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		// cap the num of goroutines to num of CPU, because
 		// bin.GenMock in each goroutine starts a sub process
-		n := runtime.GOMAXPROCS(0)
+		n := runtime.NumCPU()
 		if n > mockCount {
 			n = mockCount
 		}
