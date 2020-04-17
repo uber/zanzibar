@@ -166,22 +166,6 @@ func getModuleConfigFileName(instance *ModuleInstance) string {
 	return instance.JSONFileName
 }
 
-// NewClientSpec creates a client spec from a yaml file.
-func NewClientSpec(
-	instance *ModuleInstance,
-	h *PackageHelper,
-) (*ClientSpec, error) {
-	clientConfig, errNew := newClientConfig(instance.YAMLFileRaw)
-	if errNew != nil {
-		return nil, errors.Wrapf(
-			errNew,
-			"Could not parse class config yaml file: %s",
-			getModuleConfigFileName(instance),
-		)
-	}
-	return clientConfig.NewClientSpec(instance, h)
-}
-
 // MiddlewareSpec holds information about each middleware at the endpoint
 type MiddlewareSpec struct {
 	// The middleware package name.
