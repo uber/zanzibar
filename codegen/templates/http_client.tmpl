@@ -95,6 +95,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
 	}
 
+
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	return &{{$clientName}}{

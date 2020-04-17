@@ -1456,6 +1456,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
 	}
 
+
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	return &{{$clientName}}{
@@ -1816,7 +1817,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 14692, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 14693, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
