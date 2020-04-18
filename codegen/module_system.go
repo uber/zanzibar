@@ -1019,20 +1019,19 @@ func (g *EndpointGenerator) ComputeSpec(
 					err, "Error creating endpoint spec for endpoint: %s", yamlFile,
 				)
 			}
-			ch <- endpointSpecRes{espec, err}
+			ch <- endpointSpecRes{espec: espec, err: err}
 		}(yamlFile)
+	}
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
 
-		go func() {
-			wg.Wait()
-			close(ch)
-		}()
-
-		for endpointSpecRes := range ch {
-			if endpointSpecRes.err != nil {
-				return nil, endpointSpecRes.err
-			}
-			endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
+	for endpointSpecRes := range ch {
+		if endpointSpecRes.err != nil {
+			return nil, endpointSpecRes.err
 		}
+		endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 	}
 
 	return endpointSpecs, nil
@@ -1048,10 +1047,7 @@ type endpointSpecRes struct {
 func (g *EndpointGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	var fileMap sync.Map
-
 	endpointMeta := make([]*EndpointMeta, 0)
-
 	endpointSpecsUntyped, err := g.ComputeSpec(instance)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -1062,26 +1058,40 @@ func (g *EndpointGenerator) Generate(
 	}
 	endpointSpecs := endpointSpecsUntyped.([]*EndpointSpec)
 
+	for _, espec := range endpointSpecs {
+		// allow configured header to pass down to switch downstream service dynmamic
+		reqHeaders := espec.ReqHeaders
+		if reqHeaders == nil {
+			reqHeaders = make(map[string]*TypedHeader)
+		}
+		shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
+		reqHeaders[shk] = &TypedHeader{
+			Name:        shk,
+			TransformTo: shk,
+			Field:       &compile.FieldSpec{Required: false},
+		}
+		espec.ReqHeaders = reqHeaders
+	}
 	var wg sync.WaitGroup
-	wg.Add(2*len(endpointSpecs) + 1)
+	var fileMap sync.Map
+	wg.Add(len(endpointSpecs) + 1)
 	ch := make(chan endpointMetaResult, 2*len(endpointSpecs)+1)
 	for _, espec := range endpointSpecs {
 		go func(espec *EndpointSpec) {
 			defer wg.Done()
-			meta, err := g.generateEndpointFile(espec, instance, fileMap)
+			meta, err := g.generateEndpointFile(espec, instance, &fileMap)
 			if err != nil {
 				err = errors.Wrapf(
 					err,
 					"Error executing endpoint template %q",
 					instance.InstanceName,
 				)
+				ch <- endpointMetaResult{meta: nil, err: err}
+				return
 			}
 			ch <- endpointMetaResult{meta: meta, err: err}
-		}(espec)
 
-		go func(espec *EndpointSpec) {
-			defer wg.Done()
-			err = g.generateEndpointTestFile(espec, instance, fileMap)
+			err = g.generateEndpointTestFile(espec, instance, &fileMap)
 			if err != nil {
 				err = errors.Wrapf(
 					err,
@@ -1120,7 +1130,7 @@ func (g *EndpointGenerator) Generate(
 	}()
 
 	for endpointMetaResult := range ch {
-		if endpointMetaResult.err == nil {
+		if endpointMetaResult.err != nil {
 			return nil, endpointMetaResult.err
 		}
 		if endpointMetaResult.meta == nil {
@@ -1164,7 +1174,7 @@ type endpointMetaResult struct {
 }
 
 func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *ModuleInstance,
-	out sync.Map) (*EndpointMeta, error) {
+	out *sync.Map) (*EndpointMeta, error) {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
 	thriftServiceName := e.ThriftServiceName
@@ -1232,17 +1242,6 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		clientName = e.ClientSpec.ClientName
 	}
 
-	// allow configured header to pass down to switch downstream service dynmamic
-	reqHeaders := e.ReqHeaders
-	if reqHeaders == nil {
-		reqHeaders = make(map[string]*TypedHeader)
-	}
-	shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
-	reqHeaders[shk] = &TypedHeader{
-		Name:        shk,
-		TransformTo: shk,
-		Field:       &compile.FieldSpec{Required: false},
-	}
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		Instance:               instance,
@@ -1250,10 +1249,10 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		GatewayPackageName:     g.packageHelper.GoGatewayPackageName(),
 		IncludedPackages:       includedPackages,
 		Method:                 method,
-		ReqHeaders:             reqHeaders,
+		ReqHeaders:             e.ReqHeaders,
 		IsClientlessEndpoint:   e.IsClientlessEndpoint,
-		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
-		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
+		ReqHeadersKeys:         sortedHeaders(e.ReqHeaders, false),
+		ReqRequiredHeadersKeys: sortedHeaders(e.ReqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
 		ResRequiredHeadersKeys: sortedHeaders(e.ResHeaders, true),
 		ResHeaders:             e.ResHeaders,
@@ -1306,7 +1305,7 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 }
 
 func (g *EndpointGenerator) generateEndpointTestFile(
-	e *EndpointSpec, instance *ModuleInstance, out sync.Map,
+	e *EndpointSpec, instance *ModuleInstance, out *sync.Map,
 ) error {
 	if len(e.TestFixtures) < 1 { // skip tests if testFixtures is missing
 		return nil
@@ -1414,9 +1413,9 @@ func (generator *GatewayServiceGenerator) Generate(
 ) (*BuildResult, error) {
 	var fileMap sync.Map
 	var wg sync.WaitGroup
-	wgSize := 5
-	wg.Add(wgSize)
-	ch := make(chan error, wgSize)
+	wgCount := 5
+	wg.Add(wgCount)
+	ch := make(chan error, wgCount)
 
 	go func() {
 		defer wg.Done()
@@ -1514,6 +1513,17 @@ func (generator *GatewayServiceGenerator) Generate(
 		}
 		fileMap.Store("module/init.go", initializer)
 	}()
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for err := range ch {
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	files := make(map[string][]byte)
 	fileMap.Range(func(key, value interface{}) bool {

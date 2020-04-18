@@ -416,77 +416,19 @@ func NewEndpointSpec(yamlFile string, h *PackageHelper, midSpecs map[string]*Mid
 		ClientMethod:         clientMethod,
 	}
 
+	defaultMidSpecs := h.DefaultMiddlewareSpecsOrdered()[endpointType.(string)]
+
+	espec, err = augmentEndpointSpec(espec, endpointConfigObj, midSpecs, defaultMidSpecs)
+	if err != nil {
+		return nil, err
+	}
 	err = espec.SetDownstream(clientSpecs, h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Error parsing downstream info for endpoint: %s", yamlFile,
 		)
 	}
-
-	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(
-		h.ConfigRoot(),
-		h.DefaultMiddlewareSpecs(),
-		endpointType.(string))
-	if err != nil {
-		return nil, errors.Wrap(
-			err, "error getting ordered default middleware specs",
-		)
-	}
-
-	return augmentEndpointSpec(espec, endpointConfigObj, midSpecs, defaultMidSpecs)
-}
-
-func getOrderedDefaultMiddlewareSpecs(
-	cfgDir string,
-	middlewareSpecs map[string]*MiddlewareSpec,
-	classType string,
-) ([]MiddlewareSpec, error) {
-	middlewareObj := map[string][]string{}
-
-	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/default.yaml")
-	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
-		// Cannot find yaml file, use json file instead
-		middlewareOrderingFile = filepath.Join(cfgDir, "middlewares/default.json")
-		if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
-			// This file is not required so it is okay to skip
-			return nil, nil
-		}
-	}
-
-	bytes, err := ioutil.ReadFile(middlewareOrderingFile)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "could not read default middleware ordering file: %s", middlewareOrderingFile,
-		)
-	}
-	err = yaml.Unmarshal(bytes, &middlewareObj)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "could not parse default middleware ordering file: %s", middlewareOrderingFile,
-		)
-	}
-	middlewareOrderingObj := middlewareObj[classType]
-
-	return sortByMiddlewareOrdering(middlewareOrderingObj, middlewareSpecs)
-}
-
-// sortByMiddlewareOrdering sorts middlewareSpecs using the ordering from middlewareOrderingObj
-func sortByMiddlewareOrdering(
-	middlewareOrderingObj []string,
-	middlewareSpecs map[string]*MiddlewareSpec,
-) ([]MiddlewareSpec, error) {
-	middlewares := make([]MiddlewareSpec, 0)
-
-	for _, middlewareName := range middlewareOrderingObj {
-		middlewareSpec, ok := middlewareSpecs[middlewareName]
-		if !ok {
-			return nil, errors.Errorf("could not find middleware %s", middlewareName)
-		}
-
-		middlewares = append(middlewares, *middlewareSpec)
-	}
-
-	return middlewares, nil
+	return espec, nil
 }
 
 func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*EndpointTestFixture, error) {
@@ -929,6 +871,15 @@ func (e *EndpointSpec) SetDownstream(
 		return e.ModuleSpec.SetDownstream(e, h)
 	}
 
+	err := e.setMatchingClientSpec(clientModules)
+	if err != nil {
+		return err
+	}
+
+	return e.ModuleSpec.SetDownstream(e, h)
+}
+
+func (e *EndpointSpec) setMatchingClientSpec(clientModules []*ClientSpec) error {
 	var clientSpec *ClientSpec
 	for _, v := range clientModules {
 		if v.ClientID == e.ClientID {
@@ -946,8 +897,7 @@ func (e *EndpointSpec) SetDownstream(
 	}
 
 	e.ClientSpec = clientSpec
-
-	return e.ModuleSpec.SetDownstream(e, h)
+	return nil
 }
 
 // EndpointConfig represent the "config" field of endpoint-config.yaml

@@ -573,8 +573,11 @@ func (system *ModuleSystem) ResolveModules(
 		resolvedModulesCopy := copyResolveModule(resolvedModules)
 
 		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
-			go system.resolveModule(baseDirectory, moduleDirectoryGlob, className, packageRoot,
-				targetGenDir, defaultDependencies, ch, &wg, resolvedModulesCopy)
+			go func(moduleDirectoryGlob string) {
+				defer wg.Done()
+				ch <- system.resolveModule(baseDirectory, moduleDirectoryGlob, className, packageRoot,
+					targetGenDir, defaultDependencies, resolvedModulesCopy)
+			}(moduleDirectoryGlob)
 		}
 		go func() {
 			wg.Wait()
@@ -623,28 +626,25 @@ type resolveResult struct {
 
 func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryGlob string, className string,
 	packageRoot string, targetGenDir string, defaultDependencies []ModuleDependency,
-	ch chan resolveResult, wg *sync.WaitGroup, parentModule map[string]map[string]*ModuleInstance) {
-	defer wg.Done()
+	parentModule map[string]map[string]*ModuleInstance) resolveResult {
 	curModules := map[string]map[string]*ModuleInstance{}
 	mergeResolveMap(parentModule, curModules, "")
 
 	moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
 	if err != nil {
-		ch <- resolveResult{err: errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)}
-		return
+		return resolveResult{err: errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)}
 	}
 
 	for _, moduleDirAbs := range moduleDirectoriesAbs {
 		stat, err := os.Stat(moduleDirAbs)
 		if err != nil {
-			ch <- resolveResult{
+			return resolveResult{
 				err: errors.Wrapf(
 					err,
 					"internal error: cannot stat %q",
 					moduleDirAbs,
 				),
 			}
-			return
 		}
 
 		if !stat.IsDir() {
@@ -655,13 +655,12 @@ func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryG
 
 		moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
 		if err != nil {
-			ch <- resolveResult{err: errors.Wrapf(
+			return resolveResult{err: errors.Wrapf(
 				err,
 				"internal error: cannot make %q relative to %q",
 				moduleDirAbs,
 				baseDirectory,
 			)}
-			return
 		}
 
 		classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
@@ -681,12 +680,11 @@ func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryG
 			defaultDependencies,
 		)
 		if instanceErr != nil {
-			ch <- resolveResult{err: errors.Wrapf(
+			return resolveResult{err: errors.Wrapf(
 				instanceErr,
 				"Error reading multi instance %q",
 				moduleDir,
 			)}
-			return
 		}
 
 		instanceNameMap := curModules[instance.ClassName]
@@ -697,13 +695,12 @@ func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryG
 		instanceNameMap[instance.InstanceName] = instance
 
 		if className != instance.ClassName {
-			ch <- resolveResult{err: fmt.Errorf(
+			return resolveResult{err: fmt.Errorf(
 				"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
 				moduleDirectoryGlob,
 				className,
 				moduleDir,
 			)}
-			return
 		}
 	}
 
@@ -713,18 +710,15 @@ func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryG
 		curModules,
 	)
 	if resolveErr != nil {
-		ch <- resolveResult{err: resolveErr}
-		return
+		return resolveResult{err: resolveErr}
 	}
 
 	// Resolved recursive dependencies for all classes
 	recursiveErr := system.populateRecursiveDependencies(curModules[className])
 	if recursiveErr != nil {
-		ch <- resolveResult{err: recursiveErr}
-		return
+		return resolveResult{err: recursiveErr}
 	}
-	ch <- resolveResult{module: curModules}
-	return
+	return resolveResult{module: curModules}
 }
 
 func mergeResolveMap(srcModuleMap map[string]map[string]*ModuleInstance,
@@ -764,8 +758,10 @@ func (system *ModuleSystem) getDefaultDependencies(
 			go system.getDefaultDependency(baseDirectory, defaultDepDirAbs, moduleSearchPaths,
 				className, ch, &wg)
 		}
-		wg.Wait()
-		close(ch)
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
 		for ele := range ch {
 			if ele.err != nil {
 				return nil, ele.err
@@ -1154,9 +1150,6 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 		for _, initialInstance := range initialInstances {
 			for _, instance := range allModules[className] {
 				if initialInstance.equal(instance) {
-					if _, ok := toBeBuiltModules[instance.ClassName]; !ok {
-						toBeBuiltModules[instance.ClassName] = make([]*ModuleInstance, 0)
-					}
 					toBeBuiltModules[instance.ClassName] = append(toBeBuiltModules[instance.ClassName], instance)
 					break
 				}
@@ -1171,9 +1164,6 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 					for _, classInstanceDependency := range classInstanceTransitives {
 						if !classInstanceDependency.equal(dependentInstance) {
 							continue
-						}
-						if _, ok := toBeBuiltModules[instance.ClassName]; !ok {
-							toBeBuiltModules[instance.ClassName] = make([]*ModuleInstance, 0)
 						}
 						toBeBuiltModules[instance.ClassName] = append(toBeBuiltModules[instance.ClassName], instance)
 						fmt.Printf(

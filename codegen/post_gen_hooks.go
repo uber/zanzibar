@@ -111,6 +111,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 					clientInterface = customInterface
 				}
 				mutex.Lock()
+				defer mutex.Unlock()
 				importPathMap[key] = importPath
 				clientInterfaceMap[key] = clientInterface
 				// gather all modules that need to generate fixture types
@@ -119,8 +120,6 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 					pathSymbolMap[importPath] = clientInterface
 					fixtureMap[key] = f
 				}
-				mutex.Unlock()
-
 			}(instance)
 		}
 
@@ -386,6 +385,9 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		errChanSize := 0
 		shouldGenMap := map[*ModuleInstance][]*EndpointSpec{}
 		for _, instance := range instances["endpoint"] {
+			if instance.genSpec == nil {
+				continue
+			}
 			endpointSpecs := instance.genSpec.([]*EndpointSpec)
 			for _, endpointSpec := range endpointSpecs {
 				if endpointSpec.WorkflowType == "custom" {
