@@ -225,7 +225,10 @@ func getDefaultMiddlewareSpecsOrdered(
 	cfgDir string,
 	middlewareSpecs map[string]*MiddlewareSpec,
 ) (map[string][]MiddlewareSpec, error) {
-	middlewareObj := map[string][]string{}
+
+	if len(middlewareSpecs) == 0 {
+		return map[string][]MiddlewareSpec{}, nil
+	}
 
 	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/default.yaml")
 	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
@@ -237,6 +240,7 @@ func getDefaultMiddlewareSpecsOrdered(
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not read default middleware ordering file: %s", middlewareOrderingFile)
 	}
+	middlewareObj := map[string][]string{}
 	err = yaml.Unmarshal(bytes, &middlewareObj)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not parse default middleware ordering file: %s", middlewareOrderingFile)

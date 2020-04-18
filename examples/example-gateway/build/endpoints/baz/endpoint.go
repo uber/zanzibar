@@ -39,14 +39,14 @@ func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		SimpleServiceCallHandler:              NewSimpleServiceCallHandler(deps),
 		SimpleServiceCompareHandler:           NewSimpleServiceCompareHandler(deps),
+		SimpleServiceGetProfileHandler:        NewSimpleServiceGetProfileHandler(deps),
+		SimpleServiceHeaderSchemaHandler:      NewSimpleServiceHeaderSchemaHandler(deps),
 		SimpleServicePingHandler:              NewSimpleServicePingHandler(deps),
 		SimpleServiceSillyNoopHandler:         NewSimpleServiceSillyNoopHandler(deps),
 		SimpleServiceTransHandler:             NewSimpleServiceTransHandler(deps),
 		SimpleServiceTransHeadersHandler:      NewSimpleServiceTransHeadersHandler(deps),
-		SimpleServiceTransHeadersTypeHandler:  NewSimpleServiceTransHeadersTypeHandler(deps),
 		SimpleServiceTransHeadersNoReqHandler: NewSimpleServiceTransHeadersNoReqHandler(deps),
-		SimpleServiceHeaderSchemaHandler:      NewSimpleServiceHeaderSchemaHandler(deps),
-		SimpleServiceGetProfileHandler:        NewSimpleServiceGetProfileHandler(deps),
+		SimpleServiceTransHeadersTypeHandler:  NewSimpleServiceTransHeadersTypeHandler(deps),
 	}
 }
 
@@ -54,14 +54,14 @@ func NewEndpoint(deps *module.Dependencies) Endpoint {
 type EndpointHandlers struct {
 	SimpleServiceCallHandler              *SimpleServiceCallHandler
 	SimpleServiceCompareHandler           *SimpleServiceCompareHandler
+	SimpleServiceGetProfileHandler        *SimpleServiceGetProfileHandler
+	SimpleServiceHeaderSchemaHandler      *SimpleServiceHeaderSchemaHandler
 	SimpleServicePingHandler              *SimpleServicePingHandler
 	SimpleServiceSillyNoopHandler         *SimpleServiceSillyNoopHandler
 	SimpleServiceTransHandler             *SimpleServiceTransHandler
 	SimpleServiceTransHeadersHandler      *SimpleServiceTransHeadersHandler
-	SimpleServiceTransHeadersTypeHandler  *SimpleServiceTransHeadersTypeHandler
 	SimpleServiceTransHeadersNoReqHandler *SimpleServiceTransHeadersNoReqHandler
-	SimpleServiceHeaderSchemaHandler      *SimpleServiceHeaderSchemaHandler
-	SimpleServiceGetProfileHandler        *SimpleServiceGetProfileHandler
+	SimpleServiceTransHeadersTypeHandler  *SimpleServiceTransHeadersTypeHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -74,35 +74,35 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	if err1 != nil {
 		return err1
 	}
-	err2 := handlers.SimpleServicePingHandler.Register(gateway)
+	err2 := handlers.SimpleServiceGetProfileHandler.Register(gateway)
 	if err2 != nil {
 		return err2
 	}
-	err3 := handlers.SimpleServiceSillyNoopHandler.Register(gateway)
+	err3 := handlers.SimpleServiceHeaderSchemaHandler.Register(gateway)
 	if err3 != nil {
 		return err3
 	}
-	err4 := handlers.SimpleServiceTransHandler.Register(gateway)
+	err4 := handlers.SimpleServicePingHandler.Register(gateway)
 	if err4 != nil {
 		return err4
 	}
-	err5 := handlers.SimpleServiceTransHeadersHandler.Register(gateway)
+	err5 := handlers.SimpleServiceSillyNoopHandler.Register(gateway)
 	if err5 != nil {
 		return err5
 	}
-	err6 := handlers.SimpleServiceTransHeadersTypeHandler.Register(gateway)
+	err6 := handlers.SimpleServiceTransHandler.Register(gateway)
 	if err6 != nil {
 		return err6
 	}
-	err7 := handlers.SimpleServiceTransHeadersNoReqHandler.Register(gateway)
+	err7 := handlers.SimpleServiceTransHeadersHandler.Register(gateway)
 	if err7 != nil {
 		return err7
 	}
-	err8 := handlers.SimpleServiceHeaderSchemaHandler.Register(gateway)
+	err8 := handlers.SimpleServiceTransHeadersNoReqHandler.Register(gateway)
 	if err8 != nil {
 		return err8
 	}
-	err9 := handlers.SimpleServiceGetProfileHandler.Register(gateway)
+	err9 := handlers.SimpleServiceTransHeadersTypeHandler.Register(gateway)
 	if err9 != nil {
 		return err9
 	}

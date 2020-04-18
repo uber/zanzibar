@@ -1139,6 +1139,10 @@ func (g *EndpointGenerator) Generate(
 		endpointMeta = append(endpointMeta, endpointMetaResult.meta)
 	}
 
+	sort.SliceStable(endpointMeta, func(i, j int) bool {
+		return endpointMeta[i].Spec.HandleID < endpointMeta[j].Spec.HandleID
+	})
+
 	endpointCollection, err := g.templates.ExecTemplate(
 		"endpoint_collection.tmpl",
 		&EndpointCollectionMeta{
