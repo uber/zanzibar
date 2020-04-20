@@ -1139,6 +1139,7 @@ func (g *EndpointGenerator) Generate(
 		endpointMeta = append(endpointMeta, endpointMetaResult.meta)
 	}
 
+	// sort for deterministic code gen order in endpoint.go file
 	sort.SliceStable(endpointMeta, func(i, j int) bool {
 		return endpointMeta[i].Spec.HandleID < endpointMeta[j].Spec.HandleID
 	})
@@ -1417,6 +1418,7 @@ func (generator *GatewayServiceGenerator) Generate(
 ) (*BuildResult, error) {
 	var fileMap sync.Map
 	var wg sync.WaitGroup
+	// number of go routines spawned
 	wgCount := 5
 	wg.Add(wgCount)
 	ch := make(chan error, wgCount)
