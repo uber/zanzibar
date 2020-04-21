@@ -1013,11 +1013,21 @@ func (g *EndpointGenerator) ComputeSpec(
 	for _, yamlFile := range endpointYamls {
 		go func(yamlFile string) {
 			defer wg.Done()
-			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs(), clientSpecs)
+			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
 			if err != nil {
 				err = errors.Wrapf(
 					err, "Error creating endpoint spec for endpoint: %s", yamlFile,
 				)
+				ch <- endpointSpecRes{err: err}
+				return
+			}
+			err = espec.SetDownstream(clientSpecs, g.packageHelper)
+			if err != nil {
+				err = errors.Wrapf(
+					err, "Error parsing downstream info for endpoint: %s", yamlFile,
+				)
+				ch <- endpointSpecRes{err: err}
+				return
 			}
 			ch <- endpointSpecRes{espec: espec, err: err}
 		}(yamlFile)
@@ -1269,19 +1279,6 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		DeputyReqHeader:        g.packageHelper.DeputyReqHeader(),
 	}
 
-	var endpoint []byte
-	if e.EndpointType == "http" {
-		endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
-	} else if e.EndpointType == "tchannel" {
-		endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
-	} else {
-		err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "Error executing endpoint template")
-	}
-
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
 	if e.EndpointType == "tchannel" {
 		targetPath = strings.TrimSuffix(targetPath, ".go") + "_tchannel.go"
@@ -1291,20 +1288,50 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		endpointFilePath = targetPath
 	}
 
-	out.Store(endpointFilePath, endpoint)
+	var wg sync.WaitGroup
+	goRoutineCount := 2
+	wg.Add(goRoutineCount)
+	ch := make(chan error, goRoutineCount)
+	go func() {
+		defer wg.Done()
+		var endpoint []byte
+		if e.EndpointType == "http" {
+			endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
+		} else if e.EndpointType == "tchannel" {
+			endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
+		} else {
+			err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
+		}
+		if err != nil {
+			ch <- errors.Wrap(err, "Error executing endpoint template")
+			return
+		}
+		out.Store(endpointFilePath, endpoint)
+	}()
 
-	tmpl := ""
-	if e.IsClientlessEndpoint {
-		tmpl = "clientless-workflow.tmpl"
-	} else {
-		tmpl = "workflow.tmpl"
-	}
+	go func() {
+		defer wg.Done()
+		var tmpl string
+		if e.IsClientlessEndpoint {
+			tmpl = "clientless-workflow.tmpl"
+		} else {
+			tmpl = "workflow.tmpl"
+		}
+		workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
+		if err != nil {
+			ch <- errors.Wrap(err, "Error executing workflow template")
+		}
+		out.Store("workflow/"+endpointFilePath, workflow)
+	}()
 
-	workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error executing workflow template")
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for err := range ch {
+		return nil, err
 	}
-	out.Store("workflow/"+endpointFilePath, workflow)
 
 	return meta, nil
 }

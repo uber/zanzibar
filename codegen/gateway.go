@@ -280,8 +280,7 @@ func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlF
 }
 
 // NewEndpointSpec creates an endpoint spec from a yaml file.
-func NewEndpointSpec(yamlFile string, h *PackageHelper, midSpecs map[string]*MiddlewareSpec,
-	clientSpecs []*ClientSpec) (*EndpointSpec, error) {
+func NewEndpointSpec(yamlFile string, h *PackageHelper, midSpecs map[string]*MiddlewareSpec) (*EndpointSpec, error) {
 	_, err := os.Stat(yamlFile)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Could not find file %s: ", yamlFile)
@@ -421,12 +420,6 @@ func NewEndpointSpec(yamlFile string, h *PackageHelper, midSpecs map[string]*Mid
 	espec, err = augmentEndpointSpec(espec, endpointConfigObj, midSpecs, defaultMidSpecs)
 	if err != nil {
 		return nil, err
-	}
-	err = espec.SetDownstream(clientSpecs, h)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Error parsing downstream info for endpoint: %s", yamlFile,
-		)
 	}
 	return espec, nil
 }
