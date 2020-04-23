@@ -8314,6 +8314,384 @@ func (v *Bar_ArgWithQueryParams_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
 
+// Bar_DeleteWithBody_Args represents the arguments for the Bar.deleteWithBody function.
+//
+// The arguments for deleteWithBody are sent and received over the wire as this struct.
+type Bar_DeleteWithBody_Args struct {
+	Filter string `json:"filter,required"`
+	Count  *int32 `json:"count,omitempty"`
+}
+
+// ToWire translates a Bar_DeleteWithBody_Args struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Bar_DeleteWithBody_Args) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Filter), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 2, Value: w}
+	i++
+	if v.Count != nil {
+		w, err = wire.NewValueI32(*(v.Count)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Bar_DeleteWithBody_Args struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Bar_DeleteWithBody_Args struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Bar_DeleteWithBody_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Bar_DeleteWithBody_Args) FromWire(w wire.Value) error {
+	var err error
+
+	filterIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				v.Filter, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				filterIsSet = true
+			}
+		case 3:
+			if field.Value.Type() == wire.TI32 {
+				var x int32
+				x, err = field.Value.GetI32(), error(nil)
+				v.Count = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !filterIsSet {
+		return errors.New("field Filter of Bar_DeleteWithBody_Args is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Bar_DeleteWithBody_Args
+// struct.
+func (v *Bar_DeleteWithBody_Args) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Filter: %v", v.Filter)
+	i++
+	if v.Count != nil {
+		fields[i] = fmt.Sprintf("Count: %v", *(v.Count))
+		i++
+	}
+
+	return fmt.Sprintf("Bar_DeleteWithBody_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Bar_DeleteWithBody_Args match the
+// provided Bar_DeleteWithBody_Args.
+//
+// This function performs a deep comparison.
+func (v *Bar_DeleteWithBody_Args) Equals(rhs *Bar_DeleteWithBody_Args) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !(v.Filter == rhs.Filter) {
+		return false
+	}
+	if !_I32_EqualsPtr(v.Count, rhs.Count) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Bar_DeleteWithBody_Args.
+func (v *Bar_DeleteWithBody_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	enc.AddString("filter", v.Filter)
+	if v.Count != nil {
+		enc.AddInt32("count", *v.Count)
+	}
+	return err
+}
+
+// GetFilter returns the value of Filter if it is set or its
+// zero value if it is unset.
+func (v *Bar_DeleteWithBody_Args) GetFilter() (o string) {
+	if v != nil {
+		o = v.Filter
+	}
+	return
+}
+
+// GetCount returns the value of Count if it is set or its
+// zero value if it is unset.
+func (v *Bar_DeleteWithBody_Args) GetCount() (o int32) {
+	if v != nil && v.Count != nil {
+		return *v.Count
+	}
+
+	return
+}
+
+// IsSetCount returns true if Count is not nil.
+func (v *Bar_DeleteWithBody_Args) IsSetCount() bool {
+	return v != nil && v.Count != nil
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the arguments.
+//
+// This will always be "deleteWithBody" for this struct.
+func (v *Bar_DeleteWithBody_Args) MethodName() string {
+	return "deleteWithBody"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Call for this struct.
+func (v *Bar_DeleteWithBody_Args) EnvelopeType() wire.EnvelopeType {
+	return wire.Call
+}
+
+// Bar_DeleteWithBody_Helper provides functions that aid in handling the
+// parameters and return values of the Bar.deleteWithBody
+// function.
+var Bar_DeleteWithBody_Helper = struct {
+	// Args accepts the parameters of deleteWithBody in-order and returns
+	// the arguments struct for the function.
+	Args func(
+		filter string,
+		count *int32,
+	) *Bar_DeleteWithBody_Args
+
+	// IsException returns true if the given error can be thrown
+	// by deleteWithBody.
+	//
+	// An error can be thrown by deleteWithBody only if the
+	// corresponding exception type was mentioned in the 'throws'
+	// section for it in the Thrift file.
+	IsException func(error) bool
+
+	// WrapResponse returns the result struct for deleteWithBody
+	// given the error returned by it. The provided error may
+	// be nil if deleteWithBody did not fail.
+	//
+	// This allows mapping errors returned by deleteWithBody into a
+	// serializable result struct. WrapResponse returns a
+	// non-nil error if the provided error cannot be thrown by
+	// deleteWithBody
+	//
+	//   err := deleteWithBody(args)
+	//   result, err := Bar_DeleteWithBody_Helper.WrapResponse(err)
+	//   if err != nil {
+	//     return fmt.Errorf("unexpected error from deleteWithBody: %v", err)
+	//   }
+	//   serialize(result)
+	WrapResponse func(error) (*Bar_DeleteWithBody_Result, error)
+
+	// UnwrapResponse takes the result struct for deleteWithBody
+	// and returns the erorr returned by it (if any).
+	//
+	// The error is non-nil only if deleteWithBody threw an
+	// exception.
+	//
+	//   result := deserialize(bytes)
+	//   err := Bar_DeleteWithBody_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*Bar_DeleteWithBody_Result) error
+}{}
+
+func init() {
+	Bar_DeleteWithBody_Helper.Args = func(
+		filter string,
+		count *int32,
+	) *Bar_DeleteWithBody_Args {
+		return &Bar_DeleteWithBody_Args{
+			Filter: filter,
+			Count:  count,
+		}
+	}
+
+	Bar_DeleteWithBody_Helper.IsException = func(err error) bool {
+		switch err.(type) {
+		default:
+			return false
+		}
+	}
+
+	Bar_DeleteWithBody_Helper.WrapResponse = func(err error) (*Bar_DeleteWithBody_Result, error) {
+		if err == nil {
+			return &Bar_DeleteWithBody_Result{}, nil
+		}
+
+		return nil, err
+	}
+	Bar_DeleteWithBody_Helper.UnwrapResponse = func(result *Bar_DeleteWithBody_Result) (err error) {
+		return
+	}
+
+}
+
+// Bar_DeleteWithBody_Result represents the result of a Bar.deleteWithBody function call.
+//
+// The result of a deleteWithBody execution is sent and received over the wire as this struct.
+type Bar_DeleteWithBody_Result struct {
+}
+
+// ToWire translates a Bar_DeleteWithBody_Result struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Bar_DeleteWithBody_Result) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Bar_DeleteWithBody_Result struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Bar_DeleteWithBody_Result struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Bar_DeleteWithBody_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Bar_DeleteWithBody_Result) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Bar_DeleteWithBody_Result
+// struct.
+func (v *Bar_DeleteWithBody_Result) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("Bar_DeleteWithBody_Result{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Bar_DeleteWithBody_Result match the
+// provided Bar_DeleteWithBody_Result.
+//
+// This function performs a deep comparison.
+func (v *Bar_DeleteWithBody_Result) Equals(rhs *Bar_DeleteWithBody_Result) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of Bar_DeleteWithBody_Result.
+func (v *Bar_DeleteWithBody_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	return err
+}
+
+// MethodName returns the name of the Thrift function as specified in
+// the IDL, for which this struct represent the result.
+//
+// This will always be "deleteWithBody" for this struct.
+func (v *Bar_DeleteWithBody_Result) MethodName() string {
+	return "deleteWithBody"
+}
+
+// EnvelopeType returns the kind of value inside this struct.
+//
+// This will always be Reply for this struct.
+func (v *Bar_DeleteWithBody_Result) EnvelopeType() wire.EnvelopeType {
+	return wire.Reply
+}
+
 // Bar_DeleteWithQueryParams_Args represents the arguments for the Bar.deleteWithQueryParams function.
 //
 // The arguments for deleteWithQueryParams are sent and received over the wire as this struct.
