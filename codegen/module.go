@@ -32,6 +32,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/abhishekparwal/parallelize-go/parallelize"
+
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 )
@@ -566,32 +568,27 @@ func (system *ModuleSystem) ResolveModules(
 			return nil, errors.Wrapf(err, "error getting default dependencies for class %s", className)
 		}
 
-		var wg sync.WaitGroup
-		ch := make(chan resolveResult, len(system.moduleSearchPaths[className]))
-		wg.Add(len(system.moduleSearchPaths[className]))
-
+		runner := parallelize.NewUnboundedRunner(len(system.moduleSearchPaths[className]))
 		resolvedModulesCopy := copyResolveModule(resolvedModules)
-
 		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
-			go func(moduleDirectoryGlob string) {
-				defer wg.Done()
-				ch <- system.resolveModule(baseDirectory, moduleDirectoryGlob, className, packageRoot,
+			f := func(moduleDirectoryGlob interface{}) (interface{}, error) {
+				result := system.resolveModule(baseDirectory, moduleDirectoryGlob.(string), className, packageRoot,
 					targetGenDir, defaultDependencies, resolvedModulesCopy)
-			}(moduleDirectoryGlob)
-		}
-		go func() {
-			wg.Wait()
-			close(ch)
-		}()
-
-		for result := range ch {
-			if result.err != nil {
-				return nil, result.err
+				return result.module, result.err
 			}
-			if result.module == nil {
+			wrk := &parallelize.SingleParamWork{Data: moduleDirectoryGlob, Func: f}
+			runner.SubmitWork(wrk)
+		}
+
+		results, err := runner.GetResult()
+		if err != nil {
+			return nil, err
+		}
+		for _, result := range results {
+			if result == nil {
 				continue
 			}
-			mergeResolveMap(result.module, resolvedModules, className)
+			mergeResolveMap(result.(map[string]map[string]*ModuleInstance), resolvedModules, className)
 		}
 	}
 
@@ -1344,12 +1341,13 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 	if !commitChange {
 		return nil
 	}
-	var wg sync.WaitGroup
-	wg.Add(len(buildResult.Files))
-	ch := make(chan error, len(buildResult.Files))
+	runner := parallelize.NewUnboundedRunner(len(buildResult.Files))
 	for filePath, content := range buildResult.Files {
-		go func(filePath string, content []byte) {
-			defer wg.Done()
+		f := func(filePathInf interface{}, contentInf interface{}) (interface{}, error) {
+
+			filePath := filePathInf.(string)
+			content := contentInf.([]byte)
+
 			filePath = filepath.Clean(filePath)
 
 			resolvedPath := filepath.Join(
@@ -1358,12 +1356,11 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 			)
 
 			if err := writeFile(resolvedPath, content); err != nil {
-				ch <- errors.Wrapf(
+				return nil, errors.Wrapf(
 					err,
 					"Error writing to file %q",
 					resolvedPath,
 				)
-				return
 			}
 
 			// HACK: The module system writer shouldn't
@@ -1373,20 +1370,19 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 			// for the generators yet.
 			if filepath.Ext(filePath) == ".go" {
 				if err := FormatGoFile(resolvedPath); err != nil {
-					ch <- err
-					return
+					return nil, err
 				}
 			}
-		}(filePath, content)
-	}
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
-	for err := range ch {
-		if err != nil {
-			return err
+			return nil, nil
 		}
+
+		wrk := &parallelize.TwoParamWork{Data1: filePath, Data2: content, Func: f}
+		runner.SubmitWork(wrk)
+	}
+
+	_, err = runner.GetResult()
+	if err != nil {
+		return err
 	}
 
 	return nil

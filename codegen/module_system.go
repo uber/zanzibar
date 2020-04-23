@@ -28,6 +28,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/abhishekparwal/parallelize-go/parallelize"
+
 	validator2 "gopkg.in/validator.v2"
 
 	"github.com/ghodss/yaml"
@@ -1082,13 +1084,11 @@ func (g *EndpointGenerator) Generate(
 		}
 		espec.ReqHeaders = reqHeaders
 	}
-	var wg sync.WaitGroup
 	var fileMap sync.Map
-	wg.Add(len(endpointSpecs) + 1)
-	ch := make(chan endpointMetaResult, 2*len(endpointSpecs)+1)
+	runner := parallelize.NewUnboundedRunner(len(endpointSpecs) + 1)
 	for _, espec := range endpointSpecs {
-		go func(espec *EndpointSpec) {
-			defer wg.Done()
+		f := func(especInf interface{}) (interface{}, error) {
+			espec := especInf.(*EndpointSpec)
 			meta, err := g.generateEndpointFile(espec, instance, &fileMap)
 			if err != nil {
 				err = errors.Wrapf(
@@ -1096,11 +1096,8 @@ func (g *EndpointGenerator) Generate(
 					"Error executing endpoint template %q",
 					instance.InstanceName,
 				)
-				ch <- endpointMetaResult{meta: nil, err: err}
-				return
+				return nil, err
 			}
-			ch <- endpointMetaResult{meta: meta, err: err}
-
 			err = g.generateEndpointTestFile(espec, instance, &fileMap)
 			if err != nil {
 				err = errors.Wrapf(
@@ -1108,13 +1105,15 @@ func (g *EndpointGenerator) Generate(
 					"Error executing endpoint test template %q",
 					instance.InstanceName,
 				)
+				return nil, err
 			}
-			ch <- endpointMetaResult{meta: nil, err: err}
-		}(espec)
+			return meta, err
+		}
+		wrk := &parallelize.SingleParamWork{Data: espec, Func: f}
+		runner.SubmitWork(wrk)
 	}
 
-	go func() {
-		defer wg.Done()
+	f := func() (interface{}, error) {
 		dependencies, err := GenerateDependencyStruct(
 			instance,
 			g.packageHelper,
@@ -1126,27 +1125,24 @@ func (g *EndpointGenerator) Generate(
 				"Error generating service dependencies for %s",
 				instance.InstanceName,
 			)
-			ch <- endpointMetaResult{meta: nil, err: err}
-			return
+			return nil, err
 		}
 		if dependencies != nil {
 			fileMap.Store("module/dependencies.go", dependencies)
 		}
-	}()
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
-
-	for endpointMetaResult := range ch {
-		if endpointMetaResult.err != nil {
-			return nil, endpointMetaResult.err
-		}
-		if endpointMetaResult.meta == nil {
+	results, err := runner.GetResult()
+	if err != nil {
+		return nil, err
+	}
+	for _, meta := range results {
+		if meta == nil {
 			continue
 		}
-		endpointMeta = append(endpointMeta, endpointMetaResult.meta)
+		endpointMeta = append(endpointMeta, meta.(*EndpointMeta))
 	}
 
 	// sort for deterministic code gen order in endpoint.go file
@@ -1288,12 +1284,9 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		endpointFilePath = targetPath
 	}
 
-	var wg sync.WaitGroup
-	goRoutineCount := 2
-	wg.Add(goRoutineCount)
-	ch := make(chan error, goRoutineCount)
-	go func() {
-		defer wg.Done()
+	workCount := 2
+	runner := parallelize.NewUnboundedRunner(workCount)
+	f := func() (interface{}, error) {
 		var endpoint []byte
 		if e.EndpointType == "http" {
 			endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
@@ -1303,14 +1296,14 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 			err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
 		}
 		if err != nil {
-			ch <- errors.Wrap(err, "Error executing endpoint template")
-			return
+			return nil, errors.Wrap(err, "Error executing endpoint template")
 		}
 		out.Store(endpointFilePath, endpoint)
-	}()
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	go func() {
-		defer wg.Done()
+	f = func() (interface{}, error) {
 		var tmpl string
 		if e.IsClientlessEndpoint {
 			tmpl = "clientless-workflow.tmpl"
@@ -1319,17 +1312,13 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		}
 		workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
 		if err != nil {
-			ch <- errors.Wrap(err, "Error executing workflow template")
+			return nil, errors.Wrap(err, "Error executing workflow template")
 		}
 		out.Store("workflow/"+endpointFilePath, workflow)
-	}()
-
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
-
-	for err := range ch {
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
+	if _, err := runner.GetResult(); err != nil {
 		return nil, err
 	}
 
@@ -1440,18 +1429,12 @@ func (generator *GatewayServiceGenerator) ComputeSpec(
 
 // Generate returns the gateway build result, which contains the service and
 // service test main files, and no spec
-func (generator *GatewayServiceGenerator) Generate(
-	instance *ModuleInstance,
-) (*BuildResult, error) {
+func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*BuildResult, error) {
 	var fileMap sync.Map
-	var wg sync.WaitGroup
-	// number of go routines spawned
-	wgCount := 5
-	wg.Add(wgCount)
-	ch := make(chan error, wgCount)
+	workCount := 5
+	runner := parallelize.NewUnboundedRunner(workCount)
 
-	go func() {
-		defer wg.Done()
+	f := func() (interface{}, error) {
 		service, err := generator.templates.ExecTemplate(
 			"service.tmpl",
 			instance,
@@ -1463,14 +1446,14 @@ func (generator *GatewayServiceGenerator) Generate(
 				"Error generating service service.go for %s",
 				instance.InstanceName,
 			)
-			ch <- err
-			return
+			return nil, err
 		}
 		fileMap.Store("service.go", service)
-	}()
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	go func() {
-		defer wg.Done()
+	f = func() (interface{}, error) {
 		// generate main.go
 		main, err := generator.templates.ExecTemplate(
 			"main.tmpl",
@@ -1483,14 +1466,14 @@ func (generator *GatewayServiceGenerator) Generate(
 				"Error generating service main.go for %s",
 				instance.InstanceName,
 			)
-			ch <- err
-			return
+			return nil, err
 		}
 		fileMap.Store("main/main.go", main)
-	}()
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	go func() {
-		defer wg.Done()
+	f = func() (interface{}, error) {
 		// generate main_test.go
 		mainTest, err := generator.templates.ExecTemplate(
 			"main_test.tmpl",
@@ -1503,14 +1486,14 @@ func (generator *GatewayServiceGenerator) Generate(
 				"Error generating service main_test.go for %s",
 				instance.InstanceName,
 			)
-			ch <- err
-			return
+			return nil, err
 		}
 		fileMap.Store("main/main_test.go", mainTest)
-	}()
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	go func() {
-		defer wg.Done()
+	f = func() (interface{}, error) {
 		dependencies, err := GenerateDependencyStruct(
 			instance,
 			generator.packageHelper,
@@ -1522,14 +1505,14 @@ func (generator *GatewayServiceGenerator) Generate(
 				"Error generating service dependencies for %s",
 				instance.InstanceName,
 			)
-			ch <- err
-			return
+			return nil, err
 		}
 		fileMap.Store("module/dependencies.go", dependencies)
-	}()
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	go func() {
-		defer wg.Done()
+	f = func() (interface{}, error) {
 		initializer, err := GenerateInitializer(
 			instance,
 			generator.packageHelper,
@@ -1541,21 +1524,15 @@ func (generator *GatewayServiceGenerator) Generate(
 				"Error generating service initializer for %s",
 				instance.InstanceName,
 			)
-			ch <- err
-			return
-		}
-		fileMap.Store("module/init.go", initializer)
-	}()
-
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
-
-	for err := range ch {
-		if err != nil {
 			return nil, err
 		}
+		fileMap.Store("module/init.go", initializer)
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
+
+	if _, err := runner.GetResult(); err != nil {
+		return nil, err
 	}
 
 	files := make(map[string][]byte)
