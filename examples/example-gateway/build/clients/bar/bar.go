@@ -94,6 +94,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_DeleteFoo_Args,
 	) (map[string]string, error)
+	DeleteWithBody(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_DeleteWithBody_Args,
+	) (map[string]string, error)
 	DeleteWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -262,6 +267,7 @@ func NewClient(deps *module.Dependencies) Client {
 				"ArgWithQueryHeader":              "Bar::argWithQueryHeader",
 				"ArgWithQueryParams":              "Bar::argWithQueryParams",
 				"DeleteFoo":                       "Bar::deleteFoo",
+				"DeleteWithBody":                  "Bar::deleteWithBody",
 				"DeleteWithQueryParams":           "Bar::deleteWithQueryParams",
 				"Hello":                           "Bar::helloWorld",
 				"ListAndEnum":                     "Bar::listAndEnum",
@@ -1299,6 +1305,80 @@ func (c *barClient) DeleteFoo(
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
 		return nil, headerErr
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, clientErr = req.Do()
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
+				return nil
+			}
+			return clientErr
+		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := make(map[string]string)
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+	}
+
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// DeleteWithBody calls "/bar/withBody" endpoint.
+func (c *barClient) DeleteWithBody(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_DeleteWithBody_Args,
+) (map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithBody", "Bar::deleteWithBody", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/withBody"
+
+	err := req.WriteJSON("DELETE", fullURL, headers, r)
+	if err != nil {
+		return nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
