@@ -295,6 +295,15 @@ service Bar {
        zanzibar.http.status = "200"
     )
 
+    void deleteWithBody(
+      2: required string filter
+      3: optional i32 count
+    ) (
+       zanzibar.http.method = "DELETE"
+       zanzibar.http.path = "/bar/withBody"
+       zanzibar.http.status = "200"
+    )
+
 }
 
 service  Echo {
