@@ -1285,12 +1285,12 @@ func (system *ModuleSystem) IncrementalBuild(
 	for i, hook := range system.postGenHook {
 		if hook != nil {
 			wg.Add(1)
-			go func() {
+			go func(hook PostGenHook) {
 				defer wg.Done()
 				if err := hook(toBeBuiltModules); err != nil {
 					ch <- errors.Wrapf(err, "error running %dth post generation hook", i)
 				}
-			}()
+			}(hook)
 		}
 	}
 
