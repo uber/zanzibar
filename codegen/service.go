@@ -281,21 +281,13 @@ func (ms *ModuleSpec) SetDownstream(
 	// If this is an endpoint then a downstream will be defined.
 	// If if it a client it will not be.
 	if method.Downstream != nil {
-		// TODO: once all client configs have "exposedMethods" field, we can find the exact
-		// service, instead of loop over for service looking for the first matching method,
-		// which could totally be wrong method
-		downstreamMethod, err := findMethodByName(method.Name, method.Downstream.Services)
-		if err != nil {
-			return err
-		}
+		downstreamMethod := method.DownstreamMethod
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
-
 		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, headersPropagate, respTransforms, h, downstreamMethod)
 		if err != nil {
 			return err
 		}
-
 	}
 
 	if method.Downstream != nil && len(headersPropagate) > 0 {

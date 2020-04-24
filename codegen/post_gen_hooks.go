@@ -30,6 +30,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/abhishekparwal/parallelize-go/parallelize"
+
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"gopkg.in/validator.v2"
@@ -66,7 +68,7 @@ func newMockableClient(raw []byte) (*mockableClient, error) {
 }
 
 // ClientMockGenHook returns a PostGenHook to generate client mocks
-func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
+func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (PostGenHook, error) {
 	bin, err := NewMockgenBin(h, t)
 	if err != nil {
 		return nil, errors.Wrap(err, "error building mockgen binary")
@@ -79,39 +81,52 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		importPathMap := make(map[string]string, mockCount)
 		fixtureMap := make(map[string]*Fixture, mockCount)
-		clientInterfaceMap := make(map[string]string)
-		pathSymbolMap := make(map[string]string)
+		clientInterfaceMap := make(map[string]string, mockCount)
+		pathSymbolMap := make(map[string]string, mockCount)
+		runner := parallelize.NewUnboundedRunner(mockCount)
+		var mutex sync.Mutex
 		for _, instance := range clientInstances {
-			key := instance.ClassType + instance.InstanceName
-			client, errClient := newMockableClient(instance.YAMLFileRaw)
-			if errClient != nil {
-				return errors.Wrapf(
-					err,
-					"error parsing client-config for client %q",
-					instance.InstanceName,
-				)
-			}
+			f := func(instanceInf interface{}) (interface{}, error) {
+				instance := instanceInf.(*ModuleInstance)
+				key := instance.ClassType + instance.InstanceName
+				client, errClient := newMockableClient(instance.YAMLFileRaw)
+				if errClient != nil {
+					return nil, errors.Wrapf(
+						err,
+						"error parsing client-config for client %q",
+						instance.InstanceName,
+					)
+				}
 
-			importPath := instance.PackageInfo.GeneratedPackagePath
-			customInterface := client.Config.CustomInterface
-			if instance.ClassType == custom {
-				importPath = client.Config.CustomImportPath
-			}
+				importPath := instance.PackageInfo.GeneratedPackagePath
+				customInterface := client.Config.CustomInterface
+				if instance.ClassType == custom {
+					importPath = client.Config.CustomImportPath
+				}
 
-			clientInterface := defaultClientInterface
-			// if an interfaces name is provided use that, else use "Client"
-			if customInterface != "" {
-				clientInterface = customInterface
+				clientInterface := defaultClientInterface
+				// if an interfaces name is provided use that, else use "Client"
+				if customInterface != "" {
+					clientInterface = customInterface
+				}
+				mutex.Lock()
+				defer mutex.Unlock()
+				importPathMap[key] = importPath
+				clientInterfaceMap[key] = clientInterface
+				// gather all modules that need to generate fixture types
+				f := client.Config.Fixture
+				if f != nil && f.Scenarios != nil {
+					pathSymbolMap[importPath] = clientInterface
+					fixtureMap[key] = f
+				}
+				return nil, nil
 			}
-			importPathMap[key] = importPath
-			clientInterfaceMap[key] = clientInterface
+			wrk := &parallelize.SingleParamWork{Data: instance, Func: f}
+			runner.SubmitWork(wrk)
+		}
 
-			// gather all modules that need to generate fixture types
-			f := client.Config.Fixture
-			if f != nil && f.Scenarios != nil {
-				pathSymbolMap[importPath] = clientInterface
-				fixtureMap[key] = f
-			}
+		if _, err := runner.GetResult(); err != nil {
+			return err
 		}
 
 		// only run reflect program once to gather interface info for all clients
@@ -122,93 +137,58 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		var idx int32 = 1
 		var files sync.Map
-		var wg sync.WaitGroup
-		ic := make(chan *ModuleInstance)
-		ec := make(chan error, mockCount)
+		runner = parallelize.NewBoundedRunner(mockCount, parallelizeFactor*runtime.NumCPU())
+		for _, instance := range clientInstances {
+			f := func(instanceInf interface{}) (interface{}, error) {
+				instance := instanceInf.(*ModuleInstance)
+				key := instance.ClassType + instance.InstanceName
+				buildDir := h.CodeGenTargetPath()
+				genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
 
-		// cap the num of goroutines to num of CPU, because
-		// bin.GenMock in each goroutine starts a sub process
-		n := runtime.GOMAXPROCS(0)
-		if n > mockCount {
-			n = mockCount
-		}
-		wg.Add(n)
+				importPath := importPathMap[key]
 
-		for i := 0; i < n; i++ {
-			go func() {
-				defer wg.Done()
+				// generate mock client, this starts a sub process.
+				mock, err := bin.GenMock(importPath, "clientmock", clientInterfaceMap[key])
+				if err != nil {
+					return nil, errors.Wrapf(
+						err,
+						"error generating mocks for client %q",
+						instance.InstanceName,
+					)
+				}
+				files.Store(filepath.Join(genDir, "mock_client.go"), mock)
 
-				for {
-					instance, ok := <-ic
-					if !ok {
-						return
-					}
-
-					key := instance.ClassType + instance.InstanceName
-					buildDir := h.CodeGenTargetPath()
-					genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
-
-					importPath := importPathMap[key]
-
-					// generate mock client, this starts a sub process.
-					mock, err := bin.GenMock(importPath, "clientmock", clientInterfaceMap[key])
+				// generate fixture types and augmented mock client
+				if f, ok := fixtureMap[key]; ok {
+					types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f, clientInterfaceMap[key])
 					if err != nil {
-						ec <- errors.Wrapf(
+						return nil, errors.Wrapf(
 							err,
-							"error generating mocks for client %q",
+							"error generating fixture types for client %q",
 							instance.InstanceName,
 						)
-						return
-					}
-					files.Store(filepath.Join(genDir, "mock_client.go"), mock)
-
-					// generate fixture types and augmented mock client
-					if f, ok := fixtureMap[key]; ok {
-						types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f, clientInterfaceMap[key])
-						if err != nil {
-							ec <- errors.Wrapf(
-								err,
-								"error generating fixture types for client %q",
-								instance.InstanceName,
-							)
-							return
-						}
-
-						files.Store(filepath.Join(genDir, "types.go"), types)
-						files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
 					}
 
-					PrintGenLine(
-						"mock",
-						instance.ClassName,
-						instance.InstanceName,
-						path.Join(path.Base(buildDir), instance.Directory, "mock-client"),
-						int(atomic.LoadInt32(&idx)), mockCount,
-					)
-					atomic.AddInt32(&idx, 1)
+					files.Store(filepath.Join(genDir, "types.go"), types)
+					files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
 				}
-			}()
-		}
 
-		for _, instance := range clientInstances {
-			ic <- instance
-		}
-		close(ic)
-		wg.Wait()
-
-		select {
-		case err := <-ec:
-			close(ec)
-			errs := []string{err.Error()}
-			for e := range ec {
-				errs = append(errs, e.Error())
+				PrintGenLine(
+					"mock",
+					instance.ClassName,
+					instance.InstanceName,
+					path.Join(path.Base(buildDir), instance.Directory, "mock-client"),
+					int(atomic.LoadInt32(&idx)), mockCount,
+				)
+				atomic.AddInt32(&idx, 1)
+				return nil, nil
 			}
-			return errors.Errorf(
-				"encountered %d errors when generating mock clients:\n%s",
-				len(errs),
-				strings.Join(errs, "\n"),
-			)
-		default:
+			wrk := &parallelize.SingleParamWork{Data: instance, Func: f}
+			runner.SubmitWork(wrk)
+		}
+
+		if _, err := runner.GetResult(); err != nil {
+			return errors.Wrap(err, "encountered errors when generating mock clients")
 		}
 
 		files.Range(func(p, data interface{}) bool {
@@ -366,6 +346,9 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		errChanSize := 0
 		shouldGenMap := map[*ModuleInstance][]*EndpointSpec{}
 		for _, instance := range instances["endpoint"] {
+			if instance.genSpec == nil {
+				continue
+			}
 			endpointSpecs := instance.genSpec.([]*EndpointSpec)
 			for _, endpointSpec := range endpointSpecs {
 				if endpointSpec.WorkflowType == "custom" {

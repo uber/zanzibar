@@ -1,6 +1,8 @@
 hash: 3f062f8bb36e98ab5f0e2d01fb79a28fe3fc681ee4ce2ad6d1b7f666c41f14fe
 updated: 2019-12-16T13:39:57.012116-08:00
 imports:
+- name: github.com/abhishekparwal/parallelize-go
+  version: d8b5605db3bba7174eb2d6ec4415c1bf33cbacc6
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
   subpackages:
