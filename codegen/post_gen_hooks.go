@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -67,7 +68,7 @@ func newMockableClient(raw []byte) (*mockableClient, error) {
 }
 
 // ClientMockGenHook returns a PostGenHook to generate client mocks
-func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
+func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (PostGenHook, error) {
 	bin, err := NewMockgenBin(h, t)
 	if err != nil {
 		return nil, errors.Wrap(err, "error building mockgen binary")
@@ -136,7 +137,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		var idx int32 = 1
 		var files sync.Map
-		runner = parallelize.NewUnboundedRunner(mockCount)
+		runner = parallelize.NewBoundedRunner(mockCount, parallelizeFactor*runtime.NumCPU())
 		for _, instance := range clientInstances {
 			f := func(instanceInf interface{}) (interface{}, error) {
 				instance := instanceInf.(*ModuleInstance)

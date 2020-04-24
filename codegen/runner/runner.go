@@ -32,6 +32,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
+const _defaultParallelizeFactor = 2
+
 type stackTracer interface {
 	StackTrace() errors.StackTrace
 }
@@ -142,7 +144,11 @@ func main() {
 	}
 	var moduleSystem *codegen.ModuleSystem
 	if genMock {
-		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.yaml")
+		parallelizeFactor := _defaultParallelizeFactor
+		if config.ContainsKey("parallelizeFactor") {
+			parallelizeFactor = int(config.MustGetInt("parallelizeFactor"))
+		}
+		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.yaml", parallelizeFactor)
 	} else {
 		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper)
 	}

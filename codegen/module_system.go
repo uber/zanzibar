@@ -240,6 +240,7 @@ func NewDefaultModuleSystemWithMockHook(
 	workflowMock bool,
 	serviceMock bool,
 	configFile string,
+	parallelizeFactor int,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
 	t, err := NewDefaultTemplate()
@@ -249,7 +250,7 @@ func NewDefaultModuleSystemWithMockHook(
 
 	var clientMockGenHook, workflowMockGenHook, serviceMockGenHook PostGenHook
 	if clientsMock {
-		clientMockGenHook, err = ClientMockGenHook(h, t)
+		clientMockGenHook, err = ClientMockGenHook(h, t, parallelizeFactor)
 		if err != nil {
 			return nil, errors.Wrap(err, "error creating client mock gen hook")
 		}
