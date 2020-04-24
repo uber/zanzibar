@@ -1139,7 +1139,7 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 	allModules map[string][]*ModuleInstance,
 ) (map[string][]*ModuleInstance, error) {
 
-	toBeBuiltModules := make(map[string][]*ModuleInstance, 0)
+	toBeBuiltModules := make(map[ModuleDependency]*ModuleInstance, 0)
 
 	for _, className := range system.classOrder {
 
@@ -1147,40 +1147,45 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 		for _, initialInstance := range initialInstances {
 			for _, instance := range allModules[className] {
 				if initialInstance.equal(instance) {
-					toBeBuiltModules[instance.ClassName] = append(toBeBuiltModules[instance.ClassName], instance)
+					toBeBuiltModules[instance.AsModuleDependency()] = instance
 					break
 				}
 			}
 		}
 
 		// Collect all the ModuleInstances that depend on anything from toBeBuiltModules
-		for _, dependentInstances := range toBeBuiltModules {
-			for _, dependentInstance := range dependentInstances {
-				for _, instance := range allModules[className] {
-					classInstanceTransitives := instance.RecursiveDependencies[dependentInstance.ClassName]
-					for _, classInstanceDependency := range classInstanceTransitives {
-						if !classInstanceDependency.equal(dependentInstance) {
-							continue
-						}
-						toBeBuiltModules[instance.ClassName] = append(toBeBuiltModules[instance.ClassName], instance)
-						fmt.Printf(
-							"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
-							instance.InstanceName,
-							instance.ClassName,
-							instance.ClassType,
-							dependentInstance.InstanceName,
-							dependentInstance.ClassName,
-							dependentInstance.ClassType,
-						)
-						break
+		for _, dependentInstance := range toBeBuiltModules {
+			for _, instance := range allModules[className] {
+				classInstanceTransitives := instance.RecursiveDependencies[dependentInstance.ClassName]
+				for _, classInstanceDependency := range classInstanceTransitives {
+					if !classInstanceDependency.equal(dependentInstance) {
+						continue
 					}
+					toBeBuiltModules[instance.AsModuleDependency()] = instance
+					fmt.Printf(
+						"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
+						instance.InstanceName,
+						instance.ClassName,
+						instance.ClassType,
+						dependentInstance.InstanceName,
+						dependentInstance.ClassName,
+						dependentInstance.ClassType,
+					)
+					break
 				}
 			}
 		}
-
 	}
 
-	return toBeBuiltModules, nil
+	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
+	for _, instance := range toBeBuiltModules {
+		if _, ok := toBeBuiltModulesList[instance.ClassName]; !ok {
+			toBeBuiltModulesList[instance.ClassName] = make([]*ModuleInstance, 0)
+		}
+		toBeBuiltModulesList[instance.ClassName] = append(toBeBuiltModulesList[instance.ClassName], instance)
+	}
+
+	return toBeBuiltModulesList, nil
 }
 
 // IncrementalBuild is like Build but filtered to only the given module instances.
