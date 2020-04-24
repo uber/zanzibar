@@ -21,10 +21,13 @@
 package codegen
 
 import (
+	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -56,8 +59,8 @@ type PackageHelper struct {
 	annotationPrefix string
 	// The middlewares available for the endpoints
 	middlewareSpecs map[string]*MiddlewareSpec
-	// The default middlewares for all endpoints
-	defaultMiddlewareSpecs map[string]*MiddlewareSpec
+	// The default middlewares by class name
+	defaultMiddlewareSpecsOrdered map[string][]MiddlewareSpec
 	// Use deputy client when this header is set
 	deputyReqHeader string
 	// traceKey is the key for unique trace id that identifies request / response pair
@@ -194,24 +197,74 @@ func NewPackageHelper(
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot load default middlewares")
 	}
+	defaultMiddlewareSpecsOrdered, err := getDefaultMiddlewareSpecsOrdered(absConfigRoot, defaultMiddlewareSpecs)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot load ordered default middlewares")
+	}
 
 	p := &PackageHelper{
-		packageRoot:            packageRoot,
-		configRoot:             absConfigRoot,
-		thriftRootDir:          filepath.Join(absConfigRoot, options.relThriftRootDir()),
-		genCodePackage:         options.genCodePackage(packageRoot),
-		goGatewayNamespace:     goGatewayNamespace,
-		targetGenDir:           filepath.Join(absConfigRoot, options.relTargetGenDir()),
-		copyrightHeader:        options.copyrightHeader(),
-		middlewareSpecs:        middlewareSpecs,
-		defaultMiddlewareSpecs: defaultMiddlewareSpecs,
-		annotationPrefix:       options.annotationPrefix(),
-		deputyReqHeader:        options.deputyReqHeader(),
-		traceKey:               options.traceKey(),
-		moduleSearchPaths:      options.ModuleSearchPaths,
-		defaultDependencies:    options.DefaultDependencies,
+		packageRoot:                   packageRoot,
+		configRoot:                    absConfigRoot,
+		thriftRootDir:                 filepath.Join(absConfigRoot, options.relThriftRootDir()),
+		genCodePackage:                options.genCodePackage(packageRoot),
+		goGatewayNamespace:            goGatewayNamespace,
+		targetGenDir:                  filepath.Join(absConfigRoot, options.relTargetGenDir()),
+		copyrightHeader:               options.copyrightHeader(),
+		middlewareSpecs:               middlewareSpecs,
+		defaultMiddlewareSpecsOrdered: defaultMiddlewareSpecsOrdered,
+		annotationPrefix:              options.annotationPrefix(),
+		deputyReqHeader:               options.deputyReqHeader(),
+		traceKey:                      options.traceKey(),
+		moduleSearchPaths:             options.ModuleSearchPaths,
+		defaultDependencies:           options.DefaultDependencies,
 	}
 	return p, nil
+}
+
+func getDefaultMiddlewareSpecsOrdered(
+	cfgDir string,
+	middlewareSpecs map[string]*MiddlewareSpec,
+) (map[string][]MiddlewareSpec, error) {
+
+	if len(middlewareSpecs) == 0 {
+		return map[string][]MiddlewareSpec{}, nil
+	}
+
+	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/default.yaml")
+	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
+		// Cannot find yaml file, use json file instead
+		middlewareOrderingFile = filepath.Join(cfgDir, "middlewares/default.json")
+	}
+
+	bytes, err := ioutil.ReadFile(middlewareOrderingFile)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not read default middleware ordering file: %s", middlewareOrderingFile)
+	}
+	middlewareObj := map[string][]string{}
+	err = yaml.Unmarshal(bytes, &middlewareObj)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not parse default middleware ordering file: %s", middlewareOrderingFile)
+	}
+
+	return sortByMiddlewareOrdering(middlewareObj, middlewareSpecs)
+}
+
+// sortByMiddlewareOrdering sorts middlewareSpecs using the ordering from middlewareOrderingObj
+func sortByMiddlewareOrdering(
+	middlewareOrderingObj map[string][]string,
+	middlewareSpecs map[string]*MiddlewareSpec,
+) (map[string][]MiddlewareSpec, error) {
+	middlewares := make(map[string][]MiddlewareSpec, len(middlewareOrderingObj))
+	for className, middlewareNames := range middlewareOrderingObj {
+		for _, middlewareName := range middlewareNames {
+			middlewareSpec, ok := middlewareSpecs[middlewareName]
+			if !ok {
+				return nil, errors.Errorf("Unexpected - could not find middleware %s", middlewareName)
+			}
+			middlewares[className] = append(middlewares[className], *middlewareSpec)
+		}
+	}
+	return middlewares, nil
 }
 
 // PackageRoot returns the service's root package name
@@ -229,9 +282,9 @@ func (p PackageHelper) MiddlewareSpecs() map[string]*MiddlewareSpec {
 	return p.middlewareSpecs
 }
 
-// DefaultMiddlewareSpecs returns a map of default middlewares
-func (p PackageHelper) DefaultMiddlewareSpecs() map[string]*MiddlewareSpec {
-	return p.defaultMiddlewareSpecs
+// DefaultMiddlewareSpecsOrdered returns a map of default middlewares indexed by class name
+func (p PackageHelper) DefaultMiddlewareSpecsOrdered() map[string][]MiddlewareSpec {
+	return p.defaultMiddlewareSpecsOrdered
 }
 
 // GenCodePackage returns the file path to the idl generated code folder

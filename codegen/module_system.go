@@ -26,6 +26,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
+
+	"github.com/abhishekparwal/parallelize-go/parallelize"
 
 	validator2 "gopkg.in/validator.v2"
 
@@ -237,6 +240,7 @@ func NewDefaultModuleSystemWithMockHook(
 	workflowMock bool,
 	serviceMock bool,
 	configFile string,
+	parallelizeFactor int,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
 	t, err := NewDefaultTemplate()
@@ -246,7 +250,7 @@ func NewDefaultModuleSystemWithMockHook(
 
 	var clientMockGenHook, workflowMockGenHook, serviceMockGenHook PostGenHook
 	if clientsMock {
-		clientMockGenHook, err = ClientMockGenHook(h, t)
+		clientMockGenHook, err = ClientMockGenHook(h, t, parallelizeFactor)
 		if err != nil {
 			return nil, errors.Wrap(err, "error creating client mock gen hook")
 		}
@@ -1006,25 +1010,49 @@ func (g *EndpointGenerator) ComputeSpec(
 			endpointYamls, filepath.Join(endpointConfigDir, fileName),
 		)
 	}
+	var wg sync.WaitGroup
+	wg.Add(len(endpointYamls))
+	ch := make(chan endpointSpecRes, len(endpointYamls))
 	for _, yamlFile := range endpointYamls {
-		espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
-		if err != nil {
-			return nil, errors.Wrapf(
-				err, "Error parsing endpoint yaml file: %s", yamlFile,
-			)
-		}
+		go func(yamlFile string) {
+			defer wg.Done()
+			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
+			if err != nil {
+				err = errors.Wrapf(
+					err, "Error creating endpoint spec for endpoint: %s", yamlFile,
+				)
+				ch <- endpointSpecRes{err: err}
+				return
+			}
+			err = espec.SetDownstream(clientSpecs, g.packageHelper)
+			if err != nil {
+				err = errors.Wrapf(
+					err, "Error parsing downstream info for endpoint: %s", yamlFile,
+				)
+				ch <- endpointSpecRes{err: err}
+				return
+			}
+			ch <- endpointSpecRes{espec: espec, err: err}
+		}(yamlFile)
+	}
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
 
-		endpointSpecs = append(endpointSpecs, espec)
-
-		err = espec.SetDownstream(clientSpecs, g.packageHelper)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err, "Error parsing downstream info for endpoint: %s", yamlFile,
-			)
+	for endpointSpecRes := range ch {
+		if endpointSpecRes.err != nil {
+			return nil, endpointSpecRes.err
 		}
+		endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 	}
 
 	return endpointSpecs, nil
+}
+
+type endpointSpecRes struct {
+	espec *EndpointSpec
+	err   error
 }
 
 // Generate returns the endpoint build result, which contains a file per
@@ -1032,9 +1060,7 @@ func (g *EndpointGenerator) ComputeSpec(
 func (g *EndpointGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	files := make(map[string][]byte)
 	endpointMeta := make([]*EndpointMeta, 0)
-
 	endpointSpecsUntyped, err := g.ComputeSpec(instance)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -1046,41 +1072,84 @@ func (g *EndpointGenerator) Generate(
 	endpointSpecs := endpointSpecsUntyped.([]*EndpointSpec)
 
 	for _, espec := range endpointSpecs {
-		meta, err := g.generateEndpointFile(espec, instance, files)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error executing endpoint template %q",
-				instance.InstanceName,
-			)
+		// allow configured header to pass down to switch downstream service dynmamic
+		reqHeaders := espec.ReqHeaders
+		if reqHeaders == nil {
+			reqHeaders = make(map[string]*TypedHeader)
 		}
-		endpointMeta = append(endpointMeta, meta)
-
-		err = g.generateEndpointTestFile(espec, instance, files)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error executing endpoint test template %q",
-				instance.InstanceName,
-			)
+		shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
+		reqHeaders[shk] = &TypedHeader{
+			Name:        shk,
+			TransformTo: shk,
+			Field:       &compile.FieldSpec{Required: false},
 		}
+		espec.ReqHeaders = reqHeaders
+	}
+	var fileMap sync.Map
+	runner := parallelize.NewUnboundedRunner(len(endpointSpecs) + 1)
+	for _, espec := range endpointSpecs {
+		f := func(especInf interface{}) (interface{}, error) {
+			espec := especInf.(*EndpointSpec)
+			meta, err := g.generateEndpointFile(espec, instance, &fileMap)
+			if err != nil {
+				err = errors.Wrapf(
+					err,
+					"Error executing endpoint template %q",
+					instance.InstanceName,
+				)
+				return nil, err
+			}
+			err = g.generateEndpointTestFile(espec, instance, &fileMap)
+			if err != nil {
+				err = errors.Wrapf(
+					err,
+					"Error executing endpoint test template %q",
+					instance.InstanceName,
+				)
+				return nil, err
+			}
+			return meta, err
+		}
+		wrk := &parallelize.SingleParamWork{Data: espec, Func: f}
+		runner.SubmitWork(wrk)
 	}
 
-	dependencies, err := GenerateDependencyStruct(
-		instance,
-		g.packageHelper,
-		g.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service dependencies for %s",
-			instance.InstanceName,
+	f := func() (interface{}, error) {
+		dependencies, err := GenerateDependencyStruct(
+			instance,
+			g.packageHelper,
+			g.templates,
 		)
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service dependencies for %s",
+				instance.InstanceName,
+			)
+			return nil, err
+		}
+		if dependencies != nil {
+			fileMap.Store("module/dependencies.go", dependencies)
+		}
+		return nil, nil
 	}
-	if dependencies != nil {
-		files["module/dependencies.go"] = dependencies
+	runner.SubmitWork(parallelize.StatelessFunc(f))
+
+	results, err := runner.GetResult()
+	if err != nil {
+		return nil, err
 	}
+	for _, meta := range results {
+		if meta == nil {
+			continue
+		}
+		endpointMeta = append(endpointMeta, meta.(*EndpointMeta))
+	}
+
+	// sort for deterministic code gen order in endpoint.go file
+	sort.SliceStable(endpointMeta, func(i, j int) bool {
+		return endpointMeta[i].Spec.HandleID < endpointMeta[j].Spec.HandleID
+	})
 
 	endpointCollection, err := g.templates.ExecTemplate(
 		"endpoint_collection.tmpl",
@@ -1097,7 +1166,13 @@ func (g *EndpointGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
-	files["endpoint.go"] = endpointCollection
+	fileMap.Store("endpoint.go", endpointCollection)
+
+	files := make(map[string][]byte)
+	fileMap.Range(func(key, value interface{}) bool {
+		files[key.(string)] = value.([]byte)
+		return true
+	})
 
 	return &BuildResult{
 		Files: files,
@@ -1105,9 +1180,13 @@ func (g *EndpointGenerator) Generate(
 	}, nil
 }
 
-func (g *EndpointGenerator) generateEndpointFile(
-	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
-) (*EndpointMeta, error) {
+type endpointMetaResult struct {
+	meta *EndpointMeta
+	err  error
+}
+
+func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *ModuleInstance,
+	out *sync.Map) (*EndpointMeta, error) {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
 	thriftServiceName := e.ThriftServiceName
@@ -1127,7 +1206,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		if err != nil {
 			structFilePath = e.GoStructsFileName
 		}
-		if _, ok := out[structFilePath]; !ok {
+		if _, ok := out.Load(structFilePath); !ok {
 			meta := &StructMeta{
 				Instance: instance,
 				Spec:     m,
@@ -1140,7 +1219,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 			if err != nil {
 				return nil, err
 			}
-			out[structFilePath] = structs
+			out.Store(structFilePath, structs)
 		}
 	}
 
@@ -1175,17 +1254,6 @@ func (g *EndpointGenerator) generateEndpointFile(
 		clientName = e.ClientSpec.ClientName
 	}
 
-	// allow configured header to pass down to switch downstream service dynmamic
-	reqHeaders := e.ReqHeaders
-	if reqHeaders == nil {
-		reqHeaders = make(map[string]*TypedHeader)
-	}
-	shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
-	reqHeaders[shk] = &TypedHeader{
-		Name:        shk,
-		TransformTo: shk,
-		Field:       &compile.FieldSpec{Required: false},
-	}
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		Instance:               instance,
@@ -1193,10 +1261,10 @@ func (g *EndpointGenerator) generateEndpointFile(
 		GatewayPackageName:     g.packageHelper.GoGatewayPackageName(),
 		IncludedPackages:       includedPackages,
 		Method:                 method,
-		ReqHeaders:             reqHeaders,
+		ReqHeaders:             e.ReqHeaders,
 		IsClientlessEndpoint:   e.IsClientlessEndpoint,
-		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
-		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
+		ReqHeadersKeys:         sortedHeaders(e.ReqHeaders, false),
+		ReqRequiredHeadersKeys: sortedHeaders(e.ReqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
 		ResRequiredHeadersKeys: sortedHeaders(e.ResHeaders, true),
 		ResHeaders:             e.ResHeaders,
@@ -1208,19 +1276,6 @@ func (g *EndpointGenerator) generateEndpointFile(
 		DeputyReqHeader:        g.packageHelper.DeputyReqHeader(),
 	}
 
-	var endpoint []byte
-	if e.EndpointType == "http" {
-		endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
-	} else if e.EndpointType == "tchannel" {
-		endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
-	} else {
-		err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "Error executing endpoint template")
-	}
-
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
 	if e.EndpointType == "tchannel" {
 		targetPath = strings.TrimSuffix(targetPath, ".go") + "_tchannel.go"
@@ -1230,26 +1285,49 @@ func (g *EndpointGenerator) generateEndpointFile(
 		endpointFilePath = targetPath
 	}
 
-	out[endpointFilePath] = endpoint
-
-	tmpl := ""
-	if e.IsClientlessEndpoint {
-		tmpl = "clientless-workflow.tmpl"
-	} else {
-		tmpl = "workflow.tmpl"
+	workCount := 2
+	runner := parallelize.NewUnboundedRunner(workCount)
+	f := func() (interface{}, error) {
+		var endpoint []byte
+		if e.EndpointType == "http" {
+			endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
+		} else if e.EndpointType == "tchannel" {
+			endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
+		} else {
+			err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
+		}
+		if err != nil {
+			return nil, errors.Wrap(err, "Error executing endpoint template")
+		}
+		out.Store(endpointFilePath, endpoint)
+		return nil, nil
 	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error executing workflow template")
+	f = func() (interface{}, error) {
+		var tmpl string
+		if e.IsClientlessEndpoint {
+			tmpl = "clientless-workflow.tmpl"
+		} else {
+			tmpl = "workflow.tmpl"
+		}
+		workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error executing workflow template")
+		}
+		out.Store("workflow/"+endpointFilePath, workflow)
+		return nil, nil
 	}
-	out["workflow/"+endpointFilePath] = workflow
+	runner.SubmitWork(parallelize.StatelessFunc(f))
+	if _, err := runner.GetResult(); err != nil {
+		return nil, err
+	}
 
 	return meta, nil
 }
 
 func (g *EndpointGenerator) generateEndpointTestFile(
-	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
+	e *EndpointSpec, instance *ModuleInstance, out *sync.Map,
 ) error {
 	if len(e.TestFixtures) < 1 { // skip tests if testFixtures is missing
 		return nil
@@ -1319,7 +1397,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		return errors.Wrap(err, "Error executing endpoint test template")
 	}
 
-	out[endpointTestFilePath] = endpointTest
+	out.Store(endpointTestFilePath, endpointTest)
 
 	return nil
 }
@@ -1352,86 +1430,117 @@ func (generator *GatewayServiceGenerator) ComputeSpec(
 
 // Generate returns the gateway build result, which contains the service and
 // service test main files, and no spec
-func (generator *GatewayServiceGenerator) Generate(
-	instance *ModuleInstance,
-) (*BuildResult, error) {
-	service, err := generator.templates.ExecTemplate(
-		"service.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service service.go for %s",
-			instance.InstanceName,
+func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*BuildResult, error) {
+	var fileMap sync.Map
+	workCount := 5
+	runner := parallelize.NewUnboundedRunner(workCount)
+
+	f := func() (interface{}, error) {
+		service, err := generator.templates.ExecTemplate(
+			"service.tmpl",
+			instance,
+			generator.packageHelper,
 		)
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service service.go for %s",
+				instance.InstanceName,
+			)
+			return nil, err
+		}
+		fileMap.Store("service.go", service)
+		return nil, nil
 	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	// generate main.go
-	main, err := generator.templates.ExecTemplate(
-		"main.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service main.go for %s",
-			instance.InstanceName,
+	f = func() (interface{}, error) {
+		// generate main.go
+		main, err := generator.templates.ExecTemplate(
+			"main.tmpl",
+			instance,
+			generator.packageHelper,
 		)
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service main.go for %s",
+				instance.InstanceName,
+			)
+			return nil, err
+		}
+		fileMap.Store("main/main.go", main)
+		return nil, nil
 	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	// generate main_test.go
-	mainTest, err := generator.templates.ExecTemplate(
-		"main_test.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service main_test.go for %s",
-			instance.InstanceName,
+	f = func() (interface{}, error) {
+		// generate main_test.go
+		mainTest, err := generator.templates.ExecTemplate(
+			"main_test.tmpl",
+			instance,
+			generator.packageHelper,
 		)
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service main_test.go for %s",
+				instance.InstanceName,
+			)
+			return nil, err
+		}
+		fileMap.Store("main/main_test.go", mainTest)
+		return nil, nil
 	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	dependencies, err := GenerateDependencyStruct(
-		instance,
-		generator.packageHelper,
-		generator.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service dependencies for %s",
-			instance.InstanceName,
+	f = func() (interface{}, error) {
+		dependencies, err := GenerateDependencyStruct(
+			instance,
+			generator.packageHelper,
+			generator.templates,
 		)
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service dependencies for %s",
+				instance.InstanceName,
+			)
+			return nil, err
+		}
+		fileMap.Store("module/dependencies.go", dependencies)
+		return nil, nil
 	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
 
-	initializer, err := GenerateInitializer(
-		instance,
-		generator.packageHelper,
-		generator.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service initializer for %s",
-			instance.InstanceName,
+	f = func() (interface{}, error) {
+		initializer, err := GenerateInitializer(
+			instance,
+			generator.packageHelper,
+			generator.templates,
 		)
+		if err != nil {
+			err = errors.Wrapf(
+				err,
+				"Error generating service initializer for %s",
+				instance.InstanceName,
+			)
+			return nil, err
+		}
+		fileMap.Store("module/init.go", initializer)
+		return nil, nil
+	}
+	runner.SubmitWork(parallelize.StatelessFunc(f))
+
+	if _, err := runner.GetResult(); err != nil {
+		return nil, err
 	}
 
-	files := map[string][]byte{
-		"service.go":        service,
-		"main/main.go":      main,
-		"main/main_test.go": mainTest,
-		"module/init.go":    initializer,
-	}
-
-	if dependencies != nil {
-		files["module/dependencies.go"] = dependencies
-	}
+	files := make(map[string][]byte)
+	fileMap.Range(func(key, value interface{}) bool {
+		files[key.(string)] = value.([]byte)
+		return true
+	})
 
 	return &BuildResult{
 		Files: files,
