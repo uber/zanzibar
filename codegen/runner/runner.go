@@ -59,6 +59,7 @@ func main() {
 	configFile := flag.String("config", "", "the config file path")
 	moduleName := flag.String("instance", "", "")
 	moduleClass := flag.String("type", "", "")
+	selectiveModule := flag.Bool("selective", false, "")
 	flag.Parse()
 
 	if *configFile == "" {
@@ -112,7 +113,9 @@ func main() {
 	config.MustGetStruct("moduleSearchPaths", &searchPaths)
 
 	defaultDependencies := make(map[string][]string, 0)
-	config.MustGetStruct("defaultDependencies", &defaultDependencies)
+	if config.ContainsKey("defaultDependencies") {
+		config.MustGetStruct("defaultDependencies", &defaultDependencies)
+	}
 
 	defaultHeaders := make([]string, 0)
 	if config.ContainsKey("defaultHeaders") {
@@ -154,9 +157,10 @@ func main() {
 		if config.ContainsKey("parallelizeFactor") {
 			parallelizeFactor = int(config.MustGetInt("parallelizeFactor"))
 		}
-		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.yaml", parallelizeFactor)
+		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.yaml",
+			parallelizeFactor, true)
 	} else {
-		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper)
+		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper, true)
 	}
 	checkError(
 		err, fmt.Sprintf("Error creating module system %s", configRoot),
@@ -176,13 +180,33 @@ func main() {
 			}
 		}
 	} else {
-		//lint:ignore SA1019 Migration to incremental builds is ongoing
-		_, err = moduleSystem.GenerateBuild(
+		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath())
+		checkError(err, "error resolving modules")
+		var dependencies []codegen.ModuleDependency
+		if *selectiveModule {
+			dependencies = getSelectiveModule()
+		}
+		_, err = moduleSystem.IncrementalBuild(
 			packageHelper.PackageRoot(),
 			configRoot,
 			packageHelper.CodeGenTargetPath(),
+			dependencies, resolvedModules,
 			true,
 		)
+		checkError(err, "Failed to generate module system components")
 	}
-	checkError(err, "Failed to generate module system components")
+}
+
+func getSelectiveModule() []codegen.ModuleDependency {
+	dependencies := []codegen.ModuleDependency{
+		{
+			ClassName:    "endpoint",
+			InstanceName: "bounce",
+		},
+		{
+			ClassName:    "client",
+			InstanceName: "echo",
+		},
+	}
+	return dependencies
 }

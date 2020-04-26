@@ -1,0 +1,8 @@
+endpointId: echo
+endpointType: tchannel
+handleId: echo
+thriftFile: endpoints/tchannel/echo/echo.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Echo::echo
+workflowImportPath: github.com/uber/zanzibar/examples/selective-gateway/endpoints/tchannel/echo
+workflowType: custom

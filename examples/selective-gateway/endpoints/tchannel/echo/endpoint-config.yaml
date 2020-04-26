@@ -1,0 +1,8 @@
+config:
+  endpoints:
+  - echo.yaml
+dependencies:
+  client:
+    - bar
+name: echo
+type: tchannel

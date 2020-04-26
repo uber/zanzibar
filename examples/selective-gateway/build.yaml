@@ -1,0 +1,27 @@
+annotationPrefix: zanzibar
+clientConfig: ./clients
+copyrightHeader: ./copyright_header.txt
+endpointConfig: ./endpoints
+genCodePackage: github.com/uber/zanzibar/examples/selective-gateway/build/gen-code
+genMock: true
+middlewareConfig: ./middlewares
+defaultMiddlewareConfig: ./middlewares/default
+packageRoot: github.com/uber/zanzibar/examples/selective-gateway
+targetGenDir: ./build
+thriftRootDir: ./idl
+traceKey: x-trace-id
+moduleSearchPaths:
+  client:
+    - clients/*
+    - app/*/clients/*
+  middleware:
+    - middlewares/*
+    - middlewares/default/*
+  endpoint:
+    - endpoints/*
+    - endpoints/tchannel/*
+    - app/*/endpoints/*
+  service:
+    - services/*
+    - app/*/services/*
+
