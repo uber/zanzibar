@@ -568,27 +568,51 @@ func (system *ModuleSystem) ResolveModules(
 			return nil, errors.Wrapf(err, "error getting default dependencies for class %s", className)
 		}
 
-		runner := parallelize.NewUnboundedRunner(len(system.moduleSearchPaths[className]))
-		resolvedModulesCopy := copyResolveModule(resolvedModules)
 		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
-			f := func(moduleDirectoryGlob interface{}) (interface{}, error) {
-				result := system.resolveModule(baseDirectory, moduleDirectoryGlob.(string), className, packageRoot,
-					targetGenDir, defaultDependencies, resolvedModulesCopy)
-				return result.module, result.err
+			moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
+			if err != nil {
+				return nil, errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)
 			}
-			wrk := &parallelize.SingleParamWork{Data: moduleDirectoryGlob, Func: f}
-			runner.SubmitWork(wrk)
-		}
 
-		results, err := runner.GetResult()
-		if err != nil {
-			return nil, err
-		}
-		for _, result := range results {
-			if result == nil {
-				continue
+			runner := parallelize.NewUnboundedRunner(len(moduleDirectoriesAbs))
+			for _, moduleDirAbs := range moduleDirectoriesAbs {
+				f := system.getInstanceFunc(baseDirectory, className, packageRoot, targetGenDir, defaultDependencies,
+					moduleDirectoryGlob)
+				wrk := &parallelize.SingleParamWork{Data: moduleDirAbs, Func: f}
+				runner.SubmitWork(wrk)
 			}
-			mergeResolveMap(result.(map[string]map[string]*ModuleInstance), resolvedModules, className)
+
+			results, err := runner.GetResult()
+			if err != nil {
+				return nil, err
+			}
+			for _, instanceInf := range results {
+				if instanceInf == nil {
+					continue
+				}
+				instance := instanceInf.(*ModuleInstance)
+				instanceMap := resolvedModules[instance.ClassName]
+				if instanceMap == nil {
+					instanceMap = map[string]*ModuleInstance{}
+					resolvedModules[instance.ClassName] = instanceMap
+				}
+				instanceMap[instance.InstanceName] = instance
+			}
+
+			// Resolve dependencies for all classes
+			resolveErr := system.populateResolvedDependencies(
+				resolvedModules[className],
+				resolvedModules,
+			)
+			if resolveErr != nil {
+				return nil, resolveErr
+			}
+
+			// Resolved recursive dependencies for all classes
+			recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
+			if recursiveErr != nil {
+				return nil, recursiveErr
+			}
 		}
 	}
 
@@ -599,6 +623,71 @@ func (system *ModuleSystem) ResolveModules(
 		}
 	}
 	return classArrayModuleMap, nil
+}
+
+func (system *ModuleSystem) getInstanceFunc(baseDirectory string, className string, packageRoot string, targetGenDir string, defaultDependencies []ModuleDependency, moduleDirectoryGlob string) func(moduleDirAbsInf interface{}) (interface{}, error) {
+	f := func(moduleDirAbsInf interface{}) (interface{}, error) {
+		moduleDirAbs := moduleDirAbsInf.(string)
+		stat, err := os.Stat(moduleDirAbs)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"internal error: cannot stat %q",
+				moduleDirAbs,
+			)
+		}
+
+		if !stat.IsDir() {
+			// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
+			// interested only in the containing directories.
+			return nil, nil
+		}
+
+		moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"internal error: cannot make %q relative to %q",
+				moduleDirAbs,
+				baseDirectory,
+			)
+		}
+
+		classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
+		if classConfigPath == "" {
+			fmt.Printf("  no class config found in %s directory\n", moduleDirAbs)
+			// No class config found in this directory, skip over it
+			return nil, nil
+		}
+
+		instance, instanceErr := system.readInstance(
+			className,
+			packageRoot,
+			baseDirectory,
+			targetGenDir,
+			moduleDir,
+			moduleDirAbs,
+			defaultDependencies,
+		)
+		if instanceErr != nil {
+			return nil, errors.Wrapf(
+				instanceErr,
+				"Error reading multi instance %q",
+				moduleDir,
+			)
+		}
+
+		if className != instance.ClassName {
+			return nil, fmt.Errorf(
+				"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
+				moduleDirectoryGlob,
+				className,
+				moduleDir,
+			)
+		}
+		return instance, nil
+	}
+	return f
 }
 
 func copyResolveModule(resolvedModules map[string]map[string]*ModuleInstance) map[string]map[string]*ModuleInstance {
