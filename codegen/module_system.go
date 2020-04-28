@@ -28,12 +28,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/abhishekparwal/parallelize-go/parallelize"
-
 	validator2 "gopkg.in/validator.v2"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/parallelize"
 	"go.uber.org/thriftrw/compile"
 )
 
