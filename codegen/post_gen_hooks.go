@@ -30,10 +30,9 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/abhishekparwal/parallelize-go/parallelize"
-
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/parallelize"
 	"gopkg.in/validator.v2"
 )
 

@@ -119,5 +119,3 @@ import:
   - prometheus/promhttp
 
 - package: github.com/emicklei/proto
-
-- package: github.com/abhishekparwal/parallelize-go
