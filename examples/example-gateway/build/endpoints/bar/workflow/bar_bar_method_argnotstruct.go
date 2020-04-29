@@ -85,13 +85,15 @@ func (w barArgNotStructWorkflow) Handle(
 	var ok bool
 	var h string
 
-	h, ok = reqHeaders.Get("x-uber-foo")
+	k := textproto.CanonicalMIMEHeaderKey("x-uber-foo")
+	h, ok = reqHeaders.Get(k)
 	if ok {
-		clientHeaders["x-uber-foo"] = h
+		clientHeaders[k] = h
 	}
-	h, ok = reqHeaders.Get("x-uber-bar")
+	k := textproto.CanonicalMIMEHeaderKey("x-uber-bar")
+	h, ok = reqHeaders.Get(k)
 	if ok {
-		clientHeaders["x-uber-bar"] = h
+		clientHeaders[k] = h
 	}
 
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
