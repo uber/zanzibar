@@ -78,6 +78,19 @@ func (w googleNowCheckCredentialsWorkflow) Handle(
 
 	var ok bool
 	var h string
+	var k string
+
+	k = textproto.CanonicalMIMEHeaderKey("x-uber-foo")
+	h, ok = reqHeaders.Get(k)
+	if ok {
+		clientHeaders[k] = h
+	}
+	k = textproto.CanonicalMIMEHeaderKey("x-uber-bar")
+	h, ok = reqHeaders.Get(k)
+	if ok {
+		clientHeaders[k] = h
+	}
+
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h

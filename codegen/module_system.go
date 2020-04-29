@@ -56,6 +56,7 @@ type EndpointMeta struct {
 	ResRequiredHeadersKeys []string
 	TraceKey               string
 	DeputyReqHeader        string
+	DefaultHeaders         []string
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -1273,6 +1274,7 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		WorkflowPkg:            workflowPkg,
 		TraceKey:               g.packageHelper.traceKey,
 		DeputyReqHeader:        g.packageHelper.DeputyReqHeader(),
+		DefaultHeaders:         e.DefaultHeaders,
 	}
 
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
