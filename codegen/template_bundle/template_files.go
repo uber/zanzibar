@@ -3440,6 +3440,7 @@ package workflow
 {{- $endpointType := .Spec.EndpointType }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $defaultHeaders := .DefaultHeaders }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
@@ -3568,9 +3569,24 @@ func (w {{$workflowStruct}}) Handle(
 	{{end}}
 
 	clientHeaders := map[string]string{}
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	{{if (ne (len $defaultHeaders) 0) }}
 	var ok bool
 	var h string
+	var k string
+	{{range $i, $k := $defaultHeaders}}
+	k = textproto.CanonicalMIMEHeaderKey("{{$k}}")
+	h, ok = reqHeaders.Get(k)
+	if ok {
+		clientHeaders[k] = h
+	}
+	{{- end -}}
+	{{- end -}}
+
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	{{if (eq (len $defaultHeaders) 0) }}
+	var ok bool
+	var h string
+	{{- end -}}
 	{{- end -}}
 	{{range $i, $k := $reqHeaderMapKeys}}
 	h, ok = reqHeaders.Get("{{$k}}")
@@ -3723,7 +3739,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8344, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8690, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

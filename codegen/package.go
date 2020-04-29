@@ -58,6 +58,8 @@ type PackageHelper struct {
 	middlewareSpecs map[string]*MiddlewareSpec
 	// The default middlewares for all endpoints
 	defaultMiddlewareSpecs map[string]*MiddlewareSpec
+	// The default headers to forward with all requests when present
+	defaultHeaders []string
 	// Use deputy client when this header is set
 	deputyReqHeader string
 	// traceKey is the key for unique trace id that identifies request / response pair
@@ -95,6 +97,8 @@ type PackageHelperOptions struct {
 	CopyrightHeader string
 	// header key to redirect client requests to staging environment, defaults to "X-Zanzibar-Use-Staging"
 	StagingReqHeader string
+	// The default headers to forward with all requests when present
+	DefaultHeaders []string
 	// header key to redirect client requests to local environment, defaults to "x-deputy-forwarded"
 	DeputyReqHeader string
 	// header key to uniquely identifies request/response pair, defaults to "x-trace-id"
@@ -210,6 +214,7 @@ func NewPackageHelper(
 		traceKey:               options.traceKey(),
 		moduleSearchPaths:      options.ModuleSearchPaths,
 		defaultDependencies:    options.DefaultDependencies,
+		defaultHeaders:         options.DefaultHeaders,
 	}
 	return p, nil
 }

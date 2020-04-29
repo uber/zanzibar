@@ -251,6 +251,8 @@ type EndpointSpec struct {
 	ReqHeaders map[string]*TypedHeader `yaml:"reqHeaderMap,omitempty"`
 	// ResHeaders maps headers from client to server
 	ResHeaders map[string]*TypedHeader `yaml:"resHeaderMap,omitempty"`
+	// DefaultHeaders a slice of headers that are forwarded to downstream when available
+	DefaultHeaders []string `yaml:"-"`
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
@@ -417,6 +419,7 @@ func NewEndpointSpec(
 		IsClientlessEndpoint: isClientlessEndpoint,
 		ClientID:             clientID,
 		ClientMethod:         clientMethod,
+		DefaultHeaders:       h.defaultHeaders,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(
