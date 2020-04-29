@@ -114,6 +114,9 @@ func main() {
 	defaultDependencies := make(map[string][]string, 0)
 	config.MustGetStruct("defaultDependencies", &defaultDependencies)
 
+	defaultHeaders := make([]string, 0)
+	config.MustGetStruct("defaultHeaders", &defaultHeaders)
+
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
@@ -127,6 +130,7 @@ func main() {
 		TraceKey:                      config.MustGetString("traceKey"),
 		ModuleSearchPaths:             searchPaths,
 		DefaultDependencies:           defaultDependencies,
+		DefaultHeaders:                defaultHeaders,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(

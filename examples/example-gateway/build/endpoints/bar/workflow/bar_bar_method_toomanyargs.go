@@ -87,6 +87,16 @@ func (w barTooManyArgsWorkflow) Handle(
 
 	var ok bool
 	var h string
+
+	h, ok = reqHeaders.Get("x-uber-foo")
+	if ok {
+		clientHeaders["x-uber-foo"] = h
+	}
+	h, ok = reqHeaders.Get("x-uber-bar")
+	if ok {
+		clientHeaders["x-uber-bar"] = h
+	}
+
 	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h

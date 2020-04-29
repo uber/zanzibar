@@ -6,6 +6,9 @@ genCodePackage: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
 genMock: true
 middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
+defaultHeaders:
+  - x-uber-foo
+  - x-uber-bar
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
 thriftRootDir: ./idl

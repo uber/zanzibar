@@ -5,6 +5,7 @@ package workflow
 {{- $endpointType := .Spec.EndpointType }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $defaultHeaders := .DefaultHeaders }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
 {{- $resHeaderMap := .ResHeaders }}
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
@@ -133,9 +134,22 @@ func (w {{$workflowStruct}}) Handle(
 	{{end}}
 
 	clientHeaders := map[string]string{}
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	{{if (ne (len $defaultHeaders) 0) }}
 	var ok bool
 	var h string
+	{{range $i, $k := $defaultHeaders}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		clientHeaders["{{$k}}"] = h
+	}
+	{{- end -}}
+	{{- end -}}
+
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	{{if (eq (len $defaultHeaders) 0) }}
+	var ok bool
+	var h string
+	{{- end -}}
 	{{- end -}}
 	{{range $i, $k := $reqHeaderMapKeys}}
 	h, ok = reqHeaders.Get("{{$k}}")
