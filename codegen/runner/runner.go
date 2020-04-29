@@ -115,7 +115,10 @@ func main() {
 	config.MustGetStruct("defaultDependencies", &defaultDependencies)
 
 	defaultHeaders := make([]string, 0)
-	config.MustGetStruct("defaultHeaders", &defaultHeaders)
+	if config.ContainsKey("defaultHeaders") {
+		config.MustGetStruct("defaultHeaders", &defaultHeaders)
+	}
+
 
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
