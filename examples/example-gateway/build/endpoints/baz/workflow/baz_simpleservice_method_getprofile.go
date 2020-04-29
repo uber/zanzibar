@@ -84,13 +84,14 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 
 	var ok bool
 	var h string
+	var k string
 
-	k := textproto.CanonicalMIMEHeaderKey("x-uber-foo")
+	k = textproto.CanonicalMIMEHeaderKey("x-uber-foo")
 	h, ok = reqHeaders.Get(k)
 	if ok {
 		clientHeaders[k] = h
 	}
-	k := textproto.CanonicalMIMEHeaderKey("x-uber-bar")
+	k = textproto.CanonicalMIMEHeaderKey("x-uber-bar")
 	h, ok = reqHeaders.Get(k)
 	if ok {
 		clientHeaders[k] = h

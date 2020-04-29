@@ -3572,8 +3572,9 @@ func (w {{$workflowStruct}}) Handle(
 	{{if (ne (len $defaultHeaders) 0) }}
 	var ok bool
 	var h string
+	var k string
 	{{range $i, $k := $defaultHeaders}}
-	k := textproto.CanonicalMIMEHeaderKey("{{$k}}")
+	k = textproto.CanonicalMIMEHeaderKey("{{$k}}")
 	h, ok = reqHeaders.Get(k)
 	if ok {
 		clientHeaders[k] = h
@@ -3738,7 +3739,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8677, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8690, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

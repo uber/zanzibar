@@ -137,8 +137,9 @@ func (w {{$workflowStruct}}) Handle(
 	{{if (ne (len $defaultHeaders) 0) }}
 	var ok bool
 	var h string
+	var k string
 	{{range $i, $k := $defaultHeaders}}
-	k := textproto.CanonicalMIMEHeaderKey("{{$k}}")
+	k = textproto.CanonicalMIMEHeaderKey("{{$k}}")
 	h, ok = reqHeaders.Get(k)
 	if ok {
 		clientHeaders[k] = h
