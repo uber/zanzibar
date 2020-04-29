@@ -119,7 +119,6 @@ func main() {
 		config.MustGetStruct("defaultHeaders", &defaultHeaders)
 	}
 
-
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
