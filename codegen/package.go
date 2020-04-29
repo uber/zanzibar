@@ -360,3 +360,9 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 func (p PackageHelper) DeputyReqHeader() string {
 	return p.deputyReqHeader
 }
+
+// DefaultHeaders returns a list of headers that will always be forwarded
+// when present in the incoming request.
+func (p PackageHelper) DefaultHeaders() []string {
+	return p.defaultHeaders
+}
