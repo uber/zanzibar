@@ -272,14 +272,7 @@ func TestNotFollowRedirect(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	fakeNormal := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(999)
-		_, err := w.Write([]byte(`false`))
-		assert.NoError(t, err)
-	}
-
 	bgateway.HTTPBackends()["bar"].HandleFunc("POST", "/bar/echo", fakeEcho)
-	bgateway.HTTPBackends()["bar"].HandleFunc("GET", "/bar-path", fakeNormal)
 
 	client := zanzibar.NewHTTPClientContext(
 		bgateway.ActualGateway.Logger,
