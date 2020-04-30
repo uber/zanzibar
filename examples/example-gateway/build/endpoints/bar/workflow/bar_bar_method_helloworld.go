@@ -119,6 +119,13 @@ func (w barHelloWorldWorkflow) Handle(
 
 			return "", nil, serverErr
 
+		case *clientsBarBar.SeeOthersRedirection:
+			serverErr := convertHelloWorldSeeOthersRedirection(
+				errValue,
+			)
+
+			return "", nil, serverErr
+
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
@@ -142,6 +149,13 @@ func convertHelloWorldBarException(
 ) *endpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
 	serverError := &endpointsBarBar.BarException{}
+	return serverError
+}
+func convertHelloWorldSeeOthersRedirection(
+	clientError *clientsBarBar.SeeOthersRedirection,
+) *endpointsBarBar.SeeOthersRedirection {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBarBar.SeeOthersRedirection{}
 	return serverError
 }
 

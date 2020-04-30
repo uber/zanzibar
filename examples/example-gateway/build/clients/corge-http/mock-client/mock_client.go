@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	corge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
-	runtime "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface
@@ -69,10 +69,10 @@ func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2 interface{}) *gomo
 }
 
 // HTTPClient mocks base method
-func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*runtime.HTTPClient)
+	ret0, _ := ret[0].(*zanzibar.HTTPClient)
 	return ret0
 }
 
