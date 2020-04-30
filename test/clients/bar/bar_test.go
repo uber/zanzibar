@@ -46,6 +46,41 @@ var defaultTestConfig map[string]interface{} = map[string]interface{}{
 	"clients.baz.serviceName": "baz",
 }
 
+func TestHelloWorld(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	// note: we set clients.bar.followRedirect: false in test.yaml
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/hello",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Location", "http://example.com/")
+			w.WriteHeader(303)
+			_, err := w.Write([]byte(`hello world`))
+			assert.NoError(t, err)
+		},
+	)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	result, _, err := bar.Hello(
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		},
+	)
+	assert.Equal(t, new(barGen.SeeOthersRedirection), err)
+	assert.Equal(t, "", result)
+}
+
 func TestEchoI8(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,

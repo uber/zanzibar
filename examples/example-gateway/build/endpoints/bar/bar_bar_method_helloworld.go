@@ -130,6 +130,10 @@ func (h *BarHelloWorldHandler) HandleRequest(
 			)
 			return
 
+		case *endpointsBarBar.SeeOthersRedirection:
+			res.WriteJSONBytes(303, cliRespHeaders, nil)
+			return
+
 		default:
 			res.SendError(500, "Unexpected server error", err)
 			return

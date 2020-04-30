@@ -2885,6 +2885,100 @@ func (v *RequestWithDuplicateType) IsSetRequest2() bool {
 	return v != nil && v.Request2 != nil
 }
 
+type SeeOthersRedirection struct {
+}
+
+// ToWire translates a SeeOthersRedirection struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *SeeOthersRedirection) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a SeeOthersRedirection struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a SeeOthersRedirection struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v SeeOthersRedirection
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *SeeOthersRedirection) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a SeeOthersRedirection
+// struct.
+func (v *SeeOthersRedirection) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("SeeOthersRedirection{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this SeeOthersRedirection match the
+// provided SeeOthersRedirection.
+//
+// This function performs a deep comparison.
+func (v *SeeOthersRedirection) Equals(rhs *SeeOthersRedirection) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of SeeOthersRedirection.
+func (v *SeeOthersRedirection) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	return err
+}
+
+func (v *SeeOthersRedirection) Error() string {
+	return v.String()
+}
+
 type StringList []string
 
 // ToWire translates StringList into a Thrift-level intermediate
@@ -9630,6 +9724,8 @@ func init() {
 		switch err.(type) {
 		case *BarException:
 			return true
+		case *SeeOthersRedirection:
+			return true
 		default:
 			return false
 		}
@@ -9646,6 +9742,11 @@ func init() {
 				return nil, errors.New("WrapResponse received non-nil error type with nil value for Bar_HelloWorld_Result.BarException")
 			}
 			return &Bar_HelloWorld_Result{BarException: e}, nil
+		case *SeeOthersRedirection:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for Bar_HelloWorld_Result.SeeOthersRedirection")
+			}
+			return &Bar_HelloWorld_Result{SeeOthersRedirection: e}, nil
 		}
 
 		return nil, err
@@ -9653,6 +9754,10 @@ func init() {
 	Bar_HelloWorld_Helper.UnwrapResponse = func(result *Bar_HelloWorld_Result) (success string, err error) {
 		if result.BarException != nil {
 			err = result.BarException
+			return
+		}
+		if result.SeeOthersRedirection != nil {
+			err = result.SeeOthersRedirection
 			return
 		}
 
@@ -9674,8 +9779,9 @@ func init() {
 // Success is set only if the function did not throw an exception.
 type Bar_HelloWorld_Result struct {
 	// Value returned by helloWorld after a successful execution.
-	Success      *string       `json:"success,omitempty"`
-	BarException *BarException `json:"barException,omitempty"`
+	Success              *string               `json:"success,omitempty"`
+	BarException         *BarException         `json:"barException,omitempty"`
+	SeeOthersRedirection *SeeOthersRedirection `json:"seeOthersRedirection,omitempty"`
 }
 
 // ToWire translates a Bar_HelloWorld_Result struct into a Thrift-level intermediate
@@ -9695,7 +9801,7 @@ type Bar_HelloWorld_Result struct {
 //   }
 func (v *Bar_HelloWorld_Result) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -9717,12 +9823,26 @@ func (v *Bar_HelloWorld_Result) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 1, Value: w}
 		i++
 	}
+	if v.SeeOthersRedirection != nil {
+		w, err = v.SeeOthersRedirection.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 
 	if i != 1 {
 		return wire.Value{}, fmt.Errorf("Bar_HelloWorld_Result should have exactly one field: got %v fields", i)
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _SeeOthersRedirection_Read(w wire.Value) (*SeeOthersRedirection, error) {
+	var v SeeOthersRedirection
+	err := v.FromWire(w)
+	return &v, err
 }
 
 // FromWire deserializes a Bar_HelloWorld_Result struct from its Thrift-level
@@ -9765,6 +9885,14 @@ func (v *Bar_HelloWorld_Result) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.SeeOthersRedirection, err = _SeeOthersRedirection_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -9773,6 +9901,9 @@ func (v *Bar_HelloWorld_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if v.BarException != nil {
+		count++
+	}
+	if v.SeeOthersRedirection != nil {
 		count++
 	}
 	if count != 1 {
@@ -9789,7 +9920,7 @@ func (v *Bar_HelloWorld_Result) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	if v.Success != nil {
 		fields[i] = fmt.Sprintf("Success: %v", *(v.Success))
@@ -9797,6 +9928,10 @@ func (v *Bar_HelloWorld_Result) String() string {
 	}
 	if v.BarException != nil {
 		fields[i] = fmt.Sprintf("BarException: %v", v.BarException)
+		i++
+	}
+	if v.SeeOthersRedirection != nil {
+		fields[i] = fmt.Sprintf("SeeOthersRedirection: %v", v.SeeOthersRedirection)
 		i++
 	}
 
@@ -9819,6 +9954,9 @@ func (v *Bar_HelloWorld_Result) Equals(rhs *Bar_HelloWorld_Result) bool {
 	if !((v.BarException == nil && rhs.BarException == nil) || (v.BarException != nil && rhs.BarException != nil && v.BarException.Equals(rhs.BarException))) {
 		return false
 	}
+	if !((v.SeeOthersRedirection == nil && rhs.SeeOthersRedirection == nil) || (v.SeeOthersRedirection != nil && rhs.SeeOthersRedirection != nil && v.SeeOthersRedirection.Equals(rhs.SeeOthersRedirection))) {
+		return false
+	}
 
 	return true
 }
@@ -9834,6 +9972,9 @@ func (v *Bar_HelloWorld_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err
 	}
 	if v.BarException != nil {
 		err = multierr.Append(err, enc.AddObject("barException", v.BarException))
+	}
+	if v.SeeOthersRedirection != nil {
+		err = multierr.Append(err, enc.AddObject("seeOthersRedirection", v.SeeOthersRedirection))
 	}
 	return err
 }
@@ -9866,6 +10007,21 @@ func (v *Bar_HelloWorld_Result) GetBarException() (o *BarException) {
 // IsSetBarException returns true if BarException is not nil.
 func (v *Bar_HelloWorld_Result) IsSetBarException() bool {
 	return v != nil && v.BarException != nil
+}
+
+// GetSeeOthersRedirection returns the value of SeeOthersRedirection if it is set or its
+// zero value if it is unset.
+func (v *Bar_HelloWorld_Result) GetSeeOthersRedirection() (o *SeeOthersRedirection) {
+	if v != nil && v.SeeOthersRedirection != nil {
+		return v.SeeOthersRedirection
+	}
+
+	return
+}
+
+// IsSetSeeOthersRedirection returns true if SeeOthersRedirection is not nil.
+func (v *Bar_HelloWorld_Result) IsSetSeeOthersRedirection() bool {
+	return v != nil && v.SeeOthersRedirection != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in
@@ -19178,12 +19334,10 @@ func init() {
 		Key   *BarResponse
 		Value string
 	}, err error) {
-
 		if result.Success != nil {
 			success = result.Success
 			return
 		}
-
 		err = errors.New("expected a non-void result")
 		return
 	}

@@ -3,6 +3,7 @@ clients.bar.defaultHeaders:
 clients.bar.ip: 127.0.0.1
 clients.bar.port: 4001
 clients.bar.timeout: 10000
+clients.bar.followRedirect: false
 clients.baz.ip: 127.0.0.1
 clients.baz.port: 4002
 clients.baz.serviceName: Qux

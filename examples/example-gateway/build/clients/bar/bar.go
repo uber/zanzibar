@@ -1491,7 +1491,7 @@ func (c *barClient) Hello(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
+	res.CheckOKResponse([]int{200, 303, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -1507,6 +1507,8 @@ func (c *barClient) Hello(
 
 		return responseBody, respHeaders, nil
 
+	case 303:
+		return defaultRes, respHeaders, &clientsBarBar.SeeOthersRedirection{}
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},
