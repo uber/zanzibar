@@ -243,6 +243,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	followRedirect := true
+	if deps.Default.Config.ContainsKey("clients.bar.followRedirect") {
+		followRedirect = deps.Default.Config.MustGetBoolean("clients.bar.followRedirect")
+	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
@@ -290,6 +294,7 @@ func NewClient(deps *module.Dependencies) Client {
 			baseURL,
 			defaultHeaders,
 			timeout,
+			followRedirect,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey:   requestUUIDHeaderKey,
@@ -1486,7 +1491,7 @@ func (c *barClient) Hello(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
+	res.CheckOKResponse([]int{200, 303, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -1502,6 +1507,8 @@ func (c *barClient) Hello(
 
 		return responseBody, respHeaders, nil
 
+	case 303:
+		return defaultRes, respHeaders, &clientsBarBar.SeeOthersRedirection{}
 	case 403:
 		allOptions := []interface{}{
 			&clientsBarBar.BarException{},

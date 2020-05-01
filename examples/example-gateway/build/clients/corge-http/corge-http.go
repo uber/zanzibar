@@ -101,6 +101,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	followRedirect := true
+	if deps.Default.Config.ContainsKey("clients.corge-http.followRedirect") {
+		followRedirect = deps.Default.Config.MustGetBoolean("clients.corge-http.followRedirect")
+	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
@@ -122,6 +126,7 @@ func NewClient(deps *module.Dependencies) Client {
 			baseURL,
 			defaultHeaders,
 			timeout,
+			followRedirect,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey:   requestUUIDHeaderKey,

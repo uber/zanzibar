@@ -74,10 +74,14 @@ exception BarException {
     1: required string stringField (zanzibar.http.ref = "headers.another-header-field")
 }
 
+exception SeeOthersRedirection {
+}
+
 service Bar {
     string helloWorld(
     ) throws (
        1: BarException barException (zanzibar.http.status = "403")
+       2: SeeOthersRedirection seeOthersRedirection (zanzibar.http.status = "303", zanzibar.http.res.body.disallow = "true")
    ) (
        zanzibar.http.method = "GET"
        zanzibar.http.path = "/bar/hello"

@@ -78,6 +78,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 		baseURL,
 		map[string]string{},
 		time.Second,
+		true,
 	)
 	ctx := context.Background()
 
@@ -139,6 +140,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 		baseURL,
 		map[string]string{},
 		time.Second,
+		true,
 	)
 	ctx := context.Background()
 
@@ -177,16 +179,25 @@ func TestUnknownStatusCode(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
+	addr := bgateway.HTTPBackends()["bar"].RealAddr
+	baseURL := "http://" + addr
+
+	// test UnknownStatusCode along with follow redirect by default
 	fakeEcho := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Location", baseURL+"/bar-path")
+		w.WriteHeader(303)
+		_, err := w.Write([]byte(`false`))
+		assert.NoError(t, err)
+	}
+
+	fakeNormal := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(999)
 		_, err := w.Write([]byte(`false`))
 		assert.NoError(t, err)
 	}
 
 	bgateway.HTTPBackends()["bar"].HandleFunc("POST", "/bar/echo", fakeEcho)
-
-	addr := bgateway.HTTPBackends()["bar"].RealAddr
-	baseURL := "http://" + addr
+	bgateway.HTTPBackends()["bar"].HandleFunc("GET", "/bar-path", fakeNormal)
 
 	client := zanzibar.NewHTTPClientContext(
 		bgateway.ActualGateway.Logger,
@@ -199,6 +210,7 @@ func TestUnknownStatusCode(t *testing.T) {
 		baseURL,
 		map[string]string{},
 		time.Second,
+		true,
 	)
 
 	ctx := context.Background()
@@ -227,6 +239,72 @@ func TestUnknownStatusCode(t *testing.T) {
 	logs := bgateway.AllLogs()
 	assert.Len(t, logs["Could not parse response json"], 1)
 	assert.Len(t, logs["Could not emit statusCode metric"], 1)
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+}
+
+func TestNotFollowRedirect(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		&testGateway.Options{
+			LogWhitelist: map[string]bool{
+				"Could not emit statusCode metric": true,
+			},
+			KnownHTTPBackends: []string{"bar"},
+			ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+		},
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	addr := bgateway.HTTPBackends()["bar"].RealAddr
+	baseURL := "http://" + addr
+
+	redirectURI := baseURL + "/bar-path"
+	fakeEcho := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Location", redirectURI)
+		w.WriteHeader(303)
+		_, err := w.Write([]byte(`false`))
+		assert.NoError(t, err)
+	}
+
+	bgateway.HTTPBackends()["bar"].HandleFunc("POST", "/bar/echo", fakeEcho)
+
+	client := zanzibar.NewHTTPClientContext(
+		bgateway.ActualGateway.Logger,
+		bgateway.ActualGateway.ContextMetrics,
+		jsonwrapper.NewDefaultJSONWrapper(),
+		"bar",
+		map[string]string{
+			"echo": "bar::echo",
+		},
+		baseURL,
+		map[string]string{},
+		time.Second,
+		false,
+	)
+
+	ctx := context.Background()
+
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
+
+	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
+	assert.NoError(t, err)
+
+	res, err := req.Do()
+	assert.NoError(t, err)
+
+	var resp string
+	assert.Error(t, res.ReadAndUnmarshalBody(&resp))
+	assert.Equal(t, "", resp)
+	assert.Equal(t, 303, res.StatusCode)
+	assert.Equal(t, redirectURI, res.Header["Location"][0])
+
+	logs := bgateway.AllLogs()
 	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
