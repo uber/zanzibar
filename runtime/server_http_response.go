@@ -205,22 +205,24 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 	res.WriteBytes(statusCode, headers, bytes)
 }
 
-// WriteJSON writes a json serializable struct to Response
-func (res *ServerHTTPResponse) WriteJSON(
-	statusCode int, headers Header, body interface{},
-) {
+// MarshalResponseJSON serializes a json serializable into bytes
+func (res *ServerHTTPResponse) MarshalResponseJSON(body interface{}) []byte {
 	if body == nil {
 		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
 		res.logger.Error("Could not serialize nil pointer body")
-		return
+		return nil
 	}
 	bytes, err := res.jsonWrapper.Marshal(body)
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
 		res.logger.Error("Could not serialize json response", zap.Error(err))
-		return
+		return nil
 	}
+	return bytes
+}
 
+// SendResponse sets content-type if not present and fills Response
+func (res *ServerHTTPResponse) SendResponse(statusCode int, headers Header, body interface{}, bytes []byte) {
 	contentTypePresent := false
 	if headers != nil {
 		for _, k := range headers.Keys() {
@@ -242,6 +244,17 @@ func (res *ServerHTTPResponse) WriteJSON(
 	res.pendingStatusCode = statusCode
 	res.pendingBodyBytes = bytes
 	res.pendingBodyObj = body
+}
+
+// WriteJSON writes a json serializable struct to Response
+func (res *ServerHTTPResponse) WriteJSON(
+	statusCode int, headers Header, body interface{},
+) {
+	bytes := res.MarshalResponseJSON(body)
+	if bytes == nil {
+		return
+	}
+	res.SendResponse(statusCode, headers, body, bytes)
 }
 
 // PeekBody allows for inspecting a key path inside the body
