@@ -1298,7 +1298,8 @@ func (system *ModuleSystem) getSelectiveModules(toBeBuiltModules map[string][]*M
 	return selectiveModuleInstances
 }
 
-// recursiveSelectiveDependencies gets  a recursive dependencies of direct dependencies including itself
+// recursiveSelectiveDependencies gets a recursive dependencies of resolved (direct)
+// dependencies including direct dependencies itself
 func recursiveSelectiveDependencies(instance *ModuleInstance) map[string][]*ModuleInstance {
 	filteredRecursiveMap := map[string]*ModuleInstance{}
 	for _, resolvedDependencies := range instance.ResolvedDependencies {
@@ -1319,8 +1320,7 @@ func recursiveSelectiveDependencies(instance *ModuleInstance) map[string][]*Modu
 	return filteredRecursiveModules
 }
 
-// resolvedSelectiveDependencies gets a subset of resolved dependencies (
-// direct) of a instance which needs to be built
+// resolvedSelectiveDependencies gets a subset of resolved dependencies (direct) of a instance which needs to be built
 func resolvedSelectiveDependencies(instance *ModuleInstance, toBuiltMap map[string]*ModuleInstance) map[string][]*ModuleInstance {
 	filteredResolvedModules := map[string][]*ModuleInstance{}
 	for _, resolvedDependencies := range instance.ResolvedDependencies {

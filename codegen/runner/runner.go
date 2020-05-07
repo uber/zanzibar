@@ -157,8 +157,8 @@ func main() {
 		if config.ContainsKey("parallelizeFactor") {
 			parallelizeFactor = int(config.MustGetInt("parallelizeFactor"))
 		}
-		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true, true, true, "test.yaml",
-			parallelizeFactor, true)
+		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper, true,
+			true, true, "test.yaml", parallelizeFactor, true)
 	} else {
 		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper, true)
 	}
