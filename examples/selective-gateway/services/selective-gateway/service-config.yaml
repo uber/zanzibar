@@ -1,0 +1,8 @@
+name: selective-gateway
+type: gateway
+config: {}
+dependencies:
+  endpoint:
+  - tchannel/echo
+  - bounce
+selectiveBuilding: true

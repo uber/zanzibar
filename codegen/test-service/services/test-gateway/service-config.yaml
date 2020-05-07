@@ -1,0 +1,9 @@
+name: test-gateway
+type: gateway
+config: {}
+dependencies:
+  endpoint:
+  - health
+  - another/bar
+  - more-endpoints/foo
+selectiveBuilding: true

@@ -55,6 +55,7 @@ const yamlConfigSuffix = "-config.yaml"
 func NewModuleSystem(
 	moduleSearchPaths map[string][]string,
 	defaultDependencies map[string][]string,
+	selectiveBuilding bool,
 	postGenHook ...PostGenHook,
 ) *ModuleSystem {
 	return &ModuleSystem{
@@ -63,6 +64,7 @@ func NewModuleSystem(
 		postGenHook:         postGenHook,
 		moduleSearchPaths:   moduleSearchPaths,
 		defaultDependencies: defaultDependencies,
+		selectiveBuilding:   selectiveBuilding,
 	}
 }
 
@@ -73,6 +75,7 @@ type ModuleSystem struct {
 	postGenHook         []PostGenHook
 	moduleSearchPaths   map[string][]string
 	defaultDependencies map[string][]string
+	selectiveBuilding   bool
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -689,140 +692,6 @@ func (system *ModuleSystem) getInstanceFunc(baseDirectory string, className stri
 	return f
 }
 
-func copyResolveModule(resolvedModules map[string]map[string]*ModuleInstance) map[string]map[string]*ModuleInstance {
-	resolvedModulesCopy := map[string]map[string]*ModuleInstance{}
-	for className, instanceMap := range resolvedModules {
-		instanceMapCopy := resolvedModulesCopy[className]
-		if instanceMapCopy == nil {
-			instanceMapCopy = map[string]*ModuleInstance{}
-			resolvedModulesCopy[className] = instanceMapCopy
-		}
-		for instanceName, instance := range instanceMap {
-			instanceMapCopy[instanceName] = instance
-		}
-	}
-	return resolvedModulesCopy
-}
-
-type resolveResult struct {
-	err    error
-	module map[string]map[string]*ModuleInstance
-}
-
-func (system *ModuleSystem) resolveModule(baseDirectory string, moduleDirectoryGlob string, className string,
-	packageRoot string, targetGenDir string, defaultDependencies []ModuleDependency,
-	parentModule map[string]map[string]*ModuleInstance) resolveResult {
-	curModules := map[string]map[string]*ModuleInstance{}
-	mergeResolveMap(parentModule, curModules, "")
-
-	moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
-	if err != nil {
-		return resolveResult{err: errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)}
-	}
-
-	for _, moduleDirAbs := range moduleDirectoriesAbs {
-		stat, err := os.Stat(moduleDirAbs)
-		if err != nil {
-			return resolveResult{
-				err: errors.Wrapf(
-					err,
-					"internal error: cannot stat %q",
-					moduleDirAbs,
-				),
-			}
-		}
-
-		if !stat.IsDir() {
-			// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
-			// interested only in the containing directories.
-			continue
-		}
-
-		moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
-		if err != nil {
-			return resolveResult{err: errors.Wrapf(
-				err,
-				"internal error: cannot make %q relative to %q",
-				moduleDirAbs,
-				baseDirectory,
-			)}
-		}
-
-		classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
-		if classConfigPath == "" {
-			fmt.Printf("  no class config found in %s directory\n", moduleDirAbs)
-			// No class config found in this directory, skip over it
-			continue
-		}
-
-		instance, instanceErr := system.readInstance(
-			className,
-			packageRoot,
-			baseDirectory,
-			targetGenDir,
-			moduleDir,
-			moduleDirAbs,
-			defaultDependencies,
-		)
-		if instanceErr != nil {
-			return resolveResult{err: errors.Wrapf(
-				instanceErr,
-				"Error reading multi instance %q",
-				moduleDir,
-			)}
-		}
-
-		instanceNameMap := curModules[instance.ClassName]
-		if instanceNameMap == nil {
-			instanceNameMap = map[string]*ModuleInstance{}
-			curModules[instance.ClassName] = instanceNameMap
-		}
-		instanceNameMap[instance.InstanceName] = instance
-
-		if className != instance.ClassName {
-			return resolveResult{err: fmt.Errorf(
-				"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
-				moduleDirectoryGlob,
-				className,
-				moduleDir,
-			)}
-		}
-	}
-
-	// Resolve dependencies for all classes
-	resolveErr := system.populateResolvedDependencies(
-		curModules[className],
-		curModules,
-	)
-	if resolveErr != nil {
-		return resolveResult{err: resolveErr}
-	}
-
-	// Resolved recursive dependencies for all classes
-	recursiveErr := system.populateRecursiveDependencies(curModules[className])
-	if recursiveErr != nil {
-		return resolveResult{err: recursiveErr}
-	}
-	return resolveResult{module: curModules}
-}
-
-func mergeResolveMap(srcModuleMap map[string]map[string]*ModuleInstance,
-	destModuleMap map[string]map[string]*ModuleInstance, curClassName string) {
-	for srcClassName, srcInstanceMap := range srcModuleMap {
-		if curClassName != "" && curClassName != srcClassName {
-			continue
-		}
-		destInstanceMap := destModuleMap[srcClassName]
-		if destInstanceMap == nil {
-			destInstanceMap = map[string]*ModuleInstance{}
-			destModuleMap[srcClassName] = destInstanceMap
-		}
-		for srcInstanceName, srcInstance := range srcInstanceMap {
-			destModuleMap[srcClassName][srcInstanceName] = srcInstance
-		}
-	}
-}
-
 func (system *ModuleSystem) getDefaultDependencies(
 	baseDirectory string,
 	className string,
@@ -1095,6 +964,7 @@ func (system *ModuleSystem) readInstance(
 		JSONFileRaw:           jsonRaw,
 		YAMLFileRaw:           raw,
 		Config:                config.Config,
+		SelectiveBuilding:     config.SelectiveBuilding,
 	}, nil
 }
 
@@ -1273,7 +1143,13 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 		toBeBuiltModulesList[instance.ClassName] = append(toBeBuiltModulesList[instance.ClassName], instance)
 	}
 
+	system.trimToSelectiveDependencies(toBeBuiltModulesList)
+
 	return toBeBuiltModulesList, nil
+}
+
+func instanceFQN(instance *ModuleInstance) string {
+	return fmt.Sprintf("%s.%s", instance.ClassName, instance.InstanceName)
 }
 
 // IncrementalBuild is like Build but filtered to only the given module instances.
@@ -1286,9 +1162,12 @@ func (system *ModuleSystem) IncrementalBuild(
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 
-	if len(instances) == 0 {
-		fmt.Println("Skipping build since no module dependency is provided")
-		return make(map[string][]*ModuleInstance), nil
+	if instances == nil || len(instances) == 0 {
+		for _, modules := range resolvedModules {
+			for _, instance := range modules {
+				instances = append(instances, instance.AsModuleDependency())
+			}
+		}
 	}
 
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
@@ -1304,8 +1183,8 @@ func (system *ModuleSystem) IncrementalBuild(
 					ch <- err
 				}
 			}(instance)
-
 		}
+
 		go func() {
 			wg.Wait()
 			close(ch)
@@ -1325,7 +1204,8 @@ func (system *ModuleSystem) IncrementalBuild(
 	// the SpecProvider interface, hence incremental build is not possible.
 	if len(toBeBuiltModules) == 0 {
 		var err error
-		toBeBuiltModules, err = system.collectTransitiveDependencies(instances, resolvedModules)
+		toBeBuiltModules, err = system.collectTransitiveDependencies(instances,
+			resolvedModules)
 		if err != nil {
 			// if incrementalBuild fails, perform a full build.
 			fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
@@ -1393,6 +1273,80 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	return toBeBuiltModules, nil
+}
+
+func (system *ModuleSystem) trimToSelectiveDependencies(toBeBuiltModules map[string][]*ModuleInstance) {
+	if system.selectiveBuilding {
+		selectiveModuleInstances := system.getSelectiveModules(toBeBuiltModules)
+		toBuiltMap := flattenInstances(toBeBuiltModules)
+		for _, instance := range selectiveModuleInstances {
+			instance.ResolvedDependencies = resolvedSelectiveDependencies(instance, toBuiltMap)
+			instance.RecursiveDependencies = recursiveSelectiveDependencies(instance)
+		}
+	}
+}
+
+func (system *ModuleSystem) getSelectiveModules(toBeBuiltModules map[string][]*ModuleInstance) map[string]*ModuleInstance {
+	selectiveModuleInstances := map[string]*ModuleInstance{}
+	for _, instances := range toBeBuiltModules {
+		for _, instance := range instances {
+			if instance.SelectiveBuilding {
+				selectiveModuleInstances[instanceFQN(instance)] = instance
+			}
+		}
+	}
+	return selectiveModuleInstances
+}
+
+// recursiveSelectiveDependencies gets a recursive dependencies of resolved (direct)
+// dependencies including direct dependencies itself
+func recursiveSelectiveDependencies(instance *ModuleInstance) map[string][]*ModuleInstance {
+	filteredRecursiveMap := map[string]*ModuleInstance{}
+	for _, resolvedDependencies := range instance.ResolvedDependencies {
+		for _, resolvedInstance := range resolvedDependencies {
+			for _, recursiveDependencies := range resolvedInstance.RecursiveDependencies {
+				for _, recursiveInstance := range recursiveDependencies {
+					filteredRecursiveMap[instanceFQN(recursiveInstance)] = recursiveInstance
+				}
+			}
+			filteredRecursiveMap[instanceFQN(resolvedInstance)] = resolvedInstance
+		}
+	}
+
+	filteredRecursiveModules := map[string][]*ModuleInstance{}
+	for _, instance := range filteredRecursiveMap {
+		filteredRecursiveModules[instance.ClassName] = append(filteredRecursiveModules[instance.ClassName], instance)
+	}
+	return filteredRecursiveModules
+}
+
+// resolvedSelectiveDependencies gets a subset of resolved dependencies (direct) of a instance which needs to be built
+func resolvedSelectiveDependencies(instance *ModuleInstance, toBuiltMap map[string]*ModuleInstance) map[string][]*ModuleInstance {
+	filteredResolvedModules := map[string][]*ModuleInstance{}
+	for _, resolvedDependencies := range instance.ResolvedDependencies {
+		for _, resolvedInstance := range resolvedDependencies {
+			if _, ok := toBuiltMap[instanceFQN(resolvedInstance)]; ok {
+				filteredResolvedModules[resolvedInstance.ClassName] = append(
+					filteredResolvedModules[resolvedInstance.ClassName], resolvedInstance)
+			}
+		}
+	}
+	// if after filtering there are no dependencies, we will default it to all dependencies.
+	// this is done as when a module alone changes toBuilt would not have any dependencies
+	if len(filteredResolvedModules) == 0 {
+		filteredResolvedModules = instance.ResolvedDependencies
+	}
+	return filteredResolvedModules
+}
+
+func flattenInstances(resolvedModules map[string][]*ModuleInstance) map[string]*ModuleInstance {
+	flattenedMap := map[string]*ModuleInstance{}
+	for _, instances := range resolvedModules {
+		for _, instance := range instances {
+			flattenedMap[instanceFQN(instance)] = instance
+		}
+	}
+	return flattenedMap
 }
 
 // Build invokes the generator for a module instance and optionally writes the files to disk
@@ -1709,6 +1663,8 @@ type ModuleInstance struct {
 	JSONFileRaw []byte // Deprecated
 	// YAMLFileRaw is the raw YAML file read as bytes used for future parsing
 	YAMLFileRaw []byte
+	// SelectiveBuilding allows the module to be built with subset of dependencies
+	SelectiveBuilding bool
 }
 
 func (instance *ModuleInstance) String() string {
@@ -1760,6 +1716,8 @@ type ClassConfigBase struct {
 	IsExportGenerated *bool `yaml:"IsExportGenerated,omitempty" json:"IsExportGenerated"`
 	// Owner is the Name of the class instance owner
 	Owner string `yaml:"owner,omitempty"`
+	// SelectiveBuilding allows the module to be built with subset of dependencies
+	SelectiveBuilding bool `yaml:"selectiveBuilding,omitempty" json:"selectiveBuilding"`
 }
 
 // ClassConfig maps onto a YAML configuration for a class type

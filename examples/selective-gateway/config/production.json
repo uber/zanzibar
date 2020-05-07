@@ -1,0 +1,30 @@
+{
+	"clients.bar.defaultHeaders": {
+		"X-Client-ID": "bar"
+	},
+	"clients.bar.ip": "127.0.0.1",
+	"clients.bar.port": 4001,
+	"clients.bar.timeout": 10000,
+	"clients.baz.ip": "127.0.0.1",
+	"clients.baz.port": 4002,
+	"envVarsToTagInRootScope": [],
+	"http.port": 7783,
+	"http.clients.requestUUIDHeaderKey": "x-request-uuid",
+	"logger.fileName": "/var/log/selective-gateway/selective-gateway.log",
+	"logger.output": "disk",
+	"metrics.serviceName": "selective-gateway",
+	"metrics.m3.includeHost": true,
+	"service.env.config": {},
+	"serviceName": "selective-gateway",
+	"sidecarRouter.default.http.ip": "127.0.0.1",
+	"sidecarRouter.default.http.port": 4999,
+	"sidecarRouter.default.http.calleeHeader": "RPC-Service",
+	"sidecarRouter.default.http.callerHeader": "RPC-Caller",
+	"sidecarRouter.default.tchannel.ip": "127.0.0.1",
+	"sidecarRouter.default.tchannel.port": 5000,
+	"tchannel.port": 7784,
+	"tchannel.processName": "selective-gateway",
+	"tchannel.serviceName": "selective-gateway",
+	"tchannel.clients.requestUUIDHeaderKey": "x-request-uuid",
+	"useDatacenter": false
+}

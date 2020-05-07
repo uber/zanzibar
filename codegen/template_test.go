@@ -74,7 +74,7 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
+	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper, false)
 	if !assert.NoError(t, err, "failed to create module system", err) {
 		return
 	}
