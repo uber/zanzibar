@@ -14,6 +14,10 @@ else
     go run codegen/runner/runner.go -config="$PREFIX/build.json"
 fi
 
+PREFIX=examples/selective-gateway
+bash ./codegen/runner/pre-steps.sh "$PREFIX/build" "$PREFIX" "$ANNOPREFIX"
+go run codegen/runner/runner.go -config="$PREFIX/build.yaml" -selective
+
 end=`date +%s`
 runtime=$((end - start))
 echo "Generated build : +$runtime"

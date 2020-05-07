@@ -241,6 +241,7 @@ func NewDefaultModuleSystemWithMockHook(
 	serviceMock bool,
 	configFile string,
 	parallelizeFactor int,
+	selectiveBuilding bool,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
 	t, err := NewDefaultTemplate()
@@ -267,16 +268,17 @@ func NewDefaultModuleSystemWithMockHook(
 		hooks = append(hooks, serviceMockGenHook)
 	}
 
-	return NewDefaultModuleSystem(h, hooks...)
+	return NewDefaultModuleSystem(h, selectiveBuilding, hooks...)
 }
 
 // NewDefaultModuleSystem creates a fresh instance of the default zanzibar
 // module system (clients, endpoints, services)
 func NewDefaultModuleSystem(
 	h *PackageHelper,
+	selectiveBuilding bool,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	system := NewModuleSystem(h.moduleSearchPaths, h.defaultDependencies, hooks...)
+	system := NewModuleSystem(h.moduleSearchPaths, h.defaultDependencies, selectiveBuilding, hooks...)
 
 	tmpl, err := NewDefaultTemplate()
 	if err != nil {

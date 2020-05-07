@@ -122,6 +122,7 @@ generate:
 check-generate:
 	@rm -f git-status.log
 	rm -rf ./examples/example-gateway/build
+	rm -rf ./examples/selective-gateway/build
 	make generate
 	git status --porcelain > git-status.log
 	@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );

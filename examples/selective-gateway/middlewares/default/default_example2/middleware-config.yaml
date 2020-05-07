@@ -1,0 +1,8 @@
+config:
+  path: github.com/uber/zanzibar/examples/selective-gateway/middlewares/default/default_example2
+  schema: ./middlewares/default/default_example2/default_example2_schema.json
+dependencies:
+  client:
+  - echo
+name: default_example2
+type: http
