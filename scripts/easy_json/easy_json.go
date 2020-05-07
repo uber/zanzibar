@@ -28,6 +28,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -131,21 +132,39 @@ func main() {
 		os.Exit(1)
 		return
 	}
-	runner := parallelize.NewUnboundedRunner(len(files))
+	runner := parallelize.NewFixedBoundedRunner(len(files), true)
 	for _, file := range files {
 		f := func(file interface{}) (interface{}, error) {
-			return generateEasyJSONFile(file.(string))
+			return shouldGenerateEasyJSONFile(file.(string))
 		}
 		wrk := &parallelize.SingleParamWork{Data: file, Func: f}
 		runner.SubmitWork(wrk)
 	}
-	if _, err := runner.GetResult(); err != nil {
+	result, err := runner.GetResult()
+	if err != nil {
 		os.Exit(1)
 		return
 	}
+
+	// for deterministic code gen, easy json generates differently with different input order
+	var sortFiles []string
+	for _, f := range result {
+		if f == nil {
+			continue
+		}
+		sortFiles = append(sortFiles, f.(string))
+	}
+	sort.Strings(sortFiles)
+	for _, f := range sortFiles {
+		if err := generateEasyJSONFile(f); err != nil {
+			err = errors.Wrapf(err, errorStr, f)
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	}
 }
 
-func generateEasyJSONFile(file string) (interface{}, error) {
+func shouldGenerateEasyJSONFile(file string) (interface{}, error) {
 	easyJSONFile := file[0:len(file)-3] + "_easyjson.go"
 	oldChecksum := getOldChecksum(easyJSONFile)
 	newChecksum := getNewChecksum(file)
@@ -154,16 +173,20 @@ func generateEasyJSONFile(file string) (interface{}, error) {
 	if oldChecksum != "" && oldChecksum == newChecksum {
 		return nil, nil
 	}
+	return file, nil
+}
+
+func generateEasyJSONFile(file string) error {
+	newChecksum := getNewChecksum(file)
+	easyJSONFile := file[0:len(file)-3] + "_easyjson.go"
 
 	if err := generate(file); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return nil, errors.Errorf(errorStr, file)
+		return err
 	}
 
 	bytes, err := ioutil.ReadFile(easyJSONFile)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return nil, errors.Errorf(errorStr, file)
+		return err
 	}
 
 	checksumLine := checksumPrefix + newChecksum + "\n"
@@ -171,13 +194,12 @@ func generateEasyJSONFile(file string) (interface{}, error) {
 
 	newBytes := make([]byte, newLength)
 	copy(newBytes, prefixBytes)
-	copy(newBytes[len(prefixBytes):], []byte(checksumLine))
+	copy(newBytes[len(prefixBytes):], checksumLine)
 	copy(newBytes[len(prefixBytes)+len(checksumLine):], bytes)
 
 	err = ioutil.WriteFile(easyJSONFile, newBytes, 0644)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return nil, errors.Errorf(errorStr, file)
+		return err
 	}
-	return nil, nil
+	return nil
 }
