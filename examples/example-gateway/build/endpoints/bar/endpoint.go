@@ -46,9 +46,9 @@ func NewEndpoint(deps *module.Dependencies) Endpoint {
 		BarArgWithParamsAndDuplicateFieldsHandler: NewBarArgWithParamsAndDuplicateFieldsHandler(deps),
 		BarArgWithQueryHeaderHandler:              NewBarArgWithQueryHeaderHandler(deps),
 		BarArgWithQueryParamsHandler:              NewBarArgWithQueryParamsHandler(deps),
+		BarDeleteWithBodyHandler:                  NewBarDeleteWithBodyHandler(deps),
 		BarHelloWorldHandler:                      NewBarHelloWorldHandler(deps),
 		BarListAndEnumHandler:                     NewBarListAndEnumHandler(deps),
-		BarDeleteWithBodyHandler:                  NewBarDeleteWithBodyHandler(deps),
 		BarMissingArgHandler:                      NewBarMissingArgHandler(deps),
 		BarNoRequestHandler:                       NewBarNoRequestHandler(deps),
 		BarNormalHandler:                          NewBarNormalHandler(deps),
@@ -64,16 +64,12 @@ type EndpointHandlers struct {
 	BarArgWithNearDupQueryParamsHandler       *BarArgWithNearDupQueryParamsHandler
 	BarArgWithNestedQueryParamsHandler        *BarArgWithNestedQueryParamsHandler
 	BarArgWithParamsHandler                   *BarArgWithParamsHandler
-<<<<<<< HEAD
 	BarArgWithParamsAndDuplicateFieldsHandler *BarArgWithParamsAndDuplicateFieldsHandler
 	BarArgWithQueryHeaderHandler              *BarArgWithQueryHeaderHandler
 	BarArgWithQueryParamsHandler              *BarArgWithQueryParamsHandler
+	BarDeleteWithBodyHandler                  *BarDeleteWithBodyHandler
 	BarHelloWorldHandler                      *BarHelloWorldHandler
 	BarListAndEnumHandler                     *BarListAndEnumHandler
-=======
-	BarArgWithManyQueryParamsHandler          *BarArgWithManyQueryParamsHandler
-	BarDeleteWithBodyHandler                  *BarDeleteWithBodyHandler
->>>>>>> Add a test endpoint to exercise the DELETE with body code path
 	BarMissingArgHandler                      *BarMissingArgHandler
 	BarNoRequestHandler                       *BarNoRequestHandler
 	BarNormalHandler                          *BarNormalHandler
@@ -114,63 +110,35 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	if err7 != nil {
 		return err7
 	}
-<<<<<<< HEAD
 	err8 := handlers.BarArgWithQueryParamsHandler.Register(gateway)
 	if err8 != nil {
 		return err8
 	}
-	err9 := handlers.BarHelloWorldHandler.Register(gateway)
+	err9 := handlers.BarDeleteWithBodyHandler.Register(gateway)
 	if err9 != nil {
 		return err9
 	}
-	err10 := handlers.BarListAndEnumHandler.Register(gateway)
+	err10 := handlers.BarHelloWorldHandler.Register(gateway)
 	if err10 != nil {
 		return err10
 	}
-	err11 := handlers.BarMissingArgHandler.Register(gateway)
+	err11 := handlers.BarListAndEnumHandler.Register(gateway)
 	if err11 != nil {
 		return err11
 	}
-	err12 := handlers.BarNoRequestHandler.Register(gateway)
+	err12 := handlers.BarMissingArgHandler.Register(gateway)
 	if err12 != nil {
 		return err12
 	}
-	err13 := handlers.BarNormalHandler.Register(gateway)
+	err13 := handlers.BarNoRequestHandler.Register(gateway)
 	if err13 != nil {
 		return err13
 	}
-	err14 := handlers.BarTooManyArgsHandler.Register(gateway)
-=======
-	err8 := handlers.BarDeleteWithBodyHandler.Register(gateway)
-	if err8 != nil {
-		return err8
-	}
-	err9 := handlers.BarMissingArgHandler.Register(gateway)
-	if err9 != nil {
-		return err9
-	}
-	err10 := handlers.BarNoRequestHandler.Register(gateway)
-	if err10 != nil {
-		return err10
-	}
-	err11 := handlers.BarNormalHandler.Register(gateway)
-	if err11 != nil {
-		return err11
-	}
-	err12 := handlers.BarTooManyArgsHandler.Register(gateway)
-	if err12 != nil {
-		return err12
-	}
-	err13 := handlers.BarHelloWorldHandler.Register(gateway)
-	if err13 != nil {
-		return err13
-	}
-	err14 := handlers.BarListAndEnumHandler.Register(gateway)
->>>>>>> Add a test endpoint to exercise the DELETE with body code path
+	err14 := handlers.BarNormalHandler.Register(gateway)
 	if err14 != nil {
 		return err14
 	}
-	err15 := handlers.BarArgWithParamsAndDuplicateFieldsHandler.Register(gateway)
+	err15 := handlers.BarTooManyArgsHandler.Register(gateway)
 	if err15 != nil {
 		return err15
 	}
