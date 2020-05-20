@@ -254,7 +254,7 @@ func NewMethod(
 	method.setValidStatusCodes()
 
 	if method.RequestType != "" {
-		hasNoBody := method.HTTPMethod == "GET" || method.HTTPMethod == "DELETE"
+		hasNoBody := method.HTTPMethod == "GET"
 		if method.IsEndpoint {
 			err := method.setParseQueryParamStatements(funcSpec, packageHelper, hasNoBody)
 			if err != nil {
@@ -1170,7 +1170,7 @@ func getQueryEncodeExpression(typeSpec compile.TypeSpec, valueName string) strin
 // hasQueryParams - checks to see if either this field has a query-param annotation
 // or if this is a struct, some field in it has.
 // Caveat is that unannotated fields are considered Query Params IF the REST method
-// should not have a body (GET, DELETE).  This is an existing convenience afforded to callers
+// should not have a body (GET).  This is an existing convenience afforded to callers
 func (ms *MethodSpec) hasQueryParams(field *compile.FieldSpec, defaultIsQuery bool) bool {
 
 	httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
