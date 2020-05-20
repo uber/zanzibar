@@ -1,5 +1,5 @@
-hash: 3f062f8bb36e98ab5f0e2d01fb79a28fe3fc681ee4ce2ad6d1b7f666c41f14fe
-updated: 2019-12-16T13:39:57.012116-08:00
+hash: 442c2a5cafaa5f1b3b864afa4f1f9bb76bb91c56f9fc6bb95dc450cf4d84e2d5
+updated: 2020-05-19T16:56:29.110822-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -18,7 +18,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/buger/jsonparser
-  version: 1a29609e0929ccd5666069e2e7213c2c69fa4ac2
+  version: 5754b3eaeae78aeca49528d2ab980c0f26ca707c
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
@@ -68,13 +68,12 @@ imports:
 - name: github.com/gogo/status
   version: 935308aef7372e7685e8fbee162aae8f7a7e515a
 - name: github.com/golang/mock
-  version: 9fa652df1129bef0e734c9cf9bf6dbae9ef3b9fa
+  version: 3a35fb6e3e18b9dbfee291262260dee7372d2a92
   subpackages:
   - gomock
-  - mockgen
   - mockgen/model
 - name: github.com/golang/protobuf
-  version: 6c65a5562fc06764971b7c5d05c76c75e84bdbf7
+  version: d04d7b157bb510b1e0c10132224b616ac0e26b17
   subpackages:
   - proto
   - ptypes
@@ -85,20 +84,20 @@ imports:
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/jessevdk/go-flags
   version: c0795c8afcf41dd1d786bebce68636c199b3bb45
+- name: github.com/josharian/intern
+  version: a140101e2404c737ca154f12ac2a9d1cc161aee6
 - name: github.com/jteeuwen/go-bindata
   version: 6025e8de665b31fa74ab1a66f2cddd8c0abf887e
 - name: github.com/kardianos/osext
   version: 2bc1f35cddc0cc527b4bc3dce8578fc2a6c11384
 - name: github.com/kisielk/errcheck
-  version: e14f8d59a22d460d56c5ee92507cd94c78fbf274
-  subpackages:
-  - internal/errcheck
+  version: 1618cdcbe3fabdf54e22f92bcf11146995e58997
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: 4a28c93cedfd643c29df9591ffc9b54761e23f6d
+  version: 0d574ab354cd22dbdd807aadc26f8afe489bb35a
   subpackages:
   - bootstrap
   - buffer
@@ -113,7 +112,7 @@ imports:
 - name: github.com/mcuadros/go-jsonschema-generator
   version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
 - name: github.com/mitchellh/mapstructure
-  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+  version: 14428cd8e72132155ec2f0f13c4eb93ffe620f7c
 - name: github.com/opentracing/opentracing-go
   version: 659c90643e714681897ec2521c60567dd21da733
   subpackages:
@@ -122,7 +121,7 @@ imports:
 - name: github.com/pborman/uuid
   version: adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1
 - name: github.com/pkg/errors
-  version: ba968bfe8b2f7e042a574c888954fccecfa385b4
+  version: 614d223910a179a466c1767a985424175c39b465
 - name: github.com/pmezard/go-difflib
   version: 5d4384ee4fb2527b0a1256a821ebfc92f91efefc
   subpackages:
@@ -150,16 +149,12 @@ imports:
   - iostats
   - nfs
   - xfs
-- name: github.com/samuel/go-thrift
-  version: e8b6b52668fe9c972220addc130edf46a9b466b1
-  subpackages:
-  - parser
 - name: github.com/sergi/go-diff
-  version: 1744e2970ca51c86172c8190fadad617561ed6e7
+  version: 58c5cb1602ee9676b5d3590d782bedde80706fcc
   subpackages:
   - diffmatchpatch
 - name: github.com/stretchr/testify
-  version: 221dbe5ed46703ee255b1da0dec05086f5035f62
+  version: 3ebf1ddaeb260c4b1ae502a01c7844fa8c1fa0e9
   subpackages:
   - assert
   - require
@@ -176,11 +171,12 @@ imports:
   - m3/thrift
   - m3/thriftudp
 - name: github.com/uber/jaeger-client-go
-  version: 5b163d27fabddbb0e7fae4548c8933c379210610
+  version: 41cd5f0d8e719abff4f35d21d93eeccf5ea96891
   subpackages:
   - config
   - internal/baggage
   - internal/baggage/remote
+  - internal/reporterstats
   - internal/spanlog
   - internal/throttler
   - internal/throttler/remote
@@ -201,26 +197,25 @@ imports:
   - metrics
   - metrics/tally
 - name: github.com/uber/tchannel-go
-  version: e6bc214d794a9d6062045dd672de210cf211994d
+  version: 2acaee7490c16abc67578902d385266078cea691
   subpackages:
   - internal/argreader
   - relay
   - testutils/testreader
   - thrift/arg2
-  - thrift/thrift-gen
   - tnet
   - tos
   - trand
   - typed
 - name: go.uber.org/atomic
-  version: 40ae6a40a970ef4cdbffa7b24b280e316db8accc
+  version: 845920076a298bdb984fb0f1b86052e4ca0a281c
 - name: go.uber.org/automaxprocs
-  version: 946a8391268aea0a60a86403988ff3ab4b604a83
+  version: e393bb0ea0644204c502247d647e428742196ebe
   subpackages:
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
-  version: be3040509ed2f4075ec55f1f6632596608477a23
+  version: 781ef046233be0a0bf1efcb95d41e46042624ccb
   subpackages:
   - internal/digreflect
   - internal/dot
@@ -231,15 +226,15 @@ imports:
   - internal/fxreflect
   - internal/lifecycle
 - name: go.uber.org/multierr
-  version: 824d08f79702fe5f54aca8400aa0d754318786e7
+  version: b587143a48b62b01d337824eab43700af6ffe222
 - name: go.uber.org/net/metrics
-  version: 05a053b545cba614bf12635803f4749dab7bd0d0
+  version: 1b0dba5372807d15069c48adcf7d2ee974d3aa40
   subpackages:
   - bucket
   - push
   - tallypush
 - name: go.uber.org/thriftrw
-  version: 3934cedb5d52491fd98e0203eb2a61b00b7da282
+  version: 4a3f3beff53973def29153d1336a53df7a812f30
   subpackages:
   - ast
   - compile
@@ -254,10 +249,7 @@ imports:
   - internal/goast
   - internal/multiplex
   - internal/plugin
-  - internal/plugin/builtin/pluginapigen
   - internal/process
-  - internal/semver
-  - plugin
   - plugin/api
   - protocol
   - protocol/binary
@@ -265,12 +257,8 @@ imports:
   - thriftreflect
   - version
   - wire
-- name: go.uber.org/tools
-  version: ce2550dad7144b81ae2f67dc5e55597643f6902b
-  subpackages:
-  - update-license
 - name: go.uber.org/yarpc
-  version: a471b8ec71047ae92683262313a0b04fa847f27c
+  version: 5bf307e0b6d5e72465cb2815dceee5ca41223b86
   subpackages:
   - api/backoff
   - api/encoding
@@ -285,8 +273,10 @@ imports:
   - internal/config
   - internal/digester
   - internal/errorsync
+  - internal/firstoutboundmiddleware
   - internal/grpcerrorcodes
   - internal/humanize
+  - internal/inboundcall
   - internal/inboundmiddleware
   - internal/interpolate
   - internal/introspection
@@ -305,7 +295,7 @@ imports:
   - yarpcconfig
   - yarpcerrors
 - name: go.uber.org/zap
-  version: 33e58d4d0120aa28d4df84cd244838c490846c9d
+  version: feeb9a050b31b40eec6f2470e7599eeeadfe5bdd
   subpackages:
   - buffer
   - internal/bufferpool
@@ -314,11 +304,16 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/lint
-  version: d0100b6bd8b389f0385611eb39152c4d7c3a7905
+  version: 16217165b5de779cb6a5e4fc81fa9c1166fda457
   subpackages:
   - golint
+- name: golang.org/x/mod
+  version: 859b3ef565e237f9f1a0fb6b55385c497545680d
+  subpackages:
+  - module
+  - semver
 - name: golang.org/x/net
-  version: c0dbc17a35534bf2e581d7a942408dc936316da4
+  version: d87ec0cfa47603df72c7e24116080bdcd7788ba7
   subpackages:
   - bpf
   - context
@@ -333,7 +328,7 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: ac6580df4449443a05718fd7858c1f91ad5f8d20
+  version: fe76b779f299728f3bd63f77ea2c815504229c3b
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -344,30 +339,27 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: a0e659d5136104039ac16d1718b6ef26f458e22c
+  version: 57a9e4404bf7b38f22bbca9af3ddf0dee8e76a04
   subpackages:
   - cmd/goimports
-  - cmd/stringer
   - go/ast/astutil
   - go/buildutil
   - go/gcexportdata
   - go/internal/cgo
   - go/internal/gcimporter
-  - go/internal/packagesdriver
   - go/loader
-  - go/packages
   - go/types/typeutil
-  - internal/fastwalk
-  - internal/gopathwalk
-  - internal/semver
+- name: golang.org/x/xerrors
+  version: 9bdfabe68543c54f90421aeb9a60ef8061b5b544
 - name: google.golang.org/genproto
   version: d831d65fe17df2e52bcc4316d4a9f7a418701f43
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 1a3960e4bd028ac0cec0a2afd27d7d8e67c11514
+  version: 754ee590a4f386d0910d887f3b8776354042260b
   repo: https://github.com/grpc/grpc-go
   subpackages:
+  - attributes
   - backoff
   - balancer
   - balancer/base
@@ -387,10 +379,13 @@ imports:
   - internal/buffer
   - internal/channelz
   - internal/envconfig
+  - internal/grpclog
   - internal/grpcrand
   - internal/grpcsync
+  - internal/grpcutil
   - internal/resolver/dns
   - internal/resolver/passthrough
+  - internal/status
   - internal/syscall
   - internal/transport
   - keepalive
@@ -402,10 +397,43 @@ imports:
   - stats
   - status
   - tap
+- name: google.golang.org/protobuf
+  version: 118baf639023c3e171d19f20c72a05e3992fc90e
+  subpackages:
+  - encoding/prototext
+  - encoding/protowire
+  - internal/descfmt
+  - internal/descopts
+  - internal/detrand
+  - internal/encoding/defval
+  - internal/encoding/messageset
+  - internal/encoding/tag
+  - internal/encoding/text
+  - internal/errors
+  - internal/fieldnum
+  - internal/fieldsort
+  - internal/filedesc
+  - internal/filetype
+  - internal/flags
+  - internal/genname
+  - internal/impl
+  - internal/mapsort
+  - internal/pragma
+  - internal/set
+  - internal/strs
+  - internal/version
+  - proto
+  - reflect/protoreflect
+  - reflect/protoregistry
+  - runtime/protoiface
+  - runtime/protoimpl
+  - types/known/anypb
+  - types/known/durationpb
+  - types/known/timestamppb
 - name: gopkg.in/validator.v2
   version: c3144fdedc21c005c4ba9c3ab3ecb86419dd39f3
 - name: gopkg.in/yaml.v2
-  version: 1f64d6156d11335c3f22d9330b0ad14fc1e789ce
+  version: 0b1645d91e851e735d3e23330303ce81f70adbe3
 - name: honnef.co/go/tools
   version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
   subpackages:
