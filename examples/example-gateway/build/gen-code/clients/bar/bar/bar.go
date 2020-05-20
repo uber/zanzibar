@@ -19322,12 +19322,10 @@ func init() {
 		Key   *BarResponse
 		Value string
 	}, err error) {
-
 		if result.Success != nil {
 			success = result.Success
 			return
 		}
-
 		err = errors.New("expected a non-void result")
 		return
 	}
