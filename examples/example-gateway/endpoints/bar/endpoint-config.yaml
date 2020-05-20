@@ -8,6 +8,7 @@ config:
   - arg_with_query_header.yaml
   - arg_with_params.yaml
   - arg_with_many_query_params.yaml
+  - delete_with_body.yaml
   - missing_arg.yaml
   - no_request.yaml
   - normal.yaml
