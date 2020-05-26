@@ -483,10 +483,7 @@ func (g *httpClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	exposedMethods, err := reverseExposedMethods(clientSpec, instance)
-	if err != nil {
-		return nil, err
-	}
+	exposedMethods := reverseExposedMethods(clientSpec)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -617,10 +614,7 @@ func (g *tchannelClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	exposedMethods, err := reverseExposedMethods(clientSpec, instance)
-	if err != nil {
-		return nil, err
-	}
+	exposedMethods := reverseExposedMethods(clientSpec)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -699,21 +693,15 @@ func (g *tchannelClientGenerator) Generate(
 	}, nil
 }
 
-// reverse index and validate the exposed methods map
-func reverseExposedMethods(clientSpec *ClientSpec, instance *ModuleInstance) (map[string]string, error) {
+// reverse index and filter the exposed methods map as the gen-thrift-spec can be subset
+func reverseExposedMethods(clientSpec *ClientSpec) map[string]string {
 	reversed := map[string]string{}
 	for exposedMethod, idlMethod := range clientSpec.ExposedMethods {
-		reversed[idlMethod] = exposedMethod
-		if !hasMethod(clientSpec, idlMethod) {
-			return nil, errors.Errorf(
-				"Invalid exposedMethods for client %q, method %q not found",
-				instance.InstanceName,
-				idlMethod,
-			)
+		if hasMethod(clientSpec, idlMethod) {
+			reversed[idlMethod] = exposedMethod
 		}
 	}
-
-	return reversed, nil
+	return reversed
 }
 
 func hasMethod(cspec *ClientSpec, idlMethod string) bool {
@@ -913,10 +901,7 @@ func (g *gRPCClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	reversedMethods, err := reverseExposedMethods(clientSpec, instance)
-	if err != nil {
-		return nil, err
-	}
+	reversedMethods := reverseExposedMethods(clientSpec)
 
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
