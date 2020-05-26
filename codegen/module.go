@@ -1170,17 +1170,18 @@ func (system *ModuleSystem) IncrementalBuild(
 		}
 	}
 
+	errModuleMap := map[*ModuleInstance]struct{}{}
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
 	for _, className := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(resolvedModules[className]))
-		ch := make(chan error, len(resolvedModules[className]))
+		ch := make(chan errorModule, len(resolvedModules[className]))
 		for _, instance := range resolvedModules[className] {
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
-					ch <- err
+					ch <- errorModule{err: err, mi: instance}
 				}
 			}(instance)
 		}
@@ -1190,15 +1191,25 @@ func (system *ModuleSystem) IncrementalBuild(
 			close(ch)
 		}()
 
-		for err := range ch {
-			if err != nil {
-				// if incrementalBuild fails, perform a full build.
-				fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
-				toBeBuiltModules = resolvedModules
-				break
+		for errModule := range ch {
+			if errModule.err != nil {
+				errModuleMap[errModule.mi] = struct{}{}
 			}
 		}
 	}
+
+	resolvedModulesCopy := map[string][]*ModuleInstance{}
+	for cls, modules := range resolvedModules {
+		for _, m := range modules {
+			if _, ok := errModuleMap[m]; ok {
+				// skipping error modules
+				fmt.Println("skipping module gen", m.InstanceName)
+				continue
+			}
+			resolvedModulesCopy[cls] = append(resolvedModulesCopy[cls], m)
+		}
+	}
+	resolvedModules = resolvedModulesCopy
 
 	// If toBeBuiltModules is not empty already, it is likely that one of the modules does not implement
 	// the SpecProvider interface, hence incremental build is not possible.
@@ -1273,6 +1284,12 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	return toBeBuiltModules, nil
+}
+
+type errorModule struct {
+	err error
+	cls string
+	mi  *ModuleInstance
 }
 
 func (system *ModuleSystem) trimToSelectiveDependencies(toBeBuiltModules map[string][]*ModuleInstance) {
