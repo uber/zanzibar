@@ -120,7 +120,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	}
 
 	logFn(
-		fmt.Sprintf("Finished an incoming server HTTP request with %v status code", res.StatusCode),
+		fmt.Sprintf("Finished an incoming server HTTP request with %d status code", res.StatusCode),
 		append(logFields, serverHTTPLogFields(res.Request, res)...)...,
 	)
 }
@@ -134,6 +134,8 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		zap.Time("timestamp-started", req.startTime),
 		zap.Time("timestamp-finished", res.finishTime),
 		zap.Int("statusCode", res.StatusCode),
+		zap.String("endpointName", req.EndpointName),
+		zap.String("handlerName", req.HandlerName),
 	}
 
 	for k, v := range res.Headers() {
