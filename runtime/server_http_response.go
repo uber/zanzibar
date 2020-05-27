@@ -120,7 +120,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	}
 
 	logFn(
-		"Finished an incoming server HTTP request",
+		fmt.Sprintf("Finished an incoming server HTTP request with %v status code", res.StatusCode),
 		append(logFields, serverHTTPLogFields(res.Request, res)...)...,
 	)
 }

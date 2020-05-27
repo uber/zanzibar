@@ -175,7 +175,7 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingGetQueryBool(t *testing.T) {
@@ -237,7 +237,7 @@ func TestFailingGetQueryBool(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingGetQueryInt8(t *testing.T) {
@@ -299,7 +299,7 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingHasQueryValue(t *testing.T) {
@@ -361,7 +361,7 @@ func TestFailingHasQueryValue(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingGetQueryInt16(t *testing.T) {
@@ -423,7 +423,7 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingGetQueryInt32(t *testing.T) {
@@ -485,7 +485,7 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingGetQueryInt64(t *testing.T) {
@@ -547,7 +547,7 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingGetQueryFloat64(t *testing.T) {
@@ -609,7 +609,7 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestFailingHasQueryPrefix(t *testing.T) {
@@ -671,7 +671,7 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 }
 
 func TestGetQueryBoolList(t *testing.T) {
@@ -2378,9 +2378,9 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	assert.NoError(t, err)
 
 	allLogs := bgateway.AllLogs()
-	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request with 200 status code"]))
 
-	tags := allLogs["Finished an incoming server HTTP request"][0]
+	tags := allLogs["Finished an incoming server HTTP request with 200 status code"][0]
 	dynamicHeaders := []string{
 		"requestUUID",
 		"remoteAddr",
@@ -2397,7 +2397,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	}
 
 	expectedValues := map[string]interface{}{
-		"msg":             "Finished an incoming server HTTP request",
+		"msg":             "Finished an incoming server HTTP request with 200 status code",
 		"env":             "test",
 		"level":           "debug",
 		"zone":            "unknown",
