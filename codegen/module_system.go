@@ -443,6 +443,10 @@ func newHTTPClientGenerator(templates *Template, packageHelper *PackageHelper) *
 func (g *httpClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
+	// return cached result if available
+	if instance.GeneratedSpec() != nil {
+		return instance.GeneratedSpec(), nil
+	}
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -574,6 +578,10 @@ func getExposedMethodValidator() *validator2.Validator {
 func (g *tchannelClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
+	// return cached result if available
+	if instance.GeneratedSpec() != nil {
+		return instance.GeneratedSpec(), nil
+	}
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -767,6 +775,10 @@ func newCustomClientGenerator(templates *Template, packageHelper *PackageHelper)
 func (g *customClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
+	// return cached result if available
+	if instance.GeneratedSpec() != nil {
+		return instance.GeneratedSpec(), nil
+	}
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -861,6 +873,10 @@ func newGRPCClientGenerator(templates *Template, packageHelper *PackageHelper) *
 func (g *gRPCClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
+	// return cached result if available
+	if instance.GeneratedSpec() != nil {
+		return instance.GeneratedSpec(), nil
+	}
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -975,6 +991,10 @@ type EndpointGenerator struct {
 func (g *EndpointGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
+	// return cached result if available
+	if instance.GeneratedSpec() != nil {
+		return instance.GeneratedSpec(), nil
+	}
 	endpointYamls := []string{}
 	endpointSpecs := []*EndpointSpec{}
 	clientSpecs := readClientDependencySpecs(instance)
