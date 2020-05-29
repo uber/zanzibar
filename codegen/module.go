@@ -1088,7 +1088,26 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 		return fmt.Errorf("error when running computespec: %s", err.Error())
 	}
 	instance.genSpec = spec
+	filterNilDeps(instance)
 	return nil
+}
+
+func filterNilDeps(in *ModuleInstance) {
+	filterNilDepsHelper(in.ResolvedDependencies)
+	filterNilDepsHelper(in.RecursiveDependencies)
+}
+
+func filterNilDepsHelper(deps map[string][]*ModuleInstance) {
+	for cls, modInstances := range deps {
+		var validClients []*ModuleInstance
+		for _, c := range modInstances {
+			if c.GeneratedSpec() == nil {
+				continue
+			}
+			validClients = append(validClients, c)
+		}
+		deps[cls] = validClients
+	}
 }
 
 // collectTransitiveDependencies will collect every instance in resolvedModules that depends on something in initialInstances.
@@ -1162,26 +1181,18 @@ func (system *ModuleSystem) IncrementalBuild(
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 
-	if instances == nil || len(instances) == 0 {
-		for _, modules := range resolvedModules {
-			for _, instance := range modules {
-				instances = append(instances, instance.AsModuleDependency())
-			}
-		}
-	}
-
 	errModuleMap := map[*ModuleInstance]struct{}{}
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
 	for _, className := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(resolvedModules[className]))
-		ch := make(chan errorModule, len(resolvedModules[className]))
+		ch := make(chan *ModuleInstance, len(resolvedModules[className]))
 		for _, instance := range resolvedModules[className] {
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
-					ch <- errorModule{err: err, mi: instance}
+					ch <- instance
 				}
 			}(instance)
 		}
@@ -1191,10 +1202,8 @@ func (system *ModuleSystem) IncrementalBuild(
 			close(ch)
 		}()
 
-		for errModule := range ch {
-			if errModule.err != nil {
-				errModuleMap[errModule.mi] = struct{}{}
-			}
+		for mi := range ch {
+			errModuleMap[mi] = struct{}{}
 		}
 	}
 
@@ -1210,6 +1219,14 @@ func (system *ModuleSystem) IncrementalBuild(
 		}
 	}
 	resolvedModules = resolvedModulesCopy
+
+	if instances == nil || len(instances) == 0 {
+		for _, modules := range resolvedModules {
+			for _, instance := range modules {
+				instances = append(instances, instance.AsModuleDependency())
+			}
+		}
+	}
 
 	// If toBeBuiltModules is not empty already, it is likely that one of the modules does not implement
 	// the SpecProvider interface, hence incremental build is not possible.
@@ -1284,12 +1301,6 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	return toBeBuiltModules, nil
-}
-
-type errorModule struct {
-	err error
-	cls string
-	mi  *ModuleInstance
 }
 
 func (system *ModuleSystem) trimToSelectiveDependencies(toBeBuiltModules map[string][]*ModuleInstance) {
