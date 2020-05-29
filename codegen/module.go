@@ -1088,26 +1088,26 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 		return fmt.Errorf("error when running computespec: %s", err.Error())
 	}
 	instance.genSpec = spec
-	filterNilDeps(instance)
+	// HACK: to get get of bad modules, which should not be there at first place
+	filterNilClientDeps(instance)
 	return nil
 }
 
-func filterNilDeps(in *ModuleInstance) {
-	filterNilDepsHelper(in.ResolvedDependencies)
-	filterNilDepsHelper(in.RecursiveDependencies)
+func filterNilClientDeps(in *ModuleInstance) {
+	filterNilClientDepsHelper(in.ResolvedDependencies)
+	filterNilClientDepsHelper(in.RecursiveDependencies)
 }
 
-func filterNilDepsHelper(deps map[string][]*ModuleInstance) {
-	for cls, modInstances := range deps {
-		var validClients []*ModuleInstance
-		for _, c := range modInstances {
-			if c.GeneratedSpec() == nil {
-				continue
-			}
-			validClients = append(validClients, c)
+func filterNilClientDepsHelper(deps map[string][]*ModuleInstance) {
+	moduleInstances := deps["client"]
+	var validClients []*ModuleInstance
+	for _, modInstance := range moduleInstances {
+		if modInstance.GeneratedSpec() == nil {
+			continue
 		}
-		deps[cls] = validClients
+		validClients = append(validClients, modInstance)
 	}
+	deps["client"] = validClients
 }
 
 // collectTransitiveDependencies will collect every instance in resolvedModules that depends on something in initialInstances.
@@ -1192,6 +1192,7 @@ func (system *ModuleSystem) IncrementalBuild(
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
+					// HACK: to get get of bad modules, which should not be even be loaded in dag at first place
 					ch <- instance
 				}
 			}(instance)

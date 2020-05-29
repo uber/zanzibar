@@ -34,7 +34,12 @@ import (
 // Dependencies contains dependencies for the clientless endpoint module
 type Dependencies struct {
 	Default    *zanzibar.DefaultDependencies
+	Client     *ClientDependencies
 	Middleware *MiddlewareDependencies
+}
+
+// ClientDependencies contains client dependencies
+type ClientDependencies struct {
 }
 
 // MiddlewareDependencies contains middleware dependencies

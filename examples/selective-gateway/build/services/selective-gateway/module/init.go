@@ -73,6 +73,7 @@ func InitializeDependencies(
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &echoclientmodule.ClientDependencies{},
 	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}

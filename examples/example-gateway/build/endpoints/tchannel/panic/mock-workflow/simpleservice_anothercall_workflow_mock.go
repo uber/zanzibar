@@ -76,6 +76,7 @@ func NewSimpleServiceAnotherCallWorkflowMock(t *testing.T) (workflow.SimpleServi
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := panictchannelendpointstatic.NewSimpleServiceAnotherCallWorkflow(

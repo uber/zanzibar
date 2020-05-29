@@ -141,24 +141,31 @@ func InitializeDependencies(
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Bar = barclientgenerated.NewClient(&barclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &barclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &bazclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Contacts = contactsclientgenerated.NewClient(&contactsclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &contactsclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.GoogleNow = googlenowclientgenerated.NewClient(&googlenowclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &googlenowclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Multi = multiclientgenerated.NewClient(&multiclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &multiclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Quux = quuxclientstatic.NewClient(&quuxclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &quuxclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Withexceptions = withexceptionsclientgenerated.NewClient(&withexceptionsclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &withexceptionsclientmodule.ClientDependencies{},
 	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
@@ -177,6 +184,7 @@ func InitializeDependencies(
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
@@ -186,6 +194,7 @@ func InitializeDependencies(
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &exampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
@@ -215,6 +224,7 @@ func InitializeDependencies(
 	})
 	initializedEndpointDependencies.Clientless = clientlessendpointgenerated.NewEndpoint(&clientlessendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &clientlessendpointmodule.ClientDependencies{},
 		Middleware: &clientlessendpointmodule.MiddlewareDependencies{
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
@@ -314,6 +324,7 @@ func InitializeDependencies(
 
 	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &ClientDependencies{},
 		Endpoint: &EndpointDependencies{
 			Bar:            initializedEndpointDependencies.Bar,
 			Baz:            initializedEndpointDependencies.Baz,

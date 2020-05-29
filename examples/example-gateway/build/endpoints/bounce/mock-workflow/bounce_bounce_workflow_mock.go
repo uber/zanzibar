@@ -79,6 +79,7 @@ func NewBounceBounceWorkflowMock(t *testing.T) (workflow.BounceBounceWorkflow, *
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := bounceendpointstatic.NewBounceBounceWorkflow(

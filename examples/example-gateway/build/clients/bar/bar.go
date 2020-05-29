@@ -871,8 +871,8 @@ func (c *barClient) ArgWithNestedQueryParams(
 			optAuthUUID2Query := *r.Opt.AuthUUID2
 			queryValues.Set("opt.authUUID2", optAuthUUID2Query)
 		}
+		fullURL += "?" + queryValues.Encode()
 	}
-	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
