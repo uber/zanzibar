@@ -22,6 +22,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"sort"
 	"strings"
@@ -95,7 +96,22 @@ func (r *Router) Handle(method, path string, handler http.Handler) error {
 		trie = NewTrie()
 		r.tries[method] = trie
 	}
-	return trie.Set(path, handler, r.isWhitelistedPath(path))
+	err := trie.Set(path, handler, r.isWhitelistedPath(path))
+	if err == errExist {
+		return &urlFailure{url: path, method: method}
+	}
+	return err
+}
+
+// urlFailure captures errors for conflicting paths
+type urlFailure struct {
+	method string
+	url    string
+}
+
+// Error returns the error string
+func (e *urlFailure) Error() string {
+	return fmt.Sprintf("panic: path: %q method: %q conflicts with an existing path", e.url, e.method)
 }
 
 // ServeHTTP dispatches the request to a register handler to handle.
