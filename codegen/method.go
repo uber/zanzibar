@@ -1228,6 +1228,11 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 			return false
 		}
 
+		if !hasQueryFields {
+			statements.append("queryValues := &url.Values{}")
+			hasQueryFields = true
+		}
+
 		realType := compile.RootTypeSpec(field.Type)
 		longFieldName := goPrefix + "." + PascalCase(field.Name)
 
@@ -1265,11 +1270,6 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		identifierName := CamelCase(longQueryName) + "Query"
 		_, isList := realType.(*compile.ListSpec)
 		_, isSet := realType.(*compile.SetSpec)
-
-		if !hasQueryFields {
-			statements.append("queryValues := &url.Values{}")
-			hasQueryFields = true
-		}
 
 		if field.Required {
 			if isList {
@@ -1317,6 +1317,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 	if hasQueryFields {
 		statements.append("fullURL += \"?\" + queryValues.Encode()")
 	}
+
 	ms.WriteQueryParamGoStatements = statements.GetLines()
 	return nil
 }

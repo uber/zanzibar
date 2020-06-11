@@ -833,12 +833,12 @@ func (c *barClient) ArgWithNestedQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
 
+	queryValues := &url.Values{}
 	if r.Request == nil {
 		return nil, nil, errors.New(
 			"The field .Request is required",
 		)
 	}
-	queryValues := &url.Values{}
 	requestNameQuery := r.Request.Name
 	queryValues.Set("request.name", requestNameQuery)
 	if r.Request.UserUUID != nil {

@@ -1088,7 +1088,29 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 		return fmt.Errorf("error when running computespec: %s", err.Error())
 	}
 	instance.genSpec = spec
+	// HACK: to get get of bad modules, which should not be there at first place
+	filterNilClientDeps(instance)
 	return nil
+}
+
+func filterNilClientDeps(in *ModuleInstance) {
+	filterNilClientDepsHelper(in.ResolvedDependencies)
+	filterNilClientDepsHelper(in.RecursiveDependencies)
+}
+
+func filterNilClientDepsHelper(deps map[string][]*ModuleInstance) {
+	moduleInstances, ok := deps["client"]
+	if !ok {
+		return
+	}
+	var validClients []*ModuleInstance
+	for _, modInstance := range moduleInstances {
+		if modInstance.GeneratedSpec() == nil {
+			continue
+		}
+		validClients = append(validClients, modInstance)
+	}
+	deps["client"] = validClients
 }
 
 // collectTransitiveDependencies will collect every instance in resolvedModules that depends on something in initialInstances.
@@ -1162,25 +1184,19 @@ func (system *ModuleSystem) IncrementalBuild(
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 
-	if instances == nil || len(instances) == 0 {
-		for _, modules := range resolvedModules {
-			for _, instance := range modules {
-				instances = append(instances, instance.AsModuleDependency())
-			}
-		}
-	}
-
+	errModuleMap := map[*ModuleInstance]struct{}{}
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
 	for _, className := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(resolvedModules[className]))
-		ch := make(chan error, len(resolvedModules[className]))
+		ch := make(chan *ModuleInstance, len(resolvedModules[className]))
 		for _, instance := range resolvedModules[className] {
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
-					ch <- err
+					// HACK: to get get of bad modules, which should not be even be loaded in dag at first place
+					ch <- instance
 				}
 			}(instance)
 		}
@@ -1190,12 +1206,28 @@ func (system *ModuleSystem) IncrementalBuild(
 			close(ch)
 		}()
 
-		for err := range ch {
-			if err != nil {
-				// if incrementalBuild fails, perform a full build.
-				fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
-				toBeBuiltModules = resolvedModules
-				break
+		for mi := range ch {
+			errModuleMap[mi] = struct{}{}
+		}
+	}
+
+	resolvedModulesCopy := map[string][]*ModuleInstance{}
+	for cls, modules := range resolvedModules {
+		for _, m := range modules {
+			if _, ok := errModuleMap[m]; ok {
+				// skipping error modules
+				fmt.Println("skipping module gen", m.InstanceName)
+				continue
+			}
+			resolvedModulesCopy[cls] = append(resolvedModulesCopy[cls], m)
+		}
+	}
+	resolvedModules = resolvedModulesCopy
+
+	if instances == nil || len(instances) == 0 {
+		for _, modules := range resolvedModules {
+			for _, instance := range modules {
+				instances = append(instances, instance.AsModuleDependency())
 			}
 		}
 	}
