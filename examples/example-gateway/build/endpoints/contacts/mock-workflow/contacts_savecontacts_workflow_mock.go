@@ -80,7 +80,6 @@ func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveCon
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := contactsendpointstatic.NewContactsSaveContactsWorkflow(

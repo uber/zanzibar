@@ -33,12 +33,7 @@ import (
 // Dependencies contains dependencies for the app/demo/xyz service module
 type Dependencies struct {
 	Default  *zanzibar.DefaultDependencies
-	Client   *ClientDependencies
 	Endpoint *EndpointDependencies
-}
-
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
 }
 
 // EndpointDependencies contains endpoint dependencies

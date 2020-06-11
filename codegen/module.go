@@ -1099,7 +1099,10 @@ func filterNilClientDeps(in *ModuleInstance) {
 }
 
 func filterNilClientDepsHelper(deps map[string][]*ModuleInstance) {
-	moduleInstances := deps["client"]
+	moduleInstances, ok := deps["client"]
+	if !ok {
+		return
+	}
 	var validClients []*ModuleInstance
 	for _, modInstance := range moduleInstances {
 		if modInstance.GeneratedSpec() == nil {

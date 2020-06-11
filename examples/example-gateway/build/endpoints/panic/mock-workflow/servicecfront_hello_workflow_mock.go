@@ -79,7 +79,6 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := panicendpointstatic.NewServiceCFrontHelloWorkflow(

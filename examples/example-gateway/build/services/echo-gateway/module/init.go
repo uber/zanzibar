@@ -93,11 +93,9 @@ func InitializeDependencies(
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &bazclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &echoclientmodule.ClientDependencies{},
 	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
@@ -116,7 +114,6 @@ func InitializeDependencies(
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
@@ -134,7 +131,6 @@ func InitializeDependencies(
 	})
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &echoendpointmodule.ClientDependencies{},
 		Middleware: &echoendpointmodule.MiddlewareDependencies{
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
@@ -144,7 +140,6 @@ func InitializeDependencies(
 
 	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &ClientDependencies{},
 		Endpoint: &EndpointDependencies{
 			Bounce: initializedEndpointDependencies.Bounce,
 			Echo:   initializedEndpointDependencies.Echo,

@@ -96,7 +96,6 @@ func InitializeDependenciesMock(
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
@@ -133,7 +132,6 @@ func InitializeDependenciesMock(
 
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &module.ClientDependencies{},
 		Endpoint: &module.EndpointDependencies{
 			AppDemoAbc: initializedEndpointDependencies.AppDemoAbc,
 			Bar:        initializedEndpointDependencies.Bar,

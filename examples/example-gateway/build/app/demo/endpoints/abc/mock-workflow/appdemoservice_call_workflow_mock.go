@@ -76,7 +76,6 @@ func NewAppDemoServiceCallWorkflowMock(t *testing.T) (workflow.AppDemoServiceCal
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := appdemoabcendpointstatic.NewAppDemoServiceCallWorkflow(

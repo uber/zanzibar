@@ -138,7 +138,6 @@ func InitializeDependenciesMock(
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
@@ -148,7 +147,6 @@ func InitializeDependenciesMock(
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &exampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
@@ -178,7 +176,6 @@ func InitializeDependenciesMock(
 	})
 	initializedEndpointDependencies.Clientless = clientlessendpointgenerated.NewEndpoint(&clientlessendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &clientlessendpointmodule.ClientDependencies{},
 		Middleware: &clientlessendpointmodule.MiddlewareDependencies{
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
@@ -278,7 +275,6 @@ func InitializeDependenciesMock(
 
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &module.ClientDependencies{},
 		Endpoint: &module.EndpointDependencies{
 			Bar:            initializedEndpointDependencies.Bar,
 			Baz:            initializedEndpointDependencies.Baz,

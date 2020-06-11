@@ -76,13 +76,11 @@ func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockClie
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := echoendpointstatic.NewEchoEchoWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
-			Client:  &module.ClientDependencies{},
 			Middleware: &module.MiddlewareDependencies{
 				DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 				DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,

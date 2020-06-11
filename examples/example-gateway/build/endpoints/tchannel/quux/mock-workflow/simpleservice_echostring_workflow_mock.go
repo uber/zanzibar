@@ -80,7 +80,6 @@ func NewSimpleServiceEchoStringWorkflowMock(t *testing.T) (workflow.SimpleServic
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := quuxendpointstatic.NewSimpleServiceEchoStringWorkflow(

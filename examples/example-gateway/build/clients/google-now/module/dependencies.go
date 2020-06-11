@@ -30,9 +30,4 @@ import (
 // Dependencies contains dependencies for the google-now client module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
-	Client  *ClientDependencies
-}
-
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
 }

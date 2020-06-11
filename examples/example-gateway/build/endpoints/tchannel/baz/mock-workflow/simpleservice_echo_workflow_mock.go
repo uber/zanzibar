@@ -82,11 +82,9 @@ func NewSimpleServiceEchoWorkflowMock(t *testing.T) (workflow.SimpleServiceEchoW
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &exampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	w := baztchannelendpointstatic.NewSimpleServiceEchoWorkflow(

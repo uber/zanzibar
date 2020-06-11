@@ -1310,15 +1310,12 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 	}
 	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
 
-	for i := 0; i < len(stack)-1; i++ {
+	for i := 0; i < len(stack); i++ {
 		statements.append("}")
 	}
 
 	if hasQueryFields {
 		statements.append("fullURL += \"?\" + queryValues.Encode()")
-	}
-	if len(stack) > 0 {
-		statements.append("}")
 	}
 
 	ms.WriteQueryParamGoStatements = statements.GetLines()

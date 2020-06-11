@@ -96,11 +96,9 @@ func InitializeDependencies(
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Bar = barclientgenerated.NewClient(&barclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &barclientmodule.ClientDependencies{},
 	})
 	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &bazclientmodule.ClientDependencies{},
 	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
@@ -119,7 +117,6 @@ func InitializeDependencies(
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
@@ -156,7 +153,6 @@ func InitializeDependencies(
 
 	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &ClientDependencies{},
 		Endpoint: &EndpointDependencies{
 			AppDemoAbc: initializedEndpointDependencies.AppDemoAbc,
 			Bar:        initializedEndpointDependencies.Bar,

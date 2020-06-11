@@ -94,7 +94,6 @@ func InitializeDependenciesMock(
 	})
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &defaultexampletchannelmiddlewaremodule.ClientDependencies{},
 	})
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
@@ -112,7 +111,6 @@ func InitializeDependenciesMock(
 	})
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &echoendpointmodule.ClientDependencies{},
 		Middleware: &echoendpointmodule.MiddlewareDependencies{
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
@@ -122,7 +120,6 @@ func InitializeDependenciesMock(
 
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client:  &module.ClientDependencies{},
 		Endpoint: &module.EndpointDependencies{
 			Bounce: initializedEndpointDependencies.Bounce,
 			Echo:   initializedEndpointDependencies.Echo,

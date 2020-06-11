@@ -427,7 +427,6 @@ type httpClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 	validator     *validator2.Validator
-	genSpecMap    sync.Map
 }
 
 // newHTTPClientGenerator generates an instance of a zanzibar http client
@@ -444,10 +443,6 @@ func newHTTPClientGenerator(templates *Template, packageHelper *PackageHelper) *
 func (g *httpClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	spec, ok := g.genSpecMap.Load(instanceFQN(instance))
-	if ok {
-		return spec, nil
-	}
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -469,7 +464,6 @@ func (g *httpClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-	g.genSpecMap.Store(instanceFQN(instance), clientSpec)
 	return clientSpec, nil
 }
 
@@ -557,7 +551,6 @@ type tchannelClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 	validator     *validator2.Validator
-	genSpecMap    sync.Map
 }
 
 // newTChannelClientGenerator generates an instance of a zanzibar TChannel client
@@ -580,11 +573,6 @@ func getExposedMethodValidator() *validator2.Validator {
 func (g *tchannelClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	spec, ok := g.genSpecMap.Load(instanceFQN(instance))
-	if ok {
-		return spec, nil
-	}
-
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -606,7 +594,6 @@ func (g *tchannelClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-	g.genSpecMap.Store(instanceFQN(instance), clientSpec)
 	return clientSpec, nil
 }
 
@@ -762,7 +749,6 @@ type customClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 	validator     *validator2.Validator
-	genSpecMap    sync.Map
 }
 
 // newCustomClientGenerator generates custom client spec for future use in ClientsInitGenerator
@@ -779,11 +765,6 @@ func newCustomClientGenerator(templates *Template, packageHelper *PackageHelper)
 func (g *customClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	spec, ok := g.genSpecMap.Load(instanceFQN(instance))
-	if ok {
-		return spec, nil
-	}
-
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -805,7 +786,6 @@ func (g *customClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-	g.genSpecMap.Store(instanceFQN(instance), clientSpec)
 	return clientSpec, nil
 }
 
@@ -862,7 +842,6 @@ type gRPCClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 	validator     *validator2.Validator
-	genSpecMap    sync.Map
 }
 
 // NewgrpcClientGenerator generates an instance of a zanzibar grpc client
@@ -879,10 +858,6 @@ func newGRPCClientGenerator(templates *Template, packageHelper *PackageHelper) *
 func (g *gRPCClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	spec, ok := g.genSpecMap.Load(instanceFQN(instance))
-	if ok {
-		return spec, nil
-	}
 	// Parse the client config from the endpoint YAML file
 	clientConfig, err := newClientConfig(instance.YAMLFileRaw, g.validator)
 	if err != nil {
@@ -904,7 +879,6 @@ func (g *gRPCClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-	g.genSpecMap.Store(instanceFQN(instance), clientSpec)
 	return clientSpec, nil
 }
 
@@ -991,17 +965,12 @@ func (g *gRPCClientGenerator) Generate(
 type EndpointGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
-	genSpecMap    sync.Map
 }
 
 // ComputeSpec computes the endpoint specs for a group of endpoints
 func (g *EndpointGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	spec, ok := g.genSpecMap.Load(instanceFQN(instance))
-	if ok {
-		return spec, nil
-	}
 	endpointYamls := []string{}
 	endpointSpecs := []*EndpointSpec{}
 	clientSpecs := readClientDependencySpecs(instance)
@@ -1060,7 +1029,6 @@ func (g *EndpointGenerator) ComputeSpec(
 		}
 		endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 	}
-	g.genSpecMap.Store(instanceFQN(instance), endpointSpecs)
 	return endpointSpecs, nil
 }
 
