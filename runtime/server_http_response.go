@@ -133,7 +133,7 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		zap.String("host", req.httpRequest.Host),
 		zap.Time("timestamp-started", req.startTime),
 		zap.Time("timestamp-finished", res.finishTime),
-		zap.Int("statusCode", res.StatusCode)
+		zap.Int("statusCode", res.StatusCode),
 	}
 
 	for k, v := range res.Headers() {
