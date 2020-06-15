@@ -21,7 +21,6 @@
 package benchgateway
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -31,6 +30,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/uber/zanzibar/test/lib/util"
 
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -46,7 +47,7 @@ type BenchGateway struct {
 
 	backendsHTTP     map[string]*testBackend.TestHTTPBackend
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
-	logBytes         *bytes.Buffer
+	logBytes         *util.Buffer
 	readLogs         bool
 	logMessages      map[string][]testGateway.LogMessage
 	httpClient       *http.Client
@@ -133,7 +134,7 @@ func CreateGateway(
 		},
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
-		logBytes:         bytes.NewBuffer(nil),
+		logBytes:         &util.Buffer{},
 
 		readLogs:     false,
 		logMessages:  map[string][]testGateway.LogMessage{},
