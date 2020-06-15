@@ -730,7 +730,7 @@ func TestBarWithManyQueryParamsRequiredCall(t *testing.T) {
 
 	logs := gateway.AllLogs()
 
-	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request with 400 status code"]))
 	assert.Equal(t, 1, len(logs["Started Example-gateway"]))
 	assert.Equal(t, 1, len(logs["Got request with missing query string value"]))
 
