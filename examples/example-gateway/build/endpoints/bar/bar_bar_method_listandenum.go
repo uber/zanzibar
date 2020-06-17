@@ -38,7 +38,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -103,7 +103,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ListAndEnum_Args
+	var requestBody endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args
 
 	demoIdsOk := req.CheckQueryValue("demoIds")
 	if !demoIdsOk {
@@ -117,7 +117,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 
 	demoTypeOk := req.HasQueryValue("demoType")
 	if demoTypeOk {
-		var demoTypeQuery endpointsBarBar.DemoType
+		var demoTypeQuery endpointsIDlEndpointsBarBar.DemoType
 		_tmpdemoTypeQuery, ok := req.GetQueryValue("demoType")
 		if ok {
 			if err := demoTypeQuery.UnmarshalText([]byte(_tmpdemoTypeQuery)); err != nil {
@@ -128,7 +128,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.DemoType = (*endpointsBarBar.DemoType)(ptr.Int32(int32(demoTypeQuery)))
+		requestBody.DemoType = (*endpointsIDlEndpointsBarBar.DemoType)(ptr.Int32(int32(demoTypeQuery)))
 	}
 
 	demosOk := req.HasQueryValue("demos")
@@ -137,14 +137,14 @@ func (h *BarListAndEnumHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		demosQueryFinal := make([]endpointsBarBar.DemoType, len(demosQuery))
+		demosQueryFinal := make([]endpointsIDlEndpointsBarBar.DemoType, len(demosQuery))
 		for i, v := range demosQuery {
-			var _tmpv endpointsBarBar.DemoType
+			var _tmpv endpointsIDlEndpointsBarBar.DemoType
 			if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
 				req.LogAndSendQueryError(err, "enum", "demos", v)
 				return
 			}
-			demosQueryFinal[i] = endpointsBarBar.DemoType(_tmpv)
+			demosQueryFinal[i] = endpointsIDlEndpointsBarBar.DemoType(_tmpv)
 		}
 		requestBody.Demos = demosQueryFinal
 	}
@@ -195,7 +195,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsBarBar.BarException:
+		case *endpointsIDlEndpointsBarBar.BarException:
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)

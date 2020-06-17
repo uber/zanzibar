@@ -26,8 +26,8 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
-	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"go.uber.org/zap"

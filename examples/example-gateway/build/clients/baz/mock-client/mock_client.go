@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	baz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	baz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 // MockClient is a mock of Client interface

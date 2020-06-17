@@ -112,7 +112,7 @@ func newClientSpec(
 	h *PackageHelper,
 	annotate bool,
 ) (*ClientSpec, error) {
-	thriftFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
+	thriftFile := filepath.Join(h.ThriftIDLPath(), h.GetModuleIdlSubDir(false), config.IDLFile)
 	mspec, err := NewModuleSpec(thriftFile, annotate, false, h)
 
 	if err != nil {
@@ -252,7 +252,7 @@ func newGRPCClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	protoFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
+	protoFile := filepath.Join(h.ThriftIDLPath(), h.GetModuleIdlSubDir(false), config.IDLFile)
 	protoSpec, err := NewProtoModuleSpec(protoFile, false, h)
 	if err != nil {
 		return nil, errors.Wrapf(

@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type BarListAndEnumWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_ListAndEnum_Args,
+		r *endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args,
 	) (string, zanzibar.Header, error)
 }
 
@@ -76,7 +76,7 @@ type barListAndEnumWorkflow struct {
 func (w barListAndEnumWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_ListAndEnum_Args,
+	r *endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args,
 ) (string, zanzibar.Header, error) {
 	clientRequest := convertToListAndEnumClientRequest(r)
 
@@ -115,7 +115,7 @@ func (w barListAndEnumWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBarBar.BarException:
+		case *clientsIDlClientsBarBar.BarException:
 			serverErr := convertListAndEnumBarException(
 				errValue,
 			)
@@ -140,27 +140,27 @@ func (w barListAndEnumWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToListAndEnumClientRequest(in *endpointsBarBar.Bar_ListAndEnum_Args) *clientsBarBar.Bar_ListAndEnum_Args {
-	out := &clientsBarBar.Bar_ListAndEnum_Args{}
+func convertToListAndEnumClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args) *clientsIDlClientsBarBar.Bar_ListAndEnum_Args {
+	out := &clientsIDlClientsBarBar.Bar_ListAndEnum_Args{}
 
 	out.DemoIds = make([]string, len(in.DemoIds))
 	for index1, value2 := range in.DemoIds {
 		out.DemoIds[index1] = string(value2)
 	}
-	out.DemoType = (*clientsBarBar.DemoType)(in.DemoType)
-	out.Demos = make([]clientsBarBar.DemoType, len(in.Demos))
+	out.DemoType = (*clientsIDlClientsBarBar.DemoType)(in.DemoType)
+	out.Demos = make([]clientsIDlClientsBarBar.DemoType, len(in.Demos))
 	for index3, value4 := range in.Demos {
-		out.Demos[index3] = clientsBarBar.DemoType(value4)
+		out.Demos[index3] = clientsIDlClientsBarBar.DemoType(value4)
 	}
 
 	return out
 }
 
 func convertListAndEnumBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
+	clientError *clientsIDlClientsBarBar.BarException,
+) *endpointsIDlEndpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
+	serverError := &endpointsIDlEndpointsBarBar.BarException{}
 	return serverError
 }
 

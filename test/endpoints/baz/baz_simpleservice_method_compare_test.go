@@ -33,8 +33,8 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )

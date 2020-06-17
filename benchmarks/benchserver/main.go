@@ -29,7 +29,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	baz "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 )
 

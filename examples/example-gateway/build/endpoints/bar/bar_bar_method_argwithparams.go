@@ -37,7 +37,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -102,14 +102,14 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithParams_Args
+	var requestBody endpointsIDlEndpointsBarBar.Bar_ArgWithParams_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
 
 	requestBody.UUID = req.Params.Get("uuid")
 	if requestBody.Params == nil {
-		requestBody.Params = &endpointsBarBar.ParamsStruct{}
+		requestBody.Params = &endpointsIDlEndpointsBarBar.ParamsStruct{}
 	}
 	requestBody.Params.UserUUID = req.Params.Get("user-uuid")
 

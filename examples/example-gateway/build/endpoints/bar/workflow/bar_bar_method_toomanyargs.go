@@ -31,11 +31,11 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	clientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
-	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
-	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	clientsIDlClientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
+	clientsIDlClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	endpointsIDlEndpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/foo/foo"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -46,8 +46,8 @@ type BarTooManyArgsWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_TooManyArgs_Args,
-	) (*endpointsBarBar.BarResponse, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args,
+	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarTooManyArgsWorkflow creates a workflow
@@ -79,8 +79,8 @@ type barTooManyArgsWorkflow struct {
 func (w barTooManyArgsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_TooManyArgs_Args,
-) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args,
+) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -126,14 +126,14 @@ func (w barTooManyArgsWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBarBar.BarException:
+		case *clientsIDlClientsBarBar.BarException:
 			serverErr := convertTooManyArgsBarException(
 				errValue,
 			)
 
 			return nil, nil, serverErr
 
-		case *clientsFooFoo.FooException:
+		case *clientsIDlClientsFooFoo.FooException:
 			serverErr := convertTooManyArgsFooException(
 				errValue,
 			)
@@ -164,22 +164,22 @@ func (w barTooManyArgsWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args) *clientsBarBar.Bar_TooManyArgs_Args {
-	out := &clientsBarBar.Bar_TooManyArgs_Args{}
+func convertToTooManyArgsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args) *clientsIDlClientsBarBar.Bar_TooManyArgs_Args {
+	out := &clientsIDlClientsBarBar.Bar_TooManyArgs_Args{}
 
 	if in.Request != nil {
-		out.Request = &clientsBarBar.BarRequest{}
+		out.Request = &clientsIDlClientsBarBar.BarRequest{}
 		out.Request.StringField = string(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
 		out.Request.BinaryField = []byte(in.Request.BinaryField)
-		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
-		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
-		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
+		out.Request.Timestamp = clientsIDlClientsBarBar.Timestamp(in.Request.Timestamp)
+		out.Request.EnumField = clientsIDlClientsBarBar.Fruit(in.Request.EnumField)
+		out.Request.LongField = clientsIDlClientsBarBar.Long(in.Request.LongField)
 	} else {
 		out.Request = nil
 	}
 	if in.Foo != nil {
-		out.Foo = &clientsFooFoo.FooStruct{}
+		out.Foo = &clientsIDlClientsFooFoo.FooStruct{}
 		out.Foo.FooString = string(in.Foo.FooString)
 		out.Foo.FooI32 = (*int32)(in.Foo.FooI32)
 		out.Foo.FooI16 = (*int16)(in.Foo.FooI16)
@@ -190,7 +190,7 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 			out.Foo.FooMap[key1] = string(value2)
 		}
 		if in.Foo.Message != nil {
-			out.Foo.Message = &clientsFooBaseBase.Message{}
+			out.Foo.Message = &clientsIDlClientsFooBaseBase.Message{}
 			out.Foo.Message.Body = string(in.Foo.Message.Body)
 		} else {
 			out.Foo.Message = nil
@@ -203,45 +203,45 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 }
 
 func convertTooManyArgsBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
+	clientError *clientsIDlClientsBarBar.BarException,
+) *endpointsIDlEndpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
+	serverError := &endpointsIDlEndpointsBarBar.BarException{}
 	return serverError
 }
 func convertTooManyArgsFooException(
-	clientError *clientsFooFoo.FooException,
-) *endpointsFooFoo.FooException {
+	clientError *clientsIDlClientsFooFoo.FooException,
+) *endpointsIDlEndpointsFooFoo.FooException {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsFooFoo.FooException{}
+	serverError := &endpointsIDlEndpointsFooFoo.FooException{}
 	return serverError
 }
 
-func convertBarTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	out := &endpointsBarBar.BarResponse{}
+func convertBarTooManyArgsClientResponse(in *clientsIDlClientsBarBar.BarResponse) *endpointsIDlEndpointsBarBar.BarResponse {
+	out := &endpointsIDlEndpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+	out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 	for key1, value2 := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
+		out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key1)] = int32(value2)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 	for key3, value4 := range in.MapIntWithoutRange {
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
-	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+	var convertBarResponseHelper5 func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse) {
 		if in != nil {
-			out = &endpointsBarBar.BarResponse{}
+			out = &endpointsIDlEndpointsBarBar.BarResponse{}
 			out.StringField = string(in.StringField)
 			out.IntWithRange = int32(in.IntWithRange)
 			out.IntWithoutRange = int32(in.IntWithoutRange)
-			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 			for key6, value7 := range in.MapIntWithRange {
-				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+				out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key6)] = int32(value7)
 			}
 			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 			for key8, value9 := range in.MapIntWithoutRange {

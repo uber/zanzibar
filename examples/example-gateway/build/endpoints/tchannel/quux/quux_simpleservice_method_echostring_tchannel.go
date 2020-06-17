@@ -34,7 +34,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	endpointsTchannelQuuxQuux "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/quux/quux"
+	endpointsIDlEndpointsTchannelQuuxQuux "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
 	customQuux "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/quux"
 
 	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
@@ -96,9 +96,9 @@ func (h *SimpleServiceEchoStringHandler) Handle(
 
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 
-	var res endpointsTchannelQuuxQuux.SimpleService_EchoString_Result
+	var res endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Result
 
-	var req endpointsTchannelQuuxQuux.SimpleService_EchoString_Args
+	var req endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
@@ -137,8 +137,8 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	hostPort string,
-	req *endpointsTchannelQuuxQuux.SimpleService_EchoString_Args,
-	res *endpointsTchannelQuuxQuux.SimpleService_EchoString_Result,
+	req *endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Args,
+	res *endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {

@@ -35,7 +35,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
 
 	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
@@ -103,9 +103,9 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 		)
 	}
 
-	var res endpointsTchannelBazBaz.SimpleService_AnotherCall_Result
+	var res endpointsIDlEndpointsTchannelBazBaz.SimpleService_AnotherCall_Result
 
-	var req endpointsTchannelBazBaz.SimpleService_AnotherCall_Args
+	var req endpointsIDlEndpointsTchannelBazBaz.SimpleService_AnotherCall_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
@@ -132,19 +132,19 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *endpointsTchannelBazBaz.AuthErr:
+		case *endpointsIDlEndpointsTchannelBazBaz.AuthErr:
 			ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
-				"app-error": "endpointsTchannelBazBaz.AuthErr",
+				"app-error": "endpointsIDlEndpointsTchannelBazBaz.AuthErr",
 			})
 			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 			if v == nil {
 				h.Deps.Default.ContextLogger.Error(
 					ctx,
-					"Endpoint failure: handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+					"Endpoint failure: handler returned non-nil error type *endpointsIDlEndpointsTchannelBazBaz.AuthErr but nil value",
 					zap.Error(err),
 				)
 				return false, nil, resHeaders, errors.Errorf(
-					"%s.%s (%s) handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+					"%s.%s (%s) handler returned non-nil error type *endpointsIDlEndpointsTchannelBazBaz.AuthErr but nil value",
 					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 				)
 			}
@@ -187,8 +187,8 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	hostPort string,
-	req *endpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
-	res *endpointsTchannelBazBaz.SimpleService_AnotherCall_Result,
+	req *endpointsIDlEndpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
+	res *endpointsIDlEndpointsTchannelBazBaz.SimpleService_AnotherCall_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {

@@ -31,9 +31,9 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -111,14 +111,14 @@ func (w simpleServiceSillyNoopWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertSillyNoopAuthErr(
 				errValue,
 			)
 
 			return nil, serverErr
 
-		case *clientsBazBase.ServerErr:
+		case *clientsIDlClientsBazBase.ServerErr:
 			serverErr := convertSillyNoopServerErr(
 				errValue,
 			)
@@ -143,16 +143,16 @@ func (w simpleServiceSillyNoopWorkflow) Handle(
 }
 
 func convertSillyNoopAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }
 func convertSillyNoopServerErr(
-	clientError *clientsBazBase.ServerErr,
-) *endpointsBazBaz.ServerErr {
+	clientError *clientsIDlClientsBazBase.ServerErr,
+) *endpointsIDlEndpointsBazBaz.ServerErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.ServerErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.ServerErr{}
 	return serverError
 }

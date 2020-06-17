@@ -38,8 +38,8 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 func TestTransSuccessfulRequestOKResponse(t *testing.T) {
@@ -78,12 +78,12 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 	fakeTrans := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Trans_Args,
-	) (*clientsBazBase.TransStruct, map[string]string, error) {
+		args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
+	) (*clientsIDlClientsBazBase.TransStruct, map[string]string, error) {
 
 		var resHeaders map[string]string
 
-		var res clientsBazBase.TransStruct
+		var res clientsIDlClientsBazBase.TransStruct
 
 		clientResponse := []byte(`{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
 		err := json.Unmarshal(clientResponse, &res)

@@ -30,15 +30,15 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 // SecondServiceEchoBinaryFunc is the handler function for "echoBinary" method of thrift service "SecondService".
 type SecondServiceEchoBinaryFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoBinary_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
 ) ([]byte, map[string]string, error)
 
 // NewSecondServiceEchoBinaryHandler wraps a handler function so it can be registered with a thrift server.
@@ -57,8 +57,8 @@ func (h *SecondServiceEchoBinaryHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoBinary_Args
-	var res clientsBazBaz.SecondService_EchoBinary_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoBinary_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoBinary_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -77,7 +77,7 @@ func (h *SecondServiceEchoBinaryHandler) Handle(
 type SecondServiceEchoBoolFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoBool_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
 ) (bool, map[string]string, error)
 
 // NewSecondServiceEchoBoolHandler wraps a handler function so it can be registered with a thrift server.
@@ -96,8 +96,8 @@ func (h *SecondServiceEchoBoolHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoBool_Args
-	var res clientsBazBaz.SecondService_EchoBool_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoBool_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoBool_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -116,7 +116,7 @@ func (h *SecondServiceEchoBoolHandler) Handle(
 type SecondServiceEchoDoubleFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoDouble_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
 ) (float64, map[string]string, error)
 
 // NewSecondServiceEchoDoubleHandler wraps a handler function so it can be registered with a thrift server.
@@ -135,8 +135,8 @@ func (h *SecondServiceEchoDoubleHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoDouble_Args
-	var res clientsBazBaz.SecondService_EchoDouble_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoDouble_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoDouble_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -155,8 +155,8 @@ func (h *SecondServiceEchoDoubleHandler) Handle(
 type SecondServiceEchoEnumFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoEnum_Args,
-) (clientsBazBaz.Fruit, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
+) (clientsIDlClientsBazBaz.Fruit, map[string]string, error)
 
 // NewSecondServiceEchoEnumHandler wraps a handler function so it can be registered with a thrift server.
 func NewSecondServiceEchoEnumHandler(f SecondServiceEchoEnumFunc) zanzibar.TChannelHandler {
@@ -174,8 +174,8 @@ func (h *SecondServiceEchoEnumHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoEnum_Args
-	var res clientsBazBaz.SecondService_EchoEnum_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoEnum_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoEnum_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -194,7 +194,7 @@ func (h *SecondServiceEchoEnumHandler) Handle(
 type SecondServiceEchoI16Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI16_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
 ) (int16, map[string]string, error)
 
 // NewSecondServiceEchoI16Handler wraps a handler function so it can be registered with a thrift server.
@@ -213,8 +213,8 @@ func (h *SecondServiceEchoI16Handler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoI16_Args
-	var res clientsBazBaz.SecondService_EchoI16_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoI16_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoI16_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -233,7 +233,7 @@ func (h *SecondServiceEchoI16Handler) Handle(
 type SecondServiceEchoI32Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI32_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
 ) (int32, map[string]string, error)
 
 // NewSecondServiceEchoI32Handler wraps a handler function so it can be registered with a thrift server.
@@ -252,8 +252,8 @@ func (h *SecondServiceEchoI32Handler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoI32_Args
-	var res clientsBazBaz.SecondService_EchoI32_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoI32_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoI32_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -272,7 +272,7 @@ func (h *SecondServiceEchoI32Handler) Handle(
 type SecondServiceEchoI64Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI64_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
 ) (int64, map[string]string, error)
 
 // NewSecondServiceEchoI64Handler wraps a handler function so it can be registered with a thrift server.
@@ -291,8 +291,8 @@ func (h *SecondServiceEchoI64Handler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoI64_Args
-	var res clientsBazBaz.SecondService_EchoI64_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoI64_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoI64_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -311,7 +311,7 @@ func (h *SecondServiceEchoI64Handler) Handle(
 type SecondServiceEchoI8Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI8_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
 ) (int8, map[string]string, error)
 
 // NewSecondServiceEchoI8Handler wraps a handler function so it can be registered with a thrift server.
@@ -330,8 +330,8 @@ func (h *SecondServiceEchoI8Handler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoI8_Args
-	var res clientsBazBaz.SecondService_EchoI8_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoI8_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoI8_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -350,7 +350,7 @@ func (h *SecondServiceEchoI8Handler) Handle(
 type SecondServiceEchoStringFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoString_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
 ) (string, map[string]string, error)
 
 // NewSecondServiceEchoStringHandler wraps a handler function so it can be registered with a thrift server.
@@ -369,8 +369,8 @@ func (h *SecondServiceEchoStringHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoString_Args
-	var res clientsBazBaz.SecondService_EchoString_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoString_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoString_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -389,7 +389,7 @@ func (h *SecondServiceEchoStringHandler) Handle(
 type SecondServiceEchoStringListFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStringList_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
 ) ([]string, map[string]string, error)
 
 // NewSecondServiceEchoStringListHandler wraps a handler function so it can be registered with a thrift server.
@@ -408,8 +408,8 @@ func (h *SecondServiceEchoStringListHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoStringList_Args
-	var res clientsBazBaz.SecondService_EchoStringList_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoStringList_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoStringList_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -428,8 +428,8 @@ func (h *SecondServiceEchoStringListHandler) Handle(
 type SecondServiceEchoStringMapFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStringMap_Args,
-) (map[string]*clientsBazBase.BazResponse, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
+) (map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 // NewSecondServiceEchoStringMapHandler wraps a handler function so it can be registered with a thrift server.
 func NewSecondServiceEchoStringMapHandler(f SecondServiceEchoStringMapFunc) zanzibar.TChannelHandler {
@@ -447,8 +447,8 @@ func (h *SecondServiceEchoStringMapHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoStringMap_Args
-	var res clientsBazBaz.SecondService_EchoStringMap_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoStringMap_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -467,7 +467,7 @@ func (h *SecondServiceEchoStringMapHandler) Handle(
 type SecondServiceEchoStringSetFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStringSet_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
 ) (map[string]struct{}, map[string]string, error)
 
 // NewSecondServiceEchoStringSetHandler wraps a handler function so it can be registered with a thrift server.
@@ -486,8 +486,8 @@ func (h *SecondServiceEchoStringSetHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoStringSet_Args
-	var res clientsBazBaz.SecondService_EchoStringSet_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoStringSet_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -506,8 +506,8 @@ func (h *SecondServiceEchoStringSetHandler) Handle(
 type SecondServiceEchoStructListFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStructList_Args,
-) ([]*clientsBazBase.BazResponse, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
+) ([]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 // NewSecondServiceEchoStructListHandler wraps a handler function so it can be registered with a thrift server.
 func NewSecondServiceEchoStructListHandler(f SecondServiceEchoStructListFunc) zanzibar.TChannelHandler {
@@ -525,8 +525,8 @@ func (h *SecondServiceEchoStructListHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoStructList_Args
-	var res clientsBazBaz.SecondService_EchoStructList_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoStructList_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoStructList_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -545,8 +545,8 @@ func (h *SecondServiceEchoStructListHandler) Handle(
 type SecondServiceEchoStructSetFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStructSet_Args,
-) ([]*clientsBazBase.BazResponse, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
+) ([]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 // NewSecondServiceEchoStructSetHandler wraps a handler function so it can be registered with a thrift server.
 func NewSecondServiceEchoStructSetHandler(f SecondServiceEchoStructSetFunc) zanzibar.TChannelHandler {
@@ -564,8 +564,8 @@ func (h *SecondServiceEchoStructSetHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoStructSet_Args
-	var res clientsBazBaz.SecondService_EchoStructSet_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoStructSet_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -584,8 +584,8 @@ func (h *SecondServiceEchoStructSetHandler) Handle(
 type SecondServiceEchoTypedefFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoTypedef_Args,
-) (clientsBazBase.UUID, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
+) (clientsIDlClientsBazBase.UUID, map[string]string, error)
 
 // NewSecondServiceEchoTypedefHandler wraps a handler function so it can be registered with a thrift server.
 func NewSecondServiceEchoTypedefHandler(f SecondServiceEchoTypedefFunc) zanzibar.TChannelHandler {
@@ -603,8 +603,8 @@ func (h *SecondServiceEchoTypedefHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoTypedef_Args
-	var res clientsBazBaz.SecondService_EchoTypedef_Result
+	var req clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args
+	var res clientsIDlClientsBazBaz.SecondService_EchoTypedef_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -623,7 +623,7 @@ func (h *SecondServiceEchoTypedefHandler) Handle(
 type SimpleServiceCallFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_Call_Args,
+	args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
 ) (map[string]string, error)
 
 // NewSimpleServiceCallHandler wraps a handler function so it can be registered with a thrift server.
@@ -642,8 +642,8 @@ func (h *SimpleServiceCallHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_Call_Args
-	var res clientsBazBaz.SimpleService_Call_Result
+	var req clientsIDlClientsBazBaz.SimpleService_Call_Args
+	var res clientsIDlClientsBazBaz.SimpleService_Call_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -652,7 +652,7 @@ func (h *SimpleServiceCallHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for call returned non-nil error type *AuthErr but nil value",
@@ -671,8 +671,8 @@ func (h *SimpleServiceCallHandler) Handle(
 type SimpleServiceCompareFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_Compare_Args,
-) (*clientsBazBase.BazResponse, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
+) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServiceCompareHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChannelHandler {
@@ -690,8 +690,8 @@ func (h *SimpleServiceCompareHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_Compare_Args
-	var res clientsBazBaz.SimpleService_Compare_Result
+	var req clientsIDlClientsBazBaz.SimpleService_Compare_Args
+	var res clientsIDlClientsBazBaz.SimpleService_Compare_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -700,14 +700,14 @@ func (h *SimpleServiceCompareHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for compare returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for compare returned non-nil error type *OtherAuthErr but nil value",
@@ -728,8 +728,8 @@ func (h *SimpleServiceCompareHandler) Handle(
 type SimpleServiceGetProfileFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_GetProfile_Args,
-) (*clientsBazBaz.GetProfileResponse, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
+) (*clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error)
 
 // NewSimpleServiceGetProfileHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceGetProfileHandler(f SimpleServiceGetProfileFunc) zanzibar.TChannelHandler {
@@ -747,8 +747,8 @@ func (h *SimpleServiceGetProfileHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_GetProfile_Args
-	var res clientsBazBaz.SimpleService_GetProfile_Result
+	var req clientsIDlClientsBazBaz.SimpleService_GetProfile_Args
+	var res clientsIDlClientsBazBaz.SimpleService_GetProfile_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -757,7 +757,7 @@ func (h *SimpleServiceGetProfileHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for getProfile returned non-nil error type *AuthErr but nil value",
@@ -778,8 +778,8 @@ func (h *SimpleServiceGetProfileHandler) Handle(
 type SimpleServiceHeaderSchemaFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_HeaderSchema_Args,
-) (*clientsBazBaz.HeaderSchema, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
+) (*clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error)
 
 // NewSimpleServiceHeaderSchemaHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceHeaderSchemaHandler(f SimpleServiceHeaderSchemaFunc) zanzibar.TChannelHandler {
@@ -797,8 +797,8 @@ func (h *SimpleServiceHeaderSchemaHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_HeaderSchema_Args
-	var res clientsBazBaz.SimpleService_HeaderSchema_Result
+	var req clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args
+	var res clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -807,14 +807,14 @@ func (h *SimpleServiceHeaderSchemaHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for headerSchema returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for headerSchema returned non-nil error type *OtherAuthErr but nil value",
@@ -835,7 +835,7 @@ func (h *SimpleServiceHeaderSchemaHandler) Handle(
 type SimpleServicePingFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-) (*clientsBazBase.BazResponse, map[string]string, error)
+) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServicePingHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChannelHandler {
@@ -853,8 +853,8 @@ func (h *SimpleServicePingHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_Ping_Args
-	var res clientsBazBaz.SimpleService_Ping_Result
+	var req clientsIDlClientsBazBaz.SimpleService_Ping_Args
+	var res clientsIDlClientsBazBaz.SimpleService_Ping_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -891,8 +891,8 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_SillyNoop_Args
-	var res clientsBazBaz.SimpleService_SillyNoop_Result
+	var req clientsIDlClientsBazBaz.SimpleService_SillyNoop_Args
+	var res clientsIDlClientsBazBaz.SimpleService_SillyNoop_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -901,14 +901,14 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for sillyNoop returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBase.ServerErr:
+		case *clientsIDlClientsBazBase.ServerErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for sillyNoop returned non-nil error type *ServerErr but nil value",
@@ -945,8 +945,8 @@ func (h *SimpleServiceTestUUIDHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_TestUuid_Args
-	var res clientsBazBaz.SimpleService_TestUuid_Result
+	var req clientsIDlClientsBazBaz.SimpleService_TestUuid_Args
+	var res clientsIDlClientsBazBaz.SimpleService_TestUuid_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -964,8 +964,8 @@ func (h *SimpleServiceTestUUIDHandler) Handle(
 type SimpleServiceTransFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_Trans_Args,
-) (*clientsBazBase.TransStruct, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
+) (*clientsIDlClientsBazBase.TransStruct, map[string]string, error)
 
 // NewSimpleServiceTransHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceTransHandler(f SimpleServiceTransFunc) zanzibar.TChannelHandler {
@@ -983,8 +983,8 @@ func (h *SimpleServiceTransHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_Trans_Args
-	var res clientsBazBaz.SimpleService_Trans_Result
+	var req clientsIDlClientsBazBaz.SimpleService_Trans_Args
+	var res clientsIDlClientsBazBaz.SimpleService_Trans_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -993,14 +993,14 @@ func (h *SimpleServiceTransHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for trans returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for trans returned non-nil error type *OtherAuthErr but nil value",
@@ -1021,8 +1021,8 @@ func (h *SimpleServiceTransHandler) Handle(
 type SimpleServiceTransHeadersFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_TransHeaders_Args,
-) (*clientsBazBase.TransHeaders, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
+) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 
 // NewSimpleServiceTransHeadersHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceTransHeadersHandler(f SimpleServiceTransHeadersFunc) zanzibar.TChannelHandler {
@@ -1040,8 +1040,8 @@ func (h *SimpleServiceTransHeadersHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_TransHeaders_Args
-	var res clientsBazBaz.SimpleService_TransHeaders_Result
+	var req clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args
+	var res clientsIDlClientsBazBaz.SimpleService_TransHeaders_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -1050,14 +1050,14 @@ func (h *SimpleServiceTransHeadersHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for transHeaders returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for transHeaders returned non-nil error type *OtherAuthErr but nil value",
@@ -1078,8 +1078,8 @@ func (h *SimpleServiceTransHeadersHandler) Handle(
 type SimpleServiceTransHeadersNoReqFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-) (*clientsBazBase.TransHeaders, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 
 // NewSimpleServiceTransHeadersNoReqHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceTransHeadersNoReqHandler(f SimpleServiceTransHeadersNoReqFunc) zanzibar.TChannelHandler {
@@ -1097,8 +1097,8 @@ func (h *SimpleServiceTransHeadersNoReqHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_TransHeadersNoReq_Args
-	var res clientsBazBaz.SimpleService_TransHeadersNoReq_Result
+	var req clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args
+	var res clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -1107,7 +1107,7 @@ func (h *SimpleServiceTransHeadersNoReqHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for transHeadersNoReq returned non-nil error type *AuthErr but nil value",
@@ -1128,8 +1128,8 @@ func (h *SimpleServiceTransHeadersNoReqHandler) Handle(
 type SimpleServiceTransHeadersTypeFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_TransHeadersType_Args,
-) (*clientsBazBaz.TransHeaderType, map[string]string, error)
+	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
+) (*clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error)
 
 // NewSimpleServiceTransHeadersTypeHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceTransHeadersTypeHandler(f SimpleServiceTransHeadersTypeFunc) zanzibar.TChannelHandler {
@@ -1147,8 +1147,8 @@ func (h *SimpleServiceTransHeadersTypeHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_TransHeadersType_Args
-	var res clientsBazBaz.SimpleService_TransHeadersType_Result
+	var req clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args
+	var res clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -1157,14 +1157,14 @@ func (h *SimpleServiceTransHeadersTypeHandler) Handle(
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for transHeadersType returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for transHeadersType returned non-nil error type *OtherAuthErr but nil value",
@@ -1203,8 +1203,8 @@ func (h *SimpleServiceURLTestHandler) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_UrlTest_Args
-	var res clientsBazBaz.SimpleService_UrlTest_Result
+	var req clientsIDlClientsBazBaz.SimpleService_UrlTest_Args
+	var res clientsIDlClientsBazBaz.SimpleService_UrlTest_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err

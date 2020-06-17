@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -124,13 +124,13 @@ func (h *BarHelloWorldHandler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsBarBar.BarException:
+		case *endpointsIDlEndpointsBarBar.BarException:
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
 			return
 
-		case *endpointsBarBar.SeeOthersRedirection:
+		case *endpointsIDlEndpointsBarBar.SeeOthersRedirection:
 			res.WriteJSONBytes(303, cliRespHeaders, nil)
 			return
 

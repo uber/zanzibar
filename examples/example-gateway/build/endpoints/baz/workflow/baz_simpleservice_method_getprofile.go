@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -43,8 +43,8 @@ type SimpleServiceGetProfileWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBazBaz.SimpleService_GetProfile_Args,
-	) (*endpointsBazBaz.GetProfileResponse, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBazBaz.SimpleService_GetProfile_Args,
+	) (*endpointsIDlEndpointsBazBaz.GetProfileResponse, zanzibar.Header, error)
 }
 
 // NewSimpleServiceGetProfileWorkflow creates a workflow
@@ -76,8 +76,8 @@ type simpleServiceGetProfileWorkflow struct {
 func (w simpleServiceGetProfileWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_GetProfile_Args,
-) (*endpointsBazBaz.GetProfileResponse, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBazBaz.SimpleService_GetProfile_Args,
+) (*endpointsIDlEndpointsBazBaz.GetProfileResponse, zanzibar.Header, error) {
 	clientRequest := convertToGetProfileClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -115,7 +115,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertGetProfileAuthErr(
 				errValue,
 			)
@@ -140,12 +140,12 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToGetProfileClientRequest(in *endpointsBazBaz.SimpleService_GetProfile_Args) *clientsBazBaz.SimpleService_GetProfile_Args {
-	out := &clientsBazBaz.SimpleService_GetProfile_Args{}
+func convertToGetProfileClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_GetProfile_Args) *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args {
+	out := &clientsIDlClientsBazBaz.SimpleService_GetProfile_Args{}
 
 	if in.Request != nil {
-		out.Request = &clientsBazBaz.GetProfileRequest{}
-		out.Request.Target = clientsBazBaz.UUID(in.Request.Target)
+		out.Request = &clientsIDlClientsBazBaz.GetProfileRequest{}
+		out.Request.Target = clientsIDlClientsBazBaz.UUID(in.Request.Target)
 	} else {
 		out.Request = nil
 	}
@@ -154,44 +154,44 @@ func convertToGetProfileClientRequest(in *endpointsBazBaz.SimpleService_GetProfi
 }
 
 func convertGetProfileAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }
 
-func convertSimpleServiceGetProfileClientResponse(in *clientsBazBaz.GetProfileResponse) *endpointsBazBaz.GetProfileResponse {
-	out := &endpointsBazBaz.GetProfileResponse{}
+func convertSimpleServiceGetProfileClientResponse(in *clientsIDlClientsBazBaz.GetProfileResponse) *endpointsIDlEndpointsBazBaz.GetProfileResponse {
+	out := &endpointsIDlEndpointsBazBaz.GetProfileResponse{}
 
-	out.Payloads = make([]*endpointsBazBaz.Profile, len(in.Payloads))
+	out.Payloads = make([]*endpointsIDlEndpointsBazBaz.Profile, len(in.Payloads))
 	for index1, value2 := range in.Payloads {
 		if value2 != nil {
-			out.Payloads[index1] = &endpointsBazBaz.Profile{}
+			out.Payloads[index1] = &endpointsIDlEndpointsBazBaz.Profile{}
 			if in.Payloads[index1].Recur1 != nil {
-				out.Payloads[index1].Recur1 = &endpointsBazBaz.Recur1{}
-				out.Payloads[index1].Recur1.Field1 = make(map[endpointsBazBaz.UUID]*endpointsBazBaz.Recur2, len(in.Payloads[index1].Recur1.Field1))
+				out.Payloads[index1].Recur1 = &endpointsIDlEndpointsBazBaz.Recur1{}
+				out.Payloads[index1].Recur1.Field1 = make(map[endpointsIDlEndpointsBazBaz.UUID]*endpointsIDlEndpointsBazBaz.Recur2, len(in.Payloads[index1].Recur1.Field1))
 				for key3, value4 := range in.Payloads[index1].Recur1.Field1 {
 					if value4 != nil {
-						out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)] = &endpointsBazBaz.Recur2{}
+						out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)] = &endpointsIDlEndpointsBazBaz.Recur2{}
 						if in.Payloads[index1].Recur1.Field1[key3].Field21 != nil {
-							out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)].Field21 = &endpointsBazBaz.Recur3{}
+							out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)].Field21 = &endpointsIDlEndpointsBazBaz.Recur3{}
 							if in.Payloads[index1] != nil && in.Payloads[index1].Recur1 != nil && in.Payloads[index1].Recur1.Field1[key3] != nil && in.Payloads[index1].Recur1.Field1[key3].Field21 != nil {
-								out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)].Field21.Field31 = endpointsBazBaz.UUID(in.Payloads[index1].Recur1.Field1[key3].Field21.Field31)
+								out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)].Field21.Field31 = endpointsIDlEndpointsBazBaz.UUID(in.Payloads[index1].Recur1.Field1[key3].Field21.Field31)
 							}
 						} else {
-							out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)].Field21 = nil
+							out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)].Field21 = nil
 						}
 						if in.Payloads[index1].Recur1.Field1[key3].Field22 != nil {
-							out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)].Field22 = &endpointsBazBaz.Recur3{}
+							out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)].Field22 = &endpointsIDlEndpointsBazBaz.Recur3{}
 							if in.Payloads[index1] != nil && in.Payloads[index1].Recur1 != nil && in.Payloads[index1].Recur1.Field1[key3] != nil && in.Payloads[index1].Recur1.Field1[key3].Field22 != nil {
-								out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)].Field22.Field31 = endpointsBazBaz.UUID(in.Payloads[index1].Recur1.Field1[key3].Field22.Field31)
+								out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)].Field22.Field31 = endpointsIDlEndpointsBazBaz.UUID(in.Payloads[index1].Recur1.Field1[key3].Field22.Field31)
 							}
 						} else {
-							out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)].Field22 = nil
+							out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)].Field22 = nil
 						}
 					} else {
-						out.Payloads[index1].Recur1.Field1[endpointsBazBaz.UUID(key3)] = nil
+						out.Payloads[index1].Recur1.Field1[endpointsIDlEndpointsBazBaz.UUID(key3)] = nil
 					}
 				}
 			} else {

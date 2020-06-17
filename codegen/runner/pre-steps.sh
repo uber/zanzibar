@@ -32,7 +32,10 @@ THRIFTRW_SRCS="$(echo "$THRIFTRW_SRCS" | xargs -n1 | sort | uniq)"
 
 DIRNAME="$(dirname "$0")"
 EASY_JSON_RAW_DIR="$DIRNAME/../../scripts/easy_json"
-EASY_JSON_DIR="$(cd "$EASY_JSON_RAW_DIR";pwd)"
+EASY_JSON_DIR="$(
+	cd "$EASY_JSON_RAW_DIR"
+	pwd
+)"
 EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
 EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 RESOLVE_THRIFT_FILE="$DIRNAME/../../scripts/resolve_thrift/main.go"
@@ -42,22 +45,28 @@ RESOLVE_I64_BINARY="$DIRNAME/../../scripts/resolve_i64/resolve_i64"
 
 if [[ -d "$DIRNAME/../../vendor" ]]; then
 	THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
-	THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
+	THRIFTRW_DIR="$(
+		cd "$THRIFTRW_RAW_DIR"
+		pwd
+	)"
 	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
 	THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
 else
 	THRIFTRW_RAW_DIR="$DIRNAME/../../../../../go.uber.org/thriftrw"
-	THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
+	THRIFTRW_DIR="$(
+		cd "$THRIFTRW_RAW_DIR"
+		pwd
+	)"
 	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
 	THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
 fi
 
 start=$(date +%s)
-echo "$start" > .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
+echo "$start" >.TMP_ZANZIBAR_TIMESTAMP_FILE.txt
 
 go build -o "$THRIFTRW_BINARY" "$THRIFTRW_MAIN_FILE"
 end=$(date +%s)
-runtime=$((end-start))
+runtime=$((end - start))
 echo "Compiled thriftrw : +$runtime"
 
 echo "Generating Go code from Thrift files"
@@ -87,15 +96,15 @@ Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
 echo "Generating Go code from Proto files"
 found_protos=$(find "$IDL_DIR" -name "*.proto")
 for proto_file in ${found_protos}; do
-  # We are not generating clients here, just (de)serializers.
-  proto_path="$ABS_IDL_DIR"
-  gencode_path="$ABS_GENCODE_DIR"
-  mkdir -p "$gencode_path"
-  proto_file="$PWD/$proto_file"
-  protoc --proto_path="$proto_path" \
-        --proto_path=./vendor/github.com/gogo/protobuf/protobuf \
-        --gogoslick_out="$GOGO_WKT_COMPATIBILITY":"$gencode_path" \
-        "$proto_file"
+	# We are not generating clients here, just (de)serializers.
+	proto_path="$ABS_IDL_DIR"
+	gencode_path="$ABS_GENCODE_DIR"
+	mkdir -p "$gencode_path"
+	proto_file="$PWD/$proto_file"
+	protoc --proto_path="$proto_path" \
+		--proto_path=./vendor/github.com/gogo/protobuf/protobuf \
+		--gogoslick_out="$GOGO_WKT_COMPATIBILITY":"$gencode_path" \
+		"$proto_file"
 done
 
 echo "Generating YARPC clients from Proto files"
@@ -125,23 +134,31 @@ for config_file in ${config_files}; do
 			proto_path="$ABS_IDL_DIR"
 			gencode_path="$ABS_GENCODE_DIR"
 			mkdir -p "$gencode_path"
-			proto_file="$ABS_IDL_DIR/$proto_file"
+			if [[ ${config_file} != *"/selective-gateway"* ]]; then
+				module_prefix="clients-idl"
+				if [[ ${config_file} == *"/endpoints"* ]]; then
+					module_prefix="endpoints-idl"
+				fi
+				proto_file="$ABS_IDL_DIR/$module_prefix/$proto_file"
+			else
+				proto_file="$ABS_IDL_DIR/$proto_file"
+			fi
 			protoc --proto_path="$proto_path" \
-            --proto_path=./vendor/github.com/gogo/protobuf/protobuf \
-            --gogoslick_out="$GOGO_WKT_COMPATIBILITY":"$gencode_path" \
-            --yarpc-go_out="$gencode_path" \
-            "$proto_file"
+				--proto_path=./vendor/github.com/gogo/protobuf/protobuf \
+				--gogoslick_out="$GOGO_WKT_COMPATIBILITY":"$gencode_path" \
+				--yarpc-go_out="$gencode_path" \
+				"$proto_file"
 		fi
 	done
 done
 
 end=$(date +%s)
-runtime=$((end-start))
+runtime=$((end - start))
 echo "Generated structs : +$runtime"
 
 go build -o "$EASY_JSON_BINARY" "$EASY_JSON_FILE"
 end=$(date +%s)
-runtime=$((end-start))
+runtime=$((end - start))
 echo "Compiled easyjson : +$runtime"
 
 go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
@@ -178,13 +195,23 @@ for config_file in ${config_files}; do
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
 		found_thrifts+=" $thrift_file"
 
-		thrift_file="$IDL_DIR/$thrift_file"
+		if [[ ${config_file} != *"/selective-gateway"* ]]; then
+			module_prefix="clients-idl"
+			#echo $config_file
+			if [[ ${config_file} == *"/endpoints"* ]]; then
+				module_prefix="endpoints-idl"
+			fi
+			thrift_file="$IDL_DIR/$module_prefix/$thrift_file"
+		else
+			thrift_file="$IDL_DIR/$thrift_file"
+		fi
+
 		gen_code_dir=$(
-		"$RESOLVE_THRIFT_BINARY" "$thrift_file" "$ANNOPREFIX" | \
-			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
-			sort | uniq | xargs
+			"$RESOLVE_THRIFT_BINARY" "$thrift_file" "$ANNOPREFIX" |
+				sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" |
+				sort | uniq | xargs
 		)
-		"$RESOLVE_I64_BINARY" "$thrift_file" "/idl/"  "json.type"
+		"$RESOLVE_I64_BINARY" "$thrift_file" "/idl/" "json.type"
 		target_dirs+=" $gen_code_dir"
 	done
 done
@@ -201,5 +228,5 @@ $(find "${target_dirs[@]}" -name "*.go" | \
 goimports -w "$BUILD_DIR/gen-code/"
 
 end=$(date +%s)
-runtime=$((end-start))
+runtime=$((end - start))
 echo "Generated structs : +$runtime"

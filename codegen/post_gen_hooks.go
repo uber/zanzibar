@@ -345,10 +345,10 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		errChanSize := 0
 		shouldGenMap := map[*ModuleInstance][]*EndpointSpec{}
 		for _, instance := range instances["endpoint"] {
-			if instance.genSpec == nil {
+			if instance.GeneratedSpec() == nil {
 				continue
 			}
-			endpointSpecs := instance.genSpec.([]*EndpointSpec)
+			endpointSpecs := instance.GeneratedSpec().([]*EndpointSpec)
 			for _, endpointSpec := range endpointSpecs {
 				if endpointSpec.WorkflowType == "custom" {
 					shouldGenMap[instance] = endpointSpecs

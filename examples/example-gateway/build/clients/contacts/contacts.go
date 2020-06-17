@@ -34,7 +34,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
-	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	clientsIDlClientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 // Client defines contacts client interface.
@@ -43,8 +43,8 @@ type Client interface {
 	SaveContacts(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsContactsContacts.Contacts_SaveContacts_Args,
-	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
+		args *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
+	) (*clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error)
 	TestURLURL(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -157,8 +157,8 @@ func (c *contactsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsContactsContacts.Contacts_SaveContacts_Args,
-) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
+	r *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
+) (*clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
 		if headers == nil {
@@ -167,7 +167,7 @@ func (c *contactsClient) SaveContacts(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	var defaultRes *clientsContactsContacts.SaveContactsResponse
+	var defaultRes *clientsIDlClientsContactsContacts.SaveContactsResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient)
 
 	// Generate full URL.
@@ -210,7 +210,7 @@ func (c *contactsClient) SaveContacts(
 
 	switch res.StatusCode {
 	case 202:
-		var responseBody clientsContactsContacts.SaveContactsResponse
+		var responseBody clientsIDlClientsContactsContacts.SaveContactsResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -223,9 +223,9 @@ func (c *contactsClient) SaveContacts(
 		return &responseBody, respHeaders, nil
 
 	case 400:
-		return defaultRes, respHeaders, &clientsContactsContacts.BadRequest{}
+		return defaultRes, respHeaders, &clientsIDlClientsContactsContacts.BadRequest{}
 	case 404:
-		return defaultRes, respHeaders, &clientsContactsContacts.NotFound{}
+		return defaultRes, respHeaders, &clientsIDlClientsContactsContacts.NotFound{}
 
 	default:
 		_, err = res.ReadAll()

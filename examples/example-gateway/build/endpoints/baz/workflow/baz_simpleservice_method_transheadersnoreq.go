@@ -32,9 +32,9 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -45,7 +45,7 @@ type SimpleServiceTransHeadersNoReqWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsBazBaz.TransHeader, zanzibar.Header, error)
+	) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
 }
 
 // NewSimpleServiceTransHeadersNoReqWorkflow creates a workflow
@@ -77,7 +77,7 @@ type simpleServiceTransHeadersNoReqWorkflow struct {
 func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsBazBaz.TransHeader, zanzibar.Header, error) {
+) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := propagateHeadersTransHeadersNoReqClientRequests(nil, reqHeaders)
 
 	clientHeaders := map[string]string{}
@@ -127,7 +127,7 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertTransHeadersNoReqAuthErr(
 				errValue,
 			)
@@ -153,22 +153,22 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 }
 
 func convertTransHeadersNoReqAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }
 
-func convertSimpleServiceTransHeadersNoReqClientResponse(in *clientsBazBase.TransHeaders) *endpointsBazBaz.TransHeader {
-	out := &endpointsBazBaz.TransHeader{}
+func convertSimpleServiceTransHeadersNoReqClientResponse(in *clientsIDlClientsBazBase.TransHeaders) *endpointsIDlEndpointsBazBaz.TransHeader {
+	out := &endpointsIDlEndpointsBazBaz.TransHeader{}
 
 	return out
 }
 
-func propagateHeadersTransHeadersNoReqClientRequests(in *clientsBazBaz.SimpleService_TransHeadersNoReq_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeadersNoReq_Args {
+func propagateHeadersTransHeadersNoReqClientRequests(in *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args, headers zanzibar.Header) *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args {
 	if in == nil {
-		in = &clientsBazBaz.SimpleService_TransHeadersNoReq_Args{}
+		in = &clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args{}
 	}
 	if key, ok := headers.Get("b3"); ok {
 		if v, err := strconv.ParseBool(key); err == nil {
@@ -185,7 +185,7 @@ func propagateHeadersTransHeadersNoReqClientRequests(in *clientsBazBaz.SimpleSer
 	}
 	if key, ok := headers.Get("i2"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.NestedStruct{}
+			in.Req = &clientsIDlClientsBazBase.NestedStruct{}
 		}
 		if v, err := strconv.ParseInt(key, 10, 32); err == nil {
 			val := int32(v)
@@ -195,7 +195,7 @@ func propagateHeadersTransHeadersNoReqClientRequests(in *clientsBazBaz.SimpleSer
 	}
 	if key, ok := headers.Get("s1"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.NestedStruct{}
+			in.Req = &clientsIDlClientsBazBase.NestedStruct{}
 		}
 		in.Req.Msg = key
 

@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type SimpleServiceCallWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBazBaz.SimpleService_Call_Args,
+		r *endpointsIDlEndpointsBazBaz.SimpleService_Call_Args,
 	) (zanzibar.Header, error)
 }
 
@@ -76,7 +76,7 @@ type simpleServiceCallWorkflow struct {
 func (w simpleServiceCallWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_Call_Args,
+	r *endpointsIDlEndpointsBazBaz.SimpleService_Call_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToCallClientRequest(r)
 
@@ -123,7 +123,7 @@ func (w simpleServiceCallWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertCallAuthErr(
 				errValue,
 			)
@@ -150,11 +150,11 @@ func (w simpleServiceCallWorkflow) Handle(
 	return resHeaders, nil
 }
 
-func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *clientsBazBaz.SimpleService_Call_Args {
-	out := &clientsBazBaz.SimpleService_Call_Args{}
+func convertToCallClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_Call_Args) *clientsIDlClientsBazBaz.SimpleService_Call_Args {
+	out := &clientsIDlClientsBazBaz.SimpleService_Call_Args{}
 
 	if in.Arg != nil {
-		out.Arg = &clientsBazBaz.BazRequest{}
+		out.Arg = &clientsIDlClientsBazBaz.BazRequest{}
 		out.Arg.B1 = bool(in.Arg.B1)
 		out.Arg.S2 = string(in.Arg.S2)
 		out.Arg.I3 = int32(in.Arg.I3)
@@ -162,15 +162,15 @@ func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *cl
 		out.Arg = nil
 	}
 	out.I64Optional = (*int64)(in.I64Optional)
-	out.TestUUID = (*clientsBazBaz.UUID)(in.TestUUID)
+	out.TestUUID = (*clientsIDlClientsBazBaz.UUID)(in.TestUUID)
 
 	return out
 }
 
 func convertCallAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }

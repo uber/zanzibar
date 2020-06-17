@@ -34,7 +34,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
-	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
+	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
 )
 
 // Client defines google-now client interface.
@@ -43,7 +43,7 @@ type Client interface {
 	AddCredentials(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
+		args *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 	) (map[string]string, error)
 	CheckCredentials(
 		ctx context.Context,
@@ -157,7 +157,7 @@ func (c *googleNowClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *googleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
+	r *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {

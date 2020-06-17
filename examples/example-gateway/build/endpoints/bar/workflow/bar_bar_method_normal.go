@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -43,8 +43,8 @@ type BarNormalWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_Normal_Args,
-	) (*endpointsBarBar.BarResponse, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBarBar.Bar_Normal_Args,
+	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarNormalWorkflow creates a workflow
@@ -76,8 +76,8 @@ type barNormalWorkflow struct {
 func (w barNormalWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_Normal_Args,
-) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBarBar.Bar_Normal_Args,
+) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -115,7 +115,7 @@ func (w barNormalWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBarBar.BarException:
+		case *clientsIDlClientsBarBar.BarException:
 			serverErr := convertNormalBarException(
 				errValue,
 			)
@@ -140,17 +140,17 @@ func (w barNormalWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
-	out := &clientsBarBar.Bar_Normal_Args{}
+func convertToNormalClientRequest(in *endpointsIDlEndpointsBarBar.Bar_Normal_Args) *clientsIDlClientsBarBar.Bar_Normal_Args {
+	out := &clientsIDlClientsBarBar.Bar_Normal_Args{}
 
 	if in.Request != nil {
-		out.Request = &clientsBarBar.BarRequest{}
+		out.Request = &clientsIDlClientsBarBar.BarRequest{}
 		out.Request.StringField = string(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
 		out.Request.BinaryField = []byte(in.Request.BinaryField)
-		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
-		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
-		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
+		out.Request.Timestamp = clientsIDlClientsBarBar.Timestamp(in.Request.Timestamp)
+		out.Request.EnumField = clientsIDlClientsBarBar.Fruit(in.Request.EnumField)
+		out.Request.LongField = clientsIDlClientsBarBar.Long(in.Request.LongField)
 	} else {
 		out.Request = nil
 	}
@@ -159,38 +159,38 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 }
 
 func convertNormalBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
+	clientError *clientsIDlClientsBarBar.BarException,
+) *endpointsIDlEndpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
+	serverError := &endpointsIDlEndpointsBarBar.BarException{}
 	return serverError
 }
 
-func convertBarNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	out := &endpointsBarBar.BarResponse{}
+func convertBarNormalClientResponse(in *clientsIDlClientsBarBar.BarResponse) *endpointsIDlEndpointsBarBar.BarResponse {
+	out := &endpointsIDlEndpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+	out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 	for key1, value2 := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
+		out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key1)] = int32(value2)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 	for key3, value4 := range in.MapIntWithoutRange {
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
-	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+	var convertBarResponseHelper5 func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse) {
 		if in != nil {
-			out = &endpointsBarBar.BarResponse{}
+			out = &endpointsIDlEndpointsBarBar.BarResponse{}
 			out.StringField = string(in.StringField)
 			out.IntWithRange = int32(in.IntWithRange)
 			out.IntWithoutRange = int32(in.IntWithoutRange)
-			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 			for key6, value7 := range in.MapIntWithRange {
-				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+				out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key6)] = int32(value7)
 			}
 			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 			for key8, value9 := range in.MapIntWithoutRange {

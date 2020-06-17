@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -43,8 +43,8 @@ type BarArgWithManyQueryParamsWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_ArgWithManyQueryParams_Args,
-	) (*endpointsBarBar.BarResponse, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args,
+	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithManyQueryParamsWorkflow creates a workflow
@@ -76,8 +76,8 @@ type barArgWithManyQueryParamsWorkflow struct {
 func (w barArgWithManyQueryParamsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_ArgWithManyQueryParams_Args,
-) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args,
+) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithManyQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -133,8 +133,8 @@ func (w barArgWithManyQueryParamsWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithManyQueryParams_Args) *clientsBarBar.Bar_ArgWithManyQueryParams_Args {
-	out := &clientsBarBar.Bar_ArgWithManyQueryParams_Args{}
+func convertToArgWithManyQueryParamsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args) *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args {
+	out := &clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args{}
 
 	out.AStr = string(in.AStr)
 	out.AnOptStr = (*string)(in.AnOptStr)
@@ -150,15 +150,15 @@ func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWit
 	out.AnOptInt64 = (*int64)(in.AnOptInt64)
 	out.AFloat64 = float64(in.AFloat64)
 	out.AnOptFloat64 = (*float64)(in.AnOptFloat64)
-	out.AUUID = clientsBarBar.UUID(in.AUUID)
-	out.AnOptUUID = (*clientsBarBar.UUID)(in.AnOptUUID)
-	out.AListUUID = make([]clientsBarBar.UUID, len(in.AListUUID))
+	out.AUUID = clientsIDlClientsBarBar.UUID(in.AUUID)
+	out.AnOptUUID = (*clientsIDlClientsBarBar.UUID)(in.AnOptUUID)
+	out.AListUUID = make([]clientsIDlClientsBarBar.UUID, len(in.AListUUID))
 	for index1, value2 := range in.AListUUID {
-		out.AListUUID[index1] = clientsBarBar.UUID(value2)
+		out.AListUUID[index1] = clientsIDlClientsBarBar.UUID(value2)
 	}
-	out.AnOptListUUID = make([]clientsBarBar.UUID, len(in.AnOptListUUID))
+	out.AnOptListUUID = make([]clientsIDlClientsBarBar.UUID, len(in.AnOptListUUID))
 	for index3, value4 := range in.AnOptListUUID {
-		out.AnOptListUUID[index3] = clientsBarBar.UUID(value4)
+		out.AnOptListUUID[index3] = clientsIDlClientsBarBar.UUID(value4)
 	}
 	out.AStringList = make([]string, len(in.AStringList))
 	for index5, value6 := range in.AStringList {
@@ -168,55 +168,55 @@ func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWit
 	for index7, value8 := range in.AnOptStringList {
 		out.AnOptStringList[index7] = string(value8)
 	}
-	out.AUUIDList = make([]clientsBarBar.UUID, len(in.AUUIDList))
+	out.AUUIDList = make([]clientsIDlClientsBarBar.UUID, len(in.AUUIDList))
 	for index9, value10 := range in.AUUIDList {
-		out.AUUIDList[index9] = clientsBarBar.UUID(value10)
+		out.AUUIDList[index9] = clientsIDlClientsBarBar.UUID(value10)
 	}
-	out.AnOptUUIDList = make([]clientsBarBar.UUID, len(in.AnOptUUIDList))
+	out.AnOptUUIDList = make([]clientsIDlClientsBarBar.UUID, len(in.AnOptUUIDList))
 	for index11, value12 := range in.AnOptUUIDList {
-		out.AnOptUUIDList[index11] = clientsBarBar.UUID(value12)
+		out.AnOptUUIDList[index11] = clientsIDlClientsBarBar.UUID(value12)
 	}
-	out.ATs = clientsBarBar.Timestamp(in.ATs)
-	out.AnOptTs = (*clientsBarBar.Timestamp)(in.AnOptTs)
-	out.AReqDemo = clientsBarBar.DemoType(in.AReqDemo)
-	out.AnOptFruit = (*clientsBarBar.Fruit)(in.AnOptFruit)
-	out.AReqFruits = make([]clientsBarBar.Fruit, len(in.AReqFruits))
+	out.ATs = clientsIDlClientsBarBar.Timestamp(in.ATs)
+	out.AnOptTs = (*clientsIDlClientsBarBar.Timestamp)(in.AnOptTs)
+	out.AReqDemo = clientsIDlClientsBarBar.DemoType(in.AReqDemo)
+	out.AnOptFruit = (*clientsIDlClientsBarBar.Fruit)(in.AnOptFruit)
+	out.AReqFruits = make([]clientsIDlClientsBarBar.Fruit, len(in.AReqFruits))
 	for index13, value14 := range in.AReqFruits {
-		out.AReqFruits[index13] = clientsBarBar.Fruit(value14)
+		out.AReqFruits[index13] = clientsIDlClientsBarBar.Fruit(value14)
 	}
-	out.AnOptDemos = make([]clientsBarBar.DemoType, len(in.AnOptDemos))
+	out.AnOptDemos = make([]clientsIDlClientsBarBar.DemoType, len(in.AnOptDemos))
 	for index15, value16 := range in.AnOptDemos {
-		out.AnOptDemos[index15] = clientsBarBar.DemoType(value16)
+		out.AnOptDemos[index15] = clientsIDlClientsBarBar.DemoType(value16)
 	}
 
 	return out
 }
 
-func convertBarArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	out := &endpointsBarBar.BarResponse{}
+func convertBarArgWithManyQueryParamsClientResponse(in *clientsIDlClientsBarBar.BarResponse) *endpointsIDlEndpointsBarBar.BarResponse {
+	out := &endpointsIDlEndpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+	out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 	for key1, value2 := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
+		out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key1)] = int32(value2)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 	for key3, value4 := range in.MapIntWithoutRange {
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
-	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+	var convertBarResponseHelper5 func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse) {
 		if in != nil {
-			out = &endpointsBarBar.BarResponse{}
+			out = &endpointsIDlEndpointsBarBar.BarResponse{}
 			out.StringField = string(in.StringField)
 			out.IntWithRange = int32(in.IntWithRange)
 			out.IntWithoutRange = int32(in.IntWithoutRange)
-			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 			for key6, value7 := range in.MapIntWithRange {
-				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+				out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key6)] = int32(value7)
 			}
 			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 			for key8, value9 := range in.MapIntWithoutRange {

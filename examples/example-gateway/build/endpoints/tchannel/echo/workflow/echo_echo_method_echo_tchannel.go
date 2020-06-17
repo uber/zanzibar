@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/echo/echo"
+	endpointsIDlEndpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/echo/echo"
 )
 
 // EchoEchoWorkflow defines the interface for EchoEcho workflow
@@ -36,6 +36,6 @@ type EchoEchoWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsTchannelEchoEcho.Echo_Echo_Args,
+		r *endpointsIDlEndpointsTchannelEchoEcho.Echo_Echo_Args,
 	) (string, zanzibar.Header, error)
 }

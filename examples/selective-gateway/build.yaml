@@ -9,6 +9,9 @@ defaultMiddlewareConfig: ./middlewares/default
 packageRoot: github.com/uber/zanzibar/examples/selective-gateway
 targetGenDir: ./build
 thriftRootDir: ./idl
+moduleIdlSubDir:
+  endpoints: .
+  default: .
 traceKey: x-trace-id
 moduleSearchPaths:
   client:

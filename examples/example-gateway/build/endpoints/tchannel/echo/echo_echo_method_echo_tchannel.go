@@ -34,7 +34,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	endpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/echo/echo"
+	endpointsIDlEndpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/echo/echo"
 	customEcho "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/echo"
 
 	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
@@ -96,9 +96,9 @@ func (h *EchoEchoHandler) Handle(
 
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 
-	var res endpointsTchannelEchoEcho.Echo_Echo_Result
+	var res endpointsIDlEndpointsTchannelEchoEcho.Echo_Echo_Result
 
-	var req endpointsTchannelEchoEcho.Echo_Echo_Args
+	var req endpointsIDlEndpointsTchannelEchoEcho.Echo_Echo_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
@@ -137,8 +137,8 @@ func (h *EchoEchoHandler) redirectToDeputy(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	hostPort string,
-	req *endpointsTchannelEchoEcho.Echo_Echo_Args,
-	res *endpointsTchannelEchoEcho.Echo_Echo_Result,
+	req *endpointsIDlEndpointsTchannelEchoEcho.Echo_Echo_Args,
+	res *endpointsIDlEndpointsTchannelEchoEcho.Echo_Echo_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {

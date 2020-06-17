@@ -2,7 +2,7 @@ package fixture
 
 import (
 	mc "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
-	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 var saveContactsFixtures = &mc.SaveContactsScenarios{

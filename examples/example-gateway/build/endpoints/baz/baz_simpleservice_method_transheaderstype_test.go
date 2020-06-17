@@ -38,7 +38,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
@@ -77,12 +77,12 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 	fakeTransHeadersType := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_TransHeadersType_Args,
-	) (*clientsBazBaz.TransHeaderType, map[string]string, error) {
+		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
+	) (*clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error) {
 
 		var resHeaders map[string]string
 
-		var res clientsBazBaz.TransHeaderType
+		var res clientsIDlClientsBazBaz.TransHeaderType
 
 		clientResponse := []byte(`{"b1":true,"f3":3.14,"i1":3,"i2":3,"s6":"2a629c1a-262a-43f0-8623-869b0256a321","u4":"2a629c1a-262a-43f0-8623-869b0256a321","u5":"2a629c1a-262a-43f0-8623-869b0256a321"}`)
 		err := json.Unmarshal(clientResponse, &res)

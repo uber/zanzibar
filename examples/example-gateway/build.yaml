@@ -12,6 +12,9 @@ defaultHeaders:
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
 thriftRootDir: ./idl
+moduleIdlSubDir:
+  endpoints: endpoints-idl
+  default: clients-idl
 traceKey: x-trace-id
 moduleSearchPaths:
   client:

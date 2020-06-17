@@ -237,7 +237,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
-	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -425,7 +425,7 @@ package fixture
 
 import (
 	mc "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
-	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 var saveContactsFixtures = &mc.SaveContactsScenarios{

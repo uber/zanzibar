@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
+	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
@@ -39,8 +39,8 @@ type ClientlessClientlessArgWithHeadersWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
-	) (*endpointsClientlessClientless.Response, zanzibar.Header, error)
+		r *endpointsIDlEndpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
+	) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error)
 }
 
 // NewClientlessClientlessArgWithHeadersWorkflow creates a workflow
@@ -60,8 +60,8 @@ type clientlessClientlessArgWithHeadersWorkflow struct {
 func (w clientlessClientlessArgWithHeadersWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
-) (*endpointsClientlessClientless.Response, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
+) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error) {
 	response := convertClientlessArgWithHeadersDummyResponse(r)
 
 	clientlessHeaders := map[string]string{}
@@ -91,8 +91,8 @@ func (w clientlessClientlessArgWithHeadersWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertClientlessArgWithHeadersDummyResponse(in *endpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args) *endpointsClientlessClientless.Response {
-	out := &endpointsClientlessClientless.Response{}
+func convertClientlessArgWithHeadersDummyResponse(in *endpointsIDlEndpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args) *endpointsIDlEndpointsClientlessClientless.Response {
+	out := &endpointsIDlEndpointsClientlessClientless.Response{}
 
 	return out
 }
