@@ -28,6 +28,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/pkg/errors"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -111,6 +113,20 @@ func (*TestHTTPEndpointGenerator) ComputeSpec(
 	return &TestEndpointSpec{
 		Info: "http",
 	}, nil
+}
+
+type TestHTTPEndpointGeneratorSkip struct{}
+
+func (*TestHTTPEndpointGeneratorSkip) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	return nil, nil
+}
+
+func (*TestHTTPEndpointGeneratorSkip) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return nil, errors.Wrapf(&ErrorSkipCodeGen{idlFile: "dummy"}, "")
 }
 
 type TestServiceSpec struct {
@@ -919,6 +935,276 @@ func TestExampleServiceIncremental(t *testing.T) {
 			}
 		} else {
 			t.Errorf("Unexpected resolved class type %s", className)
+		}
+	}
+}
+
+func TestExampleServiceIncrementalSkip(t *testing.T) {
+	moduleSystem := NewModuleSystem(
+		map[string][]string{
+			"client": {
+				"clients/*",
+				"endpoints/*/*",
+			},
+			"endpoint": {
+				"endpoints/*",
+				"another/*",
+				"more-endpoints/*",
+			},
+			"middleware": {"middlewares/*"},
+			"service":    {"services/*"},
+		},
+		map[string][]string{},
+		false,
+	)
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"tchannel",
+		&TestTChannelClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"grpc",
+		&TestGRPCClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error regarding grpc client class type :%s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGeneratorSkip{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
+	})
+	if err == nil {
+		t.Errorf("Expected double definition of client class to error")
+	}
+
+	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+	targetGenDir := path.Join(testServiceDir, "build")
+
+	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	if err != nil {
+		t.Errorf("Unexpected error generating modukes %s", err)
+	}
+
+	instances, err := moduleSystem.IncrementalBuild(
+		packageRoot,
+		testServiceDir,
+		targetGenDir,
+		[]ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+			{
+				ClassName:    "client",
+				InstanceName: "example-grpc",
+			},
+		},
+		resolvedModules,
+		true,
+	)
+	if err != nil {
+		t.Errorf("Unexpected error generating build %s", err)
+	}
+
+	expectedClientDependency := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "tchannel",
+		Directory:     "clients/example-dependency",
+		InstanceName:  "example-dependency",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampledependencyClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampledependencyClientStatic",
+			PackageName:           "exampledependencyClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+		},
+		Dependencies:          []ModuleDependency{},
+		ResolvedDependencies:  map[string][]*ModuleInstance{},
+		RecursiveDependencies: map[string][]*ModuleInstance{},
+	}
+
+	expectedClientInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "http",
+		Directory:     "clients/example",
+		InstanceName:  "example",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+	}
+
+	expectedGRPCClientInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "grpc",
+		Directory:     "clients/example-example",
+		InstanceName:  "example-grpc",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+	}
+
+	expectedClients := []*ModuleInstance{
+		&expectedClientInstance,
+		&expectedGRPCClientInstance,
+	}
+	var expectedEndpoints []*ModuleInstance
+
+	for _, classInstances := range instances {
+		sort.Slice(classInstances, func(i, j int) bool {
+			return classInstances[i].InstanceName < classInstances[j].InstanceName
+		})
+	}
+
+	sort.Slice(expectedEndpoints, func(i, j int) bool {
+		return expectedEndpoints[i].InstanceName < expectedEndpoints[j].InstanceName
+	})
+
+	sort.Slice(expectedClients, func(i, j int) bool {
+		return expectedClients[i].InstanceName < expectedClients[j].InstanceName
+	})
+
+	classInstances := instances["client"]
+	if len(classInstances) != len(expectedClients) {
+		t.Errorf(
+			"Expected %d client class instance but found %d",
+			len(expectedClients),
+			len(classInstances),
+		)
+	}
+
+	for _, instance := range expectedClients {
+		compareInstances(t, instance, expectedClients)
+	}
+
+	classInstances = instances["endpoint"]
+
+	if len(classInstances) != len(expectedEndpoints) {
+		t.Errorf(
+			"Expected %d endpoint class instance but found %d",
+			len(expectedEndpoints),
+			len(classInstances),
+		)
+	}
+
+	for _, instance := range classInstances {
+		compareInstances(t, instance, expectedEndpoints)
+
+		clientDependency := instance.ResolvedDependencies["client"][0]
+		clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
+		if !ok {
+			t.Errorf("type casting failed %s\n", clientDependency)
+		}
+
+		if clientSpec.Info != instance.ClassType {
+			t.Errorf(
+				"Expected client spec info on generated client spec",
+			)
 		}
 	}
 }

@@ -115,6 +115,10 @@ func NewModuleSpec(
 	isEndpoint bool,
 	packageHelper *PackageHelper,
 ) (*ModuleSpec, error) {
+	if !fileExists(thrift) {
+		return nil, &ErrorSkipCodeGen{idlFile: thrift}
+	}
+
 	module, err := compile.Compile(thrift)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parse thrift file")
@@ -134,6 +138,26 @@ func NewModuleSpec(
 		return nil, err
 	}
 	return moduleSpec, nil
+}
+
+// ErrorSkipCodeGen when thrown modules can be skipped building without failing code gen
+type ErrorSkipCodeGen struct {
+	idlFile string
+}
+
+// Error when thrown modules can be skipped building without failing code gen
+func (e *ErrorSkipCodeGen) Error() string {
+	return fmt.Sprintf("code gen skip for idlFile: %v", e.idlFile)
+}
+
+// fileExists checks if a file exists and is not a directory before we
+// try using it to prevent further errors.
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
 
 // AddImports adds imported Go packages in ModuleSpec in alphabetical order.
