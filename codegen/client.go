@@ -116,9 +116,7 @@ func newClientSpec(
 	mspec, err := NewModuleSpec(thriftFile, annotate, false, h)
 
 	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Could not build module spec for thrift %s: ", thriftFile,
-		)
+		return nil, err
 	}
 	mspec.PackageName = mspec.PackageName + "client"
 

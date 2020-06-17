@@ -36,6 +36,12 @@ func TestModuleSpec(t *testing.T) {
 	assert.NoError(t, err, "unable to parse the thrift file")
 }
 
+func TestModuleSpecNoThriftExist(t *testing.T) {
+	barThrift := "../examples/example-gateway/idl/clients/bar/bar_no_exist.thrift"
+	_, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
+	assert.Error(t, err.(*codegen.ErrorSkipCodeGen))
+}
+
 func TestProtoModuleSpec(t *testing.T) {
 	echoProto := "../examples/example-gateway/idl/clients/echo/echo.proto"
 	_, err := codegen.NewProtoModuleSpec(echoProto, false, newPackageHelper(t))

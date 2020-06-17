@@ -1085,7 +1085,9 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 
 	spec, err := specProvider.ComputeSpec(instance)
 	if err != nil {
-		return fmt.Errorf("error when running computespec: %s", err.Error())
+		// Don't create new errors, rather wrap the error as we need the original error at caller
+		fmt.Println("error when running computespec", err.Error())
+		return err
 	}
 	instance.genSpec = spec
 	// HACK: to get get of bad modules, which should not be there at first place
@@ -1184,19 +1186,24 @@ func (system *ModuleSystem) IncrementalBuild(
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 
-	errModuleMap := map[*ModuleInstance]struct{}{}
+	skipModuleMap := map[*ModuleInstance]struct{}{}
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
 	for _, className := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(resolvedModules[className]))
-		ch := make(chan *ModuleInstance, len(resolvedModules[className]))
+		ch := make(chan *populateSpecRes, len(resolvedModules[className]))
 		for _, instance := range resolvedModules[className] {
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
-					// HACK: to get get of bad modules, which should not be even be loaded in dag at first place
-					ch <- instance
+					baseErr := errors.Cause(err)
+					if _, ok := baseErr.(*ErrorSkipCodeGen); ok {
+						// HACK: to get get of bad modules, which should not be even be loaded in dag at first place
+						ch <- &populateSpecRes{mi: instance}
+					} else {
+						ch <- &populateSpecRes{err: err}
+					}
 				}
 			}(instance)
 		}
@@ -1206,19 +1213,24 @@ func (system *ModuleSystem) IncrementalBuild(
 			close(ch)
 		}()
 
-		for mi := range ch {
-			errModuleMap[mi] = struct{}{}
+		for psRes := range ch {
+			if psRes.err != nil {
+				return nil, psRes.err
+			}
+			skipModuleMap[psRes.mi] = struct{}{}
 		}
 	}
 
 	resolvedModulesCopy := map[string][]*ModuleInstance{}
 	for cls, modules := range resolvedModules {
 		for _, m := range modules {
-			if _, ok := errModuleMap[m]; ok {
+			if _, ok := skipModuleMap[m]; ok {
 				// skipping error modules
 				fmt.Println("skipping module gen", m.InstanceName)
 				continue
 			}
+			m.RecursiveDependencies = trimSkipDependencies(m.RecursiveDependencies, skipModuleMap)
+			m.ResolvedDependencies = trimSkipDependencies(m.ResolvedDependencies, skipModuleMap)
 			resolvedModulesCopy[cls] = append(resolvedModulesCopy[cls], m)
 		}
 	}
@@ -1305,6 +1317,24 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	return toBeBuiltModules, nil
+}
+
+func trimSkipDependencies(depsMap map[string][]*ModuleInstance, skipModuleMap map[*ModuleInstance]struct{}) map[string][]*ModuleInstance {
+	newDepsMap := map[string][]*ModuleInstance{}
+	for cl, deps := range depsMap {
+		for _, d := range deps {
+			if _, ok := skipModuleMap[d]; ok {
+				continue
+			}
+			newDepsMap[cl] = append(newDepsMap[cl], d)
+		}
+	}
+	return newDepsMap
+}
+
+type populateSpecRes struct {
+	mi  *ModuleInstance
+	err error
 }
 
 func (system *ModuleSystem) trimToSelectiveDependencies(toBeBuiltModules map[string][]*ModuleInstance) {
