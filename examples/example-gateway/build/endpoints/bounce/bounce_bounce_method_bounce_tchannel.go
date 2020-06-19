@@ -34,7 +34,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	endpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bounce/bounce"
+	endpointsIDlEndpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
 	customBounce "github.com/uber/zanzibar/examples/example-gateway/endpoints/bounce"
 
 	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
@@ -96,9 +96,9 @@ func (h *BounceBounceHandler) Handle(
 
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 
-	var res endpointsBounceBounce.Bounce_Bounce_Result
+	var res endpointsIDlEndpointsBounceBounce.Bounce_Bounce_Result
 
-	var req endpointsBounceBounce.Bounce_Bounce_Args
+	var req endpointsIDlEndpointsBounceBounce.Bounce_Bounce_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
@@ -137,8 +137,8 @@ func (h *BounceBounceHandler) redirectToDeputy(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	hostPort string,
-	req *endpointsBounceBounce.Bounce_Bounce_Args,
-	res *endpointsBounceBounce.Bounce_Bounce_Result,
+	req *endpointsIDlEndpointsBounceBounce.Bounce_Bounce_Args,
+	res *endpointsIDlEndpointsBounceBounce.Bounce_Bounce_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {

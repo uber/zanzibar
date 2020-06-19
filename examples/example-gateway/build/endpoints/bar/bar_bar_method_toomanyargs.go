@@ -37,8 +37,8 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
-	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	endpointsIDlEndpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/foo/foo"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -103,7 +103,7 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_TooManyArgs_Args
+	var requestBody endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -154,13 +154,13 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsBarBar.BarException:
+		case *endpointsIDlEndpointsBarBar.BarException:
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
 			return
 
-		case *endpointsFooFoo.FooException:
+		case *endpointsIDlEndpointsFooFoo.FooException:
 			res.WriteJSON(
 				418, cliRespHeaders, errValue,
 			)

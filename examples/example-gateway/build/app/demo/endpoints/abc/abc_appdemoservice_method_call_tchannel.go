@@ -33,7 +33,7 @@ import (
 	"go.uber.org/zap"
 
 	customAbc "github.com/uber/zanzibar/examples/example-gateway/app/demo/endpoints/abc"
-	endpointsAppDemoEndpointsAbc "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/app/demo/endpoints/abc"
+	endpointsIDlEndpointsAppDemoEndpointsAbc "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/app/demo/endpoints/abc"
 
 	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
 
@@ -94,7 +94,7 @@ func (h *AppDemoServiceCallHandler) Handle(
 
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 
-	var res endpointsAppDemoEndpointsAbc.AppDemoService_Call_Result
+	var res endpointsIDlEndpointsAppDemoEndpointsAbc.AppDemoService_Call_Result
 
 	workflow := customAbc.NewAppDemoServiceCallWorkflow(h.Deps)
 

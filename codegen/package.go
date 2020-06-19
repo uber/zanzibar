@@ -21,6 +21,7 @@
 package codegen
 
 import (
+	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
@@ -30,8 +31,10 @@ import (
 )
 
 const (
-	_thriftSuffix = ".thrift"
-	_protoSuffix  = ".proto"
+	_thriftSuffix          = ".thrift"
+	_protoSuffix           = ".proto"
+	_endpointModuleName    = "endpoints"
+	_defaultModuleFallback = "default"
 )
 
 // PackageHelper manages the mapping from thrift file to generated type code and service code.
@@ -42,6 +45,8 @@ type PackageHelper struct {
 	configRoot string
 	// The absolute root directory containing thrift files
 	thriftRootDir string
+	// moduleIdlSubDir defines subdir for idl per module
+	moduleIdlSubDir map[string]string
 	// The go package name of where all the generated structs are
 	genCodePackage string
 	// The absolute directory to put the generated service code
@@ -70,7 +75,7 @@ type PackageHelper struct {
 	defaultDependencies map[string][]string
 }
 
-//NewDefaultPackageHelperOptions returns a new default PackageHelperOptions, all optional fields are set as default.
+// NewDefaultPackageHelperOptions returns a new default PackageHelperOptions, all optional fields are set as default.
 func NewDefaultPackageHelperOptions() *PackageHelperOptions {
 	return &PackageHelperOptions{}
 }
@@ -80,6 +85,8 @@ func NewDefaultPackageHelperOptions() *PackageHelperOptions {
 type PackageHelperOptions struct {
 	// relative path to the idl dir, defaults to "./idl"
 	RelThriftRootDir string
+	// subdir for idl per module
+	ModuleIdlSubDir map[string]string
 	// relative path to the target dir that will contain generated code, defaults to "./build"
 	RelTargetGenDir string
 	// relative path to the middleware config dir, defaults to ""
@@ -121,6 +128,10 @@ func (p *PackageHelperOptions) relThriftRootDir() string {
 		return p.RelThriftRootDir
 	}
 	return "./idl"
+}
+
+func (p *PackageHelperOptions) moduleIdlSubDir() map[string]string {
+	return p.ModuleIdlSubDir
 }
 
 func (p *PackageHelperOptions) relMiddlewareConfigDir() string {
@@ -199,6 +210,11 @@ func NewPackageHelper(
 		return nil, errors.Wrapf(err, "cannot load default middlewares")
 	}
 
+	moduleIdlSubDir := options.moduleIdlSubDir()
+	if len(moduleIdlSubDir) == 0 {
+		moduleIdlSubDir = map[string]string{_endpointModuleName: ".", _defaultModuleFallback: "."}
+	}
+
 	p := &PackageHelper{
 		packageRoot:            packageRoot,
 		configRoot:             absConfigRoot,
@@ -215,6 +231,7 @@ func NewPackageHelper(
 		moduleSearchPaths:      options.ModuleSearchPaths,
 		defaultDependencies:    options.DefaultDependencies,
 		defaultHeaders:         options.DefaultHeaders,
+		moduleIdlSubDir:        moduleIdlSubDir,
 	}
 	return p, nil
 }
@@ -326,6 +343,22 @@ func (p PackageHelper) getRelativeFileName(idlFile string) (string, error) {
 		)
 	}
 	return idlFile[idx+len(p.thriftRootDir):], nil
+}
+
+// GetModuleIdlSubDir returns subdir for idl per module
+func (p PackageHelper) GetModuleIdlSubDir(isEndpoint bool) string {
+	className := p.getModuleClass(isEndpoint)
+	if subDir, ok := p.moduleIdlSubDir[className]; ok {
+		return subDir
+	}
+	panic(fmt.Sprintf("unrecognized module %s", className))
+}
+
+func (p PackageHelper) getModuleClass(isEndpoint bool) string {
+	if isEndpoint {
+		return _endpointModuleName
+	}
+	return _defaultModuleFallback
 }
 
 // TargetClientsInitPath returns where the clients init should go

@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type BarArgNotStructWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_ArgNotStruct_Args,
+		r *endpointsIDlEndpointsBarBar.Bar_ArgNotStruct_Args,
 	) (zanzibar.Header, error)
 }
 
@@ -76,7 +76,7 @@ type barArgNotStructWorkflow struct {
 func (w barArgNotStructWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_ArgNotStruct_Args,
+	r *endpointsIDlEndpointsBarBar.Bar_ArgNotStruct_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
@@ -115,7 +115,7 @@ func (w barArgNotStructWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBarBar.BarException:
+		case *clientsIDlClientsBarBar.BarException:
 			serverErr := convertArgNotStructBarException(
 				errValue,
 			)
@@ -139,8 +139,8 @@ func (w barArgNotStructWorkflow) Handle(
 	return resHeaders, nil
 }
 
-func convertToArgNotStructClientRequest(in *endpointsBarBar.Bar_ArgNotStruct_Args) *clientsBarBar.Bar_ArgNotStruct_Args {
-	out := &clientsBarBar.Bar_ArgNotStruct_Args{}
+func convertToArgNotStructClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgNotStruct_Args) *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args {
+	out := &clientsIDlClientsBarBar.Bar_ArgNotStruct_Args{}
 
 	out.Request = string(in.Request)
 
@@ -148,9 +148,9 @@ func convertToArgNotStructClientRequest(in *endpointsBarBar.Bar_ArgNotStruct_Arg
 }
 
 func convertArgNotStructBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
+	clientError *clientsIDlClientsBarBar.BarException,
+) *endpointsIDlEndpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
+	serverError := &endpointsIDlEndpointsBarBar.BarException{}
 	return serverError
 }

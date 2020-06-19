@@ -37,7 +37,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -105,7 +105,7 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	if !req.CheckHeaders([]string{"Auth", "Content-Type"}) {
 		return
 	}
-	var requestBody endpointsBazBaz.SimpleService_HeaderSchema_Args
+	var requestBody endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -156,13 +156,13 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsBazBaz.AuthErr:
+		case *endpointsIDlEndpointsBazBaz.AuthErr:
 			res.WriteJSON(
 				401, cliRespHeaders, errValue,
 			)
 			return
 
-		case *endpointsBazBaz.OtherAuthErr:
+		case *endpointsIDlEndpointsBazBaz.OtherAuthErr:
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)

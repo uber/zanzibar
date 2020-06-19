@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	corge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
+	corge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
 )
 
 // MockClient is a mock of Client interface

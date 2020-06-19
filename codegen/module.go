@@ -1089,7 +1089,11 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 		fmt.Println("error when running computespec", err.Error())
 		return err
 	}
-	instance.genSpec = spec
+	if spec != nil {
+		instance.mu.Lock()
+		instance.genSpec = spec
+		instance.mu.Unlock()
+	}
 	// HACK: to get get of bad modules, which should not be there at first place
 	filterNilClientDeps(instance)
 	return nil
@@ -1446,7 +1450,9 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 	if buildResult == nil {
 		return nil
 	}
+	instance.mu.Lock()
 	instance.genSpec = buildResult.Spec
+	instance.mu.Unlock()
 	if !commitChange {
 		return nil
 	}
@@ -1686,7 +1692,7 @@ type ModuleInstance struct {
 	// genSpec is used to share generated specs across dependencies. Generators
 	// should not mutate this directly, and should return the spec as a result.
 	// Only the module system code should mutate a module instance.
-	genSpec interface{}
+	genSpec interface{} // protected by mu
 	// PackageInfo is the name for the generated module instance
 	PackageInfo *PackageInfo
 	// ClassName is the name of the class as defined in the module system
@@ -1727,6 +1733,7 @@ type ModuleInstance struct {
 	YAMLFileRaw []byte
 	// SelectiveBuilding allows the module to be built with subset of dependencies
 	SelectiveBuilding bool
+	mu                sync.RWMutex
 }
 
 func (instance *ModuleInstance) String() string {
@@ -1735,6 +1742,8 @@ func (instance *ModuleInstance) String() string {
 
 // GeneratedSpec returns the last spec result returned for the module instance
 func (instance *ModuleInstance) GeneratedSpec() interface{} {
+	instance.mu.RLock()
+	defer instance.mu.RUnlock()
 	return instance.genSpec
 }
 

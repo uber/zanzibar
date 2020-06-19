@@ -26,8 +26,8 @@ import (
 	echoclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/workflow"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

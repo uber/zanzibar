@@ -38,7 +38,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 )
 
 func TestPingSuccessfulRequestOKResponse(t *testing.T) {
@@ -77,11 +77,11 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	fakePing := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsBazBase.BazResponse, map[string]string, error) {
+	) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 
 		var resHeaders map[string]string
 
-		var res clientsBazBase.BazResponse
+		var res clientsIDlClientsBazBase.BazResponse
 
 		clientResponse := []byte(`{"message":"pong"}`)
 		err := json.Unmarshal(clientResponse, &res)

@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type BarDeleteWithBodyWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBarBar.Bar_DeleteWithBody_Args,
+		r *endpointsIDlEndpointsBarBar.Bar_DeleteWithBody_Args,
 	) (zanzibar.Header, error)
 }
 
@@ -76,7 +76,7 @@ type barDeleteWithBodyWorkflow struct {
 func (w barDeleteWithBodyWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_DeleteWithBody_Args,
+	r *endpointsIDlEndpointsBarBar.Bar_DeleteWithBody_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToDeleteWithBodyClientRequest(r)
 
@@ -132,8 +132,8 @@ func (w barDeleteWithBodyWorkflow) Handle(
 	return resHeaders, nil
 }
 
-func convertToDeleteWithBodyClientRequest(in *endpointsBarBar.Bar_DeleteWithBody_Args) *clientsBarBar.Bar_DeleteWithBody_Args {
-	out := &clientsBarBar.Bar_DeleteWithBody_Args{}
+func convertToDeleteWithBodyClientRequest(in *endpointsIDlEndpointsBarBar.Bar_DeleteWithBody_Args) *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args {
+	out := &clientsIDlClientsBarBar.Bar_DeleteWithBody_Args{}
 
 	out.Filter = string(in.Filter)
 	out.Count = (*int32)(in.Count)

@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 

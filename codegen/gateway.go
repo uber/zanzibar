@@ -325,7 +325,7 @@ func NewEndpointSpec(
 	}
 
 	thriftFile := filepath.Join(
-		h.ThriftIDLPath(), endpointConfigObj["thriftFile"].(string),
+		h.ThriftIDLPath(), h.GetModuleIdlSubDir(true), endpointConfigObj["thriftFile"].(string),
 	)
 
 	mspec, err := NewModuleSpec(thriftFile, endpointType == "http", true, h)

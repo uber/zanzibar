@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	endpointClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
+	endpointClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 

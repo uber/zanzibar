@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -43,8 +43,8 @@ type SimpleServiceHeaderSchemaWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBazBaz.SimpleService_HeaderSchema_Args,
-	) (*endpointsBazBaz.HeaderSchema, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args,
+	) (*endpointsIDlEndpointsBazBaz.HeaderSchema, zanzibar.Header, error)
 }
 
 // NewSimpleServiceHeaderSchemaWorkflow creates a workflow
@@ -76,8 +76,8 @@ type simpleServiceHeaderSchemaWorkflow struct {
 func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_HeaderSchema_Args,
-) (*endpointsBazBaz.HeaderSchema, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args,
+) (*endpointsIDlEndpointsBazBaz.HeaderSchema, zanzibar.Header, error) {
 	clientRequest := convertToHeaderSchemaClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -131,14 +131,14 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertHeaderSchemaAuthErr(
 				errValue,
 			)
 
 			return nil, nil, serverErr
 
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertHeaderSchemaOtherAuthErr(
 				errValue,
 			)
@@ -163,11 +163,11 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToHeaderSchemaClientRequest(in *endpointsBazBaz.SimpleService_HeaderSchema_Args) *clientsBazBaz.SimpleService_HeaderSchema_Args {
-	out := &clientsBazBaz.SimpleService_HeaderSchema_Args{}
+func convertToHeaderSchemaClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args) *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args {
+	out := &clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args{}
 
 	if in.Req != nil {
-		out.Req = &clientsBazBaz.HeaderSchema{}
+		out.Req = &clientsIDlClientsBazBaz.HeaderSchema{}
 	} else {
 		out.Req = nil
 	}
@@ -176,22 +176,22 @@ func convertToHeaderSchemaClientRequest(in *endpointsBazBaz.SimpleService_Header
 }
 
 func convertHeaderSchemaAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }
 func convertHeaderSchemaOtherAuthErr(
-	clientError *clientsBazBaz.OtherAuthErr,
-) *endpointsBazBaz.OtherAuthErr {
+	clientError *clientsIDlClientsBazBaz.OtherAuthErr,
+) *endpointsIDlEndpointsBazBaz.OtherAuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.OtherAuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.OtherAuthErr{}
 	return serverError
 }
 
-func convertSimpleServiceHeaderSchemaClientResponse(in *clientsBazBaz.HeaderSchema) *endpointsBazBaz.HeaderSchema {
-	out := &endpointsBazBaz.HeaderSchema{}
+func convertSimpleServiceHeaderSchemaClientResponse(in *clientsIDlClientsBazBaz.HeaderSchema) *endpointsIDlEndpointsBazBaz.HeaderSchema {
+	out := &endpointsIDlEndpointsBazBaz.HeaderSchema{}
 
 	return out
 }

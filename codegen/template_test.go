@@ -63,6 +63,10 @@ func TestGenerateBar(t *testing.T) {
 			"middleware": {"middlewares/*"},
 			"endpoint":   {"endpoints/*"},
 		},
+		ModuleIdlSubDir: map[string]string{
+			"endpoints": "endpoints-idl",
+			"default":   "clients-idl",
+		},
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(

@@ -34,7 +34,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions/module"
-	clientsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/withexceptions/withexceptions"
+	clientsIDlClientsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/withexceptions/withexceptions"
 )
 
 // Client defines withexceptions client interface.
@@ -43,7 +43,7 @@ type Client interface {
 	Func1(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsWithexceptionsWithexceptions.Response, map[string]string, error)
+	) (*clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error)
 }
 
 // withexceptionsClient is the http client.
@@ -151,7 +151,7 @@ func (c *withexceptionsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsWithexceptionsWithexceptions.Response, map[string]string, error) {
+) (*clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
 		if headers == nil {
@@ -160,7 +160,7 @@ func (c *withexceptionsClient) Func1(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	var defaultRes *clientsWithexceptionsWithexceptions.Response
+	var defaultRes *clientsIDlClientsWithexceptionsWithexceptions.Response
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", "WithExceptions::Func1", c.httpClient)
 
 	// Generate full URL.
@@ -203,7 +203,7 @@ func (c *withexceptionsClient) Func1(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsWithexceptionsWithexceptions.Response
+		var responseBody clientsIDlClientsWithexceptionsWithexceptions.Response
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -217,7 +217,7 @@ func (c *withexceptionsClient) Func1(
 
 	case 401:
 		allOptions := []interface{}{
-			&clientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsWithexceptionsWithexceptions.ExceptionType2{},
+			&clientsIDlClientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsIDlClientsWithexceptionsWithexceptions.ExceptionType2{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {

@@ -38,8 +38,8 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
@@ -78,12 +78,12 @@ func TestTransHeadersNoReqSuccessfulRequestOKResponse(t *testing.T) {
 	fakeTransHeadersType := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-	) (*clientsBazBase.TransHeaders, map[string]string, error) {
+		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+	) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
 
 		var resHeaders map[string]string
 
-		var res clientsBazBase.TransHeaders
+		var res clientsIDlClientsBazBase.TransHeaders
 
 		clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
 		err := json.Unmarshal(clientResponse, &res)

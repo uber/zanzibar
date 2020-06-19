@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	endpointsIDlEndpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 )
 
 // ContactsSaveContactsWorkflow defines the interface for ContactsSaveContacts workflow
@@ -36,6 +36,6 @@ type ContactsSaveContactsWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsContactsContacts.Contacts_SaveContacts_Args,
-	) (*endpointsContactsContacts.SaveContactsResponse, zanzibar.Header, error)
+		r *endpointsIDlEndpointsContactsContacts.Contacts_SaveContacts_Args,
+	) (*endpointsIDlEndpointsContactsContacts.SaveContactsResponse, zanzibar.Header, error)
 }

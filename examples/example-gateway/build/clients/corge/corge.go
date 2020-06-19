@@ -40,7 +40,7 @@ import (
 	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
-	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
+	clientsIDlClientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
 )
 
 // Client defines corge client interface.
@@ -48,7 +48,7 @@ type Client interface {
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsCorgeCorge.Corge_EchoString_Args,
+		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
 	) (string, map[string]string, error)
 }
 
@@ -222,9 +222,9 @@ type corgeClient struct {
 func (c *corgeClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsCorgeCorge.Corge_EchoString_Args,
+	args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
 ) (string, map[string]string, error) {
-	var result clientsCorgeCorge.Corge_EchoString_Result
+	var result clientsIDlClientsCorgeCorge.Corge_EchoString_Result
 	var resp string
 
 	logger := c.client.Loggers["Corge::echoString"]
@@ -266,7 +266,7 @@ func (c *corgeClient) EchoString(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}

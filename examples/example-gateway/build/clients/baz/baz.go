@@ -40,8 +40,8 @@ import (
 	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 // Client defines baz client interface.
@@ -49,104 +49,104 @@ type Client interface {
 	EchoBinary(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoBinary_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
 	) ([]byte, map[string]string, error)
 	EchoBool(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoBool_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
 	) (bool, map[string]string, error)
 	EchoDouble(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoDouble_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
 	) (float64, map[string]string, error)
 	EchoEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoEnum_Args,
-	) (clientsBazBaz.Fruit, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
+	) (clientsIDlClientsBazBaz.Fruit, map[string]string, error)
 	EchoI16(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoI16_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
 	) (int16, map[string]string, error)
 	EchoI32(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoI32_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
 	) (int32, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoI64_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
 	) (int64, map[string]string, error)
 	EchoI8(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoI8_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
 	) (int8, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoString_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
 	) (string, map[string]string, error)
 	EchoStringList(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoStringList_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
 	) ([]string, map[string]string, error)
 	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoStringMap_Args,
-	) (map[string]*clientsBazBase.BazResponse, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
+	) (map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	EchoStringSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoStringSet_Args,
+		args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
 	) (map[string]struct{}, map[string]string, error)
 	EchoStructList(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoStructList_Args,
-	) ([]*clientsBazBase.BazResponse, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
+	) ([]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoStructSet_Args,
-	) ([]*clientsBazBase.BazResponse, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
+	) ([]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	EchoTypedef(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoTypedef_Args,
-	) (clientsBazBase.UUID, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
+	) (clientsIDlClientsBazBase.UUID, map[string]string, error)
 
 	Call(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Call_Args,
+		args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
 	) (map[string]string, error)
 	Compare(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Compare_Args,
-	) (*clientsBazBase.BazResponse, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
+	) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	GetProfile(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_GetProfile_Args,
-	) (*clientsBazBaz.GetProfileResponse, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
+	) (*clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error)
 	HeaderSchema(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_HeaderSchema_Args,
-	) (*clientsBazBaz.HeaderSchema, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
+	) (*clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error)
 	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsBazBase.BazResponse, map[string]string, error)
+	) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	DeliberateDiffNoop(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -158,23 +158,23 @@ type Client interface {
 	Trans(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Trans_Args,
-	) (*clientsBazBase.TransStruct, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
+	) (*clientsIDlClientsBazBase.TransStruct, map[string]string, error)
 	TransHeaders(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_TransHeaders_Args,
-	) (*clientsBazBase.TransHeaders, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
+	) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersNoReq(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-	) (*clientsBazBase.TransHeaders, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+	) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersType(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_TransHeadersType_Args,
-	) (*clientsBazBaz.TransHeaderType, map[string]string, error)
+		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
+	) (*clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error)
 	URLTest(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -377,9 +377,9 @@ type bazClient struct {
 func (c *bazClient) EchoBinary(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoBinary_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
 ) ([]byte, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoBinary_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoBinary_Result
 	var resp []byte
 
 	logger := c.client.Loggers["SecondService::echoBinary"]
@@ -421,7 +421,7 @@ func (c *bazClient) EchoBinary(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -432,9 +432,9 @@ func (c *bazClient) EchoBinary(
 func (c *bazClient) EchoBool(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoBool_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
 ) (bool, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoBool_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoBool_Result
 	var resp bool
 
 	logger := c.client.Loggers["SecondService::echoBool"]
@@ -476,7 +476,7 @@ func (c *bazClient) EchoBool(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -487,9 +487,9 @@ func (c *bazClient) EchoBool(
 func (c *bazClient) EchoDouble(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoDouble_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
 ) (float64, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoDouble_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoDouble_Result
 	var resp float64
 
 	logger := c.client.Loggers["SecondService::echoDouble"]
@@ -531,7 +531,7 @@ func (c *bazClient) EchoDouble(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -542,10 +542,10 @@ func (c *bazClient) EchoDouble(
 func (c *bazClient) EchoEnum(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoEnum_Args,
-) (clientsBazBaz.Fruit, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoEnum_Result
-	var resp clientsBazBaz.Fruit
+	args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
+) (clientsIDlClientsBazBaz.Fruit, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SecondService_EchoEnum_Result
+	var resp clientsIDlClientsBazBaz.Fruit
 
 	logger := c.client.Loggers["SecondService::echoEnum"]
 
@@ -586,7 +586,7 @@ func (c *bazClient) EchoEnum(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -597,9 +597,9 @@ func (c *bazClient) EchoEnum(
 func (c *bazClient) EchoI16(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI16_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
 ) (int16, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoI16_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoI16_Result
 	var resp int16
 
 	logger := c.client.Loggers["SecondService::echoI16"]
@@ -641,7 +641,7 @@ func (c *bazClient) EchoI16(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -652,9 +652,9 @@ func (c *bazClient) EchoI16(
 func (c *bazClient) EchoI32(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI32_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
 ) (int32, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoI32_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoI32_Result
 	var resp int32
 
 	logger := c.client.Loggers["SecondService::echoI32"]
@@ -696,7 +696,7 @@ func (c *bazClient) EchoI32(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -707,9 +707,9 @@ func (c *bazClient) EchoI32(
 func (c *bazClient) EchoI64(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI64_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
 ) (int64, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoI64_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoI64_Result
 	var resp int64
 
 	logger := c.client.Loggers["SecondService::echoI64"]
@@ -751,7 +751,7 @@ func (c *bazClient) EchoI64(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -762,9 +762,9 @@ func (c *bazClient) EchoI64(
 func (c *bazClient) EchoI8(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoI8_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
 ) (int8, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoI8_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoI8_Result
 	var resp int8
 
 	logger := c.client.Loggers["SecondService::echoI8"]
@@ -806,7 +806,7 @@ func (c *bazClient) EchoI8(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -817,9 +817,9 @@ func (c *bazClient) EchoI8(
 func (c *bazClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoString_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
 ) (string, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoString_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoString_Result
 	var resp string
 
 	logger := c.client.Loggers["SecondService::echoString"]
@@ -861,7 +861,7 @@ func (c *bazClient) EchoString(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -872,9 +872,9 @@ func (c *bazClient) EchoString(
 func (c *bazClient) EchoStringList(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStringList_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
 ) ([]string, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoStringList_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoStringList_Result
 	var resp []string
 
 	logger := c.client.Loggers["SecondService::echoStringList"]
@@ -916,7 +916,7 @@ func (c *bazClient) EchoStringList(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -927,10 +927,10 @@ func (c *bazClient) EchoStringList(
 func (c *bazClient) EchoStringMap(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStringMap_Args,
-) (map[string]*clientsBazBase.BazResponse, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoStringMap_Result
-	var resp map[string]*clientsBazBase.BazResponse
+	args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
+) (map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SecondService_EchoStringMap_Result
+	var resp map[string]*clientsIDlClientsBazBase.BazResponse
 
 	logger := c.client.Loggers["SecondService::echoStringMap"]
 
@@ -971,7 +971,7 @@ func (c *bazClient) EchoStringMap(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -982,9 +982,9 @@ func (c *bazClient) EchoStringMap(
 func (c *bazClient) EchoStringSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStringSet_Args,
+	args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
 ) (map[string]struct{}, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoStringSet_Result
+	var result clientsIDlClientsBazBaz.SecondService_EchoStringSet_Result
 	var resp map[string]struct{}
 
 	logger := c.client.Loggers["SecondService::echoStringSet"]
@@ -1026,7 +1026,7 @@ func (c *bazClient) EchoStringSet(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1037,10 +1037,10 @@ func (c *bazClient) EchoStringSet(
 func (c *bazClient) EchoStructList(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStructList_Args,
-) ([]*clientsBazBase.BazResponse, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoStructList_Result
-	var resp []*clientsBazBase.BazResponse
+	args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
+) ([]*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SecondService_EchoStructList_Result
+	var resp []*clientsIDlClientsBazBase.BazResponse
 
 	logger := c.client.Loggers["SecondService::echoStructList"]
 
@@ -1081,7 +1081,7 @@ func (c *bazClient) EchoStructList(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1092,10 +1092,10 @@ func (c *bazClient) EchoStructList(
 func (c *bazClient) EchoStructSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStructSet_Args,
-) ([]*clientsBazBase.BazResponse, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoStructSet_Result
-	var resp []*clientsBazBase.BazResponse
+	args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
+) ([]*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SecondService_EchoStructSet_Result
+	var resp []*clientsIDlClientsBazBase.BazResponse
 
 	logger := c.client.Loggers["SecondService::echoStructSet"]
 
@@ -1136,7 +1136,7 @@ func (c *bazClient) EchoStructSet(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1147,10 +1147,10 @@ func (c *bazClient) EchoStructSet(
 func (c *bazClient) EchoTypedef(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoTypedef_Args,
-) (clientsBazBase.UUID, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoTypedef_Result
-	var resp clientsBazBase.UUID
+	args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
+) (clientsIDlClientsBazBase.UUID, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SecondService_EchoTypedef_Result
+	var resp clientsIDlClientsBazBase.UUID
 
 	logger := c.client.Loggers["SecondService::echoTypedef"]
 
@@ -1191,7 +1191,7 @@ func (c *bazClient) EchoTypedef(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1202,9 +1202,9 @@ func (c *bazClient) EchoTypedef(
 func (c *bazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_Call_Args,
+	args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
 ) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_Call_Result
+	var result clientsIDlClientsBazBaz.SimpleService_Call_Result
 
 	logger := c.client.Loggers["SimpleService::call"]
 
@@ -1254,10 +1254,10 @@ func (c *bazClient) Call(
 func (c *bazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_Compare_Args,
-) (*clientsBazBase.BazResponse, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_Compare_Result
-	var resp *clientsBazBase.BazResponse
+	args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
+) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_Compare_Result
+	var resp *clientsIDlClientsBazBase.BazResponse
 
 	logger := c.client.Loggers["SimpleService::compare"]
 
@@ -1302,7 +1302,7 @@ func (c *bazClient) Compare(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1313,10 +1313,10 @@ func (c *bazClient) Compare(
 func (c *bazClient) GetProfile(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_GetProfile_Args,
-) (*clientsBazBaz.GetProfileResponse, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_GetProfile_Result
-	var resp *clientsBazBaz.GetProfileResponse
+	args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
+) (*clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_GetProfile_Result
+	var resp *clientsIDlClientsBazBaz.GetProfileResponse
 
 	logger := c.client.Loggers["SimpleService::getProfile"]
 
@@ -1359,7 +1359,7 @@ func (c *bazClient) GetProfile(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1370,10 +1370,10 @@ func (c *bazClient) GetProfile(
 func (c *bazClient) HeaderSchema(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_HeaderSchema_Args,
-) (*clientsBazBaz.HeaderSchema, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_HeaderSchema_Result
-	var resp *clientsBazBaz.HeaderSchema
+	args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
+) (*clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Result
+	var resp *clientsIDlClientsBazBaz.HeaderSchema
 
 	logger := c.client.Loggers["SimpleService::headerSchema"]
 
@@ -1418,7 +1418,7 @@ func (c *bazClient) HeaderSchema(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1429,13 +1429,13 @@ func (c *bazClient) HeaderSchema(
 func (c *bazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
-) (*clientsBazBase.BazResponse, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_Ping_Result
-	var resp *clientsBazBase.BazResponse
+) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_Ping_Result
+	var resp *clientsIDlClientsBazBase.BazResponse
 
 	logger := c.client.Loggers["SimpleService::ping"]
 
-	args := &clientsBazBaz.SimpleService_Ping_Args{}
+	args := &clientsIDlClientsBazBaz.SimpleService_Ping_Args{}
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
@@ -1473,7 +1473,7 @@ func (c *bazClient) Ping(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1485,11 +1485,11 @@ func (c *bazClient) DeliberateDiffNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_SillyNoop_Result
+	var result clientsIDlClientsBazBaz.SimpleService_SillyNoop_Result
 
 	logger := c.client.Loggers["SimpleService::sillyNoop"]
 
-	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
+	args := &clientsIDlClientsBazBaz.SimpleService_SillyNoop_Args{}
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
@@ -1539,11 +1539,11 @@ func (c *bazClient) TestUUID(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_TestUuid_Result
+	var result clientsIDlClientsBazBaz.SimpleService_TestUuid_Result
 
 	logger := c.client.Loggers["SimpleService::testUuid"]
 
-	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
+	args := &clientsIDlClientsBazBaz.SimpleService_TestUuid_Args{}
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
@@ -1588,10 +1588,10 @@ func (c *bazClient) TestUUID(
 func (c *bazClient) Trans(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_Trans_Args,
-) (*clientsBazBase.TransStruct, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_Trans_Result
-	var resp *clientsBazBase.TransStruct
+	args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
+) (*clientsIDlClientsBazBase.TransStruct, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_Trans_Result
+	var resp *clientsIDlClientsBazBase.TransStruct
 
 	logger := c.client.Loggers["SimpleService::trans"]
 
@@ -1636,7 +1636,7 @@ func (c *bazClient) Trans(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1647,10 +1647,10 @@ func (c *bazClient) Trans(
 func (c *bazClient) TransHeaders(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_TransHeaders_Args,
-) (*clientsBazBase.TransHeaders, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_TransHeaders_Result
-	var resp *clientsBazBase.TransHeaders
+	args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
+) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_TransHeaders_Result
+	var resp *clientsIDlClientsBazBase.TransHeaders
 
 	logger := c.client.Loggers["SimpleService::transHeaders"]
 
@@ -1695,7 +1695,7 @@ func (c *bazClient) TransHeaders(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1706,10 +1706,10 @@ func (c *bazClient) TransHeaders(
 func (c *bazClient) TransHeadersNoReq(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-) (*clientsBazBase.TransHeaders, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_TransHeadersNoReq_Result
-	var resp *clientsBazBase.TransHeaders
+	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+) (*clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Result
+	var resp *clientsIDlClientsBazBase.TransHeaders
 
 	logger := c.client.Loggers["SimpleService::transHeadersNoReq"]
 
@@ -1752,7 +1752,7 @@ func (c *bazClient) TransHeadersNoReq(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1763,10 +1763,10 @@ func (c *bazClient) TransHeadersNoReq(
 func (c *bazClient) TransHeadersType(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SimpleService_TransHeadersType_Args,
-) (*clientsBazBaz.TransHeaderType, map[string]string, error) {
-	var result clientsBazBaz.SimpleService_TransHeadersType_Result
-	var resp *clientsBazBaz.TransHeaderType
+	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
+) (*clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error) {
+	var result clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Result
+	var resp *clientsIDlClientsBazBaz.TransHeaderType
 
 	logger := c.client.Loggers["SimpleService::transHeadersType"]
 
@@ -1811,7 +1811,7 @@ func (c *bazClient) TransHeadersType(
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
@@ -1823,11 +1823,11 @@ func (c *bazClient) URLTest(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_UrlTest_Result
+	var result clientsIDlClientsBazBaz.SimpleService_UrlTest_Result
 
 	logger := c.client.Loggers["SimpleService::urlTest"]
 
-	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
+	args := &clientsIDlClientsBazBaz.SimpleService_UrlTest_Args{}
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error

@@ -36,7 +36,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 func TestCallSuccessfulRequestOKResponse(t *testing.T) {
@@ -75,7 +75,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	fakeCall := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Call_Args,
+		args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
 	) (map[string]string, error) {
 
 		var resHeaders map[string]string

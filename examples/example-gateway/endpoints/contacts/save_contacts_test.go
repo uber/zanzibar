@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	mockcontactsworkflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/mock-workflow"
-	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 

@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 )
 
 // SimpleServiceAnotherCallWorkflow defines the interface for SimpleServiceAnotherCall workflow
@@ -36,6 +36,6 @@ type SimpleServiceAnotherCallWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
+		r *endpointsIDlEndpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
 	) (zanzibar.Header, error)
 }

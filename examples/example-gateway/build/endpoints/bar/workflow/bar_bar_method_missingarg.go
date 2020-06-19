@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type BarMissingArgWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarMissingArgWorkflow creates a workflow
@@ -75,7 +75,7 @@ type barMissingArgWorkflow struct {
 func (w barMissingArgWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -112,7 +112,7 @@ func (w barMissingArgWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBarBar.BarException:
+		case *clientsIDlClientsBarBar.BarException:
 			serverErr := convertMissingArgBarException(
 				errValue,
 			)
@@ -138,38 +138,38 @@ func (w barMissingArgWorkflow) Handle(
 }
 
 func convertMissingArgBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
+	clientError *clientsIDlClientsBarBar.BarException,
+) *endpointsIDlEndpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
+	serverError := &endpointsIDlEndpointsBarBar.BarException{}
 	return serverError
 }
 
-func convertBarMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	out := &endpointsBarBar.BarResponse{}
+func convertBarMissingArgClientResponse(in *clientsIDlClientsBarBar.BarResponse) *endpointsIDlEndpointsBarBar.BarResponse {
+	out := &endpointsIDlEndpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+	out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 	for key1, value2 := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
+		out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key1)] = int32(value2)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 	for key3, value4 := range in.MapIntWithoutRange {
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
-	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+	var convertBarResponseHelper5 func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsIDlClientsBarBar.BarResponse) (out *endpointsIDlEndpointsBarBar.BarResponse) {
 		if in != nil {
-			out = &endpointsBarBar.BarResponse{}
+			out = &endpointsIDlEndpointsBarBar.BarResponse{}
 			out.StringField = string(in.StringField)
 			out.IntWithRange = int32(in.IntWithRange)
 			out.IntWithoutRange = int32(in.IntWithoutRange)
-			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			out.MapIntWithRange = make(map[endpointsIDlEndpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 			for key6, value7 := range in.MapIntWithRange {
-				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+				out.MapIntWithRange[endpointsIDlEndpointsBarBar.UUID(key6)] = int32(value7)
 			}
 			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 			for key8, value9 := range in.MapIntWithoutRange {

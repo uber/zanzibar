@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

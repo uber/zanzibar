@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type SimpleServicePingWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsBazBaz.BazResponse, zanzibar.Header, error)
+	) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error)
 }
 
 // NewSimpleServicePingWorkflow creates a workflow
@@ -75,7 +75,7 @@ type simpleServicePingWorkflow struct {
 func (w simpleServicePingWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
+) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -130,8 +130,8 @@ func (w simpleServicePingWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertSimpleServicePingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
-	out := &endpointsBazBaz.BazResponse{}
+func convertSimpleServicePingClientResponse(in *clientsIDlClientsBazBase.BazResponse) *endpointsIDlEndpointsBazBaz.BazResponse {
+	out := &endpointsIDlEndpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)
 

@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bounce/bounce"
+	endpointsIDlEndpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
 )
 
 // BounceBounceWorkflow defines the interface for BounceBounce workflow
@@ -36,6 +36,6 @@ type BounceBounceWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBounceBounce.Bounce_Bounce_Args,
+		r *endpointsIDlEndpointsBounceBounce.Bounce_Bounce_Args,
 	) (string, zanzibar.Header, error)
 }

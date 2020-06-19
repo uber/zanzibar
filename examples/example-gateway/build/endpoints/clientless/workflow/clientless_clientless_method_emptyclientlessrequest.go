@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
+	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
@@ -39,7 +39,7 @@ type ClientlessEmptyclientlessRequestWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
+		r *endpointsIDlEndpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
 	) (zanzibar.Header, error)
 }
 
@@ -60,7 +60,7 @@ type clientlessEmptyclientlessRequestWorkflow struct {
 func (w clientlessEmptyclientlessRequestWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
+	r *endpointsIDlEndpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
 ) (zanzibar.Header, error) {
 
 	clientlessHeaders := map[string]string{}

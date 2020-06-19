@@ -26,8 +26,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	bazGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	bazGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"

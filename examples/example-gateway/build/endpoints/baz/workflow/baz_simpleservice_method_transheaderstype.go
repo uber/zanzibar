@@ -32,8 +32,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -44,8 +44,8 @@ type SimpleServiceTransHeadersTypeWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBazBaz.SimpleService_TransHeadersType_Args,
-	) (*endpointsBazBaz.TransHeader, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBazBaz.SimpleService_TransHeadersType_Args,
+	) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
 }
 
 // NewSimpleServiceTransHeadersTypeWorkflow creates a workflow
@@ -77,8 +77,8 @@ type simpleServiceTransHeadersTypeWorkflow struct {
 func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_TransHeadersType_Args,
-) (*endpointsBazBaz.TransHeader, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBazBaz.SimpleService_TransHeadersType_Args,
+) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := convertToTransHeadersTypeClientRequest(r)
 	clientRequest = propagateHeadersTransHeadersTypeClientRequests(clientRequest, reqHeaders)
 
@@ -117,14 +117,14 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertTransHeadersTypeAuthErr(
 				errValue,
 			)
 
 			return nil, nil, serverErr
 
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertTransHeadersTypeOtherAuthErr(
 				errValue,
 			)
@@ -149,11 +149,11 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToTransHeadersTypeClientRequest(in *endpointsBazBaz.SimpleService_TransHeadersType_Args) *clientsBazBaz.SimpleService_TransHeadersType_Args {
-	out := &clientsBazBaz.SimpleService_TransHeadersType_Args{}
+func convertToTransHeadersTypeClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_TransHeadersType_Args) *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args {
+	out := &clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args{}
 
 	if in.Req != nil {
-		out.Req = &clientsBazBaz.TransHeaderType{}
+		out.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 	} else {
 		out.Req = nil
 	}
@@ -162,33 +162,33 @@ func convertToTransHeadersTypeClientRequest(in *endpointsBazBaz.SimpleService_Tr
 }
 
 func convertTransHeadersTypeAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }
 func convertTransHeadersTypeOtherAuthErr(
-	clientError *clientsBazBaz.OtherAuthErr,
-) *endpointsBazBaz.OtherAuthErr {
+	clientError *clientsIDlClientsBazBaz.OtherAuthErr,
+) *endpointsIDlEndpointsBazBaz.OtherAuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.OtherAuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.OtherAuthErr{}
 	return serverError
 }
 
-func convertSimpleServiceTransHeadersTypeClientResponse(in *clientsBazBaz.TransHeaderType) *endpointsBazBaz.TransHeader {
-	out := &endpointsBazBaz.TransHeader{}
+func convertSimpleServiceTransHeadersTypeClientResponse(in *clientsIDlClientsBazBaz.TransHeaderType) *endpointsIDlEndpointsBazBaz.TransHeader {
+	out := &endpointsIDlEndpointsBazBaz.TransHeader{}
 
 	return out
 }
 
-func propagateHeadersTransHeadersTypeClientRequests(in *clientsBazBaz.SimpleService_TransHeadersType_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeadersType_Args {
+func propagateHeadersTransHeadersTypeClientRequests(in *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args, headers zanzibar.Header) *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args {
 	if in == nil {
-		in = &clientsBazBaz.SimpleService_TransHeadersType_Args{}
+		in = &clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args{}
 	}
 	if key, ok := headers.Get("x-boolean"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
 		if v, err := strconv.ParseBool(key); err == nil {
 			in.Req.B1 = v
@@ -197,7 +197,7 @@ func propagateHeadersTransHeadersTypeClientRequests(in *clientsBazBaz.SimpleServ
 	}
 	if key, ok := headers.Get("x-float"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
 		if v, err := strconv.ParseFloat(key, 64); err == nil {
 			in.Req.F3 = &v
@@ -206,7 +206,7 @@ func propagateHeadersTransHeadersTypeClientRequests(in *clientsBazBaz.SimpleServ
 	}
 	if key, ok := headers.Get("x-int"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
 		if v, err := strconv.ParseInt(key, 10, 32); err == nil {
 			val := int32(v)
@@ -216,7 +216,7 @@ func propagateHeadersTransHeadersTypeClientRequests(in *clientsBazBaz.SimpleServ
 	}
 	if key, ok := headers.Get("x-int"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
 		if v, err := strconv.ParseInt(key, 10, 64); err == nil {
 			in.Req.I2 = v
@@ -225,24 +225,24 @@ func propagateHeadersTransHeadersTypeClientRequests(in *clientsBazBaz.SimpleServ
 	}
 	if key, ok := headers.Get("x-string"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
 		in.Req.S6 = key
 
 	}
 	if key, ok := headers.Get("x-string"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
-		val := clientsBazBaz.UUID(key)
+		val := clientsIDlClientsBazBaz.UUID(key)
 		in.Req.U4 = val
 
 	}
 	if key, ok := headers.Get("x-string"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBaz.TransHeaderType{}
+			in.Req = &clientsIDlClientsBazBaz.TransHeaderType{}
 		}
-		val := clientsBazBaz.UUID(key)
+		val := clientsIDlClientsBazBaz.UUID(key)
 		in.Req.U5 = &val
 
 	}
