@@ -1,5 +1,5 @@
 hash: 442c2a5cafaa5f1b3b864afa4f1f9bb76bb91c56f9fc6bb95dc450cf4d84e2d5
-updated: 2020-05-19T16:56:29.110822-07:00
+updated: 2020-06-22T18:22:08.048206-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -18,7 +18,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/buger/jsonparser
-  version: 5754b3eaeae78aeca49528d2ab980c0f26ca707c
+  version: 63af0e0b6f304f0f4f7ea28e53ac7dd3246a31bb
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
@@ -83,7 +83,7 @@ imports:
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/jessevdk/go-flags
-  version: c0795c8afcf41dd1d786bebce68636c199b3bb45
+  version: c6ca198ec95c841fdb89fc0de7496fed11ab854e
 - name: github.com/josharian/intern
   version: a140101e2404c737ca154f12ac2a9d1cc161aee6
 - name: github.com/jteeuwen/go-bindata
@@ -91,13 +91,13 @@ imports:
 - name: github.com/kardianos/osext
   version: 2bc1f35cddc0cc527b4bc3dce8578fc2a6c11384
 - name: github.com/kisielk/errcheck
-  version: 1618cdcbe3fabdf54e22f92bcf11146995e58997
+  version: d6d3f06ea42cf94a406b94907dea49889fa86057
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
   subpackages:
   - internal/load
 - name: github.com/mailru/easyjson
-  version: 0d574ab354cd22dbdd807aadc26f8afe489bb35a
+  version: 8ba3c7bdceed0f2e8089b8bac6627e18a1392659
   subpackages:
   - bootstrap
   - buffer
@@ -112,7 +112,7 @@ imports:
 - name: github.com/mcuadros/go-jsonschema-generator
   version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
 - name: github.com/mitchellh/mapstructure
-  version: 14428cd8e72132155ec2f0f13c4eb93ffe620f7c
+  version: d16e9488127408e67948eb43b6d3fbb9f222da10
 - name: github.com/opentracing/opentracing-go
   version: 659c90643e714681897ec2521c60567dd21da733
   subpackages:
@@ -154,7 +154,7 @@ imports:
   subpackages:
   - diffmatchpatch
 - name: github.com/stretchr/testify
-  version: 3ebf1ddaeb260c4b1ae502a01c7844fa8c1fa0e9
+  version: f654a9112bbeac49ca2cd45bfbe11533c4666cf8
   subpackages:
   - assert
   - require
@@ -171,7 +171,7 @@ imports:
   - m3/thrift
   - m3/thriftudp
 - name: github.com/uber/jaeger-client-go
-  version: 41cd5f0d8e719abff4f35d21d93eeccf5ea96891
+  version: 66c008c3d6ad856cac92a0af53186efbffa8e6a5
   subpackages:
   - config
   - internal/baggage
@@ -197,7 +197,7 @@ imports:
   - metrics
   - metrics/tally
 - name: github.com/uber/tchannel-go
-  version: 2acaee7490c16abc67578902d385266078cea691
+  version: 3d6cba062690d2ab8e8640ed127bec2a8d26c7a7
   subpackages:
   - internal/argreader
   - relay
@@ -212,10 +212,11 @@ imports:
 - name: go.uber.org/automaxprocs
   version: e393bb0ea0644204c502247d647e428742196ebe
   subpackages:
+  - internal/cgroups
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
-  version: 781ef046233be0a0bf1efcb95d41e46042624ccb
+  version: 627535aad4ae507da807d9e0ff981fc30b5057bb
   subpackages:
   - internal/digreflect
   - internal/dot
@@ -258,13 +259,14 @@ imports:
   - version
   - wire
 - name: go.uber.org/yarpc
-  version: 5bf307e0b6d5e72465cb2815dceee5ca41223b86
+  version: ff06e63f11ec8970bb1db1f569362f12b27fb868
   subpackages:
   - api/backoff
   - api/encoding
   - api/middleware
   - api/peer
   - api/transport
+  - api/x/introspection
   - encoding/protobuf
   - encoding/protobuf/reflection
   - internal
@@ -313,7 +315,7 @@ imports:
   - module
   - semver
 - name: golang.org/x/net
-  version: d87ec0cfa47603df72c7e24116080bdcd7788ba7
+  version: 627f9648deb96c27737b83199d44bb5c1010cbcf
   subpackages:
   - bpf
   - context
@@ -328,9 +330,11 @@ imports:
   - ipv6
   - trace
 - name: golang.org/x/sys
-  version: fe76b779f299728f3bd63f77ea2c815504229c3b
+  version: ed371f2e16b4b305ee99df548828de367527b76b
   subpackages:
+  - internal/unsafeheader
   - unix
+  - windows
 - name: golang.org/x/text
   version: 342b2e1fbaa52c93f31447ad2c6abc048c63e475
   subpackages:
@@ -339,7 +343,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/tools
-  version: 57a9e4404bf7b38f22bbca9af3ddf0dee8e76a04
+  version: 20e05c1c8ffa075386be4ad638812b3baace6619
   subpackages:
   - cmd/goimports
   - go/ast/astutil
@@ -356,13 +360,14 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 754ee590a4f386d0910d887f3b8776354042260b
+  version: 1f47ba4663831f2a9c28a62a7de3ff8bc45078f0
   repo: https://github.com/grpc/grpc-go
   subpackages:
   - attributes
   - backoff
   - balancer
   - balancer/base
+  - balancer/grpclb/state
   - balancer/roundrobin
   - binarylog/grpc_binarylog_v1
   - codes
@@ -385,12 +390,12 @@ imports:
   - internal/grpcutil
   - internal/resolver/dns
   - internal/resolver/passthrough
+  - internal/serviceconfig
   - internal/status
   - internal/syscall
   - internal/transport
   - keepalive
   - metadata
-  - naming
   - peer
   - resolver
   - serviceconfig
@@ -431,9 +436,11 @@ imports:
   - types/known/durationpb
   - types/known/timestamppb
 - name: gopkg.in/validator.v2
-  version: c3144fdedc21c005c4ba9c3ab3ecb86419dd39f3
+  version: 2b28d334fa054977b7c725c7639a1ca4efc18bad
 - name: gopkg.in/yaml.v2
   version: 0b1645d91e851e735d3e23330303ce81f70adbe3
+- name: gopkg.in/yaml.v3
+  version: eeeca48fe7764f320e4870d231902bf9c1be2c08
 - name: honnef.co/go/tools
   version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
   subpackages:
