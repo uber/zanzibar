@@ -16,6 +16,7 @@ metrics.runtime.enableGCMetrics: true
 metrics.runtime.enableMemMetrics: true
 metrics.type: m3
 service.env.config: {}
+serviceNameEnvKey: PRODUCTION_SERVICE_NAME_KEY
 subLoggerLevel.http: info
 subLoggerLevel.jaeger: info
 subLoggerLevel.tchannel: info
