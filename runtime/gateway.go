@@ -73,6 +73,7 @@ const (
 // Options configures the gateway
 type Options struct {
 	MetricsBackend            tally.CachedStatsReporter
+	MetricsDefaultBuckets     tally.Buckets // To support non-default histogram metric bucketing specific to a gateway
 	LogWriter                 zapcore.WriteSyncer
 	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 	GetContextFieldExtractors func() []ContextLogFieldsExtractor
@@ -109,18 +110,19 @@ type Gateway struct {
 	// gRPC client dispatcher for gRPC client lifecycle management
 	GRPCClientDispatcher *yarpc.Dispatcher
 
-	atomLevel       *zap.AtomicLevel
-	loggerFile      *os.File
-	scopeCloser     io.Closer
-	metricsBackend  tally.CachedStatsReporter
-	runtimeMetrics  RuntimeMetricsCollector
-	logEncoder      zapcore.Encoder
-	logWriter       zapcore.WriteSyncer
-	logWriteSyncer  zapcore.WriteSyncer
-	httpServer      *HTTPServer
-	localHTTPServer *HTTPServer
-	tchannelServer  *tchannel.Channel
-	tracerCloser    io.Closer
+	atomLevel             *zap.AtomicLevel
+	loggerFile            *os.File
+	scopeCloser           io.Closer
+	metricsBackend        tally.CachedStatsReporter
+	runtimeMetrics        RuntimeMetricsCollector
+	metricsDefaultBuckets tally.Buckets
+	logEncoder            zapcore.Encoder
+	logWriter             zapcore.WriteSyncer
+	logWriteSyncer        zapcore.WriteSyncer
+	httpServer            *HTTPServer
+	localHTTPServer       *HTTPServer
+	tchannelServer        *tchannel.Channel
+	tracerCloser          io.Closer
 
 	requestUUIDHeaderKey string
 }
@@ -152,6 +154,7 @@ func CreateGateway(
 	config *StaticConfig, opts *Options,
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
+	var metricsDefaultBuckets tally.Buckets
 	var logWriter zapcore.WriteSyncer
 	var scopeTagsExtractors []ContextScopeTagsExtractor
 	var logFieldsExtractors []ContextLogFieldsExtractor
@@ -162,6 +165,11 @@ func CreateGateway(
 	}
 	if opts.MetricsBackend != nil {
 		metricsBackend = opts.MetricsBackend
+	}
+	if opts.MetricsDefaultBuckets != nil {
+		metricsDefaultBuckets = opts.MetricsDefaultBuckets
+	} else {
+		metricsDefaultBuckets = tally.DefaultBuckets
 	}
 	if opts.LogWriter != nil {
 		logWriter = opts.LogWriter
@@ -199,17 +207,17 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		HTTPPort:         int32(config.MustGetInt("http.port")),
-		TChannelPort:     int32(config.MustGetInt("tchannel.port")),
-		ServiceName:      config.MustGetString("serviceName"),
-		WaitGroup:        &sync.WaitGroup{},
-		Config:           config,
-		ContextExtractor: extractors,
-		JSONWrapper:      jsonWrapper,
-		logWriter:        logWriter,
-		metricsBackend:   metricsBackend,
-
-		requestUUIDHeaderKey: opts.RequestUUIDHeaderKey,
+		HTTPPort:              int32(config.MustGetInt("http.port")),
+		TChannelPort:          int32(config.MustGetInt("tchannel.port")),
+		ServiceName:           config.MustGetString("serviceName"),
+		WaitGroup:             &sync.WaitGroup{},
+		Config:                config,
+		ContextExtractor:      extractors,
+		JSONWrapper:           jsonWrapper,
+		logWriter:             logWriter,
+		metricsBackend:        metricsBackend,
+		metricsDefaultBuckets: metricsDefaultBuckets,
+		requestUUIDHeaderKey:  opts.RequestUUIDHeaderKey,
 	}
 
 	gateway.setupConfig(config)
@@ -563,7 +571,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		tally.ScopeOptions{
 			Tags:            defaultTags,
 			CachedReporter:  gateway.metricsBackend,
-			DefaultBuckets:  tally.MustMakeExponentialDurationBuckets(10*time.Millisecond, 2, 11), // Range: 10ms - 10s
+			DefaultBuckets:  gateway.metricsDefaultBuckets,
 			Separator:       tally.DefaultSeparator,
 			SanitizeOptions: &m3.DefaultSanitizerOpts,
 		},

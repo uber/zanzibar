@@ -126,8 +126,8 @@ func TestCallMetrics(t *testing.T) {
 		statusTags[k] = v
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range statusTags {
 		histogramTags[k] = v
@@ -214,8 +214,8 @@ func TestCallMetrics(t *testing.T) {
 	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
 
 	cHistogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms",
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms",
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range clientTags {
 		cHistogramTags[k] = v
