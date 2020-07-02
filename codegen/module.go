@@ -1202,6 +1202,9 @@ func (system *ModuleSystem) IncrementalBuild(
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
 					baseErr := errors.Cause(err)
+					if _, ok := baseErr.(*IgnorePopulateSpecStageErr); ok {
+						return
+					}
 					if _, ok := baseErr.(*ErrorSkipCodeGen); ok {
 						// HACK: to get get of bad modules, which should not be even be loaded in dag at first place
 						ch <- &populateSpecRes{mi: instance}
