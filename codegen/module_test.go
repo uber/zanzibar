@@ -126,7 +126,7 @@ func (*TestHTTPEndpointGeneratorSkip) Generate(
 func (*TestHTTPEndpointGeneratorSkip) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
-	return nil, errors.Wrapf(&ErrorSkipCodeGen{idlFile: "dummy"}, "")
+	return nil, errors.Wrapf(&ErrorSkipCodeGen{IDLFile: "dummy"}, "")
 }
 
 type TestServiceSpec struct {
