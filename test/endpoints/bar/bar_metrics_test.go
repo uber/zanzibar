@@ -115,8 +115,8 @@ func TestCallMetrics(t *testing.T) {
 		statusTags[k] = v
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range statusTags {
 		histogramTags[k] = v
@@ -162,8 +162,8 @@ func TestCallMetrics(t *testing.T) {
 		cStatusTags[k] = v
 	}
 	cHistogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range httpClientTags {
 		cHistogramTags[k] = v

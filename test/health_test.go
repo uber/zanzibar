@@ -149,8 +149,8 @@ func TestHealthMetrics(t *testing.T) {
 		statusTags[k] = v
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): There must be a better way than this hard-coding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): There must be a better way than this hard-coding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range statusTags {
 		histogramTags[k] = v
@@ -239,8 +239,8 @@ func TestRuntimeMetrics(t *testing.T) {
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms",
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms",
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range tags {
 		histogramTags[k] = v
