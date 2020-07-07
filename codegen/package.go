@@ -37,14 +37,14 @@ const (
 	_defaultModuleFallback = "default"
 )
 
-// PackageHelper manages the mapping from thrift file to generated type code and service code.
+// PackageHelper manages the mapping from idl file to generated type code and service code.
 type PackageHelper struct {
 	// The project package name
 	packageRoot string
 	// The absolute root dir path for all configs, i.e., clients, endpoints, idl, etc
 	configRoot string
-	// The absolute root directory containing thrift files
-	thriftRootDir string
+	// The absolute root directory containing idl files
+	idlRootDir string
 	// moduleIdlSubDir defines subdir for idl per module
 	moduleIdlSubDir map[string]string
 	// The go package name of where all the generated structs are
@@ -84,7 +84,7 @@ func NewDefaultPackageHelperOptions() *PackageHelperOptions {
 // Each field is optional, if not set, it is set to the corresponding default value.
 type PackageHelperOptions struct {
 	// relative path to the idl dir, defaults to "./idl"
-	RelThriftRootDir string
+	RelIdlRootDir string
 	// subdir for idl per module
 	ModuleIdlSubDir map[string]string
 	// relative path to the target dir that will contain generated code, defaults to "./build"
@@ -123,9 +123,9 @@ func (p *PackageHelperOptions) relTargetGenDir() string {
 	return "./build"
 }
 
-func (p *PackageHelperOptions) relThriftRootDir() string {
-	if p.RelThriftRootDir != "" {
-		return p.RelThriftRootDir
+func (p *PackageHelperOptions) relIdlRootDir() string {
+	if p.RelIdlRootDir != "" {
+		return p.RelIdlRootDir
 	}
 	return "./idl"
 }
@@ -218,7 +218,7 @@ func NewPackageHelper(
 	p := &PackageHelper{
 		packageRoot:            packageRoot,
 		configRoot:             absConfigRoot,
-		thriftRootDir:          filepath.Join(absConfigRoot, options.relThriftRootDir()),
+		idlRootDir:             filepath.Join(absConfigRoot, options.relIdlRootDir()),
 		genCodePackage:         options.genCodePackage(packageRoot),
 		goGatewayNamespace:     goGatewayNamespace,
 		targetGenDir:           filepath.Join(absConfigRoot, options.relTargetGenDir()),
@@ -276,16 +276,16 @@ func (p PackageHelper) TypeImportPath(idlFile string) (string, error) {
 		suffix = filepath.Dir(idlFile)
 	}
 
-	idx := strings.Index(idlFile, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.idlRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			idlFile, p.thriftRootDir,
+			idlFile, p.idlRootDir,
 		)
 	}
 	return path.Join(
 		p.genCodePackage,
-		idlFile[idx+len(p.thriftRootDir):len(suffix)],
+		idlFile[idx+len(p.idlRootDir):len(suffix)],
 	), nil
 }
 
@@ -294,9 +294,9 @@ func (p PackageHelper) GoGatewayPackageName() string {
 	return p.goGatewayNamespace
 }
 
-// ThriftIDLPath returns the file path to the thrift idl folder
-func (p PackageHelper) ThriftIDLPath() string {
-	return p.thriftRootDir
+// IdlPath returns the file path to the thrift idl folder
+func (p PackageHelper) IdlPath() string {
+	return p.idlRootDir
 }
 
 // CodeGenTargetPath returns the file path where the code should
@@ -310,11 +310,11 @@ func (p PackageHelper) TypePackageName(idlFile string) (string, error) {
 	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
 		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
 	}
-	idx := strings.Index(idlFile, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.idlRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			idlFile, p.thriftRootDir,
+			idlFile, p.idlRootDir,
 		)
 	}
 	var prefix string
@@ -324,25 +324,25 @@ func (p PackageHelper) TypePackageName(idlFile string) (string, error) {
 		prefix = strings.TrimSuffix(idlFile, _protoSuffix)
 	}
 
-	// Strip the leading / and strip the .thrift on the end.
-	thriftSegment := idlFile[idx+len(p.thriftRootDir)+1 : len(prefix)]
+	// Strip the leading / and the trailing .thrift/.proto suffix.
+	segment := idlFile[idx+len(p.idlRootDir)+1 : len(prefix)]
 
-	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
-	return CamelCase(thriftPackageName), nil
+	packageName := strings.Replace(segment, "/", "_", -1)
+	return CamelCase(packageName), nil
 }
 
 func (p PackageHelper) getRelativeFileName(idlFile string) (string, error) {
 	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
 		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
 	}
-	idx := strings.Index(idlFile, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.idlRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			idlFile, p.thriftRootDir,
+			idlFile, p.idlRootDir,
 		)
 	}
-	return idlFile[idx+len(p.thriftRootDir):], nil
+	return idlFile[idx+len(p.idlRootDir):], nil
 }
 
 // GetModuleIdlSubDir returns subdir for idl per module

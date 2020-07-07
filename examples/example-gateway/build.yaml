@@ -11,7 +11,7 @@ defaultHeaders:
   - x-uber-bar
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
-thriftRootDir: ./idl
+idlRootDir: ./idl
 moduleIdlSubDir:
   endpoints: endpoints-idl
   default: clients-idl

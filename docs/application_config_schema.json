@@ -10,7 +10,7 @@
 				"github.com/uber/zanzibar/examples/example-gateway"
 			]
 		},
-		"thriftRootDir": {
+		"idlRootDir": {
 			"type": "string",
 			"description": "The path of idl directory, relative to application root directory",
 			"examples": [
@@ -83,7 +83,7 @@
 	},
 	"required": [
 		"packageRoot",
-		"thriftRootDir",
+		"idlRootDir",
 		"genCodePackage",
 		"targetGenDir",
 		"middlewareConfig",

@@ -489,7 +489,7 @@ func doNewClientSpecTest(t *testing.T, rawConfig []byte, clientType string) {
 	}
 	h := newTestPackageHelper(t)
 
-	idlFile := filepath.Join(h.ThriftIDLPath(), h.GetModuleIdlSubDir(false), "clients/bar/bar.thrift")
+	idlFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), "clients/bar/bar.thrift")
 	expectedSpec := &ClientSpec{
 		ModuleSpec:         nil,
 		YAMLFile:           instance.YAMLFileName,
@@ -538,7 +538,7 @@ func TestGRPCClientNewClientSpec(t *testing.T) {
 	}
 	h := newTestPackageHelper(t)
 
-	idlFile := filepath.Join(h.ThriftIDLPath(), h.GetModuleIdlSubDir(false), "clients/echo/echo.proto")
+	idlFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), "clients/echo/echo.proto")
 	expectedSpec := &ClientSpec{
 		ModuleSpec:         nil,
 		YAMLFile:           instance.YAMLFileName,

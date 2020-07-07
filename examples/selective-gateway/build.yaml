@@ -8,7 +8,7 @@ middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
 packageRoot: github.com/uber/zanzibar/examples/selective-gateway
 targetGenDir: ./build
-thriftRootDir: ./idl
+idlRootDir: ./idl
 moduleIdlSubDir:
   endpoints: .
   default: .

@@ -126,7 +126,7 @@ func main() {
 	config.MustGetStruct("moduleIdlSubDir", &moduleIdlSubDir)
 	fmt.Printf("moduleIdlSubDir paths %#v\n", moduleIdlSubDir)
 	options := &codegen.PackageHelperOptions{
-		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
+		RelIdlRootDir:                 config.MustGetString("idlRootDir"),
 		ModuleIdlSubDir:               moduleIdlSubDir,
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
 		RelMiddlewareConfigDir:        relMiddlewareConfigDir,
