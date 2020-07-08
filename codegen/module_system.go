@@ -926,7 +926,7 @@ func (g *GRPCClientGenerator) Generate(
 	}
 	return &BuildResult{
 		Files: files,
-		Spec:  (*ClientSpec)(nil),
+		Spec:  clientSpec,
 	}, nil
 }
 
