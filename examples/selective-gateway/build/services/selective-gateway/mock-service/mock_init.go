@@ -29,13 +29,15 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
+	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
 	bounceendpointgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce"
 	bounceendpointmodule "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 )
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Echo *echoclientgenerated.MockClient
+	Echo   *echoclientgenerated.MockClient
+	Mirror *mirrorclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -60,18 +62,21 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Echo: echoclientgenerated.NewMockClient(ctrl),
+		Echo:   echoclientgenerated.NewMockClient(ctrl),
+		Mirror: mirrorclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Echo = mockClientNodes.Echo
+	initializedClientDependencies.Mirror = mockClientNodes.Mirror
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bounce = bounceendpointgenerated.NewEndpoint(&bounceendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &bounceendpointmodule.ClientDependencies{
-			Echo: initializedClientDependencies.Echo,
+			Echo:   initializedClientDependencies.Echo,
+			Mirror: initializedClientDependencies.Mirror,
 		},
 	})
 

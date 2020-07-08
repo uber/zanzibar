@@ -24,9 +24,11 @@ import (
 	"context"
 
 	echoclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
+	mirrorclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/workflow"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/echo"
+	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/mirror"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -34,12 +36,14 @@ import (
 // NewBounceBounceWorkflow ...
 func NewBounceBounceWorkflow(deps *module.Dependencies) workflow.BounceBounceWorkflow {
 	return &bounceWorkflow{
-		echo: deps.Client.Echo,
+		echo:   deps.Client.Echo,
+		mirror: deps.Client.Mirror,
 	}
 }
 
 type bounceWorkflow struct {
-	echo echoclient.Client
+	echo   echoclient.Client
+	mirror mirrorclient.Client
 }
 
 // Handle ...
@@ -49,6 +53,10 @@ func (w bounceWorkflow) Handle(
 	req *bounce.Bounce_Bounce_Args,
 ) (string, zanzibar.Header, error) {
 	res, err := w.echo.Echo(ctx, &echo.Request{Message: req.Msg})
+	if err != nil {
+		return "", nil, err
+	}
+	_, err = w.mirror.Mirror(ctx, &mirror.Request{Message: req.Msg})
 	if err != nil {
 		return "", nil, err
 	}

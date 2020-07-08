@@ -953,7 +953,7 @@ func (g *gRPCClientGenerator) Generate(
 	}
 	return &BuildResult{
 		Files: files,
-		Spec:  (*ClientSpec)(nil),
+		Spec:  clientSpec,
 	}, nil
 }
 

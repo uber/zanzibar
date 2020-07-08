@@ -21,23 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mockbounceworkflow
+package module
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
-	echoclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
-	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
-	mirrorclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// MockClientNodes contains mock client dependencies for the bounce endpoint module
-type MockClientNodes struct {
-	Echo   *echoclientgeneratedmock.MockClient
-	Mirror *mirrorclientgeneratedmock.MockClient
-}
-
-// clientDependenciesNodes contains client dependencies
-type clientDependenciesNodes struct {
-	Echo   echoclientgenerated.Client
-	Mirror mirrorclientgenerated.Client
+// Dependencies contains dependencies for the mirror client module
+type Dependencies struct {
+	Default *zanzibar.DefaultDependencies
 }

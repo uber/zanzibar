@@ -211,6 +211,10 @@ func getSelectiveModule() []codegen.ModuleDependency {
 			ClassName:    "client",
 			InstanceName: "echo",
 		},
+		{
+			ClassName:    "client",
+			InstanceName: "mirror",
+		},
 	}
 	return dependencies
 }

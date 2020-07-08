@@ -26,6 +26,8 @@ package module
 import (
 	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
 	echoclientmodule "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/module"
+	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
+	mirrorclientmodule "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/module"
 	bounceendpointgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce"
 	bounceendpointmodule "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 
@@ -40,7 +42,8 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Echo echoclientgenerated.Client
+	Echo   echoclientgenerated.Client
+	Mirror mirrorclientgenerated.Client
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -74,13 +77,17 @@ func InitializeDependencies(
 	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bounce = bounceendpointgenerated.NewEndpoint(&bounceendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &bounceendpointmodule.ClientDependencies{
-			Echo: initializedClientDependencies.Echo,
+			Echo:   initializedClientDependencies.Echo,
+			Mirror: initializedClientDependencies.Mirror,
 		},
 	})
 
