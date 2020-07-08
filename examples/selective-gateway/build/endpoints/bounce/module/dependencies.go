@@ -25,6 +25,7 @@ package module
 
 import (
 	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
+	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -37,5 +38,6 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Echo echoclientgenerated.Client
+	Echo   echoclientgenerated.Client
+	Mirror mirrorclientgenerated.Client
 }

@@ -32,6 +32,7 @@ import (
 	"go.uber.org/zap"
 
 	echoclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
+	mirrorclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
 	module "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 	workflow "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/workflow"
 	bounceendpointstatic "github.com/uber/zanzibar/examples/selective-gateway/endpoints/bounce"
@@ -50,15 +51,18 @@ func NewBounceBounceWorkflowMock(t *testing.T) (workflow.BounceBounceWorkflow, *
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{
-		Echo: echoclientgeneratedmock.NewMockClient(ctrl),
+		Echo:   echoclientgeneratedmock.NewMockClient(ctrl),
+		Mirror: mirrorclientgeneratedmock.NewMockClient(ctrl),
 	}
 	initializedClientDependencies.Echo = mockClientNodes.Echo
+	initializedClientDependencies.Mirror = mockClientNodes.Mirror
 
 	w := bounceendpointstatic.NewBounceBounceWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{
-				Echo: initializedClientDependencies.Echo,
+				Echo:   initializedClientDependencies.Echo,
+				Mirror: initializedClientDependencies.Mirror,
 			},
 		},
 	)

@@ -1,0 +1,6 @@
+name: mirror
+type: grpc
+config:
+  idlFile: clients/mirror/mirror.proto
+  exposedMethods:
+    "MirrorMirror": "Mirror::Mirror"
