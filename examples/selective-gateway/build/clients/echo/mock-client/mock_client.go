@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	echo "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/echo"
+	echo "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
 	yarpc "go.uber.org/yarpc"
 )
 

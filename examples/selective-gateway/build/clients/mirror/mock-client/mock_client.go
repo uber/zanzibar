@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	mirror "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/mirror"
+	mirror "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
 	yarpc "go.uber.org/yarpc"
 )
 

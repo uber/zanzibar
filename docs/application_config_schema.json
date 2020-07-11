@@ -18,11 +18,23 @@
 			]
 		},
 		"genCodePackage": {
-			"type": "string",
-			"description": "The package path for thriftrw and easyjson generated structs and (de)serializers",
-			"examples": [
-				"github.com/uber/zanzibar/examples/example-gateway/build/gen-code"
-			]
+			"type": "object",
+			"properties": {
+				".thrift": {
+					"type": "string",
+					"description": "The package path for thriftrw generated code",
+					"examples": [
+						"github.com/uber/zanzibar/examples/example-gateway/build/gen-code"
+					]
+				},
+				".proto": {
+					"type": "string",
+					"description": "The package path for protobuf generated code",
+					"examples": [
+						"github.com/uber/zanzibar/examples/example-gateway/build/proto-gen"
+					]
+				}
+			}
 		},
 		"targetGenDir": {
 			"type": "The directory path of all generated code, relative to application root directory",

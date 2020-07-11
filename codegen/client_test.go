@@ -432,7 +432,10 @@ func newTestPackageHelper(t *testing.T) *PackageHelper {
 	options := &PackageHelperOptions{
 		RelTargetGenDir: "tmpDir",
 		CopyrightHeader: "copyright",
-		GenCodePackage:  packageRoot + "/build/gen-code",
+		GenCodePackage:  map[string]string{
+			".thrift": packageRoot + "/build/gen-code",
+			".proto": packageRoot + "/build/gen-code",
+		},
 		TraceKey:        "trace-key",
 		ModuleIdlSubDir: map[string]string{"endpoints": "endpoints-idl", "default": "clients-idl"},
 	}

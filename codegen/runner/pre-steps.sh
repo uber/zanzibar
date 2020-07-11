@@ -80,6 +80,10 @@ done
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 
+PROTO_GENCODE_PACKAGE=$($YQ -r '.genCodePackage[".proto"]' "$CONFIG_DIR/build.yaml")
+PROTO_GENCODE_DIR=$(basename "$PROTO_GENCODE_PACKAGE")
+ABS_PROTO_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/$PROTO_GENCODE_DIR")"
+
 GOGO_WKT_COMPATIBILITY="\
 Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
 Mgoogle/protobuf/api.proto=github.com/gogo/protobuf/types,\
@@ -98,7 +102,7 @@ found_protos=$(find "$IDL_DIR" -name "*.proto")
 for proto_file in ${found_protos}; do
 	# We are not generating clients here, just (de)serializers.
 	proto_path="$ABS_IDL_DIR"
-	gencode_path="$ABS_GENCODE_DIR"
+	gencode_path="$ABS_PROTO_GENCODE_DIR"
 	mkdir -p "$gencode_path"
 	proto_file="$PWD/$proto_file"
 	protoc --proto_path="$proto_path" \
@@ -132,7 +136,7 @@ for config_file in ${config_files}; do
 		if [[ ! -z ${proto_file} ]] && [[ ${found_protos} != *${proto_file}* ]]; then
 			found_protos+=" $proto_file"
 			proto_path="$ABS_IDL_DIR"
-			gencode_path="$ABS_GENCODE_DIR"
+			gencode_path="$ABS_PROTO_GENCODE_DIR"
 			mkdir -p "$gencode_path"
 			if [[ ${config_file} != *"/selective-gateway"* ]]; then
 				module_prefix="clients-idl"
