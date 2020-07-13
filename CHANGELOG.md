@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.6.0 - 2020-07-13
 ### Added
 - Added support for circuit breaker, logging, and metrics similar to other protocol clients for gRPC clients ([#627](https://github.com/uber/zanzibar/pull/627))
 ### Fixed
@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **BREAKING** `NewDefaultModuleSystemWithMockHook` API changed to add option for which hooks to execute. ([#638](https://github.com/uber/zanzibar/pull/638))
 - `resolve_thrift` tool will now check if the given file has the `.thrift` extension. ([#634](https://github.com/uber/zanzibar/pull/634))
+- **BREAKING** The `thriftRootDir` field type in application config file (build.yaml) is now `idlRootDir` since both thrift and protobuf are suppported (client idl only for now) different idl types.
 - **BREAKING** The `genCodePackage` field type in application config file (build.yaml) is now `object` with properties `".thrift"` and `".proto"` to support separated gen code dirs for different idl types.
 
 
