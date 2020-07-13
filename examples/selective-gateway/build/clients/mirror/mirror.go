@@ -30,7 +30,7 @@ import (
 	"go.uber.org/yarpc"
 
 	module "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/module"
-	gen "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/mirror"
+	gen "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )

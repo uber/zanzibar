@@ -56,8 +56,11 @@ func TestGenerateBar(t *testing.T) {
 		RelMiddlewareConfigDir:        "./middlewares",
 		RelDefaultMiddlewareConfigDir: "./middlewares/default",
 		CopyrightHeader:               testCopyrightHeader,
-		GenCodePackage:                packageRoot + "/build/gen-code",
-		TraceKey:                      "trace-key",
+		GenCodePackage: map[string]string{
+			".thrift": packageRoot + "/build/gen-code",
+			".proto":  packageRoot + "/build/gen-code",
+		},
+		TraceKey: "trace-key",
 		ModuleSearchPaths: map[string][]string{
 			"client":     {"clients/*"},
 			"middleware": {"middlewares/*"},

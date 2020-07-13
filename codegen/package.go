@@ -31,24 +31,25 @@ import (
 )
 
 const (
-	_thriftSuffix          = ".thrift"
-	_protoSuffix           = ".proto"
-	_endpointModuleName    = "endpoints"
-	_defaultModuleFallback = "default"
+	thriftExtension       = ".thrift"
+	protoExtension        = ".proto"
+	endpointModuleName    = "endpoints"
+	defaultModuleFallback = "default"
 )
 
-// PackageHelper manages the mapping from thrift file to generated type code and service code.
+// PackageHelper manages the mapping from idl file to generated type code and service code.
 type PackageHelper struct {
 	// The project package name
 	packageRoot string
 	// The absolute root dir path for all configs, i.e., clients, endpoints, idl, etc
 	configRoot string
-	// The absolute root directory containing thrift files
-	thriftRootDir string
+	// The absolute root directory containing idl files
+	idlRootDir string
 	// moduleIdlSubDir defines subdir for idl per module
 	moduleIdlSubDir map[string]string
-	// The go package name of where all the generated structs are
-	genCodePackage string
+	// The map of idl type to go package name of where the generated structs are
+	// map is keyed with idl file extension, e.g., .thrift, .proto
+	genCodePackage map[string]string
 	// The absolute directory to put the generated service code
 	targetGenDir string
 	// The go package name where all the generated code is
@@ -84,7 +85,7 @@ func NewDefaultPackageHelperOptions() *PackageHelperOptions {
 // Each field is optional, if not set, it is set to the corresponding default value.
 type PackageHelperOptions struct {
 	// relative path to the idl dir, defaults to "./idl"
-	RelThriftRootDir string
+	RelIdlRootDir string
 	// subdir for idl per module
 	ModuleIdlSubDir map[string]string
 	// relative path to the target dir that will contain generated code, defaults to "./build"
@@ -94,8 +95,9 @@ type PackageHelperOptions struct {
 	// relative path to the default middleware config dir, defaults to ""
 	RelDefaultMiddlewareConfigDir string
 
-	// package path to the generated code, defaults to PackageRoot + "/" + RelTargetGenDir + "/gen-code"
-	GenCodePackage string
+	// map of idl type to package path of the generated code
+	// map should be keyed with idl file extension, e.g., .thrift, .proto
+	GenCodePackage map[string]string
 
 	// thrift http annotation prefix, defaults to "zanzibar"
 	AnnotationPrefix string
@@ -123,9 +125,9 @@ func (p *PackageHelperOptions) relTargetGenDir() string {
 	return "./build"
 }
 
-func (p *PackageHelperOptions) relThriftRootDir() string {
-	if p.RelThriftRootDir != "" {
-		return p.RelThriftRootDir
+func (p *PackageHelperOptions) relIdlRootDir() string {
+	if p.RelIdlRootDir != "" {
+		return p.RelIdlRootDir
 	}
 	return "./idl"
 }
@@ -142,11 +144,16 @@ func (p *PackageHelperOptions) relDefaultMiddlewareConfigDir() string {
 	return p.RelDefaultMiddlewareConfigDir
 }
 
-func (p *PackageHelperOptions) genCodePackage(packageRoot string) string {
-	if p.GenCodePackage != "" {
+func (p *PackageHelperOptions) genCodePackage(packageRoot string) map[string]string {
+	if p.GenCodePackage != nil {
 		return p.GenCodePackage
 	}
-	return path.Join(packageRoot, p.relTargetGenDir(), "gen-code")
+
+	defaultGenCodePath := path.Join(packageRoot, p.relTargetGenDir(), "gen-code")
+	return map[string]string{
+		"thrift": defaultGenCodePath,
+		"proto":  defaultGenCodePath,
+	}
 }
 
 func (p *PackageHelperOptions) annotationPrefix() string {
@@ -212,13 +219,13 @@ func NewPackageHelper(
 
 	moduleIdlSubDir := options.moduleIdlSubDir()
 	if len(moduleIdlSubDir) == 0 {
-		moduleIdlSubDir = map[string]string{_endpointModuleName: ".", _defaultModuleFallback: "."}
+		moduleIdlSubDir = map[string]string{endpointModuleName: ".", defaultModuleFallback: "."}
 	}
 
 	p := &PackageHelper{
 		packageRoot:            packageRoot,
 		configRoot:             absConfigRoot,
-		thriftRootDir:          filepath.Join(absConfigRoot, options.relThriftRootDir()),
+		idlRootDir:             filepath.Join(absConfigRoot, options.relIdlRootDir()),
 		genCodePackage:         options.genCodePackage(packageRoot),
 		goGatewayNamespace:     goGatewayNamespace,
 		targetGenDir:           filepath.Join(absConfigRoot, options.relTargetGenDir()),
@@ -256,36 +263,42 @@ func (p PackageHelper) DefaultMiddlewareSpecs() map[string]*MiddlewareSpec {
 	return p.defaultMiddlewareSpecs
 }
 
-// GenCodePackage returns the file path to the idl generated code folder
-func (p PackageHelper) GenCodePackage() string {
+// GenCodePackage returns map of idl type to the file path of the idl generated code folder
+func (p PackageHelper) GenCodePackage() map[string]string {
 	return p.genCodePackage
 }
 
 // TypeImportPath returns the Go import path for types defined in a idlFile file.
 func (p PackageHelper) TypeImportPath(idlFile string) (string, error) {
-	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
-		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
+	if !strings.HasSuffix(idlFile, thriftExtension) && !strings.HasSuffix(idlFile, protoExtension) {
+		return "", errors.Errorf("idl file %s is not %s or %s", idlFile, thriftExtension, protoExtension)
 	}
 	var suffix string
 	// for a filepath: a/b/c.(thrift|proto)
 	// - thrift generates code in path: a/b/c/c.go
 	// - proto generates code in path: a/b/c.go
-	if strings.HasSuffix(idlFile, _thriftSuffix) {
-		suffix = strings.TrimSuffix(idlFile, _thriftSuffix)
+	if strings.HasSuffix(idlFile, thriftExtension) {
+		suffix = strings.TrimSuffix(idlFile, thriftExtension)
 	} else {
 		suffix = filepath.Dir(idlFile)
 	}
 
-	idx := strings.Index(idlFile, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.idlRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			idlFile, p.thriftRootDir,
+			idlFile, p.idlRootDir,
 		)
 	}
+
+	ext := filepath.Ext(idlFile)
+	genCodePkg, ok := p.genCodePackage[ext]
+	if !ok {
+		return "", errors.Errorf("genCodePackage for %q idl file is not configured in build.yaml", ext)
+	}
 	return path.Join(
-		p.genCodePackage,
-		idlFile[idx+len(p.thriftRootDir):len(suffix)],
+		genCodePkg,
+		idlFile[idx+len(p.idlRootDir):len(suffix)],
 	), nil
 }
 
@@ -294,9 +307,9 @@ func (p PackageHelper) GoGatewayPackageName() string {
 	return p.goGatewayNamespace
 }
 
-// ThriftIDLPath returns the file path to the thrift idl folder
-func (p PackageHelper) ThriftIDLPath() string {
-	return p.thriftRootDir
+// IdlPath returns the file path to the thrift idl folder
+func (p PackageHelper) IdlPath() string {
+	return p.idlRootDir
 }
 
 // CodeGenTargetPath returns the file path where the code should
@@ -307,42 +320,42 @@ func (p PackageHelper) CodeGenTargetPath() string {
 
 // TypePackageName returns the package name that defines the type.
 func (p PackageHelper) TypePackageName(idlFile string) (string, error) {
-	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
-		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
+	if !strings.HasSuffix(idlFile, thriftExtension) && !strings.HasSuffix(idlFile, protoExtension) {
+		return "", errors.Errorf("file %s is not %s or %s", idlFile, thriftExtension, protoExtension)
 	}
-	idx := strings.Index(idlFile, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.idlRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			idlFile, p.thriftRootDir,
+			idlFile, p.idlRootDir,
 		)
 	}
 	var prefix string
-	if strings.HasSuffix(idlFile, _thriftSuffix) {
-		prefix = strings.TrimSuffix(idlFile, _thriftSuffix)
+	if strings.HasSuffix(idlFile, thriftExtension) {
+		prefix = strings.TrimSuffix(idlFile, thriftExtension)
 	} else {
-		prefix = strings.TrimSuffix(idlFile, _protoSuffix)
+		prefix = strings.TrimSuffix(idlFile, protoExtension)
 	}
 
-	// Strip the leading / and strip the .thrift on the end.
-	thriftSegment := idlFile[idx+len(p.thriftRootDir)+1 : len(prefix)]
+	// Strip the leading / and the trailing .thrift/.proto suffix.
+	segment := idlFile[idx+len(p.idlRootDir)+1 : len(prefix)]
 
-	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
-	return CamelCase(thriftPackageName), nil
+	packageName := strings.Replace(segment, "/", "_", -1)
+	return CamelCase(packageName), nil
 }
 
 func (p PackageHelper) getRelativeFileName(idlFile string) (string, error) {
-	if !strings.HasSuffix(idlFile, _thriftSuffix) && !strings.HasSuffix(idlFile, _protoSuffix) {
-		return "", errors.Errorf("file %s is not %s or %s", idlFile, _thriftSuffix, _protoSuffix)
+	if !strings.HasSuffix(idlFile, thriftExtension) && !strings.HasSuffix(idlFile, protoExtension) {
+		return "", errors.Errorf("file %s is not %s or %s", idlFile, thriftExtension, protoExtension)
 	}
-	idx := strings.Index(idlFile, p.thriftRootDir)
+	idx := strings.Index(idlFile, p.idlRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in IDL dir (%s)",
-			idlFile, p.thriftRootDir,
+			idlFile, p.idlRootDir,
 		)
 	}
-	return idlFile[idx+len(p.thriftRootDir):], nil
+	return idlFile[idx+len(p.idlRootDir):], nil
 }
 
 // GetModuleIdlSubDir returns subdir for idl per module
@@ -356,9 +369,9 @@ func (p PackageHelper) GetModuleIdlSubDir(isEndpoint bool) string {
 
 func (p PackageHelper) getModuleClass(isEndpoint bool) string {
 	if isEndpoint {
-		return _endpointModuleName
+		return endpointModuleName
 	}
-	return _defaultModuleFallback
+	return defaultModuleFallback
 }
 
 // TargetClientsInitPath returns where the clients init should go

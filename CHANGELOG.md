@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **BREAKING** `NewDefaultModuleSystemWithMockHook` API changed to add option for which hooks to execute. ([#638](https://github.com/uber/zanzibar/pull/638))
 - `resolve_thrift` tool will now check if the given file has the `.thrift` extension. ([#634](https://github.com/uber/zanzibar/pull/634))
+- **BREAKING** The `genCodePackage` field type in application config file (build.yaml) is now `object` with properties `".thrift"` and `".proto"` to support separated gen code dirs for different idl types.
 
 
 ## 0.4.0 - 2019-08-21

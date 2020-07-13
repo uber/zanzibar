@@ -124,15 +124,16 @@ func main() {
 
 	moduleIdlSubDir := map[string]string{}
 	config.MustGetStruct("moduleIdlSubDir", &moduleIdlSubDir)
-	fmt.Printf("moduleIdlSubDir paths %#v\n", moduleIdlSubDir)
+	genCodePackage := map[string]string{}
+	config.MustGetStruct("genCodePackage", &genCodePackage)
 	options := &codegen.PackageHelperOptions{
-		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
+		RelIdlRootDir:                 config.MustGetString("idlRootDir"),
 		ModuleIdlSubDir:               moduleIdlSubDir,
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
 		RelMiddlewareConfigDir:        relMiddlewareConfigDir,
 		RelDefaultMiddlewareConfigDir: relDefaultMiddlewareConfigDir,
 		AnnotationPrefix:              config.MustGetString("annotationPrefix"),
-		GenCodePackage:                config.MustGetString("genCodePackage"),
+		GenCodePackage:                genCodePackage,
 		CopyrightHeader:               string(copyright),
 		StagingReqHeader:              stagingReqHeader,
 		DeputyReqHeader:               deputyReqHeader,

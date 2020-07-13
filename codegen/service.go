@@ -36,8 +36,6 @@ type ModuleSpec struct {
 	// CompiledModule is the resolved module from thrift file
 	// that will contain modules and typedefs not directly mounted on AST
 	CompiledModule *compile.Module `json:"omitempty"`
-	// ProtoModule foo
-	ProtoModule *proto.Proto
 	// Source thrift file to generate the code.
 	ThriftFile string
 	// Whether the ThriftFile should have annotations or not
@@ -92,7 +90,6 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool, h *PackageHelper) (*M
 	pModule := newVisitor().Visit(protoModules)
 
 	moduleSpec := &ModuleSpec{
-		ProtoModule:   protoModules,
 		ProtoServices: pModule.Services,
 		ThriftFile:    protoFile,
 		WantAnnot:     false,

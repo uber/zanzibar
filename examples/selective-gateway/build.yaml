@@ -2,13 +2,15 @@ annotationPrefix: zanzibar
 clientConfig: ./clients
 copyrightHeader: ./copyright_header.txt
 endpointConfig: ./endpoints
-genCodePackage: github.com/uber/zanzibar/examples/selective-gateway/build/gen-code
+genCodePackage:
+  .thrift: github.com/uber/zanzibar/examples/selective-gateway/build/gen-code
+  .proto: github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen
 genMock: true
 middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
 packageRoot: github.com/uber/zanzibar/examples/selective-gateway
 targetGenDir: ./build
-thriftRootDir: ./idl
+idlRootDir: ./idl
 moduleIdlSubDir:
   endpoints: .
   default: .

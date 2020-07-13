@@ -432,7 +432,10 @@ func newTestPackageHelper(t *testing.T) *PackageHelper {
 	options := &PackageHelperOptions{
 		RelTargetGenDir: "tmpDir",
 		CopyrightHeader: "copyright",
-		GenCodePackage:  packageRoot + "/build/gen-code",
+		GenCodePackage: map[string]string{
+			".thrift": packageRoot + "/build/gen-code",
+			".proto":  packageRoot + "/build/gen-code",
+		},
 		TraceKey:        "trace-key",
 		ModuleIdlSubDir: map[string]string{"endpoints": "endpoints-idl", "default": "clients-idl"},
 	}
@@ -489,7 +492,7 @@ func doNewClientSpecTest(t *testing.T, rawConfig []byte, clientType string) {
 	}
 	h := newTestPackageHelper(t)
 
-	idlFile := filepath.Join(h.ThriftIDLPath(), h.GetModuleIdlSubDir(false), "clients/bar/bar.thrift")
+	idlFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), "clients/bar/bar.thrift")
 	expectedSpec := &ClientSpec{
 		ModuleSpec:         nil,
 		YAMLFile:           instance.YAMLFileName,
@@ -538,7 +541,7 @@ func TestGRPCClientNewClientSpec(t *testing.T) {
 	}
 	h := newTestPackageHelper(t)
 
-	idlFile := filepath.Join(h.ThriftIDLPath(), h.GetModuleIdlSubDir(false), "clients/echo/echo.proto")
+	idlFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), "clients/echo/echo.proto")
 	expectedSpec := &ClientSpec{
 		ModuleSpec:         nil,
 		YAMLFile:           instance.YAMLFileName,
