@@ -229,7 +229,7 @@ $(find "${target_dirs[@]}" -name "*.go" | \
 )
 "$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
-goimports -w "$BUILD_DIR/gen-code/"
+goimports -w "$ABS_GENCODE_DIR" "$ABS_PROTO_GENCODE_DIR"
 
 end=$(date +%s)
 runtime=$((end - start))

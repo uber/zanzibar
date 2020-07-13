@@ -159,7 +159,9 @@ test-only:
 	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race ./codegen/... ./runtime/... | grep -v '\[no test files\]'
 	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race $$(go list ./examples/example-gateway/... | grep -v build) | \
 	 grep -v '\[no test files\]'
-	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test ./test/... ./examples/example-gateway/build/... | \
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race $$(go list ./examples/selective-gateway/... | grep -v build) | \
+	 grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test ./test/... ./examples/example-gateway/build/... ./examples/selective-gateway/build/... | \
 	 grep -v '\[no test files\]'
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "<coverage />" > ./coverage/cobertura-coverage.xml

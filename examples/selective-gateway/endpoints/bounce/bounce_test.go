@@ -9,9 +9,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/echo"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/mirror"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
+	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
 )
 
 func TestEcho(t *testing.T) {
