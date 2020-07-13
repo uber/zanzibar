@@ -152,7 +152,7 @@ func (p *PackageHelperOptions) genCodePackage(packageRoot string) map[string]str
 	defaultGenCodePath := path.Join(packageRoot, p.relTargetGenDir(), "gen-code")
 	return map[string]string{
 		"thrift": defaultGenCodePath,
-		"proto": defaultGenCodePath,
+		"proto":  defaultGenCodePath,
 	}
 }
 

@@ -69,11 +69,11 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 	options := &codegen.PackageHelperOptions{
 		RelTargetGenDir: tmpDir,
 		CopyrightHeader: testCopyrightHeader,
-		GenCodePackage:  map[string]string{
+		GenCodePackage: map[string]string{
 			".thrift": packageRoot + "/build/gen-code",
-			".proto": packageRoot + "/build/gen-code",
+			".proto":  packageRoot + "/build/gen-code",
 		},
-		TraceKey:        "trace-key",
+		TraceKey: "trace-key",
 	}
 
 	h, err := codegen.NewPackageHelper(
