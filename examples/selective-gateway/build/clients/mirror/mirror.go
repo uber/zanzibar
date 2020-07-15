@@ -37,17 +37,24 @@ import (
 
 // Client defines mirror client interface.
 type Client interface {
-	Mirror(
+	MirrorMirror(
 		ctx context.Context,
 		request *gen.Request,
 		opts ...yarpc.CallOption,
 	) (*gen.Response, error)
+
+	MirrorInternalMirror(
+		ctx context.Context,
+		request *gen.InternalRequest,
+		opts ...yarpc.CallOption,
+	) (*gen.InternalResponse, error)
 }
 
 // mirrorClient is the gRPC client for downstream service.
 type mirrorClient struct {
-	client gen.MirrorYARPCClient
-	opts   *zanzibar.GRPCClientOpts
+	mirrorInternalClient gen.MirrorInternalYARPCClient
+	mirrorClient         gen.MirrorYARPCClient
+	opts                 *zanzibar.GRPCClientOpts
 }
 
 // NewClient returns a new gRPC client for service mirror
@@ -63,26 +70,27 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	timeoutInMS := int(deps.Default.Config.MustGetInt("clients.mirror.timeout"))
 	methodNames := map[string]string{
-		"Mirror::Mirror": "Mirror",
+		"Mirror::Mirror":         "MirrorMirror",
+		"MirrorInternal::Mirror": "MirrorInternalMirror",
 	}
 	return &mirrorClient{
-		client: gen.NewMirrorYARPCClient(oc),
+		mirrorInternalClient: gen.NewMirrorInternalYARPCClient(oc),
+		mirrorClient:         gen.NewMirrorYARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
 			deps.Default.Logger,
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
 			methodNames,
 			"mirror",
-			"Mirror",
 			routingKey,
 			requestUUIDHeaderKey,
-			configureCicruitBreaker(deps, timeoutInMS),
+			configureCircuitBreaker(deps, timeoutInMS),
 			timeoutInMS,
 		),
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.mirror.circuitBreakerDisabled") {
@@ -125,8 +133,8 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	return true
 }
 
-// Mirror is a client RPC call for method Mirror::Mirror.
-func (e *mirrorClient) Mirror(
+// MirrorMirror is a client RPC call for method Mirror::Mirror.
+func (e *mirrorClient) MirrorMirror(
 	ctx context.Context,
 	request *gen.Request,
 	opts ...yarpc.CallOption,
@@ -148,7 +156,45 @@ func (e *mirrorClient) Mirror(
 	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
-	runFunc := e.client.Mirror
+	runFunc := e.mirrorClient.Mirror
+	callHelper.Start()
+	if e.opts.CircuitBreakerDisabled {
+		result, err = runFunc(ctx, request, opts...)
+	} else {
+		err = hystrix.DoC(ctx, "mirror", func(ctx context.Context) error {
+			result, err = runFunc(ctx, request, opts...)
+			return err
+		}, nil)
+	}
+	callHelper.Finish(ctx, err)
+
+	return result, err
+}
+
+// MirrorInternalMirror is a client RPC call for method MirrorInternal::Mirror.
+func (e *mirrorClient) MirrorInternalMirror(
+	ctx context.Context,
+	request *gen.InternalRequest,
+	opts ...yarpc.CallOption,
+) (*gen.InternalResponse, error) {
+	var result *gen.InternalResponse
+	var err error
+
+	ctx, callHelper := zanzibar.NewGRPCClientCallHelper(ctx, "MirrorInternal::Mirror", e.opts)
+
+	if e.opts.RoutingKey != "" {
+		opts = append(opts, yarpc.WithRoutingKey(e.opts.RoutingKey))
+	}
+	if e.opts.RequestUUIDHeaderKey != "" {
+		reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+		if reqUUID != "" {
+			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
+		}
+	}
+	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
+	defer cancel()
+
+	runFunc := e.mirrorInternalClient.Mirror
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)

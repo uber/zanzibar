@@ -212,6 +212,199 @@ var (
 	emptyMirrorServiceMirrorYARPCResponse = &Response{}
 )
 
+// MirrorInternalYARPCClient is the YARPC client-side interface for the MirrorInternal service.
+type MirrorInternalYARPCClient interface {
+	Mirror(context.Context, *InternalRequest, ...yarpc.CallOption) (*InternalResponse, error)
+}
+
+func newMirrorInternalYARPCClient(clientConfig transport.ClientConfig, anyResolver jsonpb.AnyResolver, options ...protobuf.ClientOption) MirrorInternalYARPCClient {
+	return &_MirrorInternalYARPCCaller{protobuf.NewStreamClient(
+		protobuf.ClientParams{
+			ServiceName:  "mirror.MirrorInternal",
+			ClientConfig: clientConfig,
+			AnyResolver:  anyResolver,
+			Options:      options,
+		},
+	)}
+}
+
+// NewMirrorInternalYARPCClient builds a new YARPC client for the MirrorInternal service.
+func NewMirrorInternalYARPCClient(clientConfig transport.ClientConfig, options ...protobuf.ClientOption) MirrorInternalYARPCClient {
+	return newMirrorInternalYARPCClient(clientConfig, nil, options...)
+}
+
+// MirrorInternalYARPCServer is the YARPC server-side interface for the MirrorInternal service.
+type MirrorInternalYARPCServer interface {
+	Mirror(context.Context, *InternalRequest) (*InternalResponse, error)
+}
+
+type buildMirrorInternalYARPCProceduresParams struct {
+	Server      MirrorInternalYARPCServer
+	AnyResolver jsonpb.AnyResolver
+}
+
+func buildMirrorInternalYARPCProcedures(params buildMirrorInternalYARPCProceduresParams) []transport.Procedure {
+	handler := &_MirrorInternalYARPCHandler{params.Server}
+	return protobuf.BuildProcedures(
+		protobuf.BuildProceduresParams{
+			ServiceName: "mirror.MirrorInternal",
+			UnaryHandlerParams: []protobuf.BuildProceduresUnaryHandlerParams{
+				{
+					MethodName: "Mirror",
+					Handler: protobuf.NewUnaryHandler(
+						protobuf.UnaryHandlerParams{
+							Handle:      handler.Mirror,
+							NewRequest:  newMirrorInternalServiceMirrorYARPCRequest,
+							AnyResolver: params.AnyResolver,
+						},
+					),
+				},
+			},
+			OnewayHandlerParams: []protobuf.BuildProceduresOnewayHandlerParams{},
+			StreamHandlerParams: []protobuf.BuildProceduresStreamHandlerParams{},
+		},
+	)
+}
+
+// BuildMirrorInternalYARPCProcedures prepares an implementation of the MirrorInternal service for YARPC registration.
+func BuildMirrorInternalYARPCProcedures(server MirrorInternalYARPCServer) []transport.Procedure {
+	return buildMirrorInternalYARPCProcedures(buildMirrorInternalYARPCProceduresParams{Server: server})
+}
+
+// FxMirrorInternalYARPCClientParams defines the input
+// for NewFxMirrorInternalYARPCClient. It provides the
+// paramaters to get a MirrorInternalYARPCClient in an
+// Fx application.
+type FxMirrorInternalYARPCClientParams struct {
+	fx.In
+
+	Provider    yarpc.ClientConfig
+	AnyResolver jsonpb.AnyResolver `name:"yarpcfx" optional:"true"`
+}
+
+// FxMirrorInternalYARPCClientResult defines the output
+// of NewFxMirrorInternalYARPCClient. It provides a
+// MirrorInternalYARPCClient to an Fx application.
+type FxMirrorInternalYARPCClientResult struct {
+	fx.Out
+
+	Client MirrorInternalYARPCClient
+
+	// We are using an fx.Out struct here instead of just returning a client
+	// so that we can add more values or add named versions of the client in
+	// the future without breaking any existing code.
+}
+
+// NewFxMirrorInternalYARPCClient provides a MirrorInternalYARPCClient
+// to an Fx application using the given name for routing.
+//
+//  fx.Provide(
+//    mirror.NewFxMirrorInternalYARPCClient("service-name"),
+//    ...
+//  )
+func NewFxMirrorInternalYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
+	return func(params FxMirrorInternalYARPCClientParams) FxMirrorInternalYARPCClientResult {
+		return FxMirrorInternalYARPCClientResult{
+			Client: newMirrorInternalYARPCClient(params.Provider.ClientConfig(name), params.AnyResolver, options...),
+		}
+	}
+}
+
+// FxMirrorInternalYARPCProceduresParams defines the input
+// for NewFxMirrorInternalYARPCProcedures. It provides the
+// paramaters to get MirrorInternalYARPCServer procedures in an
+// Fx application.
+type FxMirrorInternalYARPCProceduresParams struct {
+	fx.In
+
+	Server      MirrorInternalYARPCServer
+	AnyResolver jsonpb.AnyResolver `name:"yarpcfx" optional:"true"`
+}
+
+// FxMirrorInternalYARPCProceduresResult defines the output
+// of NewFxMirrorInternalYARPCProcedures. It provides
+// MirrorInternalYARPCServer procedures to an Fx application.
+//
+// The procedures are provided to the "yarpcfx" value group.
+// Dig 1.2 or newer must be used for this feature to work.
+type FxMirrorInternalYARPCProceduresResult struct {
+	fx.Out
+
+	Procedures     []transport.Procedure `group:"yarpcfx"`
+	ReflectionMeta reflection.ServerMeta `group:"yarpcfx"`
+}
+
+// NewFxMirrorInternalYARPCProcedures provides MirrorInternalYARPCServer procedures to an Fx application.
+// It expects a MirrorInternalYARPCServer to be present in the container.
+//
+//  fx.Provide(
+//    mirror.NewFxMirrorInternalYARPCProcedures(),
+//    ...
+//  )
+func NewFxMirrorInternalYARPCProcedures() interface{} {
+	return func(params FxMirrorInternalYARPCProceduresParams) FxMirrorInternalYARPCProceduresResult {
+		return FxMirrorInternalYARPCProceduresResult{
+			Procedures: buildMirrorInternalYARPCProcedures(buildMirrorInternalYARPCProceduresParams{
+				Server:      params.Server,
+				AnyResolver: params.AnyResolver,
+			}),
+			ReflectionMeta: reflection.ServerMeta{
+				ServiceName:     "mirror.MirrorInternal",
+				FileDescriptors: yarpcFileDescriptorClosure735477c7170897b9,
+			},
+		}
+	}
+}
+
+type _MirrorInternalYARPCCaller struct {
+	streamClient protobuf.StreamClient
+}
+
+func (c *_MirrorInternalYARPCCaller) Mirror(ctx context.Context, request *InternalRequest, options ...yarpc.CallOption) (*InternalResponse, error) {
+	responseMessage, err := c.streamClient.Call(ctx, "Mirror", request, newMirrorInternalServiceMirrorYARPCResponse, options...)
+	if responseMessage == nil {
+		return nil, err
+	}
+	response, ok := responseMessage.(*InternalResponse)
+	if !ok {
+		return nil, protobuf.CastError(emptyMirrorInternalServiceMirrorYARPCResponse, responseMessage)
+	}
+	return response, err
+}
+
+type _MirrorInternalYARPCHandler struct {
+	server MirrorInternalYARPCServer
+}
+
+func (h *_MirrorInternalYARPCHandler) Mirror(ctx context.Context, requestMessage proto.Message) (proto.Message, error) {
+	var request *InternalRequest
+	var ok bool
+	if requestMessage != nil {
+		request, ok = requestMessage.(*InternalRequest)
+		if !ok {
+			return nil, protobuf.CastError(emptyMirrorInternalServiceMirrorYARPCRequest, requestMessage)
+		}
+	}
+	response, err := h.server.Mirror(ctx, request)
+	if response == nil {
+		return nil, err
+	}
+	return response, err
+}
+
+func newMirrorInternalServiceMirrorYARPCRequest() proto.Message {
+	return &InternalRequest{}
+}
+
+func newMirrorInternalServiceMirrorYARPCResponse() proto.Message {
+	return &InternalResponse{}
+}
+
+var (
+	emptyMirrorInternalServiceMirrorYARPCRequest  = &InternalRequest{}
+	emptyMirrorInternalServiceMirrorYARPCResponse = &InternalResponse{}
+)
+
 var yarpcFileDescriptorClosure735477c7170897b9 = [][]byte{
 	// clients/mirror/mirror.proto
 	[]byte{
@@ -220,9 +413,12 @@ var yarpcFileDescriptorClosure735477c7170897b9 = [][]byte{
 		0x25, 0xf9, 0x42, 0x6c, 0x10, 0x9e, 0x92, 0x32, 0x17, 0x7b, 0x50, 0x6a, 0x61, 0x69, 0x6a, 0x71,
 		0x89, 0x90, 0x04, 0x17, 0x7b, 0x6e, 0x6a, 0x71, 0x71, 0x62, 0x7a, 0xaa, 0x04, 0xa3, 0x02, 0xa3,
 		0x06, 0x67, 0x10, 0x8c, 0xab, 0xa4, 0xc2, 0xc5, 0x11, 0x94, 0x5a, 0x5c, 0x90, 0x9f, 0x57, 0x9c,
-		0x8a, 0x5b, 0x95, 0x91, 0x29, 0x17, 0x9b, 0x2f, 0xd8, 0x50, 0x21, 0x6d, 0x38, 0x8b, 0x5f, 0x0f,
-		0x6a, 0x2b, 0xd4, 0x12, 0x29, 0x01, 0x84, 0x00, 0xc4, 0xc0, 0x24, 0x36, 0xb0, 0x83, 0x8c, 0x01,
-		0x01, 0x00, 0x00, 0xff, 0xff, 0x0f, 0x62, 0x7b, 0xeb, 0xaf, 0x00, 0x00, 0x00,
+		0x8a, 0x47, 0x95, 0x36, 0x17, 0xbf, 0x67, 0x5e, 0x49, 0x6a, 0x51, 0x5e, 0x62, 0x0e, 0x61, 0x23,
+		0x75, 0xb8, 0x04, 0x10, 0x8a, 0x09, 0x19, 0x6d, 0x64, 0xca, 0xc5, 0xe6, 0x0b, 0x76, 0xaf, 0x90,
+		0x36, 0x9c, 0xc5, 0xaf, 0x07, 0xf5, 0x10, 0xd4, 0x32, 0x29, 0x01, 0x84, 0x00, 0xc4, 0x40, 0x23,
+		0x5f, 0x2e, 0x3e, 0x88, 0x62, 0x98, 0x55, 0x42, 0xd6, 0x70, 0xed, 0xe2, 0x30, 0xd5, 0x68, 0x6e,
+		0x96, 0x92, 0xc0, 0x94, 0x80, 0x18, 0x97, 0xc4, 0x06, 0x0e, 0x3a, 0x63, 0x40, 0x00, 0x00, 0x00,
+		0xff, 0xff, 0xfa, 0x4b, 0x9b, 0xc3, 0x59, 0x01, 0x00, 0x00,
 	},
 }
 
@@ -230,6 +426,11 @@ func init() {
 	yarpc.RegisterClientBuilder(
 		func(clientConfig transport.ClientConfig, structField reflect.StructField) MirrorYARPCClient {
 			return NewMirrorYARPCClient(clientConfig, protobuf.ClientBuilderOptions(clientConfig, structField)...)
+		},
+	)
+	yarpc.RegisterClientBuilder(
+		func(clientConfig transport.ClientConfig, structField reflect.StructField) MirrorInternalYARPCClient {
+			return NewMirrorInternalYARPCClient(clientConfig, protobuf.ClientBuilderOptions(clientConfig, structField)...)
 		},
 	)
 }
