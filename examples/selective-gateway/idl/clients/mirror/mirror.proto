@@ -13,3 +13,15 @@ message Response {
 service Mirror {
     rpc Mirror(Request) returns (Response);
 }
+
+message InternalRequest {
+    string message = 1;
+}
+
+message InternalResponse {
+    string message = 1;
+}
+
+service MirrorInternal {
+    rpc Mirror(InternalRequest) returns (InternalResponse);
+}

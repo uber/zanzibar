@@ -110,27 +110,118 @@ func (m *Response) GetMessage() string {
 	return ""
 }
 
+type InternalRequest struct {
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (m *InternalRequest) Reset()      { *m = InternalRequest{} }
+func (*InternalRequest) ProtoMessage() {}
+func (*InternalRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_735477c7170897b9, []int{2}
+}
+func (m *InternalRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *InternalRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_InternalRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *InternalRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InternalRequest.Merge(m, src)
+}
+func (m *InternalRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *InternalRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_InternalRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InternalRequest proto.InternalMessageInfo
+
+func (m *InternalRequest) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+type InternalResponse struct {
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (m *InternalResponse) Reset()      { *m = InternalResponse{} }
+func (*InternalResponse) ProtoMessage() {}
+func (*InternalResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_735477c7170897b9, []int{3}
+}
+func (m *InternalResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *InternalResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_InternalResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *InternalResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InternalResponse.Merge(m, src)
+}
+func (m *InternalResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *InternalResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_InternalResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InternalResponse proto.InternalMessageInfo
+
+func (m *InternalResponse) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*Request)(nil), "mirror.Request")
 	proto.RegisterType((*Response)(nil), "mirror.Response")
+	proto.RegisterType((*InternalRequest)(nil), "mirror.InternalRequest")
+	proto.RegisterType((*InternalResponse)(nil), "mirror.InternalResponse")
 }
 
 func init() { proto.RegisterFile("clients/mirror/mirror.proto", fileDescriptor_735477c7170897b9) }
 
 var fileDescriptor_735477c7170897b9 = []byte{
-	// 182 bytes of a gzipped FileDescriptorProto
+	// 227 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x4e, 0xce, 0xc9, 0x4c,
 	0xcd, 0x2b, 0x29, 0xd6, 0xcf, 0xcd, 0x2c, 0x2a, 0xca, 0x2f, 0x82, 0x52, 0x7a, 0x05, 0x45, 0xf9,
 	0x25, 0xf9, 0x42, 0x6c, 0x10, 0x9e, 0x92, 0x32, 0x17, 0x7b, 0x50, 0x6a, 0x61, 0x69, 0x6a, 0x71,
 	0x89, 0x90, 0x04, 0x17, 0x7b, 0x6e, 0x6a, 0x71, 0x71, 0x62, 0x7a, 0xaa, 0x04, 0xa3, 0x02, 0xa3,
 	0x06, 0x67, 0x10, 0x8c, 0xab, 0xa4, 0xc2, 0xc5, 0x11, 0x94, 0x5a, 0x5c, 0x90, 0x9f, 0x57, 0x9c,
-	0x8a, 0x5b, 0x95, 0x91, 0x29, 0x17, 0x9b, 0x2f, 0xd8, 0x50, 0x21, 0x6d, 0x38, 0x8b, 0x5f, 0x0f,
-	0x6a, 0x2b, 0xd4, 0x12, 0x29, 0x01, 0x84, 0x00, 0xc4, 0x40, 0x27, 0x93, 0x0b, 0x0f, 0xe5, 0x18,
-	0x6e, 0x3c, 0x94, 0x63, 0xf8, 0xf0, 0x50, 0x8e, 0xb1, 0xe1, 0x91, 0x1c, 0xe3, 0x8a, 0x47, 0x72,
-	0x8c, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x8b, 0x47,
-	0x72, 0x0c, 0x1f, 0x1e, 0xc9, 0x31, 0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c, 0xc3, 0x8d,
-	0xc7, 0x72, 0x0c, 0x49, 0x6c, 0x60, 0x6f, 0x18, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0x14, 0xb4,
-	0x35, 0x3b, 0xe5, 0x00, 0x00, 0x00,
+	0x8a, 0x47, 0x95, 0x36, 0x17, 0xbf, 0x67, 0x5e, 0x49, 0x6a, 0x51, 0x5e, 0x62, 0x0e, 0x61, 0x23,
+	0x75, 0xb8, 0x04, 0x10, 0x8a, 0x09, 0x19, 0x6d, 0x64, 0xca, 0xc5, 0xe6, 0x0b, 0x76, 0xaf, 0x90,
+	0x36, 0x9c, 0xc5, 0xaf, 0x07, 0xf5, 0x10, 0xd4, 0x32, 0x29, 0x01, 0x84, 0x00, 0xc4, 0x40, 0x23,
+	0x5f, 0x2e, 0x3e, 0x88, 0x62, 0x98, 0x55, 0x42, 0xd6, 0x70, 0xed, 0xe2, 0x30, 0xd5, 0x68, 0x6e,
+	0x96, 0x92, 0xc0, 0x94, 0x80, 0x18, 0xe7, 0x64, 0x72, 0xe1, 0xa1, 0x1c, 0xc3, 0x8d, 0x87, 0x72,
+	0x0c, 0x1f, 0x1e, 0xca, 0x31, 0x36, 0x3c, 0x92, 0x63, 0x5c, 0xf1, 0x48, 0x8e, 0xf1, 0xc4, 0x23,
+	0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x7c, 0xf1, 0x48, 0x8e, 0xe1, 0xc3,
+	0x23, 0x39, 0xc6, 0x09, 0x8f, 0xe5, 0x18, 0x2e, 0x3c, 0x96, 0x63, 0xb8, 0xf1, 0x58, 0x8e, 0x21,
+	0x89, 0x0d, 0x1c, 0xe0, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0x44, 0x19, 0x54, 0xf5, 0x8f,
+	0x01, 0x00, 0x00,
 }
 
 func (this *Request) Equal(that interface{}) bool {
@@ -181,6 +272,54 @@ func (this *Response) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *InternalRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*InternalRequest)
+	if !ok {
+		that2, ok := that.(InternalRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Message != that1.Message {
+		return false
+	}
+	return true
+}
+func (this *InternalResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*InternalResponse)
+	if !ok {
+		that2, ok := that.(InternalResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Message != that1.Message {
+		return false
+	}
+	return true
+}
 func (this *Request) GoString() string {
 	if this == nil {
 		return "nil"
@@ -197,6 +336,26 @@ func (this *Response) GoString() string {
 	}
 	s := make([]string, 0, 5)
 	s = append(s, "&mirror.Response{")
+	s = append(s, "Message: "+fmt.Sprintf("%#v", this.Message)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *InternalRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&mirror.InternalRequest{")
+	s = append(s, "Message: "+fmt.Sprintf("%#v", this.Message)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *InternalResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&mirror.InternalResponse{")
 	s = append(s, "Message: "+fmt.Sprintf("%#v", this.Message)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -257,6 +416,54 @@ func (m *Response) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
+func (m *InternalRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *InternalRequest) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Message) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintMirror(dAtA, i, uint64(len(m.Message)))
+		i += copy(dAtA[i:], m.Message)
+	}
+	return i, nil
+}
+
+func (m *InternalResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *InternalResponse) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Message) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintMirror(dAtA, i, uint64(len(m.Message)))
+		i += copy(dAtA[i:], m.Message)
+	}
+	return i, nil
+}
+
 func encodeVarintMirror(dAtA []byte, offset int, v uint64) int {
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
@@ -280,6 +487,32 @@ func (m *Request) Size() (n int) {
 }
 
 func (m *Response) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovMirror(uint64(l))
+	}
+	return n
+}
+
+func (m *InternalRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovMirror(uint64(l))
+	}
+	return n
+}
+
+func (m *InternalResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -320,6 +553,26 @@ func (this *Response) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Response{`,
+		`Message:` + fmt.Sprintf("%v", this.Message) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *InternalRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&InternalRequest{`,
+		`Message:` + fmt.Sprintf("%v", this.Message) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *InternalResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&InternalResponse{`,
 		`Message:` + fmt.Sprintf("%v", this.Message) + `,`,
 		`}`,
 	}, "")
@@ -445,6 +698,176 @@ func (m *Response) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: Response: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMirror
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMirror
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMirror
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMirror(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMirror
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMirror
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *InternalRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMirror
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: InternalRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: InternalRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMirror
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMirror
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMirror
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMirror(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMirror
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMirror
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *InternalResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMirror
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: InternalResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: InternalResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

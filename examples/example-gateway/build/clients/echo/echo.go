@@ -37,7 +37,7 @@ import (
 
 // Client defines echo client interface.
 type Client interface {
-	Echo(
+	EchoEcho(
 		ctx context.Context,
 		request *gen.Request,
 		opts ...yarpc.CallOption,
@@ -46,8 +46,8 @@ type Client interface {
 
 // echoClient is the gRPC client for downstream service.
 type echoClient struct {
-	client gen.EchoYARPCClient
-	opts   *zanzibar.GRPCClientOpts
+	echoClient gen.EchoYARPCClient
+	opts       *zanzibar.GRPCClientOpts
 }
 
 // NewClient returns a new gRPC client for service echo
@@ -66,23 +66,22 @@ func NewClient(deps *module.Dependencies) Client {
 		"Echo::Echo": "Echo",
 	}
 	return &echoClient{
-		client: gen.NewEchoYARPCClient(oc),
+		echoClient: gen.NewEchoYARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
 			deps.Default.Logger,
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
 			methodNames,
 			"echo",
-			"Echo",
 			routingKey,
 			requestUUIDHeaderKey,
-			configureCicruitBreaker(deps, timeoutInMS),
+			configureCircuitBreaker(deps, timeoutInMS),
 			timeoutInMS,
 		),
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.echo.circuitBreakerDisabled") {
@@ -125,8 +124,8 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	return true
 }
 
-// Echo is a client RPC call for method Echo::Echo.
-func (e *echoClient) Echo(
+// EchoEcho is a client RPC call for method Echo::Echo.
+func (e *echoClient) EchoEcho(
 	ctx context.Context,
 	request *gen.Request,
 	opts ...yarpc.CallOption,
@@ -148,7 +147,7 @@ func (e *echoClient) Echo(
 	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
-	runFunc := e.client.Echo
+	runFunc := e.echoClient.Echo
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)

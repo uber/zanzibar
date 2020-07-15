@@ -33,7 +33,6 @@ import (
 )
 
 const (
-	serviceName            = "Echo"
 	clientID               = "Echo"
 	methodName             = "Echo"
 	routingKey             = "routingKey"
@@ -76,9 +75,9 @@ var (
 	}
 	expectedScopeTags = map[string]map[string]string{
 		serviceMethod: {
-			scopeTagClient:         clientID,
-			scopeTagClientMethod:   methodName,
-			scopeTagsTargetService: serviceName,
+			scopeTagClient:          clientID,
+			scopeTagClientMethod:    methodName,
+			scopeTagsTargetEndpoint: serviceMethod,
 		},
 	}
 )
@@ -90,16 +89,12 @@ func TestNewGRPCClientOpts(t *testing.T) {
 		extractors,
 		methodNames,
 		clientID,
-		serviceName,
 		routingKey,
 		requestUUIDHeaderKey,
 		circuitBreakerDisabled,
 		timeoutInMS,
 	)
 	expected := &GRPCClientOpts{
-		serviceName,
-		clientID,
-		methodNames,
 		expectedLoggers,
 		metrics,
 		extractors,
@@ -120,7 +115,6 @@ func TestGRPCCallHelper(t *testing.T) {
 		extractors,
 		methodNames,
 		clientID,
-		serviceName,
 		routingKey,
 		requestUUIDHeaderKey,
 		circuitBreakerDisabled,

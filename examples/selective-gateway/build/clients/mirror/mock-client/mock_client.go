@@ -36,22 +36,42 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// Mirror mocks base method
-func (m *MockClient) Mirror(arg0 context.Context, arg1 *mirror.Request, arg2 ...yarpc.CallOption) (*mirror.Response, error) {
+// MirrorInternalMirror mocks base method
+func (m *MockClient) MirrorInternalMirror(arg0 context.Context, arg1 *mirror.InternalRequest, arg2 ...yarpc.CallOption) (*mirror.InternalResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "Mirror", varargs...)
+	ret := m.ctrl.Call(m, "MirrorInternalMirror", varargs...)
+	ret0, _ := ret[0].(*mirror.InternalResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MirrorInternalMirror indicates an expected call of MirrorInternalMirror
+func (mr *MockClientMockRecorder) MirrorInternalMirror(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MirrorInternalMirror", reflect.TypeOf((*MockClient)(nil).MirrorInternalMirror), varargs...)
+}
+
+// MirrorMirror mocks base method
+func (m *MockClient) MirrorMirror(arg0 context.Context, arg1 *mirror.Request, arg2 ...yarpc.CallOption) (*mirror.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "MirrorMirror", varargs...)
 	ret0, _ := ret[0].(*mirror.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Mirror indicates an expected call of Mirror
-func (mr *MockClientMockRecorder) Mirror(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+// MirrorMirror indicates an expected call of MirrorMirror
+func (mr *MockClientMockRecorder) MirrorMirror(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mirror", reflect.TypeOf((*MockClient)(nil).Mirror), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MirrorMirror", reflect.TypeOf((*MockClient)(nil).MirrorMirror), varargs...)
 }

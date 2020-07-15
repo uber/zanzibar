@@ -1178,6 +1178,7 @@ func fixture_typesTmpl() (*asset, error) {
 
 var _grpc_clientTmpl = []byte(`{{- /* template to render gateway gRPC client code */ -}}
 {{- $instance := .Instance }}
+{{- $services := .Services }}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
@@ -1202,21 +1203,26 @@ import (
 type Client interface {
 {{range $i, $svc := .ProtoServices -}}
 	{{range $j, $method := $svc.RPC}}
-		{{title $method.Name}} (
+	{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+	{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+	{{- if $methodName -}}
+		{{$methodName}} (
 		ctx context.Context,
 		request *gen.{{$method.Request.Name}},
 		opts ...yarpc.CallOption,
 		) (*gen.{{$method.Response.Name}}, error)
 	{{ end -}}
+	{{ end -}}
+{{ end -}}
 }
 
 // {{$clientName}} is the gRPC client for downstream service.
 type {{$clientName}} struct {
-	client gen.{{pascal $svc.Name}}YARPCClient
+	{{range $i, $s := $services -}}
+	{{camel $s.Name}}Client gen.{{pascal $s.Name}}YARPCClient
+	{{ end -}}
 	opts   *zanzibar.GRPCClientOpts
 }
-
-{{- end}}
 
 // NewClient returns a new gRPC client for service {{$clientID}}
 func {{$exportName}}(deps *module.Dependencies) Client {
@@ -1237,26 +1243,25 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{- end -}}
 		{{- end}}
 	}
-	{{range $i, $svc := .ProtoServices -}}
 	return &{{$clientName}}{
-		client: gen.New{{pascal $svc.Name}}YARPCClient(oc),
+		{{range $i, $s := $services -}}
+		{{camel $s.Name}}Client: gen.New{{pascal $s.Name}}YARPCClient(oc),
+		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		methodNames,
 		"{{$clientID}}",
-		"{{$svc.Name}}",
 		routingKey,
 		requestUUIDHeaderKey,
-		configureCicruitBreaker(deps, timeoutInMS),
+		configureCircuitBreaker(deps, timeoutInMS),
 		timeoutInMS,
 		),
 	}
-	{{- end}}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -1301,9 +1306,11 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 
 {{range $i, $svc := .ProtoServices -}}
 {{range $j, $method := $svc.RPC -}}
-{{if $method.Name -}}
-// {{$method.Name}} is a client RPC call for method {{printf "%s::%s" $svc.Name $method.Name}}.
-func (e *{{$clientName}}) {{$method.Name}}(
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{if $methodName -}}
+// {{$methodName}} is a client RPC call for method {{printf "%s::%s" $svc.Name $method.Name}}.
+func (e *{{$clientName}}) {{$methodName}}(
 	ctx context.Context,
 	request *gen.{{$method.Request.Name}},
 	opts ...yarpc.CallOption,
@@ -1325,7 +1332,7 @@ func (e *{{$clientName}}) {{$method.Name}}(
 	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
-	runFunc := e.client.{{$method.Name}}
+	runFunc := e.{{camel $svc.Name}}Client.{{$method.Name}}
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
@@ -1354,7 +1361,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6081, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6458, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

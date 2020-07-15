@@ -32,9 +32,6 @@ import (
 
 // GRPCClientOpts used to configure various client options.
 type GRPCClientOpts struct {
-	ServiceName            string
-	ClientID               string
-	MethodNames            map[string]string
 	Loggers                map[string]*zap.Logger
 	Metrics                ContextMetrics
 	ContextExtractor       ContextExtractor
@@ -51,31 +48,28 @@ func NewGRPCClientOpts(
 	metrics ContextMetrics,
 	contextExtractor ContextExtractor,
 	methodNames map[string]string,
-	clientID, serviceName, routingKey, requestUUIDHeaderKey string,
+	clientID, routingKey, requestUUIDHeaderKey string,
 	circuitBreakerDisabled bool,
 	timeoutInMS int,
 ) *GRPCClientOpts {
 	numMethods := len(methodNames)
 	loggers := make(map[string]*zap.Logger, numMethods)
+	scopeTags := make(map[string]map[string]string)
 	for serviceMethod, methodName := range methodNames {
 		loggers[serviceMethod] = logger.With(
 			zap.String(logFieldClientID, clientID),
 			zap.String(logFieldClientMethod, methodName),
-			zap.String(logFieldClientService, serviceName),
+			zap.String(logFieldClientThriftMethod, serviceMethod),
 		)
 	}
-	scopeTags := make(map[string]map[string]string)
 	for serviceMethod, methodName := range methodNames {
 		scopeTags[serviceMethod] = map[string]string{
-			scopeTagClient:         clientID,
-			scopeTagClientMethod:   methodName,
-			scopeTagsTargetService: serviceName,
+			scopeTagClient:          clientID,
+			scopeTagClientMethod:    methodName,
+			scopeTagsTargetEndpoint: serviceMethod,
 		}
 	}
 	return &GRPCClientOpts{
-		ServiceName:            serviceName,
-		ClientID:               clientID,
-		MethodNames:            methodNames,
 		Loggers:                loggers,
 		Metrics:                metrics,
 		ContextExtractor:       contextExtractor,

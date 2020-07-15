@@ -899,13 +899,24 @@ func (g *gRPCClientGenerator) Generate(
 
 	reversedMethods := reverseExposedMethods(clientSpec)
 
+	serviceNames := map[string]struct{}{}
+	for key := range reversedMethods {
+		serviceName := strings.Split(key, "::")[0]
+		serviceNames[serviceName] = struct{}{}
+	}
+
+	services := []*ServiceSpec{}
+	for name := range serviceNames {
+		services = append(services, &ServiceSpec{Name: name})
+	}
+
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
 		ProtoServices:    clientSpec.ModuleSpec.ProtoServices,
 		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
-		Services:         nil,
+		Services:         services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   reversedMethods,

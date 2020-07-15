@@ -13,3 +13,7 @@ message Response {
 service Echo {
     rpc Echo(Request) returns (Response);
 }
+
+service EchoInternal {
+    rpc Echo(Request) returns (Response);
+}

@@ -27,10 +27,12 @@ func TestEcho(t *testing.T) {
 	ctx := context.Background()
 	var result bounce.Bounce_Bounce_Result
 
-	ms.MockClients().Echo.EXPECT().Echo(gomock.Any(), &echo.Request{Message: message}).
+	ms.MockClients().Echo.EXPECT().EchoEcho(gomock.Any(), &echo.Request{Message: message}).
 		Return(&echo.Response{Message: message}, nil)
-	ms.MockClients().Mirror.EXPECT().Mirror(gomock.Any(), &mirror.Request{Message: message}).
+	ms.MockClients().Mirror.EXPECT().MirrorMirror(gomock.Any(), &mirror.Request{Message: message}).
 		Return(&mirror.Response{Message: message}, nil)
+	ms.MockClients().Mirror.EXPECT().MirrorInternalMirror(gomock.Any(), &mirror.InternalRequest{Message: message}).
+		Return(&mirror.InternalResponse{Message: message}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
 		ctx, "Bounce", "bounce", nil, args, &result,
