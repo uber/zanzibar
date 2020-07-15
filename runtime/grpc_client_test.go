@@ -34,7 +34,7 @@ import (
 
 const (
 	clientID               = "Echo"
-	methodName             = "Echo"
+	methodName             = "EchoEcho"
 	routingKey             = "routingKey"
 	requestUUIDHeaderKey   = "reqID"
 	circuitBreakerDisabled = false

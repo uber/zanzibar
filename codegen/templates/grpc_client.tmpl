@@ -61,7 +61,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	methodNames := map[string]string{
 		{{range $i, $svc := .ProtoServices -}}
 			{{range $j, $method := $svc.RPC -}}
-				"{{printf "%s::%s" $svc.Name $method.Name}}": "{{$method.Name}}",
+			{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+			{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+			{{- if $methodName -}}
+				"{{$serviceMethod}}": "{{$methodName}}",
+			{{ end -}}
 			{{- end -}}
 		{{- end}}
 	}

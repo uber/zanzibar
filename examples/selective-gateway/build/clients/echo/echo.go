@@ -63,7 +63,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	timeoutInMS := int(deps.Default.Config.MustGetInt("clients.echo.timeout"))
 	methodNames := map[string]string{
-		"Echo::Echo": "Echo", "EchoInternal::Echo": "Echo",
+		"Echo::Echo": "EchoEcho",
 	}
 	return &echoClient{
 		echoClient: gen.NewEchoYARPCClient(oc),

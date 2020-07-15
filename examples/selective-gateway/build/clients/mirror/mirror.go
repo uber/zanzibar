@@ -52,8 +52,8 @@ type Client interface {
 
 // mirrorClient is the gRPC client for downstream service.
 type mirrorClient struct {
-	mirrorClient         gen.MirrorYARPCClient
 	mirrorInternalClient gen.MirrorInternalYARPCClient
+	mirrorClient         gen.MirrorYARPCClient
 	opts                 *zanzibar.GRPCClientOpts
 }
 
@@ -70,11 +70,12 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	timeoutInMS := int(deps.Default.Config.MustGetInt("clients.mirror.timeout"))
 	methodNames := map[string]string{
-		"Mirror::Mirror": "Mirror", "MirrorInternal::Mirror": "Mirror",
+		"Mirror::Mirror":         "MirrorMirror",
+		"MirrorInternal::Mirror": "MirrorInternalMirror",
 	}
 	return &mirrorClient{
-		mirrorClient:         gen.NewMirrorYARPCClient(oc),
 		mirrorInternalClient: gen.NewMirrorInternalYARPCClient(oc),
+		mirrorClient:         gen.NewMirrorYARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
 			deps.Default.Logger,
 			deps.Default.ContextMetrics,

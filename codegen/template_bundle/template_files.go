@@ -1239,7 +1239,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	methodNames := map[string]string{
 		{{range $i, $svc := .ProtoServices -}}
 			{{range $j, $method := $svc.RPC -}}
-				"{{printf "%s::%s" $svc.Name $method.Name}}": "{{$method.Name}}",
+			{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+			{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+			{{- if $methodName -}}
+				"{{$serviceMethod}}": "{{$methodName}}",
+			{{ end -}}
 			{{- end -}}
 		{{- end}}
 	}
@@ -1361,7 +1365,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6458, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6603, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
