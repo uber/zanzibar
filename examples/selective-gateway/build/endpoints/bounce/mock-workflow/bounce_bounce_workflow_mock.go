@@ -35,6 +35,7 @@ import (
 	mirrorclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
 	module "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 	workflow "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/workflow"
+	fixtureechoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/clients/echo/fixture"
 	bounceendpointstatic "github.com/uber/zanzibar/examples/selective-gateway/endpoints/bounce"
 )
 
@@ -51,7 +52,7 @@ func NewBounceBounceWorkflowMock(t *testing.T) (workflow.BounceBounceWorkflow, *
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{
-		Echo:   echoclientgeneratedmock.NewMockClient(ctrl),
+		Echo:   echoclientgeneratedmock.New(ctrl, fixtureechoclientgenerated.Fixture),
 		Mirror: mirrorclientgeneratedmock.NewMockClient(ctrl),
 	}
 	initializedClientDependencies.Echo = mockClientNodes.Echo

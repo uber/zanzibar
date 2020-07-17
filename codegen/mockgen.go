@@ -119,13 +119,20 @@ func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf 
 			outString = append(outString, ret)
 		}
 
-		methods = append(methods, &reflectMethod{
+		method := &reflectMethod{
 			Name:      m.Name,
 			In:        in,
 			Out:       out,
 			InString:  strings.Join(inString, " ,"),
 			OutString: strings.Join(outString, " ,"),
-		})
+		}
+
+		if m.Variadic != nil {
+			method.Variadic = "arg" + strconv.Itoa(len(m.In))
+			method.VariadicType = m.Variadic.Type.String(pkgPathToAlias, "")
+		}
+
+		methods = append(methods, method)
 	}
 
 	data := map[string]interface{}{
@@ -148,6 +155,8 @@ func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf 
 type reflectMethod struct {
 	Name                string
 	In, Out             map[string]string
+	Variadic            string
+	VariadicType        string
 	InString, OutString string
 }
 
