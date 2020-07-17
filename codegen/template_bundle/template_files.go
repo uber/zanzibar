@@ -161,12 +161,24 @@ func (s *{{$methodMockType}}) {{$scenarioMethod}}() Call {
 		{{$argName}} = gomock.Any()
 	}
 	{{- end}}
+	{{- if $method.Variadic}}
+	var {{$method.Variadic}} []interface{}
+	if f.{{title $method.Variadic}} != nil {
+		for _, v := range f.{{title $method.Variadic}} {
+			{{$method.Variadic}} = append({{$method.Variadic}}, v)
+		}
+	} else if f.{{title $method.Variadic}}Any > 0 {
+		for i := 0; i < f.{{title $method.Variadic}}Any; i++ {
+			{{$method.Variadic}} = append({{$method.Variadic}}, gomock.Any())
+		}
+	}
+	{{- end}}
 
 	{{range $retName, $retType := $method.Out}}
 	{{$retName}} := f.{{title $retName}}
 	{{- end}}
 
-	return Call{call: s.mockClient.EXPECT().{{$methodName}}({{$method.InString}}).Return({{$method.OutString}})}
+	return Call{call: s.mockClient.EXPECT().{{$methodName}}({{$method.InString}}{{if $method.Variadic}}, {{$method.Variadic}}...{{end}}).Return({{$method.OutString}})}
 }
 {{- end -}}
 {{- end -}}
@@ -182,7 +194,7 @@ func augmented_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 3157, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 3627, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1149,10 +1161,20 @@ type {{$methodName}}Fixture struct {
 	{{title $argName}} {{$argType}}
 	{{- end}}
 
+	{{- if $method.Variadic}}
+	{{title $method.Variadic}} []{{$method.VariadicType}}
+	{{- end}}
+
 	// Arg{n}Any indicates the nth argument could be gomock.Any
 	{{- range $argName, $argType := $method.In}}
 	{{title $argName}}Any bool
 	{{- end}}
+
+	{{- if $method.Variadic}}
+	// {{title $method.Variadic}}Any indicates the variadic argument is a number of gomock.Any
+	{{title $method.Variadic}}Any int
+	{{- end}}
+
 
 	{{range $retName, $retType := $method.Out}}
 	{{title $retName}} {{$retType}}
@@ -1171,7 +1193,7 @@ func fixture_typesTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "fixture_types.tmpl", size: 1379, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "fixture_types.tmpl", size: 1640, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

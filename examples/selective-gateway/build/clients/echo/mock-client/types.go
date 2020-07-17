@@ -21,23 +21,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mockbounceworkflow
+package clientmock
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
-	echoclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
-	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
-	mirrorclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
+	context "context"
+
+	echo "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
+	yarpc "go.uber.org/yarpc"
 )
 
-// MockClientNodes contains mock client dependencies for the bounce endpoint module
-type MockClientNodes struct {
-	Echo   *echoclientgeneratedmock.MockClientWithFixture
-	Mirror *mirrorclientgeneratedmock.MockClient
+// ClientFixture defines the client fixture type
+type ClientFixture struct {
+	EchoEcho *EchoEchoScenarios
 }
 
-// clientDependenciesNodes contains client dependencies
-type clientDependenciesNodes struct {
-	Echo   echoclientgenerated.Client
-	Mirror mirrorclientgenerated.Client
+// EchoEchoScenarios defines all fixture scenarios for EchoEcho
+type EchoEchoScenarios struct {
+	Success *EchoEchoFixture `scenario:"success"`
+}
+
+// EchoEchoFixture defines the fixture type for EchoEcho
+type EchoEchoFixture struct {
+	Arg0 context.Context
+	Arg1 *echo.Request
+	Arg2 []yarpc.CallOption
+
+	// Arg{n}Any indicates the nth argument could be gomock.Any
+	Arg0Any bool
+	Arg1Any bool
+	// Arg2Any indicates the variadic argument is a number of gomock.Any
+	Arg2Any int
+
+	Ret0 *echo.Response
+	Ret1 error
 }

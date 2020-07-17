@@ -23,6 +23,8 @@ package bounce
 import (
 	"context"
 
+	"go.uber.org/yarpc"
+
 	echoclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
 	mirrorclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
@@ -52,7 +54,7 @@ func (w bounceWorkflow) Handle(
 	reqHeaders zanzibar.Header,
 	req *bounce.Bounce_Bounce_Args,
 ) (string, zanzibar.Header, error) {
-	res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg})
+	res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg}, yarpc.WithRoutingKey("echo"))
 	if err != nil {
 		return "", nil, err
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
 )
 
@@ -27,8 +26,7 @@ func TestEcho(t *testing.T) {
 	ctx := context.Background()
 	var result bounce.Bounce_Bounce_Result
 
-	ms.MockClients().Echo.EXPECT().EchoEcho(gomock.Any(), &echo.Request{Message: message}).
-		Return(&echo.Response{Message: message}, nil)
+	ms.MockClients().Echo.ExpectEchoEcho().Success()
 	ms.MockClients().Mirror.EXPECT().MirrorMirror(gomock.Any(), &mirror.Request{Message: message}).
 		Return(&mirror.Response{Message: message}, nil)
 	ms.MockClients().Mirror.EXPECT().MirrorInternalMirror(gomock.Any(), &mirror.InternalRequest{Message: message}).
