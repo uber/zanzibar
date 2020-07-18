@@ -173,7 +173,7 @@ func (c *contactsClient) SaveContacts(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.SaveContactsRequest.UserUUID) + "/contacts"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	err := req.WriteJSON("POST", fullURL, headers, r.SaveContactsRequest)
 	if err != nil {
 		return defaultRes, nil, err
 	}
