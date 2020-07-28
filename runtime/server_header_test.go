@@ -78,7 +78,6 @@ func TestValues(t *testing.T) {
 	testCases := []struct {
 		title          string
 		header         func() zanzibar.ServerHTTPHeader
-		key            string
 		expectedValues []string
 		expectedBool   bool
 	}{
@@ -240,7 +239,6 @@ func TestSTHValues(t *testing.T) {
 	testCases := []struct {
 		title          string
 		header         func() zanzibar.ServerTChannelHeader
-		key            string
 		expectedValues []string
 		expectedBool   bool
 	}{
