@@ -74,7 +74,7 @@ func TestGetMultivalueKey(t *testing.T) {
 }
 
 func TestValues(t *testing.T) {
-	key := "foo"
+	key := "Canonicalized-Key"
 	testCases := []struct {
 		title          string
 		header         func() zanzibar.ServerHTTPHeader
@@ -101,6 +101,17 @@ func TestValues(t *testing.T) {
 				return zh
 			},
 			expectedValues: []string{"headerOne"},
+			expectedBool:   true,
+		},
+		{
+			title: "Zero values for a valid key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.NewServerHTTPHeader(http.Header{
+					key: []string{},
+				})
+				return zh
+			},
+			expectedValues: []string{},
 			expectedBool:   true,
 		},
 		{
@@ -215,7 +226,7 @@ func TestSTHGetMissingKey(t *testing.T) {
 }
 
 func TestSTHValues(t *testing.T) {
-	key := "foo"
+	key := "Canonicalized-Key"
 	testCases := []struct {
 		title          string
 		header         func() zanzibar.ServerTChannelHeader
