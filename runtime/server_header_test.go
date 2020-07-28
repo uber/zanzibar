@@ -104,6 +104,16 @@ func TestValues(t *testing.T) {
 			expectedBool:   true,
 		},
 		{
+			title: "Single value containing comma-separated inner values for a valid key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.ServerHTTPHeader{}
+				zh.Set(key, "headerOne,headerTwo")
+				return zh
+			},
+			expectedValues: []string{"headerOne,headerTwo"},
+			expectedBool:   true,
+		},
+		{
 			title: "Zero values for a valid key",
 			header: func() zanzibar.ServerHTTPHeader {
 				zh := zanzibar.NewServerHTTPHeader(http.Header{
@@ -255,6 +265,16 @@ func TestSTHValues(t *testing.T) {
 				return zh
 			},
 			expectedValues: []string{"headerOne"},
+			expectedBool:   true,
+		},
+		{
+			title: "Single value containing comma-separated inner values for a valid key",
+			header: func() zanzibar.ServerTChannelHeader {
+				zh := zanzibar.ServerTChannelHeader{}
+				zh.Set(key, "headerOne,headerTwo")
+				return zh
+			},
+			expectedValues: []string{"headerOne,headerTwo"},
 			expectedBool:   true,
 		},
 		{
