@@ -73,6 +73,76 @@ func TestGetMultivalueKey(t *testing.T) {
 	assert.Equal(t, "headOne", v)
 }
 
+func TestValues(t *testing.T) {
+	key := "Canonicalized-Key"
+	testCases := []struct {
+		title          string
+		header         func() zanzibar.ServerHTTPHeader
+		expectedValues []string
+		expectedBool   bool
+	}{
+		{
+			title: "Multiple values for a valid key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.NewServerHTTPHeader(http.Header{})
+				zh.Set(key, "headerOne")
+				zh.Add(key, "headerTwo")
+				return zh
+			},
+			expectedValues: []string{"headerOne", "headerTwo"},
+			expectedBool:   true,
+		},
+		{
+			title: "Single value for a valid key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.NewServerHTTPHeader(http.Header{})
+				zh.Set(key, "headerOne")
+				return zh
+			},
+			expectedValues: []string{"headerOne"},
+			expectedBool:   true,
+		},
+		{
+			title: "Single value containing comma-separated inner values for a valid key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.ServerHTTPHeader{}
+				zh.Set(key, "headerOne,headerTwo")
+				return zh
+			},
+			expectedValues: []string{"headerOne,headerTwo"},
+			expectedBool:   true,
+		},
+		{
+			title: "Zero values for a valid key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.NewServerHTTPHeader(http.Header{
+					key: []string{},
+				})
+				return zh
+			},
+			expectedValues: []string{},
+			expectedBool:   true,
+		},
+		{
+			title: "Missing header key",
+			header: func() zanzibar.ServerHTTPHeader {
+				zh := zanzibar.NewServerHTTPHeader(http.Header{})
+				return zh
+			},
+			expectedValues: []string{},
+			expectedBool:   false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.title, func(t *testing.T) {
+			actualValues, actualBool := tc.header().Values(key)
+			assert.Equal(t, tc.expectedValues, actualValues, tc.title)
+			assert.Equal(t, tc.expectedBool, actualBool, tc.title)
+		})
+	}
+}
+
 func TestAdd(t *testing.T) {
 	zh := zanzibar.NewServerHTTPHeader(http.Header{})
 	zh.Set("bar", "otherHeader")
@@ -162,6 +232,67 @@ func TestSTHGetMissingKey(t *testing.T) {
 	v, ok := zh.Get("foo")
 	assert.Equal(t, false, ok)
 	assert.Equal(t, "", v)
+}
+
+func TestSTHValues(t *testing.T) {
+	key := "Canonicalized-Key"
+	testCases := []struct {
+		title          string
+		header         func() zanzibar.ServerTChannelHeader
+		expectedValues []string
+		expectedBool   bool
+	}{
+		{
+			title: "Multiple values set for a valid key",
+			header: func() zanzibar.ServerTChannelHeader {
+				zh := zanzibar.ServerTChannelHeader{}
+				zh.Set(key, "headerOne")
+				// For ServerTChannelHeader, Add is an alias to Set so
+				// this will overwrite the existing key with the new value.
+				zh.Add(key, "headerTwo")
+				return zh
+			},
+			expectedValues: []string{"headerTwo"},
+			expectedBool:   true,
+		},
+		{
+			title: "Single value for a valid key",
+			header: func() zanzibar.ServerTChannelHeader {
+				zh := zanzibar.ServerTChannelHeader{}
+				zh.Set(key, "headerOne")
+				return zh
+			},
+			expectedValues: []string{"headerOne"},
+			expectedBool:   true,
+		},
+		{
+			title: "Single value containing comma-separated inner values for a valid key",
+			header: func() zanzibar.ServerTChannelHeader {
+				zh := zanzibar.ServerTChannelHeader{}
+				zh.Set(key, "headerOne,headerTwo")
+				return zh
+			},
+			expectedValues: []string{"headerOne,headerTwo"},
+			expectedBool:   true,
+		},
+		{
+			title: "Missing header key",
+			header: func() zanzibar.ServerTChannelHeader {
+				zh := zanzibar.ServerTChannelHeader{}
+				return zh
+			},
+			expectedValues: []string{},
+			expectedBool:   false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.title, func(t *testing.T) {
+			actualValues, actualBool := tc.header().Values(key)
+			assert.Equal(t, tc.expectedValues, actualValues, tc.title)
+			assert.Equal(t, tc.expectedBool, actualBool, tc.title)
+		})
+	}
 }
 
 func TestSTHAdd(t *testing.T) {
