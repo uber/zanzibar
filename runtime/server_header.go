@@ -40,7 +40,7 @@ type Header interface {
 	// Values mirrors the implementation of http.header and returns a slice of header values.
 	// When a key contains multiple values, the entire collection is returned.
 	// Ref: https://golang.org/pkg/net/http/#Header.Values
-	//Values(key string) ([]string, bool)
+	Values(key string) ([]string, bool)
 	Add(key string, value string)
 	Set(key string, value string)
 	Keys() []string
