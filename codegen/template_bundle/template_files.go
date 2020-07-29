@@ -1452,7 +1452,7 @@ type {{$clientName}} struct {
 	callerHeader string
 	callerName   string
 	calleeName   string
-	alternateRoutingMap map[string]map[string]string
+	altRoutingMap map[string]map[string]string
 	{{end -}}
 }
 
@@ -1466,10 +1466,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	callerName := deps.Default.Config.MustGetString("serviceName")
 	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 
-	var alternateServiceDetail = config.AlternateServiceDetail{}
+	var altServiceDetail = config.AlternateServiceDetail{}
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
-		var alternateServiceDetail config.AlternateServiceDetail
-		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+		var altServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &altServiceDetail)
 	}
 
 	{{else -}}
@@ -1507,7 +1507,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeHeader: calleeHeader,
 		callerName: callerName,
 		calleeName: calleeName,
-		alternateRoutingMap: initializeAlternateRoutingMap(alternateServiceDetail),
+		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
@@ -1528,7 +1528,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 }
 
 {{if $sidecarRouter -}}
-func initializeAlternateRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
 	routingMap := make(map[string]map[string]string)
 	for _, alt := range altServiceDetail.RoutingConfigs {
 		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
@@ -1625,14 +1625,15 @@ func (c *{{$clientName}}) {{$methodName}}(
 	headers[c.callerHeader] = c.callerName
 
 	// Set the service name if dynamic routing header is present
-	for headerKey, headerVal := range headers {
-		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
+	for routeHeaderKey, routeMap := range c.altRoutingMap {
+		if headerVal, ok := headers[routeHeaderKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
-				//if headerVal matches routeRegex regex, set the alternative service name
-				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
-                	headers[c.calleeHeader] = altServiceName
-                }
-			}
+        		//if headerVal matches routeRegex regex, set the alternative service name
+        		if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+        			headers[c.calleeHeader] = altServiceName
+        			break
+        		}
+        	}
 		}
 	}
 
@@ -1889,7 +1890,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16298, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16277, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
