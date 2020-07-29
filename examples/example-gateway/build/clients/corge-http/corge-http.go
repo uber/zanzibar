@@ -26,10 +26,12 @@ package corgehttpclient
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
 
+	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
@@ -71,10 +73,11 @@ type corgeHTTPClient struct {
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey   string
 
-	calleeHeader string
-	callerHeader string
-	callerName   string
-	calleeName   string
+	calleeHeader        string
+	callerHeader        string
+	callerName          string
+	calleeName          string
+	alternateRoutingMap map[string]map[string]string
 }
 
 // NewClient returns a new http client.
@@ -85,6 +88,13 @@ func NewClient(deps *module.Dependencies) Client {
 	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.default.http.calleeHeader")
 	callerName := deps.Default.Config.MustGetString("serviceName")
 	calleeName := deps.Default.Config.MustGetString("clients.corge-http.serviceName")
+
+	var alternateServiceDetail = config.AlternateServiceDetail{}
+	if deps.Default.Config.ContainsKey("clients.corge-http.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.corge-http.alternates", &alternateServiceDetail)
+	}
+
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.corge-http.timeout"))
 	timeout := time.Millisecond * time.Duration(
@@ -109,11 +119,12 @@ func NewClient(deps *module.Dependencies) Client {
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	return &corgeHTTPClient{
-		clientID:     "corge-http",
-		callerHeader: callerHeader,
-		calleeHeader: calleeHeader,
-		callerName:   callerName,
-		calleeName:   calleeName,
+		clientID:            "corge-http",
+		callerHeader:        callerHeader,
+		calleeHeader:        calleeHeader,
+		callerName:          callerName,
+		calleeName:          calleeName,
+		alternateRoutingMap: initializeAlternativeRoutingMap(alternateServiceDetail),
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"corge-http",
@@ -133,6 +144,17 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
+func initializeAlternativeRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+	routingMap := make(map[string]map[string]string)
+	for _, alt := range altServiceDetail.RoutingConfigs {
+		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
+			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
+		} else {
+			routingMap[alt.HeaderName] = map[string]string{alt.HeaderValue: alt.ServiceName}
+		}
+	}
+	return routingMap
+}
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
@@ -198,7 +220,24 @@ func (c *corgeHTTPClient) EchoString(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Corge::echoString", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for headerKey, headerVal := range headers {
+		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
+				if matchFound {
+					headers[c.callerHeader] = altServiceName
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.callerHeader]; !ok {
+		headers[c.callerHeader] = c.callerName
+	}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string"
@@ -281,7 +320,24 @@ func (c *corgeHTTPClient) NoContent(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContent", "Corge::noContent", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for headerKey, headerVal := range headers {
+		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
+				if matchFound {
+					headers[c.callerHeader] = altServiceName
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.callerHeader]; !ok {
+		headers[c.callerHeader] = c.callerName
+	}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/no-content"
@@ -359,7 +415,24 @@ func (c *corgeHTTPClient) NoContentNoException(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContentNoException", "Corge::noContentNoException", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for headerKey, headerVal := range headers {
+		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
+				if matchFound {
+					headers[c.callerHeader] = altServiceName
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.callerHeader]; !ok {
+		headers[c.callerHeader] = c.callerName
+	}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/no-content-no-exception"
@@ -433,7 +506,24 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CorgeNoContentOnException", "Corge::noContentOnException", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for headerKey, headerVal := range headers {
+		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
+				if matchFound {
+					headers[c.callerHeader] = altServiceName
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.callerHeader]; !ok {
+		headers[c.callerHeader] = c.callerName
+	}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/no-content-on-exception"

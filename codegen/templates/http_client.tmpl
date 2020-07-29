@@ -58,6 +58,7 @@ type {{$clientName}} struct {
 	callerHeader string
 	callerName   string
 	calleeName   string
+	alternateRoutingMap map[string]map[string]string
 	{{end -}}
 }
 
@@ -70,6 +71,13 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
 	callerName := deps.Default.Config.MustGetString("serviceName")
 	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+
+	var alternateServiceDetail = config.AlternateServiceDetail{}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		var alternateServiceDetail config.AlternateServiceDetail
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
+	}
+
 	{{else -}}
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
@@ -105,6 +113,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeHeader: calleeHeader,
 		callerName: callerName,
 		calleeName: calleeName,
+		alternateRoutingMap: initializeAlternativeRoutingMap(alternateServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
@@ -123,6 +132,20 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		requestUUIDHeaderKey: requestUUIDHeaderKey,
 	}
 }
+
+{{if $sidecarRouter -}}
+func initializeAlternativeRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+	routingMap := make(map[string]map[string]string)
+	for _, alt := range altServiceDetail.RoutingConfigs {
+		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
+			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
+		} else {
+			routingMap[alt.HeaderName] = map[string]string{alt.HeaderValue:alt.ServiceName}
+		}
+	}
+	return routingMap
+}
+{{end -}}
 
 func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
@@ -206,7 +229,24 @@ func (c *{{$clientName}}) {{$methodName}}(
 
 	{{if $sidecarRouter -}}
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for headerKey, headerVal := range headers {
+		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
+				if matchFound {
+					headers[c.callerHeader] = altServiceName
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.callerHeader]; !ok {
+		headers[c.callerHeader] = c.callerName
+	}
 	{{end}}
 
 	// Generate full URL.
