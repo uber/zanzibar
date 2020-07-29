@@ -27,6 +27,21 @@
 	"clients.corge-http.serviceName": "CorgeHttp",
 	"clients.corge-http.maxConcurrentRequests": 1000,
 	"clients.corge-http.errorPercentThreshold": 20,
+	"clients.corge-http.alternates": {
+	  "routingConfigs": [
+		{
+		  "headerName": "x-api-environment",
+		  "headerValue": "^sandbox$",
+		  "serviceName": "CorgeHttp-staging"
+		}
+	  ],
+	  "servicesDetail": {
+		"corge-http-staging": {
+		  "ip": "127.0.0.1",
+		  "port": 5436
+		}
+	  }
+	},
 	"clients.google-now.ip": "127.0.0.1",
 	"clients.google-now.port": 14120,
 	"clients.google-now.timeout": 10000,
