@@ -236,8 +236,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 			for routeRegex, altServiceName := range routeMap {
 				//if headerVal matches routeRegex regex, set the alternative service name
 				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
-                	headers[c.calleeHeader] = altServiceName
-                }
+					headers[c.calleeHeader] = altServiceName
+				}
 			}
 		}
 	}
