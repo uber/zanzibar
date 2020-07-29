@@ -237,15 +237,15 @@ func (c *{{$clientName}}) {{$methodName}}(
 				//if headerVal matches routeRegex regex, set the alternative service name
 				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
 				if matchFound {
-					headers[c.callerHeader] = altServiceName
+					headers[c.calleeHeader] = altServiceName
 				}
 			}
 		}
 	}
 
 	// If serviceName was not set in the dynamic routing section above, set as the default
-	if _, ok := headers[c.callerHeader]; !ok {
-		headers[c.callerHeader] = c.callerName
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
 	}
 	{{end}}
 
