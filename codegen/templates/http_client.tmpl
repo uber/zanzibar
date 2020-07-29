@@ -113,7 +113,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeHeader: calleeHeader,
 		callerName: callerName,
 		calleeName: calleeName,
-		alternateRoutingMap: initializeAlternativeRoutingMap(alternateServiceDetail),
+		alternateRoutingMap: initializeAlternateRoutingMap(alternateServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
@@ -134,7 +134,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 }
 
 {{if $sidecarRouter -}}
-func initializeAlternativeRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+func initializeAlternateRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
 	routingMap := make(map[string]map[string]string)
 	for _, alt := range altServiceDetail.RoutingConfigs {
 		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
@@ -235,10 +235,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
 				//if headerVal matches routeRegex regex, set the alternative service name
-				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
-				if matchFound {
-					headers[c.calleeHeader] = altServiceName
-				}
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+                	headers[c.calleeHeader] = altServiceName
+                }
 			}
 		}
 	}

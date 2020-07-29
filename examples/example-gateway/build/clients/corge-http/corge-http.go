@@ -124,7 +124,7 @@ func NewClient(deps *module.Dependencies) Client {
 		calleeHeader:        calleeHeader,
 		callerName:          callerName,
 		calleeName:          calleeName,
-		alternateRoutingMap: initializeAlternativeRoutingMap(alternateServiceDetail),
+		alternateRoutingMap: initializeAlternateRoutingMap(alternateServiceDetail),
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"corge-http",
@@ -144,7 +144,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func initializeAlternativeRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+func initializeAlternateRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
 	routingMap := make(map[string]map[string]string)
 	for _, alt := range altServiceDetail.RoutingConfigs {
 		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
@@ -226,17 +226,16 @@ func (c *corgeHTTPClient) EchoString(
 		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
 				//if headerVal matches routeRegex regex, set the alternative service name
-				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
-				if matchFound {
-					headers[c.callerHeader] = altServiceName
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
 				}
 			}
 		}
 	}
 
 	// If serviceName was not set in the dynamic routing section above, set as the default
-	if _, ok := headers[c.callerHeader]; !ok {
-		headers[c.callerHeader] = c.callerName
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
 	}
 
 	// Generate full URL.
@@ -326,17 +325,16 @@ func (c *corgeHTTPClient) NoContent(
 		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
 				//if headerVal matches routeRegex regex, set the alternative service name
-				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
-				if matchFound {
-					headers[c.callerHeader] = altServiceName
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
 				}
 			}
 		}
 	}
 
 	// If serviceName was not set in the dynamic routing section above, set as the default
-	if _, ok := headers[c.callerHeader]; !ok {
-		headers[c.callerHeader] = c.callerName
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
 	}
 
 	// Generate full URL.
@@ -421,17 +419,16 @@ func (c *corgeHTTPClient) NoContentNoException(
 		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
 				//if headerVal matches routeRegex regex, set the alternative service name
-				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
-				if matchFound {
-					headers[c.callerHeader] = altServiceName
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
 				}
 			}
 		}
 	}
 
 	// If serviceName was not set in the dynamic routing section above, set as the default
-	if _, ok := headers[c.callerHeader]; !ok {
-		headers[c.callerHeader] = c.callerName
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
 	}
 
 	// Generate full URL.
@@ -512,17 +509,16 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		if routeMap, ok := c.alternateRoutingMap[headerKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
 				//if headerVal matches routeRegex regex, set the alternative service name
-				matchFound, _ := regexp.MatchString(routeRegex, headerVal)
-				if matchFound {
-					headers[c.callerHeader] = altServiceName
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
 				}
 			}
 		}
 	}
 
 	// If serviceName was not set in the dynamic routing section above, set as the default
-	if _, ok := headers[c.callerHeader]; !ok {
-		headers[c.callerHeader] = c.callerName
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
 	}
 
 	// Generate full URL.
