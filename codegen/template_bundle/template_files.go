@@ -1628,12 +1628,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	for routeHeaderKey, routeMap := range c.altRoutingMap {
 		if headerVal, ok := headers[routeHeaderKey]; ok {
 			for routeRegex, altServiceName := range routeMap {
-        		//if headerVal matches routeRegex regex, set the alternative service name
-        		if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
-        			headers[c.calleeHeader] = altServiceName
-        			break
-        		}
-        	}
+				//if headerVal matches routeRegex regex, set the alternative service name
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
+					break
+				}
+			}
 		}
 	}
 
@@ -1890,7 +1890,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16277, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16241, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
