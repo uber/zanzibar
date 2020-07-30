@@ -145,6 +145,7 @@ func NewClient(deps *module.Dependencies) Client {
 }
 
 func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+	// The goal is to support for each header key, multiple values that point to different services
 	routingMap := make(map[string]map[string]string)
 	for _, alt := range altServiceDetail.RoutingConfigs {
 		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {

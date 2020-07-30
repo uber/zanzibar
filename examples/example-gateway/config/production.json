@@ -31,8 +31,18 @@
 	  "routingConfigs": [
 		{
 		  "headerName": "x-api-environment",
-		  "headerValue": "^sandbox$",
+		  "headerValue": "^staging",
 		  "serviceName": "CorgeHttp-staging"
+		},
+		{
+		  "headerName": "x-api-environment",
+		  "headerValue": "^canary",
+		  "serviceName": "CorgeHttp-canary"
+		},
+		{
+		  "headerName": "x-alt-router",
+		  "headerValue": "^alternate",
+		  "serviceName": "CorgeHttp-alt"
 		}
 	  ],
 	  "servicesDetail": {
