@@ -1399,6 +1399,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"fmt"
+	"net/textproto"
 	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"time"
@@ -1468,7 +1469,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 
 	var altServiceDetail = config.AlternateServiceDetail{}
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
-		var altServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &altServiceDetail)
 	}
 
@@ -1532,10 +1532,10 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 	// The goal is to support for each header key, multiple values that point to different services
 	routingMap := make(map[string]map[string]string)
 	for _, alt := range altServiceDetail.RoutingConfigs {
-		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
+		if headerValueToServiceMap, ok := routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)]; ok {
 			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
 		} else {
-			routingMap[alt.HeaderName] = map[string]string{alt.HeaderValue:alt.ServiceName}
+			routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)] = map[string]string{alt.HeaderValue:alt.ServiceName}
 		}
 	}
 	return routingMap
@@ -1891,7 +1891,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16338, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

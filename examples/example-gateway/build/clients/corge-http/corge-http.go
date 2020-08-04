@@ -26,6 +26,7 @@ package corgehttpclient
 import (
 	"context"
 	"fmt"
+	"net/textproto"
 	"regexp"
 	"time"
 
@@ -91,7 +92,6 @@ func NewClient(deps *module.Dependencies) Client {
 
 	var altServiceDetail = config.AlternateServiceDetail{}
 	if deps.Default.Config.ContainsKey("clients.corge-http.alternates") {
-		var altServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.corge-http.alternates", &altServiceDetail)
 	}
 
@@ -148,10 +148,10 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 	// The goal is to support for each header key, multiple values that point to different services
 	routingMap := make(map[string]map[string]string)
 	for _, alt := range altServiceDetail.RoutingConfigs {
-		if headerValueToServiceMap, ok := routingMap[alt.HeaderName]; ok {
+		if headerValueToServiceMap, ok := routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)]; ok {
 			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
 		} else {
-			routingMap[alt.HeaderName] = map[string]string{alt.HeaderValue: alt.ServiceName}
+			routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)] = map[string]string{alt.HeaderValue: alt.ServiceName}
 		}
 	}
 	return routingMap
