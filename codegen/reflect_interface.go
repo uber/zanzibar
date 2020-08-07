@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -56,6 +57,7 @@ func ReflectInterface(projRoot string, pathSymbolMap map[string]string) (map[str
 		progBinary += ".exe"
 	}
 
+	log.Println("starting zanzibar reflectInterface")
 	// Generate program
 	paths := make(map[string]bool, len(pathSymbolMap))
 	for p := range pathSymbolMap {
@@ -69,6 +71,7 @@ func ReflectInterface(projRoot string, pathSymbolMap map[string]string) (map[str
 	if err := reflectProgram.Execute(&program, &data); err != nil {
 		return nil, err
 	}
+	log.Println("created zanzibar reflectInterface program")
 
 	if err := ioutil.WriteFile(filepath.Join(tmpDir, progSource), program.Bytes(), 0600); err != nil {
 		return nil, err
@@ -83,6 +86,7 @@ func ReflectInterface(projRoot string, pathSymbolMap map[string]string) (map[str
 	if err := build.Run(); err != nil {
 		return nil, errors.Wrap(err, buildStderr.String())
 	}
+	log.Println("built the program")
 	progPath := filepath.Join(tmpDir, progBinary)
 
 	// Run it
@@ -94,6 +98,7 @@ func ReflectInterface(projRoot string, pathSymbolMap map[string]string) (map[str
 	if err := cmd.Run(); err != nil {
 		return nil, errors.Wrap(err, stderr.String())
 	}
+	log.Println("ran the program")
 
 	var pkgs map[string]*model.Package
 	if err := gob.NewDecoder(&stdout).Decode(&pkgs); err != nil {
