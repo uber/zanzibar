@@ -282,6 +282,34 @@ func (gateway *BenchGateway) MakeRequest(
 	return client.Do(req)
 }
 
+// MakeRequestWithHeaderValues helper
+func (gateway *BenchGateway) MakeRequestWithHeaderValues(
+	method string, url string, headers zanzibar.Header, body io.Reader,
+) (*http.Response, error) {
+	client := gateway.httpClient
+
+	fullURL := "http://" + gateway.ActualGateway.RealHTTPAddr + url
+
+	req, err := http.NewRequest(method, fullURL, body)
+
+	// For each key, fetch every disparate header value and add
+	// it to the bench gateway request.
+	keys := headers.Keys()
+	for _, key := range keys {
+		if values, found := headers.Values(key); found {
+			for _, value := range values {
+				req.Header.Add(key, value)
+			}
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Do(req)
+}
+
 // MakeTChannelRequest helper
 func (gateway *BenchGateway) MakeTChannelRequest(
 	ctx context.Context,
