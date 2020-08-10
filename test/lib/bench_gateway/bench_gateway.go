@@ -271,12 +271,12 @@ func (gateway *BenchGateway) MakeRequest(
 	fullURL := "http://" + gateway.ActualGateway.RealHTTPAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
-	for headerName, headerValue := range headers {
-		req.Header.Set(headerName, headerValue)
-	}
-
 	if err != nil {
 		return nil, err
+	}
+
+	for headerName, headerValue := range headers {
+		req.Header.Set(headerName, headerValue)
 	}
 
 	return client.Do(req)
@@ -291,6 +291,9 @@ func (gateway *BenchGateway) MakeRequestWithHeaderValues(
 	fullURL := "http://" + gateway.ActualGateway.RealHTTPAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
+	if err != nil {
+		return nil, err
+	}
 
 	// For each key, fetch every disparate header value and add
 	// it to the bench gateway request.
@@ -301,10 +304,6 @@ func (gateway *BenchGateway) MakeRequestWithHeaderValues(
 				req.Header.Add(key, value)
 			}
 		}
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	return client.Do(req)
