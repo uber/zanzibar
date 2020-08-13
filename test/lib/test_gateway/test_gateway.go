@@ -52,6 +52,15 @@ type TestGateway interface {
 		headers map[string]string,
 		body io.Reader,
 	) (*http.Response, error)
+	// MakeRequestWithHeaderValues is an alternate version of `MakeRequest` that uses `zanzibar.Header`
+	// instead of a `map[string]string` to represent headers. This allows us to fetch multiple values
+	// for a given header key.
+	MakeRequestWithHeaderValues(
+		method string,
+		url string,
+		headers zanzibar.Header,
+		body io.Reader,
+	) (*http.Response, error)
 	MakeTChannelRequest(
 		ctx context.Context,
 		thriftService string,
@@ -333,12 +342,42 @@ func (gateway *ChildProcessGateway) MakeRequest(
 	fullURL := "http://" + gateway.RealHTTPAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
+	if err != nil {
+		return nil, err
+	}
+
 	for headerName, headerValue := range headers {
 		req.Header.Set(headerName, headerValue)
 	}
 
+	return client.Do(req)
+}
+
+// MakeRequestWithHeaderValues helper
+func (gateway *ChildProcessGateway) MakeRequestWithHeaderValues(
+	method string,
+	url string,
+	headers zanzibar.Header,
+	body io.Reader,
+) (*http.Response, error) {
+	client := gateway.HTTPClient
+
+	fullURL := "http://" + gateway.RealHTTPAddr + url
+
+	req, err := http.NewRequest(method, fullURL, body)
 	if err != nil {
 		return nil, err
+	}
+
+	// For each key, fetch every disparate header value and add
+	// it to the test gateway request.
+	keys := headers.Keys()
+	for _, key := range keys {
+		if values, found := headers.Values(key); found {
+			for _, value := range values {
+				req.Header.Add(key, value)
+			}
+		}
 	}
 
 	return client.Do(req)
