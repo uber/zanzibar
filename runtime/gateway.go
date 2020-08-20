@@ -66,8 +66,9 @@ var defaultShutdownPollInterval = 500 * time.Millisecond
 var defaultCloseTimeout = 10000 * time.Millisecond
 
 const (
-	localhost = "127.0.0.1"
-	testenv   = "test"
+	localhost                = "127.0.0.1"
+	testenv                  = "test"
+	metricsServiceFromEnvKey = "metrics.serviceNameEnv"
 )
 
 // Options configures the gateway
@@ -529,9 +530,16 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 
 func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	metricsType := config.MustGetString("metrics.type")
-	service := config.MustGetString("metrics.serviceName")
-	env := config.MustGetString("env")
 
+	var service string
+	if config.ContainsKey(metricsServiceFromEnvKey) {
+		service = os.Getenv(config.MustGetString(metricsServiceFromEnvKey))
+	}
+	if service == "" {
+		service = config.MustGetString("metrics.serviceName")
+	}
+
+	env := config.MustGetString("env")
 	if metricsType == "m3" {
 		if gateway.metricsBackend != nil {
 			panic("expected no metrics backend in gateway.")
