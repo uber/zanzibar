@@ -29,7 +29,22 @@ type ProtoModule struct {
 	PackageName string
 	FilePath    string
 	Imports     []string
-	Services    []*ProtoService
+	Services    Services
+}
+
+// Services is list of ProtoServices
+type Services []*ProtoService
+
+func (a Services) Len() int {
+	return len(a)
+}
+
+func (a Services) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a Services) Less(i, j int) bool {
+	return a[i].Name < a[j].Name
 }
 
 // ProtoService is an internal representation of Proto service and methods in that service.

@@ -48,7 +48,7 @@ type ModuleSpec struct {
 	GoThriftTypesFilePath string
 	// Generated imports
 	IncludedPackages []GoPackageImport
-	Services         []*ServiceSpec
+	Services         ServiceSpecs
 	ProtoServices    []*ProtoService
 }
 
@@ -56,6 +56,21 @@ type ModuleSpec struct {
 type GoPackageImport struct {
 	PackageName string
 	AliasName   string
+}
+
+// ServiceSpecs is a list of ServiceSpecs
+type ServiceSpecs []*ServiceSpec
+
+func (a ServiceSpecs) Len() int {
+	return len(a)
+}
+
+func (a ServiceSpecs) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a ServiceSpecs) Less(i, j int) bool {
+	return a[i].Name < a[j].Name
 }
 
 // ServiceSpec specifies a service.
@@ -88,6 +103,8 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool, h *PackageHelper) (*M
 		return nil, errors.Wrap(err, "failed parsing proto file")
 	}
 	pModule := newVisitor().Visit(protoModules)
+
+	sort.Sort(&pModule.Services)
 
 	moduleSpec := &ModuleSpec{
 		ProtoServices: pModule.Services,
