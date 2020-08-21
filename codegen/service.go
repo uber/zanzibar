@@ -71,6 +71,7 @@ func (a ServiceSpecs) Swap(i, j int) {
 func (a ServiceSpecs) Less(i, j int) bool {
 	return a[i].Name < a[j].Name
 }
+
 // ServiceSpec specifies a service.
 type ServiceSpec struct {
 	// Service name
