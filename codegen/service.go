@@ -58,6 +58,7 @@ type GoPackageImport struct {
 	AliasName   string
 }
 
+// ServiceSpecs is a list of ServiceSpecs
 type ServiceSpecs []*ServiceSpec
 
 func (a ServiceSpecs) Len() int {
@@ -103,7 +104,7 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool, h *PackageHelper) (*M
 	}
 	pModule := newVisitor().Visit(protoModules)
 
-	sort.Sort(pModule.Services)
+	sort.Sort(&pModule.Services)
 
 	moduleSpec := &ModuleSpec{
 		ProtoServices: pModule.Services,

@@ -484,7 +484,7 @@ func (g *httpClientGenerator) Generate(
 
 	exposedMethods := reverseExposedMethods(clientSpec)
 
-	sort.Sort(clientSpec.ModuleSpec.Services)
+	sort.Sort(&clientSpec.ModuleSpec.Services)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,

@@ -32,6 +32,7 @@ type ProtoModule struct {
 	Services    Services
 }
 
+// Services is list of ProtoServices
 type Services []*ProtoService
 
 func (a Services) Len() int {
