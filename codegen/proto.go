@@ -46,7 +46,6 @@ func (a Services) Less(i, j int) bool {
 	return a[i].Name < a[j].Name
 }
 
-
 // ProtoService is an internal representation of Proto service and methods in that service.
 type ProtoService struct {
 	Name string
