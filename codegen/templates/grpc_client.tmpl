@@ -40,7 +40,7 @@ type Client interface {
 
 // {{$clientName}} is the gRPC client for downstream service.
 type {{$clientName}} struct {
-	{{range $i, $s := $services -}}
+	{{range $s := $services -}}
 	{{camel $s.Name}}Client gen.{{pascal $s.Name}}YARPCClient
 	{{ end -}}
 	opts   *zanzibar.GRPCClientOpts
