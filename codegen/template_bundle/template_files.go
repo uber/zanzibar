@@ -1240,7 +1240,7 @@ type Client interface {
 
 // {{$clientName}} is the gRPC client for downstream service.
 type {{$clientName}} struct {
-	{{range $s := $services -}}
+	{{range $i, $s := $services -}}
 	{{camel $s.Name}}Client gen.{{pascal $s.Name}}YARPCClient
 	{{ end -}}
 	opts   *zanzibar.GRPCClientOpts
@@ -1270,7 +1270,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{- end}}
 	}
 	return &{{$clientName}}{
-		{{range $s := $services -}}
+		{{range $i, $s := $services -}}
 		{{camel $s.Name}}Client: gen.New{{pascal $s.Name}}YARPCClient(oc),
 		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
@@ -1387,7 +1387,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6595, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6603, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
