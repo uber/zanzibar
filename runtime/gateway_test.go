@@ -72,7 +72,7 @@ func TestGetServiceNameFromEnv(t *testing.T) {
 		"jaeger.reporter.hostport":           "localhost:6831",
 		"jaeger.sampler.param":               0.001,
 		"jaeger.sampler.type":                "remote",
-		"logger.fileName":                    "foober",
+		"logger.fileName":                    "",
 		"logger.output":                      "",
 		"subLoggerLevel.jaeger":              "info",
 		"subLoggerLevel.http":                "info",
