@@ -89,6 +89,8 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool, h *PackageHelper) (*M
 	}
 	pModule := newVisitor().Visit(protoModules)
 
+	sort.Sort(pModule.Services)
+
 	moduleSpec := &ModuleSpec{
 		ProtoServices: pModule.Services,
 		ThriftFile:    protoFile,
