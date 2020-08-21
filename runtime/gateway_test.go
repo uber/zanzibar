@@ -21,6 +21,9 @@
 package zanzibar
 
 import (
+	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"os"
 	"testing"
 
 	"go.uber.org/zap"
@@ -45,6 +48,62 @@ func TestCreatGatewayLoggingConfig(t *testing.T) {
 	err := g.setupLogger(cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, zap.NewAtomicLevelAt(zap.FatalLevel), *g.atomLevel)
+}
+
+func TestGetServiceNameFromEnv(t *testing.T) {
+	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
+		"logger.level":                       "fatal",
+		"http.port":                          int64(1234),
+		"tchannel.port":                      int64(5678),
+		"metrics.flushInterval":              1000,
+		"metrics.runtime.collectInterval":    1000,
+		"metrics.runtime.enableCPUMetrics":   false,
+		"metrics.runtime.enableMemMetrics":   false,
+		"metrics.runtime.enableGCMetrics":    false,
+		"useDatacenter":                      false,
+		"metrics.m3.includeHost":             false,
+		"envVarsToTagInRootScope":            []string{},
+		"metrics.m3.maxPacketSizeBytes":      int64(99999),
+		"metrics.m3.maxQueueSize":            int64(9999),
+		"metrics.m3.hostPort":                "127.0.0.1:8053",
+		"metrics.type":                       "m3",
+		"jaeger.disabled":                    true,
+		"jaeger.reporter.flush.milliseconds": 10000,
+		"jaeger.reporter.hostport":           "localhost:6831",
+		"jaeger.sampler.param":               0.001,
+		"jaeger.sampler.type":                "remote",
+		"logger.fileName":                    "foober",
+		"logger.output":                      "",
+		"subLoggerLevel.jaeger":              "info",
+		"subLoggerLevel.http":                "info",
+		"subLoggerLevel.tchannel":            "info",
+		"env":                                "local",
+		"datacenter":                         "xyz1",
+		"tchannel.serviceName":               "test",
+		"tchannel.processName":               "test",
+		"sidecarRouter.default.grpc.ip":      "127.0.0.1",
+		"sidecarRouter.default.grpc.port":    4998,
+		"grpc.clientServiceNameMapping":      map[string]string{"test":"test"},
+		"serviceName":                        "not-overridden",
+		"metrics.serviceName":                "not-overridden",
+		"serviceNameEnv":                     "TEST",
+		"metrics.serviceNameEnv":             "TEST",
+	})
+
+	var metricsBackend tally.CachedStatsReporter
+	opts := &Options{
+		GetContextScopeExtractors: nil,
+		GetContextFieldExtractors: nil,
+		JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
+		MetricsBackend:            metricsBackend,
+	}
+
+	os.Setenv("TEST", "overridden")
+
+	g1, err := CreateGateway(cfg, opts)
+	assert.Nil(t, err)
+	assert.Equal(t, g1.ServiceName, "overridden")
+	os.Unsetenv("TEST")
 }
 
 func TestCreatGatewayBadLoggingConfig(t *testing.T) {

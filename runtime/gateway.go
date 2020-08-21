@@ -69,6 +69,7 @@ const (
 	localhost                = "127.0.0.1"
 	testenv                  = "test"
 	metricsServiceFromEnvKey = "metrics.serviceNameEnv"
+	serviceFromEnvKey        = "serviceNameEnv"
 )
 
 // Options configures the gateway
@@ -207,10 +208,18 @@ func CreateGateway(
 		LogFieldsExtractors: logFieldsExtractors,
 	}
 
+	var service string
+	if config.ContainsKey(serviceFromEnvKey) {
+		service = os.Getenv(config.MustGetString(serviceFromEnvKey))
+	}
+	if service == "" {
+		service = config.MustGetString("serviceName")
+	}
+
 	gateway := &Gateway{
 		HTTPPort:              int32(config.MustGetInt("http.port")),
 		TChannelPort:          int32(config.MustGetInt("tchannel.port")),
-		ServiceName:           config.MustGetString("serviceName"),
+		ServiceName:           service,
 		WaitGroup:             &sync.WaitGroup{},
 		Config:                config,
 		ContextExtractor:      extractors,
