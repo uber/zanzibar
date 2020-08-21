@@ -48,7 +48,7 @@ type ModuleSpec struct {
 	GoThriftTypesFilePath string
 	// Generated imports
 	IncludedPackages []GoPackageImport
-	Services         []*ServiceSpec
+	Services         ServiceSpecs
 	ProtoServices    []*ProtoService
 }
 
@@ -58,6 +58,19 @@ type GoPackageImport struct {
 	AliasName   string
 }
 
+type ServiceSpecs []*ServiceSpec
+
+func (a ServiceSpecs) Len() int {
+	return len(a)
+}
+
+func (a ServiceSpecs) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a ServiceSpecs) Less(i, j int) bool {
+	return a[i].Name < a[j].Name
+}
 // ServiceSpec specifies a service.
 type ServiceSpec struct {
 	// Service name
