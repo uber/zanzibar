@@ -21,10 +21,11 @@
 package zanzibar
 
 import (
-	"github.com/uber-go/tally"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	"os"
 	"testing"
+
+	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	"go.uber.org/zap"
 
@@ -83,7 +84,7 @@ func TestGetServiceNameFromEnv(t *testing.T) {
 		"tchannel.processName":               "test",
 		"sidecarRouter.default.grpc.ip":      "127.0.0.1",
 		"sidecarRouter.default.grpc.port":    4998,
-		"grpc.clientServiceNameMapping":      map[string]string{"test":"test"},
+		"grpc.clientServiceNameMapping":      map[string]string{"test": "test"},
 		"serviceName":                        "not-overridden",
 		"metrics.serviceName":                "not-overridden",
 		"serviceNameEnv":                     "TEST",
