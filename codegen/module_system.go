@@ -909,10 +909,12 @@ func (g *gRPCClientGenerator) Generate(
 		serviceNames[serviceName] = struct{}{}
 	}
 
-	services := []*ServiceSpec{}
+	services := ServiceSpecs{}
 	for name := range serviceNames {
 		services = append(services, &ServiceSpec{Name: name})
 	}
+
+	sort.Sort(&services)
 
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
