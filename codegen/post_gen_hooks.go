@@ -68,15 +68,18 @@ func newMockableClient(raw []byte) (*mockableClient, error) {
 
 // ClientMockGenHook returns a PostGenHook to generate client mocks
 func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (PostGenHook, error) {
-	bin, err := NewMockgenBin(h, t)
-	if err != nil {
-		return nil, errors.Wrap(err, "error building mockgen binary")
-	}
-
 	return func(instances map[string][]*ModuleInstance) error {
 		clientInstances := instances["client"]
 		mockCount := len(clientInstances)
+		if mockCount == 0 {
+			return nil
+		}
+
 		fmt.Printf("Generating %d client mocks:\n", mockCount)
+		bin, err := NewMockgenBin(h, t)
+		if err != nil {
+			return errors.Wrap(err, "error building mockgen binary")
+		}
 
 		importPathMap := make(map[string]string, mockCount)
 		fixtureMap := make(map[string]*Fixture, mockCount)
@@ -205,6 +208,10 @@ func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (Po
 func ServiceMockGenHook(h *PackageHelper, t *Template, configFile string) PostGenHook {
 	return func(instances map[string][]*ModuleInstance) error {
 		mockCount := len(instances["service"])
+		if mockCount == 0 {
+			return nil
+		}
+
 		fmt.Printf("Generating %d service mocks:\n", mockCount)
 		ec := make(chan error, mockCount)
 		var idx int32 = 1
