@@ -1085,8 +1085,6 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 
 	spec, err := specProvider.ComputeSpec(instance)
 	if err != nil {
-		// Don't create new errors, rather wrap the error as we need the original error at caller
-		fmt.Println("error when running computespec", err.Error())
 		return err
 	}
 	if spec != nil {
