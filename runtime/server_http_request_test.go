@@ -21,14 +21,14 @@
 package zanzibar_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"sort"
 	"testing"
-
-	"bytes"
 
 	"github.com/buger/jsonparser"
 	"github.com/stretchr/testify/assert"
@@ -799,6 +799,7 @@ func TestGetQueryInt8List(t *testing.T) {
 			) {
 				l, ok := req.GetQueryInt8List("a")
 				assert.True(t, ok)
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, []int8{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -901,6 +902,7 @@ func TestGetQueryInt8Set(t *testing.T) {
 				l, ok := req.GetQueryInt8Set("a")
 				assert.True(t, ok)
 				expected := []int8{42, 49}
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -1107,6 +1109,7 @@ func TestGetQueryInt16Set(t *testing.T) {
 				l, ok := req.GetQueryInt16Set("a")
 				assert.True(t, ok)
 				expected := []int16{42, 49}
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -1313,6 +1316,7 @@ func TestGetQueryInt32Set(t *testing.T) {
 				l, ok := req.GetQueryInt32Set("a")
 				assert.True(t, ok)
 				expected := []int32{42, 49}
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -1519,6 +1523,7 @@ func TestGetQueryInt64Set(t *testing.T) {
 				l, ok := req.GetQueryInt64Set("a")
 				assert.True(t, ok)
 				expected := []int64{42, 49}
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -1623,6 +1628,7 @@ func TestGetQueryFloat64List(t *testing.T) {
 			) {
 				l, ok := req.GetQueryFloat64List("a")
 				assert.True(t, ok)
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.InEpsilonSlice(t, []float64{42.24, 49.94}, l, float64(0.005))
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
