@@ -516,148 +516,161 @@ func (req *ServerHTTPRequest) GetQueryValueList(key string) ([]string, bool) {
 
 // -- Query param as set --
 
+/**
+ * A set of bools does not make sense and is unimplemented
+ * Also, in every use-case for a gateway, a set implemented as a map is not very useful, instead one where
+ * it is a list with no duplicates is. Therefore the implementation picks that approach.
+ */
+
 // The "value" in the map representation of a set datastructure
 var _nullVal = struct{}{}
 
-// GetQueryBoolSet will return a query param as a set of boolean
-// @argo: Does this method even make sense?
-func (req *ServerHTTPRequest) GetQueryBoolSet(key string) (map[bool]struct{}, bool) {
+// GetQueryInt8Set will return a query params as set of int8 (implemented as a deduped slice)
+func (req *ServerHTTPRequest) GetQueryInt8Set(key string) ([]int8, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[bool]struct{}, len(values))
+	set := make(map[int8]struct{}, len(values))
 	for _, value := range values {
-		if value == "true" {
-			ret[true] = _nullVal
-		} else if value == "false" {
-			ret[false] = _nullVal
-		} else {
-			err := &strconv.NumError{
-				Func: "ParseBool",
-				Num:  value,
-				Err:  strconv.ErrSyntax,
-			}
-			req.LogAndSendQueryError(err, "bool", key, value)
-			return nil, false
-		}
-	}
-
-	return ret, true
-}
-
-// GetQueryInt8Set will return a query params as set of int8
-func (req *ServerHTTPRequest) GetQueryInt8Set(key string) (map[int8]struct{}, bool) {
-	success := req.parseQueryValues()
-	if !success {
-		return nil, false
-	}
-
-	values := req.queryValues[key]
-	ret := make(map[int8]struct{}, len(values))
-	for _, value := range values {
-		number, err := strconv.ParseInt(value, 10, 8)
+		number, err := strconv.ParseInt(value, 0, 8)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int8", key, value)
 			return nil, false
 		}
-		ret[int8(number)] = _nullVal
+		set[int8(number)] = _nullVal
+	}
+	ret := make([]int8, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryInt16Set will return a query params as set of int16
-func (req *ServerHTTPRequest) GetQueryInt16Set(key string) (map[int16]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryInt16Set(key string) ([]int16, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[int16]struct{}, len(values))
+	set := make(map[int16]struct{}, len(values))
 	for _, value := range values {
-		number, err := strconv.ParseInt(value, 10, 16)
+		number, err := strconv.ParseInt(value, 0, 16)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int16", key, value)
 			return nil, false
 		}
-		ret[int16(number)] = _nullVal
+		set[int16(number)] = _nullVal
+	}
+	ret := make([]int16, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryInt32Set will return a query params as set of int32
-func (req *ServerHTTPRequest) GetQueryInt32Set(key string) (map[int32]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryInt32Set(key string) ([]int32, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[int32]struct{}, len(values))
+	set := make(map[int32]struct{}, len(values))
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 32)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int32", key, value)
 			return nil, false
 		}
-		ret[int32(number)] = _nullVal
+		set[int32(number)] = _nullVal
+	}
+	ret := make([]int32, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryInt64Set will return a query params as set of int64
-func (req *ServerHTTPRequest) GetQueryInt64Set(key string) (map[int64]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryInt64Set(key string) ([]int64, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[int64]struct{}, len(values))
+	set := make(map[int64]struct{}, len(values))
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int64", key, value)
 			return nil, false
 		}
-		ret[number] = _nullVal
+		set[number] = _nullVal
+	}
+	ret := make([]int64, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryFloat64Set will return a query params as set of float64
-func (req *ServerHTTPRequest) GetQueryFloat64Set(key string) (map[float64]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryFloat64Set(key string) ([]float64, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[float64]struct{}, len(values))
+	set := make(map[float64]struct{}, len(values))
 	for _, value := range values {
 		number, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			req.LogAndSendQueryError(err, "float64", key, value)
 			return nil, false
 		}
-		ret[number] = _nullVal
+		set[number] = _nullVal
+	}
+	ret := make([]float64, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryValueSet will return all query parameters for key as a set
-func (req *ServerHTTPRequest) GetQueryValueSet(key string) (map[string]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryValueSet(key string) ([]string, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
-	ret := make(map[string]struct{}, len(req.queryValues[key]))
+	set := make(map[string]struct{}, len(req.queryValues[key]))
 	for _, v := range req.queryValues[key] {
-		ret[v] = _nullVal
+		set[v] = _nullVal
+	}
+	ret := make([]string, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }

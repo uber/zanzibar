@@ -31,3 +31,4 @@ examples/example-gateway/build/example-gateway
 .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
 package-lock.json
 gomock_reflect_*
+runtime/foober
