@@ -1628,7 +1628,6 @@ func TestGetQueryFloat64List(t *testing.T) {
 			) {
 				l, ok := req.GetQueryFloat64List("a")
 				assert.True(t, ok)
-				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.InEpsilonSlice(t, []float64{42.24, 49.94}, l, float64(0.005))
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -1730,8 +1729,8 @@ func TestGetQueryFloat64Set(t *testing.T) {
 			) {
 				l, ok := req.GetQueryFloat64Set("a")
 				assert.True(t, ok)
-				expected := []float64{42.24, 49.94}
-				assert.EqualValues(t, expected, l)
+				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
+				assert.InEpsilonSlice(t, []float64{42.24, 49.94}, l, float64(0.005))
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
 		).HandleRequest),
@@ -1947,10 +1946,9 @@ func TestGetQueryValueSet(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				params, ok := req.GetQueryValueSet("foo")
-				if !assert.Equal(t, true, ok) {
+				if !assert.True(t, ok) {
 					return
 				}
-
 				lastQueryParam = params
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
@@ -1970,8 +1968,8 @@ func TestGetQueryValueSet(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-
 	assert.Equal(t, "200 OK", resp.Status)
+	sort.Strings(lastQueryParam)
 	assert.Equal(t, []string{"baz", "baz2"}, lastQueryParam)
 
 	resp, err = mockService.MakeHTTPRequest("GET", "/foo?bar=bar", nil, nil)
