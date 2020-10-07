@@ -1,0 +1,11 @@
+{
+	"name": "trafficshadowclient1",
+	"type": "http",
+	"config": {
+		"idlFile": "clients/trafficshadowclient1/trafficshadowclient1.thrift",
+		"idlFileSha": "{{placeholder}}",
+		"exposedMethods": {
+			"Hello": "trafficshadowclient1::helloWorld"
+		}
+	}
+}

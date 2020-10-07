@@ -57,6 +57,7 @@ type EndpointMeta struct {
 	TraceKey               string
 	DeputyReqHeader        string
 	DefaultHeaders         []string
+	IsTrafficShadowingEnabled bool
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -1262,6 +1263,7 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		Method:                 method,
 		ReqHeaders:             e.ReqHeaders,
 		IsClientlessEndpoint:   e.IsClientlessEndpoint,
+		IsTrafficShadowingEnabled: e.IsTrafficShadowingEnabled,
 		ReqHeadersKeys:         sortedHeaders(e.ReqHeaders, false),
 		ReqRequiredHeadersKeys: sortedHeaders(e.ReqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),

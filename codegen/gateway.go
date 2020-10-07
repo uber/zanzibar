@@ -267,6 +267,8 @@ type EndpointSpec struct {
 	ClientSpec *ClientSpec `yaml:"-"`
 	// IsClientlessEndpoint checks if the endpoint is clientless
 	IsClientlessEndpoint bool `yaml:"-"`
+
+	IsTrafficShadowingEnabled bool `yaml:"-"`
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {

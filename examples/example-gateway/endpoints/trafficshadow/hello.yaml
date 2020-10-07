@@ -1,0 +1,13 @@
+clientId: bar
+clientMethod: Hello
+endpointId: trafficshadow
+endpointType: http
+handleId: helloWorld
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/trafficshadow/trafficshadow.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: trafficshadow::helloWorld
+workflowType: httpClient
