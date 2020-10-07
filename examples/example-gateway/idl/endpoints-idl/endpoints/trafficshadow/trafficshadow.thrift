@@ -17,8 +17,8 @@ exception TrafficShadowException {
 exception SeeOthersRedirection {
 }
 
-service trafficshadow {
-    string helloWorld(
+service Trafficshadow {
+    TrafficShadowResponse helloWorld(
     ) throws (
        1: TrafficShadowException trafficShadowException (zanzibar.http.status = "403")
        2: SeeOthersRedirection seeOthersRedirection (zanzibar.http.status = "303", zanzibar.http.res.body.disallow = "true")

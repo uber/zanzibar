@@ -14,3 +14,4 @@ dependencies:
   - tchannel/quux
   - withexceptions
   - clientless
+  - trafficshadow

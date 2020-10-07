@@ -5,7 +5,7 @@
 		"idlFile": "clients/trafficshadowclient1/trafficshadowclient1.thrift",
 		"idlFileSha": "{{placeholder}}",
 		"exposedMethods": {
-			"Hello": "trafficshadowclient1::helloWorld"
+			"Hello": "Trafficshadowclient1::helloWorld"
 		}
 	}
 }

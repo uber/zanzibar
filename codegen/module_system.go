@@ -1310,6 +1310,8 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		var tmpl string
 		if e.IsClientlessEndpoint {
 			tmpl = "clientless-workflow.tmpl"
+		} else if e.IsTrafficShadowingEnabled {
+			tmpl = "traffic_shadow_workflow.tmpl"
 		} else {
 			tmpl = "workflow.tmpl"
 		}

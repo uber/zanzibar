@@ -17,7 +17,7 @@ exception TrafficShadowException {
 exception SeeOthersRedirection {
 }
 
-service trafficshadowclient2 {
+service Trafficshadowclient2 {
     TrafficShadowClient2Response helloWorld(
     ) throws (
         1: TrafficShadowException trafficShadowException (zanzibar.http.status = "403")

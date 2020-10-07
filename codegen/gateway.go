@@ -40,6 +40,7 @@ const (
 	resHeaders         = "resHeaderMap"
 	customWorkflow     = "custom"
 	clientlessWorkflow = "clientless"
+	trafficShadowWorkflow = "trafficShadow"
 )
 
 var mandatoryEndpointFields = []string{
@@ -341,6 +342,7 @@ func NewEndpointSpec(
 	var clientID string
 	var clientMethod string
 	var isClientlessEndpoint bool
+	var isTrafficShadowEnabled bool
 
 	workflowType := endpointConfigObj["workflowType"].(string)
 	if workflowType == "httpClient" || workflowType == "tchannelClient" {
@@ -373,6 +375,26 @@ func NewEndpointSpec(
 		workflowImportPath = iworkflowImportPath.(string)
 	} else if workflowType == clientlessWorkflow {
 		isClientlessEndpoint = true
+	} else if workflowType == trafficShadowWorkflow {
+		isTrafficShadowEnabled = true
+		iclientID, ok := endpointConfigObj["clientId"]
+		if !ok {
+			return nil, errors.Errorf(
+				"endpoint config %q must have clientName field", yamlFile,
+			)
+		}
+		if iclientID != nil {
+			clientID = iclientID.(string)
+		}
+		iclientMethod, ok := endpointConfigObj["clientMethod"]
+		if !ok {
+			return nil, errors.Errorf(
+				"endpoint config %q must have clientMethod field", yamlFile,
+			)
+		}
+		if iclientMethod != nil {
+			clientMethod = iclientMethod.(string)
+		}
 	} else {
 		return nil, errors.Errorf(
 			"Invalid workflowType %q for endpoint %q",
@@ -422,6 +444,7 @@ func NewEndpointSpec(
 		ClientID:             clientID,
 		ClientMethod:         clientMethod,
 		DefaultHeaders:       h.defaultHeaders,
+		IsTrafficShadowingEnabled: isTrafficShadowEnabled,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(

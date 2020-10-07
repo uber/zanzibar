@@ -3,11 +3,20 @@ clientMethod: Hello
 endpointId: trafficshadow
 endpointType: http
 handleId: helloWorld
-middlewares: []
+middlewares:
+  - name: transformResponse
+    options:
+      transforms:
+        - from: ResField1
+          override: true
+          to: ResField
+#        - from: resField2
+#          override: false
+#          to: resField
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}
 thriftFile: endpoints/trafficshadow/trafficshadow.thrift
 thriftFileSha: '{{placeholder}}'
-thriftMethodName: trafficshadow::helloWorld
-workflowType: httpClient
+thriftMethodName: Trafficshadow::helloWorld
+workflowType: trafficShadow
