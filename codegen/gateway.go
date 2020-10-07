@@ -270,6 +270,9 @@ type EndpointSpec struct {
 	IsClientlessEndpoint bool `yaml:"-"`
 
 	IsTrafficShadowingEnabled bool `yaml:"-"`
+	TrafficShadowClientID string `yaml:"trafficShadowClientId,omitempty"`
+	TrafficShadowClientName string `yaml:"trafficShadowClientName,omitempty"`
+	TrafficShadowClientMethod string `yaml:"trafficShadowClientMethod,omitempty"`
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {
@@ -343,6 +346,9 @@ func NewEndpointSpec(
 	var clientMethod string
 	var isClientlessEndpoint bool
 	var isTrafficShadowEnabled bool
+	var trafficShadowClientId string
+	var trafficShadowClientMethod string
+	var trafficShadowClientName string
 
 	workflowType := endpointConfigObj["workflowType"].(string)
 	if workflowType == "httpClient" || workflowType == "tchannelClient" {
@@ -395,6 +401,10 @@ func NewEndpointSpec(
 		if iclientMethod != nil {
 			clientMethod = iclientMethod.(string)
 		}
+
+		trafficShadowClientId = endpointConfigObj["trafficShadowClientId"].(string)
+		trafficShadowClientMethod = endpointConfigObj["trafficShadowClientMethod"].(string)
+		trafficShadowClientName = endpointConfigObj["trafficShadowClientName"].(string)
 	} else {
 		return nil, errors.Errorf(
 			"Invalid workflowType %q for endpoint %q",
@@ -445,6 +455,9 @@ func NewEndpointSpec(
 		ClientMethod:         clientMethod,
 		DefaultHeaders:       h.defaultHeaders,
 		IsTrafficShadowingEnabled: isTrafficShadowEnabled,
+		TrafficShadowClientID: trafficShadowClientId,
+		TrafficShadowClientName: trafficShadowClientName,
+		TrafficShadowClientMethod: trafficShadowClientMethod,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(

@@ -58,6 +58,9 @@ type EndpointMeta struct {
 	DeputyReqHeader        string
 	DefaultHeaders         []string
 	IsTrafficShadowingEnabled bool
+	TrafficShadowClientID string
+	TrafficShadowClientName string
+	TrafficShadowClientMethod string
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -1276,6 +1279,9 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		TraceKey:               g.packageHelper.traceKey,
 		DeputyReqHeader:        g.packageHelper.DeputyReqHeader(),
 		DefaultHeaders:         e.DefaultHeaders,
+		TrafficShadowClientID:  e.TrafficShadowClientID,
+		TrafficShadowClientName: e.TrafficShadowClientName,
+		TrafficShadowClientMethod: e.TrafficShadowClientMethod,
 	}
 
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)

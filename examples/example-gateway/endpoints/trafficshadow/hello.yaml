@@ -1,5 +1,8 @@
 clientId: trafficshadowclient1
 clientMethod: Hello
+trafficShadowClientId: trafficshadowclient2
+trafficShadowClientName: Trafficshadowclient2
+trafficShadowClientMethod: Hello
 endpointId: trafficshadow
 endpointType: http
 handleId: helloWorld
