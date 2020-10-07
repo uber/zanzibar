@@ -1,4 +1,4 @@
-clientId: bar
+clientId: trafficshadowclient1
 clientMethod: Hello
 endpointId: trafficshadow
 endpointType: http

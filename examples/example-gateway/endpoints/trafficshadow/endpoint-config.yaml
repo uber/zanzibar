@@ -1,0 +1,9 @@
+config:
+  endpoints:
+  - hello.yaml
+  rateLimit: 100
+dependencies:
+  client:
+  - trafficshadowclient1
+name: trafficshadow
+type: http
