@@ -267,6 +267,8 @@ func (ms *ModuleSpec) SetDownstream(
 		methodName   = e.ThriftMethodName
 		clientSpec   = e.ClientSpec
 		clientMethod = e.ClientMethod
+		shadowClientSpec = e.ShadowClientSpec
+		shadowClientMethod = e.TrafficShadowClientMethod
 
 		// TODO: move generated middlewares out of zanzibar
 		headersPropagate   = e.HeadersPropagate
@@ -319,6 +321,14 @@ func (ms *ModuleSpec) SetDownstream(
 		return err
 	}
 
+	if e.WorkflowType == trafficShadowWorkflow {
+		sm1 := strings.Split(shadowClientSpec.ExposedMethods[shadowClientMethod], "::")
+		err := method.setShadowDownstream(shadowClientSpec.ModuleSpec, sm1[0], sm1[1])
+		if err != nil {
+			return err
+		}
+	}
+
 	// Exception validation
 	for en := range method.DownstreamMethod.ExceptionsIndex {
 		if _, ok := method.ExceptionsIndex[en]; !ok {
@@ -335,6 +345,18 @@ func (ms *ModuleSpec) SetDownstream(
 		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, headersPropagate, respTransforms, h, downstreamMethod)
 		if err != nil {
 			return err
+		}
+	}
+
+	if e.WorkflowType == trafficShadowWorkflow {
+		if method.ShadowDownstream != nil {
+			shadowDownstreamMethod := method.ShadowDownstreamMethod
+			shadowDownstreamSpec := shadowDownstreamMethod.CompiledThriftSpec
+			funcSpec := method.CompiledThriftSpec
+			err = method.setTypeConvertersForShadowClient(funcSpec, shadowDownstreamSpec, reqTransforms, headersPropagate, respTransforms, h, shadowDownstreamMethod)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

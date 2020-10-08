@@ -138,6 +138,13 @@ type MethodSpec struct {
 	// The downstream method spec for the endpoint
 	DownstreamMethod *MethodSpec
 
+	// The downstream service method set by endpoint config
+	ShadowDownstream *ModuleSpec
+	// the downstream service name
+	ShadowDownstreamService string
+	// The downstream method spec for the endpoint
+	ShadowDownstreamMethod *MethodSpec
+
 	// Statements for converting request types
 	ConvertRequestGoStatements []string
 
@@ -152,6 +159,9 @@ type MethodSpec struct {
 
 	// Statements for reading data out of url params (server)
 	RequestParamGoStatements []string
+
+	// Statements for converting response types
+	ConvertShadowResponseGoStatements []string
 }
 
 type annotations struct {
@@ -901,6 +911,42 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
+func (ms *MethodSpec) setShadowDownstream(
+	clientModule *ModuleSpec, clientThriftService, clientThriftMethod string,
+) error {
+	var downstreamService *ServiceSpec
+	for _, service := range clientModule.Services {
+		if service.Name == clientThriftService {
+			downstreamService = service
+			break
+		}
+	}
+	if downstreamService == nil {
+		return errors.Errorf(
+			"Downstream service '%s' is not found in '%s'",
+			clientThriftService, clientModule.ThriftFile,
+		)
+	}
+	var downstreamMethod *MethodSpec
+	for _, method := range downstreamService.Methods {
+		if method.Name == clientThriftMethod {
+			downstreamMethod = method
+			break
+		}
+	}
+	if downstreamMethod == nil {
+		return errors.Errorf(
+			"\n Downstream method '%s' is not found in '%s'",
+			clientThriftMethod, clientModule.ThriftFile,
+		)
+	}
+	// Remove irrelevant services and methods.
+	ms.ShadowDownstream = clientModule
+	ms.ShadowDownstreamService = clientThriftService
+	ms.ShadowDownstreamMethod = downstreamMethod
+	return nil
+}
+
 func (ms *MethodSpec) setHeaderPropagator(
 	reqHeaders []string,
 	downstreamSpec *compile.FunctionSpec,
@@ -931,6 +977,61 @@ func (ms *MethodSpec) setHeaderPropagator(
 	hp.append("return in")
 	hp.append("}")
 	ms.PropagateHeadersGoStatements = hp.GetLines()
+	return nil
+}
+
+func (ms *MethodSpec) setTypeConvertersForShadowClient(
+	funcSpec *compile.FunctionSpec,
+	downstreamSpec *compile.FunctionSpec,
+	reqTransforms map[string]FieldMapperEntry,
+	headersPropagate map[string]FieldMapperEntry,
+	respTransforms map[string]FieldMapperEntry,
+	h *PackageHelper,
+	downstreamMethod *MethodSpec,
+) error {
+	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
+
+	// TODO: support non-struct return types
+	respType := funcSpec.ResultSpec.ReturnType
+
+	downstreamRespType := downstreamMethod.CompiledThriftSpec.ResultSpec.ReturnType
+
+	if respType == nil || downstreamRespType == nil {
+		return nil
+	}
+
+	respConverter := NewTypeConverter(h, nil)
+
+	respConverter.append(
+		"func convert",
+		PascalCase(ms.ShadowDownstreamService), PascalCase(ms.Name),
+		"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
+	var respFields, downstreamRespFields []*compile.FieldSpec
+	switch respType.(type) {
+	case
+			*compile.BoolSpec,
+			*compile.I8Spec,
+			*compile.I16Spec,
+			*compile.I32Spec,
+			*compile.EnumSpec,
+			*compile.I64Spec,
+			*compile.DoubleSpec,
+			*compile.StringSpec:
+
+		respConverter.append("out", " := in\t\n")
+	default:
+		// default as struct
+		respFields = respType.(*compile.StructSpec).Fields
+		downstreamRespFields = downstreamRespType.(*compile.StructSpec).Fields
+		respConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
+		err := respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms)
+		if err != nil {
+			return err
+		}
+	}
+	respConverter.append("\nreturn out \t}")
+	ms.ConvertShadowResponseGoStatements = respConverter.GetLines()
+
 	return nil
 }
 

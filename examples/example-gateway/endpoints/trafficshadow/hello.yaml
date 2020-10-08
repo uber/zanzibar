@@ -11,11 +11,11 @@ middlewares:
     options:
       transforms:
         - from: ResField1
-          override: true
+          override: false
           to: ResField
-#        - from: resField2
-#          override: false
-#          to: resField
+        - from: ResField2
+          override: false
+          to: ResField
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}

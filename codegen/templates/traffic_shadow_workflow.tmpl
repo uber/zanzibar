@@ -38,6 +38,13 @@ import (
 	{{end}}
 	{{- end}}
 
+	{{if .Method.ShadowDownstream }}
+    {{- range $idx, $pkg := .Method.ShadowDownstream.IncludedPackages -}}
+    {{$file := basePath $pkg.PackageName -}}
+    {{$pkg.AliasName}} "{{$pkg.PackageName}}"
+    {{end}}
+    {{- end}}
+
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	"go.uber.org/zap"
 )
@@ -74,9 +81,12 @@ Handle(
 {{- with .Method -}}
 {{- $methodName := title .Name }}
 {{- $clientPackage := .Downstream.PackageName -}}
+{{- $shadowClientPackage := .ShadowDownstream.PackageName -}}
 {{- $clientMethod := .DownstreamMethod -}}
+{{- $shadowClientMethod := .ShadowDownstreamMethod -}}
 {{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $shadowClientResType := fullTypeName  ($shadowClientMethod).ResponseType ($shadowClientPackage) -}}
 {{- $clientExceptions := .DownstreamMethod.Exceptions -}}
 
 // New{{$workflowInterface}} creates a workflow
@@ -179,7 +189,7 @@ func (w {{$workflowStruct}}) Handle(
         clientRespBody, _, _ := w.Clients.{{$trafficShadowClientName}}.{{$trafficShadowClientMethod}}(
                 			ctx, clientHeaders,
                 		)
-        response := convert{{$trafficShadowClientName}}{{$trafficShadowClientMethod}}ClientResponse(clientRespBody)
+        response := convert{{.ShadowDownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
         	return response, resHeaders, nil
 	} else {
 		clientRespBody, _, _ := w.Clients.{{$clientName}}.{{$clientMethodName}}(
@@ -197,8 +207,8 @@ func (w {{$workflowStruct}}) Handle(
 
 {{end -}}
 
-{{if and (ne .ResponseType "") (ne "clientsIDlClientsTrafficshadowclient2Trafficshadowclient2.TrafficShadowClient2Response" "") -}}
-{{ range $key, $line := $method.ConvertResponseGoStatements -}}
+{{if and (ne .ResponseType "") (ne $shadowClientResType "") -}}
+{{ range $key, $line := $method.ConvertShadowResponseGoStatements -}}
 {{$line}}
 {{ end }}
 

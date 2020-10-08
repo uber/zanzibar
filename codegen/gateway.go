@@ -266,6 +266,8 @@ type EndpointSpec struct {
 	ClientMethod string `yaml:"clientMethod,omitempty"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
+	// The client for this endpoint if httpClient or tchannelClient
+	ShadowClientSpec *ClientSpec `yaml:"-"`
 	// IsClientlessEndpoint checks if the endpoint is clientless
 	IsClientlessEndpoint bool `yaml:"-"`
 
@@ -983,6 +985,25 @@ func (e *EndpointSpec) SetDownstream(
 	}
 
 	e.ClientSpec = clientSpec
+
+	if e.WorkflowType == trafficShadowWorkflow {
+		var shadowClientSpec *ClientSpec
+		for _, v := range clientModules {
+			if v.ClientID == e.TrafficShadowClientID {
+				shadowClientSpec = v
+				break
+			}
+		}
+
+		if shadowClientSpec == nil {
+			return errors.Errorf(
+				"When parsing endpoint yaml %q, "+
+					"could not find client %q in gateway",
+				e.YAMLFile, e.ClientID,
+			)
+		}
+		e.ShadowClientSpec = shadowClientSpec
+	}
 
 	return e.ModuleSpec.SetDownstream(e, h)
 }
