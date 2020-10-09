@@ -30,11 +30,19 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 )
 
-func TestTrafficShadowHello(t *testing.T) {
+func TestTrafficShadowHelloForClient1(t *testing.T) {
+	 testTrafficShadowHello(t, false)
+}
+
+func TestTrafficShadowHelloForClient2(t *testing.T) {
+	testTrafficShadowHello(t, true)
+}
+
+func testTrafficShadowHello(t *testing.T, callShadowClient bool) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"trafficshadowclient1"},
+		KnownHTTPBackends: []string{"trafficshadowclient1", "trafficshadowclient2"},
 		TestBinary:        util.DefaultMainFile("example-gateway"),
 		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
@@ -43,22 +51,51 @@ func TestTrafficShadowHello(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.HTTPBackends()["trafficshadowclient1"].HandleFunc(
-		"GET", "/trafficshadow/hello",
-		func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			if _, err := w.Write([]byte(`"hello"`)); err != nil {
-				t.Fatal("can't write fake response")
-			}
-			counter++
-		},
-	)
+	if callShadowClient {
+		gateway.HTTPBackends()["trafficshadowclient2"].HandleFunc(
+			"GET", "/trafficshadow/hello",
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				if _, err := w.Write([]byte(`{
+				"resField2": "ashish2"
+			}`)); err != nil {
+					t.Fatal("can't write fake response")
+				}
+				counter++
+			},
+		)
+	} else {
+		gateway.HTTPBackends()["trafficshadowclient1"].HandleFunc(
+			"GET", "/trafficshadow/hello",
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				if _, err := w.Write([]byte(`{
+				"resField1": "ashish1"
+			}`)); err != nil {
+					t.Fatal("can't write fake response")
+				}
+				counter++
+			},
+		)
+	}
 
-	res, err := gateway.MakeRequest(
-		"GET",
-		"/trafficshadow/hello",
-		nil, nil,
-	)
+	var res *http.Response
+	if callShadowClient {
+		res, _ = gateway.MakeRequest(
+			"GET",
+			"/trafficshadow/hello",
+			map[string]string{
+				"X-Uber-Shadow-Client": "sample_val",
+			}, nil,
+		)
+	} else {
+		res, _ = gateway.MakeRequest(
+			"GET",
+			"/trafficshadow/hello",
+			nil, nil,
+		)
+	}
+
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
@@ -71,5 +108,9 @@ func TestTrafficShadowHello(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, `"hello"`, string(respBytes))
+	if callShadowClient {
+		assert.Equal(t, `{"resField":"ashish2"}`, string(respBytes))
+	} else {
+		assert.Equal(t, `{"resField":"ashish1"}`, string(respBytes))
+	}
 }
