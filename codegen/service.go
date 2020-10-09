@@ -274,6 +274,7 @@ func (ms *ModuleSpec) SetDownstream(
 		headersPropagate   = e.HeadersPropagate
 		reqTransforms      = e.ReqTransforms
 		respTransforms     = e.RespTransforms
+		shadowRespTransforms  = e.ShadowRespTransforms
 		dummyReqTransforms = e.DummyReqTransforms
 	)
 	for _, v := range ms.Services {
@@ -353,7 +354,7 @@ func (ms *ModuleSpec) SetDownstream(
 			shadowDownstreamMethod := method.ShadowDownstreamMethod
 			shadowDownstreamSpec := shadowDownstreamMethod.CompiledThriftSpec
 			funcSpec := method.CompiledThriftSpec
-			err = method.setTypeConvertersForShadowClient(funcSpec, shadowDownstreamSpec, reqTransforms, headersPropagate, respTransforms, h, shadowDownstreamMethod)
+			err = method.setTypeConvertersForShadowClient(funcSpec, shadowDownstreamSpec, reqTransforms, headersPropagate, shadowRespTransforms, h, shadowDownstreamMethod)
 			if err != nil {
 				return err
 			}

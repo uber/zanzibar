@@ -11,10 +11,10 @@ middlewares:
     options:
       transforms:
         - from: ResField1
-          override: false
+          override: true
           to: ResField
-        - from: ResField2
-          override: false
+        - fromShadow: ResField2
+          override: true
           to: ResField
 reqHeaderMap: {}
 resHeaderMap: {}

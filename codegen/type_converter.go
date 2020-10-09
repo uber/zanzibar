@@ -1154,7 +1154,6 @@ func (c *TypeConverter) genConverterForPrimitive(
 		return nil
 	}
 	// set assignment
-	fmt.Println("xyz ", toField.Name, fromField)
 	if toField.Required {
 		toTypeCast = typeName
 		overrideTypeCast = typeName

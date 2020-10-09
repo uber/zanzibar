@@ -275,6 +275,9 @@ type EndpointSpec struct {
 	TrafficShadowClientID string `yaml:"trafficShadowClientId,omitempty"`
 	TrafficShadowClientName string `yaml:"trafficShadowClientName,omitempty"`
 	TrafficShadowClientMethod string `yaml:"trafficShadowClientMethod,omitempty"`
+
+	// shadow response fields that should override their values.
+	ShadowRespTransforms map[string]FieldMapperEntry `yaml:"-"`
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, yamlFile string) error {
@@ -736,7 +739,7 @@ func augmentEndpointSpec(
 			}
 			// req/res transform middleware set type converter
 			if name == "transformRequest" {
-				reqTransforms, err := setTransformMiddleware(middlewareObj)
+				reqTransforms, _, err := setTransformMiddleware(middlewareObj)
 				if err != nil {
 					return nil, err
 				}
@@ -744,15 +747,16 @@ func augmentEndpointSpec(
 				continue
 			}
 			if name == "transformResponse" {
-				resTransforms, err := setTransformMiddleware(middlewareObj)
+				resTransforms, shadowResTransforms, err := setTransformMiddleware(middlewareObj)
 				if err != nil {
 					return nil, err
 				}
 				espec.RespTransforms = resTransforms
+				espec.ShadowRespTransforms = shadowResTransforms
 				continue
 			}
 			if name == "transformClientlessReq" {
-				dummyResTransforms, err := setTransformMiddleware(middlewareObj)
+				dummyResTransforms, _, err := setTransformMiddleware(middlewareObj)
 				if err != nil {
 					return nil, err
 				}
@@ -760,7 +764,7 @@ func augmentEndpointSpec(
 				continue
 			}
 			if name == "transformError" {
-				errTransforms, err := setTransformMiddleware(middlewareObj)
+				errTransforms, _, err := setTransformMiddleware(middlewareObj)
 				if err != nil {
 					return nil, err
 				}
@@ -890,42 +894,54 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 	return fieldMap, nil
 }
 
-func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
+func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry,map[string]FieldMapperEntry, error) {
 	fieldMap := make(map[string]FieldMapperEntry)
+	shadowFieldMap := make(map[string]FieldMapperEntry)
 	opts, ok := middlewareObj["options"].(map[string]interface{})
 	if !ok {
-		return nil, errors.Errorf(
+		return nil,nil, errors.Errorf(
 			"transform middleware found with no options.",
 		)
 	}
 	transforms := opts["transforms"].([]interface{})
 	for _, transform := range transforms {
 		transformMap := transform.(map[string]interface{})
-		fromField, ok := transformMap["from"].(string)
-		if !ok {
-			return nil, errors.New(
+
+		fromShadowField, fromShadowOk := transformMap["fromShadow"].(string)
+
+		fromField, fromOk := transformMap["from"].(string)
+		if !fromOk && !fromShadowOk {
+			return nil,nil, errors.New(
 				"transform middleware found with no source field",
 			)
 		}
+
 		toField, ok := transformMap["to"].(string)
 		if !ok {
-			return nil, errors.New(
+			return nil,nil, errors.New(
 				"transform middleware found with no destination field",
 			)
 		}
-		overrideOpt, ok := transformMap["override"].(bool)
-		if ok {
-			fieldMap[toField] = FieldMapperEntry{
-				QualifiedName: fromField,
-				Override:      overrideOpt,
+
+		if fromOk {
+			overrideOpt, ok := transformMap["override"].(bool)
+			if ok {
+				fieldMap[toField] = FieldMapperEntry{
+					QualifiedName: fromField,
+					Override:      overrideOpt,
+				}
+			} else {
+				fieldMap[toField] = FieldMapperEntry{
+					QualifiedName: fromField,
+				}
 			}
 		} else {
-			fieldMap[toField] = FieldMapperEntry{
-				QualifiedName: fromField,
+			shadowFieldMap[toField] = FieldMapperEntry{
+				QualifiedName: fromShadowField,
 			}
 		}
 	}
-	return fieldMap, nil
+	return fieldMap, shadowFieldMap, nil
 }
 
 // TargetEndpointPath generates a filepath for each endpoint method
