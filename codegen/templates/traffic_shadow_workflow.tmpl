@@ -39,11 +39,11 @@ import (
 	{{- end}}
 
 	{{if .Method.ShadowDownstream }}
-    {{- range $idx, $pkg := .Method.ShadowDownstream.IncludedPackages -}}
-    {{$file := basePath $pkg.PackageName -}}
-    {{$pkg.AliasName}} "{{$pkg.PackageName}}"
-    {{end}}
-    {{- end}}
+	{{- range $idx, $pkg := .Method.ShadowDownstream.IncludedPackages -}}
+	{{$file := basePath $pkg.PackageName -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+	{{- end}}
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	"go.uber.org/zap"
@@ -184,19 +184,19 @@ func (w {{$workflowStruct}}) Handle(
 
 	h, ok = reqHeaders.Get("X-Uber-Shadow-Client")
 
-    resHeaders := zanzibar.ServerTChannelHeader{}
+	resHeaders := zanzibar.ServerTChannelHeader{}
 	if ok {
-        clientRespBody, _, _ := w.Clients.{{$trafficShadowClientName}}.{{$trafficShadowClientMethod}}(
-                			ctx, clientHeaders,
-                		)
-        response := convert{{.ShadowDownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
-        	return response, resHeaders, nil
+		clientRespBody, _, _ := w.Clients.{{$trafficShadowClientName}}.{{$trafficShadowClientMethod}}(
+							ctx, clientHeaders,
+						)
+		response := convert{{.ShadowDownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
+			return response, resHeaders, nil
 	} else {
 		clientRespBody, _, _ := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-                			ctx, clientHeaders,
-                		)
-        response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
-        	return response, resHeaders, nil
+							ctx, clientHeaders,
+						)
+		response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
+			return response, resHeaders, nil
 	}
 }
 
