@@ -942,14 +942,14 @@ func (c *TypeConverter) GenStructConverter(
 	// Add compiled FieldSpecs to the FieldMapperEntry
 	fieldMap = addSpecToMap(fieldMap, fromFields, "")
 	// Check for vlaues not populated recursively by addSpecToMap
-	//for k, v := range fieldMap {
-	//	if fieldMap[k].Field == nil {
-	//		return errors.Errorf(
-	//			"Failed to find field ( %s ) for transform.",
-	//			v.QualifiedName,
-	//		)
-	//	}
-	//}
+	for k, v := range fieldMap {
+		if fieldMap[k].Field == nil {
+			return errors.Errorf(
+				"Failed to find field ( %s ) for transform.",
+				v.QualifiedName,
+			)
+		}
+	}
 
 	c.useRecurGen = c.isRecursiveStruct(toFields) || c.isRecursiveStruct(fromFields)
 
