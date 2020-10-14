@@ -35,6 +35,10 @@ import (
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
 	quuxclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+	trafficshadowclient1clientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/trafficshadowclient1"
+	trafficshadowclient1clientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/trafficshadowclient1/module"
+	trafficshadowclient2clientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/trafficshadowclient2"
+	trafficshadowclient2clientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/trafficshadowclient2/module"
 	withexceptionsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions"
 	withexceptionsclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions/module"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
@@ -57,6 +61,8 @@ import (
 	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	quuxendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux"
 	quuxendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux/module"
+	trafficshadowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/trafficshadow"
+	trafficshadowendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/trafficshadow/module"
 	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
 	withexceptionsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
@@ -83,13 +89,15 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Bar            barclientgenerated.Client
-	Baz            bazclientgenerated.Client
-	Contacts       contactsclientgenerated.Client
-	GoogleNow      googlenowclientgenerated.Client
-	Multi          multiclientgenerated.Client
-	Quux           quuxclientstatic.IClient
-	Withexceptions withexceptionsclientgenerated.Client
+	Bar                  barclientgenerated.Client
+	Baz                  bazclientgenerated.Client
+	Contacts             contactsclientgenerated.Client
+	GoogleNow            googlenowclientgenerated.Client
+	Multi                multiclientgenerated.Client
+	Quux                 quuxclientstatic.IClient
+	Trafficshadowclient1 trafficshadowclient1clientgenerated.Client
+	Trafficshadowclient2 trafficshadowclient2clientgenerated.Client
+	Withexceptions       withexceptionsclientgenerated.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -113,6 +121,7 @@ type EndpointDependenciesNodes struct {
 	BazTChannel    baztchannelendpointgenerated.Endpoint
 	PanicTChannel  panictchannelendpointgenerated.Endpoint
 	Quux           quuxendpointgenerated.Endpoint
+	Trafficshadow  trafficshadowendpointgenerated.Endpoint
 	Withexceptions withexceptionsendpointgenerated.Endpoint
 }
 
@@ -155,6 +164,12 @@ func InitializeDependencies(
 		Default: initializedDefaultDependencies,
 	})
 	initializedClientDependencies.Quux = quuxclientstatic.NewClient(&quuxclientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Trafficshadowclient1 = trafficshadowclient1clientgenerated.NewClient(&trafficshadowclient1clientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Trafficshadowclient2 = trafficshadowclient2clientgenerated.NewClient(&trafficshadowclient2clientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 	initializedClientDependencies.Withexceptions = withexceptionsclientgenerated.NewClient(&withexceptionsclientmodule.Dependencies{
@@ -300,6 +315,18 @@ func InitializeDependencies(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Trafficshadow = trafficshadowendpointgenerated.NewEndpoint(&trafficshadowendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &trafficshadowendpointmodule.ClientDependencies{
+			Trafficshadowclient1: initializedClientDependencies.Trafficshadowclient1,
+			Trafficshadowclient2: initializedClientDependencies.Trafficshadowclient2,
+		},
+		Middleware: &trafficshadowendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &withexceptionsendpointmodule.ClientDependencies{
@@ -325,6 +352,7 @@ func InitializeDependencies(
 			BazTChannel:    initializedEndpointDependencies.BazTChannel,
 			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
 			Quux:           initializedEndpointDependencies.Quux,
+			Trafficshadow:  initializedEndpointDependencies.Trafficshadow,
 			Withexceptions: initializedEndpointDependencies.Withexceptions,
 		},
 	}

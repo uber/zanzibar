@@ -34,6 +34,8 @@ import (
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	quuxclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
+	trafficshadowclient1clientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/trafficshadowclient1/mock-client"
+	trafficshadowclient2clientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/trafficshadowclient2/mock-client"
 	withexceptionsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions/mock-client"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -55,6 +57,8 @@ import (
 	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	quuxendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux"
 	quuxendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux/module"
+	trafficshadowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/trafficshadow"
+	trafficshadowendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/trafficshadow/module"
 	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
 	withexceptionsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
@@ -73,13 +77,15 @@ import (
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Bar            *barclientgenerated.MockClient
-	Baz            *bazclientgenerated.MockClient
-	Contacts       *contactsclientgenerated.MockClientWithFixture
-	GoogleNow      *googlenowclientgenerated.MockClient
-	Multi          *multiclientgenerated.MockClient
-	Quux           *quuxclientgenerated.MockIClientWithFixture
-	Withexceptions *withexceptionsclientgenerated.MockClient
+	Bar                  *barclientgenerated.MockClient
+	Baz                  *bazclientgenerated.MockClient
+	Contacts             *contactsclientgenerated.MockClientWithFixture
+	GoogleNow            *googlenowclientgenerated.MockClient
+	Multi                *multiclientgenerated.MockClient
+	Quux                 *quuxclientgenerated.MockIClientWithFixture
+	Trafficshadowclient1 *trafficshadowclient1clientgenerated.MockClient
+	Trafficshadowclient2 *trafficshadowclient2clientgenerated.MockClient
+	Withexceptions       *withexceptionsclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -104,13 +110,15 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Bar:            barclientgenerated.NewMockClient(ctrl),
-		Baz:            bazclientgenerated.NewMockClient(ctrl),
-		Contacts:       contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
-		GoogleNow:      googlenowclientgenerated.NewMockClient(ctrl),
-		Multi:          multiclientgenerated.NewMockClient(ctrl),
-		Quux:           quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
-		Withexceptions: withexceptionsclientgenerated.NewMockClient(ctrl),
+		Bar:                  barclientgenerated.NewMockClient(ctrl),
+		Baz:                  bazclientgenerated.NewMockClient(ctrl),
+		Contacts:             contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
+		GoogleNow:            googlenowclientgenerated.NewMockClient(ctrl),
+		Multi:                multiclientgenerated.NewMockClient(ctrl),
+		Quux:                 quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
+		Trafficshadowclient1: trafficshadowclient1clientgenerated.NewMockClient(ctrl),
+		Trafficshadowclient2: trafficshadowclient2clientgenerated.NewMockClient(ctrl),
+		Withexceptions:       withexceptionsclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
@@ -120,6 +128,8 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.GoogleNow = mockClientNodes.GoogleNow
 	initializedClientDependencies.Multi = mockClientNodes.Multi
 	initializedClientDependencies.Quux = mockClientNodes.Quux
+	initializedClientDependencies.Trafficshadowclient1 = mockClientNodes.Trafficshadowclient1
+	initializedClientDependencies.Trafficshadowclient2 = mockClientNodes.Trafficshadowclient2
 	initializedClientDependencies.Withexceptions = mockClientNodes.Withexceptions
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
@@ -261,6 +271,18 @@ func InitializeDependenciesMock(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Trafficshadow = trafficshadowendpointgenerated.NewEndpoint(&trafficshadowendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &trafficshadowendpointmodule.ClientDependencies{
+			Trafficshadowclient1: initializedClientDependencies.Trafficshadowclient1,
+			Trafficshadowclient2: initializedClientDependencies.Trafficshadowclient2,
+		},
+		Middleware: &trafficshadowendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &withexceptionsendpointmodule.ClientDependencies{
@@ -286,6 +308,7 @@ func InitializeDependenciesMock(
 			BazTChannel:    initializedEndpointDependencies.BazTChannel,
 			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
 			Quux:           initializedEndpointDependencies.Quux,
+			Trafficshadow:  initializedEndpointDependencies.Trafficshadow,
 			Withexceptions: initializedEndpointDependencies.Withexceptions,
 		},
 	}

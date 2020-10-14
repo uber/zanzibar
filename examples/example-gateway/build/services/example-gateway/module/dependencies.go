@@ -34,6 +34,7 @@ import (
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	quuxendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux"
+	trafficshadowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/trafficshadow"
 	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -57,5 +58,6 @@ type EndpointDependencies struct {
 	BazTChannel    baztchannelendpointgenerated.Endpoint
 	PanicTChannel  panictchannelendpointgenerated.Endpoint
 	Quux           quuxendpointgenerated.Endpoint
+	Trafficshadow  trafficshadowendpointgenerated.Endpoint
 	Withexceptions withexceptionsendpointgenerated.Endpoint
 }
