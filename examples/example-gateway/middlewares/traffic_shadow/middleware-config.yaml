@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/examples/example-gateway/middlewares/traffic_shadow
+  schema: ./middlewares/traffic_shadow/traffic_shadow_schema.json
+dependencies: {}
+name: traffic_shadow
+type: http

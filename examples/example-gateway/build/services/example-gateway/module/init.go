@@ -75,6 +75,8 @@ import (
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
+	trafficshadowmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/traffic_shadow"
+	trafficshadowmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/traffic_shadow/module"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -107,6 +109,7 @@ type MiddlewareDependenciesNodes struct {
 	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 	Example                examplemiddlewaregenerated.Middleware
 	ExampleTchannel        exampletchannelmiddlewaregenerated.Middleware
+	TrafficShadow          trafficshadowmiddlewaregenerated.Middleware
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -200,6 +203,9 @@ func InitializeDependencies(
 		},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedMiddlewareDependencies.TrafficShadow = trafficshadowmiddlewaregenerated.NewMiddleware(&trafficshadowmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -325,6 +331,7 @@ func InitializeDependencies(
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+			TrafficShadow:          initializedMiddlewareDependencies.TrafficShadow,
 		},
 	})
 	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{

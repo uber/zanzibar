@@ -71,6 +71,8 @@ import (
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
+	trafficshadowmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/traffic_shadow"
+	trafficshadowmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/traffic_shadow/module"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
 )
@@ -156,6 +158,9 @@ func InitializeDependenciesMock(
 		},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedMiddlewareDependencies.TrafficShadow = trafficshadowmiddlewaregenerated.NewMiddleware(&trafficshadowmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -281,6 +286,7 @@ func InitializeDependenciesMock(
 			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+			TrafficShadow:          initializedMiddlewareDependencies.TrafficShadow,
 		},
 	})
 	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{

@@ -39,6 +39,7 @@ import (
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+	trafficShadow "github.com/uber/zanzibar/examples/example-gateway/middlewares/traffic_shadow"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/trafficshadow/module"
 )
@@ -63,6 +64,9 @@ func NewTrafficshadowHelloWorldHandler(deps *module.Dependencies) *Trafficshadow
 			),
 			deps.Middleware.DefaultExample.NewMiddlewareHandle(
 				defaultExample.Options{},
+			),
+			deps.Middleware.TrafficShadow.NewMiddlewareHandle(
+				trafficShadow.Options{},
 			),
 		}, handler.HandleRequest).Handle,
 	)

@@ -6,5 +6,7 @@ dependencies:
   client:
   - trafficshadowclient1
   - trafficshadowclient2
+  middleware:
+  - traffic_shadow
 name: trafficshadow
 type: http

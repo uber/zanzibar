@@ -29,6 +29,7 @@ import (
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
 	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	trafficshadowmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/traffic_shadow"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -51,4 +52,5 @@ type MiddlewareDependencies struct {
 	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
 	DefaultExample2        defaultexample2middlewaregenerated.Middleware
 	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
+	TrafficShadow          trafficshadowmiddlewaregenerated.Middleware
 }

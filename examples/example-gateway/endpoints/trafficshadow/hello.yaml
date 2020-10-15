@@ -16,6 +16,7 @@ middlewares:
         - fromShadow: ResField2
           override: true
           to: ResField
+  - name: traffic_shadow
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures: {}
