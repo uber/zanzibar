@@ -88,7 +88,7 @@ func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCo
 		totalDurationHistPrefix: "circuitbreaker.totalDurationHist",
 		runDurationPrefix:       "circuitbreaker.runDuration",
 		runDurationHistPrefix:   "circuitbreaker.runDurationHist",
-		contextCanceled:         "circuitbreaker.context",
+		contextCanceled:         "circuitbreaker.contextCanceled",
 		contextDeadlineExceeded: "circuitbreaker.contextDeadlineExceeded",
 	}
 }
