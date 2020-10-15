@@ -422,15 +422,6 @@ func (gateway *Gateway) Shutdown() {
 		}
 	}()
 
-	// shutdown tchannel server
-	swg.Add(1)
-	go func() {
-		defer swg.Done()
-		if err := gateway.shutdownTChannelServer(ctx); err != nil {
-			ec <- errors.Wrap(err, "error shutting down tchannel server")
-		}
-	}()
-
 	// stop all grpc clients
 	if gateway.GRPCClientDispatcher != nil {
 		swg.Add(1)
