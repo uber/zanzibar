@@ -135,7 +135,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 		var err error
 		rawBody, err = req.jsonWrapper.Marshal(body)
 		if err != nil {
-			req.ContextLogger.Error(req.ctx,"Could not serialize request json", zap.Error(err))
+			req.ContextLogger.Error(req.ctx, "Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(
 				err, "Could not serialize %s.%s request json",
 				req.ClientID, req.MethodName,

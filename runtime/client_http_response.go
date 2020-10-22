@@ -154,7 +154,7 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 		}
 	}
 
-	res.req.ContextLogger.Warn(res.req.ctx,"Unknown response status code",
+	res.req.ContextLogger.Warn(res.req.ctx, "Unknown response status code",
 		zap.Int("UnknownStatusCode", res.rawResponse.StatusCode),
 	)
 }
@@ -163,13 +163,13 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 func (res *ClientHTTPResponse) finish() {
 	if !res.req.started {
 		/* coverage ignore next line */
-		res.req.ContextLogger.Error(res.req.ctx,"Forgot to start client request")
+		res.req.ContextLogger.Error(res.req.ctx, "Forgot to start client request")
 		/* coverage ignore next line */
 		return
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.req.ContextLogger.Error(res.req.ctx,"Finished a client response multiple times")
+		res.req.ContextLogger.Error(res.req.ctx, "Finished a client response multiple times")
 		/* coverage ignore next line */
 		return
 	}
