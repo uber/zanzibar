@@ -6,10 +6,9 @@ package bounce
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 // Bounce_Bounce_Args represents the arguments for the Bounce.bounce function.

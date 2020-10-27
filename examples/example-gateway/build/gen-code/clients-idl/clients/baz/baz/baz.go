@@ -9,14 +9,13 @@ import (
 	json "encoding/json"
 	errors "errors"
 	fmt "fmt"
-	math "math"
-	strconv "strconv"
-	strings "strings"
-
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	base "github.com/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 	multierr "go.uber.org/multierr"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	math "math"
+	strconv "strconv"
+	strings "strings"
 )
 
 type AuthErr struct {
@@ -8262,10 +8261,12 @@ func init() {
 		Key   *base.BazResponse
 		Value string
 	}, err error) {
+
 		if result.Success != nil {
 			success = result.Success
 			return
 		}
+
 		err = errors.New("expected a non-void result")
 		return
 	}
