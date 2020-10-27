@@ -79,6 +79,7 @@ type TChannelClientOption struct {
 type TChannelClient struct {
 	ClientID string
 	Loggers  map[string]*zap.Logger
+	ContextLogger     ContextLogger
 
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
@@ -102,6 +103,7 @@ type TChannelClient struct {
 func NewTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
+	contextLogger ContextLogger,
 	scope tally.Scope,
 	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
@@ -109,6 +111,7 @@ func NewTChannelClient(
 	return NewTChannelClientContext(
 		ch,
 		logger,
+		contextLogger,
 		NewContextMetrics(scope),
 		contextExtractor,
 		opt,
@@ -119,6 +122,7 @@ func NewTChannelClient(
 func NewTChannelClientContext(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
+	contextLogger ContextLogger,
 	metrics ContextMetrics,
 	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
@@ -145,6 +149,7 @@ func NewTChannelClientContext(
 		timeoutPerAttempt:    opt.TimeoutPerAttempt,
 		routingKey:           opt.RoutingKey,
 		Loggers:              loggers,
+		ContextLogger:        contextLogger,
 		metrics:              metrics,
 		contextExtractor:     contextExtractor,
 		requestUUIDHeaderKey: opt.RequestUUIDHeaderKey,

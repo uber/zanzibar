@@ -50,7 +50,7 @@ type ServerHTTPResponse struct {
 	logger            Logger
 	scope             tally.Scope
 	jsonWrapper       jsonwrapper.JSONWrapper
-	err               error
+	Err               error
 }
 
 // NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
@@ -145,11 +145,11 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		}
 	}
 
-	if res.err != nil {
-		fields = append(fields, zap.Error(res.err))
+	if res.Err != nil {
+		fields = append(fields, zap.Error(res.Err))
 
-		cause := errors.Cause(res.err)
-		if cause != nil && cause != res.err {
+		cause := errors.Cause(res.Err)
+		if cause != nil && cause != res.Err {
 			fields = append(fields, zap.NamedError("errorCause", cause))
 		}
 	}
@@ -170,7 +170,7 @@ func (res *ServerHTTPResponse) SendErrorString(
 func (res *ServerHTTPResponse) SendError(
 	statusCode int, errMsg string, errCause error,
 ) {
-	res.err = errCause
+	res.Err = errCause
 	res.WriteJSONBytes(statusCode, nil,
 		[]byte(`{"error":"`+errMsg+`"}`),
 	)

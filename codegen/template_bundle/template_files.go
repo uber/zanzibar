@@ -1275,6 +1275,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
 		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		methodNames,
@@ -1511,7 +1512,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.Logger, deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -3023,7 +3024,7 @@ type {{$clientName}} struct {
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
 		{{end}}
-		logger := c.client.Loggers["{{$serviceMethod}}"]
+		logger := c.client.ContextLogger
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}

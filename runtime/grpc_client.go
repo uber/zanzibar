@@ -33,6 +33,7 @@ import (
 // GRPCClientOpts used to configure various client options.
 type GRPCClientOpts struct {
 	Loggers                map[string]*zap.Logger
+	ContextLogger          ContextLogger
 	Metrics                ContextMetrics
 	ContextExtractor       ContextExtractor
 	RoutingKey             string
@@ -45,6 +46,7 @@ type GRPCClientOpts struct {
 // NewGRPCClientOpts creates a new instance of GRPCClientOpts.
 func NewGRPCClientOpts(
 	logger *zap.Logger,
+	contextLogger ContextLogger,
 	metrics ContextMetrics,
 	contextExtractor ContextExtractor,
 	methodNames map[string]string,
@@ -71,6 +73,7 @@ func NewGRPCClientOpts(
 	}
 	return &GRPCClientOpts{
 		Loggers:                loggers,
+		ContextLogger:          contextLogger,
 		Metrics:                metrics,
 		ContextExtractor:       contextExtractor,
 		RoutingKey:             routingKey,

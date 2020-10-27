@@ -38,6 +38,7 @@ type HTTPClient struct {
 	DefaultHeaders map[string]string
 	JSONWrapper    jsonwrapper.JSONWrapper
 	loggers        map[string]*zap.Logger
+	ContextLogger  ContextLogger
 	contextMetrics ContextMetrics
 }
 
@@ -55,6 +56,7 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 // NewHTTPClient is deprecated, use NewHTTPClientContext instead
 func NewHTTPClient(
 	logger *zap.Logger,
+	contextLogger  ContextLogger,
 	scope tally.Scope,
 	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
@@ -65,6 +67,7 @@ func NewHTTPClient(
 ) *HTTPClient {
 	return NewHTTPClientContext(
 		logger,
+		contextLogger,
 		NewContextMetrics(scope),
 		jsonWrapper,
 		clientID,
@@ -79,6 +82,7 @@ func NewHTTPClient(
 // NewHTTPClientContext will allocate a http client.
 func NewHTTPClientContext(
 	logger *zap.Logger,
+	contextLogger  ContextLogger,
 	ContextMetrics ContextMetrics,
 	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
@@ -118,6 +122,7 @@ func NewHTTPClientContext(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
+		ContextLogger:  contextLogger,
 		contextMetrics: ContextMetrics,
 		JSONWrapper:    jsonWrapper,
 	}

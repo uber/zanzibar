@@ -117,7 +117,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.Logger, deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}

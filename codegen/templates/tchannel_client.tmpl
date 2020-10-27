@@ -133,6 +133,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -250,7 +251,7 @@ type {{$clientName}} struct {
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
 		{{end}}
-		logger := c.client.Loggers["{{$serviceMethod}}"]
+		logger := c.client.ContextLogger
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}

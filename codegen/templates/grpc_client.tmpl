@@ -75,6 +75,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
 		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		methodNames,
