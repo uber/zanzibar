@@ -51,6 +51,7 @@ type RawTChannelClient struct {
 func NewRawTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
+	contextLogger ContextLogger,
 	scope tally.Scope,
 	opt *TChannelClientOption,
 ) *RawTChannelClient {
@@ -66,7 +67,7 @@ func NewRawTChannelClient(
 
 	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClientContext(ch, logger, metrics, nil, opt),
+		tc:      NewTChannelClientContext(ch, logger, contextLogger, metrics, nil, opt),
 		logger:  l,
 		metrics: metrics,
 	}

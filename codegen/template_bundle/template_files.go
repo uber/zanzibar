@@ -2629,6 +2629,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
 		server.Logger,
+		dependencies.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       server.ServiceName,
@@ -2731,7 +2732,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5403, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5433, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
