@@ -67,7 +67,7 @@ func NewRawTChannelClient(
 
 	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClientContext(ch, logger, contextLogger, metrics, nil, opt),
+		tc:      NewTChannelClientContext(ch, contextLogger, metrics, nil, opt),
 		logger:  l,
 		metrics: metrics,
 	}
@@ -87,13 +87,13 @@ func (r *RawTChannelClient) Call(
 		methodName:    serviceMethod,
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
-		logger:        r.logger,
+		contextLogger: r.tc.ContextLogger,
 		metrics:       r.metrics,
 	}
 
 	if m, ok := r.tc.methodNames[serviceMethod]; ok {
 		call.methodName = m
-		call.logger = r.tc.Loggers[serviceMethod]
+		call.contextLogger = r.tc.ContextLogger
 		call.metrics = r.metrics
 	}
 
