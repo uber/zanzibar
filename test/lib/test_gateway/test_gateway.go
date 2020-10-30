@@ -236,7 +236,7 @@ func CreateGateway(
 
 	tchannelClient := zanzibar.NewTChannelClientContext(
 		channel,
-		zap.NewNop(),
+		zanzibar.NewContextLogger(zap.NewNop()),
 		zanzibar.NewContextMetrics(tally.NoopScope),
 		extractors,
 		&zanzibar.TChannelClientOption{
