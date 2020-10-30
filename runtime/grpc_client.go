@@ -32,7 +32,6 @@ import (
 
 // GRPCClientOpts used to configure various client options.
 type GRPCClientOpts struct {
-	Loggers                map[string]*zap.Logger
 	ContextLogger          ContextLogger
 	Metrics                ContextMetrics
 	ContextExtractor       ContextExtractor
@@ -45,7 +44,6 @@ type GRPCClientOpts struct {
 
 // NewGRPCClientOpts creates a new instance of GRPCClientOpts.
 func NewGRPCClientOpts(
-	logger *zap.Logger,
 	contextLogger ContextLogger,
 	metrics ContextMetrics,
 	contextExtractor ContextExtractor,
@@ -54,16 +52,7 @@ func NewGRPCClientOpts(
 	circuitBreakerDisabled bool,
 	timeoutInMS int,
 ) *GRPCClientOpts {
-	numMethods := len(methodNames)
-	loggers := make(map[string]*zap.Logger, numMethods)
 	scopeTags := make(map[string]map[string]string)
-	for serviceMethod, methodName := range methodNames {
-		loggers[serviceMethod] = logger.With(
-			zap.String(logFieldClientID, clientID),
-			zap.String(logFieldClientMethod, methodName),
-			zap.String(logFieldClientThriftMethod, serviceMethod),
-		)
-	}
 	for serviceMethod, methodName := range methodNames {
 		scopeTags[serviceMethod] = map[string]string{
 			scopeTagClient:          clientID,
@@ -72,7 +61,6 @@ func NewGRPCClientOpts(
 		}
 	}
 	return &GRPCClientOpts{
-		Loggers:                loggers,
 		ContextLogger:          contextLogger,
 		Metrics:                metrics,
 		ContextExtractor:       contextExtractor,
@@ -95,7 +83,7 @@ type GRPCClientCallHelper interface {
 type callHelper struct {
 	startTime  time.Time
 	finishTime time.Time
-	logger     *zap.Logger
+	contextLogger     ContextLogger
 	metrics    ContextMetrics
 	extractor  ContextExtractor
 }
@@ -105,7 +93,7 @@ type callHelper struct {
 func NewGRPCClientCallHelper(ctx context.Context, serviceMethod string, opts *GRPCClientOpts) (context.Context, GRPCClientCallHelper) {
 	ctx = WithScopeTags(ctx, opts.ScopeTags[serviceMethod])
 	return ctx, &callHelper{
-		logger:    opts.Loggers[serviceMethod],
+		contextLogger:    opts.ContextLogger,
 		metrics:   opts.Metrics,
 		extractor: opts.ContextExtractor,
 	}
@@ -148,10 +136,10 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 			fields = append(fields, zap.Error(err))
 		}
 		c.metrics.IncCounter(ctx, "client.errors", 1)
-		c.logger.Warn("Failed to send outgoing client gRPC request", fields...)
+		c.contextLogger.Warn(ctx, "Failed to send outgoing client gRPC request", fields...)
 		return ctx
 	}
-	c.logger.Debug("Finished an outgoing client gRPC request", fields...)
+	c.contextLogger.Debug(ctx, "Finished an outgoing client gRPC request", fields...)
 	c.metrics.IncCounter(ctx, "client.success", 1)
 	return ctx
 }

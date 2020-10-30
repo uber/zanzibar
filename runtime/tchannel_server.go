@@ -56,7 +56,7 @@ type TChannelRouter struct {
 	sync.RWMutex
 	registrar tchannel.Registrar
 	endpoints map[string]*TChannelEndpoint
-	logger    *zap.Logger
+	contextLogger    ContextLogger
 	scope     tally.Scope
 	extractor ContextExtractor
 
@@ -105,7 +105,7 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 	return &TChannelRouter{
 		registrar: registrar,
 		endpoints: map[string]*TChannelEndpoint{},
-		logger:    g.Logger,
+		contextLogger:    g.ContextLogger,
 		scope:     g.RootScope,
 		extractor: g.ContextExtractor,
 
@@ -134,7 +134,7 @@ func (s *TChannelRouter) Register(e *TChannelEndpoint) error {
 func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall) {
 	method := call.MethodString()
 	if sep := strings.Index(method, "::"); sep == -1 {
-		s.logger.Error("Handle got call for which does not match the expected call format", zap.String(logFieldRequestMethod, method))
+		s.contextLogger.Error(ctx, "Handle got call for which does not match the expected call format", zap.String(logFieldRequestMethod, method))
 		return
 	}
 
@@ -142,7 +142,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	e, ok := s.endpoints[method]
 	s.RUnlock()
 	if !ok {
-		s.logger.Error("Handle got call for method which is not registered",
+		s.contextLogger.Error(ctx, "Handle got call for method which is not registered",
 			zap.String(logFieldRequestMethod, method),
 		)
 		return
@@ -169,7 +169,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	c := &tchannelInboundCall{
 		call:     call,
 		endpoint: e,
-		logger:   s.logger,
+		contextLogger:   s.contextLogger,
 		scope:    s.scope.Tagged(scopeTags),
 	}
 

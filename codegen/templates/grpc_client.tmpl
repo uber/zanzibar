@@ -74,7 +74,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{camel $s.Name}}Client: gen.New{{pascal $s.Name}}YARPCClient(oc),
 		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
-		deps.Default.Logger,
 		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
