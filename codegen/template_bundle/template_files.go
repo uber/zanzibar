@@ -2627,8 +2627,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
-		server.Logger,
-		dependencies.ContextLogger,
+		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       server.ServiceName,
