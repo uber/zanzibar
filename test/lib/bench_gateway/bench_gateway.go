@@ -164,7 +164,7 @@ func CreateGateway(
 
 	benchGateway.tchannelClient = zanzibar.NewTChannelClient(
 		gateway.Channel,
-		gateway.Logger,
+		gateway.ContextLogger,
 		gateway.RootScope,
 		gateway.ContextExtractor,
 		&zanzibar.TChannelClientOption{
