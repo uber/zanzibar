@@ -412,6 +412,9 @@ func (c *bazClient) EchoBinary(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoBinary. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBinary")
 		}
@@ -467,6 +470,9 @@ func (c *bazClient) EchoBool(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoBool. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBool")
 		}
@@ -522,6 +528,9 @@ func (c *bazClient) EchoDouble(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoDouble. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoDouble")
 		}
@@ -577,6 +586,9 @@ func (c *bazClient) EchoEnum(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoEnum. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoEnum")
 		}
@@ -632,6 +644,9 @@ func (c *bazClient) EchoI16(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoI16. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI16")
 		}
@@ -687,6 +702,9 @@ func (c *bazClient) EchoI32(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoI32. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI32")
 		}
@@ -742,6 +760,9 @@ func (c *bazClient) EchoI64(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoI64. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI64")
 		}
@@ -797,6 +818,9 @@ func (c *bazClient) EchoI8(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoI8. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI8")
 		}
@@ -852,6 +876,9 @@ func (c *bazClient) EchoString(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoString. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoString")
 		}
@@ -907,6 +934,9 @@ func (c *bazClient) EchoStringList(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoStringList. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringList")
 		}
@@ -962,6 +992,9 @@ func (c *bazClient) EchoStringMap(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoStringMap. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringMap")
 		}
@@ -1017,6 +1050,9 @@ func (c *bazClient) EchoStringSet(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoStringSet. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringSet")
 		}
@@ -1072,6 +1108,9 @@ func (c *bazClient) EchoStructList(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoStructList. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructList")
 		}
@@ -1127,6 +1166,9 @@ func (c *bazClient) EchoStructSet(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoStructSet. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructSet")
 		}
@@ -1182,6 +1224,9 @@ func (c *bazClient) EchoTypedef(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoTypedef. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoTypedef")
 		}
@@ -1293,6 +1338,9 @@ func (c *bazClient) Compare(
 			err = result.AuthErr
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for Compare. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Compare")
 		}
@@ -1350,6 +1398,9 @@ func (c *bazClient) GetProfile(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for GetProfile. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for GetProfile")
 		}
@@ -1409,6 +1460,9 @@ func (c *bazClient) HeaderSchema(
 			err = result.AuthErr
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for HeaderSchema. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for HeaderSchema")
 		}
@@ -1464,6 +1518,9 @@ func (c *bazClient) Ping(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for Ping. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Ping")
 		}
@@ -1627,6 +1684,9 @@ func (c *bazClient) Trans(
 			err = result.AuthErr
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for Trans. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Trans")
 		}
@@ -1686,6 +1746,9 @@ func (c *bazClient) TransHeaders(
 			err = result.AuthErr
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for TransHeaders. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeaders")
 		}
@@ -1743,6 +1806,9 @@ func (c *bazClient) TransHeadersNoReq(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for TransHeadersNoReq. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersNoReq")
 		}
@@ -1802,6 +1868,9 @@ func (c *bazClient) TransHeadersType(
 			err = result.AuthErr
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for TransHeadersType. Overriding")
+			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersType")
 		}
