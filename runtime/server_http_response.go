@@ -317,7 +317,7 @@ func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, int) {
 	return res.pendingBodyBytes, res.pendingStatusCode
 }
 
-// GetPendingResponse lets you read the pending body object
+// GetPendingResponseObject lets you read the pending body object
 // which isn't sent back yet.
 func (res *ServerHTTPResponse) GetPendingResponseObject() interface{} {
 	return res.pendingBodyObj
