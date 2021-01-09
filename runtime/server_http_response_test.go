@@ -559,7 +559,7 @@ func TestPendingResponseObject(t *testing.T) {
 
 				pendingObject := res.GetPendingResponseObject()
 				assert.Equal(t, "zanzibar_test.MyBody", fmt.Sprintf("%s", reflect.TypeOf(pendingObject)))
-				pendingObjectFetched, ok:= pendingObject.(MyBody)
+				pendingObjectFetched, ok := pendingObject.(MyBody)
 				assert.Equal(t, true, ok)
 				assert.Equal(t, "myToken", pendingObjectFetched.Token)
 				assert.Equal(t, "myClientToken", pendingObjectFetched.Client.Token)
