@@ -558,7 +558,6 @@ func TestPendingResponseObject(t *testing.T) {
 				res.WriteJSON(statusCode, nil, obj)
 
 				pendingObject := res.GetPendingResponseObject()
-				assert.Equal(t, "zanzibar_test.MyBody", fmt.Sprintf("%s", reflect.TypeOf(pendingObject)))
 				pendingObjectFetched, ok := pendingObject.(MyBody)
 				assert.Equal(t, true, ok)
 				assert.Equal(t, "myToken", pendingObjectFetched.Token)
