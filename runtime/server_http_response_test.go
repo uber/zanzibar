@@ -23,10 +23,8 @@ package zanzibar_test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 	"testing"
 
 	"github.com/buger/jsonparser"
