@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -518,6 +518,57 @@ func TestPendingResponseBody(t *testing.T) {
 		`{"Client":{"Token":"myClientToken"},"Token":"myToken"}`,
 		string(bytes),
 	)
+}
+
+func TestPendingResponseObject(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := createDefaultDependencies(bgateway)
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				obj := MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				}
+				_, err := json.Marshal(obj)
+				statusCode := 200
+				assert.NoError(t, err)
+				res.WriteJSON(statusCode, nil, obj)
+
+				pendingObject := res.GetPendingResponseObject()
+				pendingObjectFetched, ok := pendingObject.(MyBody)
+				assert.Equal(t, true, ok)
+				assert.Equal(t, "myToken", pendingObjectFetched.Token)
+				assert.Equal(t, "myClientToken", pendingObjectFetched.Client.Token)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	_, _ = gateway.MakeRequest("GET", "/foo", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
 }
 
 func createDefaultDependencies(bgateway *benchGateway.BenchGateway) *zanzibar.DefaultDependencies {

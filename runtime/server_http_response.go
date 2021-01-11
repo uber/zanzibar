@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -315,6 +315,12 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 // which isn't sent back yet.
 func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, int) {
 	return res.pendingBodyBytes, res.pendingStatusCode
+}
+
+// GetPendingResponseObject lets you read the pending body object
+// which isn't sent back yet.
+func (res *ServerHTTPResponse) GetPendingResponseObject() interface{} {
+	return res.pendingBodyObj
 }
 
 // Headers returns the underlying http response's headers
