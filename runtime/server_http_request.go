@@ -698,17 +698,8 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 		return false
 	}
 
-	values := req.queryValues[key]
-	if len(values) == 0 {
-		req.logger.Warn("Got request with missing query string value",
-			zap.String("expectedKey", key),
-		)
-		if !req.parseFailed {
-			req.res.SendErrorString(
-				400, "Could not parse query string",
-			)
-			req.parseFailed = true
-		}
+	_, ok := req.queryValues[key];
+	if !ok {
 		return false
 	}
 
