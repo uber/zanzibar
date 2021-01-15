@@ -90,7 +90,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"google-now",
 			map[string]string{
 				"AddCredentials":   "GoogleNowService::addCredentials",

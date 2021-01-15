@@ -258,7 +258,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"bar",
 			map[string]string{
 				"ArgNotStruct":                    "Bar::argNotStruct",

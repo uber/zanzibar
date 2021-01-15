@@ -166,7 +166,7 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 	deputyChannel.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
 		deputyChannel,
-		h.Deps.Default.Logger,
+		h.Deps.Default.ContextLogger,
 		h.Deps.Default.ContextMetrics,
 		h.Deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{

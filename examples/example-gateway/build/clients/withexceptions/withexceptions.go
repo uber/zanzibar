@@ -85,7 +85,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &withexceptionsClient{
 		clientID: "withexceptions",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"withexceptions",
 			map[string]string{
 				"Func1": "WithExceptions::Func1",
