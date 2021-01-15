@@ -288,6 +288,11 @@ type {{$clientName}} struct {
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
 				{{end -}}
+				{{if ne .ResponseType "" -}}
+				case result.Success != nil:
+					logger.Error("Internal error. Success flag is not set for {{title .Name}}. Overriding")
+					success = true
+				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}

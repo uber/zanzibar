@@ -257,6 +257,9 @@ func (c *corgeClient) EchoString(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error("Internal error. Success flag is not set for EchoString. Overriding")
+			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
 		}

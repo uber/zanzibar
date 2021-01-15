@@ -3061,6 +3061,11 @@ type {{$clientName}} struct {
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
 				{{end -}}
+				{{if ne .ResponseType "" -}}
+				case result.Success != nil:
+					logger.Error("Internal error. Success flag is not set for {{title .Name}}. Overriding")
+					success = true
+				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}
@@ -3099,7 +3104,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11209, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11400, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
