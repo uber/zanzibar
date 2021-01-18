@@ -77,7 +77,7 @@ func NewClient(deps *module.Dependencies) Client {
 		mirrorClient:         gen.NewMirrorYARPCClient(oc),
 		mirrorInternalClient: gen.NewMirrorInternalYARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
-			deps.Default.Logger,
+			deps.Default.ContextLogger,
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
 			methodNames,

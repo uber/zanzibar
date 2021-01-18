@@ -50,7 +50,6 @@ type RawTChannelClient struct {
 // It is intended to be used internally for testing.
 func NewRawTChannelClient(
 	ch *tchannel.Channel,
-	logger *zap.Logger,
 	contextLogger ContextLogger,
 	scope tally.Scope,
 	opt *TChannelClientOption,
