@@ -25,7 +25,6 @@ import (
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/zap"
 )
 
 const rawClient = "raw"
@@ -39,9 +38,9 @@ const rawClient = "raw"
 // method information (because there isn't a method anyway), but the Thrift service
 // and method information is still there.
 type RawTChannelClient struct {
-	tc      *TChannelClient
-	logger  *zap.Logger
-	metrics ContextMetrics
+	tc            *TChannelClient
+	contextLogger ContextLogger
+	metrics       ContextMetrics
 }
 
 // NewRawTChannelClient returns a RawTChannelClient that makes calls over the given
@@ -54,21 +53,12 @@ func NewRawTChannelClient(
 	scope tally.Scope,
 	opt *TChannelClientOption,
 ) *RawTChannelClient {
-	clientID := rawClient
-	if opt.ClientID != "" {
-		clientID = opt.ClientID
-	}
-
-	l := logger.With(
-		zap.String("clientID", clientID),
-		zap.String("serviceName", opt.ServiceName),
-	)
 
 	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClientContext(ch, contextLogger, metrics, nil, opt),
-		logger:  l,
-		metrics: metrics,
+		tc:            NewTChannelClientContext(ch, contextLogger, metrics, nil, opt),
+		contextLogger: contextLogger,
+		metrics:       metrics,
 	}
 }
 
