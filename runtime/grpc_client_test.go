@@ -60,19 +60,16 @@ var (
 		}
 		return fields
 	}
-	logger     = zap.NewNop()
-	metrics    = NewContextMetrics(tally.NoopScope)
-	extractors = &ContextExtractors{
+	contextLoggerImpl = NewContextLogger(zap.NewNop())
+	metrics           = NewContextMetrics(tally.NoopScope)
+	extractors        = &ContextExtractors{
 		ScopeTagsExtractors: []ContextScopeTagsExtractor{scopeExtractor},
 		LogFieldsExtractors: []ContextLogFieldsExtractor{logFieldsExtractors},
 	}
 	methodNames = map[string]string{
 		serviceMethod: methodName,
 	}
-	expectedTimeout = time.Duration(timeoutInMS) * time.Millisecond
-	expectedLoggers = map[string]*zap.Logger{
-		serviceMethod: logger,
-	}
+	expectedTimeout   = time.Duration(timeoutInMS) * time.Millisecond
 	expectedScopeTags = map[string]map[string]string{
 		serviceMethod: {
 			scopeTagClient:          clientID,
@@ -84,7 +81,7 @@ var (
 
 func TestNewGRPCClientOpts(t *testing.T) {
 	actual := NewGRPCClientOpts(
-		logger,
+		contextLoggerImpl,
 		metrics,
 		extractors,
 		methodNames,
@@ -95,7 +92,7 @@ func TestNewGRPCClientOpts(t *testing.T) {
 		timeoutInMS,
 	)
 	expected := &GRPCClientOpts{
-		expectedLoggers,
+		contextLoggerImpl,
 		metrics,
 		extractors,
 		routingKey,
@@ -110,7 +107,7 @@ func TestNewGRPCClientOpts(t *testing.T) {
 func TestGRPCCallHelper(t *testing.T) {
 	ctx := context.Background()
 	opts := NewGRPCClientOpts(
-		logger,
+		contextLoggerImpl,
 		metrics,
 		extractors,
 		methodNames,
@@ -122,18 +119,18 @@ func TestGRPCCallHelper(t *testing.T) {
 	)
 	_, actual := NewGRPCClientCallHelper(ctx, serviceMethod, opts)
 	expected := &callHelper{
-		logger:    expectedLoggers[serviceMethod],
-		metrics:   metrics,
-		extractor: extractors,
+		contextLogger: contextLoggerImpl,
+		metrics:       metrics,
+		extractor:     extractors,
 	}
 	assert.Equal(t, expected, actual)
 }
 
 func testCallHelper(t *testing.T, err error) {
 	helper := &callHelper{
-		logger:    logger,
-		metrics:   metrics,
-		extractor: extractors,
+		contextLogger: contextLoggerImpl,
+		metrics:       metrics,
+		extractor:     extractors,
 	}
 
 	assert.Zero(t, helper.startTime, "startTime not initialized to zero")

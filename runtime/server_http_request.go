@@ -108,18 +108,18 @@ func NewServerHTTPRequest(
 	logger := endpoint.contextLogger
 
 	req := &ServerHTTPRequest{
-		httpRequest:  httpRequest,
-		queryValues:  nil,
-		tracer:       endpoint.tracer,
-		EndpointName: endpoint.EndpointName,
-		HandlerName:  endpoint.HandlerName,
-		URL:          httpRequest.URL,
-		Method:       httpRequest.Method,
-		Params:       params,
-		Header:       NewServerHTTPHeader(r.Header),
-		contextLogger:       logger,
-		scope:        scope,
-		jsonWrapper:  endpoint.JSONWrapper,
+		httpRequest:   httpRequest,
+		queryValues:   nil,
+		tracer:        endpoint.tracer,
+		EndpointName:  endpoint.EndpointName,
+		HandlerName:   endpoint.HandlerName,
+		URL:           httpRequest.URL,
+		Method:        httpRequest.Method,
+		Params:        params,
+		Header:        NewServerHTTPHeader(r.Header),
+		contextLogger: logger,
+		scope:         scope,
+		jsonWrapper:   endpoint.JSONWrapper,
 	}
 
 	req.res = NewServerHTTPResponse(w, req)

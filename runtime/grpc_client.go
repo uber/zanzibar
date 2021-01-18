@@ -81,11 +81,11 @@ type GRPCClientCallHelper interface {
 }
 
 type callHelper struct {
-	startTime  time.Time
-	finishTime time.Time
-	contextLogger     ContextLogger
-	metrics    ContextMetrics
-	extractor  ContextExtractor
+	startTime     time.Time
+	finishTime    time.Time
+	contextLogger ContextLogger
+	metrics       ContextMetrics
+	extractor     ContextExtractor
 }
 
 // NewGRPCClientCallHelper used to initialize a helper that will
@@ -93,9 +93,9 @@ type callHelper struct {
 func NewGRPCClientCallHelper(ctx context.Context, serviceMethod string, opts *GRPCClientOpts) (context.Context, GRPCClientCallHelper) {
 	ctx = WithScopeTags(ctx, opts.ScopeTags[serviceMethod])
 	return ctx, &callHelper{
-		contextLogger:    opts.ContextLogger,
-		metrics:   opts.Metrics,
-		extractor: opts.ContextExtractor,
+		contextLogger: opts.ContextLogger,
+		metrics:       opts.Metrics,
+		extractor:     opts.ContextExtractor,
 	}
 }
 

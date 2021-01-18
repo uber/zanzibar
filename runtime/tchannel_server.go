@@ -54,11 +54,11 @@ type TChannelEndpoint struct {
 // TChannelRouter handles incoming TChannel calls and routes them to the matching TChannelHandler.
 type TChannelRouter struct {
 	sync.RWMutex
-	registrar tchannel.Registrar
-	endpoints map[string]*TChannelEndpoint
-	contextLogger    ContextLogger
-	scope     tally.Scope
-	extractor ContextExtractor
+	registrar     tchannel.Registrar
+	endpoints     map[string]*TChannelEndpoint
+	contextLogger ContextLogger
+	scope         tally.Scope
+	extractor     ContextExtractor
 
 	requestUUIDHeaderKey string
 }
@@ -103,11 +103,11 @@ func NewTChannelEndpointWithPostResponseCB(
 // NewTChannelRouter returns a TChannel router that can serve thrift services over TChannel.
 func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter {
 	return &TChannelRouter{
-		registrar: registrar,
-		endpoints: map[string]*TChannelEndpoint{},
-		contextLogger:    g.ContextLogger,
-		scope:     g.RootScope,
-		extractor: g.ContextExtractor,
+		registrar:     registrar,
+		endpoints:     map[string]*TChannelEndpoint{},
+		contextLogger: g.ContextLogger,
+		scope:         g.RootScope,
+		extractor:     g.ContextExtractor,
 
 		requestUUIDHeaderKey: g.requestUUIDHeaderKey,
 	}
@@ -167,10 +167,10 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 
 	var err error
 	c := &tchannelInboundCall{
-		call:     call,
-		endpoint: e,
-		contextLogger:   s.contextLogger,
-		scope:    s.scope.Tagged(scopeTags),
+		call:          call,
+		endpoint:      e,
+		contextLogger: s.contextLogger,
+		scope:         s.scope.Tagged(scopeTags),
 	}
 
 	c.start()

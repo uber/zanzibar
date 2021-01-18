@@ -47,7 +47,7 @@ type ServerHTTPResponse struct {
 	pendingBodyBytes  []byte
 	pendingBodyObj    interface{}
 	pendingStatusCode int
-	contextLogger            ContextLogger
+	contextLogger     ContextLogger
 	scope             tally.Scope
 	jsonWrapper       jsonwrapper.JSONWrapper
 	Err               error

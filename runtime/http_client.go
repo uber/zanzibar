@@ -52,7 +52,7 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 
 // NewHTTPClient is deprecated, use NewHTTPClientContext instead
 func NewHTTPClient(
-	contextLogger  ContextLogger,
+	contextLogger ContextLogger,
 	scope tally.Scope,
 	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
@@ -76,7 +76,7 @@ func NewHTTPClient(
 
 // NewHTTPClientContext will allocate a http client.
 func NewHTTPClientContext(
-	contextLogger  ContextLogger,
+	contextLogger ContextLogger,
 	ContextMetrics ContextMetrics,
 	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,

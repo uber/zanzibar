@@ -76,8 +76,8 @@ type TChannelClientOption struct {
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
-	ClientID string
-	ContextLogger     ContextLogger
+	ClientID      string
+	ContextLogger ContextLogger
 
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
