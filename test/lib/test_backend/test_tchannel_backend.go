@@ -161,6 +161,8 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		zap.String("test-backend", serviceName),
 	)
 
+	contextLogger := zanzibar.NewContextLogger(testLogger)
+
 	tchannelOpts := &tchannel.ChannelOptions{
 		Logger: zanzibar.NewTChannelLogger(testLogger),
 	}
@@ -188,6 +190,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		RootScope:        tally.NoopScope,
 		ContextExtractor: contextExtractors,
 		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
+		ContextLogger:    contextLogger,
 	}
 
 	backend.Channel = channel

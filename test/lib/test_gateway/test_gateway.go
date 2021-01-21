@@ -111,6 +111,7 @@ type ChildProcessGateway struct {
 	RealTChannelPort int
 	ContextExtractor zanzibar.ContextExtractor
 	ContextMetrics   zanzibar.ContextMetrics
+	ContextLogger    zanzibar.ContextLogger
 	staticConfig     *zanzibar.StaticConfig
 }
 
