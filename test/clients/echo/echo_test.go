@@ -83,6 +83,7 @@ func TestEcho(t *testing.T) {
 			GRPCClientDispatcher: dispatcher,
 			Config:               sc,
 			Logger:               zap.NewNop(),
+			ContextLogger:        zanzibar.NewContextLogger(zap.NewNop()),
 			ContextMetrics:       zanzibar.NewContextMetrics(tally.NewTestScope("", nil)),
 		},
 	})
