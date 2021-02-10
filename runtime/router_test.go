@@ -45,6 +45,7 @@ func (s *routerSuite) SetupTest() {
 	logger, _ := zap.NewDevelopment()
 	s.gw = new(Gateway)
 	s.gw.Logger = logger
+	s.gw.ContextLogger = NewContextLogger(zap.NewNop())
 	s.scope = tally.NewTestScope("", nil)
 	s.gw.RootScope = s.scope
 	s.gw.Config = NewStaticConfigOrDie(

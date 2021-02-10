@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.7 - 2021-02-05
+### Changed
+- **BREAKING** runtime/client_http_request.go, runtime/grpc_client.go, runtime/http_client.go, runtime/router.go, 
+runtime/server_http_request.go, runtime/server_http_response.go, runtime/tchannel_client.go, 
+runtime/tchannel_client_raw.go, runtime/tchannel_outbound_call.go, runtime_inbound_call.go, runtime/tchannel_server.go 
+now uses contextLogger instead of nornal logger ([#748](https://github.com/uber/zanzibar/pull/748))
+
 ## 0.6.5 - 2020-08-10
 ### Added
 - Added support for fetching multiple header values. https://github.com/uber/zanzibar/pull/733.

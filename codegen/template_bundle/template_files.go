@@ -1274,7 +1274,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{camel $s.Name}}Client: gen.New{{pascal $s.Name}}YARPCClient(oc),
 		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		methodNames,
@@ -1387,7 +1387,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6603, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6610, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1511,7 +1511,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -1892,7 +1892,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16405, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16412, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2627,7 +2627,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
-		server.Logger,
+		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       server.ServiceName,
@@ -2730,7 +2730,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5403, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5410, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2905,7 +2905,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -3023,7 +3023,7 @@ type {{$clientName}} struct {
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
 		{{end}}
-		logger := c.client.Loggers["{{$serviceMethod}}"]
+		logger := c.client.ContextLogger
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
@@ -3063,7 +3063,7 @@ type {{$clientName}} struct {
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					logger.Error("Internal error. Success flag is not set for {{title .Name}}. Overriding")
+					logger.Error(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
 					success = true
 				{{end -}}
 				default:
@@ -3071,7 +3071,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
+			logger.Warn(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
@@ -3084,7 +3084,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
+				logger.Warn(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return resp, respHeaders, err
 		{{end -}}
@@ -3104,7 +3104,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11400, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11422, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3482,7 +3482,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	deputyChannel.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
 		deputyChannel,
-		h.Deps.Default.Logger,
+		h.Deps.Default.ContextLogger,
 		h.Deps.Default.ContextMetrics,
 		h.Deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -3513,7 +3513,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8784, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

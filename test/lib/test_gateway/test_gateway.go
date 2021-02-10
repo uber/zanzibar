@@ -111,6 +111,7 @@ type ChildProcessGateway struct {
 	RealTChannelPort int
 	ContextExtractor zanzibar.ContextExtractor
 	ContextMetrics   zanzibar.ContextMetrics
+	ContextLogger    zanzibar.ContextLogger
 	staticConfig     *zanzibar.StaticConfig
 }
 
@@ -236,7 +237,7 @@ func CreateGateway(
 
 	tchannelClient := zanzibar.NewTChannelClientContext(
 		channel,
-		zap.NewNop(),
+		zanzibar.NewContextLogger(zap.NewNop()),
 		zanzibar.NewContextMetrics(tally.NoopScope),
 		extractors,
 		&zanzibar.TChannelClientOption{

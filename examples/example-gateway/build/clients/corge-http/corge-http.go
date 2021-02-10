@@ -126,7 +126,7 @@ func NewClient(deps *module.Dependencies) Client {
 		calleeName:    calleeName,
 		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"corge-http",
 			map[string]string{
 				"EchoString":                "Corge::echoString",

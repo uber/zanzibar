@@ -86,7 +86,7 @@ type RouterEndpoint struct {
 	JSONWrapper  jsonwrapper.JSONWrapper
 
 	contextExtractor ContextExtractor
-	logger           *zap.Logger
+	contextLogger    ContextLogger
 	scope            tally.Scope
 	tracer           opentracing.Tracer
 }
@@ -104,7 +104,7 @@ func NewRouterEndpoint(
 		HandlerName:      handlerID,
 		HandlerFn:        handler,
 		contextExtractor: extractor,
-		logger:           deps.Logger,
+		contextLogger:    deps.ContextLogger,
 		scope:            deps.Scope,
 		tracer:           deps.Tracer,
 		JSONWrapper:      deps.JSONWrapper,

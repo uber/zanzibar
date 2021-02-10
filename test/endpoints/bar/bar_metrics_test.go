@@ -210,13 +210,13 @@ func TestCallMetrics(t *testing.T) {
 		delete(logMsg, dynamicValue)
 	}
 	expectedValues := map[string]interface{}{
-		"env":                            "test",
-		"level":                          "debug",
-		"msg":                            "Finished an outgoing client HTTP request",
-		"statusCode":                     float64(200),
-		"clientID":                       "bar",
-		"clientMethod":                   "Normal",
-		"clientThriftMethod":             "Bar::normal",
+		"env":        "test",
+		"level":      "debug",
+		"msg":        "Finished an outgoing client HTTP request",
+		"statusCode": float64(200),
+		//"clientID":                       "bar",
+		//"clientMethod":                   "Normal",
+		//"clientThriftMethod":             "Bar::normal",
 		"clientHTTPMethod":               "POST",
 		"Client-Req-Header-X-Client-Id":  "bar",
 		"Client-Req-Header-Content-Type": "application/json",

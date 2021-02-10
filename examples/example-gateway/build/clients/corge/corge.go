@@ -117,7 +117,7 @@ func NewClient(deps *module.Dependencies) Client {
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -227,7 +227,7 @@ func (c *corgeClient) EchoString(
 	var result clientsIDlClientsCorgeCorge.Corge_EchoString_Result
 	var resp string
 
-	logger := c.client.Loggers["Corge::echoString"]
+	logger := c.client.ContextLogger
 
 	var success bool
 	respHeaders := make(map[string]string)
@@ -258,20 +258,20 @@ func (c *corgeClient) EchoString(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			logger.Error("Internal error. Success flag is not set for EchoString. Overriding")
+			logger.Error(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
 		}
 	}
 	if err != nil {
-		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
+		logger.Warn(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
+		logger.Warn(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }

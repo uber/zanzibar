@@ -42,7 +42,7 @@ type writeJSONSuit struct {
 
 func (wjs *writeJSONSuit) SetupSuite() {
 	client := NewHTTPClient(
-		zap.NewNop(),
+		NewContextLogger(zap.NewNop()),
 		tally.NewTestScope("", nil),
 		jsonwrapper.NewDefaultJSONWrapper(),
 		"foo",

@@ -184,10 +184,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"Regionname":           "sf",
 
 		// client specific logs
-		"clientID":                          "baz",
-		"clientService":                     "bazService",
-		"clientThriftMethod":                "SimpleService::call",
-		"clientMethod":                      "Call",
+		//"clientID":                          "baz",
+		//"clientService":                     "bazService",
+		//"clientThriftMethod":                "SimpleService::call",
+		//"clientMethod":                      "Call",
 		"Client-Req-Header-Device":          "ios",
 		"Client-Req-Header-x-uuid":          "uuid",
 		"Client-Req-Header-Regionname":      "sf",

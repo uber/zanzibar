@@ -68,7 +68,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &echoClient{
 		echoClient: gen.NewEchoYARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
-			deps.Default.Logger,
+			deps.Default.ContextLogger,
 			deps.Default.ContextMetrics,
 			deps.Default.ContextExtractor,
 			methodNames,
