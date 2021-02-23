@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -291,7 +292,9 @@ func (res *ServerHTTPResponse) flush(ctx context.Context) {
 
 	res.flushed = true
 	res.writeHeader(res.pendingStatusCode)
-	res.writeBytes(res.pendingBodyBytes)
+	if res.pendingStatusCode != http.StatusNoContent {
+		res.writeBytes(res.pendingBodyBytes)
+	}
 	res.finish(ctx)
 }
 
@@ -308,6 +311,7 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 		res.contextLogger.Error(res.Request.Context(),
 			"Could not write string to resp body",
 			zap.Error(err),
+			zap.String("bytesLength", strconv.Itoa(len(bytes))),
 		)
 	}
 }
