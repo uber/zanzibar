@@ -81,7 +81,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		"{{$clientID}}",
 		routingKey,
 		requestUUIDHeaderKey,
-		configureCircuitBreaker(deps, timeoutInMS),
+		!configureCircuitBreaker(deps, timeoutInMS),
 		timeoutInMS,
 		),
 	}
