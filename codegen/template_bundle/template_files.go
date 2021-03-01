@@ -1281,7 +1281,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		"{{$clientID}}",
 		routingKey,
 		requestUUIDHeaderKey,
-		configureCircuitBreaker(deps, timeoutInMS),
+		!configureCircuitBreaker(deps, timeoutInMS),
 		timeoutInMS,
 		),
 	}
@@ -1387,7 +1387,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6610, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6611, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

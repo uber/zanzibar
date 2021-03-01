@@ -84,7 +84,7 @@ func NewClient(deps *module.Dependencies) Client {
 			"mirror",
 			routingKey,
 			requestUUIDHeaderKey,
-			configureCircuitBreaker(deps, timeoutInMS),
+			!configureCircuitBreaker(deps, timeoutInMS),
 			timeoutInMS,
 		),
 	}

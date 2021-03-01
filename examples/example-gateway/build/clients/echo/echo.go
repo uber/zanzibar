@@ -75,7 +75,7 @@ func NewClient(deps *module.Dependencies) Client {
 			"echo",
 			routingKey,
 			requestUUIDHeaderKey,
-			configureCircuitBreaker(deps, timeoutInMS),
+			!configureCircuitBreaker(deps, timeoutInMS),
 			timeoutInMS,
 		),
 	}
