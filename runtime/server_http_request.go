@@ -88,6 +88,7 @@ func NewServerHTTPRequest(
 	}
 	if endpoint.contextExtractor != nil {
 		headers := map[string]string{}
+
 		for k, v := range r.Header {
 			// TODO: this 0th element logic is probably not correct
 			headers[k] = v[0]
@@ -99,6 +100,13 @@ func NewServerHTTPRequest(
 
 		logFields = append(logFields, endpoint.contextExtractor.ExtractLogFields(ctx)...)
 	}
+
+	val := r.Header.Get(shadowHeader)
+	if val != "" {
+		scopeTags[environmentKey] = shadowEnvironment
+		logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
+	}
+
 	ctx = WithScopeTags(ctx, scopeTags)
 	ctx = WithLogFields(ctx, logFields...)
 
