@@ -2238,7 +2238,7 @@ func TestSpanCreated(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 }
 
-func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, environment string)  {
+func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, environment string) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
@@ -2276,7 +2276,7 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 	var headers map[string]string
 	if isShadowRequest {
 		headers = map[string]string{
-			"X-Uber-Shadow-Request" : "true",
+			"X-Uber-Shadow-Request": "true",
 		}
 	}
 	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", headers, nil)
@@ -2334,8 +2334,8 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 
 func TestIncomingHTTPRequestServerLogForDiffRequestTypes(t *testing.T) {
 	tests := []struct {
-		name 	 string
-		isShadowRequest  bool
+		name                string
+		isShadowRequest     bool
 		expectedEnvironment string
 	}{
 		{
