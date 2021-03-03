@@ -222,7 +222,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			headers = make(map[string]string)
 		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
-		headers[c.requestProcedureHeaderKey] = {{$serviceMethod}}
+		headers[c.requestProcedureHeaderKey] = "{{$serviceMethod}}"
 	}
 
 	{{if .ResponseType -}}
