@@ -53,9 +53,9 @@ const (
 	clientTchannelUnmarshalError = "client.tchannel-unmarshal-error"
 
 	// shadow headers and environment
-	shadowHeader 		= "X-Uber-Shadow-Request"
-	shadowEnvironment 	= "shadow"
-	environmentKey 		= "env"
+	shadowHeader      = "X-Uber-Shadow-Request"
+	shadowEnvironment = "shadow"
+	environmentKey    = "env"
 )
 
 var knownMetrics = []string{
