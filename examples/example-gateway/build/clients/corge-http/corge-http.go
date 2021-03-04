@@ -68,11 +68,12 @@ type Client interface {
 
 // corgeHTTPClient is the http client.
 type corgeHTTPClient struct {
-	clientID               string
-	httpClient             *zanzibar.HTTPClient
-	jsonWrapper            jsonwrapper.JSONWrapper
-	circuitBreakerDisabled bool
-	requestUUIDHeaderKey   string
+	clientID                  string
+	httpClient                *zanzibar.HTTPClient
+	jsonWrapper               jsonwrapper.JSONWrapper
+	circuitBreakerDisabled    bool
+	requestUUIDHeaderKey      string
+	requestProcedureHeaderKey string
 
 	calleeHeader  string
 	callerHeader  string
@@ -111,6 +112,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey") {
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.corge-http.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.corge-http.followRedirect")
@@ -139,8 +144,9 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 			followRedirect,
 		),
-		circuitBreakerDisabled: circuitBreakerDisabled,
-		requestUUIDHeaderKey:   requestUUIDHeaderKey,
+		circuitBreakerDisabled:    circuitBreakerDisabled,
+		requestUUIDHeaderKey:      requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
@@ -210,11 +216,14 @@ func (c *corgeHTTPClient) EchoString(
 	r *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Corge::echoString"
 	}
 
 	var defaultRes string
@@ -311,11 +320,14 @@ func (c *corgeHTTPClient) NoContent(
 	r *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Corge::noContent"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContent", "Corge::noContent", c.httpClient)
@@ -406,11 +418,14 @@ func (c *corgeHTTPClient) NoContentNoException(
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Corge::noContentNoException"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContentNoException", "Corge::noContentNoException", c.httpClient)
@@ -496,11 +511,14 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
 ) (*clientsIDlClientsCorgeCorge.Foo, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Corge::noContentOnException"
 	}
 
 	var defaultRes *clientsIDlClientsCorgeCorge.Foo

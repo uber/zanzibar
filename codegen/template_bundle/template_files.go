@@ -1448,6 +1448,7 @@ type {{$clientName}} struct {
 	jsonWrapper   jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey string
+	requestProcedureHeaderKey string
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
@@ -1493,6 +1494,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey"){
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
@@ -1525,6 +1530,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey: requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
@@ -1605,11 +1611,14 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end -}}
 ) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "{{$serviceMethod}}"
 	}
 
 	{{if .ResponseType -}}
@@ -1892,7 +1901,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16412, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16830, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
