@@ -53,11 +53,12 @@ type Client interface {
 
 // googleNowClient is the http client.
 type googleNowClient struct {
-	clientID               string
-	httpClient             *zanzibar.HTTPClient
-	jsonWrapper            jsonwrapper.JSONWrapper
-	circuitBreakerDisabled bool
-	requestUUIDHeaderKey   string
+	clientID                  string
+	httpClient                *zanzibar.HTTPClient
+	jsonWrapper               jsonwrapper.JSONWrapper
+	circuitBreakerDisabled    bool
+	requestUUIDHeaderKey      string
+	requestProcedureHeaderKey string
 }
 
 // NewClient returns a new http client.
@@ -80,6 +81,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey") {
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.google-now.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.google-now.followRedirect")
@@ -101,8 +106,9 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 			followRedirect,
 		),
-		circuitBreakerDisabled: circuitBreakerDisabled,
-		requestUUIDHeaderKey:   requestUUIDHeaderKey,
+		circuitBreakerDisabled:    circuitBreakerDisabled,
+		requestUUIDHeaderKey:      requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
@@ -160,11 +166,14 @@ func (c *googleNowClient) AddCredentials(
 	r *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "GoogleNowService::addCredentials"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", "GoogleNowService::addCredentials", c.httpClient)
@@ -239,11 +248,14 @@ func (c *googleNowClient) CheckCredentials(
 	headers map[string]string,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "GoogleNowService::checkCredentials"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", "GoogleNowService::checkCredentials", c.httpClient)

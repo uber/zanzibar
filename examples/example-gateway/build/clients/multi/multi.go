@@ -51,11 +51,12 @@ type Client interface {
 
 // multiClient is the http client.
 type multiClient struct {
-	clientID               string
-	httpClient             *zanzibar.HTTPClient
-	jsonWrapper            jsonwrapper.JSONWrapper
-	circuitBreakerDisabled bool
-	requestUUIDHeaderKey   string
+	clientID                  string
+	httpClient                *zanzibar.HTTPClient
+	jsonWrapper               jsonwrapper.JSONWrapper
+	circuitBreakerDisabled    bool
+	requestUUIDHeaderKey      string
+	requestProcedureHeaderKey string
 }
 
 // NewClient returns a new http client.
@@ -78,6 +79,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey") {
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.multi.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.multi.followRedirect")
@@ -99,8 +104,9 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 			followRedirect,
 		),
-		circuitBreakerDisabled: circuitBreakerDisabled,
-		requestUUIDHeaderKey:   requestUUIDHeaderKey,
+		circuitBreakerDisabled:    circuitBreakerDisabled,
+		requestUUIDHeaderKey:      requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
@@ -157,11 +163,14 @@ func (c *multiClient) HelloA(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "ServiceABack::hello"
 	}
 
 	var defaultRes string
@@ -237,11 +246,14 @@ func (c *multiClient) HelloB(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "ServiceBBack::hello"
 	}
 
 	var defaultRes string
