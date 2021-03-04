@@ -2276,7 +2276,7 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 	var headers map[string]string
 	if isShadowRequest {
 		headers = map[string]string{
-			"X-Uber-Shadow-Request": "true",
+			"X-Shadow-Request": "true",
 		}
 	}
 	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", headers, nil)
@@ -2299,7 +2299,7 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 	}
 
 	if isShadowRequest {
-		dynamicHeaders = append(dynamicHeaders, "X-Uber-Shadow-Request")
+		dynamicHeaders = append(dynamicHeaders, "X-Shadow-Request")
 	}
 
 	for _, dynamicValue := range dynamicHeaders {
