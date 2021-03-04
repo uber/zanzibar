@@ -53,7 +53,6 @@ const (
 	clientTchannelUnmarshalError = "client.tchannel-unmarshal-error"
 
 	// shadow headers and environment
-	shadowHeader      = "X-Shadow-Request"
 	shadowEnvironment = "shadow"
 	environmentKey    = "env"
 )

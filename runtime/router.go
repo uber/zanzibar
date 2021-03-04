@@ -89,6 +89,7 @@ type RouterEndpoint struct {
 	contextLogger    ContextLogger
 	scope            tally.Scope
 	tracer           opentracing.Tracer
+	config           *StaticConfig
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -108,6 +109,7 @@ func NewRouterEndpoint(
 		scope:            deps.Scope,
 		tracer:           deps.Tracer,
 		JSONWrapper:      deps.JSONWrapper,
+		config:           deps.Config,
 	}
 }
 

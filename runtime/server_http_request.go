@@ -101,10 +101,12 @@ func NewServerHTTPRequest(
 		logFields = append(logFields, endpoint.contextExtractor.ExtractLogFields(ctx)...)
 	}
 
-	val := r.Header.Get(shadowHeader)
-	if val != "" {
-		scopeTags[environmentKey] = shadowEnvironment
-		logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
+	// Overriding the environment for shadow requests
+	if endpoint.config != nil {
+		if endpoint.config.ContainsKey("service.shadow.env.override.enable") && endpoint.config.MustGetBoolean("service.shadow.env.override.enable") && endpoint.config.ContainsKey("service.shadow.request.header") && r.Header.Get(endpoint.config.MustGetString("service.shadow.request.header")) != "" {
+			scopeTags[environmentKey] = shadowEnvironment
+			logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
+		}
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)

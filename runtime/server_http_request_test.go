@@ -2256,6 +2256,7 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 		Logger:        bgateway.ActualGateway.Logger,
 		ContextLogger: bgateway.ActualGateway.ContextLogger,
 		Tracer:        bgateway.ActualGateway.Tracer,
+		Config:        bgateway.ActualGateway.Config,
 	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
