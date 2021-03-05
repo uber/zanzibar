@@ -89,5 +89,4 @@ clients.baz.alternates:
       port: 8114
 grpc.clientServiceNameMapping:
   echo: echo
-service.shadow.request.header: x-shadow-request
 service.shadow.env.override.enable: true

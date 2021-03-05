@@ -52,6 +52,10 @@ func DefaultConfigFiles(serviceName string) []string {
 			"..", "..", "..", "examples", "example-gateway", "config",
 			"example-gateway", "test.yaml",
 		),
+		filepath.Join(
+			getDirName(),
+			"..", "..", "..", "examples", "example-gateway", "build.yaml",
+		),
 	}
 }
 

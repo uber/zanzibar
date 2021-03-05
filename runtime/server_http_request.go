@@ -103,7 +103,10 @@ func NewServerHTTPRequest(
 
 	// Overriding the environment for shadow requests
 	if endpoint.config != nil {
-		if endpoint.config.ContainsKey("service.shadow.env.override.enable") && endpoint.config.MustGetBoolean("service.shadow.env.override.enable") && endpoint.config.ContainsKey("service.shadow.request.header") && r.Header.Get(endpoint.config.MustGetString("service.shadow.request.header")) != "" {
+		if endpoint.config.ContainsKey("service.shadow.env.override.enable") &&
+			endpoint.config.MustGetBoolean("service.shadow.env.override.enable") &&
+			endpoint.config.ContainsKey("shadowRequestHeader") &&
+			r.Header.Get(endpoint.config.MustGetString("shadowRequestHeader")) != "" {
 			scopeTags[environmentKey] = shadowEnvironment
 			logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
 		}
