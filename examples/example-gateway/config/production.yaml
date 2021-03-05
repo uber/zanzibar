@@ -90,3 +90,4 @@ grpc.clientServiceNameMapping:
   echo: echo
 router.whitelistedPaths:
   - /path/whitelisted
+service.shadow.env.override.enable: true

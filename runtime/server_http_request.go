@@ -88,6 +88,7 @@ func NewServerHTTPRequest(
 	}
 	if endpoint.contextExtractor != nil {
 		headers := map[string]string{}
+
 		for k, v := range r.Header {
 			// TODO: this 0th element logic is probably not correct
 			headers[k] = v[0]
@@ -99,6 +100,18 @@ func NewServerHTTPRequest(
 
 		logFields = append(logFields, endpoint.contextExtractor.ExtractLogFields(ctx)...)
 	}
+
+	// Overriding the environment for shadow requests
+	if endpoint.config != nil {
+		if endpoint.config.ContainsKey("service.shadow.env.override.enable") &&
+			endpoint.config.MustGetBoolean("service.shadow.env.override.enable") &&
+			endpoint.config.ContainsKey("shadowRequestHeader") &&
+			r.Header.Get(endpoint.config.MustGetString("shadowRequestHeader")) != "" {
+			scopeTags[environmentKey] = shadowEnvironment
+			logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
+		}
+	}
+
 	ctx = WithScopeTags(ctx, scopeTags)
 	ctx = WithLogFields(ctx, logFields...)
 

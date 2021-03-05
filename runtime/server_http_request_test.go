@@ -2238,7 +2238,7 @@ func TestSpanCreated(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 }
 
-func TestIncomingHTTPRequestServerLog(t *testing.T) {
+func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, environment string) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
@@ -2256,6 +2256,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		Logger:        bgateway.ActualGateway.Logger,
 		ContextLogger: bgateway.ActualGateway.ContextLogger,
 		Tracer:        bgateway.ActualGateway.Tracer,
+		Config:        bgateway.ActualGateway.Config,
 	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
@@ -2273,13 +2274,20 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", nil, nil)
+	var headers map[string]string
+	if isShadowRequest {
+		headers = map[string]string{
+			"X-Shadow-Request": "true",
+		}
+	}
+	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", headers, nil)
 	assert.NoError(t, err)
 
 	allLogs := bgateway.AllLogs()
 	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request with 200 status code"]))
 
 	tags := allLogs["Finished an incoming server HTTP request with 200 status code"][0]
+
 	dynamicHeaders := []string{
 		"requestUUID",
 		"remoteAddr",
@@ -2290,6 +2298,11 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		"pid",
 		"timestamp-finished",
 	}
+
+	if isShadowRequest {
+		dynamicHeaders = append(dynamicHeaders, "X-Shadow-Request")
+	}
+
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, tags, dynamicValue)
 		delete(tags, dynamicValue)
@@ -2297,7 +2310,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 
 	expectedValues := map[string]interface{}{
 		"msg":             "Finished an incoming server HTTP request with 200 status code",
-		"env":             "test",
+		"env":             environment,
 		"level":           "debug",
 		"zone":            "unknown",
 		"service":         "example-gateway",
@@ -2317,5 +2330,30 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	}
 	for expectedKey, expectedValue := range expectedValues {
 		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
+	}
+}
+
+func TestIncomingHTTPRequestServerLogForDiffRequestTypes(t *testing.T) {
+	tests := []struct {
+		name                string
+		isShadowRequest     bool
+		expectedEnvironment string
+	}{
+		{
+			"Test incoming http request server log for normal request",
+			false,
+			"test",
+		},
+		{
+			"Test incoming http request server log for shadow request",
+			true,
+			"shadow",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testIncomingHTTPRequestServerLog(t, tt.isShadowRequest, tt.expectedEnvironment)
+		})
 	}
 }

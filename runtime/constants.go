@@ -51,6 +51,10 @@ const (
 	clientHTTPUnmarshalError = "client.http-unmarshal-error"
 	// clientTchannelReadError is the metric for tracking errors in reading tchannel response
 	clientTchannelUnmarshalError = "client.tchannel-unmarshal-error"
+
+	// shadow headers and environment
+	shadowEnvironment = "shadow"
+	environmentKey    = "env"
 )
 
 var knownMetrics = []string{
