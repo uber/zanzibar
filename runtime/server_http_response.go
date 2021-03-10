@@ -292,7 +292,7 @@ func (res *ServerHTTPResponse) flush(ctx context.Context) {
 
 	res.flushed = true
 	res.writeHeader(res.pendingStatusCode)
-	if res.pendingStatusCode != http.StatusNoContent {
+	if _, noContent := noContentStatusCodes[res.pendingStatusCode]; !noContent {
 		res.writeBytes(res.pendingBodyBytes)
 	}
 	res.finish(ctx)

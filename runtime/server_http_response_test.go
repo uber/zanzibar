@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/buger/jsonparser"
@@ -582,6 +583,81 @@ func TestPendingResponseBody204StatusNoContent(t *testing.T) {
 		t,
 		"",
 		string(bytes),
+	)
+	assert.Equal(
+		t,
+		"0",
+		strconv.Itoa(len(bytes)),
+	)
+}
+
+func TestPendingResponseBody304StatusNoContent(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := createDefaultDependencies(bgateway)
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			deps,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				obj := &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				}
+				bytes, err := json.Marshal(obj)
+				statusCode := 304
+				assert.NoError(t, err)
+				res.WriteJSON(statusCode, nil, obj)
+
+				pendingBytes, pendingStatusCode := res.GetPendingResponse()
+				assert.Equal(t, bytes, pendingBytes)
+				assert.Equal(t, statusCode, pendingStatusCode)
+
+				headers := res.Headers()
+				assert.NotNil(t, headers)
+			},
+		).HandleRequest),
+	)
+	assert.NoError(t, err)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 304)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	//The body would become blank
+	assert.Equal(
+		t,
+		``,
+		string(bytes),
+	)
+	assert.Equal(
+		t,
+		"0",
+		strconv.Itoa(len(bytes)),
 	)
 }
 

@@ -137,3 +137,8 @@ var knownStatusCodes = map[int]bool{
 	http.StatusNotExtended:                   true, // 510
 	http.StatusNetworkAuthenticationRequired: true, // 511
 }
+
+var noContentStatusCodes = map[int]bool{
+	http.StatusNoContent:   true, //204
+	http.StatusNotModified: true, //304
+}
