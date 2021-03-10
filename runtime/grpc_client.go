@@ -136,10 +136,10 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 			fields = append(fields, zap.Error(err))
 		}
 		c.metrics.IncCounter(ctx, "client.errors", 1)
-		c.contextLogger.Warn(ctx, "Failed to send outgoing client gRPC request", fields...)
+		c.contextLogger.WarnZ(ctx, "Failed to send outgoing client gRPC request", fields...)
 		return ctx
 	}
-	c.contextLogger.Debug(ctx, "Finished an outgoing client gRPC request", fields...)
+	c.contextLogger.DebugZ(ctx, "Finished an outgoing client gRPC request", fields...)
 	c.metrics.IncCounter(ctx, "client.success", 1)
 	return ctx
 }

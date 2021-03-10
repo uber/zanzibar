@@ -111,10 +111,10 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
 
-	logFn := res.contextLogger.Debug
+	logFn := res.contextLogger.DebugZ
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		tagged.Counter(endpointAppErrors).Inc(1)
-		logFn = res.contextLogger.Warn
+		logFn = res.contextLogger.WarnZ
 	}
 
 	span := res.Request.GetSpan()

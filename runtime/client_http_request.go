@@ -91,7 +91,7 @@ func NewClientHTTPRequest(
 func (req *ClientHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.ContextLogger.Error(req.ctx, "Cannot start ClientHTTPRequest twice")
+		req.ContextLogger.ErrorZ(req.ctx, "Cannot start ClientHTTPRequest twice")
 		/* coverage ignore next line */
 		return
 	}
@@ -112,7 +112,7 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 		// headerName is case insensitive, http.Header Get canonicalize the key
 		headerValue := actualHeaders.Get(headerName)
 		if headerValue == "" {
-			req.ContextLogger.Warn(req.ctx, "Got outbound request without mandatory header",
+			req.ContextLogger.WarnZ(req.ctx, "Got outbound request without mandatory header",
 				zap.String("headerName", headerName),
 			)
 
@@ -134,7 +134,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 		var err error
 		rawBody, err = req.jsonWrapper.Marshal(body)
 		if err != nil {
-			req.ContextLogger.Error(req.ctx, "Could not serialize request json", zap.Error(err))
+			req.ContextLogger.ErrorZ(req.ctx, "Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(
 				err, "Could not serialize %s.%s request json",
 				req.ClientID, req.MethodName,
@@ -163,7 +163,7 @@ func (req *ClientHTTPRequest) WriteBytes(
 	}
 
 	if httpErr != nil {
-		req.ContextLogger.Error(req.ctx, "Could not create outbound request", zap.Error(httpErr))
+		req.ContextLogger.ErrorZ(req.ctx, "Could not create outbound request", zap.Error(httpErr))
 		return errors.Wrapf(
 			httpErr, "Could not create outbound %s.%s request",
 			req.ClientID, req.MethodName,
@@ -199,7 +199,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	err := req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	if err != nil {
 		/* coverage ignore next line */
-		req.ContextLogger.Error(req.ctx, "Fail to inject span to headers", zap.Error(err))
+		req.ContextLogger.ErrorZ(req.ctx, "Fail to inject span to headers", zap.Error(err))
 		/* coverage ignore next line */
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {
-		req.ContextLogger.Error(req.ctx, "Could not make outbound request", zap.Error(err))
+		req.ContextLogger.ErrorZ(req.ctx, "Could not make outbound request", zap.Error(err))
 		return nil, err
 	}
 
@@ -224,7 +224,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
 	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
 	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
-		req.ContextLogger.Error(req.ctx, "Failed to inject tracing span.", zap.Error(err))
+		req.ContextLogger.ErrorZ(req.ctx, "Failed to inject tracing span.", zap.Error(err))
 		return err
 	}
 

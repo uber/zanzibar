@@ -154,7 +154,7 @@ func (req *ServerHTTPRequest) StartTime() time.Time {
 func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.contextLogger.Error(req.Context(),
+		req.contextLogger.ErrorZ(req.Context(),
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
@@ -177,7 +177,7 @@ func (req *ServerHTTPRequest) start() {
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
 				/* coverage ignore next line */
-				req.contextLogger.Warn(req.Context(), "Error Extracting Trace Headers", zap.Error(err))
+				req.contextLogger.WarnZ(req.Context(), "Error Extracting Trace Headers", zap.Error(err))
 			}
 			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
 		} else {
@@ -192,7 +192,7 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		_, ok := req.Header.Get(headerName)
 		if !ok {
-			req.contextLogger.Warn(req.Context(), "Got request without mandatory header",
+			req.contextLogger.WarnZ(req.Context(), "Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
 
@@ -238,7 +238,7 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 
 	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
 	if err != nil {
-		req.contextLogger.Warn(req.Context(), "Got request with invalid query string", zap.Error(err))
+		req.contextLogger.WarnZ(req.Context(), "Got request with invalid query string", zap.Error(err))
 
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -713,7 +713,7 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 
 	values := req.queryValues[key]
 	if len(values) == 0 {
-		req.contextLogger.Warn(req.Context(), "Got request with missing query string value",
+		req.contextLogger.WarnZ(req.Context(), "Got request with missing query string value",
 			zap.String("expectedKey", key),
 		)
 		if !req.parseFailed {
@@ -766,7 +766,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.contextLogger.Error(req.Context(), "Could not read request body", zap.Error(err))
+		req.contextLogger.ErrorZ(req.Context(), "Could not read request body", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(500, "Could not read request body", err)
 			req.parseFailed = true
@@ -783,7 +783,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := req.jsonWrapper.Unmarshal(rawBody, body)
 	if err != nil {
-		req.contextLogger.Warn(req.Context(), "Could not parse json", zap.Error(err))
+		req.contextLogger.WarnZ(req.Context(), "Could not parse json", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
 			req.parseFailed = true
@@ -812,7 +812,7 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 
 // LogAndSendQueryError handles parse failure of query params by logging the issue and returning a 400 to the requestor
 func (req *ServerHTTPRequest) LogAndSendQueryError(err error, expected, key, value string) {
-	req.contextLogger.Warn(req.Context(), "Got request with invalid query string types",
+	req.contextLogger.WarnZ(req.Context(), "Got request with invalid query string types",
 		zap.String("expected", expected),
 		zap.String("actual", value),
 		zap.String("key", key),

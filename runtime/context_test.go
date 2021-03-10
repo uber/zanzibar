@@ -193,6 +193,67 @@ func TestContextLogger(t *testing.T) {
 	assert.Equal(t, zap.ErrorLevel, logMessages[0].Level)
 }
 
+func TestContextLogger_DefaultZ(t *testing.T) {
+	zapLoggerCore, logs := observer.New(zap.DebugLevel)
+	zapLogger := zap.New(zapLoggerCore)
+	contextLogger := NewContextLogger(zapLogger)
+	ctx := context.Background()
+	ctxWithField := WithLogFields(ctx, zap.String("ctxField", "ctxValue"))
+
+	var logMessages []observer.LoggedEntry
+
+	contextLogger.DebugZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.DebugLevel, logMessages[0].Level)
+	assert.Equal(t, logMessages[0].Context[0].Key, "ctxField")
+	assert.Equal(t, logMessages[0].Context[0].String, "ctxValue")
+	assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+	assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+
+	contextLogger.InfoZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.InfoLevel, logMessages[0].Level)
+
+	contextLogger.WarnZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.WarnLevel, logMessages[0].Level)
+
+	contextLogger.ErrorZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.ErrorLevel, logMessages[0].Level)
+}
+
+func TestContextLogger_SkipZanzibarLogsZ(t *testing.T) {
+	zapLoggerCore, logs := observer.New(zap.DebugLevel)
+	zapLogger := zap.New(zapLoggerCore)
+	contextLogger := NewContextLogger(zapLogger)
+	contextLogger.SetSkipZanzibarLogs(true)
+	ctx := context.Background()
+	ctxWithField := WithLogFields(ctx, zap.String("ctxField", "ctxValue"))
+
+	var logMessages []observer.LoggedEntry
+
+	contextLogger.DebugZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 0)
+
+	contextLogger.InfoZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 0)
+
+	contextLogger.WarnZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 0)
+
+	contextLogger.ErrorZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 0)
+}
+
 func TestContextLoggerPanic(t *testing.T) {
 	defer func() {
 		err := recover()
