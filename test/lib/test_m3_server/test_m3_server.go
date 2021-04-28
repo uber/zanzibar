@@ -22,7 +22,6 @@ package testm3server
 
 import (
 	"bytes"
-	"github.com/uber-go/tally/thirdparty/github.com/apache/thrift/lib/go/thrift"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -36,6 +35,7 @@ import (
 	metrics "github.com/uber-go/tally/m3"
 	customtransport "github.com/uber-go/tally/m3/customtransports"
 	m3 "github.com/uber-go/tally/m3/thrift/v1"
+	"github.com/uber-go/tally/thirdparty/github.com/apache/thrift/lib/go/thrift"
 	"github.com/uber/zanzibar/test/lib"
 )
 
