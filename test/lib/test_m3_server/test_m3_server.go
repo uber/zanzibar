@@ -47,7 +47,7 @@ type FakeM3Server struct {
 	Service   *FakeM3Service
 	Addr      string
 	protocol  metrics.Protocol
-	processor *m3.M3Processor
+	processor thrift.TProcessor
 	conn      *net.UDPConn
 	closed    int32
 }
