@@ -22,6 +22,7 @@ package testm3server
 
 import (
 	"bytes"
+	"github.com/uber-go/tally/thirdparty/github.com/apache/thrift/lib/go/thrift"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -30,12 +31,11 @@ import (
 
 	"go.uber.org/thriftrw/ptr"
 
-	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
 	metrics "github.com/uber-go/tally/m3"
 	customtransport "github.com/uber-go/tally/m3/customtransports"
-	m3 "github.com/uber-go/tally/m3/thrift"
+	m3 "github.com/uber-go/tally/m3/thrift/v1"
 	"github.com/uber/zanzibar/test/lib"
 )
 
@@ -47,7 +47,7 @@ type FakeM3Server struct {
 	Service   *FakeM3Service
 	Addr      string
 	protocol  metrics.Protocol
-	processor thrift.TProcessor
+	processor *m3.M3Processor
 	conn      *net.UDPConn
 	closed    int32
 }
