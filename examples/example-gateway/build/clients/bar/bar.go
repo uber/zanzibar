@@ -258,7 +258,7 @@ func NewClient(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.bar.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	return &barClient{
 		clientID: "bar",
@@ -313,7 +313,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") {

@@ -121,7 +121,7 @@ func NewClient(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.corge-http.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	return &corgeHTTPClient{
 		clientID:      "corge-http",
@@ -162,7 +162,7 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 	}
 	return routingMap
 }
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.corge-http.circuitBreakerDisabled") {
