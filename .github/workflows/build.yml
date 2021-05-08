@@ -13,6 +13,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v2
       - name: make jenkins-install
+        env:
+          GO111MODULE: off
         run: make jenkins-install
       - name: make jenkins-test
         run: make jenkins-test
