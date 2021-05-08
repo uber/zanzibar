@@ -1,17 +1,29 @@
-name: GitHub Actions Demo
-on: [push]
+name: Build using GitHub Actions
+on: [push, pull_request]
 jobs:
-  Explore-GitHub-Actions:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.15', '1.16']    
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - uses: actions/checkout@v2
+      - name: make jenkins-install
+        run: make jenkins-install
+      - name: make jenkins-test
+        run: make jenkins-test
+      - name: make install
+        run: make install
+      - name: make cover
+        run: make cover
+      - name: make fast-bench
+        run: make fast-bench
+      - name: make bins
+        run: make bins
+      - name: make test-benchmark-runner
+        run: make test-benchmark-runner
       - run: echo "🍏 This job's status is ${{ job.status }}."
