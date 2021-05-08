@@ -22,6 +22,12 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
           
+      - name: Setup env
+        run: |
+          echo "::set-env name=GOPATH::$(dirname $GITHUB_WORKSPACE)"
+          echo "::add-path::$(dirname $GITHUB_WORKSPACE)/bin"
+        shell: bash
+          
       - name: make jenkins-install
         env:
           GO111MODULE: off
