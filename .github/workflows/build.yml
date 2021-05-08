@@ -26,6 +26,7 @@ jobs:
         env:
           GO111MODULE: off
         run: make jenkins-install
+        shell: bash
         
       - name: make jenkins-test
         run: make jenkins-test
