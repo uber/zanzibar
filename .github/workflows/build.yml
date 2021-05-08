@@ -1,31 +1,48 @@
 name: Build using GitHub Actions
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
 jobs:
+
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go-version: ['1.15', '1.16']    
+        
     steps:
+      - uses: actions/checkout@v2
+      
       - name: Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      - uses: actions/checkout@v2
+          
       - name: make jenkins-install
         env:
           GO111MODULE: off
         run: make jenkins-install
+        
       - name: make jenkins-test
         run: make jenkins-test
+        
       - name: make install
         run: make install
+        
       - name: make cover
         run: make cover
+        
       - name: make fast-bench
         run: make fast-bench
+        
       - name: make bins
         run: make bins
+        
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
+        
       - run: echo "🍏 This job's status is ${{ job.status }}."
