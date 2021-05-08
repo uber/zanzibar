@@ -17,16 +17,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      - name: Setup env
+        run: |
+          echo "$(dirname $GITHUB_WORKSPACE)" >> $GOPATH
+          echo "$(dirname $GITHUB_WORKSPACE)/bin" >> $GITHUB_PATH
+        shell: bash
+      
       - name: Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-          
-      - name: Setup env
-        run: |
-          echo "::set-env name=GOPATH::$(dirname $GITHUB_WORKSPACE)"
-          echo "::add-path::$(dirname $GITHUB_WORKSPACE)/bin"
-        shell: bash
           
       - name: make jenkins-install
         env:
