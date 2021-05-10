@@ -13,9 +13,20 @@ jobs:
     strategy:
       matrix:
         go-version: ['1.15', '1.16']    
-        
+    env:
+      GOPATH: ${{ github.workspace }}
+      GOBIN: ${{ github.workspace }}/bin
+      GO111MODULE: off
+    defaults:
+      run:
+        working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+
     steps:
-      - uses: actions/checkout@v2
+            
+      - name: checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
       
       - name: Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v2
@@ -23,8 +34,6 @@ jobs:
           go-version: ${{ matrix.go-version }}
           
       - name: make jenkins-install
-        env:
-          GO111MODULE: off
         run: make jenkins-install
         shell: bash
         
