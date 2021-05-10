@@ -47,6 +47,11 @@ jobs:
       
       # install wrk
       - run: git clone https://github.com/wg/wrk.git wrk && cd wrk && pwd && make && sudo cp -r wrk /usr/local/bin
+      # TODO: @rpatali
+      # above step is really slow and time consuming, try alternative shown below
+      #- run: wget http://us.archive.ubuntu.com/ubuntu/pool/universe/w/wrk/wrk_4.0.1-2_amd64.deb
+      #- run: sudo dpkg -i wrk_4.0.1-2_amd64.deb
+      #- run: rm wrk_4.0.1-2_amd64.deb
       
       # install protoc
       - run: curl -0L -O https://github.com/google/protobuf/releases/download/v3.7.1/protoc-3.7.1-linux-x86_64.zip
@@ -71,10 +76,6 @@ jobs:
         
       - name: make bins
         run: make bins
-        
-
-      - run: echo $GITHUB_PATH
-      - run: which wrk
 
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
