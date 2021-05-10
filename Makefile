@@ -126,6 +126,8 @@ check-generate:
 	make generate
 	# TODO: @rpatali enable after migrating to Github Actions
 	#       coden-gen currently generates slightly different on Github vs. Mac
+	#       mock-client imports have `zanzibar` alias on local where as `runtime` alias on GH
+	#       so the git-status is not clean.
 	#git status --porcelain > git-status.log
 	#@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
 
