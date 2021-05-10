@@ -39,14 +39,19 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      # install deps
       - run: sudo apt-get -qq update
       - run: sudo apt-get install -qq time
       - run: sudo apt-get install -qq build-essential libssl-dev git unzip
       - run: sudo apt-get install -qq libluajit-5.1-2 libluajit-5.1-common
+      
+      # install wrk
       - run: git clone https://github.com/wg/wrk.git wrk
       - run: cd wrk
       - run: make
       - run: sudo cp -r wrk /usr/local/bin
+      
+      # install protoc
       - run: curl -0L -O https://github.com/google/protobuf/releases/download/v3.7.1/protoc-3.7.1-linux-x86_64.zip
       - run: sudo unzip -o protoc-3.7.1-linux-x86_64.zip -d /usr/local bin/protoc
       - run: rm -f protoc-3.7.1-linux-x86_64.zip
