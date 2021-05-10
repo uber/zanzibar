@@ -47,7 +47,7 @@ jobs:
       - run: cd wrk
       - run: make
       - run: sudo cp -r wrk /usr/local/bin
-      - run: curl -0L https://github.com/google/protobuf/releases/download/v3.7.1/protoc-3.7.1-linux-x86_64.zip
+      - run: curl -0L -O https://github.com/google/protobuf/releases/download/v3.7.1/protoc-3.7.1-linux-x86_64.zip
       - run: sudo unzip -o protoc-3.7.1-linux-x86_64.zip -d /usr/local bin/protoc
       - run: rm -f protoc-3.7.1-linux-x86_64.zip
 
