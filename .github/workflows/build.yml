@@ -75,6 +75,10 @@ jobs:
       - name: make bins
         run: make bins
         
+
+      - run: echo $GITHUB_PATH
+      - run: which wrk
+
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
         
