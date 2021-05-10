@@ -38,7 +38,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-          
+
+      - run: sudo apt-get -qq update
+      - run: sudo apt-get install -qq time
+      - run: sudo apt-get install -qq build-essential libssl-dev git
+      - run: sudo apt-get install -qq libluajit-5.1-2 libluajit-5.1-common
+      - run: wget http://us.archive.ubuntu.com/ubuntu/pool/universe/w/wrk/wrk_4.0.1-2_amd64.deb
+      - run: sudo dpkg -i wrk_4.0.1-2_amd64.deb
+      - run: rm wrk_4.0.1-2_amd64.deb
+      - run: PROTOC_ZIP=protoc-3.7.1-linux-x86_64.zip
+      - run: curl -OL https://github.com/google/protobuf/releases/download/v3.7.1/$PROTOC_ZIP
+      - run: sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
+      - run: rm -f $PROTOC_ZIP
+
       - name: make jenkins-install
         run: make jenkins-install
         shell: bash
