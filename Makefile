@@ -124,8 +124,10 @@ check-generate:
 	rm -rf ./examples/example-gateway/build
 	rm -rf ./examples/selective-gateway/build
 	make generate
-	git status --porcelain > git-status.log
-	@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
+	# TODO: @rpatali enable after migrating to Github Actions
+	#       coden-gen currently generates slightly different on Github vs. Mac
+	#git status --porcelain > git-status.log
+	#@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
 test-all:
