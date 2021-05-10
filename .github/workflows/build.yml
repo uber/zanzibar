@@ -80,4 +80,12 @@ jobs:
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
         
+      - name: coveralls
+        run: make coveralls
+        
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=covprofile -service=github
+        
       - run: echo "🍏 This job's status is ${{ job.status }}."
