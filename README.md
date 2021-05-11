@@ -551,8 +551,8 @@ If you want to update a dependency:
 
 [doc-img]: https://godoc.org/github.com/uber/zanzibar?status.svg
 [doc]: https://godoc.org/github.com/uber/zanzibar
-[ci-img]: https://travis-ci.org/uber/zanzibar.svg?branch=master
-[ci]: https://travis-ci.org/uber/zanzibar
+[ci-img]: https://github.com/uber/zanzibar/actions/workflows/build.yml/badge.svg
+[ci]: https://github.com/uber/zanzibar/actions
 [cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
 [cov]: https://coveralls.io/github/uber/zanzibar?branch=master
 [go-report-img]: https://goreportcard.com/badge/github.com/uber/zanzibar
