@@ -170,13 +170,6 @@ test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
-.PHONY: coveralls
-coveralls:
-	ls ./node_modules/coveralls/bin/coveralls.js 2>/dev/null || \
-		npm i coveralls
-	# Coveralls github plugin is being used instead
-	# cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-
 .PHONY: fast-bench
 fast-bench:
 	@rm -f bench.log bench-fail.log
