@@ -79,9 +79,6 @@ jobs:
 
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
-        
-      - name: coveralls
-        run: make coveralls
           
       - name: Publish to coveralls.io
         uses: coverallsapp/github-action@v1.1.2
