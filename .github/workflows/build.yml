@@ -80,9 +80,14 @@ jobs:
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
         
-      - name: coveralls
-        run: make coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: coveralls
+      #  run: make coveralls
+      #  env:
+      #    COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Publish to coveralls.io
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ github.token }}
         
       - run: echo "🍏 This job's status is ${{ job.status }}."
