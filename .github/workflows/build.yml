@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         go-version: ['1.15', '1.16']
-        node-version: ['0.10.32']
+        node-version: ['v8.12.0']  # version Travis was using
     env:
       GOPATH: ${{ github.workspace }}
       GOBIN: ${{ github.workspace }}/bin
