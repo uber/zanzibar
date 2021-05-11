@@ -82,5 +82,7 @@ jobs:
         
       - name: coveralls
         run: make coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - run: echo "🍏 This job's status is ${{ job.status }}."
