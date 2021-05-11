@@ -84,5 +84,6 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          base-path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
         
       - run: echo "🍏 This job's status is ${{ job.status }}."
