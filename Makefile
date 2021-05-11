@@ -174,7 +174,8 @@ test-only:
 coveralls:
 	ls ./node_modules/coveralls/bin/coveralls.js 2>/dev/null || \
 		npm i coveralls
-	cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+	# Coveralls github plugin is being used instead
+	# cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 
 .PHONY: fast-bench
 fast-bench:
