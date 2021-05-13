@@ -127,6 +127,7 @@ type Gateway struct {
 	tracerCloser          io.Closer
 
 	requestUUIDHeaderKey string
+	isUnhealthy          bool
 }
 
 // DefaultDependencies are the common dependencies for all modules
@@ -378,6 +379,14 @@ func (gateway *Gateway) handleHealthRequest(
 	req *ServerHTTPRequest,
 	res *ServerHTTPResponse,
 ) {
+	if gateway.isUnhealthy {
+		message := "Unhealthy, from " + gateway.ServiceName
+		bytes := []byte(
+			"{\"ok\":false,\"message\":\"" + message + "\"}\n",
+		)
+		res.WriteJSONBytes(503, nil, bytes)
+		return
+	}
 	message := "Healthy, from " + gateway.ServiceName
 	bytes := []byte(
 		"{\"ok\":true,\"message\":\"" + message + "\"}\n",
@@ -388,6 +397,9 @@ func (gateway *Gateway) handleHealthRequest(
 
 // Shutdown starts the graceful shutdown, blocks until it is complete
 func (gateway *Gateway) Shutdown() {
+	// stop accepting incoming requests as soon as shutdown signal is received.
+	gateway.isUnhealthy = true
+
 	var swg sync.WaitGroup
 	ctx, cancel := context.WithTimeout(context.Background(), gateway.ShutdownTimeout())
 	defer cancel()
