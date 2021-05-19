@@ -164,14 +164,12 @@ imports:
   subpackages:
   - internal/mapstructure
 - name: github.com/uber-go/tally
-  version: b7bc80a1e6e81f4b9239fb9048ae46e99430014e
+  version: 24c699f78afd17db5aac42f83c1c5cad70254294
   subpackages:
   - m3
   - m3/customtransports
   - m3/thrift
   - m3/thriftudp
-- name: github.com/twmb/murmur3
-  version: 610077ff6fd864908e4604f64b6c0fc000aa6232
 - name: github.com/uber/jaeger-client-go
   version: 41cd5f0d8e719abff4f35d21d93eeccf5ea96891
   subpackages:
