@@ -28,15 +28,14 @@ import (
 	"testing"
 	"time"
 
-	"go.uber.org/thriftrw/ptr"
-
-	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
 	metrics "github.com/uber-go/tally/m3"
 	customtransport "github.com/uber-go/tally/m3/customtransports"
-	m3 "github.com/uber-go/tally/m3/thrift"
+	m3 "github.com/uber-go/tally/m3/thrift/v1"
+	"github.com/uber-go/tally/thirdparty/github.com/apache/thrift/lib/go/thrift"
 	"github.com/uber/zanzibar/test/lib"
+	"go.uber.org/thriftrw/ptr"
 )
 
 var localListenAddr = &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)}
