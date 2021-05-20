@@ -23,10 +23,9 @@ package baztchannel
 import (
 	"context"
 	"net"
+	"strings"
 	"testing"
 	"time"
-
-	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -107,7 +106,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 
 	allLogs := gateway.AllLogs()
 	assert.Equal(t, 1, len(allLogs["Started Example-gateway"]))
-	assert.Equal(t, 2, len(allLogs["Created new active connection."]))
 	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
 	assert.Equal(t, 1, len(allLogs["Finished an incoming server TChannel request"]))
 
@@ -274,7 +272,6 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.False(t, success)
 
 	assert.Len(t, gateway.Logs("info", "Started Example-gateway"), 1)
-	assert.Len(t, gateway.Logs("info", "Created new active connection."), 2)
 
 	// logged from tchannel client runtime
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)

@@ -123,22 +123,22 @@ func TestCallMetrics(t *testing.T) {
 	}
 	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value := *metrics[key].MetricValue.Timer.I64Value
+	value := metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected latency > 1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected latency < 10 milli seconds")
 
 	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
 	)]
-	value = *inboundStatus.MetricValue.Count.I64Value
+	value = inboundStatus.Value.Count
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	httpClientTags := map[string]string{
@@ -171,21 +171,21 @@ func TestCallMetrics(t *testing.T) {
 
 	key = tally.KeyForPrefixedStringMap("client.request", httpClientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
+	assert.Equal(t, int64(1), metrics[key].Value.Count, "expected counter to be 1")
 
 	key = tally.KeyForPrefixedStringMap("client.status", cStatusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
+	assert.Equal(t, int64(1), metrics[key].Value.Count, "expected counter to be 1")
 
 	key = tally.KeyForPrefixedStringMap("client.latency", httpClientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value = *metrics[key].MetricValue.Timer.I64Value
+	value = metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected latency > 1000 nano second")
 	assert.True(t, value < 10*1000*1000, "expected latency < 10 milli second")
 
 	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	allLogs := gateway.AllLogs()
 
