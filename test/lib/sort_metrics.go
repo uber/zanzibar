@@ -22,11 +22,11 @@ package lib
 
 import (
 	"github.com/uber-go/tally"
-	m3 "github.com/uber-go/tally/m3/thrift/v1"
+	m3 "github.com/uber-go/tally/m3/thrift/v2"
 )
 
 // SortMetricsByNameAndTags ...
-type SortMetricsByNameAndTags []*m3.Metric
+type SortMetricsByNameAndTags []m3.Metric
 
 // Len ...
 func (a SortMetricsByNameAndTags) Len() int {
@@ -40,19 +40,19 @@ func (a SortMetricsByNameAndTags) Swap(i, j int) {
 
 // Less ...
 func (a SortMetricsByNameAndTags) Less(i, j int) bool {
-	if a[i].GetName() == a[j].GetName() {
+	if a[i].Name == a[j].Name {
 		ti := tally.KeyForStringMap(tagsStringMap(a[i]))
 		tj := tally.KeyForStringMap(tagsStringMap(a[j]))
 		return ti < tj
 
 	}
-	return a[i].GetName() < a[j].GetName()
+	return a[i].Name < a[j].Name
 }
 
-func tagsStringMap(m *m3.Metric) map[string]string {
+func tagsStringMap(m m3.Metric) map[string]string {
 	out := make(map[string]string, len(m.Tags))
-	for tag := range m.Tags {
-		out[tag.GetTagName()+tag.GetTagValue()] = ""
+	for _, tag := range m.Tags {
+		out[tag.Name+":"+tag.Value] = ""
 	}
 	return out
 }
