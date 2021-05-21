@@ -28,14 +28,12 @@ import (
 	"testing"
 	"time"
 
-	"go.uber.org/thriftrw/ptr"
-
-	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
 	metrics "github.com/uber-go/tally/m3"
 	customtransport "github.com/uber-go/tally/m3/customtransports"
-	m3 "github.com/uber-go/tally/m3/thrift"
+	m3 "github.com/uber-go/tally/m3/thrift/v2"
+	"github.com/uber-go/tally/thirdparty/github.com/apache/thrift/lib/go/thrift"
 	"github.com/uber/zanzibar/test/lib"
 )
 
@@ -112,7 +110,7 @@ func NewFakeM3Service(
 	countMetrics bool,
 ) *FakeM3Service {
 	return &FakeM3Service{
-		metrics:      make(map[string]*m3.Metric),
+		metrics:      make(map[string]m3.Metric),
 		wg:           wg,
 		countBatches: countBatches,
 		countMetrics: countMetrics,
@@ -124,22 +122,22 @@ type FakeM3Service struct {
 	MaxMetrics       int
 	seenMetricsCount int
 	lock             sync.RWMutex
-	batches          []*m3.MetricBatch
-	metrics          map[string]*m3.Metric
+	batches          []m3.MetricBatch
+	metrics          map[string]m3.Metric
 	wg               *lib.WaitAtLeast
 	countBatches     bool
 	countMetrics     bool
 }
 
 // GetBatches gets the batches
-func (m *FakeM3Service) GetBatches() []*m3.MetricBatch {
+func (m *FakeM3Service) GetBatches() []m3.MetricBatch {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	return m.batches
 }
 
 // GetMetrics gets the individual metrics
-func (m *FakeM3Service) GetMetrics() map[string]*m3.Metric {
+func (m *FakeM3Service) GetMetrics() map[string]m3.Metric {
 	// sleep to avoid race conditions with m3.Client
 	// Basically m3.Client can still be emitting and we might not
 	// yet have all metrics in `m.metrics`
@@ -148,7 +146,7 @@ func (m *FakeM3Service) GetMetrics() map[string]*m3.Metric {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
-	cloneMap := map[string]*m3.Metric{}
+	cloneMap := map[string]m3.Metric{}
 	for key, metric := range m.metrics {
 		cloneMap[key] = metric
 	}
@@ -156,8 +154,8 @@ func (m *FakeM3Service) GetMetrics() map[string]*m3.Metric {
 	return cloneMap
 }
 
-// EmitMetricBatch is called by thrift message processor
-func (m *FakeM3Service) EmitMetricBatch(batch *m3.MetricBatch) (err error) {
+// EmitMetricBatchV2 is called by thrift message processor
+func (m *FakeM3Service) EmitMetricBatchV2(batch m3.MetricBatch) (err error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -191,25 +189,22 @@ func (m *FakeM3Service) EmitMetricBatch(batch *m3.MetricBatch) (err error) {
 	return thrift.NewTTransportException(thrift.END_OF_FILE, "complete")
 }
 
-func (m *FakeM3Service) storeMetric(metric *m3.Metric) bool {
-	mTags := metric.GetTags()
-	tags := make(map[string]string, len(mTags))
-	for tag := range mTags {
-		tags[tag.GetTagName()] = tag.GetTagValue()
+func (m *FakeM3Service) storeMetric(metric m3.Metric) bool {
+	var (
+		mTags = metric.GetTags()
+		tags  = make(map[string]string, len(mTags))
+	)
+	for _, tag := range mTags {
+		tags[tag.Name] = tag.Value
 	}
 
-	key := tally.KeyForPrefixedStringMap(metric.GetName(), tags)
+	var (
+		key     = tally.KeyForPrefixedStringMap(metric.Name, tags)
+		_, seen = m.metrics[key]
+	)
 
-	i64Value := metric.GetMetricValue().GetCount().I64Value
-	seen := m.metrics[key] != nil
-
-	if m.metrics[key] != nil && i64Value != nil {
-		newValue := *m.metrics[key].MetricValue.Count.I64Value +
-			*metric.MetricValue.Count.I64Value
-		m.metrics[key].MetricValue.Count.I64Value = ptr.Int64(newValue)
-	} else {
-		m.metrics[key] = metric
-	}
+	metric.Value.Count += m.metrics[key].Value.Count
+	m.metrics[key] = metric
 
 	return seen
 }

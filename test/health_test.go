@@ -169,24 +169,24 @@ func TestHealthMetrics(t *testing.T) {
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)]
-	value := *latencyMetric.MetricValue.Timer.I64Value
+	value := latencyMetric.Value.Timer
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected timer to be <10 milli seconds")
 
 	latencyHistMetric := metrics[tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)]
-	value = *latencyHistMetric.MetricValue.Count.I64Value
+	value = latencyHistMetric.Value.Count
 	assert.Equal(t, int64(1), value)
 
 	recvdMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.request", tags,
 	)]
-	value = *recvdMetric.MetricValue.Count.I64Value
+	value = recvdMetric.Value.Count
 	assert.Equal(t, int64(1), value)
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
 	)]
-	value = *statusMetric.MetricValue.Count.I64Value
+	value = statusMetric.Value.Count
 	assert.Equal(t, int64(1), value)
 }
 

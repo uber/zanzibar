@@ -203,7 +203,6 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	assert.Equal(t, `{"error":"Unexpected server error"}`, string(bytes))
 
 	assert.Len(t, gateway.Logs("info", "Started Example-gateway"), 1)
-	assert.Len(t, gateway.Logs("info", "Created new active connection."), 1)
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)
 	assert.Len(t, gateway.Logs("warn", "Client failure: TChannel client call returned error"), 1)
 	assert.Len(t, gateway.Logs("warn", "Finished an incoming server HTTP request with 500 status code"), 1)
