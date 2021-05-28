@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -115,30 +115,30 @@ func TestCallMetrics(t *testing.T) {
 		statusTags[k] = v
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range statusTags {
 		histogramTags[k] = v
 	}
 	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value := *metrics[key].MetricValue.Timer.I64Value
+	value := metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected latency > 1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected latency < 10 milli seconds")
 
 	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
 	)]
-	value = *inboundStatus.MetricValue.Count.I64Value
+	value = inboundStatus.Value.Count
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	httpClientTags := map[string]string{
@@ -162,8 +162,8 @@ func TestCallMetrics(t *testing.T) {
 		cStatusTags[k] = v
 	}
 	cHistogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range httpClientTags {
 		cHistogramTags[k] = v
@@ -171,21 +171,21 @@ func TestCallMetrics(t *testing.T) {
 
 	key = tally.KeyForPrefixedStringMap("client.request", httpClientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
+	assert.Equal(t, int64(1), metrics[key].Value.Count, "expected counter to be 1")
 
 	key = tally.KeyForPrefixedStringMap("client.status", cStatusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
+	assert.Equal(t, int64(1), metrics[key].Value.Count, "expected counter to be 1")
 
 	key = tally.KeyForPrefixedStringMap("client.latency", httpClientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value = *metrics[key].MetricValue.Timer.I64Value
+	value = metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected latency > 1000 nano second")
 	assert.True(t, value < 10*1000*1000, "expected latency < 10 milli second")
 
 	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	allLogs := gateway.AllLogs()
 
@@ -210,13 +210,13 @@ func TestCallMetrics(t *testing.T) {
 		delete(logMsg, dynamicValue)
 	}
 	expectedValues := map[string]interface{}{
-		"env":                            "test",
-		"level":                          "debug",
-		"msg":                            "Finished an outgoing client HTTP request",
-		"statusCode":                     float64(200),
-		"clientID":                       "bar",
-		"clientMethod":                   "Normal",
-		"clientThriftMethod":             "Bar::normal",
+		"env":        "test",
+		"level":      "debug",
+		"msg":        "Finished an outgoing client HTTP request",
+		"statusCode": float64(200),
+		//"clientID":                       "bar",
+		//"clientMethod":                   "Normal",
+		//"clientThriftMethod":             "Bar::normal",
 		"clientHTTPMethod":               "POST",
 		"Client-Req-Header-X-Client-Id":  "bar",
 		"Client-Req-Header-Content-Type": "application/json",

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,8 +30,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -140,25 +140,25 @@ func TestCallMetrics(t *testing.T) {
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
-		assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+		assert.Equal(t, int64(1), metrics[key].Value.Count)
 	}
 
 	key := tally.KeyForPrefixedStringMap("endpoint.latency", endpointTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value := *metrics[key].MetricValue.Timer.I64Value
+	value := metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
 
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO: Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO: Remove the ugly hardcoding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range endpointTags {
 		histogramTags[k] = v
 	}
 	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	tchannelOutboundNames := []string{
 		"outbound.calls.per-attempt.latency",
@@ -183,7 +183,7 @@ func TestCallMetrics(t *testing.T) {
 		"outbound.calls.per-attempt.latency",
 		tchannelOutboundTags,
 	)]
-	value = *outboundLatency.MetricValue.Timer.I64Value
+	value = outboundLatency.Value.Timer
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected timer to be 10 milli second")
 
@@ -211,23 +211,23 @@ func TestCallMetrics(t *testing.T) {
 	for _, name := range clientNames {
 		key := tally.KeyForPrefixedStringMap(name, clientTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
-		assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value, "expected counter to be 1")
+		assert.Equal(t, int64(1), metrics[key].Value.Count, "expected counter to be 1")
 	}
 
 	key = tally.KeyForPrefixedStringMap("client.latency", clientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value = *metrics[key].MetricValue.Timer.I64Value
+	value = metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
 
 	cHistogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms",
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms",
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range clientTags {
 		cHistogramTags[k] = v
 	}
 	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), *metrics[key].MetricValue.Count.I64Value)
+	assert.Equal(t, int64(1), metrics[key].Value.Count)
 }

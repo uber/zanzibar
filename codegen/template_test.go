@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -56,12 +56,19 @@ func TestGenerateBar(t *testing.T) {
 		RelMiddlewareConfigDir:        "./middlewares",
 		RelDefaultMiddlewareConfigDir: "./middlewares/default",
 		CopyrightHeader:               testCopyrightHeader,
-		GenCodePackage:                packageRoot + "/build/gen-code",
-		TraceKey:                      "trace-key",
+		GenCodePackage: map[string]string{
+			".thrift": packageRoot + "/build/gen-code",
+			".proto":  packageRoot + "/build/gen-code",
+		},
+		TraceKey: "trace-key",
 		ModuleSearchPaths: map[string][]string{
 			"client":     {"clients/*"},
 			"middleware": {"middlewares/*"},
 			"endpoint":   {"endpoints/*"},
+		},
+		ModuleIdlSubDir: map[string]string{
+			"endpoints": "endpoints-idl",
+			"default":   "clients-idl",
 		},
 	}
 

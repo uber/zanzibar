@@ -19,7 +19,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 )
@@ -106,7 +106,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
-		server.Logger,
+		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       server.ServiceName,

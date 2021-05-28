@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
@@ -65,7 +65,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	client := zanzibar.NewHTTPClientContext(
-		bgateway.ActualGateway.Logger,
+		bgateway.ActualGateway.ContextLogger,
 		bgateway.ActualGateway.ContextMetrics,
 		jsonwrapper.NewDefaultJSONWrapper(),
 		"clientID",
@@ -104,7 +104,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	client := zanzibar.NewHTTPClient(
-		bgateway.ActualGateway.Logger,
+		bgateway.ActualGateway.ContextLogger,
 		bgateway.ActualGateway.RootScope,
 		jsonwrapper.NewDefaultJSONWrapper(),
 		"clientID",
@@ -212,8 +212,8 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	assert.Equal(t, 1, len(lines))
 
 	logLine := lines[0]
-	assert.Equal(t, "bar", logLine["clientID"])
-	assert.Equal(t, "EchoI8", logLine["clientMethod"])
+	//assert.Equal(t, "bar", logLine["clientID"])
+	//assert.Equal(t, "EchoI8", logLine["clientMethod"])
 	assert.Equal(t, "x-uuid", logLine["headerName"])
 }
 
@@ -284,9 +284,6 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"zone":                             "unknown",
 		"service":                          "example-gateway",
 		"statusCode":                       float64(200),
-		"clientMethod":                     "Normal",
-		"clientID":                         "bar",
-		"clientThriftMethod":               "Bar::normal",
 		"clientHTTPMethod":                 "POST",
 		"Client-Req-Header-X-Client-Id":    "bar",
 		"Client-Req-Header-Content-Type":   "application/json",

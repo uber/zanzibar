@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -149,8 +149,8 @@ func TestHealthMetrics(t *testing.T) {
 		statusTags[k] = v
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms", // TODO(argouber): There must be a better way than this hard-coding
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): There must be a better way than this hard-coding
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range statusTags {
 		histogramTags[k] = v
@@ -169,24 +169,24 @@ func TestHealthMetrics(t *testing.T) {
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)]
-	value := *latencyMetric.MetricValue.Timer.I64Value
+	value := latencyMetric.Value.Timer
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 10*1000*1000, "expected timer to be <10 milli seconds")
 
 	latencyHistMetric := metrics[tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)]
-	value = *latencyHistMetric.MetricValue.Count.I64Value
+	value = latencyHistMetric.Value.Count
 	assert.Equal(t, int64(1), value)
 
 	recvdMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.request", tags,
 	)]
-	value = *recvdMetric.MetricValue.Count.I64Value
+	value = recvdMetric.Value.Count
 	assert.Equal(t, int64(1), value)
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
 	)]
-	value = *statusMetric.MetricValue.Count.I64Value
+	value = statusMetric.Value.Count
 	assert.Equal(t, int64(1), value)
 }
 
@@ -239,8 +239,8 @@ func TestRuntimeMetrics(t *testing.T) {
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "-infinity-10ms",
-		m3.DefaultHistogramBucketIDName: "0000",
+		m3.DefaultHistogramBucketName:   "0-10ms",
+		m3.DefaultHistogramBucketIDName: "0001",
 	}
 	for k, v := range tags {
 		histogramTags[k] = v

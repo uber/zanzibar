@@ -6,3 +6,4 @@ config:
 dependencies:
   client:
   - echo
+  - mirror

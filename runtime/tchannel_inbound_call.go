@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ type tchannelInboundCall struct {
 	resHeaders map[string]string
 
 	// Logger logs entries with default fields that contains request meta info
-	logger Logger
+	contextLogger ContextLogger
 	// Scope emit metrics with default tags that contains request meta info
 	scope tally.Scope
 }
@@ -73,10 +73,10 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 
 	fields := c.logFields(ctx)
 	if err == nil {
-		c.logger.Debug("Finished an incoming server TChannel request", fields...)
+		c.contextLogger.Debug(ctx, "Finished an incoming server TChannel request", fields...)
 	} else {
 		fields = append(fields, zap.Error(err))
-		c.logger.Warn("Failed to serve incoming TChannel request", fields...)
+		c.contextLogger.Warn(ctx, "Failed to serve incoming TChannel request", fields...)
 	}
 }
 
@@ -159,7 +159,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 	}
 	wireValue, err = protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
-		c.logger.Warn("Could not decode arg3 for inbound request", zap.Error(err))
+		c.contextLogger.Warn(ctx, "Could not decode arg3 for inbound request", zap.Error(err))
 		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -195,15 +195,15 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
 	}
 	if err != nil {
-		c.logger.Warn("Unexpected tchannel system error", zap.Error(err))
+		c.contextLogger.Warn(ctx, "Unexpected tchannel system error", zap.Error(err))
 		if er := c.call.Response().SendSystemError(errors.New("Server Error")); er != nil {
-			c.logger.Warn("Error sending server error response", zap.Error(er))
+			c.contextLogger.Warn(ctx, "Error sending server error response", zap.Error(er))
 		}
 		return
 	}
 	if !c.success {
 		if err = c.call.Response().SetApplicationError(); err != nil {
-			c.logger.Warn("Could not set application error for inbound response", zap.Error(err))
+			c.contextLogger.Warn(ctx, "Could not set application error for inbound response", zap.Error(err))
 			return
 		}
 	}
@@ -247,7 +247,7 @@ func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) 
 	structWireValue, err := resp.ToWire()
 	if err != nil {
 		if er := c.call.Response().SendSystemError(errors.New("Server Error")); er != nil {
-			c.logger.Warn("Error sending server error response", zap.Error(er))
+			c.contextLogger.Warn(ctx, "Error sending server error response", zap.Error(er))
 		}
 		return errors.Wrapf(err, "Could not serialize arg3 for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,

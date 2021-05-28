@@ -40,7 +40,7 @@ import (
 	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
-	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
+	clientsIDlClientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
 )
 
 // Client defines corge client interface.
@@ -48,7 +48,7 @@ type Client interface {
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsCorgeCorge.Corge_EchoString_Args,
+		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
 	) (string, map[string]string, error)
 }
 
@@ -113,11 +113,11 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -171,7 +171,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") {
@@ -222,12 +222,12 @@ type corgeClient struct {
 func (c *corgeClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsCorgeCorge.Corge_EchoString_Args,
+	args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
 ) (string, map[string]string, error) {
-	var result clientsCorgeCorge.Corge_EchoString_Result
+	var result clientsIDlClientsCorgeCorge.Corge_EchoString_Result
 	var resp string
 
-	logger := c.client.Loggers["Corge::echoString"]
+	logger := c.client.ContextLogger
 
 	var success bool
 	respHeaders := make(map[string]string)
@@ -257,18 +257,21 @@ func (c *corgeClient) EchoString(
 
 	if err == nil && !success {
 		switch {
+		case result.Success != nil:
+			logger.Error(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
+			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
 		}
 	}
 	if err != nil {
-		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
+		logger.Warn(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, respHeaders, err
 	}
 
-	resp, err = clientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
+	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
+		logger.Warn(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }

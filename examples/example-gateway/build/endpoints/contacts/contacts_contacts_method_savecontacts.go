@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	endpointsIDlEndpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
@@ -102,13 +102,13 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsContactsContacts.Contacts_SaveContacts_Args
+	var requestBody endpointsIDlEndpointsContactsContacts.Contacts_SaveContacts_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
 
 	if requestBody.SaveContactsRequest == nil {
-		requestBody.SaveContactsRequest = &endpointsContactsContacts.SaveContactsRequest{}
+		requestBody.SaveContactsRequest = &endpointsIDlEndpointsContactsContacts.SaveContactsRequest{}
 	}
 	requestBody.SaveContactsRequest.UserUUID = req.Params.Get("userUUID")
 
@@ -158,11 +158,11 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 
 		switch err.(type) {
 
-		case *endpointsContactsContacts.BadRequest:
+		case *endpointsIDlEndpointsContactsContacts.BadRequest:
 			res.WriteJSONBytes(400, cliRespHeaders, nil)
 			return
 
-		case *endpointsContactsContacts.NotFound:
+		case *endpointsIDlEndpointsContactsContacts.NotFound:
 			res.WriteJSONBytes(404, cliRespHeaders, nil)
 			return
 

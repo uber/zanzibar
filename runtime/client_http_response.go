@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -72,11 +72,11 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 	cerr := res.rawResponse.Body.Close()
 	if cerr != nil {
 		/* coverage ignore next line */
-		res.req.Logger.Error("Could not close response body", zap.Error(cerr))
+		res.req.ContextLogger.Error(res.req.ctx, "Could not close response body", zap.Error(cerr))
 	}
 
 	if err != nil {
-		res.req.Logger.Error("Could not read response body", zap.Error(err))
+		res.req.ContextLogger.Error(res.req.ctx, "Could not read response body", zap.Error(err))
 		res.finish()
 		return nil, errors.Wrapf(
 			err, "Could not read %s.%s response body",
@@ -108,7 +108,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) error {
 	err := res.jsonWrapper.Unmarshal(rawBody, v)
 	if err != nil {
-		res.req.Logger.Warn("Could not parse response json", zap.Error(err))
+		res.req.ContextLogger.Warn(res.req.ctx, "Could not parse response json", zap.Error(err))
 		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not parse %s.%s response json",
@@ -139,7 +139,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 
 	err = fmt.Errorf("all json serialization errors: %s", merr.Error())
 
-	res.req.Logger.Warn("Could not parse response json into any of provided interfaces", zap.Error(err))
+	res.req.ContextLogger.Warn(res.req.ctx, "Could not parse response json into any of provided interfaces", zap.Error(err))
 	return nil, errors.Wrapf(
 		err, "Could not parse %s.%s response json into any of provided interfaces",
 		res.req.ClientID, res.req.MethodName,
@@ -154,7 +154,7 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 		}
 	}
 
-	res.req.Logger.Warn("Unknown response status code",
+	res.req.ContextLogger.Warn(res.req.ctx, "Unknown response status code",
 		zap.Int("UnknownStatusCode", res.rawResponse.StatusCode),
 	)
 }
@@ -163,13 +163,13 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 func (res *ClientHTTPResponse) finish() {
 	if !res.req.started {
 		/* coverage ignore next line */
-		res.req.Logger.Error("Forgot to start client request")
+		res.req.ContextLogger.Error(res.req.ctx, "Forgot to start client request")
 		/* coverage ignore next line */
 		return
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.req.Logger.Error("Finished a client response multiple times")
+		res.req.ContextLogger.Error(res.req.ctx, "Finished a client response multiple times")
 		/* coverage ignore next line */
 		return
 	}
@@ -184,7 +184,7 @@ func (res *ClientHTTPResponse) finish() {
 	res.req.Metrics.RecordHistogramDuration(res.req.ctx, clientLatencyHist, delta)
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
-		res.req.Logger.Error(
+		res.req.ContextLogger.Error(res.req.ctx,
 			"Could not emit statusCode metric",
 			zap.Int("UnknownStatusCode", res.StatusCode),
 		)

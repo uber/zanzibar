@@ -128,11 +128,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -186,7 +186,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -250,7 +250,7 @@ type {{$clientName}} struct {
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
 		{{end}}
-		logger := c.client.Loggers["{{$serviceMethod}}"]
+		logger := c.client.ContextLogger
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
@@ -288,12 +288,17 @@ type {{$clientName}} struct {
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
 				{{end -}}
+				{{if ne .ResponseType "" -}}
+				case result.Success != nil:
+					logger.Error(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					success = true
+				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}
 		}
 		if err != nil {
-			logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
+			logger.Warn(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
@@ -306,7 +311,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
+				logger.Warn(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return resp, respHeaders, err
 		{{end -}}

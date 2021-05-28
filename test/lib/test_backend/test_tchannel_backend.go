@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -161,6 +161,8 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		zap.String("test-backend", serviceName),
 	)
 
+	contextLogger := zanzibar.NewContextLogger(testLogger)
+
 	tchannelOpts := &tchannel.ChannelOptions{
 		Logger: zanzibar.NewTChannelLogger(testLogger),
 	}
@@ -188,6 +190,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		RootScope:        tally.NoopScope,
 		ContextExtractor: contextExtractors,
 		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
+		ContextLogger:    contextLogger,
 	}
 
 	backend.Channel = channel

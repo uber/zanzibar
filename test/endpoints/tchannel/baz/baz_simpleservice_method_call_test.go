@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,17 +23,16 @@ package baztchannel
 import (
 	"context"
 	"net"
+	"strings"
 	"testing"
 	"time"
-
-	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -107,7 +106,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 
 	allLogs := gateway.AllLogs()
 	assert.Equal(t, 1, len(allLogs["Started Example-gateway"]))
-	assert.Equal(t, 2, len(allLogs["Created new active connection."]))
 	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
 	assert.Equal(t, 1, len(allLogs["Finished an incoming server TChannel request"]))
 
@@ -184,10 +182,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"Regionname":           "sf",
 
 		// client specific logs
-		"clientID":                          "baz",
-		"clientService":                     "bazService",
-		"clientThriftMethod":                "SimpleService::call",
-		"clientMethod":                      "Call",
+		//"clientID":                          "baz",
+		//"clientService":                     "bazService",
+		//"clientThriftMethod":                "SimpleService::call",
+		//"clientMethod":                      "Call",
 		"Client-Req-Header-Device":          "ios",
 		"Client-Req-Header-x-uuid":          "uuid",
 		"Client-Req-Header-Regionname":      "sf",
@@ -274,7 +272,6 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.False(t, success)
 
 	assert.Len(t, gateway.Logs("info", "Started Example-gateway"), 1)
-	assert.Len(t, gateway.Logs("info", "Created new active connection."), 2)
 
 	// logged from tchannel client runtime
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)

@@ -161,12 +161,24 @@ func (s *{{$methodMockType}}) {{$scenarioMethod}}() Call {
 		{{$argName}} = gomock.Any()
 	}
 	{{- end}}
+	{{- if $method.Variadic}}
+	var {{$method.Variadic}} []interface{}
+	if f.{{title $method.Variadic}} != nil {
+		for _, v := range f.{{title $method.Variadic}} {
+			{{$method.Variadic}} = append({{$method.Variadic}}, v)
+		}
+	} else if f.{{title $method.Variadic}}Any > 0 {
+		for i := 0; i < f.{{title $method.Variadic}}Any; i++ {
+			{{$method.Variadic}} = append({{$method.Variadic}}, gomock.Any())
+		}
+	}
+	{{- end}}
 
 	{{range $retName, $retType := $method.Out}}
 	{{$retName}} := f.{{title $retName}}
 	{{- end}}
 
-	return Call{call: s.mockClient.EXPECT().{{$methodName}}({{$method.InString}}).Return({{$method.OutString}})}
+	return Call{call: s.mockClient.EXPECT().{{$methodName}}({{$method.InString}}{{if $method.Variadic}}, {{$method.Variadic}}...{{end}}).Return({{$method.OutString}})}
 }
 {{- end -}}
 {{- end -}}
@@ -182,7 +194,7 @@ func augmented_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 3157, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 3627, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1149,10 +1161,20 @@ type {{$methodName}}Fixture struct {
 	{{title $argName}} {{$argType}}
 	{{- end}}
 
+	{{- if $method.Variadic}}
+	{{title $method.Variadic}} []{{$method.VariadicType}}
+	{{- end}}
+
 	// Arg{n}Any indicates the nth argument could be gomock.Any
 	{{- range $argName, $argType := $method.In}}
 	{{title $argName}}Any bool
 	{{- end}}
+
+	{{- if $method.Variadic}}
+	// {{title $method.Variadic}}Any indicates the variadic argument is a number of gomock.Any
+	{{title $method.Variadic}}Any int
+	{{- end}}
+
 
 	{{range $retName, $retType := $method.Out}}
 	{{title $retName}} {{$retType}}
@@ -1171,13 +1193,14 @@ func fixture_typesTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "fixture_types.tmpl", size: 1379, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "fixture_types.tmpl", size: 1640, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _grpc_clientTmpl = []byte(`{{- /* template to render gateway gRPC client code */ -}}
 {{- $instance := .Instance }}
+{{- $services := .Services }}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
@@ -1202,21 +1225,26 @@ import (
 type Client interface {
 {{range $i, $svc := .ProtoServices -}}
 	{{range $j, $method := $svc.RPC}}
-		{{title $method.Name}} (
+	{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+	{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+	{{- if $methodName -}}
+		{{$methodName}} (
 		ctx context.Context,
 		request *gen.{{$method.Request.Name}},
 		opts ...yarpc.CallOption,
 		) (*gen.{{$method.Response.Name}}, error)
 	{{ end -}}
+	{{ end -}}
+{{ end -}}
 }
 
 // {{$clientName}} is the gRPC client for downstream service.
 type {{$clientName}} struct {
-	client gen.{{pascal $svc.Name}}YARPCClient
+	{{range $i, $s := $services -}}
+	{{camel $s.Name}}Client gen.{{pascal $s.Name}}YARPCClient
+	{{ end -}}
 	opts   *zanzibar.GRPCClientOpts
 }
-
-{{- end}}
 
 // NewClient returns a new gRPC client for service {{$clientID}}
 func {{$exportName}}(deps *module.Dependencies) Client {
@@ -1233,30 +1261,33 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	methodNames := map[string]string{
 		{{range $i, $svc := .ProtoServices -}}
 			{{range $j, $method := $svc.RPC -}}
-				"{{printf "%s::%s" $svc.Name $method.Name}}": "{{$method.Name}}",
+			{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+			{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+			{{- if $methodName -}}
+				"{{$serviceMethod}}": "{{$methodName}}",
+			{{ end -}}
 			{{- end -}}
 		{{- end}}
 	}
-	{{range $i, $svc := .ProtoServices -}}
 	return &{{$clientName}}{
-		client: gen.New{{pascal $svc.Name}}YARPCClient(oc),
+		{{range $i, $s := $services -}}
+		{{camel $s.Name}}Client: gen.New{{pascal $s.Name}}YARPCClient(oc),
+		{{ end -}}
 		opts: zanzibar.NewGRPCClientOpts(
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		methodNames,
 		"{{$clientID}}",
-		"{{$svc.Name}}",
 		routingKey,
 		requestUUIDHeaderKey,
-		configureCicruitBreaker(deps, timeoutInMS),
+		!configureCircuitBreaker(deps, timeoutInMS),
 		timeoutInMS,
 		),
 	}
-	{{- end}}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -1301,9 +1332,11 @@ func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 
 {{range $i, $svc := .ProtoServices -}}
 {{range $j, $method := $svc.RPC -}}
-{{if $method.Name -}}
-// {{$method.Name}} is a client RPC call for method {{printf "%s::%s" $svc.Name $method.Name}}.
-func (e *{{$clientName}}) {{$method.Name}}(
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{if $methodName -}}
+// {{$methodName}} is a client RPC call for method {{printf "%s::%s" $svc.Name $method.Name}}.
+func (e *{{$clientName}}) {{$methodName}}(
 	ctx context.Context,
 	request *gen.{{$method.Request.Name}},
 	opts ...yarpc.CallOption,
@@ -1325,7 +1358,7 @@ func (e *{{$clientName}}) {{$method.Name}}(
 	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
-	runFunc := e.client.{{$method.Name}}
+	runFunc := e.{{camel $svc.Name}}Client.{{$method.Name}}
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
@@ -1354,7 +1387,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6081, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6611, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1366,11 +1399,13 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"fmt"
+	"net/textproto"
 	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
@@ -1413,12 +1448,14 @@ type {{$clientName}} struct {
 	jsonWrapper   jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey string
+	requestProcedureHeaderKey string
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
 	callerHeader string
 	callerName   string
 	calleeName   string
+	altRoutingMap map[string]map[string]string
 	{{end -}}
 }
 
@@ -1431,6 +1468,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
 	callerName := deps.Default.Config.MustGetString("serviceName")
 	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+
+	var altServiceDetail = config.AlternateServiceDetail{}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &altServiceDetail)
+	}
+
 	{{else -}}
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
@@ -1451,13 +1494,17 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey"){
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
 	}
 
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1466,9 +1513,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeHeader: calleeHeader,
 		callerName: callerName,
 		calleeName: calleeName,
+		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -1482,10 +1530,26 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey: requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+{{if $sidecarRouter -}}
+func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+	// The goal is to support for each header key, multiple values that point to different services
+	routingMap := make(map[string]map[string]string)
+	for _, alt := range altServiceDetail.RoutingConfigs {
+		if headerValueToServiceMap, ok := routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)]; ok {
+			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
+		} else {
+			routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)] = map[string]string{alt.HeaderValue:alt.ServiceName}
+		}
+	}
+	return routingMap
+}
+{{end -}}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -1547,11 +1611,14 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end -}}
 ) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "{{$serviceMethod}}"
 	}
 
 	{{if .ResponseType -}}
@@ -1567,7 +1634,24 @@ func (c *{{$clientName}}) {{$methodName}}(
 
 	{{if $sidecarRouter -}}
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for routeHeaderKey, routeMap := range c.altRoutingMap {
+		if headerVal, ok := headers[routeHeaderKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
+					break
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
+	}
 	{{end}}
 
 	// Generate full URL.
@@ -1586,7 +1670,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if and (.RequestBoxed) (eq .BoxedRequestType "[]byte")}}
 		err := req.WriteBytes("{{.HTTPMethod}}", fullURL, headers, r.{{.BoxedRequestName}})
 	{{else}}
-		err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
+		err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, {{if .RequestBoxed -}}r.{{.BoxedRequestName}}{{- else -}}r{{- end -}})
 	{{end -}}
 	{{else}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
@@ -1817,7 +1901,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 14693, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16830, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1840,7 +1924,7 @@ import (
 	_ "go.uber.org/automaxprocs"
 
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	app "{{$instance.PackageInfo.PackageRoot}}"
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
@@ -1932,7 +2016,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1795, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1804, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1954,7 +2038,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -2028,7 +2112,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1348, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2385,7 +2469,7 @@ import (
 	"path/filepath"
 
 	"go.uber.org/zap"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -2439,7 +2523,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1445, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2465,7 +2549,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 )
@@ -2552,7 +2636,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
-		server.Logger,
+		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       server.ServiceName,
@@ -2655,7 +2739,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5394, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5410, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2669,7 +2753,7 @@ import (
 	"runtime"
 	"path/filepath"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .Spec.IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -2691,7 +2775,7 @@ func structsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "structs.tmpl", size: 436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "structs.tmpl", size: 445, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2826,11 +2910,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
-		deps.Default.Logger,
+		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -2884,7 +2968,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -2948,7 +3032,7 @@ type {{$clientName}} struct {
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
 		{{end}}
-		logger := c.client.Loggers["{{$serviceMethod}}"]
+		logger := c.client.ContextLogger
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
@@ -2986,12 +3070,17 @@ type {{$clientName}} struct {
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
 				{{end -}}
+				{{if ne .ResponseType "" -}}
+				case result.Success != nil:
+					logger.Error(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					success = true
+				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}
 		}
 		if err != nil {
-			logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
+			logger.Warn(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
@@ -3004,7 +3093,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
+				logger.Warn(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return resp, respHeaders, err
 		{{end -}}
@@ -3024,7 +3113,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11208, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11422, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3038,7 +3127,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -3143,7 +3232,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3014, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3023, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3402,7 +3491,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	deputyChannel.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
 		deputyChannel,
-		h.Deps.Default.Logger,
+		h.Deps.Default.ContextLogger,
 		h.Deps.Default.ContextMetrics,
 		h.Deps.Default.ContextExtractor,
 		&zanzibar.TChannelClientOption{
@@ -3433,7 +3522,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8784, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

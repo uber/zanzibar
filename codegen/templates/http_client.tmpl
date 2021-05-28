@@ -5,11 +5,13 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"fmt"
+	"net/textproto"
 	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
@@ -52,12 +54,14 @@ type {{$clientName}} struct {
 	jsonWrapper   jsonwrapper.JSONWrapper
 	circuitBreakerDisabled bool
 	requestUUIDHeaderKey string
+	requestProcedureHeaderKey string
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
 	callerHeader string
 	callerName   string
 	calleeName   string
+	altRoutingMap map[string]map[string]string
 	{{end -}}
 }
 
@@ -70,6 +74,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
 	callerName := deps.Default.Config.MustGetString("serviceName")
 	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+
+	var altServiceDetail = config.AlternateServiceDetail{}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &altServiceDetail)
+	}
+
 	{{else -}}
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
@@ -90,13 +100,17 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey"){
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
 	}
 
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -105,9 +119,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		calleeHeader: calleeHeader,
 		callerName: callerName,
 		calleeName: calleeName,
+		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
 			map[string]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -121,10 +136,26 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		requestUUIDHeaderKey: requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+{{if $sidecarRouter -}}
+func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+	// The goal is to support for each header key, multiple values that point to different services
+	routingMap := make(map[string]map[string]string)
+	for _, alt := range altServiceDetail.RoutingConfigs {
+		if headerValueToServiceMap, ok := routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)]; ok {
+			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
+		} else {
+			routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)] = map[string]string{alt.HeaderValue:alt.ServiceName}
+		}
+	}
+	return routingMap
+}
+{{end -}}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -186,11 +217,14 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end -}}
 ) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "{{$serviceMethod}}"
 	}
 
 	{{if .ResponseType -}}
@@ -206,7 +240,24 @@ func (c *{{$clientName}}) {{$methodName}}(
 
 	{{if $sidecarRouter -}}
 	headers[c.callerHeader] = c.callerName
-	headers[c.calleeHeader] = c.calleeName
+
+	// Set the service name if dynamic routing header is present
+	for routeHeaderKey, routeMap := range c.altRoutingMap {
+		if headerVal, ok := headers[routeHeaderKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
+					break
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
+	}
 	{{end}}
 
 	// Generate full URL.
@@ -225,7 +276,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if and (.RequestBoxed) (eq .BoxedRequestType "[]byte")}}
 		err := req.WriteBytes("{{.HTTPMethod}}", fullURL, headers, r.{{.BoxedRequestName}})
 	{{else}}
-		err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
+		err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, {{if .RequestBoxed -}}r.{{.BoxedRequestName}}{{- else -}}r{{- end -}})
 	{{end -}}
 	{{else}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)

@@ -38,8 +38,8 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
@@ -78,12 +78,12 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	fakeCompare := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Compare_Args,
-	) (*clientsBazBase.BazResponse, map[string]string, error) {
+		args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
+	) (*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 
 		var resHeaders map[string]string
 
-		var res clientsBazBase.BazResponse
+		var res clientsIDlClientsBazBase.BazResponse
 
 		clientResponse := []byte(`{"message":"different"}`)
 		err := json.Unmarshal(clientResponse, &res)

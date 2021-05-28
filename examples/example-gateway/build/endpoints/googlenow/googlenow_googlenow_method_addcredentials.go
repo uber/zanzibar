@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/workflow"
-	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
+	endpointsIDlEndpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/googlenow/googlenow"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -104,7 +104,7 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	if !req.CheckHeaders([]string{"X-Token", "X-Uuid"}) {
 		return
 	}
-	var requestBody endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args
+	var requestBody endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}

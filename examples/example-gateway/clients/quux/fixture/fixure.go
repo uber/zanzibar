@@ -2,7 +2,7 @@ package fixture
 
 import (
 	mc "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
 )
 
 var message = &base.Message{Body: "hola"}

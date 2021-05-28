@@ -40,10 +40,20 @@ type {{$methodName}}Fixture struct {
 	{{title $argName}} {{$argType}}
 	{{- end}}
 
+	{{- if $method.Variadic}}
+	{{title $method.Variadic}} []{{$method.VariadicType}}
+	{{- end}}
+
 	// Arg{n}Any indicates the nth argument could be gomock.Any
 	{{- range $argName, $argType := $method.In}}
 	{{title $argName}}Any bool
 	{{- end}}
+
+	{{- if $method.Variadic}}
+	// {{title $method.Variadic}}Any indicates the variadic argument is a number of gomock.Any
+	{{title $method.Variadic}}Any int
+	{{- end}}
+
 
 	{{range $retName, $retType := $method.Out}}
 	{{title $retName}} {{$retType}}

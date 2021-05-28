@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@ type M3Collector struct {
 	totalDurationHistPrefix string
 	runDurationPrefix       string
 	runDurationHistPrefix   string
+	contextCanceled         string
+	contextDeadlineExceeded string
 }
 
 // M3CollectorClient provides configuration that the m3 client will need.
@@ -86,6 +88,8 @@ func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCo
 		totalDurationHistPrefix: "circuitbreaker.totalDurationHist",
 		runDurationPrefix:       "circuitbreaker.runDuration",
 		runDurationHistPrefix:   "circuitbreaker.runDurationHist",
+		contextCanceled:         "circuitbreaker.contextCanceled",
+		contextDeadlineExceeded: "circuitbreaker.contextDeadlineExceeded",
 	}
 }
 
@@ -119,6 +123,8 @@ func (g *M3Collector) Update(r metricCollector.MetricResult) {
 	g.updateHistogramMetric(g.totalDurationHistPrefix, r.TotalDuration)
 	g.updateTimerMetric(g.runDurationPrefix, r.RunDuration)
 	g.updateHistogramMetric(g.runDurationHistPrefix, r.RunDuration)
+	g.incrementCounterMetric(g.contextCanceled, r.ContextCanceled)
+	g.incrementCounterMetric(g.contextDeadlineExceeded, r.ContextDeadlineExceeded)
 }
 
 // Reset is a noop operation in this collector.

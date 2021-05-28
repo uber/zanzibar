@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,10 @@ const (
 	clientHTTPUnmarshalError = "client.http-unmarshal-error"
 	// clientTchannelReadError is the metric for tracking errors in reading tchannel response
 	clientTchannelUnmarshalError = "client.tchannel-unmarshal-error"
+
+	// shadow headers and environment
+	shadowEnvironment = "shadow"
+	environmentKey    = "env"
 )
 
 var knownMetrics = []string{
@@ -136,4 +140,9 @@ var knownStatusCodes = map[int]bool{
 	http.StatusLoopDetected:                  true, // 508
 	http.StatusNotExtended:                   true, // 510
 	http.StatusNetworkAuthenticationRequired: true, // 511
+}
+
+var noContentStatusCodes = map[int]bool{
+	http.StatusNoContent:   true, //204
+	http.StatusNotModified: true, //304
 }

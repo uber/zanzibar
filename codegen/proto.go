@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,22 @@ type ProtoModule struct {
 	PackageName string
 	FilePath    string
 	Imports     []string
-	Services    []*ProtoService
+	Services    Services
+}
+
+// Services is list of ProtoServices
+type Services []*ProtoService
+
+func (a Services) Len() int {
+	return len(a)
+}
+
+func (a Services) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a Services) Less(i, j int) bool {
+	return a[i].Name < a[j].Name
 }
 
 // ProtoService is an internal representation of Proto service and methods in that service.

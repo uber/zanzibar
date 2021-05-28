@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package mirror;
+
+message Request {
+    string message = 1;
+}
+
+message Response {
+    string message = 1;
+}
+
+service Mirror {
+    rpc Mirror(Request) returns (Response);
+}
+
+message InternalRequest {
+    string message = 1;
+}
+
+message InternalResponse {
+    string message = 1;
+}
+
+service MirrorInternal {
+    rpc Mirror(InternalRequest) returns (InternalResponse);
+}

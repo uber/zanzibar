@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,10 @@
 package util
 
 import (
+	"bytes"
 	"path/filepath"
 	"runtime"
+	"sync"
 )
 
 // DefaultMainFile returns the expected main.go file path for an example
@@ -50,6 +52,10 @@ func DefaultConfigFiles(serviceName string) []string {
 			"..", "..", "..", "examples", "example-gateway", "config",
 			"example-gateway", "test.yaml",
 		),
+		filepath.Join(
+			getDirName(),
+			"..", "..", "..", "examples", "example-gateway", "build.yaml",
+		),
 	}
 }
 
@@ -57,4 +63,26 @@ func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 
 	return filepath.Dir(file)
+}
+
+// Buffer is a goroutine safe bytes.Buffer
+type Buffer struct {
+	buffer bytes.Buffer
+	mutex  sync.Mutex
+}
+
+// Write appends the contents of p to the buffer, growing the buffer as needed. It returns
+// the number of bytes written.
+func (s *Buffer) Write(p []byte) (n int, err error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	return s.buffer.Write(p)
+}
+
+// String returns the contents of the unread portion of the buffer
+// as a string.  If the Buffer is a nil pointer, it returns "<nil>".
+func (s *Buffer) String() string {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	return s.buffer.String()
 }

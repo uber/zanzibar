@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/zap"
 	netContext "golang.org/x/net/context"
 
 	"github.com/uber/zanzibar/runtime/ruleengine"
@@ -77,8 +76,8 @@ type TChannelClientOption struct {
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
-	ClientID string
-	Loggers  map[string]*zap.Logger
+	ClientID      string
+	ContextLogger ContextLogger
 
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
@@ -101,14 +100,14 @@ type TChannelClient struct {
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
 func NewTChannelClient(
 	ch *tchannel.Channel,
-	logger *zap.Logger,
+	contextLogger ContextLogger,
 	scope tally.Scope,
 	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
 ) *TChannelClient {
 	return NewTChannelClientContext(
 		ch,
-		logger,
+		contextLogger,
 		NewContextMetrics(scope),
 		contextExtractor,
 		opt,
@@ -118,22 +117,11 @@ func NewTChannelClient(
 // NewTChannelClientContext returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
 func NewTChannelClientContext(
 	ch *tchannel.Channel,
-	logger *zap.Logger,
+	contextLogger ContextLogger,
 	metrics ContextMetrics,
 	contextExtractor ContextExtractor,
 	opt *TChannelClientOption,
 ) *TChannelClient {
-	numMethods := len(opt.MethodNames)
-	loggers := make(map[string]*zap.Logger, numMethods)
-
-	for serviceMethod, methodName := range opt.MethodNames {
-		loggers[serviceMethod] = logger.With(
-			zap.String(logFieldClientID, opt.ClientID),
-			zap.String(logFieldClientService, opt.ServiceName),
-			zap.String(logFieldClientMethod, methodName),
-			zap.String(logFieldClientThriftMethod, serviceMethod),
-		)
-	}
 
 	client := &TChannelClient{
 		ch:                   ch,
@@ -144,7 +132,7 @@ func NewTChannelClientContext(
 		timeout:              opt.Timeout,
 		timeoutPerAttempt:    opt.TimeoutPerAttempt,
 		routingKey:           opt.RoutingKey,
-		Loggers:              loggers,
+		ContextLogger:        contextLogger,
 		metrics:              metrics,
 		contextExtractor:     contextExtractor,
 		requestUUIDHeaderKey: opt.RequestUUIDHeaderKey,
@@ -175,7 +163,7 @@ func (c *TChannelClient) Call(
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
-		logger:        c.Loggers[serviceMethod],
+		contextLogger: c.ContextLogger,
 		metrics:       c.metrics,
 	}
 

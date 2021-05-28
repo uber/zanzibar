@@ -7,8 +7,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
 	mock "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/mock-service"
 )
 
@@ -25,7 +25,7 @@ func TestEcho(t *testing.T) {
 	ctx := context.Background()
 	var result bounce.Bounce_Bounce_Result
 
-	ms.MockClients().Echo.EXPECT().Echo(gomock.Any(), &echo.Request{Message: message}).
+	ms.MockClients().Echo.EXPECT().EchoEcho(gomock.Any(), &echo.Request{Message: message}).
 		Return(&echo.Response{Message: message}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(

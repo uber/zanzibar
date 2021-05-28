@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,7 @@ type ServerHTTPRequest struct {
 	Header       Header
 
 	// logger logs entries with default fields that contains request meta info
-	logger Logger
+	contextLogger ContextLogger
 	// scope emit metrics with default tags that contains request meta info
 	scope       tally.Scope
 	jsonWrapper jsonwrapper.JSONWrapper
@@ -88,6 +88,7 @@ func NewServerHTTPRequest(
 	}
 	if endpoint.contextExtractor != nil {
 		headers := map[string]string{}
+
 		for k, v := range r.Header {
 			// TODO: this 0th element logic is probably not correct
 			headers[k] = v[0]
@@ -99,27 +100,39 @@ func NewServerHTTPRequest(
 
 		logFields = append(logFields, endpoint.contextExtractor.ExtractLogFields(ctx)...)
 	}
+
+	// Overriding the environment for shadow requests
+	if endpoint.config != nil {
+		if endpoint.config.ContainsKey("service.shadow.env.override.enable") &&
+			endpoint.config.MustGetBoolean("service.shadow.env.override.enable") &&
+			endpoint.config.ContainsKey("shadowRequestHeader") &&
+			r.Header.Get(endpoint.config.MustGetString("shadowRequestHeader")) != "" {
+			scopeTags[environmentKey] = shadowEnvironment
+			logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
+		}
+	}
+
 	ctx = WithScopeTags(ctx, scopeTags)
 	ctx = WithLogFields(ctx, logFields...)
 
 	httpRequest := r.WithContext(ctx)
 
 	scope := endpoint.scope.Tagged(scopeTags)
-	logger := endpoint.logger.With(logFields...)
+	logger := endpoint.contextLogger
 
 	req := &ServerHTTPRequest{
-		httpRequest:  httpRequest,
-		queryValues:  nil,
-		tracer:       endpoint.tracer,
-		EndpointName: endpoint.EndpointName,
-		HandlerName:  endpoint.HandlerName,
-		URL:          httpRequest.URL,
-		Method:       httpRequest.Method,
-		Params:       params,
-		Header:       NewServerHTTPHeader(r.Header),
-		logger:       logger,
-		scope:        scope,
-		jsonWrapper:  endpoint.JSONWrapper,
+		httpRequest:   httpRequest,
+		queryValues:   nil,
+		tracer:        endpoint.tracer,
+		EndpointName:  endpoint.EndpointName,
+		HandlerName:   endpoint.HandlerName,
+		URL:           httpRequest.URL,
+		Method:        httpRequest.Method,
+		Params:        params,
+		Header:        NewServerHTTPHeader(r.Header),
+		contextLogger: logger,
+		scope:         scope,
+		jsonWrapper:   endpoint.JSONWrapper,
 	}
 
 	req.res = NewServerHTTPResponse(w, req)
@@ -141,7 +154,7 @@ func (req *ServerHTTPRequest) StartTime() time.Time {
 func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.logger.Error(
+		req.contextLogger.Error(req.Context(),
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
@@ -164,7 +177,7 @@ func (req *ServerHTTPRequest) start() {
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
 				/* coverage ignore next line */
-				req.logger.Warn("Error Extracting Trace Headers", zap.Error(err))
+				req.contextLogger.Warn(req.Context(), "Error Extracting Trace Headers", zap.Error(err))
 			}
 			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
 		} else {
@@ -179,7 +192,7 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		_, ok := req.Header.Get(headerName)
 		if !ok {
-			req.logger.Warn("Got request without mandatory header",
+			req.contextLogger.Warn(req.Context(), "Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
 
@@ -225,7 +238,7 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 
 	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
 	if err != nil {
-		req.logger.Warn("Got request with invalid query string", zap.Error(err))
+		req.contextLogger.Warn(req.Context(), "Got request with invalid query string", zap.Error(err))
 
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -516,148 +529,161 @@ func (req *ServerHTTPRequest) GetQueryValueList(key string) ([]string, bool) {
 
 // -- Query param as set --
 
+/**
+ * A set of bools does not make sense and is unimplemented
+ * Also, in every use-case for a gateway, a set implemented as a map is not very useful, instead one where
+ * it is a list with no duplicates is. Therefore the implementation picks that approach.
+ */
+
 // The "value" in the map representation of a set datastructure
 var _nullVal = struct{}{}
 
-// GetQueryBoolSet will return a query param as a set of boolean
-// @argo: Does this method even make sense?
-func (req *ServerHTTPRequest) GetQueryBoolSet(key string) (map[bool]struct{}, bool) {
+// GetQueryInt8Set will return a query params as set of int8 (implemented as a deduped slice)
+func (req *ServerHTTPRequest) GetQueryInt8Set(key string) ([]int8, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[bool]struct{}, len(values))
+	set := make(map[int8]struct{}, len(values))
 	for _, value := range values {
-		if value == "true" {
-			ret[true] = _nullVal
-		} else if value == "false" {
-			ret[false] = _nullVal
-		} else {
-			err := &strconv.NumError{
-				Func: "ParseBool",
-				Num:  value,
-				Err:  strconv.ErrSyntax,
-			}
-			req.LogAndSendQueryError(err, "bool", key, value)
-			return nil, false
-		}
-	}
-
-	return ret, true
-}
-
-// GetQueryInt8Set will return a query params as set of int8
-func (req *ServerHTTPRequest) GetQueryInt8Set(key string) (map[int8]struct{}, bool) {
-	success := req.parseQueryValues()
-	if !success {
-		return nil, false
-	}
-
-	values := req.queryValues[key]
-	ret := make(map[int8]struct{}, len(values))
-	for _, value := range values {
-		number, err := strconv.ParseInt(value, 10, 8)
+		number, err := strconv.ParseInt(value, 0, 8)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int8", key, value)
 			return nil, false
 		}
-		ret[int8(number)] = _nullVal
+		set[int8(number)] = _nullVal
+	}
+	ret := make([]int8, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryInt16Set will return a query params as set of int16
-func (req *ServerHTTPRequest) GetQueryInt16Set(key string) (map[int16]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryInt16Set(key string) ([]int16, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[int16]struct{}, len(values))
+	set := make(map[int16]struct{}, len(values))
 	for _, value := range values {
-		number, err := strconv.ParseInt(value, 10, 16)
+		number, err := strconv.ParseInt(value, 0, 16)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int16", key, value)
 			return nil, false
 		}
-		ret[int16(number)] = _nullVal
+		set[int16(number)] = _nullVal
+	}
+	ret := make([]int16, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryInt32Set will return a query params as set of int32
-func (req *ServerHTTPRequest) GetQueryInt32Set(key string) (map[int32]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryInt32Set(key string) ([]int32, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[int32]struct{}, len(values))
+	set := make(map[int32]struct{}, len(values))
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 32)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int32", key, value)
 			return nil, false
 		}
-		ret[int32(number)] = _nullVal
+		set[int32(number)] = _nullVal
+	}
+	ret := make([]int32, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryInt64Set will return a query params as set of int64
-func (req *ServerHTTPRequest) GetQueryInt64Set(key string) (map[int64]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryInt64Set(key string) ([]int64, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[int64]struct{}, len(values))
+	set := make(map[int64]struct{}, len(values))
 	for _, value := range values {
 		number, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			req.LogAndSendQueryError(err, "int64", key, value)
 			return nil, false
 		}
-		ret[number] = _nullVal
+		set[number] = _nullVal
+	}
+	ret := make([]int64, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryFloat64Set will return a query params as set of float64
-func (req *ServerHTTPRequest) GetQueryFloat64Set(key string) (map[float64]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryFloat64Set(key string) ([]float64, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
 	values := req.queryValues[key]
-	ret := make(map[float64]struct{}, len(values))
+	set := make(map[float64]struct{}, len(values))
 	for _, value := range values {
 		number, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			req.LogAndSendQueryError(err, "float64", key, value)
 			return nil, false
 		}
-		ret[number] = _nullVal
+		set[number] = _nullVal
+	}
+	ret := make([]float64, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
 
 // GetQueryValueSet will return all query parameters for key as a set
-func (req *ServerHTTPRequest) GetQueryValueSet(key string) (map[string]struct{}, bool) {
+func (req *ServerHTTPRequest) GetQueryValueSet(key string) ([]string, bool) {
 	success := req.parseQueryValues()
 	if !success {
 		return nil, false
 	}
 
-	ret := make(map[string]struct{}, len(req.queryValues[key]))
+	set := make(map[string]struct{}, len(req.queryValues[key]))
 	for _, v := range req.queryValues[key] {
-		ret[v] = _nullVal
+		set[v] = _nullVal
+	}
+	ret := make([]string, len(set))
+	i := 0
+	for item := range set {
+		ret[i] = item
+		i++
 	}
 	return ret, true
 }
@@ -687,7 +713,7 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 
 	values := req.queryValues[key]
 	if len(values) == 0 {
-		req.logger.Warn("Got request with missing query string value",
+		req.contextLogger.Warn(req.Context(), "Got request with missing query string value",
 			zap.String("expectedKey", key),
 		)
 		if !req.parseFailed {
@@ -740,7 +766,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.logger.Error("Could not read request body", zap.Error(err))
+		req.contextLogger.Error(req.Context(), "Could not read request body", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(500, "Could not read request body", err)
 			req.parseFailed = true
@@ -757,7 +783,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := req.jsonWrapper.Unmarshal(rawBody, body)
 	if err != nil {
-		req.logger.Warn("Could not parse json", zap.Error(err))
+		req.contextLogger.Warn(req.Context(), "Could not parse json", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
 			req.parseFailed = true
@@ -786,7 +812,7 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 
 // LogAndSendQueryError handles parse failure of query params by logging the issue and returning a 400 to the requestor
 func (req *ServerHTTPRequest) LogAndSendQueryError(err error, expected, key, value string) {
-	req.logger.Warn("Got request with invalid query string types",
+	req.contextLogger.Warn(req.Context(), "Got request with invalid query string types",
 		zap.String("expected", expected),
 		zap.String("actual", value),
 		zap.String("key", key),

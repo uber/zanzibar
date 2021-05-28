@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )

@@ -38,7 +38,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -103,10 +103,10 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithNestedQueryParams_Args
+	var requestBody endpointsIDlEndpointsBarBar.Bar_ArgWithNestedQueryParams_Args
 
 	if requestBody.Request == nil {
-		requestBody.Request = &endpointsBarBar.QueryParamsStruct{}
+		requestBody.Request = &endpointsIDlEndpointsBarBar.QueryParamsStruct{}
 	}
 	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
 	if xUUIDValueExists {
@@ -118,7 +118,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	}
 
 	if requestBody.Request == nil {
-		requestBody.Request = &endpointsBarBar.QueryParamsStruct{}
+		requestBody.Request = &endpointsIDlEndpointsBarBar.QueryParamsStruct{}
 	}
 	requestNameOk := req.CheckQueryValue("request.name")
 	if !requestNameOk {
@@ -157,7 +157,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	}
 	if _queryNeeded {
 		if requestBody.Opt == nil {
-			requestBody.Opt = &endpointsBarBar.QueryParamsOptsStruct{}
+			requestBody.Opt = &endpointsIDlEndpointsBarBar.QueryParamsOptsStruct{}
 		}
 		optNameOk := req.CheckQueryValue("opt.name")
 		if !optNameOk {

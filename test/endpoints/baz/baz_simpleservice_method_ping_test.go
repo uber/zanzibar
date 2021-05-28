@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
@@ -203,10 +203,9 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	assert.Equal(t, `{"error":"Unexpected server error"}`, string(bytes))
 
 	assert.Len(t, gateway.Logs("info", "Started Example-gateway"), 1)
-	assert.Len(t, gateway.Logs("info", "Created new active connection."), 1)
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)
 	assert.Len(t, gateway.Logs("warn", "Client failure: TChannel client call returned error"), 1)
-	assert.Len(t, gateway.Logs("warn", "Finished an incoming server HTTP request"), 1)
+	assert.Len(t, gateway.Logs("warn", "Finished an incoming server HTTP request with 500 status code"), 1)
 	assert.Len(t, gateway.Logs("warn", "Failed to send outgoing client TChannel request"), 1)
 	assert.Len(t, gateway.Logs("warn", "Client failure: could not make client request"), 1)
 

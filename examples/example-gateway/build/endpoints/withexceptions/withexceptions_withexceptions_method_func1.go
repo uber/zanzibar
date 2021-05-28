@@ -35,7 +35,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/workflow"
-	endpointsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/withexceptions/withexceptions"
+	endpointsIDlEndpointsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/withexceptions/withexceptions"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -123,13 +123,13 @@ func (h *WithExceptionsFunc1Handler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsWithexceptionsWithexceptions.EndpointExceptionType1:
+		case *endpointsIDlEndpointsWithexceptionsWithexceptions.EndpointExceptionType1:
 			res.WriteJSON(
 				401, cliRespHeaders, errValue,
 			)
 			return
 
-		case *endpointsWithexceptionsWithexceptions.EndpointExceptionType2:
+		case *endpointsIDlEndpointsWithexceptionsWithexceptions.EndpointExceptionType2:
 			res.WriteJSON(
 				401, cliRespHeaders, errValue,
 			)

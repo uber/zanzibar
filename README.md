@@ -237,7 +237,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
-	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -303,7 +303,7 @@ Note that these paths support `Glob` patterns.
 Zanzibar provides HTTP and TChannel runtime components for both clients and servers. Once all the configs are properly defined, Zanzibar is able to parse the config files and generate code and wire it up with the runime components to produce a full application. All generated code is placed in the `build` directory.
 
 #### Go Structs and (de)serializers
-Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanzibar Thrift file semantics](https://github.com/uber/zanzibar/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/idl/endpoints/bar/bar.thrift) as specified in [hello.yaml](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/bar/hello.yaml#L5). The data types in such thrift files must have their equivalents in Go.
+Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanzibar Thrift file semantics](https://github.com/uber/zanzibar/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/idl/endpoints-idl/endpoints/bar/bar.thrift) as specified in [hello.yaml](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/bar/hello.yaml#L5). The data types in such thrift files must have their equivalents in Go.
 
 - For tchannel clients/endpoints, network communication is Thrift over TChannel. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and thrift (de)serializers;
 - For http clients/endpoints, network communication is JSON over HTTP. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and then uses [easyjson](https://github.com/mailru/easyjson) to generate JSON (de)serializers.
@@ -425,7 +425,7 @@ package fixture
 
 import (
 	mc "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
-	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 var saveContactsFixtures = &mc.SaveContactsScenarios{
@@ -551,8 +551,8 @@ If you want to update a dependency:
 
 [doc-img]: https://godoc.org/github.com/uber/zanzibar?status.svg
 [doc]: https://godoc.org/github.com/uber/zanzibar
-[ci-img]: https://travis-ci.org/uber/zanzibar.svg?branch=master
-[ci]: https://travis-ci.org/uber/zanzibar
+[ci-img]: https://github.com/uber/zanzibar/actions/workflows/build.yml/badge.svg
+[ci]: https://github.com/uber/zanzibar/actions
 [cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
 [cov]: https://coveralls.io/github/uber/zanzibar?branch=master
 [go-report-img]: https://goreportcard.com/badge/github.com/uber/zanzibar

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ var fooThrift = filepath.Join(
 	os.Getenv("GOPATH"),
 	"/src/github.com/uber/zanzibar/",
 	"examples/example-gateway/idl/",
-	"clients/foo/foo.thrift")
+	"clients-idl/clients/foo/foo.thrift")
 
 var testCopyrightHeader = `// Copyright (c) 2018 Uber Technologies, Inc.
 //
@@ -69,8 +69,11 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 	options := &codegen.PackageHelperOptions{
 		RelTargetGenDir: tmpDir,
 		CopyrightHeader: testCopyrightHeader,
-		GenCodePackage:  packageRoot + "/build/gen-code",
-		TraceKey:        "trace-key",
+		GenCodePackage: map[string]string{
+			".thrift": packageRoot + "/build/gen-code",
+			".proto":  packageRoot + "/build/gen-code",
+		},
+		TraceKey: "trace-key",
 	}
 
 	h, err := codegen.NewPackageHelper(
@@ -88,7 +91,8 @@ func TestImportPath(t *testing.T) {
 	h := newPackageHelper(t)
 	p, err := h.TypeImportPath(fooThrift)
 	assert.Nil(t, err, "should not return error")
-	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo", p, "wrong type import path")
+	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo",
+		p, "wrong type import path")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.go")
 	assert.Error(t, err, "should return error for not a thrift file")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/zanzibar/clients/foo/foo.thrift")
@@ -99,7 +103,7 @@ func TestTypePackageName(t *testing.T) {
 	h := newPackageHelper(t)
 	packageName, err := h.TypePackageName(fooThrift)
 	assert.Nil(t, err, "should not return error")
-	assert.Equal(t, "clientsFooFoo", packageName, "wrong package name")
+	assert.Equal(t, "clientsIDlClientsFooFoo", packageName, "wrong package name")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.txt")
 	assert.Error(t, err, "should return error for not a thrift file")
 }

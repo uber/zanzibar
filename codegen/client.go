@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -112,13 +112,11 @@ func newClientSpec(
 	h *PackageHelper,
 	annotate bool,
 ) (*ClientSpec, error) {
-	thriftFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
+	thriftFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), config.IDLFile)
 	mspec, err := NewModuleSpec(thriftFile, annotate, false, h)
 
 	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Could not build module spec for thrift %s: ", thriftFile,
-		)
+		return nil, err
 	}
 	mspec.PackageName = mspec.PackageName + "client"
 
@@ -254,7 +252,7 @@ func newGRPCClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	protoFile := filepath.Join(h.ThriftIDLPath(), config.IDLFile)
+	protoFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), config.IDLFile)
 	protoSpec, err := NewProtoModuleSpec(protoFile, false, h)
 	if err != nil {
 		return nil, errors.Wrapf(

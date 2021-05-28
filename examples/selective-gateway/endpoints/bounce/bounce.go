@@ -23,23 +23,29 @@ package bounce
 import (
 	"context"
 
+	"go.uber.org/yarpc"
+
 	echoclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
+	mirrorclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/workflow"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/echo"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
+	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // NewBounceBounceWorkflow ...
 func NewBounceBounceWorkflow(deps *module.Dependencies) workflow.BounceBounceWorkflow {
 	return &bounceWorkflow{
-		echo: deps.Client.Echo,
+		echo:   deps.Client.Echo,
+		mirror: deps.Client.Mirror,
 	}
 }
 
 type bounceWorkflow struct {
-	echo echoclient.Client
+	echo   echoclient.Client
+	mirror mirrorclient.Client
 }
 
 // Handle ...
@@ -48,7 +54,15 @@ func (w bounceWorkflow) Handle(
 	reqHeaders zanzibar.Header,
 	req *bounce.Bounce_Bounce_Args,
 ) (string, zanzibar.Header, error) {
-	res, err := w.echo.Echo(ctx, &echo.Request{Message: req.Msg})
+	res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg}, yarpc.WithRoutingKey("echo"))
+	if err != nil {
+		return "", nil, err
+	}
+	_, err = w.mirror.MirrorMirror(ctx, &mirror.Request{Message: req.Msg})
+	if err != nil {
+		return "", nil, err
+	}
+	_, err = w.mirror.MirrorInternalMirror(ctx, &mirror.InternalRequest{Message: req.Msg})
 	if err != nil {
 		return "", nil, err
 	}

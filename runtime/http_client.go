@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,6 @@ import (
 
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
-
-	"go.uber.org/zap"
 )
 
 // HTTPClient defines a http client.
@@ -37,7 +35,7 @@ type HTTPClient struct {
 	BaseURL        string
 	DefaultHeaders map[string]string
 	JSONWrapper    jsonwrapper.JSONWrapper
-	loggers        map[string]*zap.Logger
+	ContextLogger  ContextLogger
 	contextMetrics ContextMetrics
 }
 
@@ -54,7 +52,7 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 
 // NewHTTPClient is deprecated, use NewHTTPClientContext instead
 func NewHTTPClient(
-	logger *zap.Logger,
+	contextLogger ContextLogger,
 	scope tally.Scope,
 	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
@@ -64,7 +62,7 @@ func NewHTTPClient(
 	timeout time.Duration,
 ) *HTTPClient {
 	return NewHTTPClientContext(
-		logger,
+		contextLogger,
 		NewContextMetrics(scope),
 		jsonWrapper,
 		clientID,
@@ -78,7 +76,7 @@ func NewHTTPClient(
 
 // NewHTTPClientContext will allocate a http client.
 func NewHTTPClientContext(
-	logger *zap.Logger,
+	contextLogger ContextLogger,
 	ContextMetrics ContextMetrics,
 	jsonWrapper jsonwrapper.JSONWrapper,
 	clientID string,
@@ -88,15 +86,6 @@ func NewHTTPClientContext(
 	timeout time.Duration,
 	followRedirect bool,
 ) *HTTPClient {
-	loggers := make(map[string]*zap.Logger, len(methodToTargetEndpoint))
-
-	for methodName, targetEndpointName := range methodToTargetEndpoint {
-		loggers[methodName] = logger.With(
-			zap.String(logFieldClientID, clientID),
-			zap.String(logFieldClientMethod, methodName),
-			zap.String(logFieldClientThriftMethod, targetEndpointName),
-		)
-	}
 
 	var checkRedirect func(req *http.Request, via []*http.Request) error
 	if !followRedirect {
@@ -117,7 +106,7 @@ func NewHTTPClientContext(
 		},
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
-		loggers:        loggers,
+		ContextLogger:  contextLogger,
 		contextMetrics: ContextMetrics,
 		JSONWrapper:    jsonWrapper,
 	}

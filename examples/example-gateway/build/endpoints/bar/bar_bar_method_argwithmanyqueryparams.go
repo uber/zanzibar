@@ -38,7 +38,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -103,7 +103,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithManyQueryParams_Args
+	var requestBody endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args
 
 	aStrOk := req.CheckQueryValue("aStr")
 	if !aStrOk {
@@ -246,7 +246,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.AUUID = (endpointsBarBar.UUID)(aUUIDQuery)
+	requestBody.AUUID = (endpointsIDlEndpointsBarBar.UUID)(aUUIDQuery)
 
 	anOptUUIDOk := req.HasQueryValue("anOptUUID")
 	if anOptUUIDOk {
@@ -254,7 +254,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptUUID = (*endpointsBarBar.UUID)(ptr.String(string(anOptUUIDQuery)))
+		requestBody.AnOptUUID = (*endpointsIDlEndpointsBarBar.UUID)(ptr.String(string(anOptUUIDQuery)))
 	}
 
 	aListUUIDOk := req.CheckQueryValue("aListUUID")
@@ -265,9 +265,9 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	aListUUIDQueryFinal := make([]endpointsBarBar.UUID, len(aListUUIDQuery))
+	aListUUIDQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(aListUUIDQuery))
 	for i, v := range aListUUIDQuery {
-		aListUUIDQueryFinal[i] = endpointsBarBar.UUID(v)
+		aListUUIDQueryFinal[i] = endpointsIDlEndpointsBarBar.UUID(v)
 	}
 	requestBody.AListUUID = aListUUIDQueryFinal
 
@@ -277,9 +277,9 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		anOptListUUIDQueryFinal := make([]endpointsBarBar.UUID, len(anOptListUUIDQuery))
+		anOptListUUIDQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(anOptListUUIDQuery))
 		for i, v := range anOptListUUIDQuery {
-			anOptListUUIDQueryFinal[i] = endpointsBarBar.UUID(v)
+			anOptListUUIDQueryFinal[i] = endpointsIDlEndpointsBarBar.UUID(v)
 		}
 		requestBody.AnOptListUUID = anOptListUUIDQueryFinal
 	}
@@ -292,7 +292,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.AStringList = (endpointsBarBar.StringList)(aStringListQuery)
+	requestBody.AStringList = (endpointsIDlEndpointsBarBar.StringList)(aStringListQuery)
 
 	anOptStringListOk := req.HasQueryValue("anOptStringList")
 	if anOptStringListOk {
@@ -300,7 +300,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptStringList = (endpointsBarBar.StringList)(anOptStringListQuery)
+		requestBody.AnOptStringList = (endpointsIDlEndpointsBarBar.StringList)(anOptStringListQuery)
 	}
 
 	aUUIDListOk := req.CheckQueryValue("aUUIDList")
@@ -311,11 +311,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	aUUIDListQueryFinal := make([]endpointsBarBar.UUID, len(aUUIDListQuery))
+	aUUIDListQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(aUUIDListQuery))
 	for i, v := range aUUIDListQuery {
-		aUUIDListQueryFinal[i] = endpointsBarBar.UUID(v)
+		aUUIDListQueryFinal[i] = endpointsIDlEndpointsBarBar.UUID(v)
 	}
-	requestBody.AUUIDList = (endpointsBarBar.UUIDList)(aUUIDListQueryFinal)
+	requestBody.AUUIDList = (endpointsIDlEndpointsBarBar.UUIDList)(aUUIDListQueryFinal)
 
 	anOptUUIDListOk := req.HasQueryValue("anOptUUIDList")
 	if anOptUUIDListOk {
@@ -323,11 +323,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		anOptUUIDListQueryFinal := make([]endpointsBarBar.UUID, len(anOptUUIDListQuery))
+		anOptUUIDListQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(anOptUUIDListQuery))
 		for i, v := range anOptUUIDListQuery {
-			anOptUUIDListQueryFinal[i] = endpointsBarBar.UUID(v)
+			anOptUUIDListQueryFinal[i] = endpointsIDlEndpointsBarBar.UUID(v)
 		}
-		requestBody.AnOptUUIDList = (endpointsBarBar.UUIDList)(anOptUUIDListQueryFinal)
+		requestBody.AnOptUUIDList = (endpointsIDlEndpointsBarBar.UUIDList)(anOptUUIDListQueryFinal)
 	}
 
 	aTsOk := req.CheckQueryValue("aTs")
@@ -338,7 +338,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.ATs = (endpointsBarBar.Timestamp)(aTsQuery)
+	requestBody.ATs = (endpointsIDlEndpointsBarBar.Timestamp)(aTsQuery)
 
 	anOptTsOk := req.HasQueryValue("anOptTs")
 	if anOptTsOk {
@@ -346,14 +346,14 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptTs = (*endpointsBarBar.Timestamp)(ptr.Int64(int64(anOptTsQuery)))
+		requestBody.AnOptTs = (*endpointsIDlEndpointsBarBar.Timestamp)(ptr.Int64(int64(anOptTsQuery)))
 	}
 
 	aReqDemoOk := req.CheckQueryValue("aReqDemo")
 	if !aReqDemoOk {
 		return
 	}
-	var aReqDemoQuery endpointsBarBar.DemoType
+	var aReqDemoQuery endpointsIDlEndpointsBarBar.DemoType
 	_tmpaReqDemoQuery, ok := req.GetQueryValue("aReqDemo")
 	if ok {
 		if err := aReqDemoQuery.UnmarshalText([]byte(_tmpaReqDemoQuery)); err != nil {
@@ -364,11 +364,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	requestBody.AReqDemo = (endpointsBarBar.DemoType)(aReqDemoQuery)
+	requestBody.AReqDemo = (endpointsIDlEndpointsBarBar.DemoType)(aReqDemoQuery)
 
 	anOptFruitOk := req.HasQueryValue("anOptFruit")
 	if anOptFruitOk {
-		var anOptFruitQuery endpointsBarBar.Fruit
+		var anOptFruitQuery endpointsIDlEndpointsBarBar.Fruit
 		_tmpanOptFruitQuery, ok := req.GetQueryValue("anOptFruit")
 		if ok {
 			if err := anOptFruitQuery.UnmarshalText([]byte(_tmpanOptFruitQuery)); err != nil {
@@ -379,7 +379,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		requestBody.AnOptFruit = (*endpointsBarBar.Fruit)(ptr.Int32(int32(anOptFruitQuery)))
+		requestBody.AnOptFruit = (*endpointsIDlEndpointsBarBar.Fruit)(ptr.Int32(int32(anOptFruitQuery)))
 	}
 
 	aReqFruitsOk := req.CheckQueryValue("aReqFruits")
@@ -390,14 +390,14 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if !ok {
 		return
 	}
-	aReqFruitsQueryFinal := make([]endpointsBarBar.Fruit, len(aReqFruitsQuery))
+	aReqFruitsQueryFinal := make([]endpointsIDlEndpointsBarBar.Fruit, len(aReqFruitsQuery))
 	for i, v := range aReqFruitsQuery {
-		var _tmpv endpointsBarBar.Fruit
+		var _tmpv endpointsIDlEndpointsBarBar.Fruit
 		if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
 			req.LogAndSendQueryError(err, "enum", "aReqFruits", v)
 			return
 		}
-		aReqFruitsQueryFinal[i] = endpointsBarBar.Fruit(_tmpv)
+		aReqFruitsQueryFinal[i] = endpointsIDlEndpointsBarBar.Fruit(_tmpv)
 	}
 	requestBody.AReqFruits = aReqFruitsQueryFinal
 
@@ -407,14 +407,14 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if !ok {
 			return
 		}
-		anOptDemosQueryFinal := make([]endpointsBarBar.DemoType, len(anOptDemosQuery))
+		anOptDemosQueryFinal := make([]endpointsIDlEndpointsBarBar.DemoType, len(anOptDemosQuery))
 		for i, v := range anOptDemosQuery {
-			var _tmpv endpointsBarBar.DemoType
+			var _tmpv endpointsIDlEndpointsBarBar.DemoType
 			if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
 				req.LogAndSendQueryError(err, "enum", "anOptDemos", v)
 				return
 			}
-			anOptDemosQueryFinal[i] = endpointsBarBar.DemoType(_tmpv)
+			anOptDemosQueryFinal[i] = endpointsIDlEndpointsBarBar.DemoType(_tmpv)
 		}
 		requestBody.AnOptDemos = anOptDemosQueryFinal
 	}

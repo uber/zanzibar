@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
 )
 
 // MockIClient is a mock of IClient interface

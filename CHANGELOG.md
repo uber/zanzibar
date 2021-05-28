@@ -4,7 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.6.7 - 2021-02-05
+### Changed
+- **BREAKING** runtime/client_http_request.go, runtime/grpc_client.go, runtime/http_client.go, runtime/router.go, 
+runtime/server_http_request.go, runtime/server_http_response.go, runtime/tchannel_client.go, 
+runtime/tchannel_client_raw.go, runtime/tchannel_outbound_call.go, runtime_inbound_call.go, runtime/tchannel_server.go 
+now uses contextLogger instead of nornal logger ([#748](https://github.com/uber/zanzibar/pull/748))
+
+## 0.6.5 - 2020-08-10
+### Added
+- Added support for fetching multiple header values. https://github.com/uber/zanzibar/pull/733.
+- Set explicit import alias for github.com/uber/zanzibar/runtime in templates. https://github.com/uber/zanzibar/pull/734.
+- Added support for multiple header values in TestGateway utility. https://github.com/uber/zanzibar/pull/737.
+
+## 0.6.2 - 2020-07-17
+### Added
+- Added support for variadic parameters in augmented mock clients. https://github.com/uber/zanzibar/pull/731.
+
+## 0.6.1 - 2020-07-15
+### Added
+- Added support for grpc clients that have multiple services defined in proto. https://github.com/uber/zanzibar/pull/730.
+
+## 0.6.0 - 2020-07-13
 ### Added
 - Added support for circuit breaker, logging, and metrics similar to other protocol clients for gRPC clients ([#627](https://github.com/uber/zanzibar/pull/627))
 ### Fixed
@@ -12,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **BREAKING** `NewDefaultModuleSystemWithMockHook` API changed to add option for which hooks to execute. ([#638](https://github.com/uber/zanzibar/pull/638))
 - `resolve_thrift` tool will now check if the given file has the `.thrift` extension. ([#634](https://github.com/uber/zanzibar/pull/634))
+- **BREAKING** The `thriftRootDir` field type in application config file (build.yaml) is now `idlRootDir` since both thrift and protobuf are suppported (client idl only for now) different idl types. https://github.com/uber/zanzibar/pull/728.
+- **BREAKING** The `genCodePackage` field type in application config file (build.yaml) is now `object` with properties `".thrift"` and `".proto"` to support separated gen code dirs for different idl types. https://github.com/uber/zanzibar/pull/728.
 
 
 ## 0.4.0 - 2019-08-21

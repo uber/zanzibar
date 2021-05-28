@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -122,13 +122,18 @@ func main() {
 		config.MustGetStruct("defaultHeaders", &defaultHeaders)
 	}
 
+	moduleIdlSubDir := map[string]string{}
+	config.MustGetStruct("moduleIdlSubDir", &moduleIdlSubDir)
+	genCodePackage := map[string]string{}
+	config.MustGetStruct("genCodePackage", &genCodePackage)
 	options := &codegen.PackageHelperOptions{
-		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
+		RelIdlRootDir:                 config.MustGetString("idlRootDir"),
+		ModuleIdlSubDir:               moduleIdlSubDir,
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
 		RelMiddlewareConfigDir:        relMiddlewareConfigDir,
 		RelDefaultMiddlewareConfigDir: relDefaultMiddlewareConfigDir,
 		AnnotationPrefix:              config.MustGetString("annotationPrefix"),
-		GenCodePackage:                config.MustGetString("genCodePackage"),
+		GenCodePackage:                genCodePackage,
 		CopyrightHeader:               string(copyright),
 		StagingReqHeader:              stagingReqHeader,
 		DeputyReqHeader:               deputyReqHeader,
@@ -206,6 +211,10 @@ func getSelectiveModule() []codegen.ModuleDependency {
 		{
 			ClassName:    "client",
 			InstanceName: "echo",
+		},
+		{
+			ClassName:    "client",
+			InstanceName: "mirror",
 		},
 	}
 	return dependencies

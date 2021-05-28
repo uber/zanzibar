@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
-	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
+	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
+	endpointsIDlEndpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/googlenow/googlenow"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type GoogleNowAddCredentialsWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
+		r *endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
 	) (zanzibar.Header, error)
 }
 
@@ -76,7 +76,7 @@ type googleNowAddCredentialsWorkflow struct {
 func (w googleNowAddCredentialsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
+	r *endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
@@ -143,8 +143,8 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 	return resHeaders, nil
 }
 
-func convertToAddCredentialsClientRequest(in *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args {
-	out := &clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args{}
+func convertToAddCredentialsClientRequest(in *endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args {
+	out := &clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args{}
 
 	out.AuthCode = string(in.AuthCode)
 

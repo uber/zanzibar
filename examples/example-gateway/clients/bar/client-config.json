@@ -22,6 +22,7 @@
 			"Hello": "Bar::helloWorld",
 			"DeleteFoo": "Bar::deleteFoo",
 			"DeleteWithQueryParams": "Bar::deleteWithQueryParams",
+			"DeleteWithBody": "Bar::deleteWithBody",
 			"ListAndEnum": "Bar::listAndEnum",
 			"EchoI8": "Echo::echoI8",
 			"EchoI16": "Echo::echoI16",

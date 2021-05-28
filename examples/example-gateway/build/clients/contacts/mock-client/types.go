@@ -26,7 +26,7 @@ package clientmock
 import (
 	context "context"
 
-	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 // ClientFixture defines the client fixture type

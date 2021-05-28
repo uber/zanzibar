@@ -31,8 +31,8 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/withexceptions/withexceptions"
-	endpointsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/withexceptions/withexceptions"
+	clientsIDlClientsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/withexceptions/withexceptions"
+	endpointsIDlEndpointsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/withexceptions/withexceptions"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
 	"go.uber.org/zap"
@@ -43,7 +43,7 @@ type WithExceptionsFunc1Workflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsWithexceptionsWithexceptions.Response, zanzibar.Header, error)
+	) (*endpointsIDlEndpointsWithexceptionsWithexceptions.Response, zanzibar.Header, error)
 }
 
 // NewWithExceptionsFunc1Workflow creates a workflow
@@ -75,7 +75,7 @@ type withExceptionsFunc1Workflow struct {
 func (w withExceptionsFunc1Workflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsWithexceptionsWithexceptions.Response, zanzibar.Header, error) {
+) (*endpointsIDlEndpointsWithexceptionsWithexceptions.Response, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -112,14 +112,14 @@ func (w withExceptionsFunc1Workflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsWithexceptionsWithexceptions.ExceptionType1:
+		case *clientsIDlClientsWithexceptionsWithexceptions.ExceptionType1:
 			serverErr := convertFunc1E1(
 				errValue,
 			)
 
 			return nil, nil, serverErr
 
-		case *clientsWithexceptionsWithexceptions.ExceptionType2:
+		case *clientsIDlClientsWithexceptionsWithexceptions.ExceptionType2:
 			serverErr := convertFunc1E2(
 				errValue,
 			)
@@ -145,22 +145,22 @@ func (w withExceptionsFunc1Workflow) Handle(
 }
 
 func convertFunc1E1(
-	clientError *clientsWithexceptionsWithexceptions.ExceptionType1,
-) *endpointsWithexceptionsWithexceptions.EndpointExceptionType1 {
+	clientError *clientsIDlClientsWithexceptionsWithexceptions.ExceptionType1,
+) *endpointsIDlEndpointsWithexceptionsWithexceptions.EndpointExceptionType1 {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsWithexceptionsWithexceptions.EndpointExceptionType1{}
+	serverError := &endpointsIDlEndpointsWithexceptionsWithexceptions.EndpointExceptionType1{}
 	return serverError
 }
 func convertFunc1E2(
-	clientError *clientsWithexceptionsWithexceptions.ExceptionType2,
-) *endpointsWithexceptionsWithexceptions.EndpointExceptionType2 {
+	clientError *clientsIDlClientsWithexceptionsWithexceptions.ExceptionType2,
+) *endpointsIDlEndpointsWithexceptionsWithexceptions.EndpointExceptionType2 {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsWithexceptionsWithexceptions.EndpointExceptionType2{}
+	serverError := &endpointsIDlEndpointsWithexceptionsWithexceptions.EndpointExceptionType2{}
 	return serverError
 }
 
-func convertWithExceptionsFunc1ClientResponse(in *clientsWithexceptionsWithexceptions.Response) *endpointsWithexceptionsWithexceptions.Response {
-	out := &endpointsWithexceptionsWithexceptions.Response{}
+func convertWithExceptionsFunc1ClientResponse(in *clientsIDlClientsWithexceptionsWithexceptions.Response) *endpointsIDlEndpointsWithexceptionsWithexceptions.Response {
+	out := &endpointsIDlEndpointsWithexceptionsWithexceptions.Response{}
 
 	return out
 }

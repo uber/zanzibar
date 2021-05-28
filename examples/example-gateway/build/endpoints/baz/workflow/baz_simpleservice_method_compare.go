@@ -31,9 +31,9 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	"go.uber.org/zap"
@@ -44,8 +44,8 @@ type SimpleServiceCompareWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsBazBaz.SimpleService_Compare_Args,
-	) (*endpointsBazBaz.BazResponse, zanzibar.Header, error)
+		r *endpointsIDlEndpointsBazBaz.SimpleService_Compare_Args,
+	) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error)
 }
 
 // NewSimpleServiceCompareWorkflow creates a workflow
@@ -77,8 +77,8 @@ type simpleServiceCompareWorkflow struct {
 func (w simpleServiceCompareWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_Compare_Args,
-) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsBazBaz.SimpleService_Compare_Args,
+) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error) {
 	clientRequest := convertToCompareClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -116,14 +116,14 @@ func (w simpleServiceCompareWorkflow) Handle(
 	if err != nil {
 		switch errValue := err.(type) {
 
-		case *clientsBazBaz.AuthErr:
+		case *clientsIDlClientsBazBaz.AuthErr:
 			serverErr := convertCompareAuthErr(
 				errValue,
 			)
 
 			return nil, nil, serverErr
 
-		case *clientsBazBaz.OtherAuthErr:
+		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertCompareOtherAuthErr(
 				errValue,
 			)
@@ -148,11 +148,11 @@ func (w simpleServiceCompareWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
-	out := &clientsBazBaz.SimpleService_Compare_Args{}
+func convertToCompareClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_Compare_Args) *clientsIDlClientsBazBaz.SimpleService_Compare_Args {
+	out := &clientsIDlClientsBazBaz.SimpleService_Compare_Args{}
 
 	if in.Arg1 != nil {
-		out.Arg1 = &clientsBazBaz.BazRequest{}
+		out.Arg1 = &clientsIDlClientsBazBaz.BazRequest{}
 		out.Arg1.B1 = bool(in.Arg1.B1)
 		out.Arg1.S2 = string(in.Arg1.S2)
 		out.Arg1.I3 = int32(in.Arg1.I3)
@@ -160,7 +160,7 @@ func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Arg
 		out.Arg1 = nil
 	}
 	if in.Arg2 != nil {
-		out.Arg2 = &clientsBazBaz.BazRequest{}
+		out.Arg2 = &clientsIDlClientsBazBaz.BazRequest{}
 		out.Arg2.B1 = bool(in.Arg2.B1)
 		out.Arg2.S2 = string(in.Arg2.S2)
 		out.Arg2.I3 = int32(in.Arg2.I3)
@@ -172,22 +172,22 @@ func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Arg
 }
 
 func convertCompareAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
+	clientError *clientsIDlClientsBazBaz.AuthErr,
+) *endpointsIDlEndpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.AuthErr{}
 	return serverError
 }
 func convertCompareOtherAuthErr(
-	clientError *clientsBazBaz.OtherAuthErr,
-) *endpointsBazBaz.OtherAuthErr {
+	clientError *clientsIDlClientsBazBaz.OtherAuthErr,
+) *endpointsIDlEndpointsBazBaz.OtherAuthErr {
 	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.OtherAuthErr{}
+	serverError := &endpointsIDlEndpointsBazBaz.OtherAuthErr{}
 	return serverError
 }
 
-func convertSimpleServiceCompareClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
-	out := &endpointsBazBaz.BazResponse{}
+func convertSimpleServiceCompareClientResponse(in *clientsIDlClientsBazBase.BazResponse) *endpointsIDlEndpointsBazBaz.BazResponse {
+	out := &endpointsIDlEndpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)
 

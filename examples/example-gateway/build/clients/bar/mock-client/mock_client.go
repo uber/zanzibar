@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	runtime "github.com/uber/zanzibar/runtime"
+	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface
@@ -192,6 +192,21 @@ func (m *MockClient) DeleteFoo(arg0 context.Context, arg1 map[string]string, arg
 func (mr *MockClientMockRecorder) DeleteFoo(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFoo", reflect.TypeOf((*MockClient)(nil).DeleteFoo), arg0, arg1, arg2)
+}
+
+// DeleteWithBody mocks base method
+func (m *MockClient) DeleteWithBody(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithBody_Args) (map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteWithBody", arg0, arg1, arg2)
+	ret0, _ := ret[0].(map[string]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteWithBody indicates an expected call of DeleteWithBody
+func (mr *MockClientMockRecorder) DeleteWithBody(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWithBody", reflect.TypeOf((*MockClient)(nil).DeleteWithBody), arg0, arg1, arg2)
 }
 
 // DeleteWithQueryParams mocks base method
@@ -466,10 +481,10 @@ func (mr *MockClientMockRecorder) EchoTypedef(arg0, arg1, arg2 interface{}) *gom
 }
 
 // HTTPClient mocks base method
-func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*runtime.HTTPClient)
+	ret0, _ := ret[0].(*zanzibar.HTTPClient)
 	return ret0
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,14 @@ import (
 
 // Header defines methods on ServerHeaders
 type Header interface {
+	// Get mirrors the implementation of http.header and returns a single header value.
+	// When a key contains multiple values, -only- the first one is returned.
+	// Ref: https://golang.org/pkg/net/http/#Header.Get
 	Get(key string) (string, bool)
+	// Values mirrors the implementation of http.header and returns a slice of header values.
+	// When a key contains multiple values, the entire collection is returned.
+	// Ref: https://golang.org/pkg/net/http/#Header.Values
+	Values(key string) ([]string, bool)
 	Add(key string, value string)
 	Set(key string, value string)
 	Keys() []string
@@ -53,7 +60,7 @@ func NewServerHTTPHeader(h http.Header) ServerHTTPHeader {
 
 // Get retrieves the first string stored on a given header. Bool
 // return value is used to distinguish between the presence of a
-// header with golang's zerovalue string and the absence of the string.
+// header with golang's zerovalue string and the absence of the header.
 func (zh ServerHTTPHeader) Get(key string) (string, bool) {
 	httpKey := textproto.CanonicalMIMEHeaderKey(key)
 	h := zh[httpKey]
@@ -61,6 +68,17 @@ func (zh ServerHTTPHeader) Get(key string) (string, bool) {
 		return h[0], true
 	}
 	return "", false
+}
+
+// Values retrieves the entire collection of values stored on a given header.
+// Bool return value is used to distinguish between the presence of a
+// header with golang's zerovalue slice and the absence of the header.
+func (zh ServerHTTPHeader) Values(key string) ([]string, bool) {
+	httpKey := textproto.CanonicalMIMEHeaderKey(key)
+	if _, ok := zh[httpKey]; ok {
+		return textproto.MIMEHeader(zh).Values(key), true
+	}
+	return []string{}, false
 }
 
 // GetOrEmptyStr retrieves the first string stored on a given header or
@@ -149,6 +167,19 @@ type ServerTChannelHeader map[string]string
 func (th ServerTChannelHeader) Get(key string) (string, bool) {
 	value, ok := th[key]
 	return value, ok
+}
+
+// Values retrieves the entire collection of values stored on a given header.
+// Bool return value is used to distinguish between the presence of a
+// header with golang's zerovalue slice and the absence of the header.
+func (th ServerTChannelHeader) Values(key string) ([]string, bool) {
+	if value, ok := th.Get(key); ok {
+		// In the case of TChannel, ServerTChannelHeader does not support
+		//  multiple, disparate values so we defer to Get and package it
+		// in a slice to meet the interface's requirement.
+		return []string{value}, ok
+	}
+	return []string{}, false
 }
 
 // Add is an alias to Set.

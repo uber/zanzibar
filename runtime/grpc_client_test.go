@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,9 +33,8 @@ import (
 )
 
 const (
-	serviceName            = "Echo"
 	clientID               = "Echo"
-	methodName             = "Echo"
+	methodName             = "EchoEcho"
 	routingKey             = "routingKey"
 	requestUUIDHeaderKey   = "reqID"
 	circuitBreakerDisabled = false
@@ -61,46 +60,39 @@ var (
 		}
 		return fields
 	}
-	logger     = zap.NewNop()
-	metrics    = NewContextMetrics(tally.NoopScope)
-	extractors = &ContextExtractors{
+	contextLoggerImpl = NewContextLogger(zap.NewNop())
+	metrics           = NewContextMetrics(tally.NoopScope)
+	extractors        = &ContextExtractors{
 		ScopeTagsExtractors: []ContextScopeTagsExtractor{scopeExtractor},
 		LogFieldsExtractors: []ContextLogFieldsExtractor{logFieldsExtractors},
 	}
 	methodNames = map[string]string{
 		serviceMethod: methodName,
 	}
-	expectedTimeout = time.Duration(timeoutInMS) * time.Millisecond
-	expectedLoggers = map[string]*zap.Logger{
-		serviceMethod: logger,
-	}
+	expectedTimeout   = time.Duration(timeoutInMS) * time.Millisecond
 	expectedScopeTags = map[string]map[string]string{
 		serviceMethod: {
-			scopeTagClient:         clientID,
-			scopeTagClientMethod:   methodName,
-			scopeTagsTargetService: serviceName,
+			scopeTagClient:          clientID,
+			scopeTagClientMethod:    methodName,
+			scopeTagsTargetEndpoint: serviceMethod,
 		},
 	}
 )
 
 func TestNewGRPCClientOpts(t *testing.T) {
 	actual := NewGRPCClientOpts(
-		logger,
+		contextLoggerImpl,
 		metrics,
 		extractors,
 		methodNames,
 		clientID,
-		serviceName,
 		routingKey,
 		requestUUIDHeaderKey,
 		circuitBreakerDisabled,
 		timeoutInMS,
 	)
 	expected := &GRPCClientOpts{
-		serviceName,
-		clientID,
-		methodNames,
-		expectedLoggers,
+		contextLoggerImpl,
 		metrics,
 		extractors,
 		routingKey,
@@ -115,12 +107,11 @@ func TestNewGRPCClientOpts(t *testing.T) {
 func TestGRPCCallHelper(t *testing.T) {
 	ctx := context.Background()
 	opts := NewGRPCClientOpts(
-		logger,
+		contextLoggerImpl,
 		metrics,
 		extractors,
 		methodNames,
 		clientID,
-		serviceName,
 		routingKey,
 		requestUUIDHeaderKey,
 		circuitBreakerDisabled,
@@ -128,18 +119,18 @@ func TestGRPCCallHelper(t *testing.T) {
 	)
 	_, actual := NewGRPCClientCallHelper(ctx, serviceMethod, opts)
 	expected := &callHelper{
-		logger:    expectedLoggers[serviceMethod],
-		metrics:   metrics,
-		extractor: extractors,
+		contextLogger: contextLoggerImpl,
+		metrics:       metrics,
+		extractor:     extractors,
 	}
 	assert.Equal(t, expected, actual)
 }
 
 func testCallHelper(t *testing.T, err error) {
 	helper := &callHelper{
-		logger:    logger,
-		metrics:   metrics,
-		extractor: extractors,
+		contextLogger: contextLoggerImpl,
+		metrics:       metrics,
+		extractor:     extractors,
 	}
 
 	assert.Zero(t, helper.startTime, "startTime not initialized to zero")

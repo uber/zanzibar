@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/clientless/clientless"
+	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
@@ -39,8 +39,8 @@ type ClientlessBetaWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsClientlessClientless.Clientless_Beta_Args,
-	) (*endpointsClientlessClientless.Response, zanzibar.Header, error)
+		r *endpointsIDlEndpointsClientlessClientless.Clientless_Beta_Args,
+	) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error)
 }
 
 // NewClientlessBetaWorkflow creates a workflow
@@ -60,8 +60,8 @@ type clientlessBetaWorkflow struct {
 func (w clientlessBetaWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsClientlessClientless.Clientless_Beta_Args,
-) (*endpointsClientlessClientless.Response, zanzibar.Header, error) {
+	r *endpointsIDlEndpointsClientlessClientless.Clientless_Beta_Args,
+) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error) {
 	response := convertBetaDummyResponse(r)
 
 	clientlessHeaders := map[string]string{}
@@ -79,8 +79,8 @@ func (w clientlessBetaWorkflow) Handle(
 	return response, resHeaders, nil
 }
 
-func convertBetaDummyResponse(in *endpointsClientlessClientless.Clientless_Beta_Args) *endpointsClientlessClientless.Response {
-	out := &endpointsClientlessClientless.Response{}
+func convertBetaDummyResponse(in *endpointsIDlEndpointsClientlessClientless.Clientless_Beta_Args) *endpointsIDlEndpointsClientlessClientless.Response {
+	out := &endpointsIDlEndpointsClientlessClientless.Response{}
 
 	if in.Request != nil {
 		out.FirstName = (*string)(in.Request.FirstName)

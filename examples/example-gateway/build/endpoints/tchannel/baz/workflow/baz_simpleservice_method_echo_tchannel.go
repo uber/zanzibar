@@ -28,7 +28,7 @@ import (
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 )
 
 // SimpleServiceEchoWorkflow defines the interface for SimpleServiceEcho workflow
@@ -36,6 +36,6 @@ type SimpleServiceEchoWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-		r *endpointsTchannelBazBaz.SimpleService_Echo_Args,
+		r *endpointsIDlEndpointsTchannelBazBaz.SimpleService_Echo_Args,
 	) (string, zanzibar.Header, error)
 }

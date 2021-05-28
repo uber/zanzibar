@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import (
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/zap"
 )
 
 const rawClient = "raw"
@@ -39,9 +38,9 @@ const rawClient = "raw"
 // method information (because there isn't a method anyway), but the Thrift service
 // and method information is still there.
 type RawTChannelClient struct {
-	tc      *TChannelClient
-	logger  *zap.Logger
-	metrics ContextMetrics
+	tc            *TChannelClient
+	contextLogger ContextLogger
+	metrics       ContextMetrics
 }
 
 // NewRawTChannelClient returns a RawTChannelClient that makes calls over the given
@@ -50,25 +49,16 @@ type RawTChannelClient struct {
 // It is intended to be used internally for testing.
 func NewRawTChannelClient(
 	ch *tchannel.Channel,
-	logger *zap.Logger,
+	contextLogger ContextLogger,
 	scope tally.Scope,
 	opt *TChannelClientOption,
 ) *RawTChannelClient {
-	clientID := rawClient
-	if opt.ClientID != "" {
-		clientID = opt.ClientID
-	}
-
-	l := logger.With(
-		zap.String("clientID", clientID),
-		zap.String("serviceName", opt.ServiceName),
-	)
 
 	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClientContext(ch, logger, metrics, nil, opt),
-		logger:  l,
-		metrics: metrics,
+		tc:            NewTChannelClientContext(ch, contextLogger, metrics, nil, opt),
+		contextLogger: contextLogger,
+		metrics:       metrics,
 	}
 }
 
@@ -86,13 +76,13 @@ func (r *RawTChannelClient) Call(
 		methodName:    serviceMethod,
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
-		logger:        r.logger,
+		contextLogger: r.tc.ContextLogger,
 		metrics:       r.metrics,
 	}
 
 	if m, ok := r.tc.methodNames[serviceMethod]; ok {
 		call.methodName = m
-		call.logger = r.tc.Loggers[serviceMethod]
+		call.contextLogger = r.tc.ContextLogger
 		call.metrics = r.metrics
 	}
 

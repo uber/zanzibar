@@ -38,7 +38,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -103,7 +103,7 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithQueryHeader_Args
+	var requestBody endpointsIDlEndpointsBarBar.Bar_ArgWithQueryHeader_Args
 
 	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
 	if xUUIDValueExists {

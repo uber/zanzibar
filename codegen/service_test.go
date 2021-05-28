@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,19 +31,25 @@ import (
 )
 
 func TestModuleSpec(t *testing.T) {
-	barThrift := "../examples/example-gateway/idl/clients/bar/bar.thrift"
+	barThrift := "../examples/example-gateway/idl/clients-idl/clients/bar/bar.thrift"
 	_, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the thrift file")
 }
 
+func TestModuleSpecNoThriftExist(t *testing.T) {
+	barThrift := "../examples/example-gateway/idl/clients/bar/bar_no_exist.thrift"
+	_, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
+	assert.Error(t, err.(*codegen.ErrorSkipCodeGen))
+}
+
 func TestProtoModuleSpec(t *testing.T) {
-	echoProto := "../examples/example-gateway/idl/clients/echo/echo.proto"
+	echoProto := "../examples/example-gateway/idl/clients-idl/clients/echo/echo.proto"
 	_, err := codegen.NewProtoModuleSpec(echoProto, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the proto file")
 }
 
 func TestProtoModuleSpecParseError(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("../examples/example-gateway/idl/clients/", "temp*.proto")
+	tmpFile, err := ioutil.TempFile("../examples/example-gateway/idl/clients-idl/clients/", "temp*.proto")
 	assert.NoError(t, err, "failed to create temp file")
 	defer os.Remove(tmpFile.Name())
 	_, err = tmpFile.WriteString("test")
@@ -55,8 +61,8 @@ func TestProtoModuleSpecParseError(t *testing.T) {
 
 func TestExceptionValidation(t *testing.T) {
 	var (
-		barClientThrift   = "../examples/example-gateway/idl/clients/bar/bar.thrift"
-		barEndpointThrift = "../examples/example-gateway/idl/endpoints/bar/bar.thrift"
+		barClientThrift   = "../examples/example-gateway/idl/clients-idl/clients/bar/bar.thrift"
+		barEndpointThrift = "../examples/example-gateway/idl/endpoints-idl/endpoints/bar/bar.thrift"
 		pkgHelper         = newPackageHelper(t)
 	)
 	m, err := codegen.NewModuleSpec(barEndpointThrift, true, false, pkgHelper)

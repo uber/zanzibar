@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	echoclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/echo"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -83,6 +83,7 @@ func TestEcho(t *testing.T) {
 			GRPCClientDispatcher: dispatcher,
 			Config:               sc,
 			Logger:               zap.NewNop(),
+			ContextLogger:        zanzibar.NewContextLogger(zap.NewNop()),
 			ContextMetrics:       zanzibar.NewContextMetrics(tally.NewTestScope("", nil)),
 		},
 	})
@@ -97,7 +98,7 @@ func TestEcho(t *testing.T) {
 	message := "hello"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
-	res, err := client.Echo(ctx, &echo.Request{Message: message})
+	res, err := client.EchoEcho(ctx, &echo.Request{Message: message})
 	assert.NoError(t, err)
 	assert.Equal(t, &echo.Response{Message: message}, res)
 }

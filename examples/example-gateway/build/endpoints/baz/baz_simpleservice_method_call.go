@@ -37,7 +37,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -102,13 +102,13 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBazBaz.SimpleService_Call_Args
+	var requestBody endpointsIDlEndpointsBazBaz.SimpleService_Call_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
 
 	if requestBody.Arg == nil {
-		requestBody.Arg = &endpointsBazBaz.BazRequest{}
+		requestBody.Arg = &endpointsIDlEndpointsBazBaz.BazRequest{}
 	}
 	xTokenValue, xTokenValueExists := req.Header.Get("x-token")
 	if xTokenValueExists {
@@ -117,7 +117,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	}
 	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
 	if xUUIDValueExists {
-		body := endpointsBazBaz.UUID(xUUIDValue)
+		body := endpointsIDlEndpointsBazBaz.UUID(xUUIDValue)
 		requestBody.TestUUID = &body
 	}
 
@@ -145,7 +145,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsBazBaz.AuthErr:
+		case *endpointsIDlEndpointsBazBaz.AuthErr:
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)

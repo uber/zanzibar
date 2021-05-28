@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ type tchannelOutboundCall struct {
 	finishTime    time.Time
 	reqHeaders    map[string]string
 	resHeaders    map[string]string
-	logger        *zap.Logger
+	contextLogger ContextLogger
 	metrics       ContextMetrics
 }
 
@@ -71,10 +71,10 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	// write logs
 	fields := c.logFields(ctx)
 	if err == nil {
-		c.logger.Debug("Finished an outgoing client TChannel request", fields...)
+		c.contextLogger.Debug(ctx, "Finished an outgoing client TChannel request", fields...)
 	} else {
 		fields = append(fields, zap.Error(err))
-		c.logger.Warn("Failed to send outgoing client TChannel request", fields...)
+		c.contextLogger.Warn(ctx, "Failed to send outgoing client TChannel request", fields...)
 	}
 }
 

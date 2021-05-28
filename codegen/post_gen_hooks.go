@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -68,15 +68,18 @@ func newMockableClient(raw []byte) (*mockableClient, error) {
 
 // ClientMockGenHook returns a PostGenHook to generate client mocks
 func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (PostGenHook, error) {
-	bin, err := NewMockgenBin(h, t)
-	if err != nil {
-		return nil, errors.Wrap(err, "error building mockgen binary")
-	}
-
 	return func(instances map[string][]*ModuleInstance) error {
 		clientInstances := instances["client"]
 		mockCount := len(clientInstances)
+		if mockCount == 0 {
+			return nil
+		}
+
 		fmt.Printf("Generating %d client mocks:\n", mockCount)
+		bin, err := NewMockgenBin(h, t)
+		if err != nil {
+			return errors.Wrap(err, "error building mockgen binary")
+		}
 
 		importPathMap := make(map[string]string, mockCount)
 		fixtureMap := make(map[string]*Fixture, mockCount)
@@ -205,6 +208,10 @@ func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (Po
 func ServiceMockGenHook(h *PackageHelper, t *Template, configFile string) PostGenHook {
 	return func(instances map[string][]*ModuleInstance) error {
 		mockCount := len(instances["service"])
+		if mockCount == 0 {
+			return nil
+		}
+
 		fmt.Printf("Generating %d service mocks:\n", mockCount)
 		ec := make(chan error, mockCount)
 		var idx int32 = 1
@@ -345,10 +352,10 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		errChanSize := 0
 		shouldGenMap := map[*ModuleInstance][]*EndpointSpec{}
 		for _, instance := range instances["endpoint"] {
-			if instance.genSpec == nil {
+			if instance.GeneratedSpec() == nil {
 				continue
 			}
-			endpointSpecs := instance.genSpec.([]*EndpointSpec)
+			endpointSpecs := instance.GeneratedSpec().([]*EndpointSpec)
 			for _, endpointSpec := range endpointSpecs {
 				if endpointSpec.WorkflowType == "custom" {
 					shouldGenMap[instance] = endpointSpecs

@@ -37,8 +37,8 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	clientsIDlClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
 )
 
 // Client defines bar client interface.
@@ -47,57 +47,62 @@ type Client interface {
 	ArgNotStruct(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgNotStruct_Args,
+		args *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args,
 	) (map[string]string, error)
 	ArgWithHeaders(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithHeaders_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithHeaders_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithManyQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithManyQueryParams_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithNearDupQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithNestedQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithNestedQueryParams_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithParams_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithParams_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithParamsAndDuplicateFields(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryHeader(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithQueryHeader_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ArgWithQueryParams_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_ArgWithQueryParams_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	DeleteFoo(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_DeleteFoo_Args,
+		args *clientsIDlClientsBarBar.Bar_DeleteFoo_Args,
+	) (map[string]string, error)
+	DeleteWithBody(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args,
 	) (map[string]string, error)
 	DeleteWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_DeleteWithQueryParams_Args,
+		args *clientsIDlClientsBarBar.Bar_DeleteWithQueryParams_Args,
 	) (map[string]string, error)
 	Hello(
 		ctx context.Context,
@@ -106,121 +111,122 @@ type Client interface {
 	ListAndEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_ListAndEnum_Args,
+		args *clientsIDlClientsBarBar.Bar_ListAndEnum_Args,
 	) (string, map[string]string, error)
 	MissingArg(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	NoRequest(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	Normal(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_Normal_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_Normal_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	NormalRecur(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_NormalRecur_Args,
-	) (*clientsBarBar.BarResponseRecur, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_NormalRecur_Args,
+	) (*clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error)
 	TooManyArgs(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Bar_TooManyArgs_Args,
-	) (*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Bar_TooManyArgs_Args,
+	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoBinary(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoBinary_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoBinary_Args,
 	) ([]byte, map[string]string, error)
 	EchoBool(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoBool_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoBool_Args,
 	) (bool, map[string]string, error)
 	EchoDouble(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoDouble_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoDouble_Args,
 	) (float64, map[string]string, error)
 	EchoEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoEnum_Args,
-	) (clientsBarBar.Fruit, map[string]string, error)
+		args *clientsIDlClientsBarBar.Echo_EchoEnum_Args,
+	) (clientsIDlClientsBarBar.Fruit, map[string]string, error)
 	EchoI16(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoI16_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoI16_Args,
 	) (int16, map[string]string, error)
 	EchoI32(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoI32_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoI32_Args,
 	) (int32, map[string]string, error)
 	EchoI32Map(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoI32Map_Args,
-	) (map[int32]*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Echo_EchoI32Map_Args,
+	) (map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoI64_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoI64_Args,
 	) (int64, map[string]string, error)
 	EchoI8(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoI8_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoI8_Args,
 	) (int8, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoString_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoString_Args,
 	) (string, map[string]string, error)
 	EchoStringList(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoStringList_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoStringList_Args,
 	) ([]string, map[string]string, error)
 	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoStringMap_Args,
-	) (map[string]*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Echo_EchoStringMap_Args,
+	) (map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoStringSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoStringSet_Args,
+		args *clientsIDlClientsBarBar.Echo_EchoStringSet_Args,
 	) (map[string]struct{}, map[string]string, error)
 	EchoStructList(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoStructList_Args,
-	) ([]*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Echo_EchoStructList_Args,
+	) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoStructSet_Args,
-	) ([]*clientsBarBar.BarResponse, map[string]string, error)
+		args *clientsIDlClientsBarBar.Echo_EchoStructSet_Args,
+	) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoTypedef(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoTypedef_Args,
-	) (clientsBarBar.UUID, map[string]string, error)
+		args *clientsIDlClientsBarBar.Echo_EchoTypedef_Args,
+	) (clientsIDlClientsBarBar.UUID, map[string]string, error)
 }
 
 // barClient is the http client.
 type barClient struct {
-	clientID               string
-	httpClient             *zanzibar.HTTPClient
-	jsonWrapper            jsonwrapper.JSONWrapper
-	circuitBreakerDisabled bool
-	requestUUIDHeaderKey   string
+	clientID                  string
+	httpClient                *zanzibar.HTTPClient
+	jsonWrapper               jsonwrapper.JSONWrapper
+	circuitBreakerDisabled    bool
+	requestUUIDHeaderKey      string
+	requestProcedureHeaderKey string
 }
 
 // NewClient returns a new http client.
@@ -243,17 +249,21 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey") {
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.bar.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.bar.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"bar",
 			map[string]string{
 				"ArgNotStruct":                    "Bar::argNotStruct",
@@ -266,6 +276,7 @@ func NewClient(deps *module.Dependencies) Client {
 				"ArgWithQueryHeader":              "Bar::argWithQueryHeader",
 				"ArgWithQueryParams":              "Bar::argWithQueryParams",
 				"DeleteFoo":                       "Bar::deleteFoo",
+				"DeleteWithBody":                  "Bar::deleteWithBody",
 				"DeleteWithQueryParams":           "Bar::deleteWithQueryParams",
 				"Hello":                           "Bar::helloWorld",
 				"ListAndEnum":                     "Bar::listAndEnum",
@@ -296,12 +307,13 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 			followRedirect,
 		),
-		circuitBreakerDisabled: circuitBreakerDisabled,
-		requestUUIDHeaderKey:   requestUUIDHeaderKey,
+		circuitBreakerDisabled:    circuitBreakerDisabled,
+		requestUUIDHeaderKey:      requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") {
@@ -352,14 +364,17 @@ func (c *barClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *barClient) ArgNotStruct(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgNotStruct_Args,
+	r *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argNotStruct"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgNotStruct", "Bar::argNotStruct", c.httpClient)
@@ -412,7 +427,7 @@ func (c *barClient) ArgNotStruct(
 		return respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -437,17 +452,20 @@ func (c *barClient) ArgNotStruct(
 func (c *barClient) ArgWithHeaders(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithHeaders_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithHeaders_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithHeaders"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithHeaders", "Bar::argWithHeaders", c.httpClient)
 
 	headers["name"] = string(r.Name)
@@ -506,7 +524,7 @@ func (c *barClient) ArgWithHeaders(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -535,17 +553,20 @@ func (c *barClient) ArgWithHeaders(
 func (c *barClient) ArgWithManyQueryParams(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithManyQueryParams_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithManyQueryParams"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithManyQueryParams", "Bar::argWithManyQueryParams", c.httpClient)
 
 	// Generate full URL.
@@ -683,7 +704,7 @@ func (c *barClient) ArgWithManyQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -712,17 +733,20 @@ func (c *barClient) ArgWithManyQueryParams(
 func (c *barClient) ArgWithNearDupQueryParams(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithNearDupQueryParams"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNearDupQueryParams", "Bar::argWithNearDupQueryParams", c.httpClient)
 
 	// Generate full URL.
@@ -782,7 +806,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -811,28 +835,31 @@ func (c *barClient) ArgWithNearDupQueryParams(
 func (c *barClient) ArgWithNestedQueryParams(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithNestedQueryParams_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithNestedQueryParams"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNestedQueryParams", "Bar::argWithNestedQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
 
+	queryValues := &url.Values{}
 	if r.Request == nil {
 		return nil, nil, errors.New(
 			"The field .Request is required",
 		)
 	}
-	queryValues := &url.Values{}
 	requestNameQuery := r.Request.Name
 	queryValues.Set("request.name", requestNameQuery)
 	if r.Request.UserUUID != nil {
@@ -905,7 +932,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -934,17 +961,20 @@ func (c *barClient) ArgWithNestedQueryParams(
 func (c *barClient) ArgWithParams(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithParams_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithParams_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithParams"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParams", "Bar::argWithParams", c.httpClient)
 
 	// Generate full URL.
@@ -987,7 +1017,7 @@ func (c *barClient) ArgWithParams(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1016,17 +1046,20 @@ func (c *barClient) ArgWithParams(
 func (c *barClient) ArgWithParamsAndDuplicateFields(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithParamsAndDuplicateFields"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParamsAndDuplicateFields", "Bar::argWithParamsAndDuplicateFields", c.httpClient)
 
 	// Generate full URL.
@@ -1069,7 +1102,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1098,17 +1131,20 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 func (c *barClient) ArgWithQueryHeader(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithQueryHeader_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithQueryHeader"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryHeader", "Bar::argWithQueryHeader", c.httpClient)
 
 	// Generate full URL.
@@ -1151,7 +1187,7 @@ func (c *barClient) ArgWithQueryHeader(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1180,17 +1216,20 @@ func (c *barClient) ArgWithQueryHeader(
 func (c *barClient) ArgWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ArgWithQueryParams_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_ArgWithQueryParams_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::argWithQueryParams"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryParams", "Bar::argWithQueryParams", c.httpClient)
 
 	// Generate full URL.
@@ -1250,7 +1289,7 @@ func (c *barClient) ArgWithQueryParams(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1279,14 +1318,17 @@ func (c *barClient) ArgWithQueryParams(
 func (c *barClient) DeleteFoo(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_DeleteFoo_Args,
+	r *clientsIDlClientsBarBar.Bar_DeleteFoo_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::deleteFoo"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteFoo", "Bar::deleteFoo", c.httpClient)
@@ -1356,18 +1398,98 @@ func (c *barClient) DeleteFoo(
 	}
 }
 
+// DeleteWithBody calls "/bar/withBody" endpoint.
+func (c *barClient) DeleteWithBody(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args,
+) (map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+	if reqUUID != "" {
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::deleteWithBody"
+	}
+
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithBody", "Bar::deleteWithBody", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/withBody"
+
+	err := req.WriteJSON("DELETE", fullURL, headers, r)
+	if err != nil {
+		return nil, err
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, clientErr = req.Do()
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
+				return nil
+			}
+			return clientErr
+		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := make(map[string]string)
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+	}
+
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
 // DeleteWithQueryParams calls "/bar/withQueryParams" endpoint.
 func (c *barClient) DeleteWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_DeleteWithQueryParams_Args,
+	r *clientsIDlClientsBarBar.Bar_DeleteWithQueryParams_Args,
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::deleteWithQueryParams"
 	}
 
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithQueryParams", "Bar::deleteWithQueryParams", c.httpClient)
@@ -1445,11 +1567,14 @@ func (c *barClient) Hello(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::helloWorld"
 	}
 
 	var defaultRes string
@@ -1508,10 +1633,10 @@ func (c *barClient) Hello(
 		return responseBody, respHeaders, nil
 
 	case 303:
-		return defaultRes, respHeaders, &clientsBarBar.SeeOthersRedirection{}
+		return defaultRes, respHeaders, &clientsIDlClientsBarBar.SeeOthersRedirection{}
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -1536,14 +1661,17 @@ func (c *barClient) Hello(
 func (c *barClient) ListAndEnum(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_ListAndEnum_Args,
+	r *clientsIDlClientsBarBar.Bar_ListAndEnum_Args,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::listAndEnum"
 	}
 
 	var defaultRes string
@@ -1618,7 +1746,7 @@ func (c *barClient) ListAndEnum(
 
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -1643,16 +1771,19 @@ func (c *barClient) ListAndEnum(
 func (c *barClient) MissingArg(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::missingArg"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "MissingArg", "Bar::missingArg", c.httpClient)
 
 	// Generate full URL.
@@ -1695,7 +1826,7 @@ func (c *barClient) MissingArg(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1710,7 +1841,7 @@ func (c *barClient) MissingArg(
 
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -1735,16 +1866,19 @@ func (c *barClient) MissingArg(
 func (c *barClient) NoRequest(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::noRequest"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoRequest", "Bar::noRequest", c.httpClient)
 
 	// Generate full URL.
@@ -1787,7 +1921,7 @@ func (c *barClient) NoRequest(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1802,7 +1936,7 @@ func (c *barClient) NoRequest(
 
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -1827,17 +1961,20 @@ func (c *barClient) NoRequest(
 func (c *barClient) Normal(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_Normal_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_Normal_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::normal"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Normal", "Bar::normal", c.httpClient)
 
 	// Generate full URL.
@@ -1880,7 +2017,7 @@ func (c *barClient) Normal(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1895,7 +2032,7 @@ func (c *barClient) Normal(
 
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -1920,17 +2057,20 @@ func (c *barClient) Normal(
 func (c *barClient) NormalRecur(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_NormalRecur_Args,
-) (*clientsBarBar.BarResponseRecur, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_NormalRecur_Args,
+) (*clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::normalRecur"
+	}
 
-	var defaultRes *clientsBarBar.BarResponseRecur
+	var defaultRes *clientsIDlClientsBarBar.BarResponseRecur
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NormalRecur", "Bar::normalRecur", c.httpClient)
 
 	// Generate full URL.
@@ -1973,7 +2113,7 @@ func (c *barClient) NormalRecur(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponseRecur
+		var responseBody clientsIDlClientsBarBar.BarResponseRecur
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1987,7 +2127,7 @@ func (c *barClient) NormalRecur(
 
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -2012,17 +2152,20 @@ func (c *barClient) NormalRecur(
 func (c *barClient) TooManyArgs(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Bar_TooManyArgs_Args,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Bar_TooManyArgs_Args,
+) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Bar::tooManyArgs"
+	}
 
-	var defaultRes *clientsBarBar.BarResponse
+	var defaultRes *clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TooManyArgs", "Bar::tooManyArgs", c.httpClient)
 
 	// Generate full URL.
@@ -2065,7 +2208,7 @@ func (c *barClient) TooManyArgs(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.BarResponse
+		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -2080,7 +2223,7 @@ func (c *barClient) TooManyArgs(
 
 	case 403:
 		allOptions := []interface{}{
-			&clientsBarBar.BarException{},
+			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -2089,7 +2232,7 @@ func (c *barClient) TooManyArgs(
 		return defaultRes, respHeaders, v.(error)
 	case 418:
 		allOptions := []interface{}{
-			&clientsFooFoo.FooException{},
+			&clientsIDlClientsFooFoo.FooException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
@@ -2114,14 +2257,17 @@ func (c *barClient) TooManyArgs(
 func (c *barClient) EchoBinary(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoBinary_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoBinary_Args,
 ) ([]byte, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoBinary"
 	}
 
 	var defaultRes []byte
@@ -2194,14 +2340,17 @@ func (c *barClient) EchoBinary(
 func (c *barClient) EchoBool(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoBool_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoBool_Args,
 ) (bool, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoBool"
 	}
 
 	var defaultRes bool
@@ -2280,14 +2429,17 @@ func (c *barClient) EchoBool(
 func (c *barClient) EchoDouble(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoDouble_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoDouble_Args,
 ) (float64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoDouble"
 	}
 
 	var defaultRes float64
@@ -2366,17 +2518,20 @@ func (c *barClient) EchoDouble(
 func (c *barClient) EchoEnum(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoEnum_Args,
-) (clientsBarBar.Fruit, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Echo_EchoEnum_Args,
+) (clientsIDlClientsBarBar.Fruit, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoEnum"
+	}
 
-	var defaultRes clientsBarBar.Fruit
+	var defaultRes clientsIDlClientsBarBar.Fruit
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoEnum", "Echo::echoEnum", c.httpClient)
 
 	// Generate full URL.
@@ -2424,7 +2579,7 @@ func (c *barClient) EchoEnum(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.Fruit
+		var responseBody clientsIDlClientsBarBar.Fruit
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -2452,14 +2607,17 @@ func (c *barClient) EchoEnum(
 func (c *barClient) EchoI16(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoI16_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoI16_Args,
 ) (int16, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoI16"
 	}
 
 	var defaultRes int16
@@ -2538,14 +2696,17 @@ func (c *barClient) EchoI16(
 func (c *barClient) EchoI32(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoI32_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoI32_Args,
 ) (int32, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoI32"
 	}
 
 	var defaultRes int32
@@ -2624,17 +2785,20 @@ func (c *barClient) EchoI32(
 func (c *barClient) EchoI32Map(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoI32Map_Args,
-) (map[int32]*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Echo_EchoI32Map_Args,
+) (map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoI32Map"
+	}
 
-	var defaultRes map[int32]*clientsBarBar.BarResponse
+	var defaultRes map[int32]*clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32Map", "Echo::echoI32Map", c.httpClient)
 
 	// Generate full URL.
@@ -2682,7 +2846,7 @@ func (c *barClient) EchoI32Map(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody map[int32]*clientsBarBar.BarResponse
+		var responseBody map[int32]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -2710,14 +2874,17 @@ func (c *barClient) EchoI32Map(
 func (c *barClient) EchoI64(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoI64_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoI64_Args,
 ) (int64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoI64"
 	}
 
 	var defaultRes int64
@@ -2796,14 +2963,17 @@ func (c *barClient) EchoI64(
 func (c *barClient) EchoI8(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoI8_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoI8_Args,
 ) (int8, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoI8"
 	}
 
 	var defaultRes int8
@@ -2882,14 +3052,17 @@ func (c *barClient) EchoI8(
 func (c *barClient) EchoString(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoString_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoString_Args,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoString"
 	}
 
 	var defaultRes string
@@ -2968,14 +3141,17 @@ func (c *barClient) EchoString(
 func (c *barClient) EchoStringList(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoStringList_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoStringList_Args,
 ) ([]string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoStringList"
 	}
 
 	var defaultRes []string
@@ -3054,17 +3230,20 @@ func (c *barClient) EchoStringList(
 func (c *barClient) EchoStringMap(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoStringMap_Args,
-) (map[string]*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Echo_EchoStringMap_Args,
+) (map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoStringMap"
+	}
 
-	var defaultRes map[string]*clientsBarBar.BarResponse
+	var defaultRes map[string]*clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringMap", "Echo::echoStringMap", c.httpClient)
 
 	// Generate full URL.
@@ -3112,7 +3291,7 @@ func (c *barClient) EchoStringMap(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody map[string]*clientsBarBar.BarResponse
+		var responseBody map[string]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -3140,14 +3319,17 @@ func (c *barClient) EchoStringMap(
 func (c *barClient) EchoStringSet(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoStringSet_Args,
+	r *clientsIDlClientsBarBar.Echo_EchoStringSet_Args,
 ) (map[string]struct{}, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoStringSet"
 	}
 
 	var defaultRes map[string]struct{}
@@ -3226,17 +3408,20 @@ func (c *barClient) EchoStringSet(
 func (c *barClient) EchoStructList(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoStructList_Args,
-) ([]*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Echo_EchoStructList_Args,
+) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoStructList"
+	}
 
-	var defaultRes []*clientsBarBar.BarResponse
+	var defaultRes []*clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructList", "Echo::echoStructList", c.httpClient)
 
 	// Generate full URL.
@@ -3284,7 +3469,7 @@ func (c *barClient) EchoStructList(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody []*clientsBarBar.BarResponse
+		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -3312,17 +3497,20 @@ func (c *barClient) EchoStructList(
 func (c *barClient) EchoStructSet(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoStructSet_Args,
-) ([]*clientsBarBar.BarResponse, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Echo_EchoStructSet_Args,
+) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoStructSet"
+	}
 
-	var defaultRes []*clientsBarBar.BarResponse
+	var defaultRes []*clientsIDlClientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructSet", "Echo::echoStructSet", c.httpClient)
 
 	// Generate full URL.
@@ -3370,7 +3558,7 @@ func (c *barClient) EchoStructSet(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody []*clientsBarBar.BarResponse
+		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -3398,17 +3586,20 @@ func (c *barClient) EchoStructSet(
 func (c *barClient) EchoTypedef(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoTypedef_Args,
-) (clientsBarBar.UUID, map[string]string, error) {
+	r *clientsIDlClientsBarBar.Echo_EchoTypedef_Args,
+) (clientsIDlClientsBarBar.UUID, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Echo::echoTypedef"
+	}
 
-	var defaultRes clientsBarBar.UUID
+	var defaultRes clientsIDlClientsBarBar.UUID
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoTypedef", "Echo::echoTypedef", c.httpClient)
 
 	// Generate full URL.
@@ -3456,7 +3647,7 @@ func (c *barClient) EchoTypedef(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody clientsBarBar.UUID
+		var responseBody clientsIDlClientsBarBar.UUID
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err

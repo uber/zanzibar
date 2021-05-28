@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -464,7 +464,6 @@ func (g *httpClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-
 	return clientSpec, nil
 }
 
@@ -483,10 +482,9 @@ func (g *httpClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	exposedMethods, err := reverseExposedMethods(clientSpec, instance)
-	if err != nil {
-		return nil, err
-	}
+	exposedMethods := reverseExposedMethods(clientSpec)
+
+	sort.Sort(&clientSpec.ModuleSpec.Services)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -598,7 +596,6 @@ func (g *tchannelClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-
 	return clientSpec, nil
 }
 
@@ -617,10 +614,9 @@ func (g *tchannelClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	exposedMethods, err := reverseExposedMethods(clientSpec, instance)
-	if err != nil {
-		return nil, err
-	}
+	exposedMethods := reverseExposedMethods(clientSpec)
+
+	sort.Sort(clientSpec.ModuleSpec.Services)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -699,21 +695,15 @@ func (g *tchannelClientGenerator) Generate(
 	}, nil
 }
 
-// reverse index and validate the exposed methods map
-func reverseExposedMethods(clientSpec *ClientSpec, instance *ModuleInstance) (map[string]string, error) {
+// reverse index and filter the exposed methods map as the gen-thrift-spec can be subset
+func reverseExposedMethods(clientSpec *ClientSpec) map[string]string {
 	reversed := map[string]string{}
 	for exposedMethod, idlMethod := range clientSpec.ExposedMethods {
-		reversed[idlMethod] = exposedMethod
-		if !hasMethod(clientSpec, idlMethod) {
-			return nil, errors.Errorf(
-				"Invalid exposedMethods for client %q, method %q not found",
-				instance.InstanceName,
-				idlMethod,
-			)
+		if hasMethod(clientSpec, idlMethod) {
+			reversed[idlMethod] = exposedMethod
 		}
 	}
-
-	return reversed, nil
+	return reversed
 }
 
 func hasMethod(cspec *ClientSpec, idlMethod string) bool {
@@ -800,7 +790,6 @@ func (g *customClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-
 	return clientSpec, nil
 }
 
@@ -894,7 +883,6 @@ func (g *gRPCClientGenerator) ComputeSpec(
 			instance.InstanceName,
 		)
 	}
-
 	return clientSpec, nil
 }
 
@@ -913,10 +901,20 @@ func (g *gRPCClientGenerator) Generate(
 	}
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
-	reversedMethods, err := reverseExposedMethods(clientSpec, instance)
-	if err != nil {
-		return nil, err
+	reversedMethods := reverseExposedMethods(clientSpec)
+
+	serviceNames := map[string]struct{}{}
+	for key := range reversedMethods {
+		serviceName := strings.Split(key, "::")[0]
+		serviceNames[serviceName] = struct{}{}
 	}
+
+	services := ServiceSpecs{}
+	for name := range serviceNames {
+		services = append(services, &ServiceSpec{Name: name})
+	}
+
+	sort.Sort(&services)
 
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
@@ -924,7 +922,7 @@ func (g *gRPCClientGenerator) Generate(
 		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
-		Services:         nil,
+		Services:         services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   reversedMethods,
@@ -972,7 +970,7 @@ func (g *gRPCClientGenerator) Generate(
 	}
 	return &BuildResult{
 		Files: files,
-		Spec:  (*ClientSpec)(nil),
+		Spec:  clientSpec,
 	}, nil
 }
 
@@ -1048,7 +1046,6 @@ func (g *EndpointGenerator) ComputeSpec(
 		}
 		endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 	}
-
 	return endpointSpecs, nil
 }
 

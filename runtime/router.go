@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -86,9 +86,10 @@ type RouterEndpoint struct {
 	JSONWrapper  jsonwrapper.JSONWrapper
 
 	contextExtractor ContextExtractor
-	logger           *zap.Logger
+	contextLogger    ContextLogger
 	scope            tally.Scope
 	tracer           opentracing.Tracer
+	config           *StaticConfig
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -104,10 +105,11 @@ func NewRouterEndpoint(
 		HandlerName:      handlerID,
 		HandlerFn:        handler,
 		contextExtractor: extractor,
-		logger:           deps.Logger,
+		contextLogger:    deps.ContextLogger,
 		scope:            deps.Scope,
 		tracer:           deps.Tracer,
 		JSONWrapper:      deps.JSONWrapper,
+		config:           deps.Config,
 	}
 }
 

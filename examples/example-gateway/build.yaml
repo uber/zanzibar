@@ -2,7 +2,9 @@ annotationPrefix: zanzibar
 clientConfig: ./clients
 copyrightHeader: ./copyright_header.txt
 endpointConfig: ./endpoints
-genCodePackage: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
+genCodePackage:
+  .thrift: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
+  .proto: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
 genMock: true
 middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
@@ -11,7 +13,10 @@ defaultHeaders:
   - x-uber-bar
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
-thriftRootDir: ./idl
+idlRootDir: ./idl
+moduleIdlSubDir:
+  endpoints: endpoints-idl
+  default: clients-idl
 traceKey: x-trace-id
 moduleSearchPaths:
   client:
@@ -30,3 +35,4 @@ moduleSearchPaths:
 defaultDependencies:
   endpoint:
     - middlewares/default/*
+shadowRequestHeader: x-shadow-request

@@ -34,7 +34,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
-	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	clientsIDlClientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 // Client defines contacts client interface.
@@ -43,8 +43,8 @@ type Client interface {
 	SaveContacts(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsContactsContacts.Contacts_SaveContacts_Args,
-	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
+		args *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
+	) (*clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error)
 	TestURLURL(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -53,11 +53,12 @@ type Client interface {
 
 // contactsClient is the http client.
 type contactsClient struct {
-	clientID               string
-	httpClient             *zanzibar.HTTPClient
-	jsonWrapper            jsonwrapper.JSONWrapper
-	circuitBreakerDisabled bool
-	requestUUIDHeaderKey   string
+	clientID                  string
+	httpClient                *zanzibar.HTTPClient
+	jsonWrapper               jsonwrapper.JSONWrapper
+	circuitBreakerDisabled    bool
+	requestUUIDHeaderKey      string
+	requestProcedureHeaderKey string
 }
 
 // NewClient returns a new http client.
@@ -80,17 +81,21 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey") {
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
 	followRedirect := true
 	if deps.Default.Config.ContainsKey("clients.contacts.followRedirect") {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.contacts.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
+	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
 
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClientContext(
-			deps.Default.Logger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"contacts",
 			map[string]string{
 				"SaveContacts": "Contacts::saveContacts",
@@ -101,12 +106,13 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 			followRedirect,
 		),
-		circuitBreakerDisabled: circuitBreakerDisabled,
-		requestUUIDHeaderKey:   requestUUIDHeaderKey,
+		circuitBreakerDisabled:    circuitBreakerDisabled,
+		requestUUIDHeaderKey:      requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
 	}
 }
 
-func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") {
@@ -157,23 +163,26 @@ func (c *contactsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsContactsContacts.Contacts_SaveContacts_Args,
-) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
+	r *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
+) (*clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Contacts::saveContacts"
+	}
 
-	var defaultRes *clientsContactsContacts.SaveContactsResponse
+	var defaultRes *clientsIDlClientsContactsContacts.SaveContactsResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.SaveContactsRequest.UserUUID) + "/contacts"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	err := req.WriteJSON("POST", fullURL, headers, r.SaveContactsRequest)
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -210,7 +219,7 @@ func (c *contactsClient) SaveContacts(
 
 	switch res.StatusCode {
 	case 202:
-		var responseBody clientsContactsContacts.SaveContactsResponse
+		var responseBody clientsIDlClientsContactsContacts.SaveContactsResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -223,9 +232,9 @@ func (c *contactsClient) SaveContacts(
 		return &responseBody, respHeaders, nil
 
 	case 400:
-		return defaultRes, respHeaders, &clientsContactsContacts.BadRequest{}
+		return defaultRes, respHeaders, &clientsIDlClientsContactsContacts.BadRequest{}
 	case 404:
-		return defaultRes, respHeaders, &clientsContactsContacts.NotFound{}
+		return defaultRes, respHeaders, &clientsIDlClientsContactsContacts.NotFound{}
 
 	default:
 		_, err = res.ReadAll()
@@ -246,11 +255,14 @@ func (c *contactsClient) TestURLURL(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
 	if reqUUID != "" {
-		if headers == nil {
-			headers = make(map[string]string)
-		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "Contacts::testUrlUrl"
 	}
 
 	var defaultRes string

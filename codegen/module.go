@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1085,10 +1085,36 @@ func (system *ModuleSystem) populateSpec(instance *ModuleInstance) error {
 
 	spec, err := specProvider.ComputeSpec(instance)
 	if err != nil {
-		return fmt.Errorf("error when running computespec: %s", err.Error())
+		return err
 	}
-	instance.genSpec = spec
+	if spec != nil {
+		instance.mu.Lock()
+		instance.genSpec = spec
+		instance.mu.Unlock()
+	}
+	// HACK: to get get of bad modules, which should not be there at first place
+	filterNilClientDeps(instance)
 	return nil
+}
+
+func filterNilClientDeps(in *ModuleInstance) {
+	filterNilClientDepsHelper(in.ResolvedDependencies)
+	filterNilClientDepsHelper(in.RecursiveDependencies)
+}
+
+func filterNilClientDepsHelper(deps map[string][]*ModuleInstance) {
+	moduleInstances, ok := deps["client"]
+	if !ok {
+		return
+	}
+	var validClients []*ModuleInstance
+	for _, modInstance := range moduleInstances {
+		if modInstance.GeneratedSpec() == nil {
+			continue
+		}
+		validClients = append(validClients, modInstance)
+	}
+	deps["client"] = validClients
 }
 
 // collectTransitiveDependencies will collect every instance in resolvedModules that depends on something in initialInstances.
@@ -1162,25 +1188,27 @@ func (system *ModuleSystem) IncrementalBuild(
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 
-	if instances == nil || len(instances) == 0 {
-		for _, modules := range resolvedModules {
-			for _, instance := range modules {
-				instances = append(instances, instance.AsModuleDependency())
-			}
-		}
-	}
-
+	skipModuleMap := map[*ModuleInstance]struct{}{}
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
 	for _, className := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(resolvedModules[className]))
-		ch := make(chan error, len(resolvedModules[className]))
+		ch := make(chan *populateSpecRes, len(resolvedModules[className]))
 		for _, instance := range resolvedModules[className] {
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
-					ch <- err
+					baseErr := errors.Cause(err)
+					if _, ok := baseErr.(*IgnorePopulateSpecStageErr); ok {
+						return
+					}
+					if _, ok := baseErr.(*ErrorSkipCodeGen); ok {
+						// HACK: to get get of bad modules, which should not be even be loaded in dag at first place
+						ch <- &populateSpecRes{mi: instance}
+					} else {
+						ch <- &populateSpecRes{err: err}
+					}
 				}
 			}(instance)
 		}
@@ -1190,12 +1218,33 @@ func (system *ModuleSystem) IncrementalBuild(
 			close(ch)
 		}()
 
-		for err := range ch {
-			if err != nil {
-				// if incrementalBuild fails, perform a full build.
-				fmt.Printf("Falling back to full build due to err: %s\n", err.Error())
-				toBeBuiltModules = resolvedModules
-				break
+		for psRes := range ch {
+			if psRes.err != nil {
+				return nil, psRes.err
+			}
+			skipModuleMap[psRes.mi] = struct{}{}
+		}
+	}
+
+	resolvedModulesCopy := map[string][]*ModuleInstance{}
+	for cls, modules := range resolvedModules {
+		for _, m := range modules {
+			if _, ok := skipModuleMap[m]; ok {
+				// skipping error modules
+				fmt.Println("skipping module gen", m.InstanceName)
+				continue
+			}
+			m.RecursiveDependencies = trimSkipDependencies(m.RecursiveDependencies, skipModuleMap)
+			m.ResolvedDependencies = trimSkipDependencies(m.ResolvedDependencies, skipModuleMap)
+			resolvedModulesCopy[cls] = append(resolvedModulesCopy[cls], m)
+		}
+	}
+	resolvedModules = resolvedModulesCopy
+
+	if instances == nil || len(instances) == 0 {
+		for _, modules := range resolvedModules {
+			for _, instance := range modules {
+				instances = append(instances, instance.AsModuleDependency())
 			}
 		}
 	}
@@ -1273,6 +1322,24 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 
 	return toBeBuiltModules, nil
+}
+
+func trimSkipDependencies(depsMap map[string][]*ModuleInstance, skipModuleMap map[*ModuleInstance]struct{}) map[string][]*ModuleInstance {
+	newDepsMap := map[string][]*ModuleInstance{}
+	for cl, deps := range depsMap {
+		for _, d := range deps {
+			if _, ok := skipModuleMap[d]; ok {
+				continue
+			}
+			newDepsMap[cl] = append(newDepsMap[cl], d)
+		}
+	}
+	return newDepsMap
+}
+
+type populateSpecRes struct {
+	mi  *ModuleInstance
+	err error
 }
 
 func (system *ModuleSystem) trimToSelectiveDependencies(toBeBuiltModules map[string][]*ModuleInstance) {
@@ -1384,7 +1451,9 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 	if buildResult == nil {
 		return nil
 	}
+	instance.mu.Lock()
 	instance.genSpec = buildResult.Spec
+	instance.mu.Unlock()
 	if !commitChange {
 		return nil
 	}
@@ -1624,7 +1693,7 @@ type ModuleInstance struct {
 	// genSpec is used to share generated specs across dependencies. Generators
 	// should not mutate this directly, and should return the spec as a result.
 	// Only the module system code should mutate a module instance.
-	genSpec interface{}
+	genSpec interface{} // protected by mu
 	// PackageInfo is the name for the generated module instance
 	PackageInfo *PackageInfo
 	// ClassName is the name of the class as defined in the module system
@@ -1665,6 +1734,7 @@ type ModuleInstance struct {
 	YAMLFileRaw []byte
 	// SelectiveBuilding allows the module to be built with subset of dependencies
 	SelectiveBuilding bool
+	mu                sync.RWMutex
 }
 
 func (instance *ModuleInstance) String() string {
@@ -1673,6 +1743,8 @@ func (instance *ModuleInstance) String() string {
 
 // GeneratedSpec returns the last spec result returned for the module instance
 func (instance *ModuleInstance) GeneratedSpec() interface{} {
+	instance.mu.RLock()
+	defer instance.mu.RUnlock()
 	return instance.genSpec
 }
 

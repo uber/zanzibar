@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,10 +48,10 @@ type ServerHTTPResponse struct {
 	pendingBodyBytes  []byte
 	pendingBodyObj    interface{}
 	pendingStatusCode int
-	logger            Logger
+	contextLogger     ContextLogger
 	scope             tally.Scope
 	jsonWrapper       jsonwrapper.JSONWrapper
-	err               error
+	Err               error
 }
 
 // NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
@@ -62,7 +63,7 @@ func NewServerHTTPResponse(
 		Request:        req,
 		StatusCode:     200,
 		responseWriter: w,
-		logger:         req.logger,
+		contextLogger:  req.contextLogger,
 		scope:          req.scope,
 		jsonWrapper:    req.jsonWrapper,
 	}
@@ -73,7 +74,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	logFields := GetLogFieldsFromCtx(ctx)
 	if !res.Request.started {
 		/* coverage ignore next line */
-		res.logger.Error(
+		res.contextLogger.Error(ctx,
 			"Forgot to start server response",
 			append(logFields, zap.String("path", res.Request.URL.Path))...,
 		)
@@ -82,7 +83,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.logger.Error(
+		res.contextLogger.Error(ctx,
 			"Finished a server response multiple times",
 			append(logFields, zap.String("path", res.Request.URL.Path))...,
 		)
@@ -100,7 +101,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	tagged.Timer(endpointLatency).Record(delta)
 	tagged.Histogram(endpointLatencyHist, tally.DefaultBuckets).RecordDuration(delta)
 	if !known {
-		res.logger.Error(
+		res.contextLogger.Error(ctx,
 			"Unknown status code",
 			append(logFields, zap.Int("UnknownStatusCode", res.StatusCode))...,
 		)
@@ -108,10 +109,10 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
 
-	logFn := res.logger.Debug
+	logFn := res.contextLogger.Debug
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		tagged.Counter(endpointAppErrors).Inc(1)
-		logFn = res.logger.Warn
+		logFn = res.contextLogger.Warn
 	}
 
 	span := res.Request.GetSpan()
@@ -119,8 +120,8 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		span.Finish()
 	}
 
-	logFn(
-		"Finished an incoming server HTTP request",
+	logFn(ctx,
+		fmt.Sprintf("Finished an incoming server HTTP request with %d status code", res.StatusCode),
 		append(logFields, serverHTTPLogFields(res.Request, res)...)...,
 	)
 }
@@ -145,11 +146,11 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		}
 	}
 
-	if res.err != nil {
-		fields = append(fields, zap.Error(res.err))
+	if res.Err != nil {
+		fields = append(fields, zap.Error(res.Err))
 
-		cause := errors.Cause(res.err)
-		if cause != nil && cause != res.err {
+		cause := errors.Cause(res.Err)
+		if cause != nil && cause != res.Err {
 			fields = append(fields, zap.NamedError("errorCause", cause))
 		}
 	}
@@ -170,7 +171,7 @@ func (res *ServerHTTPResponse) SendErrorString(
 func (res *ServerHTTPResponse) SendError(
 	statusCode int, errMsg string, errCause error,
 ) {
-	res.err = errCause
+	res.Err = errCause
 	res.WriteJSONBytes(statusCode, nil,
 		[]byte(`{"error":"`+errMsg+`"}`),
 	)
@@ -207,15 +208,16 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 
 // MarshalResponseJSON serializes a json serializable into bytes
 func (res *ServerHTTPResponse) MarshalResponseJSON(body interface{}) []byte {
+	ctx := res.Request.Context()
 	if body == nil {
 		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
-		res.logger.Error("Could not serialize nil pointer body")
+		res.contextLogger.Error(ctx, "Could not serialize nil pointer body")
 		return nil
 	}
 	bytes, err := res.jsonWrapper.Marshal(body)
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
-		res.logger.Error("Could not serialize json response", zap.Error(err))
+		res.contextLogger.Error(ctx, "Could not serialize json response", zap.Error(err))
 		return nil
 	}
 	return bytes
@@ -280,7 +282,7 @@ func (res *ServerHTTPResponse) PeekBody(
 func (res *ServerHTTPResponse) flush(ctx context.Context) {
 	if res.flushed {
 		/* coverage ignore next line */
-		res.logger.Error(
+		res.contextLogger.Error(ctx,
 			"Flushed a server response multiple times",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -290,7 +292,9 @@ func (res *ServerHTTPResponse) flush(ctx context.Context) {
 
 	res.flushed = true
 	res.writeHeader(res.pendingStatusCode)
-	res.writeBytes(res.pendingBodyBytes)
+	if _, noContent := noContentStatusCodes[res.pendingStatusCode]; !noContent {
+		res.writeBytes(res.pendingBodyBytes)
+	}
 	res.finish(ctx)
 }
 
@@ -304,9 +308,10 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
 		/* coverage ignore next line */
-		res.logger.Error(
+		res.contextLogger.Error(res.Request.Context(),
 			"Could not write string to resp body",
 			zap.Error(err),
+			zap.String("bytesLength", strconv.Itoa(len(bytes))),
 		)
 	}
 }
@@ -315,6 +320,12 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 // which isn't sent back yet.
 func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, int) {
 	return res.pendingBodyBytes, res.pendingStatusCode
+}
+
+// GetPendingResponseObject lets you read the pending body object
+// which isn't sent back yet.
+func (res *ServerHTTPResponse) GetPendingResponseObject() interface{} {
+	return res.pendingBodyObj
 }
 
 // Headers returns the underlying http response's headers

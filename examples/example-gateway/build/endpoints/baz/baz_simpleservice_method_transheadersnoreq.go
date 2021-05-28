@@ -35,7 +35,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	endpointsIDlEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/baz/baz"
 
 	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
@@ -127,7 +127,7 @@ func (h *SimpleServiceTransHeadersNoReqHandler) HandleRequest(
 
 		switch errValue := err.(type) {
 
-		case *endpointsBazBaz.AuthErr:
+		case *endpointsIDlEndpointsBazBaz.AuthErr:
 			res.WriteJSON(
 				401, cliRespHeaders, errValue,
 			)

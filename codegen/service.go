@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Uber Technologies, Inc.
+// Copyright (c) 2021 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,6 @@ type ModuleSpec struct {
 	// CompiledModule is the resolved module from thrift file
 	// that will contain modules and typedefs not directly mounted on AST
 	CompiledModule *compile.Module `json:"omitempty"`
-	// ProtoModule foo
-	ProtoModule *proto.Proto
 	// Source thrift file to generate the code.
 	ThriftFile string
 	// Whether the ThriftFile should have annotations or not
@@ -50,7 +48,7 @@ type ModuleSpec struct {
 	GoThriftTypesFilePath string
 	// Generated imports
 	IncludedPackages []GoPackageImport
-	Services         []*ServiceSpec
+	Services         ServiceSpecs
 	ProtoServices    []*ProtoService
 }
 
@@ -58,6 +56,21 @@ type ModuleSpec struct {
 type GoPackageImport struct {
 	PackageName string
 	AliasName   string
+}
+
+// ServiceSpecs is a list of ServiceSpecs
+type ServiceSpecs []*ServiceSpec
+
+func (a ServiceSpecs) Len() int {
+	return len(a)
+}
+
+func (a ServiceSpecs) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a ServiceSpecs) Less(i, j int) bool {
+	return a[i].Name < a[j].Name
 }
 
 // ServiceSpec specifies a service.
@@ -91,8 +104,9 @@ func NewProtoModuleSpec(protoFile string, isEndpoint bool, h *PackageHelper) (*M
 	}
 	pModule := newVisitor().Visit(protoModules)
 
+	sort.Sort(&pModule.Services)
+
 	moduleSpec := &ModuleSpec{
-		ProtoModule:   protoModules,
 		ProtoServices: pModule.Services,
 		ThriftFile:    protoFile,
 		WantAnnot:     false,
@@ -115,6 +129,10 @@ func NewModuleSpec(
 	isEndpoint bool,
 	packageHelper *PackageHelper,
 ) (*ModuleSpec, error) {
+	if !fileExists(thrift) {
+		return nil, &ErrorSkipCodeGen{IDLFile: thrift}
+	}
+
 	module, err := compile.Compile(thrift)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parse thrift file")
@@ -134,6 +152,36 @@ func NewModuleSpec(
 		return nil, err
 	}
 	return moduleSpec, nil
+}
+
+// ErrorSkipCodeGen when thrown modules can be skipped building without failing code gen
+type ErrorSkipCodeGen struct {
+	IDLFile string
+}
+
+// Error when thrown modules can be skipped building without failing code gen
+func (e *ErrorSkipCodeGen) Error() string {
+	return fmt.Sprintf("code gen skip for idlFile: %v", e.IDLFile)
+}
+
+// IgnorePopulateSpecStageErr when thrown modules can be skipped building while populating spec
+type IgnorePopulateSpecStageErr struct {
+	Err error
+}
+
+// Error when thrown modules can be skipped building without failing code gen
+func (e *IgnorePopulateSpecStageErr) Error() string {
+	return e.Err.Error()
+}
+
+// fileExists checks if a file exists and is not a directory before we
+// try using it to prevent further errors.
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
 
 // AddImports adds imported Go packages in ModuleSpec in alphabetical order.
