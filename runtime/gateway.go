@@ -413,18 +413,21 @@ func (gateway *Gateway) Shutdown() {
 		}
 	}()
 
+	// wait for servers to shutdown before stopping grpc clients.
 	swg.Wait()
 
 	// stop all grpc clients
+	swg.Add(1)
 	if gateway.GRPCClientDispatcher != nil {
 		go func() {
+			defer swg.Done()
 			if err := gateway.GRPCClientDispatcher.Stop(); err != nil {
 				ec <- errors.Wrap(err, "error stopping gRPC client dispatcher")
 			}
 		}()
 	}
 
-
+	swg.Wait()
 
 	select {
 	case err := <-ec:
