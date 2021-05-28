@@ -434,6 +434,9 @@ func (gateway *Gateway) Shutdown() {
 		}
 	}()
 
+	// wait for servers to shutdown before stopping GRPCClientDispatcher
+	swg.Wait()
+
 	// stop all grpc clients
 	if gateway.GRPCClientDispatcher != nil {
 		swg.Add(1)
