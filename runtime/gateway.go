@@ -417,8 +417,8 @@ func (gateway *Gateway) Shutdown() {
 	swg.Wait()
 
 	// stop all grpc clients
-	swg.Add(1)
 	if gateway.GRPCClientDispatcher != nil {
+		swg.Add(1)
 		go func() {
 			defer swg.Done()
 			if err := gateway.GRPCClientDispatcher.Stop(); err != nil {
