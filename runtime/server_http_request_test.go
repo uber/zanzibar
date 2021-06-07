@@ -2297,6 +2297,9 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 		"host",
 		"pid",
 		"timestamp-finished",
+		"trace.span",
+		"trace.traceId",
+		"trace.sampled",
 	}
 
 	if isShadowRequest {

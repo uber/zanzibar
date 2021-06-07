@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"fmt"
+	"github.com/uber/jaeger-client-go"
 	"net/http"
 	"strconv"
 	"strings"
@@ -135,6 +136,17 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		zap.Time("timestamp-started", req.startTime),
 		zap.Time("timestamp-finished", res.finishTime),
 		zap.Int("statusCode", res.StatusCode),
+	}
+
+	if span := req.GetSpan(); span != nil {
+		jc, ok := span.Context().(jaeger.SpanContext)
+		if ok {
+			fields = append(fields,
+				zap.String("trace.span", jc.SpanID().String()),
+				zap.String("trace.traceId", jc.TraceID().String()),
+				zap.Bool(  "trace.sampled", jc.IsSampled()),
+			)
+		}
 	}
 
 	for k, v := range res.Headers() {
