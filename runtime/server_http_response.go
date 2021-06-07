@@ -144,7 +144,7 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 			fields = append(fields,
 				zap.String("trace.span", jc.SpanID().String()),
 				zap.String("trace.traceId", jc.TraceID().String()),
-				zap.Bool(  "trace.sampled", jc.IsSampled()),
+				zap.Bool("trace.sampled", jc.IsSampled()),
 			)
 		}
 	}
