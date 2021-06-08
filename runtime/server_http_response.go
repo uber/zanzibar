@@ -23,11 +23,12 @@ package zanzibar
 import (
 	"context"
 	"fmt"
-	"github.com/uber/jaeger-client-go"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/uber/jaeger-client-go"
 
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
