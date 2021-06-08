@@ -148,6 +148,8 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 				zap.Bool("trace.sampled", jc.IsSampled()),
 			)
 		}
+	} else {
+		zap.String("missing-trace", "yes")
 	}
 
 	for k, v := range res.Headers() {
