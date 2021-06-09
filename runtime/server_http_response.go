@@ -147,6 +147,9 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 				zap.String("trace.traceId", jc.TraceID().String()),
 				zap.Bool("trace.sampled", jc.IsSampled()),
 			)
+		} else {
+			fields = append(fields,
+				zap.String("trace.missingSpan", "yes"))
 		}
 	}
 
