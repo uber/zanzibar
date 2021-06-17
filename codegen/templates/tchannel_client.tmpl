@@ -20,7 +20,6 @@ import (
 
 	"go.uber.org/zap"
 
-
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -152,6 +151,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	return &{{$clientName}}{
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		defaultDeps:            deps.Default,
 	}
 }
 
@@ -231,6 +231,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
+	defaultDeps  *zanzibar.DefaultDependencies
 }
 
 {{range $svc := .Services}}
@@ -266,7 +267,15 @@ type {{$clientName}} struct {
 		} else {
 			// We want hystrix ckt-breaker to count errors only for system issues
 			var clientErr error
+			scope := c.defaultDeps.Scope.Tagged(map[string]string{
+			"client" : "{{$svc.Name}}",
+			})
+		  start := time.Now()
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+				t := time.Now()
+			  elapsed := t.Sub(start)
+			  size := scope.Timer("client")
+			  size.Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)

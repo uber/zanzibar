@@ -137,6 +137,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &corgeClient{
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		defaultDeps:            deps.Default,
 	}
 }
 
@@ -216,6 +217,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 type corgeClient struct {
 	client                 *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
+	defaultDeps            *zanzibar.DefaultDependencies
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -239,7 +241,15 @@ func (c *corgeClient) EchoString(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
+		scope := c.defaultDeps.Scope.Tagged(map[string]string{
+			"client": "Corge",
+		})
+		start := time.Now()
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
+			t := time.Now()
+			elapsed := t.Sub(start)
+			size := scope.Timer("client")
+			size.Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)

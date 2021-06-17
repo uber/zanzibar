@@ -13,6 +13,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/yarpc"
 	"go.uber.org/yarpc/api/transport"
+	"go.uber.org/yarpc/api/x/restriction"
 	"go.uber.org/yarpc/encoding/protobuf"
 	"go.uber.org/yarpc/encoding/protobuf/reflection"
 )
@@ -86,7 +87,8 @@ type FxEchoYARPCClientParams struct {
 	fx.In
 
 	Provider    yarpc.ClientConfig
-	AnyResolver jsonpb.AnyResolver `name:"yarpcfx" optional:"true"`
+	AnyResolver jsonpb.AnyResolver  `name:"yarpcfx" optional:"true"`
+	Restriction restriction.Checker `optional:"true"`
 }
 
 // FxEchoYARPCClientResult defines the output
@@ -111,8 +113,18 @@ type FxEchoYARPCClientResult struct {
 //  )
 func NewFxEchoYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxEchoYARPCClientParams) FxEchoYARPCClientResult {
+		cc := params.Provider.ClientConfig(name)
+
+		if params.Restriction != nil {
+			if namer, ok := cc.GetUnaryOutbound().(transport.Namer); ok {
+				if err := params.Restriction.Check(protobuf.Encoding, namer.TransportName()); err != nil {
+					panic(err.Error())
+				}
+			}
+		}
+
 		return FxEchoYARPCClientResult{
-			Client: newEchoYARPCClient(params.Provider.ClientConfig(name), params.AnyResolver, options...),
+			Client: newEchoYARPCClient(cc, params.AnyResolver, options...),
 		}
 	}
 }
@@ -279,7 +291,8 @@ type FxEchoInternalYARPCClientParams struct {
 	fx.In
 
 	Provider    yarpc.ClientConfig
-	AnyResolver jsonpb.AnyResolver `name:"yarpcfx" optional:"true"`
+	AnyResolver jsonpb.AnyResolver  `name:"yarpcfx" optional:"true"`
+	Restriction restriction.Checker `optional:"true"`
 }
 
 // FxEchoInternalYARPCClientResult defines the output
@@ -304,8 +317,18 @@ type FxEchoInternalYARPCClientResult struct {
 //  )
 func NewFxEchoInternalYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxEchoInternalYARPCClientParams) FxEchoInternalYARPCClientResult {
+		cc := params.Provider.ClientConfig(name)
+
+		if params.Restriction != nil {
+			if namer, ok := cc.GetUnaryOutbound().(transport.Namer); ok {
+				if err := params.Restriction.Check(protobuf.Encoding, namer.TransportName()); err != nil {
+					panic(err.Error())
+				}
+			}
+		}
+
 		return FxEchoInternalYARPCClientResult{
-			Client: newEchoInternalYARPCClient(params.Provider.ClientConfig(name), params.AnyResolver, options...),
+			Client: newEchoInternalYARPCClient(cc, params.AnyResolver, options...),
 		}
 	}
 }

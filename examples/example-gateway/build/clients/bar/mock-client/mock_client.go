@@ -10,33 +10,33 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
-// MockClient is a mock of Client interface
+// MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
+// MockClientMockRecorder is the mock recorder for MockClient.
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance
+// NewMockClient creates a new mock instance.
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// ArgNotStruct mocks base method
+// ArgNotStruct mocks base method.
 func (m *MockClient) ArgNotStruct(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgNotStruct_Args) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgNotStruct", arg0, arg1, arg2)
@@ -45,13 +45,13 @@ func (m *MockClient) ArgNotStruct(arg0 context.Context, arg1 map[string]string, 
 	return ret0, ret1
 }
 
-// ArgNotStruct indicates an expected call of ArgNotStruct
+// ArgNotStruct indicates an expected call of ArgNotStruct.
 func (mr *MockClientMockRecorder) ArgNotStruct(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgNotStruct", reflect.TypeOf((*MockClient)(nil).ArgNotStruct), arg0, arg1, arg2)
 }
 
-// ArgWithHeaders mocks base method
+// ArgWithHeaders mocks base method.
 func (m *MockClient) ArgWithHeaders(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithHeaders_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithHeaders", arg0, arg1, arg2)
@@ -61,13 +61,13 @@ func (m *MockClient) ArgWithHeaders(arg0 context.Context, arg1 map[string]string
 	return ret0, ret1, ret2
 }
 
-// ArgWithHeaders indicates an expected call of ArgWithHeaders
+// ArgWithHeaders indicates an expected call of ArgWithHeaders.
 func (mr *MockClientMockRecorder) ArgWithHeaders(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithHeaders", reflect.TypeOf((*MockClient)(nil).ArgWithHeaders), arg0, arg1, arg2)
 }
 
-// ArgWithManyQueryParams mocks base method
+// ArgWithManyQueryParams mocks base method.
 func (m *MockClient) ArgWithManyQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithManyQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithManyQueryParams", arg0, arg1, arg2)
@@ -77,13 +77,13 @@ func (m *MockClient) ArgWithManyQueryParams(arg0 context.Context, arg1 map[strin
 	return ret0, ret1, ret2
 }
 
-// ArgWithManyQueryParams indicates an expected call of ArgWithManyQueryParams
+// ArgWithManyQueryParams indicates an expected call of ArgWithManyQueryParams.
 func (mr *MockClientMockRecorder) ArgWithManyQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithManyQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithManyQueryParams), arg0, arg1, arg2)
 }
 
-// ArgWithNearDupQueryParams mocks base method
+// ArgWithNearDupQueryParams mocks base method.
 func (m *MockClient) ArgWithNearDupQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNearDupQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithNearDupQueryParams", arg0, arg1, arg2)
@@ -93,13 +93,13 @@ func (m *MockClient) ArgWithNearDupQueryParams(arg0 context.Context, arg1 map[st
 	return ret0, ret1, ret2
 }
 
-// ArgWithNearDupQueryParams indicates an expected call of ArgWithNearDupQueryParams
+// ArgWithNearDupQueryParams indicates an expected call of ArgWithNearDupQueryParams.
 func (mr *MockClientMockRecorder) ArgWithNearDupQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithNearDupQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithNearDupQueryParams), arg0, arg1, arg2)
 }
 
-// ArgWithNestedQueryParams mocks base method
+// ArgWithNestedQueryParams mocks base method.
 func (m *MockClient) ArgWithNestedQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNestedQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithNestedQueryParams", arg0, arg1, arg2)
@@ -109,13 +109,13 @@ func (m *MockClient) ArgWithNestedQueryParams(arg0 context.Context, arg1 map[str
 	return ret0, ret1, ret2
 }
 
-// ArgWithNestedQueryParams indicates an expected call of ArgWithNestedQueryParams
+// ArgWithNestedQueryParams indicates an expected call of ArgWithNestedQueryParams.
 func (mr *MockClientMockRecorder) ArgWithNestedQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithNestedQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithNestedQueryParams), arg0, arg1, arg2)
 }
 
-// ArgWithParams mocks base method
+// ArgWithParams mocks base method.
 func (m *MockClient) ArgWithParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParams_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithParams", arg0, arg1, arg2)
@@ -125,13 +125,13 @@ func (m *MockClient) ArgWithParams(arg0 context.Context, arg1 map[string]string,
 	return ret0, ret1, ret2
 }
 
-// ArgWithParams indicates an expected call of ArgWithParams
+// ArgWithParams indicates an expected call of ArgWithParams.
 func (mr *MockClientMockRecorder) ArgWithParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithParams", reflect.TypeOf((*MockClient)(nil).ArgWithParams), arg0, arg1, arg2)
 }
 
-// ArgWithParamsAndDuplicateFields mocks base method
+// ArgWithParamsAndDuplicateFields mocks base method.
 func (m *MockClient) ArgWithParamsAndDuplicateFields(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParamsAndDuplicateFields_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithParamsAndDuplicateFields", arg0, arg1, arg2)
@@ -141,13 +141,13 @@ func (m *MockClient) ArgWithParamsAndDuplicateFields(arg0 context.Context, arg1 
 	return ret0, ret1, ret2
 }
 
-// ArgWithParamsAndDuplicateFields indicates an expected call of ArgWithParamsAndDuplicateFields
+// ArgWithParamsAndDuplicateFields indicates an expected call of ArgWithParamsAndDuplicateFields.
 func (mr *MockClientMockRecorder) ArgWithParamsAndDuplicateFields(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithParamsAndDuplicateFields", reflect.TypeOf((*MockClient)(nil).ArgWithParamsAndDuplicateFields), arg0, arg1, arg2)
 }
 
-// ArgWithQueryHeader mocks base method
+// ArgWithQueryHeader mocks base method.
 func (m *MockClient) ArgWithQueryHeader(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryHeader_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithQueryHeader", arg0, arg1, arg2)
@@ -157,13 +157,13 @@ func (m *MockClient) ArgWithQueryHeader(arg0 context.Context, arg1 map[string]st
 	return ret0, ret1, ret2
 }
 
-// ArgWithQueryHeader indicates an expected call of ArgWithQueryHeader
+// ArgWithQueryHeader indicates an expected call of ArgWithQueryHeader.
 func (mr *MockClientMockRecorder) ArgWithQueryHeader(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithQueryHeader", reflect.TypeOf((*MockClient)(nil).ArgWithQueryHeader), arg0, arg1, arg2)
 }
 
-// ArgWithQueryParams mocks base method
+// ArgWithQueryParams mocks base method.
 func (m *MockClient) ArgWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryParams_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithQueryParams", arg0, arg1, arg2)
@@ -173,13 +173,13 @@ func (m *MockClient) ArgWithQueryParams(arg0 context.Context, arg1 map[string]st
 	return ret0, ret1, ret2
 }
 
-// ArgWithQueryParams indicates an expected call of ArgWithQueryParams
+// ArgWithQueryParams indicates an expected call of ArgWithQueryParams.
 func (mr *MockClientMockRecorder) ArgWithQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithQueryParams), arg0, arg1, arg2)
 }
 
-// DeleteFoo mocks base method
+// DeleteFoo mocks base method.
 func (m *MockClient) DeleteFoo(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteFoo_Args) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteFoo", arg0, arg1, arg2)
@@ -188,13 +188,13 @@ func (m *MockClient) DeleteFoo(arg0 context.Context, arg1 map[string]string, arg
 	return ret0, ret1
 }
 
-// DeleteFoo indicates an expected call of DeleteFoo
+// DeleteFoo indicates an expected call of DeleteFoo.
 func (mr *MockClientMockRecorder) DeleteFoo(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFoo", reflect.TypeOf((*MockClient)(nil).DeleteFoo), arg0, arg1, arg2)
 }
 
-// DeleteWithBody mocks base method
+// DeleteWithBody mocks base method.
 func (m *MockClient) DeleteWithBody(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithBody_Args) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteWithBody", arg0, arg1, arg2)
@@ -203,13 +203,13 @@ func (m *MockClient) DeleteWithBody(arg0 context.Context, arg1 map[string]string
 	return ret0, ret1
 }
 
-// DeleteWithBody indicates an expected call of DeleteWithBody
+// DeleteWithBody indicates an expected call of DeleteWithBody.
 func (mr *MockClientMockRecorder) DeleteWithBody(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWithBody", reflect.TypeOf((*MockClient)(nil).DeleteWithBody), arg0, arg1, arg2)
 }
 
-// DeleteWithQueryParams mocks base method
+// DeleteWithQueryParams mocks base method.
 func (m *MockClient) DeleteWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithQueryParams_Args) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteWithQueryParams", arg0, arg1, arg2)
@@ -218,13 +218,13 @@ func (m *MockClient) DeleteWithQueryParams(arg0 context.Context, arg1 map[string
 	return ret0, ret1
 }
 
-// DeleteWithQueryParams indicates an expected call of DeleteWithQueryParams
+// DeleteWithQueryParams indicates an expected call of DeleteWithQueryParams.
 func (mr *MockClientMockRecorder) DeleteWithQueryParams(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWithQueryParams", reflect.TypeOf((*MockClient)(nil).DeleteWithQueryParams), arg0, arg1, arg2)
 }
 
-// EchoBinary mocks base method
+// EchoBinary mocks base method.
 func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBinary_Args) ([]byte, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoBinary", arg0, arg1, arg2)
@@ -234,13 +234,13 @@ func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, ar
 	return ret0, ret1, ret2
 }
 
-// EchoBinary indicates an expected call of EchoBinary
+// EchoBinary indicates an expected call of EchoBinary.
 func (mr *MockClientMockRecorder) EchoBinary(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoBinary", reflect.TypeOf((*MockClient)(nil).EchoBinary), arg0, arg1, arg2)
 }
 
-// EchoBool mocks base method
+// EchoBool mocks base method.
 func (m *MockClient) EchoBool(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBool_Args) (bool, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoBool", arg0, arg1, arg2)
@@ -250,13 +250,13 @@ func (m *MockClient) EchoBool(arg0 context.Context, arg1 map[string]string, arg2
 	return ret0, ret1, ret2
 }
 
-// EchoBool indicates an expected call of EchoBool
+// EchoBool indicates an expected call of EchoBool.
 func (mr *MockClientMockRecorder) EchoBool(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoBool", reflect.TypeOf((*MockClient)(nil).EchoBool), arg0, arg1, arg2)
 }
 
-// EchoDouble mocks base method
+// EchoDouble mocks base method.
 func (m *MockClient) EchoDouble(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoDouble_Args) (float64, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoDouble", arg0, arg1, arg2)
@@ -266,13 +266,13 @@ func (m *MockClient) EchoDouble(arg0 context.Context, arg1 map[string]string, ar
 	return ret0, ret1, ret2
 }
 
-// EchoDouble indicates an expected call of EchoDouble
+// EchoDouble indicates an expected call of EchoDouble.
 func (mr *MockClientMockRecorder) EchoDouble(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoDouble", reflect.TypeOf((*MockClient)(nil).EchoDouble), arg0, arg1, arg2)
 }
 
-// EchoEnum mocks base method
+// EchoEnum mocks base method.
 func (m *MockClient) EchoEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoEnum_Args) (bar.Fruit, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoEnum", arg0, arg1, arg2)
@@ -282,13 +282,13 @@ func (m *MockClient) EchoEnum(arg0 context.Context, arg1 map[string]string, arg2
 	return ret0, ret1, ret2
 }
 
-// EchoEnum indicates an expected call of EchoEnum
+// EchoEnum indicates an expected call of EchoEnum.
 func (mr *MockClientMockRecorder) EchoEnum(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoEnum", reflect.TypeOf((*MockClient)(nil).EchoEnum), arg0, arg1, arg2)
 }
 
-// EchoI16 mocks base method
+// EchoI16 mocks base method.
 func (m *MockClient) EchoI16(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI16_Args) (int16, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI16", arg0, arg1, arg2)
@@ -298,13 +298,13 @@ func (m *MockClient) EchoI16(arg0 context.Context, arg1 map[string]string, arg2 
 	return ret0, ret1, ret2
 }
 
-// EchoI16 indicates an expected call of EchoI16
+// EchoI16 indicates an expected call of EchoI16.
 func (mr *MockClientMockRecorder) EchoI16(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoI16", reflect.TypeOf((*MockClient)(nil).EchoI16), arg0, arg1, arg2)
 }
 
-// EchoI32 mocks base method
+// EchoI32 mocks base method.
 func (m *MockClient) EchoI32(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI32_Args) (int32, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI32", arg0, arg1, arg2)
@@ -314,13 +314,13 @@ func (m *MockClient) EchoI32(arg0 context.Context, arg1 map[string]string, arg2 
 	return ret0, ret1, ret2
 }
 
-// EchoI32 indicates an expected call of EchoI32
+// EchoI32 indicates an expected call of EchoI32.
 func (mr *MockClientMockRecorder) EchoI32(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoI32", reflect.TypeOf((*MockClient)(nil).EchoI32), arg0, arg1, arg2)
 }
 
-// EchoI32Map mocks base method
+// EchoI32Map mocks base method.
 func (m *MockClient) EchoI32Map(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI32Map_Args) (map[int32]*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI32Map", arg0, arg1, arg2)
@@ -330,13 +330,13 @@ func (m *MockClient) EchoI32Map(arg0 context.Context, arg1 map[string]string, ar
 	return ret0, ret1, ret2
 }
 
-// EchoI32Map indicates an expected call of EchoI32Map
+// EchoI32Map indicates an expected call of EchoI32Map.
 func (mr *MockClientMockRecorder) EchoI32Map(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoI32Map", reflect.TypeOf((*MockClient)(nil).EchoI32Map), arg0, arg1, arg2)
 }
 
-// EchoI64 mocks base method
+// EchoI64 mocks base method.
 func (m *MockClient) EchoI64(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI64_Args) (int64, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI64", arg0, arg1, arg2)
@@ -346,13 +346,13 @@ func (m *MockClient) EchoI64(arg0 context.Context, arg1 map[string]string, arg2 
 	return ret0, ret1, ret2
 }
 
-// EchoI64 indicates an expected call of EchoI64
+// EchoI64 indicates an expected call of EchoI64.
 func (mr *MockClientMockRecorder) EchoI64(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoI64", reflect.TypeOf((*MockClient)(nil).EchoI64), arg0, arg1, arg2)
 }
 
-// EchoI8 mocks base method
+// EchoI8 mocks base method.
 func (m *MockClient) EchoI8(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI8_Args) (int8, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI8", arg0, arg1, arg2)
@@ -362,13 +362,13 @@ func (m *MockClient) EchoI8(arg0 context.Context, arg1 map[string]string, arg2 *
 	return ret0, ret1, ret2
 }
 
-// EchoI8 indicates an expected call of EchoI8
+// EchoI8 indicates an expected call of EchoI8.
 func (mr *MockClientMockRecorder) EchoI8(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoI8", reflect.TypeOf((*MockClient)(nil).EchoI8), arg0, arg1, arg2)
 }
 
-// EchoString mocks base method
+// EchoString mocks base method.
 func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoString_Args) (string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2)
@@ -378,13 +378,13 @@ func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, ar
 	return ret0, ret1, ret2
 }
 
-// EchoString indicates an expected call of EchoString
+// EchoString indicates an expected call of EchoString.
 func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0, arg1, arg2)
 }
 
-// EchoStringList mocks base method
+// EchoStringList mocks base method.
 func (m *MockClient) EchoStringList(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringList_Args) ([]string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringList", arg0, arg1, arg2)
@@ -394,13 +394,13 @@ func (m *MockClient) EchoStringList(arg0 context.Context, arg1 map[string]string
 	return ret0, ret1, ret2
 }
 
-// EchoStringList indicates an expected call of EchoStringList
+// EchoStringList indicates an expected call of EchoStringList.
 func (mr *MockClientMockRecorder) EchoStringList(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoStringList", reflect.TypeOf((*MockClient)(nil).EchoStringList), arg0, arg1, arg2)
 }
 
-// EchoStringMap mocks base method
+// EchoStringMap mocks base method.
 func (m *MockClient) EchoStringMap(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringMap_Args) (map[string]*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringMap", arg0, arg1, arg2)
@@ -410,13 +410,13 @@ func (m *MockClient) EchoStringMap(arg0 context.Context, arg1 map[string]string,
 	return ret0, ret1, ret2
 }
 
-// EchoStringMap indicates an expected call of EchoStringMap
+// EchoStringMap indicates an expected call of EchoStringMap.
 func (mr *MockClientMockRecorder) EchoStringMap(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoStringMap", reflect.TypeOf((*MockClient)(nil).EchoStringMap), arg0, arg1, arg2)
 }
 
-// EchoStringSet mocks base method
+// EchoStringSet mocks base method.
 func (m *MockClient) EchoStringSet(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringSet_Args) (map[string]struct{}, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringSet", arg0, arg1, arg2)
@@ -426,13 +426,13 @@ func (m *MockClient) EchoStringSet(arg0 context.Context, arg1 map[string]string,
 	return ret0, ret1, ret2
 }
 
-// EchoStringSet indicates an expected call of EchoStringSet
+// EchoStringSet indicates an expected call of EchoStringSet.
 func (mr *MockClientMockRecorder) EchoStringSet(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoStringSet", reflect.TypeOf((*MockClient)(nil).EchoStringSet), arg0, arg1, arg2)
 }
 
-// EchoStructList mocks base method
+// EchoStructList mocks base method.
 func (m *MockClient) EchoStructList(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStructList_Args) ([]*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStructList", arg0, arg1, arg2)
@@ -442,13 +442,13 @@ func (m *MockClient) EchoStructList(arg0 context.Context, arg1 map[string]string
 	return ret0, ret1, ret2
 }
 
-// EchoStructList indicates an expected call of EchoStructList
+// EchoStructList indicates an expected call of EchoStructList.
 func (mr *MockClientMockRecorder) EchoStructList(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoStructList", reflect.TypeOf((*MockClient)(nil).EchoStructList), arg0, arg1, arg2)
 }
 
-// EchoStructSet mocks base method
+// EchoStructSet mocks base method.
 func (m *MockClient) EchoStructSet(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStructSet_Args) ([]*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStructSet", arg0, arg1, arg2)
@@ -458,13 +458,13 @@ func (m *MockClient) EchoStructSet(arg0 context.Context, arg1 map[string]string,
 	return ret0, ret1, ret2
 }
 
-// EchoStructSet indicates an expected call of EchoStructSet
+// EchoStructSet indicates an expected call of EchoStructSet.
 func (mr *MockClientMockRecorder) EchoStructSet(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoStructSet", reflect.TypeOf((*MockClient)(nil).EchoStructSet), arg0, arg1, arg2)
 }
 
-// EchoTypedef mocks base method
+// EchoTypedef mocks base method.
 func (m *MockClient) EchoTypedef(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoTypedef_Args) (bar.UUID, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoTypedef", arg0, arg1, arg2)
@@ -474,27 +474,27 @@ func (m *MockClient) EchoTypedef(arg0 context.Context, arg1 map[string]string, a
 	return ret0, ret1, ret2
 }
 
-// EchoTypedef indicates an expected call of EchoTypedef
+// EchoTypedef indicates an expected call of EchoTypedef.
 func (mr *MockClientMockRecorder) EchoTypedef(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoTypedef", reflect.TypeOf((*MockClient)(nil).EchoTypedef), arg0, arg1, arg2)
 }
 
-// HTTPClient mocks base method
-func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
+// HTTPClient mocks base method.
+func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*zanzibar.HTTPClient)
+	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
 }
 
-// HTTPClient indicates an expected call of HTTPClient
+// HTTPClient indicates an expected call of HTTPClient.
 func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTPClient", reflect.TypeOf((*MockClient)(nil).HTTPClient))
 }
 
-// Hello mocks base method
+// Hello mocks base method.
 func (m *MockClient) Hello(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Hello", arg0, arg1)
@@ -504,13 +504,13 @@ func (m *MockClient) Hello(arg0 context.Context, arg1 map[string]string) (string
 	return ret0, ret1, ret2
 }
 
-// Hello indicates an expected call of Hello
+// Hello indicates an expected call of Hello.
 func (mr *MockClientMockRecorder) Hello(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Hello", reflect.TypeOf((*MockClient)(nil).Hello), arg0, arg1)
 }
 
-// ListAndEnum mocks base method
+// ListAndEnum mocks base method.
 func (m *MockClient) ListAndEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ListAndEnum_Args) (string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAndEnum", arg0, arg1, arg2)
@@ -520,13 +520,13 @@ func (m *MockClient) ListAndEnum(arg0 context.Context, arg1 map[string]string, a
 	return ret0, ret1, ret2
 }
 
-// ListAndEnum indicates an expected call of ListAndEnum
+// ListAndEnum indicates an expected call of ListAndEnum.
 func (mr *MockClientMockRecorder) ListAndEnum(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAndEnum", reflect.TypeOf((*MockClient)(nil).ListAndEnum), arg0, arg1, arg2)
 }
 
-// MissingArg mocks base method
+// MissingArg mocks base method.
 func (m *MockClient) MissingArg(arg0 context.Context, arg1 map[string]string) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MissingArg", arg0, arg1)
@@ -536,13 +536,13 @@ func (m *MockClient) MissingArg(arg0 context.Context, arg1 map[string]string) (*
 	return ret0, ret1, ret2
 }
 
-// MissingArg indicates an expected call of MissingArg
+// MissingArg indicates an expected call of MissingArg.
 func (mr *MockClientMockRecorder) MissingArg(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MissingArg", reflect.TypeOf((*MockClient)(nil).MissingArg), arg0, arg1)
 }
 
-// NoRequest mocks base method
+// NoRequest mocks base method.
 func (m *MockClient) NoRequest(arg0 context.Context, arg1 map[string]string) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NoRequest", arg0, arg1)
@@ -552,13 +552,13 @@ func (m *MockClient) NoRequest(arg0 context.Context, arg1 map[string]string) (*b
 	return ret0, ret1, ret2
 }
 
-// NoRequest indicates an expected call of NoRequest
+// NoRequest indicates an expected call of NoRequest.
 func (mr *MockClientMockRecorder) NoRequest(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NoRequest", reflect.TypeOf((*MockClient)(nil).NoRequest), arg0, arg1)
 }
 
-// Normal mocks base method
+// Normal mocks base method.
 func (m *MockClient) Normal(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_Normal_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Normal", arg0, arg1, arg2)
@@ -568,13 +568,13 @@ func (m *MockClient) Normal(arg0 context.Context, arg1 map[string]string, arg2 *
 	return ret0, ret1, ret2
 }
 
-// Normal indicates an expected call of Normal
+// Normal indicates an expected call of Normal.
 func (mr *MockClientMockRecorder) Normal(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Normal", reflect.TypeOf((*MockClient)(nil).Normal), arg0, arg1, arg2)
 }
 
-// NormalRecur mocks base method
+// NormalRecur mocks base method.
 func (m *MockClient) NormalRecur(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_NormalRecur_Args) (*bar.BarResponseRecur, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NormalRecur", arg0, arg1, arg2)
@@ -584,13 +584,13 @@ func (m *MockClient) NormalRecur(arg0 context.Context, arg1 map[string]string, a
 	return ret0, ret1, ret2
 }
 
-// NormalRecur indicates an expected call of NormalRecur
+// NormalRecur indicates an expected call of NormalRecur.
 func (mr *MockClientMockRecorder) NormalRecur(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NormalRecur", reflect.TypeOf((*MockClient)(nil).NormalRecur), arg0, arg1, arg2)
 }
 
-// TooManyArgs mocks base method
+// TooManyArgs mocks base method.
 func (m *MockClient) TooManyArgs(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_TooManyArgs_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TooManyArgs", arg0, arg1, arg2)
@@ -600,7 +600,7 @@ func (m *MockClient) TooManyArgs(arg0 context.Context, arg1 map[string]string, a
 	return ret0, ret1, ret2
 }
 
-// TooManyArgs indicates an expected call of TooManyArgs
+// TooManyArgs indicates an expected call of TooManyArgs.
 func (mr *MockClientMockRecorder) TooManyArgs(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TooManyArgs", reflect.TypeOf((*MockClient)(nil).TooManyArgs), arg0, arg1, arg2)
