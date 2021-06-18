@@ -274,7 +274,7 @@ type {{$clientName}} struct {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				t := time.Now()
 			  elapsed := t.Sub(start)
-			  size := scope.Timer("client")
+			  size := scope.Timer("hystrix-timer")
 			  size.Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,

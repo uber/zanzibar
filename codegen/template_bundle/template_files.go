@@ -3056,7 +3056,7 @@ type {{$clientName}} struct {
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
 				t := time.Now()
 			  elapsed := t.Sub(start)
-			  size := scope.Timer("client")
+			  size := scope.Timer("hystrix-timer")
 			  size.Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
@@ -3122,7 +3122,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11734, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11741, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

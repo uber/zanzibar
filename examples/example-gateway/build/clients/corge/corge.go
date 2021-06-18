@@ -248,7 +248,7 @@ func (c *corgeClient) EchoString(
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
 			t := time.Now()
 			elapsed := t.Sub(start)
-			size := scope.Timer("client")
+			size := scope.Timer("hystrix-timer")
 			size.Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,

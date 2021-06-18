@@ -94,19 +94,25 @@ func TestCallMetrics(t *testing.T) {
 	cg.MetricsWaitGroup.Wait()
 	metrics := cg.M3Service.GetMetrics()
 	cbKeys := make([]string, 0)
+	hystrixTimerMetricsCount := 0
 	for key := range metrics {
 		if strings.Contains(key, "circuitbreaker") {
 			cbKeys = append(cbKeys, key)
 		}
+		// test there is one metric for timing hystrix
+		if strings.Contains(key, "hystrix-timer") {
+			hystrixTimerMetricsCount++
+		}
 	}
-	assert.Equal(t, 6, len(cbKeys)) // number off because of the histogram
+	assert.Equal(t, 6, len(cbKeys))              // number off because of the histogram
+	assert.Equal(t, 1, hystrixTimerMetricsCount) // one metric for measuring hystrix time
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
 		if strings.HasPrefix(key, "jaeger") {
 			delete(metrics, key)
 		}
 	}
-	assert.Equal(t, numMetrics+4, len(metrics)) // magic number here because there are histogram entries
+	assert.Equal(t, numMetrics+5, len(metrics)) // magic number here because there are histogram entries
 
 	endpointTags := map[string]string{
 		"env":           "test",
@@ -223,4 +229,19 @@ func TestCallMetrics(t *testing.T) {
 	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	assert.Equal(t, int64(1), metrics[key].Value.Count)
+
+	hystrixClientTags := map[string]string{
+		"dc":      "unknown",
+		"env":     "test",
+		"service": "test-gateway",
+		"client":  "SimpleService",
+	}
+
+	// test hystrix timer metric
+	key = tally.KeyForPrefixedStringMap("hystrix-timer", hystrixClientTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	value = metrics[key].Value.Timer
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
+
 }
