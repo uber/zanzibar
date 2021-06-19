@@ -237,11 +237,7 @@ func TestCallMetrics(t *testing.T) {
 		"client":  "SimpleService",
 	}
 
-	// test hystrix timer metric
+	// test hystrix timer metric exists with right tags
 	key = tally.KeyForPrefixedStringMap("hystrix-timer", hystrixClientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	value = metrics[key].Value.Timer
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 10*1000*1000, "expected timer to be < 10 milli seconds")
-
 }
