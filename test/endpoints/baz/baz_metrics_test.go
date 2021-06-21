@@ -231,10 +231,11 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), metrics[key].Value.Count)
 
 	hystrixClientTags := map[string]string{
-		"dc":      "unknown",
-		"env":     "test",
-		"service": "test-gateway",
-		"client":  "SimpleService",
+		"service":    "test-gateway",
+		"dc":         "unknown",
+		"client":     "baz",
+		"methodName": "Call",
+		"env":        "test",
 	}
 
 	// test hystrix timer metric exists with right tags

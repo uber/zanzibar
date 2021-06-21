@@ -242,14 +242,13 @@ func (c *corgeClient) EchoString(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "Corge",
+			"client":     "corge",
+			"methodName": "EchoString",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result,
 			)

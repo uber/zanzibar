@@ -397,14 +397,13 @@ func (c *bazClient) EchoBinary(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoBinary",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 			)
@@ -463,14 +462,13 @@ func (c *bazClient) EchoBool(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoBool",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 			)
@@ -529,14 +527,13 @@ func (c *bazClient) EchoDouble(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoDouble",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 			)
@@ -595,14 +592,13 @@ func (c *bazClient) EchoEnum(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoEnum",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 			)
@@ -661,14 +657,13 @@ func (c *bazClient) EchoI16(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoI16",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 			)
@@ -727,14 +722,13 @@ func (c *bazClient) EchoI32(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoI32",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 			)
@@ -793,14 +787,13 @@ func (c *bazClient) EchoI64(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoI64",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 			)
@@ -859,14 +852,13 @@ func (c *bazClient) EchoI8(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoI8",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 			)
@@ -925,14 +917,13 @@ func (c *bazClient) EchoString(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoString",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoString", reqHeaders, args, &result,
 			)
@@ -991,14 +982,13 @@ func (c *bazClient) EchoStringList(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoStringList",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 			)
@@ -1057,14 +1047,13 @@ func (c *bazClient) EchoStringMap(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoStringMap",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 			)
@@ -1123,14 +1112,13 @@ func (c *bazClient) EchoStringSet(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoStringSet",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 			)
@@ -1189,14 +1177,13 @@ func (c *bazClient) EchoStructList(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoStructList",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 			)
@@ -1255,14 +1242,13 @@ func (c *bazClient) EchoStructSet(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoStructSet",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 			)
@@ -1321,14 +1307,13 @@ func (c *bazClient) EchoTypedef(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SecondService",
+			"client":     "baz",
+			"methodName": "EchoTypedef",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 			)
@@ -1386,14 +1371,13 @@ func (c *bazClient) Call(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "Call",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "call", reqHeaders, args, &result,
 			)
@@ -1447,14 +1431,13 @@ func (c *bazClient) Compare(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "Compare",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "compare", reqHeaders, args, &result,
 			)
@@ -1517,14 +1500,13 @@ func (c *bazClient) GetProfile(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "GetProfile",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
 			)
@@ -1585,14 +1567,13 @@ func (c *bazClient) HeaderSchema(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "HeaderSchema",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
 			)
@@ -1655,14 +1636,13 @@ func (c *bazClient) Ping(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "Ping",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "ping", reqHeaders, args, &result,
 			)
@@ -1720,14 +1700,13 @@ func (c *bazClient) DeliberateDiffNoop(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "DeliberateDiffNoop",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 			)
@@ -1782,14 +1761,13 @@ func (c *bazClient) TestUUID(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "TestUUID",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
 			)
@@ -1841,14 +1819,13 @@ func (c *bazClient) Trans(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "Trans",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "trans", reqHeaders, args, &result,
 			)
@@ -1911,14 +1888,13 @@ func (c *bazClient) TransHeaders(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "TransHeaders",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
 			)
@@ -1981,14 +1957,13 @@ func (c *bazClient) TransHeadersNoReq(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "TransHeadersNoReq",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
 			)
@@ -2049,14 +2024,13 @@ func (c *bazClient) TransHeadersType(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "TransHeadersType",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 			)
@@ -2118,14 +2092,13 @@ func (c *bazClient) URLTest(
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
 		scope := c.defaultDeps.Scope.Tagged(map[string]string{
-			"client": "SimpleService",
+			"client":     "baz",
+			"methodName": "URLTest",
 		})
 		start := time.Now()
 		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
-			t := time.Now()
-			elapsed := t.Sub(start)
-			size := scope.Timer("hystrix-timer")
-			size.Record(elapsed)
+			elapsed := time.Now().Sub(start)
+			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
 			)
