@@ -13,30 +13,30 @@ import (
 	yarpc "go.uber.org/yarpc"
 )
 
-// MockClient is a mock of Client interface
+// MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
+// MockClientMockRecorder is the mock recorder for MockClient.
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance
+// NewMockClient creates a new mock instance.
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// MirrorInternalMirror mocks base method
+// MirrorInternalMirror mocks base method.
 func (m *MockClient) MirrorInternalMirror(arg0 context.Context, arg1 *mirror.InternalRequest, arg2 ...yarpc.CallOption) (*mirror.InternalResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -49,14 +49,14 @@ func (m *MockClient) MirrorInternalMirror(arg0 context.Context, arg1 *mirror.Int
 	return ret0, ret1
 }
 
-// MirrorInternalMirror indicates an expected call of MirrorInternalMirror
+// MirrorInternalMirror indicates an expected call of MirrorInternalMirror.
 func (mr *MockClientMockRecorder) MirrorInternalMirror(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MirrorInternalMirror", reflect.TypeOf((*MockClient)(nil).MirrorInternalMirror), varargs...)
 }
 
-// MirrorMirror mocks base method
+// MirrorMirror mocks base method.
 func (m *MockClient) MirrorMirror(arg0 context.Context, arg1 *mirror.Request, arg2 ...yarpc.CallOption) (*mirror.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -69,7 +69,7 @@ func (m *MockClient) MirrorMirror(arg0 context.Context, arg1 *mirror.Request, ar
 	return ret0, ret1
 }
 
-// MirrorMirror indicates an expected call of MirrorMirror
+// MirrorMirror indicates an expected call of MirrorMirror.
 func (mr *MockClientMockRecorder) MirrorMirror(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)

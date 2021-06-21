@@ -10,33 +10,33 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	withexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/withexceptions/withexceptions"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
-// MockClient is a mock of Client interface
+// MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
+// MockClientMockRecorder is the mock recorder for MockClient.
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance
+// NewMockClient creates a new mock instance.
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// Func1 mocks base method
+// Func1 mocks base method.
 func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string) (*withexceptions.Response, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Func1", arg0, arg1)
@@ -46,21 +46,21 @@ func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string) (*withe
 	return ret0, ret1, ret2
 }
 
-// Func1 indicates an expected call of Func1
+// Func1 indicates an expected call of Func1.
 func (mr *MockClientMockRecorder) Func1(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Func1", reflect.TypeOf((*MockClient)(nil).Func1), arg0, arg1)
 }
 
-// HTTPClient mocks base method
-func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
+// HTTPClient mocks base method.
+func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*zanzibar.HTTPClient)
+	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
 }
 
-// HTTPClient indicates an expected call of HTTPClient
+// HTTPClient indicates an expected call of HTTPClient.
 func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTPClient", reflect.TypeOf((*MockClient)(nil).HTTPClient))

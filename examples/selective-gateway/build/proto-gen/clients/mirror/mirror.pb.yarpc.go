@@ -13,6 +13,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/yarpc"
 	"go.uber.org/yarpc/api/transport"
+	"go.uber.org/yarpc/api/x/restriction"
 	"go.uber.org/yarpc/encoding/protobuf"
 	"go.uber.org/yarpc/encoding/protobuf/reflection"
 )
@@ -86,7 +87,8 @@ type FxMirrorYARPCClientParams struct {
 	fx.In
 
 	Provider    yarpc.ClientConfig
-	AnyResolver jsonpb.AnyResolver `name:"yarpcfx" optional:"true"`
+	AnyResolver jsonpb.AnyResolver  `name:"yarpcfx" optional:"true"`
+	Restriction restriction.Checker `optional:"true"`
 }
 
 // FxMirrorYARPCClientResult defines the output
@@ -111,8 +113,18 @@ type FxMirrorYARPCClientResult struct {
 //  )
 func NewFxMirrorYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxMirrorYARPCClientParams) FxMirrorYARPCClientResult {
+		cc := params.Provider.ClientConfig(name)
+
+		if params.Restriction != nil {
+			if namer, ok := cc.GetUnaryOutbound().(transport.Namer); ok {
+				if err := params.Restriction.Check(protobuf.Encoding, namer.TransportName()); err != nil {
+					panic(err.Error())
+				}
+			}
+		}
+
 		return FxMirrorYARPCClientResult{
-			Client: newMirrorYARPCClient(params.Provider.ClientConfig(name), params.AnyResolver, options...),
+			Client: newMirrorYARPCClient(cc, params.AnyResolver, options...),
 		}
 	}
 }
@@ -279,7 +291,8 @@ type FxMirrorInternalYARPCClientParams struct {
 	fx.In
 
 	Provider    yarpc.ClientConfig
-	AnyResolver jsonpb.AnyResolver `name:"yarpcfx" optional:"true"`
+	AnyResolver jsonpb.AnyResolver  `name:"yarpcfx" optional:"true"`
+	Restriction restriction.Checker `optional:"true"`
 }
 
 // FxMirrorInternalYARPCClientResult defines the output
@@ -304,8 +317,18 @@ type FxMirrorInternalYARPCClientResult struct {
 //  )
 func NewFxMirrorInternalYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxMirrorInternalYARPCClientParams) FxMirrorInternalYARPCClientResult {
+		cc := params.Provider.ClientConfig(name)
+
+		if params.Restriction != nil {
+			if namer, ok := cc.GetUnaryOutbound().(transport.Namer); ok {
+				if err := params.Restriction.Check(protobuf.Encoding, namer.TransportName()); err != nil {
+					panic(err.Error())
+				}
+			}
+		}
+
 		return FxMirrorInternalYARPCClientResult{
-			Client: newMirrorInternalYARPCClient(params.Provider.ClientConfig(name), params.AnyResolver, options...),
+			Client: newMirrorInternalYARPCClient(cc, params.AnyResolver, options...),
 		}
 	}
 }

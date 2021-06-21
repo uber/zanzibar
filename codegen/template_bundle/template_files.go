@@ -2802,7 +2802,6 @@ import (
 
 	"go.uber.org/zap"
 
-
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -2934,6 +2933,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	return &{{$clientName}}{
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		defaultDeps:            deps.Default,
 	}
 }
 
@@ -3013,6 +3013,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
+	defaultDeps  *zanzibar.DefaultDependencies
 }
 
 {{range $svc := .Services}}
@@ -3048,7 +3049,14 @@ type {{$clientName}} struct {
 		} else {
 			// We want hystrix ckt-breaker to count errors only for system issues
 			var clientErr error
+			scope := c.defaultDeps.Scope.Tagged(map[string]string{
+			"client" : "{{$clientID}}",
+			"methodName" : "{{$methodName}}",
+			})
+		  start := time.Now()
 			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			  elapsed := time.Now().Sub(start)
+			  scope.Timer("hystrix-timer").Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
@@ -3113,7 +3121,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11422, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11749, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
