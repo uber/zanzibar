@@ -32,7 +32,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreatGatewayLoggingConfig(t *testing.T) {
+func TestCreateGatewayLoggingConfig(t *testing.T) {
 	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
 		"logger.fileName": "foober",
 		"logger.output":   "",
@@ -99,15 +99,18 @@ func TestGetServiceNameFromEnv(t *testing.T) {
 		MetricsBackend:            metricsBackend,
 	}
 
-	os.Setenv("TEST", "overridden")
-
+	if err := os.Setenv("TEST", "overridden"); err != nil{
+		t.Errorf("no error expected but got %v", err)
+	}
 	g1, err := CreateGateway(cfg, opts)
 	assert.Nil(t, err)
 	assert.Equal(t, g1.ServiceName, "overridden")
-	os.Unsetenv("TEST")
+	if err = os.Unsetenv("TEST"); err != nil{
+		t.Errorf("no error expected but got %v", err)
+	}
 }
 
-func TestCreatGatewayBadLoggingConfig(t *testing.T) {
+func TestCreateGatewayBadLoggingConfig(t *testing.T) {
 	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
 		"logger.level": "invalid",
 	})
