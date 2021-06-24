@@ -99,13 +99,13 @@ func TestGetServiceNameFromEnv(t *testing.T) {
 		MetricsBackend:            metricsBackend,
 	}
 
-	if err := os.Setenv("TEST", "overridden"); err != nil{
+	if err := os.Setenv("TEST", "overridden"); err != nil {
 		t.Errorf("no error expected but got %v", err)
 	}
 	g1, err := CreateGateway(cfg, opts)
 	assert.Nil(t, err)
 	assert.Equal(t, g1.ServiceName, "overridden")
-	if err = os.Unsetenv("TEST"); err != nil{
+	if err = os.Unsetenv("TEST"); err != nil {
 		t.Errorf("no error expected but got %v", err)
 	}
 }
