@@ -41,16 +41,17 @@ var AppOptions = &zanzibar.Options{
 	JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
 }
 
+// GetOverrideFxOptions provides a hook to configure a non zero number of fx options
+func GetOverrideFxOptions() []fx.Option {
+	return []fx.Option{}
+}
+
 func getContextScopeTagExtractors() []zanzibar.ContextScopeTagsExtractor {
 	extractors := []zanzibar.ContextScopeTagsExtractor{
 		getRequestTags,
 	}
 
 	return extractors
-}
-
-func GetOverrideFxOptions() []fx.Option {
-	return []fx.Option{}
 }
 
 func getContextLogFieldExtractors() []zanzibar.ContextLogFieldsExtractor {

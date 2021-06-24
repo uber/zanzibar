@@ -9,13 +9,14 @@ import (
 	json "encoding/json"
 	errors "errors"
 	fmt "fmt"
+	math "math"
+	strconv "strconv"
+	strings "strings"
+
 	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
 	multierr "go.uber.org/multierr"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	math "math"
-	strconv "strconv"
-	strings "strings"
 )
 
 type BarException struct {
@@ -19707,10 +19708,14 @@ func init() {
 	Echo_EchoStructMap_Helper.UnwrapResponse = func(result *Echo_EchoStructMap_Result) (success []struct {
 		Key   *BarResponse
 		Value string
-	}, err error) { if result.Success != nil {
-		success = result.Success
+	}, err error) {
+		if result.Success != nil {
+			success = result.Success
+			return
+		}
+		err = errors.New("expected a non-void result")
 		return
-	}; err = errors.New("expected a non-void result"); return }
+	}
 
 }
 

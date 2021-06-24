@@ -6,9 +6,10 @@ package multi
 import (
 	errors "errors"
 	fmt "fmt"
+	strings "strings"
+
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	strings "strings"
 )
 
 // ServiceABack_Hello_Args represents the arguments for the ServiceABack.hello function.

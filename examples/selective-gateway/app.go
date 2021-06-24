@@ -41,6 +41,7 @@ var AppOptions = &zanzibar.Options{
 	JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
 }
 
+// GetOverrideFxOptions provides a hook to configure a non zero number of fx options
 func GetOverrideFxOptions() []fx.Option {
 	return []fx.Option{}
 }
