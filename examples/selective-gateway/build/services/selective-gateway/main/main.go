@@ -94,10 +94,12 @@ func readFlags() {
 }
 
 func main() {
-	app := fx.New(
-		fx.Invoke(zanzibarMain),
-	)
-	app.Run()
+	fx.New(
+		append(
+			app.GetOverrideFxOptions(),
+			fx.Invoke(zanzibarMain),
+		)...,
+	).Run()
 }
 
 func zanzibarMain() {
