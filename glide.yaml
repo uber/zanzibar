@@ -125,3 +125,7 @@ import:
   - prometheus/promhttp
 
 - package: github.com/emicklei/proto
+- package: code.uber.internal/sre/gogctunerfx
+  repo: gitolite@code.uber.internal:sre/gogctunerfx
+  version: ^1.0.2
+  vcs: git
