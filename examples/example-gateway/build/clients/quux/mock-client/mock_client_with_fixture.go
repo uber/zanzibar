@@ -48,8 +48,8 @@ func (c Call) MaxTimes(max int) {
 }
 
 // MinTimes marks a fixture as must be called a minimum number of times.
-func (c Call) MinTimes(max int) {
-	c.call.MinTimes(max)
+func (c Call) MinTimes(min int) {
+	c.call.MinTimes(min)
 }
 
 // New creates a new mock instance
