@@ -1,127 +1,127 @@
 package: github.com/uber/zanzibar
 import:
-- package: golang.org/x/net
-  version: master
-- package: github.com/mailru/easyjson
-  version: master
-  subpackages:
-  - buffer
-  - jlexer
-  - jwriter
-- package: go.uber.org/zap
-  version: ^1
-- package: github.com/pkg/errors
-  version: ^0.8.0
-- package: go.uber.org/atomic
-  version: ^1.3.0
-- package: github.com/uber-go/tally
-  version: ^3.4.0
-- package: github.com/kardianos/osext
-  version: master
-- package: go.uber.org/thriftrw
-  version: ^v1.23.0
-- package: github.com/uber/tchannel-go
-  version: ^1.5.0
-- package: github.com/opentracing/opentracing-go
-  version: ^1.0.0
-- package: github.com/uber/jaeger-client-go
-  version: ^2.14.0
-- package: github.com/buger/jsonparser
-  version: master
-- package: github.com/stretchr/testify
-  version: ^1.0.0
-- package: github.com/sergi/go-diff
-  version: ^1.0.0
-- package: github.com/golang/mock
-  version: ^1.2.0
-- package: github.com/pborman/uuid
-  version: ^1.1.0
-- package: github.com/kisielk/gotool
-  version: master
-- package: github.com/kisielk/errcheck
-  version: master
-- package: github.com/mitchellh/mapstructure
-  version: master
-- package: gopkg.in/yaml.v2
-  version: master
-- package: golang.org/x/tools/cmd/goimports
-  version: master
-# goimports seems to need these three below (this may get fixed later)
-- package: golang.org/x/mod/module
-  version: master
-- package: golang.org/x/mod/semver
-  version: master
-- package: golang.org/x/xerrors
-  version: master
-- package: gopkg.in/validator.v2
-  version: master
-- package: go.uber.org/fx
-- package: go.uber.org/automaxprocs
-  version: ^1.2.0
-- package: github.com/afex/hystrix-go
-  version: master
-- package: go.uber.org/multierr
-  version: ^1
-- package: go.uber.org/yarpc
-  version: ^1.41.0
-- package: github.com/ghodss/yaml
-  version: master
-- package: github.com/gogo/protobuf
-  version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
-  subpackages:
-    - gogoproto
-    - jsonpb
-    - plugin/compare
-    - plugin/defaultcheck
-    - plugin/description
-    - plugin/embedcheck
-    - plugin/enumstringer
-    - plugin/equal
-    - plugin/face
-    - plugin/gostring
-    - plugin/marshalto
-    - plugin/oneofcheck
-    - plugin/populate
-    - plugin/size
-    - plugin/stringer
-    - plugin/testgen
-    - plugin/union
-    - plugin/unmarshal
-    - proto
-    - protoc-gen-gogo/descriptor
-    - protoc-gen-gogo/generator
-    - protoc-gen-gogo/generator/internal/remap
-    - protoc-gen-gogo/grpc
-    - protoc-gen-gogo/plugin
-    - protoc-gen-gogoslick
-    - sortkeys
-    - types
-    - vanity
-    - vanity/command
+  - package: golang.org/x/net
+    version: master
+  - package: github.com/mailru/easyjson
+    version: master
+    subpackages:
+      - buffer
+      - jlexer
+      - jwriter
+  - package: go.uber.org/zap
+    version: ^1
+  - package: github.com/pkg/errors
+    version: ^0.8.0
+  - package: go.uber.org/atomic
+    version: ^1.3.0
+  - package: github.com/uber-go/tally
+    version: ^3.4.0
+  - package: github.com/kardianos/osext
+    version: master
+  - package: go.uber.org/thriftrw
+    version: ^v1.23.0
+  - package: github.com/uber/tchannel-go
+    version: ^1.5.0
+  - package: github.com/opentracing/opentracing-go
+    version: ^1.0.0
+  - package: github.com/uber/jaeger-client-go
+    version: ^2.14.0
+  - package: github.com/buger/jsonparser
+    version: master
+  - package: github.com/stretchr/testify
+    version: ^1.0.0
+  - package: github.com/sergi/go-diff
+    version: ^1.0.0
+  - package: github.com/golang/mock
+    version: ^1.2.0
+  - package: github.com/pborman/uuid
+    version: ^1.1.0
+  - package: github.com/kisielk/gotool
+    version: master
+  - package: github.com/kisielk/errcheck
+    version: master
+  - package: github.com/mitchellh/mapstructure
+    version: master
+  - package: gopkg.in/yaml.v2
+    version: master
+  - package: golang.org/x/tools/cmd/goimports
+    version: master
+  # goimports seems to need these three below (this may get fixed later)
+  - package: golang.org/x/mod/module
+    version: master
+  - package: golang.org/x/mod/semver
+    version: master
+  - package: golang.org/x/xerrors
+    version: master
+  - package: gopkg.in/validator.v2
+    version: master
+  - package: go.uber.org/fx
+  - package: go.uber.org/automaxprocs
+    version: ^1.2.0
+  - package: github.com/afex/hystrix-go
+    version: master
+  - package: go.uber.org/multierr
+    version: ^1
+  - package: go.uber.org/yarpc
+    version: ^1.41.0
+  - package: github.com/ghodss/yaml
+    version: master
+  - package: github.com/gogo/protobuf
+    version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
+    subpackages:
+      - gogoproto
+      - jsonpb
+      - plugin/compare
+      - plugin/defaultcheck
+      - plugin/description
+      - plugin/embedcheck
+      - plugin/enumstringer
+      - plugin/equal
+      - plugin/face
+      - plugin/gostring
+      - plugin/marshalto
+      - plugin/oneofcheck
+      - plugin/populate
+      - plugin/size
+      - plugin/stringer
+      - plugin/testgen
+      - plugin/union
+      - plugin/unmarshal
+      - proto
+      - protoc-gen-gogo/descriptor
+      - protoc-gen-gogo/generator
+      - protoc-gen-gogo/generator/internal/remap
+      - protoc-gen-gogo/grpc
+      - protoc-gen-gogo/plugin
+      - protoc-gen-gogoslick
+      - sortkeys
+      - types
+      - vanity
+      - vanity/command
 
-# https://github.com/uber/zanzibar/issues/583
-- package: honnef.co/go/tools/cmd/staticcheck
-  version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
+  # https://github.com/uber/zanzibar/issues/583
+  - package: honnef.co/go/tools/cmd/staticcheck
+    version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
 
-# Build tools / SDKs
-- package: github.com/jteeuwen/go-bindata
-  version: master
+  # Build tools / SDKs
+  - package: github.com/jteeuwen/go-bindata
+    version: master
 
-# Transitive dependency of fx
-- package: go.uber.org/dig
+  # Transitive dependency of fx
+  - package: go.uber.org/dig
 
-# Needed by vendor/golang.org/x/net/internal
-- package: golang.org/x/sys
-  version: master
-  subpackages:
-  - unix
+  # Needed by vendor/golang.org/x/net/internal
+  - package: golang.org/x/sys
+    version: master
+    subpackages:
+      - unix
 
-# Added due to: https://github.com/prometheus/procfs/issues/167
-- package: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
-  subpackages:
-  - prometheus
-  - prometheus/internal
-  - prometheus/promhttp
+  # Added due to: https://github.com/prometheus/procfs/issues/167
+  - package: github.com/prometheus/client_golang
+    version: c5b7fccd204277076155f10851dad72b76a49317
+    subpackages:
+      - prometheus
+      - prometheus/internal
+      - prometheus/promhttp
 
-- package: github.com/emicklei/proto
+  - package: github.com/emicklei/proto

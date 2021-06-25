@@ -23,6 +23,8 @@ package app
 import (
 	"net/textproto"
 
+	"go.uber.org/fx"
+
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	"go.uber.org/zap"
@@ -37,6 +39,11 @@ var AppOptions = &zanzibar.Options{
 	GetContextScopeExtractors: getContextScopeTagExtractors,
 	GetContextFieldExtractors: getContextLogFieldExtractors,
 	JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
+}
+
+// GetOverrideFxOptions provides a hook to configure a non zero number of fx options
+func GetOverrideFxOptions() []fx.Option {
+	return []fx.Option{}
 }
 
 func getContextScopeTagExtractors() []zanzibar.ContextScopeTagsExtractor {
