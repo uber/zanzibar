@@ -1986,8 +1986,8 @@ func readFlags() {
 func main() {
 	fx.New(
 		append(
-			app.GetOverrideFxOptions(),
-			fx.Invoke(zanzibarMain),
+			[]fx.Option{fx.Invoke(zanzibarMain)},
+			app.GetOverrideFxOptions()...,
 		)...,
 	).Run()
 }
@@ -2018,7 +2018,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1842, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1858, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

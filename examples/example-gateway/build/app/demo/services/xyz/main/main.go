@@ -96,8 +96,8 @@ func readFlags() {
 func main() {
 	fx.New(
 		append(
-			app.GetOverrideFxOptions(),
-			fx.Invoke(zanzibarMain),
+			[]fx.Option{fx.Invoke(zanzibarMain)},
+			app.GetOverrideFxOptions()...,
 		)...,
 	).Run()
 }
