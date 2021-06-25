@@ -1,12 +1,12 @@
 # <img src="zanzibar.png" width="352">    [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov] [![Go Report Card][go-report-img]][go-report]
 
 
-Zanzibar is an extensible framework to build configuration driven web applications. The goal of Zanizibar is to simplify application development into two steps:
+Zanzibar is an extensible framework to build configuration driven web applications. The goal of Zanzibar is to simplify application development into two steps:
 
 1. write configurations for the application and its components;
 2. write code to implement and test business logic.
 
-Based on the configurations, Zanizbar generates boilerplates and glue code, wires them up with your business domain code and the runtime components Zanzibar provides to create a deployable binary.
+Based on the configurations, Zanzibar generates boilerplates and glue code, wires them up with your business domain code and the runtime components Zanzibar provides to create a deployable binary.
 
 The builtin components of Zanzibar makes it easy to develop microservices and gateway services that proxy or orchestrate microservices. It is also simple to extend Zanzibar with custom plugins to ease the development of applications that suit your specific needs.
 
