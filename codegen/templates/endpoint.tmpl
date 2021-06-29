@@ -107,7 +107,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.Error(
+			h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -161,7 +161,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
@@ -198,7 +198,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
 			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
+		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	{{end -}}
