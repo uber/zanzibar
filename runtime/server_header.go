@@ -147,7 +147,7 @@ func (zh ServerHTTPHeader) EnsureContext(ctx context.Context, keys []string, log
 		"Missing mandatory headers: %s",
 		strings.Join(missing, ", "),
 	)
-	logger.Warn(ctx, "Missing mandatory headers",
+	logger.WarnZ(ctx, "Missing mandatory headers",
 		zap.Error(err),
 		zap.Strings("headers", missing),
 	)
@@ -229,7 +229,7 @@ func (th ServerTChannelHeader) EnsureContext(ctx context.Context, keys []string,
 		"Missing mandatory headers: %s",
 		strings.Join(missing, ", "),
 	)
-	logger.Warn(ctx, "Missing mandatory headers",
+	logger.WarnZ(ctx, "Missing mandatory headers",
 		zap.Error(err),
 		zap.Strings("headers", missing),
 	)

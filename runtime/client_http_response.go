@@ -76,7 +76,7 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 	}
 
 	if err != nil {
-		res.req.ContextLogger.Error(res.req.ctx, "Could not read response body", zap.Error(err))
+		res.req.ContextLogger.ErrorZ(res.req.ctx, "Could not read response body", zap.Error(err))
 		res.finish()
 		return nil, errors.Wrapf(
 			err, "Could not read %s.%s response body",
@@ -108,7 +108,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) error {
 	err := res.jsonWrapper.Unmarshal(rawBody, v)
 	if err != nil {
-		res.req.ContextLogger.Warn(res.req.ctx, "Could not parse response json", zap.Error(err))
+		res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json", zap.Error(err))
 		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not parse %s.%s response json",
@@ -139,7 +139,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 
 	err = fmt.Errorf("all json serialization errors: %s", merr.Error())
 
-	res.req.ContextLogger.Warn(res.req.ctx, "Could not parse response json into any of provided interfaces", zap.Error(err))
+	res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json into any of provided interfaces", zap.Error(err))
 	return nil, errors.Wrapf(
 		err, "Could not parse %s.%s response json into any of provided interfaces",
 		res.req.ClientID, res.req.MethodName,
@@ -154,7 +154,7 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 		}
 	}
 
-	res.req.ContextLogger.Warn(res.req.ctx, "Unknown response status code",
+	res.req.ContextLogger.WarnZ(res.req.ctx, "Unknown response status code",
 		zap.Int("UnknownStatusCode", res.rawResponse.StatusCode),
 	)
 }
@@ -176,7 +176,7 @@ func (res *ClientHTTPResponse) finish() {
 	res.finished = true
 	res.finishTime = time.Now()
 
-	logFn := res.req.ContextLogger.Debug
+	logFn := res.req.ContextLogger.DebugZ
 
 	// emit metrics
 	delta := res.finishTime.Sub(res.req.startTime)
@@ -195,7 +195,7 @@ func (res *ClientHTTPResponse) finish() {
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		res.req.Metrics.IncCounter(res.req.ctx, clientErrors, 1)
-		logFn = res.req.ContextLogger.Warn
+		logFn = res.req.ContextLogger.WarnZ
 	}
 
 	// write logs
