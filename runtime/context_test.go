@@ -182,7 +182,7 @@ func TestContextLogger(t *testing.T) {
 	assert.Len(t, logMessages, 1)
 	assert.Equal(t, zap.InfoLevel, logMessages[0].Level)
 
-	contextLogger.Warn(ctxWithField, "msg", zap.String("argField", "argValue"))
+	contextLogger.WarnZ(ctxWithField, "msg", zap.String("argField", "argValue"))
 	logMessages = logs.TakeAll()
 	assert.Len(t, logMessages, 1)
 	assert.Equal(t, zap.WarnLevel, logMessages[0].Level)
