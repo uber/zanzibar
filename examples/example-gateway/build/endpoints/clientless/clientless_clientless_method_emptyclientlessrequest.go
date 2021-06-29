@@ -90,7 +90,7 @@ func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.Error(
+			h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -124,7 +124,7 @@ func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewClientlessEmptyclientlessRequestWorkflow(h.Dependencies)
