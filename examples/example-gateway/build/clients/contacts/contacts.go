@@ -90,17 +90,27 @@ func NewClient(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.contacts.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	methodNames := map[string]string{
+		"SaveContacts": "Contacts::saveContacts",
+		"TestURLURL":   "Contacts::testUrlUrl",
+	}
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"contacts",
-			map[string]string{
-				"SaveContacts": "Contacts::saveContacts",
-				"TestURLURL":   "Contacts::testUrlUrl",
-			},
+			methodNames,
 			baseURL,
 			defaultHeaders,
 			timeout,
@@ -112,12 +122,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -141,16 +146,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.contacts.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.contacts.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("contacts", hystrix.CommandConfig{
-			MaxConcurrentRequests:  maxConcurrentRequests,
-			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
-			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
-		})
-	}
-	return circuitBreakerDisabled
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
@@ -193,7 +195,7 @@ func (c *contactsClient) SaveContacts(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "SaveContacts", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -282,7 +284,7 @@ func (c *contactsClient) TestURLURL(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "TestURLURL", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded

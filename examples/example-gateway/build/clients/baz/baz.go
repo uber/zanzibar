@@ -268,7 +268,17 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.baz.circuitBreakerDisabled")
+	}
+
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -327,12 +337,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.baz.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -356,16 +361,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.baz.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.baz.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("baz", hystrix.CommandConfig{
-			MaxConcurrentRequests:  maxConcurrentRequests,
-			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
-			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
-		})
-	}
-	return circuitBreakerDisabled
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
 }
 
 // bazClient is the TChannel client for downstream service.
@@ -401,7 +403,7 @@ func (c *bazClient) EchoBinary(
 			"methodName": "EchoBinary",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoBinary", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -466,7 +468,7 @@ func (c *bazClient) EchoBool(
 			"methodName": "EchoBool",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoBool", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -531,7 +533,7 @@ func (c *bazClient) EchoDouble(
 			"methodName": "EchoDouble",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoDouble", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -596,7 +598,7 @@ func (c *bazClient) EchoEnum(
 			"methodName": "EchoEnum",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoEnum", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -661,7 +663,7 @@ func (c *bazClient) EchoI16(
 			"methodName": "EchoI16",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI16", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -726,7 +728,7 @@ func (c *bazClient) EchoI32(
 			"methodName": "EchoI32",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI32", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -791,7 +793,7 @@ func (c *bazClient) EchoI64(
 			"methodName": "EchoI64",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI64", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -856,7 +858,7 @@ func (c *bazClient) EchoI8(
 			"methodName": "EchoI8",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI8", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -921,7 +923,7 @@ func (c *bazClient) EchoString(
 			"methodName": "EchoString",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -986,7 +988,7 @@ func (c *bazClient) EchoStringList(
 			"methodName": "EchoStringList",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStringList", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1051,7 +1053,7 @@ func (c *bazClient) EchoStringMap(
 			"methodName": "EchoStringMap",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStringMap", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1116,7 +1118,7 @@ func (c *bazClient) EchoStringSet(
 			"methodName": "EchoStringSet",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStringSet", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1181,7 +1183,7 @@ func (c *bazClient) EchoStructList(
 			"methodName": "EchoStructList",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStructList", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1246,7 +1248,7 @@ func (c *bazClient) EchoStructSet(
 			"methodName": "EchoStructSet",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStructSet", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1311,7 +1313,7 @@ func (c *bazClient) EchoTypedef(
 			"methodName": "EchoTypedef",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoTypedef", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1375,7 +1377,7 @@ func (c *bazClient) Call(
 			"methodName": "Call",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "Call", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1435,7 +1437,7 @@ func (c *bazClient) Compare(
 			"methodName": "Compare",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "Compare", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1504,7 +1506,7 @@ func (c *bazClient) GetProfile(
 			"methodName": "GetProfile",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "GetProfile", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1571,7 +1573,7 @@ func (c *bazClient) HeaderSchema(
 			"methodName": "HeaderSchema",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "HeaderSchema", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1640,7 +1642,7 @@ func (c *bazClient) Ping(
 			"methodName": "Ping",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "Ping", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1704,7 +1706,7 @@ func (c *bazClient) DeliberateDiffNoop(
 			"methodName": "DeliberateDiffNoop",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "DeliberateDiffNoop", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1765,7 +1767,7 @@ func (c *bazClient) TestUUID(
 			"methodName": "TestUUID",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "TestUUID", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1823,7 +1825,7 @@ func (c *bazClient) Trans(
 			"methodName": "Trans",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "Trans", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1892,7 +1894,7 @@ func (c *bazClient) TransHeaders(
 			"methodName": "TransHeaders",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "TransHeaders", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1961,7 +1963,7 @@ func (c *bazClient) TransHeadersNoReq(
 			"methodName": "TransHeadersNoReq",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "TransHeadersNoReq", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -2028,7 +2030,7 @@ func (c *bazClient) TransHeadersType(
 			"methodName": "TransHeadersType",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "TransHeadersType", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -2096,7 +2098,7 @@ func (c *bazClient) URLTest(
 			"methodName": "URLTest",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "baz", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "URLTest", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(

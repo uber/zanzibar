@@ -113,7 +113,17 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge.circuitBreakerDisabled")
+	}
+
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -172,12 +182,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -201,16 +206,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.corge.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.corge.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("corge", hystrix.CommandConfig{
-			MaxConcurrentRequests:  maxConcurrentRequests,
-			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
-			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
-		})
-	}
-	return circuitBreakerDisabled
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
 }
 
 // corgeClient is the TChannel client for downstream service.
@@ -246,7 +248,7 @@ func (c *corgeClient) EchoString(
 			"methodName": "EchoString",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(

@@ -42,8 +42,8 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Mirror mirrorclientgenerated.Client
 	Echo   echoclientgenerated.Client
+	Mirror mirrorclientgenerated.Client
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -74,10 +74,10 @@ func InitializeDependencies(
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
+	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
+	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 

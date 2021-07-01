@@ -73,6 +73,18 @@ func NewClient(deps *module.Dependencies) Client {
 		"Mirror::Mirror":         "MirrorMirror",
 		"MirrorInternal::Mirror": "MirrorInternalMirror",
 	}
+
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.mirror.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.mirror.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutInMS, methodNames[methodKey])
+		}
+	}
+
 	return &mirrorClient{
 		mirrorClient:         gen.NewMirrorYARPCClient(oc),
 		mirrorInternalClient: gen.NewMirrorInternalYARPCClient(oc),
@@ -84,21 +96,13 @@ func NewClient(deps *module.Dependencies) Client {
 			"mirror",
 			routingKey,
 			requestUUIDHeaderKey,
-			!configureCircuitBreaker(deps, timeoutInMS),
+			circuitBreakerDisabled,
 			timeoutInMS,
 		),
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.mirror.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.mirror.circuitBreakerDisabled")
-	}
-	if circuitBreakerDisabled {
-		return false
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -122,15 +126,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.mirror.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.mirror.requestVolumeThreshold"))
 	}
-
-	hystrix.ConfigureCommand("mirror", hystrix.CommandConfig{
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
 		RequestVolumeThreshold: requestVolumeThreshold,
 		Timeout:                timeoutVal,
 	})
-	return true
 }
 
 // MirrorMirror is a client RPC call for method Mirror::Mirror.
@@ -161,7 +163,7 @@ func (e *mirrorClient) MirrorMirror(
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
 	} else {
-		err = hystrix.DoC(ctx, "mirror", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "MirrorMirror", func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)
@@ -199,7 +201,7 @@ func (e *mirrorClient) MirrorInternalMirror(
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
 	} else {
-		err = hystrix.DoC(ctx, "mirror", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "MirrorInternalMirror", func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)

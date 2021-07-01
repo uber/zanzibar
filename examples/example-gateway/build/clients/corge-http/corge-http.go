@@ -121,7 +121,22 @@ func NewClient(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.corge-http.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	methodNames := map[string]string{
+		"EchoString":                "Corge::echoString",
+		"NoContent":                 "Corge::noContent",
+		"NoContentNoException":      "Corge::noContentNoException",
+		"CorgeNoContentOnException": "Corge::noContentOnException",
+	}
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.corge-http.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge-http.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	return &corgeHTTPClient{
 		clientID:      "corge-http",
@@ -133,12 +148,7 @@ func NewClient(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"corge-http",
-			map[string]string{
-				"EchoString":                "Corge::echoString",
-				"NoContent":                 "Corge::noContent",
-				"NoContentNoException":      "Corge::noContentNoException",
-				"CorgeNoContentOnException": "Corge::noContentOnException",
-			},
+			methodNames,
 			baseURL,
 			defaultHeaders,
 			timeout,
@@ -162,12 +172,7 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 	}
 	return routingMap
 }
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.corge-http.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge-http.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -191,16 +196,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.corge-http.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.corge-http.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("corge-http", hystrix.CommandConfig{
-			MaxConcurrentRequests:  maxConcurrentRequests,
-			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
-			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
-		})
-	}
-	return circuitBreakerDisabled
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
@@ -263,7 +265,7 @@ func (c *corgeHTTPClient) EchoString(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -366,7 +368,7 @@ func (c *corgeHTTPClient) NoContent(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "NoContent", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -464,7 +466,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "NoContentNoException", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -558,7 +560,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "CorgeNoContentOnException", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded

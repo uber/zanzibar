@@ -258,50 +258,60 @@ func NewClient(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.bar.followRedirect")
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	methodNames := map[string]string{
+		"ArgNotStruct":                    "Bar::argNotStruct",
+		"ArgWithHeaders":                  "Bar::argWithHeaders",
+		"ArgWithManyQueryParams":          "Bar::argWithManyQueryParams",
+		"ArgWithNearDupQueryParams":       "Bar::argWithNearDupQueryParams",
+		"ArgWithNestedQueryParams":        "Bar::argWithNestedQueryParams",
+		"ArgWithParams":                   "Bar::argWithParams",
+		"ArgWithParamsAndDuplicateFields": "Bar::argWithParamsAndDuplicateFields",
+		"ArgWithQueryHeader":              "Bar::argWithQueryHeader",
+		"ArgWithQueryParams":              "Bar::argWithQueryParams",
+		"DeleteFoo":                       "Bar::deleteFoo",
+		"DeleteWithBody":                  "Bar::deleteWithBody",
+		"DeleteWithQueryParams":           "Bar::deleteWithQueryParams",
+		"Hello":                           "Bar::helloWorld",
+		"ListAndEnum":                     "Bar::listAndEnum",
+		"MissingArg":                      "Bar::missingArg",
+		"NoRequest":                       "Bar::noRequest",
+		"Normal":                          "Bar::normal",
+		"NormalRecur":                     "Bar::normalRecur",
+		"TooManyArgs":                     "Bar::tooManyArgs",
+		"EchoBinary":                      "Echo::echoBinary",
+		"EchoBool":                        "Echo::echoBool",
+		"EchoDouble":                      "Echo::echoDouble",
+		"EchoEnum":                        "Echo::echoEnum",
+		"EchoI16":                         "Echo::echoI16",
+		"EchoI32":                         "Echo::echoI32",
+		"EchoI32Map":                      "Echo::echoI32Map",
+		"EchoI64":                         "Echo::echoI64",
+		"EchoI8":                          "Echo::echoI8",
+		"EchoString":                      "Echo::echoString",
+		"EchoStringList":                  "Echo::echoStringList",
+		"EchoStringMap":                   "Echo::echoStringMap",
+		"EchoStringSet":                   "Echo::echoStringSet",
+		"EchoStructList":                  "Echo::echoStructList",
+		"EchoStructSet":                   "Echo::echoStructSet",
+		"EchoTypedef":                     "Echo::echoTypedef",
+	}
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.bar.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"bar",
-			map[string]string{
-				"ArgNotStruct":                    "Bar::argNotStruct",
-				"ArgWithHeaders":                  "Bar::argWithHeaders",
-				"ArgWithManyQueryParams":          "Bar::argWithManyQueryParams",
-				"ArgWithNearDupQueryParams":       "Bar::argWithNearDupQueryParams",
-				"ArgWithNestedQueryParams":        "Bar::argWithNestedQueryParams",
-				"ArgWithParams":                   "Bar::argWithParams",
-				"ArgWithParamsAndDuplicateFields": "Bar::argWithParamsAndDuplicateFields",
-				"ArgWithQueryHeader":              "Bar::argWithQueryHeader",
-				"ArgWithQueryParams":              "Bar::argWithQueryParams",
-				"DeleteFoo":                       "Bar::deleteFoo",
-				"DeleteWithBody":                  "Bar::deleteWithBody",
-				"DeleteWithQueryParams":           "Bar::deleteWithQueryParams",
-				"Hello":                           "Bar::helloWorld",
-				"ListAndEnum":                     "Bar::listAndEnum",
-				"MissingArg":                      "Bar::missingArg",
-				"NoRequest":                       "Bar::noRequest",
-				"Normal":                          "Bar::normal",
-				"NormalRecur":                     "Bar::normalRecur",
-				"TooManyArgs":                     "Bar::tooManyArgs",
-				"EchoBinary":                      "Echo::echoBinary",
-				"EchoBool":                        "Echo::echoBool",
-				"EchoDouble":                      "Echo::echoDouble",
-				"EchoEnum":                        "Echo::echoEnum",
-				"EchoI16":                         "Echo::echoI16",
-				"EchoI32":                         "Echo::echoI32",
-				"EchoI32Map":                      "Echo::echoI32Map",
-				"EchoI64":                         "Echo::echoI64",
-				"EchoI8":                          "Echo::echoI8",
-				"EchoString":                      "Echo::echoString",
-				"EchoStringList":                  "Echo::echoStringList",
-				"EchoStringMap":                   "Echo::echoStringMap",
-				"EchoStringSet":                   "Echo::echoStringSet",
-				"EchoStructList":                  "Echo::echoStructList",
-				"EchoStructSet":                   "Echo::echoStructSet",
-				"EchoTypedef":                     "Echo::echoTypedef",
-			},
+			methodNames,
 			baseURL,
 			defaultHeaders,
 			timeout,
@@ -313,12 +323,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.bar.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -342,16 +347,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.bar.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.bar.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("bar", hystrix.CommandConfig{
-			MaxConcurrentRequests:  maxConcurrentRequests,
-			ErrorPercentThreshold:  errorPercentThreshold,
-			SleepWindow:            sleepWindowInMilliseconds,
-			RequestVolumeThreshold: requestVolumeThreshold,
-			Timeout:                timeoutVal,
-		})
-	}
-	return circuitBreakerDisabled
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+		MaxConcurrentRequests:  maxConcurrentRequests,
+		ErrorPercentThreshold:  errorPercentThreshold,
+		SleepWindow:            sleepWindowInMilliseconds,
+		RequestVolumeThreshold: requestVolumeThreshold,
+		Timeout:                timeoutVal,
+	})
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
@@ -393,7 +395,7 @@ func (c *barClient) ArgNotStruct(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgNotStruct", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -498,7 +500,7 @@ func (c *barClient) ArgWithHeaders(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithHeaders", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -678,7 +680,7 @@ func (c *barClient) ArgWithManyQueryParams(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithManyQueryParams", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -780,7 +782,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithNearDupQueryParams", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -906,7 +908,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithNestedQueryParams", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -991,7 +993,7 @@ func (c *barClient) ArgWithParams(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithParams", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1076,7 +1078,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithParamsAndDuplicateFields", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1161,7 +1163,7 @@ func (c *barClient) ArgWithQueryHeader(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithQueryHeader", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1263,7 +1265,7 @@ func (c *barClient) ArgWithQueryParams(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ArgWithQueryParams", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1354,7 +1356,7 @@ func (c *barClient) DeleteFoo(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "DeleteFoo", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1431,7 +1433,7 @@ func (c *barClient) DeleteWithBody(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "DeleteWithBody", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1517,7 +1519,7 @@ func (c *barClient) DeleteWithQueryParams(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "DeleteWithQueryParams", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1594,7 +1596,7 @@ func (c *barClient) Hello(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "Hello", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1706,7 +1708,7 @@ func (c *barClient) ListAndEnum(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "ListAndEnum", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1800,7 +1802,7 @@ func (c *barClient) MissingArg(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "MissingArg", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1895,7 +1897,7 @@ func (c *barClient) NoRequest(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "NoRequest", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1991,7 +1993,7 @@ func (c *barClient) Normal(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "Normal", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2087,7 +2089,7 @@ func (c *barClient) NormalRecur(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "NormalRecur", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2182,7 +2184,7 @@ func (c *barClient) TooManyArgs(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "TooManyArgs", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2292,7 +2294,7 @@ func (c *barClient) EchoBinary(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoBinary", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2375,7 +2377,7 @@ func (c *barClient) EchoBool(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoBool", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2464,7 +2466,7 @@ func (c *barClient) EchoDouble(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoDouble", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2553,7 +2555,7 @@ func (c *barClient) EchoEnum(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoEnum", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2642,7 +2644,7 @@ func (c *barClient) EchoI16(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI16", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2731,7 +2733,7 @@ func (c *barClient) EchoI32(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI32", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2820,7 +2822,7 @@ func (c *barClient) EchoI32Map(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI32Map", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2909,7 +2911,7 @@ func (c *barClient) EchoI64(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI64", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -2998,7 +3000,7 @@ func (c *barClient) EchoI8(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoI8", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3087,7 +3089,7 @@ func (c *barClient) EchoString(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3176,7 +3178,7 @@ func (c *barClient) EchoStringList(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStringList", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3265,7 +3267,7 @@ func (c *barClient) EchoStringMap(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStringMap", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3354,7 +3356,7 @@ func (c *barClient) EchoStringSet(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStringSet", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3443,7 +3445,7 @@ func (c *barClient) EchoStructList(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStructList", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3532,7 +3534,7 @@ func (c *barClient) EchoStructSet(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoStructSet", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -3621,7 +3623,7 @@ func (c *barClient) EchoTypedef(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoTypedef", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
