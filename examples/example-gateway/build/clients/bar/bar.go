@@ -302,7 +302,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	if !circuitBreakerDisabled {
 		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+			configureCircuitBreaker(deps, timeoutVal, methodKey)
 		}
 	}
 

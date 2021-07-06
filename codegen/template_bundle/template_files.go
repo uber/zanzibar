@@ -1517,7 +1517,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 	if !circuitBreakerDisabled {
 		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+			configureCircuitBreaker(deps, timeoutVal, methodKey)
 		}
 	}
 
@@ -1904,7 +1904,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16869, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16856, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
