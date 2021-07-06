@@ -127,7 +127,17 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	}
+
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -186,12 +196,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -215,16 +220,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
 			SleepWindow:            sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
 			Timeout:                timeoutVal,
 		})
-	}
-	return circuitBreakerDisabled
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
@@ -272,7 +274,7 @@ type {{$clientName}} struct {
 			"methodName" : "{{$methodName}}",
 			})
 		  start := time.Now()
-			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
 			  elapsed := time.Now().Sub(start)
 			  scope.Timer("hystrix-timer").Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(

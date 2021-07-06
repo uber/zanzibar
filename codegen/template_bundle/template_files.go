@@ -1269,6 +1269,18 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{- end -}}
 		{{- end}}
 	}
+
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutInMS, methodNames[methodKey])
+		}
+	}
+
 	return &{{$clientName}}{
 		{{range $i, $s := $services -}}
 		{{camel $s.Name}}Client: gen.New{{pascal $s.Name}}YARPCClient(oc),
@@ -1281,21 +1293,13 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		"{{$clientID}}",
 		routingKey,
 		requestUUIDHeaderKey,
-		!configureCircuitBreaker(deps, timeoutInMS),
+		circuitBreakerDisabled,
 		timeoutInMS,
 		),
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
-	}
-	if circuitBreakerDisabled {
-		return false
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -1319,15 +1323,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-
-	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
 		RequestVolumeThreshold: requestVolumeThreshold,
 		Timeout:                timeoutVal,
 	})
-	return true
 }
 
 {{range $i, $svc := .ProtoServices -}}
@@ -1363,7 +1365,7 @@ func (e *{{$clientName}}) {{$methodName}}(
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
 	} else {
-		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)
@@ -1387,7 +1389,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6611, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6680, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1503,8 +1505,21 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
 	}
 
-
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	methodNames := map[string]string{
+				{{range $serviceMethod, $methodName := $exposedMethods -}}
+				"{{$methodName}}": "{{$serviceMethod}}",
+				{{end}}
+	}
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1518,11 +1533,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
 			"{{$clientID}}",
-			map[string]string{
-				{{range $serviceMethod, $methodName := $exposedMethods -}}
-				"{{$methodName}}": "{{$serviceMethod}}",
-				{{end}}
-			},
+			methodNames,
 			baseURL,
 			defaultHeaders,
 			timeout,
@@ -1549,12 +1560,7 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 }
 {{end -}}
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -1578,16 +1584,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
 			SleepWindow:            sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
 			Timeout:                timeoutVal,
 		})
-	}
-	return circuitBreakerDisabled
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
@@ -1696,7 +1699,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1901,7 +1904,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16830, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 16869, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2911,7 +2914,17 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	circuitBreakerDisabled := configureCircuitBreaker(deps, timeoutVal)
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	}
+
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		}
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -2970,12 +2983,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -2999,16 +3007,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-	if !circuitBreakerDisabled {
-		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
 			SleepWindow:            sleepWindowInMilliseconds,
 			RequestVolumeThreshold: requestVolumeThreshold,
 			Timeout:                timeoutVal,
 		})
-	}
-	return circuitBreakerDisabled
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
@@ -3056,7 +3061,7 @@ type {{$clientName}} struct {
 			"methodName" : "{{$methodName}}",
 			})
 		  start := time.Now()
-			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
 			  elapsed := time.Now().Sub(start)
 			  scope.Timer("hystrix-timer").Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
@@ -3123,7 +3128,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11749, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11764, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
