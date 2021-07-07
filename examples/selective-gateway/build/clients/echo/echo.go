@@ -65,6 +65,18 @@ func NewClient(deps *module.Dependencies) Client {
 	methodNames := map[string]string{
 		"Echo::Echo": "EchoEcho",
 	}
+
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.echo.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.echo.circuitBreakerDisabled")
+	}
+	if !circuitBreakerDisabled {
+		for methodKey := range methodNames {
+			configureCircuitBreaker(deps, timeoutInMS, methodNames[methodKey])
+		}
+	}
+
 	return &echoClient{
 		echoClient: gen.NewEchoYARPCClient(oc),
 		opts: zanzibar.NewGRPCClientOpts(
@@ -75,21 +87,13 @@ func NewClient(deps *module.Dependencies) Client {
 			"echo",
 			routingKey,
 			requestUUIDHeaderKey,
-			!configureCircuitBreaker(deps, timeoutInMS),
+			circuitBreakerDisabled,
 			timeoutInMS,
 		),
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
-	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
-	circuitBreakerDisabled := false
-	if deps.Default.Config.ContainsKey("clients.echo.circuitBreakerDisabled") {
-		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.echo.circuitBreakerDisabled")
-	}
-	if circuitBreakerDisabled {
-		return false
-	}
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -113,15 +117,13 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int) bool {
 	if deps.Default.Config.ContainsKey("clients.echo.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.echo.requestVolumeThreshold"))
 	}
-
-	hystrix.ConfigureCommand("echo", hystrix.CommandConfig{
+	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
 		RequestVolumeThreshold: requestVolumeThreshold,
 		Timeout:                timeoutVal,
 	})
-	return true
 }
 
 // EchoEcho is a client RPC call for method Echo::Echo.
@@ -152,7 +154,7 @@ func (e *echoClient) EchoEcho(
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
 	} else {
-		err = hystrix.DoC(ctx, "echo", func(ctx context.Context) error {
+		err = hystrix.DoC(ctx, "EchoEcho", func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)
