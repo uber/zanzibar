@@ -339,25 +339,18 @@ func (gateway *Gateway) Bootstrap() error {
 }
 
 func (gateway *Gateway) registerPredefined() {
-	gateway.HTTPRouter.Handle("GET", "/debug/pprof", http.HandlerFunc(pprof.Index))
-	gateway.HTTPRouter.Handle("GET", "/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
-	gateway.HTTPRouter.Handle("GET", "/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
-	gateway.HTTPRouter.Handle("GET", "/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
-	gateway.HTTPRouter.Handle("POST", "/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
-	gateway.HTTPRouter.Handle(
-		"GET", "/debug/pprof/goroutine", pprof.Handler("goroutine"),
-	)
-	gateway.HTTPRouter.Handle(
-		"GET", "/debug/pprof/heap", pprof.Handler("heap"),
-	)
-	gateway.HTTPRouter.Handle(
-		"GET", "/debug/pprof/threadcreate", pprof.Handler("threadcreate"),
-	)
-	gateway.HTTPRouter.Handle(
-		"GET", "/debug/pprof/block", pprof.Handler("block"),
-	)
-	gateway.HTTPRouter.Handle("GET", "/debug/loglevel", gateway.atomLevel)
-	gateway.HTTPRouter.Handle("PUT", "/debug/loglevel", gateway.atomLevel)
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof", http.HandlerFunc(pprof.Index))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+	_ = gateway.HTTPRouter.Handle("POST", "/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	_ = gateway.HTTPRouter.Handle("POST", "/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/heap", pprof.Handler("heap"))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/pprof/block", pprof.Handler("block"))
+	_ = gateway.HTTPRouter.Handle("GET", "/debug/loglevel", gateway.atomLevel)
+	_ = gateway.HTTPRouter.Handle("PUT", "/debug/loglevel", gateway.atomLevel)
 
 	deps := &DefaultDependencies{
 		Scope:         gateway.RootScope,
