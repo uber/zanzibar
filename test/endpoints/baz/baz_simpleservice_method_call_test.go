@@ -25,7 +25,10 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+	"github.com/stretchr/testify/assert"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -96,6 +99,26 @@ func BenchmarkCall(b *testing.B) {
 			}
 		}
 	})
+
+	// test circuit breaker settings for each method match prod values
+	settings := hystrix.GetCircuitSettings()
+	names := [27]string{"baz-EchoBinary", "baz-EchoBool", "baz-EchoDouble", "baz-EchoEnum", "baz-EchoI16", "baz-EchoI32", "baz-EchoI64", "baz-EchoI8", "baz-EchoString", "baz-EchoStringList", "baz-EchoStringMap", "baz-EchoStringSet", "baz-EchoStructList", "baz-EchoStructSet", "baz-EchoTypedef", "baz-Call", "baz-Compare", "baz-GetProfile", "baz-HeaderSchema", "baz-Ping", "baz-DeliberateDiffNoop", "baz-TestUUID", "baz-Trans", "baz-TransHeaders", "baz-TransHeadersNoReq", "baz-TransHeadersType", "baz-URLTest"}
+	// baz config values from production.json
+	timeout := 10000
+	max := 1000
+	sleepWindow := 5000
+	errorPercentage := 20
+	reqThreshold := 20
+	expectedSettings := &hystrix.Settings{
+		Timeout:                time.Duration(timeout) * time.Millisecond,
+		MaxConcurrentRequests:  max,
+		RequestVolumeThreshold: uint64(reqThreshold),
+		SleepWindow:            time.Duration(sleepWindow) * time.Millisecond,
+		ErrorPercentThreshold:  errorPercentage,
+	}
+	for _, name := range names {
+		assert.Equal(b, settings[name], expectedSettings)
+	}
 
 	b.StopTimer()
 	gateway.Close()

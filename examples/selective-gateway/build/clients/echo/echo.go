@@ -72,8 +72,9 @@ func NewClient(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.echo.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutInMS, methodNames[methodKey])
+		for _, methodName := range methodNames {
+			circuitBreakerName := "echo" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutInMS, circuitBreakerName)
 		}
 	}
 
@@ -93,7 +94,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -117,7 +118,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.echo.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.echo.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -154,7 +155,8 @@ func (e *echoClient) EchoEcho(
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
 	} else {
-		err = hystrix.DoC(ctx, "EchoEcho", func(ctx context.Context) error {
+		circuitBreakerName := "echo" + "-" + "EchoEcho"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)

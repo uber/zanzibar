@@ -101,7 +101,8 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	if !circuitBreakerDisabled {
 		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodKey)
+			circuitBreakerName := "google-now" + "-" + methodKey
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -122,7 +123,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -146,7 +147,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.google-now.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.google-now.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -199,7 +200,8 @@ func (c *googleNowClient) AddCredentials(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "AddCredentials", func(ctx context.Context) error {
+		circuitBreakerName := "google-now" + "-" + "AddCredentials"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -281,7 +283,8 @@ func (c *googleNowClient) CheckCredentials(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "CheckCredentials", func(ctx context.Context) error {
+		circuitBreakerName := "google-now" + "-" + "CheckCredentials"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded

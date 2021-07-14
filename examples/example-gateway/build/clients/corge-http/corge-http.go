@@ -134,7 +134,8 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	if !circuitBreakerDisabled {
 		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodKey)
+			circuitBreakerName := "corge-http" + "-" + methodKey
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -172,7 +173,7 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 	}
 	return routingMap
 }
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -196,7 +197,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.corge-http.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.corge-http.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -265,7 +266,8 @@ func (c *corgeHTTPClient) EchoString(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
+		circuitBreakerName := "corge-http" + "-" + "EchoString"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -368,7 +370,8 @@ func (c *corgeHTTPClient) NoContent(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "NoContent", func(ctx context.Context) error {
+		circuitBreakerName := "corge-http" + "-" + "NoContent"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -466,7 +469,8 @@ func (c *corgeHTTPClient) NoContentNoException(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "NoContentNoException", func(ctx context.Context) error {
+		circuitBreakerName := "corge-http" + "-" + "NoContentNoException"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -560,7 +564,8 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "CorgeNoContentOnException", func(ctx context.Context) error {
+		circuitBreakerName := "corge-http" + "-" + "CorgeNoContentOnException"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded

@@ -275,8 +275,9 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		for _, methodName := range methodNames {
+			circuitBreakerName := "baz" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -337,7 +338,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -361,7 +362,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.baz.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.baz.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -403,7 +404,8 @@ func (c *bazClient) EchoBinary(
 			"methodName": "EchoBinary",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoBinary", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoBinary"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -468,7 +470,8 @@ func (c *bazClient) EchoBool(
 			"methodName": "EchoBool",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoBool", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoBool"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -533,7 +536,8 @@ func (c *bazClient) EchoDouble(
 			"methodName": "EchoDouble",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoDouble", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoDouble"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -598,7 +602,8 @@ func (c *bazClient) EchoEnum(
 			"methodName": "EchoEnum",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoEnum", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoEnum"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -663,7 +668,8 @@ func (c *bazClient) EchoI16(
 			"methodName": "EchoI16",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoI16", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoI16"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -728,7 +734,8 @@ func (c *bazClient) EchoI32(
 			"methodName": "EchoI32",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoI32", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoI32"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -793,7 +800,8 @@ func (c *bazClient) EchoI64(
 			"methodName": "EchoI64",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoI64", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoI64"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -858,7 +866,8 @@ func (c *bazClient) EchoI8(
 			"methodName": "EchoI8",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoI8", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoI8"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -923,7 +932,8 @@ func (c *bazClient) EchoString(
 			"methodName": "EchoString",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoString"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -988,7 +998,8 @@ func (c *bazClient) EchoStringList(
 			"methodName": "EchoStringList",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoStringList", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoStringList"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1053,7 +1064,8 @@ func (c *bazClient) EchoStringMap(
 			"methodName": "EchoStringMap",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoStringMap", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoStringMap"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1118,7 +1130,8 @@ func (c *bazClient) EchoStringSet(
 			"methodName": "EchoStringSet",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoStringSet", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoStringSet"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1183,7 +1196,8 @@ func (c *bazClient) EchoStructList(
 			"methodName": "EchoStructList",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoStructList", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoStructList"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1248,7 +1262,8 @@ func (c *bazClient) EchoStructSet(
 			"methodName": "EchoStructSet",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoStructSet", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoStructSet"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1313,7 +1328,8 @@ func (c *bazClient) EchoTypedef(
 			"methodName": "EchoTypedef",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoTypedef", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "EchoTypedef"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1377,7 +1393,8 @@ func (c *bazClient) Call(
 			"methodName": "Call",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "Call", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "Call"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1437,7 +1454,8 @@ func (c *bazClient) Compare(
 			"methodName": "Compare",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "Compare", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "Compare"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1506,7 +1524,8 @@ func (c *bazClient) GetProfile(
 			"methodName": "GetProfile",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "GetProfile", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "GetProfile"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1573,7 +1592,8 @@ func (c *bazClient) HeaderSchema(
 			"methodName": "HeaderSchema",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "HeaderSchema", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "HeaderSchema"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1642,7 +1662,8 @@ func (c *bazClient) Ping(
 			"methodName": "Ping",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "Ping", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "Ping"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1706,7 +1727,8 @@ func (c *bazClient) DeliberateDiffNoop(
 			"methodName": "DeliberateDiffNoop",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "DeliberateDiffNoop", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "DeliberateDiffNoop"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1767,7 +1789,8 @@ func (c *bazClient) TestUUID(
 			"methodName": "TestUUID",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "TestUUID", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "TestUUID"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1825,7 +1848,8 @@ func (c *bazClient) Trans(
 			"methodName": "Trans",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "Trans", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "Trans"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1894,7 +1918,8 @@ func (c *bazClient) TransHeaders(
 			"methodName": "TransHeaders",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "TransHeaders", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "TransHeaders"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -1963,7 +1988,8 @@ func (c *bazClient) TransHeadersNoReq(
 			"methodName": "TransHeadersNoReq",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "TransHeadersNoReq", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "TransHeadersNoReq"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -2030,7 +2056,8 @@ func (c *bazClient) TransHeadersType(
 			"methodName": "TransHeadersType",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "TransHeadersType", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "TransHeadersType"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
@@ -2098,7 +2125,8 @@ func (c *bazClient) URLTest(
 			"methodName": "URLTest",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "URLTest", func(ctx context.Context) error {
+		circuitBreakerName := "baz" + "-" + "URLTest"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
