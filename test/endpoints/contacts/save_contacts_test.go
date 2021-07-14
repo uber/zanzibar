@@ -25,7 +25,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/stretchr/testify/assert"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
@@ -87,6 +89,27 @@ func BenchmarkSaveContacts(b *testing.B) {
 		}
 	})
 
+	// Test http method circuit breaker settings
+	settings := hystrix.GetCircuitSettings()
+	names := [2]string{"contacts-SaveContacts", "contacts-TestURLURL"}
+	// contacts config values from production.json
+	timeout := 10000
+	max := 1000
+	errorPercentage := 20
+	// default parameters
+	sleepWindow := 5000
+	reqThreshold := 20
+	expectedSettings := &hystrix.Settings{
+		Timeout:                time.Duration(timeout) * time.Millisecond,
+		MaxConcurrentRequests:  max,
+		RequestVolumeThreshold: uint64(reqThreshold),
+		SleepWindow:            time.Duration(sleepWindow) * time.Millisecond,
+		ErrorPercentThreshold:  errorPercentage,
+	}
+	for _, name := range names {
+		assert.Equal(b, settings[name], expectedSettings)
+	}
+
 	b.StopTimer()
 	gateway.Close()
 	b.StartTimer()
@@ -129,4 +152,5 @@ func TestSaveContactsCall(t *testing.T) {
 
 	assert.Equal(t, "202 Accepted", res.Status)
 	assert.Equal(t, 1, counter)
+
 }

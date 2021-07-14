@@ -1276,8 +1276,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutInMS, methodNames[methodKey])
+		for _, methodName := range methodNames {
+			circuitBreakerName := "{{$clientID}}"  + "-" + methodName
+			configureCircuitBreaker(deps, timeoutInMS, circuitBreakerName)
 		}
 	}
 
@@ -1299,7 +1300,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -1323,7 +1324,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -1365,7 +1366,8 @@ func (e *{{$clientName}}) {{$methodName}}(
 	if e.opts.CircuitBreakerDisabled {
 		result, err = runFunc(ctx, request, opts...)
 	} else {
-		err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
+		circuitBreakerName := "{{$clientID}}" + "-" + "{{$methodName}}"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)
@@ -1389,7 +1391,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6680, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6832, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1516,8 +1518,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodKey)
+		for methodName := range methodNames {
+			circuitBreakerName := "{{$clientID}}" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -1560,7 +1563,7 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 }
 {{end -}}
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -1584,7 +1587,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
 			SleepWindow:            sleepWindowInMilliseconds,
@@ -1699,7 +1702,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
+		circuitBreakerName := "{{$clientID}}" + "-" + "{{$methodName}}"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -1904,7 +1908,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 16856, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 17017, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2921,8 +2925,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		for _, methodName := range methodNames {
+			circuitBreakerName := "{{$clientID}}" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -2983,7 +2988,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -3007,7 +3012,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 			MaxConcurrentRequests:  maxConcurrentRequests,
 			ErrorPercentThreshold:  errorPercentThreshold,
 			SleepWindow:            sleepWindowInMilliseconds,
@@ -3061,7 +3066,8 @@ type {{$clientName}} struct {
 			"methodName" : "{{$methodName}}",
 			})
 		  start := time.Now()
-			err = hystrix.DoC(ctx, "{{$methodName}}", func(ctx context.Context) error {
+			circuitBreakerName := "{{$clientID}}" + "-" + "{{$methodName}}"
+			err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			  elapsed := time.Now().Sub(start)
 			  scope.Timer("hystrix-timer").Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
@@ -3128,7 +3134,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11764, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

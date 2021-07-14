@@ -100,8 +100,9 @@ func NewClient(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodKey)
+		for methodName := range methodNames {
+			circuitBreakerName := "contacts" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -122,7 +123,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -146,7 +147,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.contacts.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.contacts.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -195,7 +196,8 @@ func (c *contactsClient) SaveContacts(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "SaveContacts", func(ctx context.Context) error {
+		circuitBreakerName := "contacts" + "-" + "SaveContacts"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded
@@ -284,7 +286,8 @@ func (c *contactsClient) TestURLURL(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "TestURLURL", func(ctx context.Context) error {
+		circuitBreakerName := "contacts" + "-" + "TestURLURL"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded

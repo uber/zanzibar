@@ -94,8 +94,9 @@ func NewClient(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.withexceptions.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodKey)
+		for methodName := range methodNames {
+			circuitBreakerName := "withexceptions" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -116,7 +117,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -140,7 +141,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.withexceptions.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.withexceptions.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -188,7 +189,8 @@ func (c *withexceptionsClient) Func1(
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
-		err = hystrix.DoC(ctx, "Func1", func(ctx context.Context) error {
+		circuitBreakerName := "withexceptions" + "-" + "Func1"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			res, clientErr = req.Do()
 			if res != nil {
 				// This is not a system error/issue. Downstream responded

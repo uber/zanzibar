@@ -120,8 +120,9 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			configureCircuitBreaker(deps, timeoutVal, methodNames[methodKey])
+		for _, methodName := range methodNames {
+			circuitBreakerName := "corge" + "-" + methodName
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
 
@@ -182,7 +183,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
@@ -206,7 +207,7 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, method s
 	if deps.Default.Config.ContainsKey("clients.corge.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.corge.requestVolumeThreshold"))
 	}
-	hystrix.ConfigureCommand(method, hystrix.CommandConfig{
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
 		MaxConcurrentRequests:  maxConcurrentRequests,
 		ErrorPercentThreshold:  errorPercentThreshold,
 		SleepWindow:            sleepWindowInMilliseconds,
@@ -248,7 +249,8 @@ func (c *corgeClient) EchoString(
 			"methodName": "EchoString",
 		})
 		start := time.Now()
-		err = hystrix.DoC(ctx, "EchoString", func(ctx context.Context) error {
+		circuitBreakerName := "corge" + "-" + "EchoString"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
