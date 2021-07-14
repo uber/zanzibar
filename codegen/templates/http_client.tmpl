@@ -120,8 +120,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			circuitBreakerName := "{{$clientID}}" + "-" + methodKey
+		for methodName := range methodNames {
+			circuitBreakerName := "{{$clientID}}" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}

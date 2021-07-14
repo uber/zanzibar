@@ -1518,8 +1518,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			circuitBreakerName := "{{$clientID}}" + "-" + methodKey
+		for methodName := range methodNames {
+			circuitBreakerName := "{{$clientID}}" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
@@ -1908,7 +1908,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 17015, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 17017, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

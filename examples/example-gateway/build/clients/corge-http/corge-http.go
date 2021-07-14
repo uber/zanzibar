@@ -133,8 +133,8 @@ func NewClient(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge-http.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			circuitBreakerName := "corge-http" + "-" + methodKey
+		for methodName := range methodNames {
+			circuitBreakerName := "corge-http" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}

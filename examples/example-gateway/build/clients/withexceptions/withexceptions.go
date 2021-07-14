@@ -94,8 +94,8 @@ func NewClient(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.withexceptions.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			circuitBreakerName := "withexceptions" + "-" + methodKey
+		for methodName := range methodNames {
+			circuitBreakerName := "withexceptions" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}

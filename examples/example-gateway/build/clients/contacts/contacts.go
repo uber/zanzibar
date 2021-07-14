@@ -100,8 +100,8 @@ func NewClient(deps *module.Dependencies) Client {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
 	}
 	if !circuitBreakerDisabled {
-		for methodKey := range methodNames {
-			circuitBreakerName := "contacts" + "-" + methodKey
+		for methodName := range methodNames {
+			circuitBreakerName := "contacts" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
 	}
