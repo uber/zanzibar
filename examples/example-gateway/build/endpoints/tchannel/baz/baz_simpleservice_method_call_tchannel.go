@@ -74,7 +74,8 @@ type SimpleServiceCallHandler struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	return g.TChannelRouter.Register(h.endpoint)
+	serviceName := g.Config.MustGetString("clients.baz.serviceName")
+	return g.TchannelRouters[serviceName].Register(h.endpoint)
 }
 
 // Handle handles RPC call of "SimpleService::Call".

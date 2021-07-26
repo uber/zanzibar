@@ -96,7 +96,9 @@ type Gateway struct {
 	RealTChannelPort int32
 	RealTChannelAddr string
 	WaitGroup        *sync.WaitGroup
+	//todo remove this..but this is being used in bench/mock init :(
 	Channel          *tchannel.Channel
+	TchannelChannels map[string]*tchannel.Channel
 	ContextLogger    ContextLogger
 	ContextMetrics   ContextMetrics
 	ContextExtractor ContextExtractor
@@ -105,9 +107,12 @@ type Gateway struct {
 	ServiceName      string
 	Config           *StaticConfig
 	HTTPRouter       HTTPRouter
-	TChannelRouter   *TChannelRouter
-	Tracer           opentracing.Tracer
-	JSONWrapper      jsonwrapper.JSONWrapper
+	//todo remove this; can do this once you make changes in tmpl
+	TChannelRouter         *TChannelRouter
+	TchannelRouters        map[string]*TChannelRouter
+	TchannelSubLoggerLevel zapcore.Level
+	Tracer                 opentracing.Tracer
+	JSONWrapper            jsonwrapper.JSONWrapper
 
 	// gRPC client dispatcher for gRPC client lifecycle management
 	GRPCClientDispatcher *yarpc.Dispatcher
@@ -139,11 +144,13 @@ type DefaultDependencies struct {
 	// ContextMetrics emit metrics from context
 	ContextMetrics ContextMetrics
 
-	Logger  *zap.Logger
-	Scope   tally.Scope
-	Tracer  opentracing.Tracer
-	Config  *StaticConfig
-	Channel *tchannel.Channel
+	Logger *zap.Logger
+	Scope  tally.Scope
+	Tracer opentracing.Tracer
+	Config *StaticConfig
+
+	//todo we had to add gateway here, see if there's a way around
+	Gateway *Gateway
 
 	// dispatcher for managing gRPC clients
 	GRPCClientDispatcher *yarpc.Dispatcher
@@ -800,6 +807,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	if !ok {
 		return errors.Errorf("unknown sub logger level for tchannel server: %s", levelString)
 	}
+	gateway.TchannelSubLoggerLevel = level
 
 	channel, err := tchannel.NewChannel(
 		serviceName,
@@ -810,22 +818,17 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 			StatsReporter: NewTChannelStatsReporter(
 				gateway.RootScope,
 			),
-
-			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
-			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
-			//RelayHost:                opts.RelayHost,
-			//RelayLocalHandlers:       opts.RelayLocalHandlers,
-			//RelayMaxTimeout:          opts.RelayMaxTimeout,
 		})
 
 	if err != nil {
-		return errors.Errorf(
-			"Error creating top channel:\n    %s",
-			err)
+		return errors.Errorf("Error creating top channel:\n%s", err)
 	}
 
-	gateway.Channel = channel
+	//gateway.Channel = channel
 	gateway.tchannelServer = channel
+	gateway.TchannelChannels = make(map[string]*tchannel.Channel)
+	gateway.TchannelRouters = make(map[string]*TChannelRouter)
+	//todo remove this
 	gateway.TChannelRouter = NewTChannelRouter(channel, gateway)
 
 	return nil
@@ -911,6 +914,7 @@ func GetHostname() string {
 
 // shutdownTChannelServer gracefully shuts down the tchannel server, blocks until the shutdown is
 // complete or the timeout has reached if there is one associated with the given context
+// It also shuts down all the dedicated client tchannel connections on a best effort basis
 func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 	shutdownPollInterval := defaultShutdownPollInterval
 	if gateway.Config.ContainsKey("shutdown.pollInterval") {
@@ -920,6 +924,17 @@ func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 	defer ticker.Stop()
 
 	gateway.tchannelServer.Close()
+	for serviceName, serviceTchannel := range gateway.TchannelChannels {
+		gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", serviceName))
+		serviceTchannel.Close()
+		scope := gateway.RootScope.Tagged(map[string]string{
+			"client": serviceName,
+		})
+		scope.Gauge("tchannel.client.closed").Update(1)
+		scope.Gauge("tchannel.client.running").Update(0)
+		scope.Gauge("tchannel.client.failed").Update(0)
+	}
+
 	for {
 		select {
 		case <-ctx.Done():

@@ -52,8 +52,9 @@ http.defaultHeaders:
 http.port: 7783
 http.clients.requestUUIDHeaderKey: x-request-uuid
 logger.fileName: /var/log/example-gateway/example-gateway.log
-logger.output: disk
+logger.output: stdout
 metrics.serviceName: example-gateway
+metrics.flushInterval: 10000
 metrics.m3.includeHost: true
 service.env.config: {}
 serviceName: example-gateway
@@ -68,6 +69,7 @@ sidecarRouter.default.tchannel.port: 5000
 tchannel.port: 7784
 tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
+subLoggerLevel.tchannel: debug
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false
 clients.baz.alternates:

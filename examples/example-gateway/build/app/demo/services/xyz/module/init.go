@@ -86,7 +86,6 @@ func InitializeDependencies(
 		Scope:            g.RootScope,
 		Tracer:           g.Tracer,
 		Config:           g.Config,
-		Channel:          g.Channel,
 
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,

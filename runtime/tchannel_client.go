@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -150,6 +151,7 @@ func (c *TChannelClient) Call(
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
+	fmt.Printf("\n **********************Hello Edge, Zanzibar Call called on [%v] %v******************", c.ClientID, c.ch)
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{
 		scopeTagClient:          c.ClientID,
@@ -262,7 +264,7 @@ func (c *TChannelClient) call(
 	return call.success, call.resHeaders, err
 }
 
-// first rule match, would be the choosen channel. if nothing matches fallback to default channel
+// first rule match, would be the chosen channel. if nothing matches fallback to default channel
 func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
 	sc *tchannel.SubChannel, ctx netContext.Context) (*tchannel.SubChannel, netContext.Context) {
 	ch := sc

@@ -195,11 +195,14 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	gateway := deps.Default.Gateway
+	channel := createNewTchannelForClient(deps, serviceName)
+	gateway.TchannelChannels[serviceName] = channel
+	gateway.TchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
 
 	ip := deps.Default.Config.MustGetString("clients.baz.ip")
 	port := deps.Default.Config.MustGetInt("clients.baz.port")
-	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	/*Ex:
 	{
@@ -231,7 +234,7 @@ func NewClient(deps *module.Dependencies) Client {
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
 	altChannelMap := make(map[string]*tchannel.SubChannel)
-	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
+	headerPatterns, re = initializeDynamicChannel(channel, deps, headerPatterns, altChannelMap, re)
 
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.baz.timeout"))
 	timeout := time.Millisecond * time.Duration(
@@ -319,7 +322,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	client := zanzibar.NewTChannelClientContext(
-		deps.Default.Channel,
+		channel,
 		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
@@ -344,7 +347,37 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.Channel {
+	processName := deps.Default.Config.MustGetString("tchannel.processName")
+	gateway := deps.Default.Gateway
+	level := gateway.TchannelSubLoggerLevel
+
+	channel, err := tchannel.NewChannel(
+		serviceName,
+		&tchannel.ChannelOptions{
+			ProcessName: processName,
+			Tracer:      deps.Default.Tracer,
+			Logger:      zanzibar.NewTChannelLogger(gateway.SubLogger("tchannel", level)),
+			StatsReporter: zanzibar.NewTChannelStatsReporter(
+				deps.Default.Scope,
+			),
+		})
+
+	scope := deps.Default.Scope.Tagged(map[string]string{
+		"client": serviceName,
+	})
+
+	if err != nil {
+		scope.Gauge("tchannel.client.running").Update(1)
+		scope.Gauge("tchannel.client.failed").Update(0)
+	} else {
+		scope.Gauge("tchannel.client.running").Update(0)
+		scope.Gauge("tchannel.client.failed").Update(1)
+	}
+	return channel
+}
+
+func initializeDynamicChannel(channel *tchannel.Channel, deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
 	if deps.Default.Config.ContainsKey("clients.baz.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.baz.alternates", &alternateServiceDetail)
@@ -361,7 +394,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 
-			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			scAlt := channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
 			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
 			if !ok {
 				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
