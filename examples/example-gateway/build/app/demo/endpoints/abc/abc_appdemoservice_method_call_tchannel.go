@@ -25,6 +25,7 @@ package appdemoabcendpoint
 
 import (
 	"context"
+	"fmt"
 	"runtime/debug"
 
 	"github.com/pkg/errors"
@@ -65,6 +66,7 @@ type AppDemoServiceCallHandler struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *AppDemoServiceCallHandler) Register(g *zanzibar.Gateway) error {
+	fmt.Printf("Register phase: In AppDemoServiceCallHandler using main server tchannel for [%v]\n", h.endpoint.Method)
 	return g.TChannelRouter.Register(h.endpoint)
 }
 

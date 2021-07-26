@@ -25,6 +25,7 @@ package baztchannelendpoint
 
 import (
 	"context"
+	"fmt"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -74,8 +75,8 @@ type SimpleServiceCallHandler struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	serviceName := g.Config.MustGetString("clients.baz.serviceName")
-	return g.TchannelRouters[serviceName].Register(h.endpoint)
+	fmt.Printf("Register phase: In SimpleServiceCallHandler using main server tchannel for [%v]\n", h.endpoint.Method)
+	return g.TChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "SimpleService::Call".

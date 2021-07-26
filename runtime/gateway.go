@@ -97,6 +97,7 @@ type Gateway struct {
 	RealTChannelAddr string
 	WaitGroup        *sync.WaitGroup
 	//todo remove this..but this is being used in bench/mock init :(
+	//todo lets rename this...
 	Channel          *tchannel.Channel
 	TchannelChannels map[string]*tchannel.Channel
 	ContextLogger    ContextLogger

@@ -2382,17 +2382,16 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:         g.Logger,
-		ContextExtractor: g.ContextExtractor,
-		ContextLogger:  g.ContextLogger,
-		ContextMetrics: zanzibar.NewContextMetrics(g.RootScope),
-		Scope:          g.RootScope,
-		Tracer:         g.Tracer,
-		Config:         g.Config,
-		Channel:        g.Channel,
-
+		Logger:               g.Logger,
+		ContextExtractor:     g.ContextExtractor,
+		ContextLogger:        g.ContextLogger,
+		ContextMetrics:       zanzibar.NewContextMetrics(g.RootScope),
+		Scope:                g.RootScope,
+		Tracer:               g.Tracer,
+		Config:               g.Config,
+		Gateway:              g,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
-		JSONWrapper:		g.JSONWrapper,
+		JSONWrapper:		  g.JSONWrapper,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -2424,7 +2423,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2483, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2522, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2941,7 +2940,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	gateway := deps.Default.Gateway
+	channel := createNewTchannelForClient(deps, serviceName)
+	gateway.TchannelChannels[serviceName] = channel
+	gateway.TchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
 
 	{{if $sidecarRouter -}}
 	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
@@ -2950,7 +2952,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	{{end -}}
-	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	/*Ex:
 	{
@@ -2982,7 +2984,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
 	altChannelMap  := make(map[string]*tchannel.SubChannel)
-	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
+	headerPatterns, re = initializeDynamicChannel(channel, deps, headerPatterns, altChannelMap, re)
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
@@ -3003,6 +3005,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{end -}}
 		{{ end -}}
 		{{ end -}}
+	}
+	for _, method := range methodNames {
+		//todo we were asserting that the registering of methods happen in separate tchannels
+		fmt.Printf("For Client: {{$clientName}} we are registering %v on the explicit client channel\n", method)
 	}
 
 	qpsLevels := map[string]string{
@@ -3029,7 +3035,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 
 	client := zanzibar.NewTChannelClientContext(
-		deps.Default.Channel,
+		channel,
 		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
@@ -3054,7 +3060,37 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 }
 
-func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.Channel {
+	processName := deps.Default.Config.MustGetString("tchannel.processName")
+	gateway := deps.Default.Gateway
+	level := gateway.TchannelSubLoggerLevel
+
+	channel, err := tchannel.NewChannel(
+		serviceName,
+		&tchannel.ChannelOptions{
+			ProcessName: processName,
+			Tracer:      deps.Default.Tracer,
+			Logger:      zanzibar.NewTChannelLogger(gateway.SubLogger("tchannel", level)),
+			StatsReporter: zanzibar.NewTChannelStatsReporter(
+			deps.Default.Scope,
+			),
+		})
+
+	scope := deps.Default.Scope.Tagged(map[string]string{
+		"client": serviceName,
+	})
+
+	if err != nil {
+		scope.Gauge("tchannel.client.running").Update(1)
+		scope.Gauge("tchannel.client.failed").Update(0)
+	} else {
+		scope.Gauge("tchannel.client.running").Update(0)
+		scope.Gauge("tchannel.client.failed").Update(1)
+	}
+	return channel
+}
+
+func initializeDynamicChannel(channel *tchannel.Channel, deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
@@ -3071,7 +3107,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 
-			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			scAlt := channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
 			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
 			if !ok {
 				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
@@ -3259,7 +3295,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13490, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13219, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3458,6 +3494,7 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+	fmt.Printf("Register phase: In {{$handlerName}} using main server tchannel for [%v]\n", h.endpoint.Method)
 	return g.TChannelRouter.Register(h.endpoint)
 }
 
@@ -3668,7 +3705,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8797, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8899, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

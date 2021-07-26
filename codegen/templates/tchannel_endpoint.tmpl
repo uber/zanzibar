@@ -73,8 +73,8 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
-	return g.TchannelRouters[serviceName].Register(h.endpoint)
+	fmt.Printf("Register phase: In {{$handlerName}} using main server tchannel for [%v]\n", h.endpoint.Method)
+	return g.TChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".

@@ -26,6 +26,7 @@ package bazclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/textproto"
 	"strconv"
 	"strings"
@@ -272,6 +273,10 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::transHeadersNoReq": "TransHeadersNoReq",
 		"SimpleService::transHeadersType":  "TransHeadersType",
 		"SimpleService::urlTest":           "URLTest",
+	}
+	for _, method := range methodNames {
+		//todo we were asserting that the registering of methods happen in separate tchannels
+		fmt.Printf("For Client: bazClient we are registering %v on the explicit client channel\n", method)
 	}
 
 	qpsLevels := map[string]string{
