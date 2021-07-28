@@ -426,7 +426,7 @@ func (gateway *Gateway) Shutdown() {
 	swg.Add(1)
 	go func() {
 		defer swg.Done()
-		if err := gateway.shutdownTChannelServer(ctx); err != nil {
+		if err := gateway.shutdownTChannelServerAndClients(ctx); err != nil {
 			ec <- errors.Wrap(err, "error shutting down tchannel server")
 		}
 	}()
@@ -909,10 +909,10 @@ func GetHostname() string {
 	return host
 }
 
-// shutdownTChannelServer gracefully shuts down the tchannel server, blocks until the shutdown is
+// shutdownTChannelServerAndClients gracefully shuts down the tchannel server, blocks until the shutdown is
 // complete or the timeout has reached if there is one associated with the given context
 // It also shuts down all the dedicated client tchannel connections on a best effort basis
-func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
+func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) error {
 	shutdownPollInterval := defaultShutdownPollInterval
 	if gateway.Config.ContainsKey("shutdown.pollInterval") {
 		shutdownPollInterval = time.Duration(gateway.Config.MustGetInt("shutdown.pollInterval")) * time.Millisecond
