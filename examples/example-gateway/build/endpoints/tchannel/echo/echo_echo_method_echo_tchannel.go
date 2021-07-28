@@ -69,7 +69,7 @@ type EchoEchoHandler struct {
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *EchoEchoHandler) Register(g *zanzibar.Gateway) error {
 	fmt.Printf("Register phase: In EchoEchoHandler using main server tchannel for [%v]\n", h.endpoint.Method)
-	return g.TChannelRouter.Register(h.endpoint)
+	return g.ServerTChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "Echo::echo".

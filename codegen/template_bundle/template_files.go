@@ -2489,7 +2489,7 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
-		Channel:              g.Channel,
+		ServerTchannel:       g.ServerTchannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
@@ -2726,7 +2726,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 	timeoutPerAttempt := time.Duration(1) * time.Minute
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
-		server.Channel,
+		server.ServerTchannel,
 		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
@@ -2814,7 +2814,7 @@ func (m *mockService) MakeTChannelRequest(
 		return false, nil, errors.New("mock server is not started")
 	}
 
-	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
+	sc := m.server.ServerTchannel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
 	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
@@ -2942,8 +2942,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 	gateway := deps.Default.Gateway
 	channel := createNewTchannelForClient(deps, serviceName)
-	gateway.TchannelChannels[serviceName] = channel
-	gateway.TchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
+	gateway.ClientTchannels[serviceName] = channel
+	gateway.ClientTchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
 
 	{{if $sidecarRouter -}}
 	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
@@ -3060,7 +3060,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 }
 
-func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.Channel {
+func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.ServerTchannel {
 	processName := deps.Default.Config.MustGetString("tchannel.processName")
 	gateway := deps.Default.Gateway
 	level := gateway.TchannelSubLoggerLevel
@@ -3090,7 +3090,7 @@ func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *
 	return channel
 }
 
-func initializeDynamicChannel(channel *tchannel.Channel, deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+func initializeDynamicChannel(channel *tchannel.ServerTchannel, deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
@@ -3495,7 +3495,7 @@ type {{$handlerName}} struct {
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	fmt.Printf("Register phase: In {{$handlerName}} using main server tchannel for [%v]\n", h.endpoint.Method)
-	return g.TChannelRouter.Register(h.endpoint)
+	return g.ServerTChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".

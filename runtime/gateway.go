@@ -89,28 +89,25 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort         int32
-	TChannelPort     int32
-	RealHTTPPort     int32
-	RealHTTPAddr     string
-	RealTChannelPort int32
-	RealTChannelAddr string
-	WaitGroup        *sync.WaitGroup
-	//todo remove this..but this is being used in bench/mock init :(
-	//todo lets rename this...
-	Channel          *tchannel.Channel
-	TchannelChannels map[string]*tchannel.Channel
-	ContextLogger    ContextLogger
-	ContextMetrics   ContextMetrics
-	ContextExtractor ContextExtractor
-	RootScope        tally.Scope
-	Logger           *zap.Logger
-	ServiceName      string
-	Config           *StaticConfig
-	HTTPRouter       HTTPRouter
-	//todo remove this; can do this once you make changes in tmpl
-	TChannelRouter         *TChannelRouter
-	TchannelRouters        map[string]*TChannelRouter
+	HTTPPort               int32
+	TChannelPort           int32
+	RealHTTPPort           int32
+	RealHTTPAddr           string
+	RealTChannelPort       int32
+	RealTChannelAddr       string
+	WaitGroup              *sync.WaitGroup
+	ServerTchannel         *tchannel.Channel
+	ClientTchannels        map[string]*tchannel.Channel
+	ContextLogger          ContextLogger
+	ContextMetrics         ContextMetrics
+	ContextExtractor       ContextExtractor
+	RootScope              tally.Scope
+	Logger                 *zap.Logger
+	ServiceName            string
+	Config                 *StaticConfig
+	HTTPRouter             HTTPRouter
+	ServerTChannelRouter   *TChannelRouter
+	ClientTchannelRouters  map[string]*TChannelRouter
 	TchannelSubLoggerLevel zapcore.Level
 	Tracer                 opentracing.Tracer
 	JSONWrapper            jsonwrapper.JSONWrapper
@@ -825,12 +822,12 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 		return errors.Errorf("Error creating top channel:\n%s", err)
 	}
 
-	//gateway.Channel = channel
-	gateway.tchannelServer = channel
-	gateway.TchannelChannels = make(map[string]*tchannel.Channel)
-	gateway.TchannelRouters = make(map[string]*TChannelRouter)
-	//todo remove this
-	gateway.TChannelRouter = NewTChannelRouter(channel, gateway)
+	gateway.ServerTchannel = channel
+	gateway.tchannelServer = gateway.ServerTchannel
+	gateway.ServerTChannelRouter = NewTChannelRouter(channel, gateway)
+	// client tchannels and router are created explicitly for each client
+	gateway.ClientTchannels = make(map[string]*tchannel.Channel)
+	gateway.ClientTchannelRouters = make(map[string]*TChannelRouter)
 
 	return nil
 }
@@ -925,7 +922,7 @@ func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 	defer ticker.Stop()
 
 	gateway.tchannelServer.Close()
-	for serviceName, serviceTchannel := range gateway.TchannelChannels {
+	for serviceName, serviceTchannel := range gateway.ClientTchannels {
 		gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", serviceName))
 		serviceTchannel.Close()
 		scope := gateway.RootScope.Tagged(map[string]string{

@@ -42,13 +42,13 @@ var realTChannelAddrRegex = regexp.MustCompile(
 
 var infoIgnoreList = map[string]bool{
 	"Outbound connection is active.":            true,
-	"Channel.Close called.":                     true,
+	"ServerTchannel.Close called.":              true,
 	"Connection.Close called.":                  true,
 	"Connection state updated in Close.":        true,
 	"Connection state updated during shutdown.": true,
 	"Removed peer from root peer list.":         true,
 	"Inbound connection is active.":             true,
-	"Channel closed.":                           true,
+	"ServerTchannel closed.":                    true,
 }
 
 // MalformedStdoutError is used when the child process has unexpected stdout

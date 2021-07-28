@@ -198,8 +198,8 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	gateway := deps.Default.Gateway
 	channel := createNewTchannelForClient(deps, serviceName)
-	gateway.TchannelChannels[serviceName] = channel
-	gateway.TchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
+	gateway.ClientTchannels[serviceName] = channel
+	gateway.ClientTchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
 
 	ip := deps.Default.Config.MustGetString("clients.baz.ip")
 	port := deps.Default.Config.MustGetInt("clients.baz.port")
