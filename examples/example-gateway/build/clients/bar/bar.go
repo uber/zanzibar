@@ -329,6 +329,25 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
+	levels := map[string]string{
+		"ArgNotStruct":                    "2",
+		"ArgWithHeaders":                  "2",
+		"ArgWithManyQueryParams":          "1",
+		"ArgWithNearDupQueryParams":       "1",
+		"ArgWithNestedQueryParams":        "2",
+		"ArgWithParams":                   "1",
+		"ArgWithParamsAndDuplicateFields": "1",
+		"ArgWithQueryHeader":              "1",
+		"ArgWithQueryParams":              "1",
+		"DeleteWithBody":                  "3",
+		"Hello":                           "2",
+		"ListAndEnum":                     "1",
+		"MissingArg":                      "2",
+		"NoRequest":                       "3",
+		"Normal":                          "1",
+		"TooManyArgs":                     "3",
+	}
+
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClientContext(

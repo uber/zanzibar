@@ -1271,7 +1271,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{- end}}
 	}
 
+<<<<<<< HEAD
 	qpsLevels := map[string]string{
+=======
+	levels := map[string]string{
+>>>>>>> cccadac6 (Add qps levels to client template files)
 			{{range $methodName, $qpsLevel := $QPSLevels -}}
 			"{{$methodName}}": "{{$qpsLevel}}",
 			{{end}}
@@ -1420,7 +1424,11 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "grpc_client.tmpl", size: 7820, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+=======
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6999, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+>>>>>>> cccadac6 (Add qps levels to client template files)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1561,6 +1569,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			}
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
+	}
+
+	levels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
 	}
 
 	return &{{$clientName}}{
@@ -1965,7 +1979,11 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "http_client.tmpl", size: 18007, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+=======
+	info := bindataFileInfo{name: "http_client.tmpl", size: 17187, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+>>>>>>> cccadac6 (Add qps levels to client template files)
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2976,7 +2994,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
+<<<<<<< HEAD
 	qpsLevels := map[string]string{
+=======
+	levels := map[string]string{
+>>>>>>> cccadac6 (Add qps levels to client template files)
 				{{range $methodName, $qpsLevel := $QPSLevels -}}
 				"{{$methodName}}": "{{$qpsLevel}}",
 				{{end}}

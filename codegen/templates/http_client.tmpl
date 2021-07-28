@@ -136,6 +136,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		}
 	}
 
+	levels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
+	}
+
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
