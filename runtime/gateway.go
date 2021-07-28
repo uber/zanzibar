@@ -142,11 +142,11 @@ type DefaultDependencies struct {
 	// ContextMetrics emit metrics from context
 	ContextMetrics ContextMetrics
 
-	Logger *zap.Logger
-	Scope  tally.Scope
-	Tracer opentracing.Tracer
-	Config *StaticConfig
-
+	Logger         *zap.Logger
+	Scope          tally.Scope
+	Tracer         opentracing.Tracer
+	Config         *StaticConfig
+	ServerTChannel *tchannel.Channel
 	//todo we had to add gateway here, see if there's a way around
 	Gateway *Gateway
 
