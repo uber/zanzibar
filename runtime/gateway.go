@@ -921,7 +921,6 @@ func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 	ticker := time.NewTicker(shutdownPollInterval)
 	defer ticker.Stop()
 
-	gateway.tchannelServer.Close()
 	for serviceName, serviceTchannel := range gateway.ClientTchannels {
 		gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", serviceName))
 		serviceTchannel.Close()
@@ -932,6 +931,7 @@ func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 		scope.Gauge("tchannel.client.running").Update(0)
 		scope.Gauge("tchannel.client.failed").Update(0)
 	}
+	gateway.tchannelServer.Close()
 
 	for {
 		select {
