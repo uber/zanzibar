@@ -120,7 +120,6 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 	for _, method := range methodNames {
-		//todo we were asserting that the registering of methods happen in separate tchannels
 		fmt.Printf("For Client: corgeClient we are registering %v on the explicit client channel\n", method)
 	}
 

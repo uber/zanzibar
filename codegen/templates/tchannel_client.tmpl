@@ -134,7 +134,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 	for _, method := range methodNames {
-		//todo we were asserting that the registering of methods happen in separate tchannels
 		fmt.Printf("For Client: {{$clientName}} we are registering %v on the explicit client channel\n", method)
 	}
 

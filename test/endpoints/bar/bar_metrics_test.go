@@ -62,7 +62,7 @@ func TestCallMetrics(t *testing.T) {
 		},
 	)
 
-	numMetrics := 12
+	numMetrics := 14
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 

@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -151,7 +150,7 @@ func (c *TChannelClient) Call(
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
-	fmt.Printf("\n **********************Hello Edge, Zanzibar Call called on [%v] %v******************", c.ClientID, c.ch)
+	//fmt.Printf("\n **********************Hello Edge, Zanzibar Call called on [%v] %v******************", c.ClientID, c.ch)
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{
 		scopeTagClient:          c.ClientID,

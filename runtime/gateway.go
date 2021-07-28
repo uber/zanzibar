@@ -147,8 +147,7 @@ type DefaultDependencies struct {
 	Tracer         opentracing.Tracer
 	Config         *StaticConfig
 	ServerTChannel *tchannel.Channel
-	//todo we had to add gateway here, see if there's a way around
-	Gateway *Gateway
+	Gateway        *Gateway
 
 	// dispatcher for managing gRPC clients
 	GRPCClientDispatcher *yarpc.Dispatcher
@@ -927,7 +926,6 @@ func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 		scope := gateway.RootScope.Tagged(map[string]string{
 			"client": serviceName,
 		})
-		scope.Gauge("tchannel.client.closed").Update(1)
 		scope.Gauge("tchannel.client.running").Update(0)
 		scope.Gauge("tchannel.client.failed").Update(0)
 	}
