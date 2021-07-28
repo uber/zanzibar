@@ -3,6 +3,7 @@ clientMethod: ArgNotStruct
 endpointId: bar
 endpointType: http
 handleId: argNotStruct
+qpsLevel: 2
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

@@ -106,6 +106,11 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
+	levels := map[string]string{
+		"AddCredentials":   "2",
+		"CheckCredentials": "1",
+	}
+
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClientContext(

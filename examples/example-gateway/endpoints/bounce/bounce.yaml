@@ -1,6 +1,7 @@
 endpointId: bounce
 endpointType: tchannel
 handleId: bounce
+qpsLevel: 2
 thriftFile: endpoints/bounce/bounce.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Bounce::bounce

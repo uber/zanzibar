@@ -3,6 +3,7 @@ clientMethod: HeaderSchema
 endpointId: baz
 endpointType: http
 handleId: headerSchema
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

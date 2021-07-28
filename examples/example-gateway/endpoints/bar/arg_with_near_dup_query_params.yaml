@@ -3,6 +3,7 @@ clientMethod: ArgWithNearDupQueryParams
 endpointId: bar
 endpointType: http
 handleId: argWithNearDupQueryParams
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

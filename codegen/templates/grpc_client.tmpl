@@ -18,6 +18,7 @@ import (
 
 {{$clientID := $instance.InstanceName -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 
@@ -68,6 +69,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{ end -}}
 			{{- end -}}
 		{{- end}}
+	}
+
+	levels := map[string]string{
+			{{range $methodName, $qpsLevel := $QPSLevels -}}
+			"{{$methodName}}": "{{$qpsLevel}}",
+			{{end}}
 	}
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled

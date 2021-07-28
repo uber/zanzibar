@@ -268,6 +268,19 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
+	levels := map[string]string{
+		"Call":               "4",
+		"Compare":            "2",
+		"DeliberateDiffNoop": "3",
+		"GetProfile":         "2",
+		"HeaderSchema":       "1",
+		"Ping":               "1",
+		"Trans":              "2",
+		"TransHeaders":       "2",
+		"TransHeadersNoReq":  "2",
+		"TransHeadersType":   "2",
+	}
+
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") {

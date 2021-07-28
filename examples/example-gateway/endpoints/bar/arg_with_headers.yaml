@@ -3,6 +3,7 @@ clientMethod: ArgWithHeaders
 endpointId: bar
 endpointType: http
 handleId: argWithHeaders
+qpsLevel: 2
 middlewares: []
 reqHeaderMap:
   X-Uuid: x-uuid

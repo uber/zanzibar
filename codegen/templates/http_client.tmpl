@@ -23,6 +23,7 @@ import (
 
 {{- $clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
@@ -124,6 +125,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
+	}
+
+	levels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
 	}
 
 	return &{{$clientName}}{

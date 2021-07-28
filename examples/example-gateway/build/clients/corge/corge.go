@@ -113,6 +113,8 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
+	levels := map[string]string{}
+
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") {

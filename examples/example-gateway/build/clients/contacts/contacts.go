@@ -106,6 +106,8 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
+	levels := map[string]string{}
+
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClientContext(

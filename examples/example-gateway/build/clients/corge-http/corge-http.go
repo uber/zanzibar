@@ -139,6 +139,8 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
+	levels := map[string]string{}
+
 	return &corgeHTTPClient{
 		clientID:      "corge-http",
 		callerHeader:  callerHeader,

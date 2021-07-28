@@ -1218,6 +1218,7 @@ import (
 
 {{$clientID := $instance.InstanceName -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 
@@ -1268,6 +1269,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{ end -}}
 			{{- end -}}
 		{{- end}}
+	}
+
+	levels := map[string]string{
+			{{range $methodName, $qpsLevel := $QPSLevels -}}
+			"{{$methodName}}": "{{$qpsLevel}}",
+			{{end}}
 	}
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
@@ -1391,7 +1398,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6832, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6999, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1421,6 +1428,7 @@ import (
 
 {{- $clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
@@ -1522,6 +1530,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
 		}
+	}
+
+	levels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
 	}
 
 	return &{{$clientName}}{
@@ -1908,7 +1922,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 17017, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 17187, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2819,6 +2833,7 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
@@ -2916,6 +2931,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{end -}}
 		{{ end -}}
 		{{ end -}}
+	}
+
+	levels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
 	}
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
@@ -3134,7 +3155,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12086, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

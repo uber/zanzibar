@@ -3,6 +3,7 @@ clientMethod: TransHeadersType
 endpointId: baz
 endpointType: http
 handleId: transHeadersType
+qpsLevel: 2
 middlewares:
 - name: headersPropagate
   options:

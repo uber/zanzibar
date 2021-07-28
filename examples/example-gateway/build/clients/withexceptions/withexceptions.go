@@ -100,6 +100,10 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
+	levels := map[string]string{
+		"Func1": "1",
+	}
+
 	return &withexceptionsClient{
 		clientID: "withexceptions",
 		httpClient: zanzibar.NewHTTPClientContext(

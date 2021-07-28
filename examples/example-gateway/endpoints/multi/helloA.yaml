@@ -3,6 +3,7 @@ clientMethod: HelloA
 endpointId: multi
 endpointType: http
 handleId: helloA
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}
