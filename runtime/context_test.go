@@ -182,7 +182,7 @@ func TestContextLogger(t *testing.T) {
 	assert.Len(t, logMessages, 1)
 	assert.Equal(t, zap.InfoLevel, logMessages[0].Level)
 
-	contextLogger.WarnZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	contextLogger.Warn(ctxWithField, "msg", zap.String("argField", "argValue"))
 	logMessages = logs.TakeAll()
 	assert.Len(t, logMessages, 1)
 	assert.Equal(t, zap.WarnLevel, logMessages[0].Level)
@@ -266,6 +266,20 @@ func TestContextLoggerPanic(t *testing.T) {
 	ctx := context.Background()
 
 	contextLogger.Panic(ctx, "msg", zap.String("argField", "argValue"))
+}
+
+func TestContextLoggerPanic_DefaultZ(t *testing.T) {
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err)
+	}()
+
+	zapNop := zap.NewNop()
+
+	contextLogger := NewContextLogger(zapNop)
+	ctx := context.Background()
+
+	contextLogger.PanicZ(ctx, "msg", zap.String("argField", "argValue"))
 }
 
 func TestExtractScopeTag(t *testing.T) {
