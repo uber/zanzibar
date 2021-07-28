@@ -1100,55 +1100,6 @@ func (g *EndpointGenerator) ComputeSpec(
 	return endpointSpecs, nil
 }
 
-// func getQPSLevels(instance *ModuleInstance) (map[string]int, error) {
-// 	endpointYamls := []string{}
-// 	endpointConfigDir := filepath.Join(
-// 		instance.BaseDirectory,
-// 		instance.Directory,
-// 	)
-// 	endpointConfig, err := readEndpointConfig(instance.YAMLFileRaw)
-// 	if err != nil {
-// 		return nil, errors.Wrapf(
-// 			err,
-// 			"Error reading HTTP endpoint %q YAML config",
-// 			instance.InstanceName,
-// 		)
-// 	}
-// 	for _, fileName := range endpointConfig.Config.Endpoints {
-// 		endpointYamls = append(
-// 			endpointYamls, filepath.Join(endpointConfigDir, fileName),
-// 		)
-// 	}
-
-// 	type endpointYaml struct {
-// 		QPSLevel     int    `yaml:"qpsLevel,omitempty"`
-// 		ClientMethod string `yaml:"clientMethod,omitempty"`
-// 	}
-// 	var qpsLevels map[string]int = make(map[string]int)
-// 	var config endpointYaml
-// 	var file []byte
-// 	for _, yamlFile := range endpointYamls {
-// 		print(yamlFile)
-// 		file, err = ioutil.ReadFile(yamlFile)
-// 		if err != nil {
-// 			print("error")
-// 		}
-// 		if err == nil {
-// 			err = yaml.Unmarshal(file, &config)
-// 		}
-// 		if err == nil {
-// 			if val, ok := qpsLevels[config.ClientMethod]; ok {
-// 				if config.QPSLevel > val {
-// 					qpsLevels[config.ClientMethod] = config.QPSLevel
-// 				}
-// 			} else {
-// 				qpsLevels[config.ClientMethod] = config.QPSLevel
-// 			}
-// 		}
-// 	}
-// 	return qpsLevels, err
-// }
-
 type endpointSpecRes struct {
 	espec *EndpointSpec
 	err   error
