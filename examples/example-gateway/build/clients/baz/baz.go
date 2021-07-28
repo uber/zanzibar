@@ -280,6 +280,8 @@ func NewClient(deps *module.Dependencies) Client {
 		"TransHeadersNoReq":  "2",
 		"TransHeadersType":   "2",
 	}
+	// had to use levels variable to get over error
+	print(levels)
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false

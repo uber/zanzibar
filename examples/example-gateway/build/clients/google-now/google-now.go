@@ -111,6 +111,9 @@ func NewClient(deps *module.Dependencies) Client {
 		"CheckCredentials": "1",
 	}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClientContext(

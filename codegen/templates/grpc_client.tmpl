@@ -77,6 +77,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{end}}
 	}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {

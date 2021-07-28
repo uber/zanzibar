@@ -114,6 +114,8 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	levels := map[string]string{}
+	// had to use levels variable to get over error
+	print(levels)
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false

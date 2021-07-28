@@ -1277,6 +1277,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			{{end}}
 	}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -1398,7 +1401,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6999, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 7064, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1537,6 +1540,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 				"{{$methodName}}": "{{$qpsLevel}}",
 				{{end}}
 	}
+
+	// had to use levels variable to get over error
+	print(levels)
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1922,7 +1928,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 17187, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 17252, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2938,6 +2944,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 				"{{$methodName}}": "{{$qpsLevel}}",
 				{{end}}
 	}
+  // had to use levels variable to get over error
+	print(levels)
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
@@ -3155,7 +3163,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12086, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12151, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

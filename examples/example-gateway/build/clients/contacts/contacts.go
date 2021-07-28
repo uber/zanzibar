@@ -108,6 +108,9 @@ func NewClient(deps *module.Dependencies) Client {
 
 	levels := map[string]string{}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClientContext(

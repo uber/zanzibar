@@ -133,6 +133,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 				{{end}}
 	}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}

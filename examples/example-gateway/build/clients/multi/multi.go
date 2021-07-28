@@ -109,6 +109,9 @@ func NewClient(deps *module.Dependencies) Client {
 		"HelloB": "1",
 	}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	return &multiClient{
 		clientID: "multi",
 		httpClient: zanzibar.NewHTTPClientContext(

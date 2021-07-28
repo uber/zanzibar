@@ -141,6 +141,9 @@ func NewClient(deps *module.Dependencies) Client {
 
 	levels := map[string]string{}
 
+	// had to use levels variable to get over error
+	print(levels)
+
 	return &corgeHTTPClient{
 		clientID:      "corge-http",
 		callerHeader:  callerHeader,
