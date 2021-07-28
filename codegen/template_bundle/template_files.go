@@ -2944,7 +2944,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 				"{{$methodName}}": "{{$qpsLevel}}",
 				{{end}}
 	}
-  // had to use levels variable to get over error
+	// had to use levels variable to get over error
 	print(levels)
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
@@ -3163,7 +3163,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12151, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12150, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
