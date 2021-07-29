@@ -168,7 +168,7 @@ func TestCallMetrics(t *testing.T) {
 	tchannelTags := map[string]string{
 		"env":             "test",
 		"app":             "test-gateway",
-		"service":         "test-gateway",
+		"service":         "bazService",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
 		"host":            zanzibar.GetHostname(),
