@@ -927,7 +927,6 @@ func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) er
 			"client": serviceName,
 		})
 		scope.Gauge("tchannel.client.running").Update(0)
-		scope.Gauge("tchannel.client.failed").Update(0)
 	}
 	gateway.tchannelServer.Close()
 

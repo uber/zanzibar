@@ -25,7 +25,6 @@ package panictchannelendpoint
 
 import (
 	"context"
-	"fmt"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -69,7 +68,6 @@ type SimpleServiceAnotherCallHandler struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *SimpleServiceAnotherCallHandler) Register(g *zanzibar.Gateway) error {
-	fmt.Printf("Register phase: In SimpleServiceAnotherCallHandler using main server tchannel for [%v]\n", h.endpoint.Method)
 	return g.ServerTChannelRouter.Register(h.endpoint)
 }
 

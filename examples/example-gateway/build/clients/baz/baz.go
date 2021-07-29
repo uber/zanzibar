@@ -26,7 +26,6 @@ package bazclient
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/textproto"
 	"strconv"
 	"strings"
@@ -274,9 +273,6 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::transHeadersType":  "TransHeadersType",
 		"SimpleService::urlTest":           "URLTest",
 	}
-	for _, method := range methodNames {
-		fmt.Printf("For Client: bazClient we are registering %v on the explicit client channel\n", method)
-	}
 
 	qpsLevels := map[string]string{
 		"baz-Call":               "4",
@@ -372,11 +368,9 @@ func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *
 	})
 
 	if err != nil {
-		scope.Gauge("tchannel.client.running").Update(1)
-		scope.Gauge("tchannel.client.failed").Update(0)
-	} else {
 		scope.Gauge("tchannel.client.running").Update(0)
-		scope.Gauge("tchannel.client.failed").Update(1)
+	} else {
+		scope.Gauge("tchannel.client.running").Update(1)
 	}
 	return channel
 }

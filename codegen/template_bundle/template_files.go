@@ -3006,9 +3006,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 		{{ end -}}
 	}
-	for _, method := range methodNames {
-		fmt.Printf("For Client: {{$clientName}} we are registering %v on the explicit client channel\n", method)
-	}
+
 
 	qpsLevels := map[string]string{
 				{{range $methodName, $qpsLevel := $QPSLevels -}}
@@ -3080,11 +3078,9 @@ func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *
 	})
 
 	if err != nil {
-		scope.Gauge("tchannel.client.running").Update(1)
-		scope.Gauge("tchannel.client.failed").Update(0)
-	} else {
 		scope.Gauge("tchannel.client.running").Update(0)
-		scope.Gauge("tchannel.client.failed").Update(1)
+	} else {
+		scope.Gauge("tchannel.client.running").Update(1)
 	}
 	return channel
 }
@@ -3294,7 +3290,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13136, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12889, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3493,7 +3489,6 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	fmt.Printf("Register phase: In {{$handlerName}} using main server tchannel for [%v]\n", h.endpoint.Method)
 	return g.ServerTChannelRouter.Register(h.endpoint)
 }
 
@@ -3704,7 +3699,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8905, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8797, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
