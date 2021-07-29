@@ -52,9 +52,8 @@ http.defaultHeaders:
 http.port: 7783
 http.clients.requestUUIDHeaderKey: x-request-uuid
 logger.fileName: /var/log/example-gateway/example-gateway.log
-logger.output: stdout
+logger.output: disk
 metrics.serviceName: example-gateway
-metrics.flushInterval: 10000
 metrics.m3.includeHost: true
 service.env.config: {}
 serviceName: example-gateway
@@ -69,7 +68,6 @@ sidecarRouter.default.tchannel.port: 5000
 tchannel.port: 7784
 tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
-subLoggerLevel.tchannel: debug
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false
 clients.baz.alternates:
@@ -92,7 +90,7 @@ grpc.clientServiceNameMapping:
   echo: echo
 router.whitelistedPaths:
   - /path/whitelisted
-service.shadow.env.override.enable: true
+
 circuitbreaking-configurations:
   levels:
     '1': '0-99'
@@ -125,3 +123,5 @@ circuitbreaking-configurations:
       errorPercentThreshold: 30
       requestVolumeThreshold: 25
       maxConcurrentRequests: 30
+
+service.shadow.env.override.enable: true
