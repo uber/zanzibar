@@ -251,7 +251,7 @@ type ContextLogger interface {
 	Panic(ctx context.Context, msg string, fields ...zap.Field)
 	Warn(ctx context.Context, msg string, fields ...zap.Field)
 
-	// DebugZ skips logs if skipZanzibarLogs is set to true otherwise behaves as normal DebugZ, similarly for other XxxxZ's
+	// DebugZ skips logs if skipZanzibarLogs is set to true otherwise behaves as normal Debug, similarly for other XxxxZ's
 	DebugZ(ctx context.Context, msg string, fields ...zap.Field)
 	ErrorZ(ctx context.Context, msg string, fields ...zap.Field)
 	InfoZ(ctx context.Context, msg string, fields ...zap.Field)
