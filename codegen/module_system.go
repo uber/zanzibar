@@ -1014,10 +1014,12 @@ type EndpointGenerator struct {
 	packageHelper *PackageHelper
 }
 
-type endpointYaml struct {
+// EndpointYaml is used to parse endpoint yaml files
+// fields used to update qpsLevels map
+type EndpointYaml struct {
 	QPSLevel     int    `yaml:"qpsLevel,omitempty"`
 	ClientMethod string `yaml:"clientMethod,omitempty"`
-	ClientId     string `yaml:"clientId,omitempty"`
+	ClientID     string `yaml:"clientId,omitempty"`
 }
 
 // ComputeSpec computes the endpoint specs for a group of endpoints
@@ -1049,7 +1051,7 @@ func (g *EndpointGenerator) ComputeSpec(
 	var wg sync.WaitGroup
 	wg.Add(len(endpointYamls))
 	ch := make(chan endpointSpecRes, len(endpointYamls))
-	var config *endpointYaml
+	var config *EndpointYaml
 	for _, yamlFile := range endpointYamls {
 		UpdateQPSLevels(yamlFile, config)
 		go func(yamlFile string) {
@@ -1087,7 +1089,8 @@ func (g *EndpointGenerator) ComputeSpec(
 	return endpointSpecs, nil
 }
 
-func UpdateQPSLevels(yamlFile string, config *endpointYaml) {
+// UpdateQPSLevels updates map from client-method name to qps level
+func UpdateQPSLevels(yamlFile string, config *EndpointYaml) {
 	file, err := ioutil.ReadFile(yamlFile)
 	if err != nil {
 		print("error")
@@ -1096,7 +1099,7 @@ func UpdateQPSLevels(yamlFile string, config *endpointYaml) {
 		err = yaml.Unmarshal(file, &config)
 	}
 	// unique key because of potential clients having same method names (staging)
-	key := config.ClientId + "-" + config.ClientMethod
+	key := config.ClientID + "-" + config.ClientMethod
 	if err == nil {
 		if val, ok := qpsLevels[key]; ok {
 			if config.QPSLevel > val {
