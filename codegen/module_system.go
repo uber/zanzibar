@@ -490,7 +490,6 @@ func (g *httpClientGenerator) Generate(
 	sort.Sort(&clientSpec.ModuleSpec.Services)
 	// transfer only the methods that belong to the client with the qps level
 	var clientQPSLevels map[string]int = make(map[string]int)
-<<<<<<< HEAD
 	for _, methodName := range exposedMethods {
 		key := clientSpec.ClientID + "-" + methodName
 		if qps, ok := qpsLevels[key]; ok {
@@ -498,15 +497,6 @@ func (g *httpClientGenerator) Generate(
 		}
 	}
 	// adding QPS Levels here will allow access in client go file
-=======
-	for _, v := range exposedMethods {
-		if qps, ok := qpsLevels[v]; ok {
-			clientQPSLevels[v] = qps
-		}
-	}
-	// adding QPS Levels here will allow access in client go file
-	print(instance.BaseDirectory)
->>>>>>> cccadac6 (Add qps levels to client template files)
 	clientMeta := &ClientMeta{
 		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
@@ -641,16 +631,10 @@ func (g *tchannelClientGenerator) Generate(
 	sort.Sort(clientSpec.ModuleSpec.Services)
 
 	var clientQPSLevels map[string]int = make(map[string]int)
-<<<<<<< HEAD
 	for _, methodName := range exposedMethods {
 		key := clientSpec.ClientID + "-" + methodName
 		if qps, ok := qpsLevels[key]; ok {
 			clientQPSLevels[key] = qps
-=======
-	for _, v := range exposedMethods {
-		if qps, ok := qpsLevels[v]; ok {
-			clientQPSLevels[v] = qps
->>>>>>> cccadac6 (Add qps levels to client template files)
 		}
 	}
 
@@ -954,16 +938,10 @@ func (g *gRPCClientGenerator) Generate(
 	sort.Sort(&services)
 
 	var clientQPSLevels map[string]int = make(map[string]int)
-<<<<<<< HEAD
 	for _, methodName := range reversedMethods {
 		key := clientSpec.ClientID + "-" + methodName
 		if qps, ok := qpsLevels[key]; ok {
 			clientQPSLevels[key] = qps
-=======
-	for _, v := range reversedMethods {
-		if qps, ok := qpsLevels[v]; ok {
-			clientQPSLevels[v] = qps
->>>>>>> cccadac6 (Add qps levels to client template files)
 		}
 	}
 
@@ -1111,7 +1089,6 @@ func (g *EndpointGenerator) ComputeSpec(
 	return endpointSpecs, nil
 }
 
-<<<<<<< HEAD
 // UpdateQPSLevels updates map from client-method name to qps level
 func UpdateQPSLevels(yamlFile string, config *EndpointYaml) {
 	file, err := ioutil.ReadFile(yamlFile)
@@ -1133,56 +1110,6 @@ func UpdateQPSLevels(yamlFile string, config *EndpointYaml) {
 		}
 	}
 }
-=======
-// func getQPSLevels(instance *ModuleInstance) (map[string]int, error) {
-// 	endpointYamls := []string{}
-// 	endpointConfigDir := filepath.Join(
-// 		instance.BaseDirectory,
-// 		instance.Directory,
-// 	)
-// 	endpointConfig, err := readEndpointConfig(instance.YAMLFileRaw)
-// 	if err != nil {
-// 		return nil, errors.Wrapf(
-// 			err,
-// 			"Error reading HTTP endpoint %q YAML config",
-// 			instance.InstanceName,
-// 		)
-// 	}
-// 	for _, fileName := range endpointConfig.Config.Endpoints {
-// 		endpointYamls = append(
-// 			endpointYamls, filepath.Join(endpointConfigDir, fileName),
-// 		)
-// 	}
-
-// 	type endpointYaml struct {
-// 		QPSLevel     int    `yaml:"qpsLevel,omitempty"`
-// 		ClientMethod string `yaml:"clientMethod,omitempty"`
-// 	}
-// 	var qpsLevels map[string]int = make(map[string]int)
-// 	var config endpointYaml
-// 	var file []byte
-// 	for _, yamlFile := range endpointYamls {
-// 		print(yamlFile)
-// 		file, err = ioutil.ReadFile(yamlFile)
-// 		if err != nil {
-// 			print("error")
-// 		}
-// 		if err == nil {
-// 			err = yaml.Unmarshal(file, &config)
-// 		}
-// 		if err == nil {
-// 			if val, ok := qpsLevels[config.ClientMethod]; ok {
-// 				if config.QPSLevel > val {
-// 					qpsLevels[config.ClientMethod] = config.QPSLevel
-// 				}
-// 			} else {
-// 				qpsLevels[config.ClientMethod] = config.QPSLevel
-// 			}
-// 		}
-// 	}
-// 	return qpsLevels, err
-// }
->>>>>>> cccadac6 (Add qps levels to client template files)
 
 type endpointSpecRes struct {
 	espec *EndpointSpec

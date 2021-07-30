@@ -112,11 +112,6 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
-	levels := map[string]string{
-		"HelloA": "1",
-		"HelloB": "1",
-	}
-
 	return &multiClient{
 		clientID: "multi",
 		httpClient: zanzibar.NewHTTPClientContext(
