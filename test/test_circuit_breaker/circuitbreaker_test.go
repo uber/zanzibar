@@ -97,7 +97,7 @@ func TestCircuitBreakerSettings(t *testing.T) {
 			sleepWindow = qpsConfig[s]["sleepWindowInMilliseconds"]
 			errorPercentage = qpsConfig[s]["errorPercentThreshold"]
 			reqThreshold = qpsConfig[s]["requestVolumeThreshold"]
-			count += 1
+			count++
 		}
 		expectedSettings := &hystrix.Settings{
 			Timeout:                time.Duration(timeout) * time.Millisecond,
