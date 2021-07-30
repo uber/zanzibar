@@ -107,7 +107,6 @@ type Gateway struct {
 	Config                 *StaticConfig
 	HTTPRouter             HTTPRouter
 	ServerTChannelRouter   *TChannelRouter
-	ClientTchannelRouters  map[string]*TChannelRouter
 	TchannelSubLoggerLevel zapcore.Level
 	Tracer                 opentracing.Tracer
 	JSONWrapper            jsonwrapper.JSONWrapper
@@ -824,10 +823,8 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	gateway.ServerTchannel = channel
 	gateway.tchannelServer = gateway.ServerTchannel
 	gateway.ServerTChannelRouter = NewTChannelRouter(channel, gateway)
-	// client tchannels and router are created explicitly for each client
+	// client tchannels are created explicitly for each client
 	gateway.ClientTchannels = make(map[string]*tchannel.Channel)
-	gateway.ClientTchannelRouters = make(map[string]*TChannelRouter)
-
 	return nil
 }
 

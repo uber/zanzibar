@@ -2943,7 +2943,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	gateway := deps.Default.Gateway
 	channel := createNewTchannelForClient(deps, serviceName)
 	gateway.ClientTchannels[serviceName] = channel
-	gateway.ClientTchannelRouters[serviceName] = zanzibar.NewTChannelRouter(channel, gateway)
 
 	{{if $sidecarRouter -}}
 	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
@@ -3290,7 +3289,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12889, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12798, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
