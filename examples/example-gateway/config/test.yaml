@@ -10,9 +10,9 @@ clients.baz.serviceName: Qux
 clients.baz.timeout: 10000
 clients.baz.timeoutPerAttempt: 2000
 clients.baz.maxConcurrentRequests: 1000
-clients.baz.errorPercentThreshold: 20
-clients.baz.sleepWindowInMilliseconds : 5000
-clients.baz.requestVolumeThreshold : 20
+# clients.baz.errorPercentThreshold: 20
+# clients.baz.sleepWindowInMilliseconds : 5000
+# clients.baz.requestVolumeThreshold : 20
 clients.contacts.ip: 127.0.0.1
 clients.contacts.port: 4000
 clients.contacts.timeout: 10000

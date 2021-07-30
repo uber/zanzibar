@@ -93,19 +93,19 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.withexceptions.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.withexceptions.circuitBreakerDisabled")
 	}
+	qpsLevels := map[string]string{
+		"withexceptions-Func1": "1",
+	}
 	if !circuitBreakerDisabled {
 		for methodName := range methodNames {
 			circuitBreakerName := "withexceptions" + "-" + methodName
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
+			qpsLevel := ""
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
-
-	levels := map[string]string{
-		"Func1": "1",
-	}
-
-	// had to use levels variable to get over error
-	print(levels)
 
 	return &withexceptionsClient{
 		clientID: "withexceptions",
@@ -124,27 +124,45 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
-	if deps.Default.Config.ContainsKey("clients.withexceptions.sleepWindowInMilliseconds") {
-		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.withexceptions.sleepWindowInMilliseconds"))
-	}
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
 	maxConcurrentRequests := 20
-	if deps.Default.Config.ContainsKey("clients.withexceptions.maxConcurrentRequests") {
-		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.withexceptions.maxConcurrentRequests"))
-	}
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
 	errorPercentThreshold := 20
-	if deps.Default.Config.ContainsKey("clients.withexceptions.errorPercentThreshold") {
-		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.withexceptions.errorPercentThreshold"))
-	}
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	requestVolumeThreshold := 20
+	// first checks if level exists in configurations then assigns parameters
+	if deps.Default.Config.ContainsKey(qpsLevel) {
+		var params map[string]int = make(map[string]int)
+		deps.Default.Config.MustGetStruct(qpsLevel, &params)
+		if sleepWindow, ok := params["sleepWindowInMilliseconds"]; ok {
+			sleepWindowInMilliseconds = sleepWindow
+		}
+		if max, ok := params["maxConcurrentRequests"]; ok {
+			maxConcurrentRequests = max
+		}
+		if errorPercent, ok := params["errorPercentThreshold"]; ok {
+			errorPercentThreshold = errorPercent
+		}
+		if requestVolume, ok := params["requestVolumeThreshold"]; ok {
+			requestVolumeThreshold = requestVolume
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.withexceptions.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.withexceptions.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.withexceptions.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.withexceptions.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.withexceptions.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.withexceptions.errorPercentThreshold"))
+	}
 	if deps.Default.Config.ContainsKey("clients.withexceptions.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.withexceptions.requestVolumeThreshold"))
 	}

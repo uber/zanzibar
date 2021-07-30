@@ -300,34 +300,34 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.bar.circuitBreakerDisabled")
 	}
+	qpsLevels := map[string]string{
+		"bar-ArgNotStruct":                    "2",
+		"bar-ArgWithHeaders":                  "2",
+		"bar-ArgWithManyQueryParams":          "1",
+		"bar-ArgWithNearDupQueryParams":       "1",
+		"bar-ArgWithNestedQueryParams":        "2",
+		"bar-ArgWithParams":                   "1",
+		"bar-ArgWithParamsAndDuplicateFields": "1",
+		"bar-ArgWithQueryHeader":              "1",
+		"bar-ArgWithQueryParams":              "1",
+		"bar-DeleteWithBody":                  "3",
+		"bar-Hello":                           "2",
+		"bar-ListAndEnum":                     "1",
+		"bar-MissingArg":                      "2",
+		"bar-NoRequest":                       "3",
+		"bar-Normal":                          "1",
+		"bar-TooManyArgs":                     "3",
+	}
 	if !circuitBreakerDisabled {
 		for methodName := range methodNames {
 			circuitBreakerName := "bar" + "-" + methodName
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
+			qpsLevel := ""
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
-
-	levels := map[string]string{
-		"ArgNotStruct":                    "2",
-		"ArgWithHeaders":                  "2",
-		"ArgWithManyQueryParams":          "1",
-		"ArgWithNearDupQueryParams":       "1",
-		"ArgWithNestedQueryParams":        "2",
-		"ArgWithParams":                   "1",
-		"ArgWithParamsAndDuplicateFields": "1",
-		"ArgWithQueryHeader":              "1",
-		"ArgWithQueryParams":              "1",
-		"DeleteWithBody":                  "3",
-		"Hello":                           "2",
-		"ListAndEnum":                     "1",
-		"MissingArg":                      "2",
-		"NoRequest":                       "3",
-		"Normal":                          "1",
-		"TooManyArgs":                     "3",
-	}
-
-	// had to use levels variable to get over error
-	print(levels)
 
 	return &barClient{
 		clientID: "bar",
@@ -346,27 +346,45 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
-	if deps.Default.Config.ContainsKey("clients.bar.sleepWindowInMilliseconds") {
-		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.bar.sleepWindowInMilliseconds"))
-	}
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
 	maxConcurrentRequests := 20
-	if deps.Default.Config.ContainsKey("clients.bar.maxConcurrentRequests") {
-		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.bar.maxConcurrentRequests"))
-	}
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
 	errorPercentThreshold := 20
-	if deps.Default.Config.ContainsKey("clients.bar.errorPercentThreshold") {
-		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.bar.errorPercentThreshold"))
-	}
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	requestVolumeThreshold := 20
+	// first checks if level exists in configurations then assigns parameters
+	if deps.Default.Config.ContainsKey(qpsLevel) {
+		var params map[string]int = make(map[string]int)
+		deps.Default.Config.MustGetStruct(qpsLevel, &params)
+		if sleepWindow, ok := params["sleepWindowInMilliseconds"]; ok {
+			sleepWindowInMilliseconds = sleepWindow
+		}
+		if max, ok := params["maxConcurrentRequests"]; ok {
+			maxConcurrentRequests = max
+		}
+		if errorPercent, ok := params["errorPercentThreshold"]; ok {
+			errorPercentThreshold = errorPercent
+		}
+		if requestVolume, ok := params["requestVolumeThreshold"]; ok {
+			requestVolumeThreshold = requestVolume
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.bar.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.bar.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.bar.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.bar.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.bar.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.bar.errorPercentThreshold"))
+	}
 	if deps.Default.Config.ContainsKey("clients.bar.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.bar.requestVolumeThreshold"))
 	}

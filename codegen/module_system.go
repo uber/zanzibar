@@ -490,13 +490,13 @@ func (g *httpClientGenerator) Generate(
 	sort.Sort(&clientSpec.ModuleSpec.Services)
 	// transfer only the methods that belong to the client with the qps level
 	var clientQPSLevels map[string]int = make(map[string]int)
-	for _, v := range exposedMethods {
-		if qps, ok := qpsLevels[v]; ok {
-			clientQPSLevels[v] = qps
+	for _, methodName := range exposedMethods {
+		key := clientSpec.ClientID + "-" + methodName
+		if qps, ok := qpsLevels[key]; ok {
+			clientQPSLevels[key] = qps
 		}
 	}
 	// adding QPS Levels here will allow access in client go file
-	print(instance.BaseDirectory)
 	clientMeta := &ClientMeta{
 		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
@@ -631,9 +631,10 @@ func (g *tchannelClientGenerator) Generate(
 	sort.Sort(clientSpec.ModuleSpec.Services)
 
 	var clientQPSLevels map[string]int = make(map[string]int)
-	for _, v := range exposedMethods {
-		if qps, ok := qpsLevels[v]; ok {
-			clientQPSLevels[v] = qps
+	for _, methodName := range exposedMethods {
+		key := clientSpec.ClientID + "-" + methodName
+		if qps, ok := qpsLevels[key]; ok {
+			clientQPSLevels[key] = qps
 		}
 	}
 
@@ -937,9 +938,10 @@ func (g *gRPCClientGenerator) Generate(
 	sort.Sort(&services)
 
 	var clientQPSLevels map[string]int = make(map[string]int)
-	for _, v := range reversedMethods {
-		if qps, ok := qpsLevels[v]; ok {
-			clientQPSLevels[v] = qps
+	for _, methodName := range reversedMethods {
+		key := clientSpec.ClientID + "-" + methodName
+		if qps, ok := qpsLevels[key]; ok {
+			clientQPSLevels[key] = qps
 		}
 	}
 
@@ -1012,6 +1014,12 @@ type EndpointGenerator struct {
 	packageHelper *PackageHelper
 }
 
+type endpointYaml struct {
+	QPSLevel     int    `yaml:"qpsLevel,omitempty"`
+	ClientMethod string `yaml:"clientMethod,omitempty"`
+	ClientId     string `yaml:"clientId,omitempty"`
+}
+
 // ComputeSpec computes the endpoint specs for a group of endpoints
 func (g *EndpointGenerator) ComputeSpec(
 	instance *ModuleInstance,
@@ -1041,30 +1049,9 @@ func (g *EndpointGenerator) ComputeSpec(
 	var wg sync.WaitGroup
 	wg.Add(len(endpointYamls))
 	ch := make(chan endpointSpecRes, len(endpointYamls))
-	type endpointYaml struct {
-		QPSLevel     int    `yaml:"qpsLevel,omitempty"`
-		ClientMethod string `yaml:"clientMethod,omitempty"`
-	}
-	var config endpointYaml
-	var file []byte
+	var config *endpointYaml
 	for _, yamlFile := range endpointYamls {
-		// TODO: can move this to helper function
-		file, err = ioutil.ReadFile(yamlFile)
-		if err != nil {
-			print("error")
-		}
-		if err == nil {
-			err = yaml.Unmarshal(file, &config)
-		}
-		if err == nil {
-			if val, ok := qpsLevels[config.ClientMethod]; ok {
-				if config.QPSLevel > val {
-					qpsLevels[config.ClientMethod] = config.QPSLevel
-				}
-			} else {
-				qpsLevels[config.ClientMethod] = config.QPSLevel
-			}
-		}
+		UpdateQPSLevels(yamlFile, config)
 		go func(yamlFile string) {
 			defer wg.Done()
 			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
@@ -1098,6 +1085,27 @@ func (g *EndpointGenerator) ComputeSpec(
 		endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 	}
 	return endpointSpecs, nil
+}
+
+func UpdateQPSLevels(yamlFile string, config *endpointYaml) {
+	file, err := ioutil.ReadFile(yamlFile)
+	if err != nil {
+		print("error")
+	}
+	if err == nil {
+		err = yaml.Unmarshal(file, &config)
+	}
+	// unique key because of potential clients having same method names (staging)
+	key := config.ClientId + "-" + config.ClientMethod
+	if err == nil {
+		if val, ok := qpsLevels[key]; ok {
+			if config.QPSLevel > val {
+				qpsLevels[key] = config.QPSLevel
+			}
+		} else {
+			qpsLevels[key] = config.QPSLevel
+		}
+	}
 }
 
 type endpointSpecRes struct {
