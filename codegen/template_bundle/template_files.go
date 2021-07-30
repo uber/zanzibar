@@ -526,7 +526,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.Error(
+			h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -580,7 +580,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
@@ -617,7 +617,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
 			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
+		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	{{end -}}
@@ -682,7 +682,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7393, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7396, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3093,7 +3093,7 @@ type {{$clientName}} struct {
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					logger.Error(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
 					success = true
 				{{end -}}
 				default:
@@ -3101,7 +3101,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			logger.Warn(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
@@ -3114,7 +3114,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.Warn(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return resp, respHeaders, err
 		{{end -}}
@@ -3134,7 +3134,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3346,7 +3346,7 @@ func (h *{{$handlerName}}) Handle(
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Deps.Default.ContextLogger.Error(
+			h.Deps.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -3375,7 +3375,7 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -3411,7 +3411,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = {{.RefResponse "r"}}
@@ -3426,7 +3426,7 @@ func (h *{{$handlerName}}) Handle(
 					})
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					if v == nil {
-						h.Deps.Default.ContextLogger.Error(
+						h.Deps.Default.ContextLogger.ErrorZ(
 							ctx,
 							"Endpoint failure: handler returned non-nil error type *{{.Type}} but nil value",
 							zap.Error(err),
@@ -3443,7 +3443,7 @@ func (h *{{$handlerName}}) Handle(
 						"app-error": "unknown",
 					})
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
-					h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+					h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 					return false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -3506,7 +3506,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 
 	deputyChannel, err := tchannel.NewChannel(serviceName, nil)
 	if err != nil {
-		h.Deps.Default.ContextLogger.Error(ctx, "Deputy Failure", zap.Error(err))
+		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
 	}
 	defer deputyChannel.Close()
 	deputyChannel.Peers().Add(hostPort)
@@ -3543,7 +3543,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8797, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
