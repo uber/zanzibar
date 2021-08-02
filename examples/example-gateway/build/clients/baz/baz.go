@@ -272,13 +272,30 @@ func NewClient(deps *module.Dependencies) Client {
 		"baz-Call":               "4",
 		"baz-Compare":            "2",
 		"baz-DeliberateDiffNoop": "3",
+		"baz-EchoBinary":         "default",
+		"baz-EchoBool":           "default",
+		"baz-EchoDouble":         "default",
+		"baz-EchoEnum":           "default",
+		"baz-EchoI16":            "default",
+		"baz-EchoI32":            "default",
+		"baz-EchoI64":            "default",
+		"baz-EchoI8":             "default",
+		"baz-EchoString":         "default",
+		"baz-EchoStringList":     "default",
+		"baz-EchoStringMap":      "default",
+		"baz-EchoStringSet":      "default",
+		"baz-EchoStructList":     "default",
+		"baz-EchoStructSet":      "default",
+		"baz-EchoTypedef":        "default",
 		"baz-GetProfile":         "2",
 		"baz-HeaderSchema":       "1",
 		"baz-Ping":               "1",
+		"baz-TestUUID":           "default",
 		"baz-Trans":              "2",
 		"baz-TransHeaders":       "2",
 		"baz-TransHeadersNoReq":  "2",
 		"baz-TransHeadersType":   "2",
+		"baz-URLTest":            "default",
 	}
 
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
@@ -355,33 +372,36 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
+type CircuitBreakerConfig struct {
+	Parameters map[string]map[string]int
+}
+
 func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
-	sleepWindowInMilliseconds := 5000
+	var sleepWindowInMilliseconds int
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
-	maxConcurrentRequests := 20
+	var maxConcurrentRequests int
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
-	errorPercentThreshold := 20
+	var errorPercentThreshold int
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
-	requestVolumeThreshold := 20
-	// first checks if level exists in configurations then assigns parameters
-	if deps.Default.Config.ContainsKey(qpsLevel) {
-		var params map[string]int = make(map[string]int)
-		deps.Default.Config.MustGetStruct(qpsLevel, &params)
-		if sleepWindow, ok := params["sleepWindowInMilliseconds"]; ok {
-			sleepWindowInMilliseconds = sleepWindow
-		}
-		if max, ok := params["maxConcurrentRequests"]; ok {
-			maxConcurrentRequests = max
-		}
-		if errorPercent, ok := params["errorPercentThreshold"]; ok {
-			errorPercentThreshold = errorPercent
-		}
-		if requestVolume, ok := params["requestVolumeThreshold"]; ok {
-			requestVolumeThreshold = requestVolume
+	var requestVolumeThreshold int
+	key := "circuitbreaking-configurations"
+	// parses circuit breaker configurations
+	if deps.Default.Config.ContainsKey(key) {
+		var config CircuitBreakerConfig
+		deps.Default.Config.MustGetStruct(key, &config)
+		parameters := config.Parameters
+		// first checks if level exists in configurations then assigns parameters
+		// if "default" qps level assigns default parameters from circuit breaker configurations
+		if settings, ok := parameters[qpsLevel]; ok {
+			sleepWindowInMilliseconds = settings["sleepWindowInMilliseconds"]
+			maxConcurrentRequests = settings["maxConcurrentRequests"]
+			errorPercentThreshold = settings["errorPercentThreshold"]
+			requestVolumeThreshold = settings["requestVolumeThreshold"]
 		}
 	}
 	// client settings override parameters

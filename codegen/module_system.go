@@ -22,10 +22,12 @@ package codegen
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/textproto"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -60,6 +62,7 @@ type EndpointMeta struct {
 	DefaultHeaders         []string
 }
 
+// TODO: comment here
 var qpsLevels map[string]int = make(map[string]int)
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -489,11 +492,16 @@ func (g *httpClientGenerator) Generate(
 
 	sort.Sort(&clientSpec.ModuleSpec.Services)
 	// transfer only the methods that belong to the client with the qps level
-	var clientQPSLevels map[string]int = make(map[string]int)
+	var clientQPSLevels map[string]string = make(map[string]string)
 	for _, methodName := range exposedMethods {
 		key := clientSpec.ClientID + "-" + methodName
 		if qps, ok := qpsLevels[key]; ok {
-			clientQPSLevels[key] = qps
+			qpsLevel := strconv.Itoa(qps)
+			clientQPSLevels[key] = qpsLevel
+		} else {
+			// if no qps level for method
+			// sets as default (default circuit breaker parameters will be assigned)
+			clientQPSLevels[key] = "default"
 		}
 	}
 	// adding QPS Levels here will allow access in client go file
@@ -630,11 +638,16 @@ func (g *tchannelClientGenerator) Generate(
 
 	sort.Sort(clientSpec.ModuleSpec.Services)
 
-	var clientQPSLevels map[string]int = make(map[string]int)
+	var clientQPSLevels map[string]string = make(map[string]string)
 	for _, methodName := range exposedMethods {
 		key := clientSpec.ClientID + "-" + methodName
 		if qps, ok := qpsLevels[key]; ok {
-			clientQPSLevels[key] = qps
+			qpsLevel := strconv.Itoa(qps)
+			clientQPSLevels[key] = qpsLevel
+		} else {
+			// if no qps level for method
+			// sets as default (default circuit breaker parameters will be assigned)
+			clientQPSLevels[key] = "default"
 		}
 	}
 
@@ -937,11 +950,16 @@ func (g *gRPCClientGenerator) Generate(
 
 	sort.Sort(&services)
 
-	var clientQPSLevels map[string]int = make(map[string]int)
+	var clientQPSLevels map[string]string = make(map[string]string)
 	for _, methodName := range reversedMethods {
 		key := clientSpec.ClientID + "-" + methodName
 		if qps, ok := qpsLevels[key]; ok {
-			clientQPSLevels[key] = qps
+			qpsLevel := strconv.Itoa(qps)
+			clientQPSLevels[key] = qpsLevel
+		} else {
+			// if no qps level for method
+			// sets as default (default circuit breaker parameters will be assigned)
+			clientQPSLevels[key] = "default"
 		}
 	}
 
@@ -1014,14 +1032,6 @@ type EndpointGenerator struct {
 	packageHelper *PackageHelper
 }
 
-// EndpointYaml is used to parse endpoint yaml files
-// fields used to update qpsLevels map
-type EndpointYaml struct {
-	QPSLevel     int    `yaml:"qpsLevel,omitempty"`
-	ClientMethod string `yaml:"clientMethod,omitempty"`
-	ClientID     string `yaml:"clientId,omitempty"`
-}
-
 // ComputeSpec computes the endpoint specs for a group of endpoints
 func (g *EndpointGenerator) ComputeSpec(
 	instance *ModuleInstance,
@@ -1051,9 +1061,8 @@ func (g *EndpointGenerator) ComputeSpec(
 	var wg sync.WaitGroup
 	wg.Add(len(endpointYamls))
 	ch := make(chan endpointSpecRes, len(endpointYamls))
-	var config *EndpointYaml
 	for _, yamlFile := range endpointYamls {
-		UpdateQPSLevels(yamlFile, config)
+		UpdateQPSLevels(yamlFile)
 		go func(yamlFile string) {
 			defer wg.Done()
 			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
@@ -1090,23 +1099,40 @@ func (g *EndpointGenerator) ComputeSpec(
 }
 
 // UpdateQPSLevels updates map from client-method name to qps level
-func UpdateQPSLevels(yamlFile string, config *EndpointYaml) {
+func UpdateQPSLevels(yamlFile string) {
+	var config map[string]interface{}
 	file, err := ioutil.ReadFile(yamlFile)
 	if err != nil {
-		print("error")
+		fmt.Printf("error reading file to update qps level")
 	}
 	if err == nil {
 		err = yaml.Unmarshal(file, &config)
 	}
-	// unique key because of potential clients having same method names (staging)
-	key := config.ClientID + "-" + config.ClientMethod
-	if err == nil {
-		if val, ok := qpsLevels[key]; ok {
-			if config.QPSLevel > val {
-				qpsLevels[key] = config.QPSLevel
+	// checks if yaml has required fields to update qpsLevels map
+	// prevents qpsLevel being "0" if no qpsLevel field
+	clientMethod, methodOK := config["clientMethod"]
+	clientID, clientOK := config["clientId"]
+	qpsLevel, qpsOK := config["qpsLevel"]
+	if methodOK && clientOK && qpsOK && err == nil {
+		// edge case where clientID or clientMethod is nil
+		if clientID != nil && clientMethod != nil {
+			// unique key because of potential clients having same method names (staging)
+			key := clientID.(string) + "-" + clientMethod.(string)
+			currentQPSLevel := qpsLevels[key]
+			// store highest qps level for circuit breaker in qpsLevels map
+			thisQPSLevel := int(qpsLevel.(float64))
+			if thisQPSLevel > currentQPSLevel {
+				// using mutex to prevent 'concurrent map writes' error
+				var mutex = &sync.Mutex{}
+				mutex.Lock()
+				qpsLevels[key] = thisQPSLevel
+				mutex.Unlock()
+			} else {
+				var mutex = &sync.Mutex{}
+				mutex.Lock()
+				qpsLevels[key] = thisQPSLevel
+				mutex.Unlock()
 			}
-		} else {
-			qpsLevels[key] = config.QPSLevel
 		}
 	}
 }
@@ -1743,10 +1769,12 @@ type ClientMeta struct {
 	Services         []*ServiceSpec
 	ProtoServices    []*ProtoService
 	ExposedMethods   map[string]string
-	QPSLevels        map[string]int
-	SidecarRouter    string
-	Fixture          *Fixture
-	DeputyReqHeader  string
+	// client-method name to qps level (string)
+	// if not qps level for method value is "default"
+	QPSLevels       map[string]string
+	SidecarRouter   string
+	Fixture         *Fixture
+	DeputyReqHeader string
 }
 
 func findMethod(

@@ -3,7 +3,6 @@ clientMethod: HelloB
 endpointId: multi
 endpointType: http
 handleId: helloB
-qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

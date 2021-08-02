@@ -56,16 +56,6 @@ func DefaultConfigFiles(serviceName string) []string {
 			getDirName(),
 			"..", "..", "..", "examples", "example-gateway", "build.yaml",
 		),
-		filepath.Join(
-			getDirName(),
-			"..", "..", "..", "examples", "example-gateway", "config",
-			"qps-config.json",
-		),
-		filepath.Join(
-			getDirName(),
-			"..", "..", "..", "examples", "example-gateway", "config",
-			"example-gateway", "qps-config.json",
-		),
 	}
 }
 

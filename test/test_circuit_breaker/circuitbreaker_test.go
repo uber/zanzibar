@@ -21,12 +21,6 @@
 package testcircuitbreaker
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -39,20 +33,6 @@ import (
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
-
-// values set when no client override and no qps level
-var defaultSettings map[string]int = map[string]int{
-	"sleepWindowInMilliseconds": 5000,
-	"maxConcurrentRequests":     20,
-	"errorPercentThreshold":     20,
-	"requestVolumeThreshold":    20,
-}
-
-// from test.yaml
-var bazClientOverrides map[string]int = map[string]int{
-	"timeout":               10000,
-	"maxConcurrentRequests": 1000,
-}
 
 func TestCircuitBreakerSettings(t *testing.T) {
 	// create gateway to get circuit breakers configured
@@ -71,70 +51,77 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		t.Error("got bootstrap err: " + err.Error())
 		return
 	}
-	// get qps config settings
-	qpsConfig := GetQPSConfigSettings()
-	// test circuit breaker settings for each method match prod values
+	// get circuit breaker settings
 	settings := hystrix.GetCircuitSettings()
 	for circuitBreakerName := range settings {
 		// checks circuit breaker names have method names and not service method names
 		assert.True(t, !strings.Contains(circuitBreakerName, "::"), "Incorrect circuit breaker names")
+		// checks circuit breaker names contain '-' which separates client id from method name
+		assert.True(t, strings.Contains(circuitBreakerName, "-"), "Circuit breaker name should have '-")
 	}
-	names := [27]string{"baz-EchoBinary", "baz-EchoBool", "baz-EchoDouble", "baz-EchoEnum", "baz-EchoI16", "baz-EchoI32", "baz-EchoI64", "baz-EchoI8", "baz-EchoString", "baz-EchoStringList", "baz-EchoStringMap", "baz-EchoStringSet", "baz-EchoStructList", "baz-EchoStructSet", "baz-EchoTypedef", "baz-Call", "baz-Compare", "baz-GetProfile", "baz-HeaderSchema", "baz-Ping", "baz-DeliberateDiffNoop", "baz-TestUUID", "baz-Trans", "baz-TransHeaders", "baz-TransHeadersNoReq", "baz-TransHeadersType", "baz-URLTest"}
-	count := 0
-	// get methods to qpsLevels
-	methodToQPSLevel := GetExpectedMethodToQPSLevels()
-	// client overrides from test.yaml
-	timeout := bazClientOverrides["timeout"]
-	max := bazClientOverrides["maxConcurrentRequests"]
+	// circuit breaker names for multi client
+	names := [2]string{"multi-HelloA", "multi-HelloB"}
+	// map circuit breaker name to qps level
+	methodToQPSLevel := map[string]string{
+		"multi-HelloA": "1",
+		"multi-HelloB": "default",
+	}
+	// circuit breaker parameters from test.yaml
+	circuitBreakerConfig := map[string]map[string]int{
+		"default": {
+			"sleepWindowInMilliseconds": 5000,
+			"errorPercentThreshold":     20,
+			"requestVolumeThreshold":    20,
+			"maxConcurrentRequests":     20,
+		},
+		"1": {
+			"sleepWindowInMilliseconds": 7000,
+			"errorPercentThreshold":     10,
+			"requestVolumeThreshold":    15,
+			"maxConcurrentRequests":     20,
+		},
+	}
+	// client overrides for multi client in test.yaml
+	multiClientOverrides := map[string]int{
+		"timeout":               10000,
+		"maxConcurrentRequests": 1000,
+		"errorPercentThreshold": 20,
+	}
+	// loop through circuit breaker names to create expected settings using
+	// circuit breaker configurations
 	for _, name := range names {
-		// default values for parameters
-		sleepWindow := defaultSettings["sleepWindowInMilliseconds"]
-		errorPercentage := defaultSettings["errorPercentThreshold"]
-		reqThreshold := defaultSettings["requestVolumeThreshold"]
-		// config values set by qps level
+		// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+		// to reject requests before allowing attempts again to determine if the circuit should again be closed
+		var sleepWindowInMilliseconds int
+		// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+		var errorPercentThreshold int
+		// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+		// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+		// the circuit will not trip open even if all 19 failed.
+		var requestVolumeThreshold int
+		// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+		var maxConcurrentRequests int
+		// method circuit breaker parameters are set using configurations for qps level
+		// 'default' also has circuit breaker configurations in config file
 		if val, ok := methodToQPSLevel[name]; ok {
-			s := strconv.Itoa(val)
-			sleepWindow = qpsConfig[s]["sleepWindowInMilliseconds"]
-			errorPercentage = qpsConfig[s]["errorPercentThreshold"]
-			reqThreshold = qpsConfig[s]["requestVolumeThreshold"]
-			count++
+			// these values have no client overrides
+			sleepWindowInMilliseconds = circuitBreakerConfig[val]["sleepWindowInMilliseconds"]
+			requestVolumeThreshold = circuitBreakerConfig[val]["requestVolumeThreshold"]
 		}
+		// client overrides: if client set configurations for circuit breakers
+		// override values are used for all client's circuit breakers
+		timeout := multiClientOverrides["timeout"]
+		maxConcurrentRequests = multiClientOverrides["maxConcurrentRequests"]
+		errorPercentThreshold = multiClientOverrides["errorPercentThreshold"]
+
 		expectedSettings := &hystrix.Settings{
 			Timeout:                time.Duration(timeout) * time.Millisecond,
-			MaxConcurrentRequests:  max,
-			RequestVolumeThreshold: uint64(reqThreshold),
-			SleepWindow:            time.Duration(sleepWindow) * time.Millisecond,
-			ErrorPercentThreshold:  errorPercentage,
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			RequestVolumeThreshold: uint64(requestVolumeThreshold),
+			SleepWindow:            time.Duration(sleepWindowInMilliseconds) * time.Millisecond,
+			ErrorPercentThreshold:  errorPercentThreshold,
 		}
+		// compare expected circuit breaker settings for multi client with actual settings
 		assert.Equal(t, settings[name], expectedSettings)
 	}
-	assert.Equal(t, len(methodToQPSLevel), count)
-}
-
-func GetQPSConfigSettings() map[string]map[string]int {
-	pwd, _ := os.Getwd()
-	pathToConfig := filepath.Join(pwd, "/qps-config.json")
-	jsonFile, err := os.Open(pathToConfig)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var qpsConfig map[string]map[string]int
-	json.Unmarshal(byteValue, &qpsConfig)
-	return qpsConfig
-}
-
-func GetExpectedMethodToQPSLevels() map[string]int {
-	pwd, _ := os.Getwd()
-	path := filepath.Join(pwd, "/expected_method_qps_levels.json")
-	jsonFile, err := os.Open(path)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var methodToQPSLevel map[string]int
-	json.Unmarshal(byteValue, &methodToQPSLevel)
-	return methodToQPSLevel
 }
