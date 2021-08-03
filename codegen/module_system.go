@@ -22,8 +22,6 @@ package codegen
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/textproto"
 	"path/filepath"
 	"sort"
@@ -1062,7 +1060,6 @@ func (g *EndpointGenerator) ComputeSpec(
 	wg.Add(len(endpointYamls))
 	ch := make(chan endpointSpecRes, len(endpointYamls))
 	for _, yamlFile := range endpointYamls {
-		UpdateQPSLevels(yamlFile)
 		go func(yamlFile string) {
 			defer wg.Done()
 			espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
@@ -1090,51 +1087,66 @@ func (g *EndpointGenerator) ComputeSpec(
 	}()
 
 	for endpointSpecRes := range ch {
+		UpdateQPSLevels(endpointSpecRes.espec)
 		if endpointSpecRes.err != nil {
 			return nil, endpointSpecRes.err
 		}
+
 		endpointSpecs = append(endpointSpecs, endpointSpecRes.espec)
 	}
 	return endpointSpecs, nil
 }
 
 // UpdateQPSLevels updates map from client-method name to qps level
-func UpdateQPSLevels(yamlFile string) {
-	var config map[string]interface{}
-	file, err := ioutil.ReadFile(yamlFile)
-	if err != nil {
-		fmt.Printf("error reading file to update qps level")
-	}
-	if err == nil {
-		err = yaml.Unmarshal(file, &config)
-	}
-	// checks if yaml has required fields to update qpsLevels map
-	// prevents qpsLevel being "0" if no qpsLevel field
-	clientMethod, methodOK := config["clientMethod"]
-	clientID, clientOK := config["clientId"]
-	qpsLevel, qpsOK := config["qpsLevel"]
-	if methodOK && clientOK && qpsOK && err == nil {
-		// edge case where clientID or clientMethod is nil
-		if clientID != nil && clientMethod != nil {
-			// unique key because of potential clients having same method names (staging)
-			key := clientID.(string) + "-" + clientMethod.(string)
-			currentQPSLevel := qpsLevels[key]
-			// store highest qps level for circuit breaker in qpsLevels map
-			thisQPSLevel := int(qpsLevel.(float64))
-			if thisQPSLevel > currentQPSLevel {
-				// using mutex to prevent 'concurrent map writes' error
-				var mutex = &sync.Mutex{}
-				mutex.Lock()
-				qpsLevels[key] = thisQPSLevel
-				mutex.Unlock()
-			} else {
-				var mutex = &sync.Mutex{}
-				mutex.Lock()
-				qpsLevels[key] = thisQPSLevel
-				mutex.Unlock()
+func UpdateQPSLevels(endpointSpec *EndpointSpec) {
+	if endpointSpec.IsQPSLevelSet && endpointSpec.ClientID != "" && endpointSpec.ClientMethod != "" {
+		key := endpointSpec.ClientID + "-" + endpointSpec.ClientMethod
+		var mutex = &sync.Mutex{}
+		mutex.Lock()
+		if qpsLevel, ok := qpsLevels[key]; ok {
+			if endpointSpec.QPSLevel > qpsLevel {
+				qpsLevels[key] = endpointSpec.QPSLevel
 			}
+		} else {
+			qpsLevels[key] = endpointSpec.QPSLevel
 		}
+		mutex.Unlock()
 	}
+	// var config map[string]interface{}
+	// file, err := ioutil.ReadFile(yamlFile)
+	// if err != nil {
+	// 	fmt.Printf("error reading file to update qps level")
+	// }
+	// if err == nil {
+	// 	err = yaml.Unmarshal(file, &config)
+	// }
+	// // checks if yaml has required fields to update qpsLevels map
+	// // prevents qpsLevel being "0" if no qpsLevel field
+	// clientMethod, methodOK := config["clientMethod"]
+	// clientID, clientOK := config["clientId"]
+	// qpsLevel, qpsOK := config["qpsLevel"]
+	// if methodOK && clientOK && qpsOK && err == nil {
+	// 	// edge case where clientID or clientMethod is nil
+	// 	if clientID != nil && clientMethod != nil {
+	// 		// unique key because of potential clients having same method names (staging)
+	// 		key := clientID.(string) + "-" + clientMethod.(string)
+	// 		currentQPSLevel := qpsLevels[key]
+	// 		// store highest qps level for circuit breaker in qpsLevels map
+	// 		thisQPSLevel := int(qpsLevel.(float64))
+	// 		if thisQPSLevel > currentQPSLevel {
+	// 			// using mutex to prevent 'concurrent map writes' error
+	// 			var mutex = &sync.Mutex{}
+	// 			mutex.Lock()
+	// 			qpsLevels[key] = thisQPSLevel
+	// 			mutex.Unlock()
+	// 		} else {
+	// 			var mutex = &sync.Mutex{}
+	// 			mutex.Lock()
+	// 			qpsLevels[key] = thisQPSLevel
+	// 			mutex.Unlock()
+	// 		}
+	// 	}
+	// }
 }
 
 type endpointSpecRes struct {
