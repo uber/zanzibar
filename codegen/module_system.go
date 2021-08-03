@@ -62,7 +62,7 @@ type EndpointMeta struct {
 	DefaultHeaders         []string
 }
 
-// TODO: comment here
+// stores qps levels for circuit breakers
 var qpsLevels map[string]int = make(map[string]int)
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -1118,21 +1118,18 @@ func UpdateQPSLevels(yamlFile string) {
 		if clientID != nil && clientMethod != nil {
 			// unique key because of potential clients having same method names (staging)
 			key := clientID.(string) + "-" + clientMethod.(string)
-			currentQPSLevel := qpsLevels[key]
 			// store highest qps level for circuit breaker in qpsLevels map
 			thisQPSLevel := int(qpsLevel.(float64))
-			if thisQPSLevel > currentQPSLevel {
-				// using mutex to prevent 'concurrent map writes' error
-				var mutex = &sync.Mutex{}
-				mutex.Lock()
-				qpsLevels[key] = thisQPSLevel
-				mutex.Unlock()
+			var mutex = &sync.Mutex{}
+			mutex.Lock()
+			if currentQPSLevel, ok := qpsLevels[key]; ok {
+				if thisQPSLevel > currentQPSLevel {
+					qpsLevels[key] = thisQPSLevel
+				}
 			} else {
-				var mutex = &sync.Mutex{}
-				mutex.Lock()
 				qpsLevels[key] = thisQPSLevel
-				mutex.Unlock()
 			}
+			mutex.Unlock()
 		}
 	}
 }
