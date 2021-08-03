@@ -28,7 +28,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 
 	yaml "github.com/ghodss/yaml"
@@ -221,10 +220,6 @@ type EndpointSpec struct {
 	EndpointID string `yaml:"endpointId" validate:"nonzero"`
 	// HandleID, used in metrics and logging, lowercase.
 	HandleID string `yaml:"handleId" validate:"nonzero"`
-	// qps level representing which qps range endpoint belongs in
-	QPSLevel int `yaml:"qpsLevel"`
-	// if qps level was set
-	IsQPSLevelSet bool
 	// ThriftFile, the thrift file for this endpoint
 	ThriftFile string `yaml:"thriftFile" validate:"nonzero"`
 	// ThriftFileSha, the SHA of the thrift file for this endpoint
@@ -407,21 +402,6 @@ func NewEndpointSpec(
 		)
 	}
 
-	qpsLevel := 0
-	isQPSLevelSet := false
-	if endpointConfigObj["qpsLevel"] != nil {
-		isQPSLevelSet = true
-		if v, ok := endpointConfigObj["qpsLevel"].(float64); ok {
-			qpsLevel = int(v)
-		}
-		if v, ok := endpointConfigObj["qpsLevel"].(int); ok {
-			qpsLevel = v
-		}
-		if v, ok := endpointConfigObj["qpsLevel"].(string); ok {
-			qpsLevel, _ = strconv.Atoi(v)
-		}
-	}
-
 	espec := &EndpointSpec{
 		ModuleSpec:           mspec,
 		YAMLFile:             yamlFile,
@@ -431,8 +411,6 @@ func NewEndpointSpec(
 		EndpointType:         endpointConfigObj["endpointType"].(string),
 		EndpointID:           endpointConfigObj["endpointId"].(string),
 		HandleID:             endpointConfigObj["handleId"].(string),
-		QPSLevel:             qpsLevel,
-		IsQPSLevelSet:        isQPSLevelSet,
 		ThriftFile:           thriftFile,
 		ThriftServiceName:    parts[0],
 		ThriftMethodName:     parts[1],
