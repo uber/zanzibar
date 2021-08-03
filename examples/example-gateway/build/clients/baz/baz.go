@@ -44,6 +44,9 @@ import (
 	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
 // Client defines baz client interface.
 type Client interface {
 	EchoBinary(
@@ -307,7 +310,7 @@ func NewClient(deps *module.Dependencies) Client {
 	if !circuitBreakerDisabled {
 		for _, methodName := range methodNames {
 			circuitBreakerName := "baz" + "-" + methodName
-			qpsLevel := ""
+			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
@@ -389,11 +392,10 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	var requestVolumeThreshold int
-	key := "circuitbreaking-configurations"
 	// parses circuit breaker configurations
-	if deps.Default.Config.ContainsKey(key) {
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
 		var config CircuitBreakerConfig
-		deps.Default.Config.MustGetStruct(key, &config)
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
 		parameters := config.Parameters
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations

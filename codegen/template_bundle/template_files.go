@@ -1222,6 +1222,9 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 {{range $i, $svc := .ProtoServices -}}
@@ -1285,7 +1288,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if !circuitBreakerDisabled {
 		for _, methodName := range methodNames {
 			circuitBreakerName := "{{$clientID}}"  + "-" + methodName
-			qpsLevel := ""
+			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
@@ -1328,11 +1331,10 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	var requestVolumeThreshold int
-	key := "circuitbreaking-configurations"
 	// parses circuit breaker configurations
-	if deps.Default.Config.ContainsKey(key) {
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
 		var config CircuitBreakerConfig
-		deps.Default.Config.MustGetStruct(key, &config)
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
 		parameters := config.Parameters
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations
@@ -1423,7 +1425,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8068, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8232, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1457,6 +1459,9 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
+
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -1558,7 +1563,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if !circuitBreakerDisabled {
 		for methodName := range methodNames {
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
-			qpsLevel := ""
+			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
@@ -1622,11 +1627,10 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	var requestVolumeThreshold int
-	key := "circuitbreaking-configurations"
 	// parses circuit breaker configurations
-	if deps.Default.Config.ContainsKey(key) {
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
 		var config CircuitBreakerConfig
-		deps.Default.Config.MustGetStruct(key, &config)
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
 		parameters := config.Parameters
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations
@@ -1971,7 +1975,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18255, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 18419, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2887,6 +2891,9 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 {{range $svc := .Services -}}
@@ -2997,7 +3004,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if !circuitBreakerDisabled {
 		for _, methodName := range methodNames {
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
-			qpsLevel := ""
+			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
@@ -3079,11 +3086,10 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	var requestVolumeThreshold int
-	key := "circuitbreaking-configurations"
 	// parses circuit breaker configurations
-	if deps.Default.Config.ContainsKey(key) {
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
 		var config CircuitBreakerConfig
-		deps.Default.Config.MustGetStruct(key, &config)
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
 		parameters := config.Parameters
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations
@@ -3229,7 +3235,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13158, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13322, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
