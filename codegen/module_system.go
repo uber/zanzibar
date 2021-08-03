@@ -1120,8 +1120,6 @@ func UpdateQPSLevels(yamlFile string) {
 			key := clientID.(string) + "-" + clientMethod.(string)
 			// store highest qps level for circuit breaker in qpsLevels map
 			thisQPSLevel := int(qpsLevel.(float64))
-			var mutex = &sync.Mutex{}
-			mutex.Lock()
 			if currentQPSLevel, ok := qpsLevels[key]; ok {
 				if thisQPSLevel > currentQPSLevel {
 					qpsLevels[key] = thisQPSLevel
@@ -1129,7 +1127,6 @@ func UpdateQPSLevels(yamlFile string) {
 			} else {
 				qpsLevels[key] = thisQPSLevel
 			}
-			mutex.Unlock()
 		}
 	}
 }
