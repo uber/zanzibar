@@ -178,7 +178,7 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 }
 {{end -}}
 
-// CircuitBreakerConfig is a map of qps level to circuit breaker parameters
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
 type CircuitBreakerConfig struct {
 	Parameters map[string]map[string]int
 }
@@ -186,15 +186,15 @@ type CircuitBreakerConfig struct {
 func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
-	sleepWindowInMilliseconds := 5000
+	var sleepWindowInMilliseconds int
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
-	maxConcurrentRequests := 20
+	var maxConcurrentRequests int
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
-	errorPercentThreshold := 20
+	var errorPercentThreshold int
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
-	requestVolumeThreshold := 20
+	var requestVolumeThreshold int
 	// parses circuit breaker configurations
 	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
 		var config CircuitBreakerConfig
