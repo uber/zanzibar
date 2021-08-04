@@ -572,18 +572,11 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 	endpointFiles := GetListOfAllFilesInDir(EndpointsBaseDir)
 	var config map[string]interface{}
 	for _, endpointFile := range endpointFiles {
-		bytes, err := ioutil.ReadFile(endpointFile)
-		if err != nil {
-			// error
-		}
-
-		err = yaml.Unmarshal(bytes, &config)
+		bytes, _ := ioutil.ReadFile(endpointFile)
+		err := yaml.Unmarshal(bytes, &config)
 		if err != nil {
 			// try json
-			err = json.Unmarshal(bytes, &config)
-		}
-		if err != nil {
-			// both didn't work
+			_ = json.Unmarshal(bytes, &config)
 		}
 		clientMethod, methodOK := config["clientMethod"]
 		clientID, clientOK := config["clientId"]
