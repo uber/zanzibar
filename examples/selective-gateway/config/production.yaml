@@ -1,35 +1,3 @@
-circuitbreaking-configurations:
-  levels:
-    '1': '0-99'
-    '2': '100-999'
-    '3': '1000-9999'
-    '4': '10000+'
-  parameters:
-    'default':
-      sleepWindowInMilliseconds: 5000
-      errorPercentThreshold: 20
-      requestVolumeThreshold: 20
-      maxConcurrentRequests: 20
-    '1':
-      sleepWindowInMilliseconds: 7000
-      errorPercentThreshold: 10
-      requestVolumeThreshold: 15
-      maxConcurrentRequests: 20
-    '2':
-      sleepWindowInMilliseconds: 4000
-      errorPercentThreshold: 15
-      requestVolumeThreshold: 22
-      maxConcurrentRequest: 20
-    '3':
-      sleepWindowInMilliseconds: 3000
-      errorPercentThreshold: 25
-      requestVolumeThreshold: 24
-      maxConcurrentRequests: 25
-    '4':
-      sleepWindowInMilliseconds: 1000
-      errorPercentThreshold: 30
-      requestVolumeThreshold: 25
-      maxConcurrentRequests: 30
 clients.bar.defaultHeaders:
   X-Client-ID: bar
 clients.bar.ip: 127.0.0.1
@@ -80,3 +48,35 @@ grpc.clientServiceNameMapping:
   echo: echo
 router.whitelistedPaths:
   - /path/whitelisted
+circuitbreaking-configurations:
+  levels:
+    '1': '0-99'
+    '2': '100-999'
+    '3': '1000-9999'
+    '4': '10000+'
+  parameters:
+    'default':
+      sleepWindowInMilliseconds: 5000
+      errorPercentThreshold: 20
+      requestVolumeThreshold: 20
+      maxConcurrentRequests: 20
+    '1':
+      sleepWindowInMilliseconds: 7000
+      errorPercentThreshold: 10
+      requestVolumeThreshold: 15
+      maxConcurrentRequests: 20
+    '2':
+      sleepWindowInMilliseconds: 4000
+      errorPercentThreshold: 15
+      requestVolumeThreshold: 22
+      maxConcurrentRequest: 20
+    '3':
+      sleepWindowInMilliseconds: 3000
+      errorPercentThreshold: 25
+      requestVolumeThreshold: 24
+      maxConcurrentRequests: 25
+    '4':
+      sleepWindowInMilliseconds: 1000
+      errorPercentThreshold: 30
+      requestVolumeThreshold: 25
+      maxConcurrentRequests: 30
