@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/textproto"
 	"path/filepath"
@@ -567,6 +566,7 @@ func (g *httpClientGenerator) Generate(
 	}, nil
 }
 
+// PopulateQPSLevels loops through endpoint dir and gets qps levels
 func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 	qpsLevels := make(map[string]int)
 	endpointFiles := GetListOfAllFilesInDir(EndpointsBaseDir)
@@ -608,7 +608,7 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 	return qpsLevels
 }
 
-// took this from edge gateway
+// GetListOfAllFilesInDir gets all the endpoint config files
 func GetListOfAllFilesInDir(baseDir string) []string {
 	filesList := []string{}
 
