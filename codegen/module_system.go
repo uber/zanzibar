@@ -87,9 +87,6 @@ type EndpointTestMeta struct {
 	IncludedPackages   []GoPackageImport
 }
 
-// qpsLevelsAll is map of circuit breaker name to qps level
-var qpsLevelsAll = make(map[string]int)
-
 // FixtureBlob implements default string used for (http | tchannel)
 // request/response
 type FixtureBlob map[string]interface{}
@@ -505,14 +502,10 @@ func (g *httpClientGenerator) Generate(
 	clientSpec := clientSpecUntyped.(*ClientSpec)
 
 	exposedMethods := reverseExposedMethods(clientSpec)
-	dir := instance.BaseDirectory
-	pathToEndpoints := dir + "/endpoints"
-	if len(qpsLevelsAll) == 0 {
-		qpsLevelsAll = PopulateQPSLevels(pathToEndpoints)
-	}
+
 	sort.Sort(&clientSpec.ModuleSpec.Services)
 	// transfer only the methods that belong to the client with the qps level
-	var clientQPSLevels map[string]string = GetClientQPSLevels(qpsLevelsAll, exposedMethods, clientSpec.ClientID)
+	var clientQPSLevels map[string]string = GetClientQPSLevels(instance.QPSLevels, exposedMethods, clientSpec.ClientID)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -698,13 +691,7 @@ func (g *tchannelClientGenerator) Generate(
 
 	sort.Sort(clientSpec.ModuleSpec.Services)
 
-	dir := instance.BaseDirectory
-	pathToEndpoints := dir + "/endpoints"
-	if len(qpsLevelsAll) == 0 {
-		qpsLevelsAll = PopulateQPSLevels(pathToEndpoints)
-	}
-
-	var clientQPSLevels map[string]string = GetClientQPSLevels(qpsLevelsAll, exposedMethods, clientSpec.ClientID)
+	var clientQPSLevels map[string]string = GetClientQPSLevels(instance.QPSLevels, exposedMethods, clientSpec.ClientID)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -1005,13 +992,7 @@ func (g *gRPCClientGenerator) Generate(
 
 	sort.Sort(&services)
 
-	dir := instance.BaseDirectory
-	pathToEndpoints := dir + "/endpoints"
-	if len(qpsLevelsAll) == 0 {
-		qpsLevelsAll = PopulateQPSLevels(pathToEndpoints)
-	}
-
-	var clientQPSLevels map[string]string = GetClientQPSLevels(qpsLevelsAll, reversedMethods, clientSpec.ClientID)
+	var clientQPSLevels map[string]string = GetClientQPSLevels(instance.QPSLevels, reversedMethods, clientSpec.ClientID)
 
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
