@@ -607,7 +607,7 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 	return qpsLevels
 }
 
-// GetListOfAllFilesInDir gets all the endpoint config files
+// GetListOfAllFilesInEndpointDir gets all the endpoint config files
 func GetListOfAllFilesInEndpointDir(baseDir string) []string {
 	filesList := []string{}
 	items, _ := ioutil.ReadDir(baseDir)
