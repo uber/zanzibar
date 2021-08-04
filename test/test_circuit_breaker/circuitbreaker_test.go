@@ -64,7 +64,7 @@ func TestCircuitBreakerSettings(t *testing.T) {
 	// map circuit breaker name to qps level
 	methodToQPSLevel := map[string]string{
 		"multi-HelloA": "1",
-		"multi-HelloB": "1",
+		"multi-HelloB": "default",
 	}
 	// circuit breaker parameters from test.yaml
 	circuitBreakerConfig := map[string]map[string]int{

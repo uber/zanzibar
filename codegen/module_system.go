@@ -569,9 +569,9 @@ func (g *httpClientGenerator) Generate(
 // PopulateQPSLevels loops through endpoint dir and gets qps levels
 func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 	qpsLevels := make(map[string]int)
-	endpointFiles := GetListOfAllFilesInDir(EndpointsBaseDir)
-	var config map[string]interface{}
+	endpointFiles := GetListOfAllFilesInEndpointDir(EndpointsBaseDir)
 	for _, endpointFile := range endpointFiles {
+		var config map[string]interface{}
 		bytes, _ := ioutil.ReadFile(endpointFile)
 		err := yaml.Unmarshal(bytes, &config)
 		if err != nil {
@@ -602,22 +602,8 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 }
 
 // GetListOfAllFilesInDir gets all the endpoint config files
-func GetListOfAllFilesInDir(baseDir string) []string {
+func GetListOfAllFilesInEndpointDir(baseDir string) []string {
 	filesList := []string{}
-
-	// err := filepath.Walk(baseDir,
-	// 	func(path string, info os.FileInfo, err error) error {
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		if !info.IsDir() && !strings.Contains(path, "endpoint-config.json") && !strings.Contains(path, "endpoint-config.yaml") {
-	// 			filesList = append(filesList, path)
-	// 		}
-	// 		return nil
-	// 	})
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 	items, _ := ioutil.ReadDir(baseDir)
 	for _, item := range items {
 		subitems, _ := ioutil.ReadDir(baseDir + "/" + item.Name())
