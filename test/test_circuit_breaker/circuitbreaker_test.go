@@ -115,24 +115,24 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		// compare expected circuit breaker settings for multi client with actual settings
 		assert.Equal(t, settings[name], expectedSettings)
 	}
-	// // circuit breakers with default qps levels
-	// bazCircuitBreakers := [17]string{"baz-EchoBinary", "baz-EchoBool", "baz-EchoDouble", "baz-EchoEnum", "baz-EchoI16", "baz-EchoI32", "baz-EchoI64", "baz-EchoI8", "baz-EchoString", "baz-EchoStringList", "baz-EchoStringMap", "baz-EchoStringSet", "baz-EchoStructList", "baz-EchoStructSet", "baz-EchoTypedef", "baz-TestUUID", "baz-URLTest"}
+	// circuit breakers with default qps levels
+	bazCircuitBreakers := [17]string{"baz-EchoBinary", "baz-EchoBool", "baz-EchoDouble", "baz-EchoEnum", "baz-EchoI16", "baz-EchoI32", "baz-EchoI64", "baz-EchoI8", "baz-EchoString", "baz-EchoStringList", "baz-EchoStringMap", "baz-EchoStringSet", "baz-EchoStructList", "baz-EchoStructSet", "baz-EchoTypedef", "baz-TestUUID", "baz-URLTest"}
 
-	// for _, name := range bazCircuitBreakers {
-	// 	// client overrides for baz
-	// 	timeout := 10000
-	// 	maxConcurrentRequests := 1000
-	// 	requestVolumeThreshold := 20
-	// 	sleepWindowInMilliseconds := 5000
-	// 	errorPercentThreshold := 20
-	// 	expectedSettings := &hystrix.Settings{
-	// 		Timeout:                time.Duration(timeout) * time.Millisecond,
-	// 		MaxConcurrentRequests:  maxConcurrentRequests,
-	// 		RequestVolumeThreshold: uint64(requestVolumeThreshold),
-	// 		SleepWindow:            time.Duration(sleepWindowInMilliseconds) * time.Millisecond,
-	// 		ErrorPercentThreshold:  errorPercentThreshold,
-	// 	}
-	// 	// compare expected circuit breaker settings for baz client with actual settings
-	// 	assert.Equal(t, settings[name], expectedSettings)
-	// }
+	for _, name := range bazCircuitBreakers {
+		// client overrides for baz
+		timeout := 10000
+		maxConcurrentRequests := 1000
+		requestVolumeThreshold := 20
+		sleepWindowInMilliseconds := 5000
+		errorPercentThreshold := 20
+		expectedSettings := &hystrix.Settings{
+			Timeout:                time.Duration(timeout) * time.Millisecond,
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			RequestVolumeThreshold: uint64(requestVolumeThreshold),
+			SleepWindow:            time.Duration(sleepWindowInMilliseconds) * time.Millisecond,
+			ErrorPercentThreshold:  errorPercentThreshold,
+		}
+		// compare expected circuit breaker settings for baz client with actual settings
+		assert.Equal(t, settings[name], expectedSettings)
+	}
 }
