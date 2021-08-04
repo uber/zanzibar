@@ -574,7 +574,7 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 	for _, endpointFile := range endpointFiles {
 		bytes, err := ioutil.ReadFile(endpointFile)
 		if err != nil {
-			print("could not read endpoint file")
+			// error
 		}
 
 		err = yaml.Unmarshal(bytes, &config)
@@ -583,20 +583,11 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 			err = json.Unmarshal(bytes, &config)
 		}
 		if err != nil {
-			print("json and yaml didn't work")
+			// both didn't work
 		}
-		fmt.Println("File name: ")
-		fmt.Println(endpointFile)
 		clientMethod, methodOK := config["clientMethod"]
 		clientID, clientOK := config["clientId"]
 		qpsLevel, qpsOK := config["qpsLevel"]
-		if strings.Contains(endpointFile, "helloB") {
-			fmt.Println("HelloB level")
-			fmt.Println(qpsLevel)
-			fmt.Println(clientMethod)
-			fmt.Println(clientID)
-			fmt.Println(qpsOK)
-		}
 		if methodOK && clientOK && qpsOK && err == nil {
 			// edge case where clientID or clientMethod is nil
 			if clientID != nil && clientMethod != nil && clientID != "" && clientMethod != "" {
