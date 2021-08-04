@@ -87,6 +87,9 @@ type EndpointTestMeta struct {
 	IncludedPackages   []GoPackageImport
 }
 
+// qpsLevelsAll is map of circuit breaker name to qps level
+var qpsLevelsAll = make(map[string]int)
+
 // FixtureBlob implements default string used for (http | tchannel)
 // request/response
 type FixtureBlob map[string]interface{}
@@ -474,7 +477,7 @@ func GetClientQPSLevels(qpsLevels map[string]int, methods map[string]string, cli
 	clientQPSLevels := make(map[string]string)
 	for _, methodName := range methods {
 		key := clientID + "-" + methodName
-		if qps, ok := qpsLevelsAll[key]; ok {
+		if qps, ok := qpsLevels[key]; ok {
 			qpsLevel := strconv.Itoa(qps)
 			clientQPSLevels[key] = qpsLevel
 		} else {
@@ -485,8 +488,6 @@ func GetClientQPSLevels(qpsLevels map[string]int, methods map[string]string, cli
 	}
 	return clientQPSLevels
 }
-
-var qpsLevelsAll = make(map[string]int)
 
 // Generate returns the HTTP client build result, which contains the files and
 // the generated client spec
