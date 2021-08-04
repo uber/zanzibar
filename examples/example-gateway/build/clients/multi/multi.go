@@ -140,15 +140,15 @@ type CircuitBreakerConfig struct {
 func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
-	var sleepWindowInMilliseconds int
+	sleepWindowInMilliseconds := 5000
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
-	var maxConcurrentRequests int
+	maxConcurrentRequests := 20
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
-	var errorPercentThreshold int
+	errorPercentThreshold := 20
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
-	var requestVolumeThreshold int
+	requestVolumeThreshold := 20
 	// parses circuit breaker configurations
 	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
 		var config CircuitBreakerConfig
