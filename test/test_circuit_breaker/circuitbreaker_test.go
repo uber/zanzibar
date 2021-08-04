@@ -60,11 +60,11 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		assert.True(t, strings.Contains(circuitBreakerName, "-"), "Circuit breaker name should have '-")
 	}
 	// circuit breaker names for multi client
-	names := [2]string{"multi-HelloA", "multi-HelloB"}
+	multiCircuitBreakerNames := [2]string{"multi-HelloA", "multi-HelloB"}
 	// map circuit breaker name to qps level
 	methodToQPSLevel := map[string]string{
 		"multi-HelloA": "1",
-		"multi-HelloB": "default",
+		"multi-HelloB": "1",
 	}
 	// circuit breaker parameters from test.yaml
 	circuitBreakerConfig := map[string]map[string]int{
@@ -89,20 +89,11 @@ func TestCircuitBreakerSettings(t *testing.T) {
 	}
 	// loop through circuit breaker names to create expected settings using
 	// circuit breaker configurations
-	for _, name := range names {
-		// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
-		// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	for _, name := range multiCircuitBreakerNames {
+
 		var sleepWindowInMilliseconds int
-		// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
-		var errorPercentThreshold int
-		// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
-		// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
-		// the circuit will not trip open even if all 19 failed.
 		var requestVolumeThreshold int
-		// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
-		var maxConcurrentRequests int
-		// method circuit breaker parameters are set using configurations for qps level
-		// 'default' also has circuit breaker configurations in config file
+
 		if val, ok := methodToQPSLevel[name]; ok {
 			// these values have no client overrides
 			sleepWindowInMilliseconds = circuitBreakerConfig[val]["sleepWindowInMilliseconds"]
@@ -111,8 +102,8 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		// client overrides: if client set configurations for circuit breakers
 		// override values are used for all client's circuit breakers
 		timeout := multiClientOverrides["timeout"]
-		maxConcurrentRequests = multiClientOverrides["maxConcurrentRequests"]
-		errorPercentThreshold = multiClientOverrides["errorPercentThreshold"]
+		maxConcurrentRequests := multiClientOverrides["maxConcurrentRequests"]
+		errorPercentThreshold := multiClientOverrides["errorPercentThreshold"]
 
 		expectedSettings := &hystrix.Settings{
 			Timeout:                time.Duration(timeout) * time.Millisecond,
@@ -124,4 +115,24 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		// compare expected circuit breaker settings for multi client with actual settings
 		assert.Equal(t, settings[name], expectedSettings)
 	}
+	// // circuit breakers with default qps levels
+	// bazCircuitBreakers := [17]string{"baz-EchoBinary", "baz-EchoBool", "baz-EchoDouble", "baz-EchoEnum", "baz-EchoI16", "baz-EchoI32", "baz-EchoI64", "baz-EchoI8", "baz-EchoString", "baz-EchoStringList", "baz-EchoStringMap", "baz-EchoStringSet", "baz-EchoStructList", "baz-EchoStructSet", "baz-EchoTypedef", "baz-TestUUID", "baz-URLTest"}
+
+	// for _, name := range bazCircuitBreakers {
+	// 	// client overrides for baz
+	// 	timeout := 10000
+	// 	maxConcurrentRequests := 1000
+	// 	requestVolumeThreshold := 20
+	// 	sleepWindowInMilliseconds := 5000
+	// 	errorPercentThreshold := 20
+	// 	expectedSettings := &hystrix.Settings{
+	// 		Timeout:                time.Duration(timeout) * time.Millisecond,
+	// 		MaxConcurrentRequests:  maxConcurrentRequests,
+	// 		RequestVolumeThreshold: uint64(requestVolumeThreshold),
+	// 		SleepWindow:            time.Duration(sleepWindowInMilliseconds) * time.Millisecond,
+	// 		ErrorPercentThreshold:  errorPercentThreshold,
+	// 	}
+	// 	// compare expected circuit breaker settings for baz client with actual settings
+	// 	assert.Equal(t, settings[name], expectedSettings)
+	// }
 }

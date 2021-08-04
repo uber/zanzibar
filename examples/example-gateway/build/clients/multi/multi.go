@@ -102,7 +102,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	qpsLevels := map[string]string{
 		"multi-HelloA": "1",
-		"multi-HelloB": "default",
+		"multi-HelloB": "1",
 	}
 	if !circuitBreakerDisabled {
 		for methodName := range methodNames {
