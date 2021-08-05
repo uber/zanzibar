@@ -575,15 +575,15 @@ func PopulateQPSLevels(EndpointsBaseDir string) (map[string]int, error) {
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error in getting endpoint files",
+			"error in getting endpoint files",
 		)
 	}
 	for _, endpointFile := range endpointFiles {
-		config, err := UnMarshalEndpointFile(endpointFile)
+		config, err := UnmarshalEndpointFile(endpointFile)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Error in unmarshalling endpoint file %q",
+				"error in unmarshalling endpoint file %q",
 				endpointFile,
 			)
 		}
@@ -614,14 +614,14 @@ func PopulateQPSLevels(EndpointsBaseDir string) (map[string]int, error) {
 	return qpsLevels, nil
 }
 
-// UnMarshalEndpointFile unmarshals endpoint file into config
-func UnMarshalEndpointFile(endpointFile string) (map[string]interface{}, error) {
+// UnmarshalEndpointFile unmarshals endpoint file into config
+func UnmarshalEndpointFile(endpointFile string) (map[string]interface{}, error) {
 	var config map[string]interface{}
 	bytes, err := ioutil.ReadFile(endpointFile)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error in reading endpoint file %q",
+			"error in reading endpoint file %q",
 			endpointFile,
 		)
 	}
@@ -631,7 +631,7 @@ func UnMarshalEndpointFile(endpointFile string) (map[string]interface{}, error) 
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Error in unmarshalling json %q",
+				"error in unmarshalling json %q",
 				endpointFile,
 			)
 		}
@@ -641,7 +641,7 @@ func UnMarshalEndpointFile(endpointFile string) (map[string]interface{}, error) 
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Error in unmarshalling yaml %q",
+				"error in unmarshalling yaml %q",
 				endpointFile,
 			)
 		}
@@ -655,7 +655,7 @@ func GetListOfAllFilesInEndpointDir(filePath string, filesList []string) ([]stri
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		return nil, errors.Errorf(
-			"Error in doing Stat with file path %q",
+			"error in getting file info for file path %q",
 			filePath,
 		)
 	}
@@ -663,7 +663,7 @@ func GetListOfAllFilesInEndpointDir(filePath string, filesList []string) ([]stri
 		items, err := ioutil.ReadDir(filePath)
 		if err != nil {
 			return nil, errors.Errorf(
-				"Error in reading base directory %q",
+				"error in reading base directory %q",
 				filePath,
 			)
 		}
