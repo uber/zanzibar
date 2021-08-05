@@ -66,13 +66,23 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
 	}
-	gateway := deps.Default.Gateway
-	channel := createNewTchannelForClient(deps, serviceName)
-	gateway.ClientTChannels[serviceName] = channel
 
 	ip := deps.Default.Config.MustGetString("sidecarRouter.default.tchannel.ip")
 	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
-	channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	gateway := deps.Default.Gateway
+	var channel *tchannel.Channel
+
+	// If dedicated.tchannel.client : true, each tchannel client will create a
+	// dedicated connection with local Muttley, else it will use a shared connection
+	if deps.Default.Config.ContainsKey("dedicated.tchannel.client") &&
+		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
+		channel = deps.Default.ServerTChannel
+		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	} else {
+		channel = createNewTchannelForClient(deps, serviceName)
+		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+		gateway.ClientTChannels[serviceName] = channel
+	}
 
 	/*Ex:
 	{

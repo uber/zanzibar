@@ -2390,6 +2390,7 @@ func InitializeDependencies(
 		Tracer:               g.Tracer,
 		Config:               g.Config,
 		Gateway:              g,
+		ServerTChannel:       g.ServerTChannel,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:		  g.JSONWrapper,
 	}
@@ -2423,7 +2424,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2522, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2564, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2940,18 +2941,29 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
 	}
-	gateway := deps.Default.Gateway
-	channel := createNewTchannelForClient(deps, serviceName)
-	gateway.ClientTChannels[serviceName] = channel
 
 	{{if $sidecarRouter -}}
-	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+		ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+		port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
 	{{else -}}
-	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+		ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+		port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	{{end -}}
-	channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+
+	gateway := deps.Default.Gateway
+	var channel *tchannel.Channel
+
+	// If dedicated.tchannel.client : true, each tchannel client will create a
+	// dedicated connection with local Muttley, else it will use a shared connection
+	if deps.Default.Config.ContainsKey("dedicated.tchannel.client") &&
+		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
+		channel = deps.Default.ServerTChannel
+		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	} else {
+		channel = createNewTchannelForClient(deps, serviceName)
+		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+		gateway.ClientTChannels[serviceName] = channel
+	}
 
 	/*Ex:
 	{
@@ -3289,7 +3301,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 12798, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13288, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
