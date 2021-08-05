@@ -22,7 +22,6 @@ package baztchannel
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -177,7 +176,6 @@ func TestCallMetrics(t *testing.T) {
 
 	for _, name := range tchannelOutboundNames {
 		key := tally.KeyForPrefixedStringMap(name, tchannelOutboundTags)
-		fmt.Println("Key aayi:", key)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 
