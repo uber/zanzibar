@@ -704,6 +704,11 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 
 	gateway.ContextLogger = NewContextLogger(gateway.Logger)
 
+	if config.ContainsKey("contextlogger.skipzanzibarlogs") {
+		skipZanzibarLogs := config.MustGetBoolean("contextlogger.skipzanzibarlogs")
+		gateway.ContextLogger.SetSkipZanzibarLogs(skipZanzibarLogs)
+	}
+
 	return nil
 }
 

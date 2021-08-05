@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/pborman/uuid"
@@ -252,6 +253,10 @@ func TestContextLogger_SkipZanzibarLogsZ(t *testing.T) {
 	contextLogger.ErrorZ(ctxWithField, "msg", zap.String("argField", "argValue"))
 	logMessages = logs.TakeAll()
 	assert.Len(t, logMessages, 0)
+
+	contextLogger.PanicZ(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 0)
 }
 
 func TestContextLoggerPanic(t *testing.T) {
@@ -316,4 +321,66 @@ func TestExtractLogField(t *testing.T) {
 	}
 	fields := extractors.ExtractLogFields(ctx)
 	assert.Equal(t, expected, fields)
+}
+
+func TestWithLogFieldsWithCounter(t *testing.T) {
+	contextLogCounter := 1
+	contextLogCounterName := "contextLogCounter"
+	ctx := context.TODO()
+	v := ctx.Value(contextLogCounterName)
+	if v != nil {
+		contextLogCounter = v.(int)
+		contextLogCounter++
+	}
+	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(contextLogCounter), "ctxFieldValue1"))
+	ctx1 := context.WithValue(ctx, contextLogCounterName, contextLogCounter)
+	logFields := GetLogFieldsFromCtx(ctx1)
+	assert.Equal(t, []zap.Field{zap.String("msg1", "ctxFieldValue1")}, logFields)
+	v = ctx1.Value(contextLogCounterName)
+	if v != nil {
+		contextLogCounter = v.(int)
+		contextLogCounter++
+	}
+	ctx2 := WithLogFields(ctx1, zap.String("msg"+strconv.Itoa(contextLogCounter), "ctxFieldValue2"))
+	ctx3 := context.WithValue(ctx2, contextLogCounterName, contextLogCounter)
+	logFields = GetLogFieldsFromCtx(ctx3)
+	assert.Equal(t, []zap.Field{zap.String("msg1", "ctxFieldValue1"),
+		zap.String("msg2", "ctxFieldValue2")}, logFields)
+}
+
+func TestContextLoggerWithContext(t *testing.T) {
+	contextLogCounter := 1
+	contextLogCounterName := "contextLogCounter"
+	ctx := context.TODO()
+	v := ctx.Value(contextLogCounterName)
+	if v != nil {
+		contextLogCounter = v.(int)
+		contextLogCounter++
+	}
+	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(contextLogCounter), "ctxFieldValue1"))
+	ctx1 := context.WithValue(ctx, contextLogCounterName, contextLogCounter)
+	logFields := GetLogFieldsFromCtx(ctx1)
+	assert.Equal(t, []zap.Field{zap.String("msg1", "ctxFieldValue1")}, logFields)
+	v = ctx1.Value(contextLogCounterName)
+	if v != nil {
+		contextLogCounter = v.(int)
+		contextLogCounter++
+	}
+	ctx2 := WithLogFields(ctx1, zap.String("msg"+strconv.Itoa(contextLogCounter), "ctxFieldValue2"))
+	ctx3 := context.WithValue(ctx2, contextLogCounterName, contextLogCounter)
+	logFields = GetLogFieldsFromCtx(ctx3)
+	assert.Equal(t, []zap.Field{zap.String("msg1", "ctxFieldValue1"),
+		zap.String("msg2", "ctxFieldValue2")}, logFields)
+}
+
+func TestAccumulateLogMsgAndFieldsInContext(t *testing.T) {
+	ctx := accumulateLogMsgAndFieldsInContext(context.TODO(), "message1", []zap.Field{zap.String("ctxField1", "ctxFieldValue1")})
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message2", []zap.Field{zap.String("ctxField1", "ctxFieldValue2")})
+	logFields := GetLogFieldsFromCtx(ctx)
+	assert.Equal(t, []zap.Field{
+		zap.String("msg1", "message1"),
+		zap.String("ctxField1", "ctxFieldValue1"),
+		zap.String("msg2", "message2"),
+		zap.String("ctxField1", "ctxFieldValue2"),
+	}, logFields)
 }

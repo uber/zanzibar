@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/uber-go/tally"
@@ -45,6 +46,7 @@ const (
 	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
 	requestLogFields      = contextFieldKey("requestLogFields")
 	scopeTags             = contextFieldKey("scopeTags")
+	ctxLogCounterName     = contextFieldKey("ctxLogCounter")
 )
 
 const (
@@ -207,6 +209,19 @@ func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field
 	return append(previousFields, newFields...)
 }
 
+func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFields []zap.Field) context.Context {
+	ctxLogCounter := 1
+	v := ctx.Value(ctxLogCounterName)
+	if v != nil {
+		ctxLogCounter = v.(int)
+		ctxLogCounter++
+	}
+	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), msg))
+	ctx = WithLogFields(ctx, newFields...)
+	ctx = context.WithValue(ctx, ctxLogCounterName, ctxLogCounter)
+	return ctx
+}
+
 // ContextExtractor is a extractor that extracts some log fields from the context
 type ContextExtractor interface {
 	ExtractScopeTags(ctx context.Context) map[string]string
@@ -245,18 +260,18 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
 type ContextLogger interface {
-	Debug(ctx context.Context, msg string, fields ...zap.Field)
-	Error(ctx context.Context, msg string, fields ...zap.Field)
-	Info(ctx context.Context, msg string, fields ...zap.Field)
-	Panic(ctx context.Context, msg string, fields ...zap.Field)
-	Warn(ctx context.Context, msg string, fields ...zap.Field)
+	Debug(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	Error(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	Info(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	Panic(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	Warn(ctx context.Context, msg string, fields ...zap.Field) context.Context
 
 	// DebugZ skips logs if skipZanzibarLogs is set to true otherwise behaves as normal Debug, similarly for other XxxxZ's
-	DebugZ(ctx context.Context, msg string, fields ...zap.Field)
-	ErrorZ(ctx context.Context, msg string, fields ...zap.Field)
-	InfoZ(ctx context.Context, msg string, fields ...zap.Field)
-	PanicZ(ctx context.Context, msg string, fields ...zap.Field)
-	WarnZ(ctx context.Context, msg string, fields ...zap.Field)
+	DebugZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	ErrorZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	InfoZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	PanicZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
+	WarnZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
 
 	// Other utility methods on the logger
 	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
@@ -281,54 +296,74 @@ type contextLogger struct {
 	skipZanzibarLogs bool
 }
 
-func (c *contextLogger) Debug(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) Debug(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
+	return ctx
 }
 
-func (c *contextLogger) Error(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) Error(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	c.log.Error(msg, accumulateLogFields(ctx, userFields)...)
+	return ctx
 }
 
-func (c *contextLogger) Info(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) Info(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	c.log.Info(msg, accumulateLogFields(ctx, userFields)...)
+	return ctx
 }
 
-func (c *contextLogger) Panic(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) Panic(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	c.log.Panic(msg, accumulateLogFields(ctx, userFields)...)
+	return ctx
 }
 
-func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	c.log.Warn(msg, accumulateLogFields(ctx, userFields)...)
+	return ctx
 }
 
-func (c *contextLogger) DebugZ(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) DebugZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if !c.skipZanzibarLogs {
 		c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
+	} else {
+		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
 	}
+	return ctx
 }
 
-func (c *contextLogger) ErrorZ(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) ErrorZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if !c.skipZanzibarLogs {
 		c.log.Error(msg, accumulateLogFields(ctx, userFields)...)
+	} else {
+		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
 	}
+	return ctx
 }
 
-func (c *contextLogger) InfoZ(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) InfoZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if !c.skipZanzibarLogs {
 		c.log.Info(msg, accumulateLogFields(ctx, userFields)...)
+	} else {
+		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
 	}
+	return ctx
 }
 
-func (c *contextLogger) PanicZ(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) PanicZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if !c.skipZanzibarLogs {
 		c.log.Panic(msg, accumulateLogFields(ctx, userFields)...)
+	} else {
+		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
 	}
+	return ctx
 }
 
-func (c *contextLogger) WarnZ(ctx context.Context, msg string, userFields ...zap.Field) {
+func (c *contextLogger) WarnZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if !c.skipZanzibarLogs {
 		c.log.Warn(msg, accumulateLogFields(ctx, userFields)...)
+	} else {
+		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
 	}
+	return ctx
 }
 
 func (c *contextLogger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
