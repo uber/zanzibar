@@ -1339,10 +1339,18 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations
 		if settings, ok := parameters[qpsLevel]; ok {
-				sleepWindowInMilliseconds = settings["sleepWindowInMilliseconds"]
-				maxConcurrentRequests = settings["maxConcurrentRequests"]
-				errorPercentThreshold = settings["errorPercentThreshold"]
-				requestVolumeThreshold = settings["requestVolumeThreshold"]
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
 		}
 	}
 	// client settings override parameters
@@ -1425,7 +1433,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8226, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8400, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1635,10 +1643,18 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations
 		if settings, ok := parameters[qpsLevel]; ok {
-				sleepWindowInMilliseconds = settings["sleepWindowInMilliseconds"]
-				maxConcurrentRequests = settings["maxConcurrentRequests"]
-				errorPercentThreshold = settings["errorPercentThreshold"]
-				requestVolumeThreshold = settings["requestVolumeThreshold"]
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
 		}
 	}
 	// client settings override parameters
@@ -1975,7 +1991,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18413, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 18587, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3094,10 +3110,18 @@ func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitB
 		// first checks if level exists in configurations then assigns parameters
 		// if "default" qps level assigns default parameters from circuit breaker configurations
 		if settings, ok := parameters[qpsLevel]; ok {
-				sleepWindowInMilliseconds = settings["sleepWindowInMilliseconds"]
-				maxConcurrentRequests = settings["maxConcurrentRequests"]
-				errorPercentThreshold = settings["errorPercentThreshold"]
-				requestVolumeThreshold = settings["requestVolumeThreshold"]
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
 		}
 	}
 	// client settings override parameters
@@ -3235,7 +3259,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13316, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13490, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
