@@ -3,6 +3,7 @@ clientMethod:
 endpointId: clientless
 endpointType: http
 handleId: emptyclientlessRequest
+qpsLevel: 3
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

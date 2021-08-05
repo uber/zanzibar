@@ -2,6 +2,7 @@
 	"endpointType": "http",
 	"endpointId": "panic",
 	"handleId": "panic",
+	"qpsLevel": 1,
 	"thriftFile": "endpoints/multi/multi.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "ServiceCFront::hello",

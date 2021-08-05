@@ -22,9 +22,12 @@ package codegen
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/textproto"
+	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -467,6 +470,23 @@ func (g *httpClientGenerator) ComputeSpec(
 	return clientSpec, nil
 }
 
+// GetClientQPSLevels gets mapping from client's circuit breaker name to qps level
+func GetClientQPSLevels(qpsLevels map[string]int, methods map[string]string, clientID string) map[string]string {
+	clientQPSLevels := make(map[string]string)
+	for _, methodName := range methods {
+		key := clientID + "-" + methodName
+		if qps, ok := qpsLevels[key]; ok {
+			qpsLevel := strconv.Itoa(qps)
+			clientQPSLevels[key] = qpsLevel
+		} else {
+			// if no qps level for method
+			// sets as default (default circuit breaker parameters will be assigned)
+			clientQPSLevels[key] = "default"
+		}
+	}
+	return clientQPSLevels
+}
+
 // Generate returns the HTTP client build result, which contains the files and
 // the generated client spec
 func (g *httpClientGenerator) Generate(
@@ -485,6 +505,8 @@ func (g *httpClientGenerator) Generate(
 	exposedMethods := reverseExposedMethods(clientSpec)
 
 	sort.Sort(&clientSpec.ModuleSpec.Services)
+	// transfer only the methods that belong to the client with the qps level
+	var clientQPSLevels map[string]string = GetClientQPSLevels(instance.QPSLevels, exposedMethods, clientSpec.ClientID)
 
 	clientMeta := &ClientMeta{
 		Instance:         instance,
@@ -494,6 +516,7 @@ func (g *httpClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
+		QPSLevels:        clientQPSLevels,
 		SidecarRouter:    clientSpec.SidecarRouter,
 	}
 
@@ -542,6 +565,121 @@ func (g *httpClientGenerator) Generate(
 		Files: files,
 		Spec:  clientSpec,
 	}, nil
+}
+
+// PopulateQPSLevels loops through endpoint dir and gets qps levels
+func PopulateQPSLevels(EndpointsBaseDir string) (map[string]int, error) {
+	qpsLevels := make(map[string]int)
+	filesList := []string{}
+	endpointFiles, err := GetListOfAllFilesInEndpointDir(EndpointsBaseDir, filesList)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"error in getting endpoint files",
+		)
+	}
+	for _, endpointFile := range endpointFiles {
+		config, err := UnmarshalEndpointFile(endpointFile)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"error in unmarshalling endpoint file %q",
+				endpointFile,
+			)
+		}
+		clientMethod, methodOK := config["clientMethod"]
+		clientID, clientOK := config["clientId"]
+		qpsLevel, qpsOK := config["qpsLevel"]
+		// these fields exist in the config files
+		hasFields := methodOK && clientOK && qpsOK
+		if hasFields {
+			// when yaml files have no values for these keys(fields)
+			clientless := clientID == nil || clientID == ""
+			methodless := clientMethod == nil || clientMethod == ""
+			if !clientless && !methodless {
+				// unique key because of potential clients having same method names (staging)
+				key := clientID.(string) + "-" + clientMethod.(string)
+				// store highest qps level for circuit breaker in qpsLevels map
+				thisQPSLevel := int(qpsLevel.(float64))
+				if currentQPSLevel, ok := qpsLevels[key]; ok {
+					if thisQPSLevel > currentQPSLevel {
+						qpsLevels[key] = thisQPSLevel
+					}
+				} else {
+					qpsLevels[key] = thisQPSLevel
+				}
+			}
+		}
+	}
+	return qpsLevels, nil
+}
+
+// UnmarshalEndpointFile unmarshals endpoint file into config
+func UnmarshalEndpointFile(endpointFile string) (map[string]interface{}, error) {
+	var config map[string]interface{}
+	bytes, err := ioutil.ReadFile(endpointFile)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"error in reading endpoint file %q",
+			endpointFile,
+		)
+	}
+	fileExtension := filepath.Ext(endpointFile)
+	if fileExtension == ".json" {
+		err = json.Unmarshal(bytes, &config)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"error in unmarshalling json %q",
+				endpointFile,
+			)
+		}
+	}
+	if fileExtension == ".yaml" {
+		err = yaml.Unmarshal(bytes, &config)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"error in unmarshalling yaml %q",
+				endpointFile,
+			)
+		}
+	}
+	return config, nil
+}
+
+// GetListOfAllFilesInEndpointDir gets all the endpoint config files
+// takes empty filesList array as parameter to add to during recursion
+func GetListOfAllFilesInEndpointDir(filePath string, filesList []string) ([]string, error) {
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		return nil, errors.Errorf(
+			"error in getting file info for file path %q",
+			filePath,
+		)
+	}
+	if fileInfo.IsDir() {
+		items, err := ioutil.ReadDir(filePath)
+		if err != nil {
+			return nil, errors.Errorf(
+				"error in reading base directory %q",
+				filePath,
+			)
+		}
+		for _, item := range items {
+			filesList, _ = GetListOfAllFilesInEndpointDir(filePath+"/"+item.Name(), filesList)
+		}
+	} else {
+		filepathExt := filepath.Ext(filePath)
+		// checks to see if file is yaml or json file
+		hasCorrectExtensions := filepathExt == ".json" || filepathExt == ".yaml"
+		if !strings.Contains(filePath, "endpoint-config") && hasCorrectExtensions {
+			filesList = append(filesList, filePath)
+			return filesList, nil
+		}
+	}
+	return filesList, nil
 }
 
 /*
@@ -618,6 +756,8 @@ func (g *tchannelClientGenerator) Generate(
 
 	sort.Sort(clientSpec.ModuleSpec.Services)
 
+	var clientQPSLevels map[string]string = GetClientQPSLevels(instance.QPSLevels, exposedMethods, clientSpec.ClientID)
+
 	clientMeta := &ClientMeta{
 		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
@@ -626,6 +766,7 @@ func (g *tchannelClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
+		QPSLevels:        clientQPSLevels,
 		SidecarRouter:    clientSpec.SidecarRouter,
 		DeputyReqHeader:  g.packageHelper.DeputyReqHeader(),
 	}
@@ -916,6 +1057,8 @@ func (g *gRPCClientGenerator) Generate(
 
 	sort.Sort(&services)
 
+	var clientQPSLevels map[string]string = GetClientQPSLevels(instance.QPSLevels, reversedMethods, clientSpec.ClientID)
+
 	// @rpatali: Update all struct to use more general field IDLFile instead of thriftFile.
 	clientMeta := &ClientMeta{
 		ProtoServices:    clientSpec.ModuleSpec.ProtoServices,
@@ -926,6 +1069,7 @@ func (g *gRPCClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   reversedMethods,
+		QPSLevels:        clientQPSLevels,
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -1622,6 +1766,7 @@ func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, o
 	return nil
 }
 
+// gets client dependencies (can we get endpoint dependencies like this)
 func readClientDependencySpecs(instance *ModuleInstance) []*ClientSpec {
 	clients := []*ClientSpec{}
 
@@ -1681,9 +1826,12 @@ type ClientMeta struct {
 	Services         []*ServiceSpec
 	ProtoServices    []*ProtoService
 	ExposedMethods   map[string]string
-	SidecarRouter    string
-	Fixture          *Fixture
-	DeputyReqHeader  string
+	// client-method name to qps level (string)
+	// if not qps level for method value is "default"
+	QPSLevels       map[string]string
+	SidecarRouter   string
+	Fixture         *Fixture
+	DeputyReqHeader string
 }
 
 func findMethod(

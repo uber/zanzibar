@@ -3,6 +3,7 @@ clientMethod: NoRequest
 endpointId: bar
 endpointType: http
 handleId: noRequest
+qpsLevel: 3
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

@@ -1,6 +1,7 @@
 endpointId: clientless
 endpointType: http
 handleId: beta
+qpsLevel: 2
 middlewares:
   - name: transformClientlessReq
     options:

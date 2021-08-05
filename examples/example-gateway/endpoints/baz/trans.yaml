@@ -3,6 +3,7 @@ clientMethod: Trans
 endpointId: baz
 endpointType: http
 handleId: trans
+qpsLevel: 2
 middlewares:
 - name: transformRequest
   options:

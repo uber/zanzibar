@@ -1,6 +1,7 @@
 endpointId: contacts
 endpointType: http
 handleId: saveContacts
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

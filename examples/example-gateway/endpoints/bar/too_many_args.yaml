@@ -3,6 +3,7 @@ clientMethod: TooManyArgs
 endpointId: bar
 endpointType: http
 handleId: tooManyArgs
+qpsLevel: 3
 middlewares: []
 reqHeaderMap:
   X-Token: X-Token

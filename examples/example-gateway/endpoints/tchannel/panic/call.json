@@ -2,6 +2,7 @@
 	"endpointType": "tchannel",
 	"endpointId": "panicTChannel",
 	"handleId": "call",
+	"qpsLevel": 2,
 	"thriftFile": "endpoints/tchannel/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::AnotherCall",

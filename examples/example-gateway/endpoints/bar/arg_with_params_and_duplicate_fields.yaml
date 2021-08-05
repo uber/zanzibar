@@ -3,6 +3,7 @@ clientMethod: ArgWithParamsAndDuplicateFields
 endpointId: bar
 endpointType: http
 handleId: argWithParamsAndDuplicateFields
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

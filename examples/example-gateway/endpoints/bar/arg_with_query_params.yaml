@@ -3,6 +3,7 @@ clientMethod: ArgWithQueryParams
 endpointId: bar
 endpointType: http
 handleId: argWithQueryParams
+qpsLevel: 1
 middlewares: []
 reqHeaderMap:
   X-Token: x-token

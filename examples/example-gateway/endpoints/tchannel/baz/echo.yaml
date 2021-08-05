@@ -1,6 +1,7 @@
 endpointId: bazTChannel
 endpointType: tchannel
 handleId: echo
+qpsLevel: 2
 thriftFile: endpoints/tchannel/baz/baz.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: SimpleService::Echo

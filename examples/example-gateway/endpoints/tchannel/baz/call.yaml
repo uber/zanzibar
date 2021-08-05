@@ -1,6 +1,7 @@
 endpointId: bazTChannel
 endpointType: tchannel
 handleId: call
+qpsLevel: 2
 middlewares:
 - name: example_tchannel
   options:

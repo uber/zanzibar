@@ -1,6 +1,7 @@
 endpointId: echo
 endpointType: tchannel
 handleId: echo
+qpsLevel: 2
 thriftFile: endpoints/tchannel/echo/echo.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Echo::echo

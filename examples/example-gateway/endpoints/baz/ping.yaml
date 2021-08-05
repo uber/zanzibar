@@ -3,6 +3,7 @@ clientMethod: Ping
 endpointId: baz
 endpointType: http
 handleId: ping
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

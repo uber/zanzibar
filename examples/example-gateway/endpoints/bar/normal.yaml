@@ -3,6 +3,7 @@ clientMethod: Normal
 endpointId: bar
 endpointType: http
 handleId: normal
+qpsLevel: 1
 middlewares:
 - name: example
   options:
