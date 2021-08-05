@@ -823,7 +823,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	gateway.ServerTChannel = channel
 	gateway.tchannelServer = gateway.ServerTChannel
 	gateway.ServerTChannelRouter = NewTChannelRouter(channel, gateway)
-	// client tchannels are created explicitly for each client
+	// client tchannels are created explicitly for each client if "dedicated.tchannel.client: true"
 	gateway.ClientTChannels = make(map[string]*tchannel.Channel)
 	return nil
 }
@@ -917,13 +917,15 @@ func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) er
 	ticker := time.NewTicker(shutdownPollInterval)
 	defer ticker.Stop()
 
-	for serviceName, serviceTchannel := range gateway.ClientTChannels {
-		gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", serviceName))
-		serviceTchannel.Close()
-		scope := gateway.RootScope.Tagged(map[string]string{
-			"client": serviceName,
-		})
-		scope.Gauge("tchannel.client.running").Update(0)
+	for serviceName, clientTchannel := range gateway.ClientTChannels {
+		go func(service string, ch *tchannel.Channel) {
+			gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", service))
+			ch.Close()
+			scope := gateway.RootScope.Tagged(map[string]string{
+				"client": service,
+			})
+			scope.Gauge("tchannel.client.running").Update(0)
+		}(serviceName, clientTchannel)
 	}
 	gateway.tchannelServer.Close()
 
