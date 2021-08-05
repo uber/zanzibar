@@ -68,7 +68,7 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 	gateway := deps.Default.Gateway
 	channel := createNewTchannelForClient(deps, serviceName)
-	gateway.ClientTchannels[serviceName] = channel
+	gateway.ClientTChannels[serviceName] = channel
 
 	ip := deps.Default.Config.MustGetString("sidecarRouter.default.tchannel.ip")
 	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
@@ -168,7 +168,7 @@ func NewClient(deps *module.Dependencies) Client {
 func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.Channel {
 	processName := deps.Default.Config.MustGetString("tchannel.processName")
 	gateway := deps.Default.Gateway
-	level := gateway.TchannelSubLoggerLevel
+	level := gateway.TChannelSubLoggerLevel
 
 	channel, err := tchannel.NewChannel(
 		serviceName,

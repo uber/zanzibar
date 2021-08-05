@@ -96,8 +96,8 @@ type Gateway struct {
 	RealTChannelPort       int32
 	RealTChannelAddr       string
 	WaitGroup              *sync.WaitGroup
-	ServerTchannel         *tchannel.Channel
-	ClientTchannels        map[string]*tchannel.Channel
+	ServerTChannel         *tchannel.Channel
+	ClientTChannels        map[string]*tchannel.Channel
 	ContextLogger          ContextLogger
 	ContextMetrics         ContextMetrics
 	ContextExtractor       ContextExtractor
@@ -107,7 +107,7 @@ type Gateway struct {
 	Config                 *StaticConfig
 	HTTPRouter             HTTPRouter
 	ServerTChannelRouter   *TChannelRouter
-	TchannelSubLoggerLevel zapcore.Level
+	TChannelSubLoggerLevel zapcore.Level
 	Tracer                 opentracing.Tracer
 	JSONWrapper            jsonwrapper.JSONWrapper
 
@@ -803,7 +803,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	if !ok {
 		return errors.Errorf("unknown sub logger level for tchannel server: %s", levelString)
 	}
-	gateway.TchannelSubLoggerLevel = level
+	gateway.TChannelSubLoggerLevel = level
 
 	channel, err := tchannel.NewChannel(
 		serviceName,
@@ -820,11 +820,11 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 		return errors.Errorf("Error creating top channel:\n%s", err)
 	}
 
-	gateway.ServerTchannel = channel
-	gateway.tchannelServer = gateway.ServerTchannel
+	gateway.ServerTChannel = channel
+	gateway.tchannelServer = gateway.ServerTChannel
 	gateway.ServerTChannelRouter = NewTChannelRouter(channel, gateway)
 	// client tchannels are created explicitly for each client
-	gateway.ClientTchannels = make(map[string]*tchannel.Channel)
+	gateway.ClientTChannels = make(map[string]*tchannel.Channel)
 	return nil
 }
 
@@ -917,7 +917,7 @@ func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) er
 	ticker := time.NewTicker(shutdownPollInterval)
 	defer ticker.Stop()
 
-	for serviceName, serviceTchannel := range gateway.ClientTchannels {
+	for serviceName, serviceTchannel := range gateway.ClientTChannels {
 		gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", serviceName))
 		serviceTchannel.Close()
 		scope := gateway.RootScope.Tagged(map[string]string{

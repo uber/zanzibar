@@ -2489,7 +2489,7 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
-		ServerTChannel:       g.ServerTchannel,
+		ServerTChannel:       g.ServerTChannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
@@ -2726,7 +2726,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 	timeoutPerAttempt := time.Duration(1) * time.Minute
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
-		server.ServerTchannel,
+		server.ServerTChannel,
 		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
@@ -2814,7 +2814,7 @@ func (m *mockService) MakeTChannelRequest(
 		return false, nil, errors.New("mock server is not started")
 	}
 
-	sc := m.server.ServerTchannel.GetSubChannel(m.server.ServiceName)
+	sc := m.server.ServerTChannel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
 	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
@@ -2942,7 +2942,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 	gateway := deps.Default.Gateway
 	channel := createNewTchannelForClient(deps, serviceName)
-	gateway.ClientTchannels[serviceName] = channel
+	gateway.ClientTChannels[serviceName] = channel
 
 	{{if $sidecarRouter -}}
 	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
@@ -3059,7 +3059,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.Channel {
 	processName := deps.Default.Config.MustGetString("tchannel.processName")
 	gateway := deps.Default.Gateway
-	level := gateway.TchannelSubLoggerLevel
+	level := gateway.TChannelSubLoggerLevel
 
 	channel, err := tchannel.NewChannel(
 		serviceName,

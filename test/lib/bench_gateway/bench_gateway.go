@@ -163,7 +163,7 @@ func CreateGateway(
 	}
 
 	benchGateway.tchannelClient = zanzibar.NewTChannelClient(
-		gateway.ServerTchannel,
+		gateway.ServerTChannel,
 		gateway.ContextLogger,
 		gateway.RootScope,
 		gateway.ContextExtractor,
@@ -317,7 +317,7 @@ func (gateway *BenchGateway) MakeTChannelRequest(
 	headers map[string]string,
 	req, res zanzibar.RWTStruct,
 ) (bool, map[string]string, error) {
-	sc := gateway.ActualGateway.ServerTchannel.GetSubChannel(gateway.ActualGateway.ServiceName)
+	sc := gateway.ActualGateway.ServerTChannel.GetSubChannel(gateway.ActualGateway.ServiceName)
 	sc.Peers().Add(gateway.ActualGateway.RealTChannelAddr)
 
 	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res)
