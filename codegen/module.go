@@ -1188,7 +1188,6 @@ func (system *ModuleSystem) IncrementalBuild(
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 
-	qpsLevels := PopulateQPSLevels(baseDirectory + "/endpoints")
 	skipModuleMap := map[*ModuleInstance]struct{}{}
 	toBeBuiltModules := make(map[string][]*ModuleInstance)
 
@@ -1268,7 +1267,11 @@ func (system *ModuleSystem) IncrementalBuild(
 	for _, moduleList := range toBeBuiltModules {
 		moduleCount += len(moduleList)
 	}
-
+	qpsLevels, err := PopulateQPSLevels(baseDirectory + "/endpoints")
+	if err != nil {
+		fmt.Printf("Error in populating qps levels")
+		return nil, err
+	}
 	for _, class := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(toBeBuiltModules[class]))

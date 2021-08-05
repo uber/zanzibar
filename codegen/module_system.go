@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/textproto"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -567,23 +568,35 @@ func (g *httpClientGenerator) Generate(
 }
 
 // PopulateQPSLevels loops through endpoint dir and gets qps levels
-func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
+func PopulateQPSLevels(EndpointsBaseDir string) (map[string]int, error) {
 	qpsLevels := make(map[string]int)
-	endpointFiles := GetListOfAllFilesInEndpointDir(EndpointsBaseDir)
+	filesList := []string{}
+	endpointFiles, err := GetListOfAllFilesInEndpointDir(EndpointsBaseDir, filesList)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error in getting endpoint files",
+		)
+	}
 	for _, endpointFile := range endpointFiles {
-		var config map[string]interface{}
-		bytes, _ := ioutil.ReadFile(endpointFile)
-		err := yaml.Unmarshal(bytes, &config)
+		config, err := UnMarshalEndpointFile(endpointFile)
 		if err != nil {
-			// try json
-			_ = json.Unmarshal(bytes, &config)
+			return nil, errors.Wrapf(
+				err,
+				"Error in unmarshalling endpoint file %q",
+				endpointFile,
+			)
 		}
 		clientMethod, methodOK := config["clientMethod"]
 		clientID, clientOK := config["clientId"]
 		qpsLevel, qpsOK := config["qpsLevel"]
-		if methodOK && clientOK && qpsOK && err == nil {
-			// edge case where clientID or clientMethod is nil
-			if clientID != nil && clientMethod != nil && clientID != "" && clientMethod != "" {
+		// these fields exist in the config files
+		hasFields := methodOK && clientOK && qpsOK
+		if hasFields {
+			// when yaml files have no values for these keys(fields)
+			clientless := clientID == nil || clientID == ""
+			methodless := clientMethod == nil || clientMethod == ""
+			if !clientless && !methodless {
 				// unique key because of potential clients having same method names (staging)
 				key := clientID.(string) + "-" + clientMethod.(string)
 				// store highest qps level for circuit breaker in qpsLevels map
@@ -598,23 +611,75 @@ func PopulateQPSLevels(EndpointsBaseDir string) map[string]int {
 			}
 		}
 	}
-	return qpsLevels
+	return qpsLevels, nil
+}
+
+// UnMarshalEndpointFile unmarshals endpoint file into config
+func UnMarshalEndpointFile(endpointFile string) (map[string]interface{}, error) {
+	var config map[string]interface{}
+	bytes, err := ioutil.ReadFile(endpointFile)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error in reading endpoint file %q",
+			endpointFile,
+		)
+	}
+	fileExtension := filepath.Ext(endpointFile)
+	if fileExtension == ".json" {
+		err = json.Unmarshal(bytes, &config)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"Error in unmarshalling json %q",
+				endpointFile,
+			)
+		}
+	}
+	if fileExtension == ".yaml" {
+		err = yaml.Unmarshal(bytes, &config)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"Error in unmarshalling yaml %q",
+				endpointFile,
+			)
+		}
+	}
+	return config, nil
 }
 
 // GetListOfAllFilesInEndpointDir gets all the endpoint config files
-func GetListOfAllFilesInEndpointDir(baseDir string) []string {
-	filesList := []string{}
-	items, _ := ioutil.ReadDir(baseDir)
-	for _, item := range items {
-		subitems, _ := ioutil.ReadDir(baseDir + "/" + item.Name())
-		for _, subitem := range subitems {
-			if !strings.Contains(subitem.Name(), "endpoint-config") {
-				path := baseDir + "/" + item.Name() + "/" + subitem.Name()
-				filesList = append(filesList, path)
-			}
+// takes empty filesList array as parameter to add to during recursion
+func GetListOfAllFilesInEndpointDir(filePath string, filesList []string) ([]string, error) {
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		return nil, errors.Errorf(
+			"Error in doing Stat with file path %q",
+			filePath,
+		)
+	}
+	if fileInfo.IsDir() {
+		items, err := ioutil.ReadDir(filePath)
+		if err != nil {
+			return nil, errors.Errorf(
+				"Error in reading base directory %q",
+				filePath,
+			)
+		}
+		for _, item := range items {
+			filesList, _ = GetListOfAllFilesInEndpointDir(filePath+"/"+item.Name(), filesList)
+		}
+	} else {
+		filepathExt := filepath.Ext(filePath)
+		// checks to see if file is yaml or json file
+		hasCorrectExtensions := filepathExt == ".json" || filepathExt == ".yaml"
+		if !strings.Contains(filePath, "endpoint-config") && hasCorrectExtensions {
+			filesList = append(filesList, filePath)
+			return filesList, nil
 		}
 	}
-	return filesList
+	return filesList, nil
 }
 
 /*
