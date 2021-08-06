@@ -259,6 +259,7 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
+//In cases it also updates the context instead of logging
 type ContextLogger interface {
 	Debug(ctx context.Context, msg string, fields ...zap.Field) context.Context
 	Error(ctx context.Context, msg string, fields ...zap.Field) context.Context
@@ -266,7 +267,7 @@ type ContextLogger interface {
 	Panic(ctx context.Context, msg string, fields ...zap.Field) context.Context
 	Warn(ctx context.Context, msg string, fields ...zap.Field) context.Context
 
-	// DebugZ skips logs if skipZanzibarLogs is set to true otherwise behaves as normal Debug, similarly for other XxxxZ's
+	// DebugZ skips logs, and adds to context if skipZanzibarLogs is set to true otherwise behaves as normal Debug, similarly for other XxxxZ's
 	DebugZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
 	ErrorZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
 	InfoZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
@@ -322,46 +323,46 @@ func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.
 }
 
 func (c *contextLogger) DebugZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
-	if !c.skipZanzibarLogs {
-		c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
-	} else {
+	if c.skipZanzibarLogs {
 		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
+	} else {
+		c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
 	}
 	return ctx
 }
 
 func (c *contextLogger) ErrorZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
-	if !c.skipZanzibarLogs {
-		c.log.Error(msg, accumulateLogFields(ctx, userFields)...)
-	} else {
+	if c.skipZanzibarLogs {
 		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
+	} else {
+		c.log.Error(msg, accumulateLogFields(ctx, userFields)...)
 	}
 	return ctx
 }
 
 func (c *contextLogger) InfoZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
-	if !c.skipZanzibarLogs {
-		c.log.Info(msg, accumulateLogFields(ctx, userFields)...)
-	} else {
+	if c.skipZanzibarLogs {
 		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
+	} else {
+		c.log.Info(msg, accumulateLogFields(ctx, userFields)...)
 	}
 	return ctx
 }
 
 func (c *contextLogger) PanicZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
-	if !c.skipZanzibarLogs {
-		c.log.Panic(msg, accumulateLogFields(ctx, userFields)...)
-	} else {
+	if c.skipZanzibarLogs {
 		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
+	} else {
+		c.log.Panic(msg, accumulateLogFields(ctx, userFields)...)
 	}
 	return ctx
 }
 
 func (c *contextLogger) WarnZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
-	if !c.skipZanzibarLogs {
-		c.log.Warn(msg, accumulateLogFields(ctx, userFields)...)
-	} else {
+	if c.skipZanzibarLogs {
 		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields)
+	} else {
+		c.log.Warn(msg, accumulateLogFields(ctx, userFields)...)
 	}
 	return ctx
 }

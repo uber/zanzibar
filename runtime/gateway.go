@@ -70,6 +70,7 @@ const (
 	testenv                  = "test"
 	metricsServiceFromEnvKey = "metrics.serviceNameEnv"
 	serviceFromEnvKey        = "serviceNameEnv"
+	skipZanzibarLogsKey      = "contextlogger.zanzibar.skiplogs"
 )
 
 // Options configures the gateway
@@ -704,8 +705,8 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 
 	gateway.ContextLogger = NewContextLogger(gateway.Logger)
 
-	if config.ContainsKey("contextlogger.skipzanzibarlogs") {
-		skipZanzibarLogs := config.MustGetBoolean("contextlogger.skipzanzibarlogs")
+	if config.ContainsKey(skipZanzibarLogsKey) {
+		skipZanzibarLogs := config.MustGetBoolean(skipZanzibarLogsKey)
 		gateway.ContextLogger.SetSkipZanzibarLogs(skipZanzibarLogs)
 	}
 
