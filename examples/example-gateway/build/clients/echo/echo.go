@@ -26,7 +26,7 @@ package echoclient
 import (
 	"context"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 	"go.uber.org/yarpc"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"

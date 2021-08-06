@@ -1206,7 +1206,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 	"go.uber.org/yarpc"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
@@ -1391,7 +1391,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6832, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6836, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1404,7 +1404,7 @@ import (
 	"context"
 	"fmt"
 	"net/textproto"
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 	"strconv"
 	"time"
 
@@ -1908,7 +1908,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 17017, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 17021, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2801,7 +2801,7 @@ import (
 	"time"
 	"net/textproto"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/tchannel-go"
@@ -3134,7 +3134,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11923, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

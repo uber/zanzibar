@@ -1,8 +1,8 @@
 hash: 1d722bd7b057c2f8fd2318482531a311e0ddac38ef0a4e69f07165067d441f69
 updated: 2021-05-20T17:25:57.736808-04:00
 imports:
-- name: github.com/afex/hystrix-go
-  version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
+- name: github.com/isopropylcyanide/hystrix-go
+  version: bf329b393f82e4ebf395b30e4a588a61a8cea670
   subpackages:
   - hystrix
   - hystrix/metric_collector

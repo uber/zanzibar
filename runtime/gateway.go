@@ -35,7 +35,7 @@ import (
 	"sync"
 	"time"
 
-	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
+	metricCollector "github.com/isopropylcyanide/hystrix-go/hystrix/metric_collector"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"

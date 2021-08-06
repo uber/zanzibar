@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
+	metricCollector "github.com/isopropylcyanide/hystrix-go/hystrix/metric_collector"
 	"github.com/uber-go/tally"
 )
 

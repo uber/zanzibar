@@ -31,7 +31,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"

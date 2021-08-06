@@ -30,7 +30,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"

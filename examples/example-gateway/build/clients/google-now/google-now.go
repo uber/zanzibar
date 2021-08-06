@@ -28,7 +28,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"

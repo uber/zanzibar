@@ -58,8 +58,8 @@ import:
   - package: go.uber.org/fx
   - package: go.uber.org/automaxprocs
     version: ^1.2.0
-  - package: github.com/afex/hystrix-go
-    version: master
+  - package: github.com/isopropylcyanide/hystrix-go
+    version: bf329b393f82e4ebf395b30e4a588a61a8cea670
   - package: go.uber.org/multierr
     version: ^1
   - package: go.uber.org/yarpc

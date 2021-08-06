@@ -30,7 +30,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"

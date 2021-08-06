@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix"
+	"github.com/isopropylcyanide/hystrix-go/hystrix"
 	"github.com/stretchr/testify/assert"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
