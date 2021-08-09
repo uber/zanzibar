@@ -426,7 +426,7 @@ func (gateway *Gateway) Shutdown() {
 	go func() {
 		defer swg.Done()
 		if err := gateway.shutdownTChannelServerAndClients(ctx); err != nil {
-			ec <- errors.Wrap(err, "error shutting down tchannel server")
+			ec <- errors.Wrap(err, "error shutting down tchannel server or clients")
 		}
 	}()
 
