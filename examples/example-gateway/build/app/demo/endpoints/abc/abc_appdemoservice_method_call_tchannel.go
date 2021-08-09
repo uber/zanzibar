@@ -78,7 +78,7 @@ func (h *AppDemoServiceCallHandler) Handle(
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Deps.Default.ContextLogger.ErrorZ(
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -108,7 +108,7 @@ func (h *AppDemoServiceCallHandler) Handle(
 	}
 
 	if err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 		return false, nil, resHeaders, err
 	}
 	res.Success = &r

@@ -73,10 +73,10 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 
 	fields := c.logFields(ctx)
 	if err == nil {
-		c.contextLogger.DebugZ(ctx, "Finished an incoming server TChannel request", fields...)
+		ctx = c.contextLogger.DebugZ(ctx, "Finished an incoming server TChannel request", fields...)
 	} else {
 		fields = append(fields, zap.Error(err))
-		c.contextLogger.WarnZ(ctx, "Failed to serve incoming TChannel request", fields...)
+		ctx = c.contextLogger.WarnZ(ctx, "Failed to serve incoming TChannel request", fields...)
 	}
 }
 
