@@ -125,4 +125,4 @@ circuitbreaking-configurations:
       maxConcurrentRequests: 30
 
 service.shadow.env.override.enable: true
-dedicated.tchannel.client: true
+dedicated.tchannel.client: false

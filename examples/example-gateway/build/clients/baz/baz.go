@@ -205,12 +205,11 @@ func NewClient(deps *module.Dependencies) Client {
 	// dedicated connection with local sidecar, else it will use a shared connection
 	if deps.Default.Config.ContainsKey("dedicated.tchannel.client") &&
 		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
+		channel = gateway.SetupClientTChannel(deps.Default.Config, serviceName)
+		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	} else {
 		channel = deps.Default.ServerTChannel
 		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
-		gateway.ClientTChannels[serviceName] = channel
-	} else {
-		channel = createNewTchannelForClient(deps, serviceName)
-		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 	}
 
 	/*Ex:

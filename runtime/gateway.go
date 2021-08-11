@@ -257,7 +257,7 @@ func CreateGateway(
 		return nil, err
 	}
 
-	if err := gateway.setupTChannel(config); err != nil {
+	if err := gateway.setupServerTChannel(config); err != nil {
 		return nil, err
 	}
 
@@ -795,7 +795,7 @@ func (gateway *Gateway) setupHTTPServer() error {
 	return nil
 }
 
-func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
+func (gateway *Gateway) setupServerTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 	levelString := gateway.Config.MustGetString("subLoggerLevel.tchannel")
@@ -826,6 +826,39 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	// client tchannels are created explicitly for each client if "dedicated.tchannel.client: true"
 	gateway.ClientTChannels = make(map[string]*tchannel.Channel)
 	return nil
+}
+
+// SetupClientTChannel sets up a dedicated tchannel for each client with a given service name
+// If multiple backends with the same service name exist (for e.g presentation service), then
+// all of them would receive the same channel. The method is exported because it is called
+// from the generated clients if "dedicated.tchannel.client: true"
+func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName string) *tchannel.Channel {
+	if ch, ok := gateway.ClientTChannels[serviceName]; ok {
+		gateway.Logger.Info(fmt.Sprintf("Returning already initialised TChannel client for [%v]", serviceName))
+		return ch
+	}
+	processName := config.MustGetString("tchannel.processName")
+	level := gateway.TChannelSubLoggerLevel
+
+	channel, err := tchannel.NewChannel(
+		serviceName,
+		&tchannel.ChannelOptions{
+			ProcessName:   processName,
+			Tracer:        gateway.Tracer,
+			Logger:        NewTChannelLogger(gateway.SubLogger("tchannel", level)),
+			StatsReporter: NewTChannelStatsReporter(gateway.RootScope),
+		})
+
+	scope := gateway.RootScope.Tagged(map[string]string{
+		"client": serviceName,
+	})
+	if err != nil {
+		scope.Gauge("tchannel.client.running").Update(0)
+	} else {
+		scope.Gauge("tchannel.client.running").Update(1)
+	}
+	gateway.ClientTChannels[serviceName] = channel
+	return channel
 }
 
 func (gateway *Gateway) setupGRPCClientDispatcher(config *StaticConfig) error {
@@ -927,14 +960,15 @@ func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) er
 		case <-ticker.C:
 			if gateway.tchannelServer.Closed() {
 				gateway.Logger.Info("TChannel server closed successfully")
+
 				for serviceName, clientTchannel := range gateway.ClientTChannels {
 					go func(service string, ch *tchannel.Channel) {
 						gateway.Logger.Info(fmt.Sprintf("Closing TChannel client for [%v]", service))
 						ch.Close()
-						scope := gateway.RootScope.Tagged(map[string]string{
+						gateway.RootScope.Tagged(map[string]string{
 							"client": service,
-						})
-						scope.Gauge("tchannel.client.running").Update(0)
+						}).Gauge("tchannel.client.running").Update(0)
+
 					}(serviceName, clientTchannel)
 				}
 			} else {

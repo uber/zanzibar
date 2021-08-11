@@ -2957,12 +2957,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	// dedicated connection with local sidecar, else it will use a shared connection
 	if deps.Default.Config.ContainsKey("dedicated.tchannel.client") &&
 		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
+		channel = gateway.SetupClientTChannel(deps.Default.Config, serviceName)
+		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	} else {
 		channel = deps.Default.ServerTChannel
 		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
-		gateway.ClientTChannels[serviceName] = channel
-	} else {
-		channel = createNewTchannelForClient(deps, serviceName)
-		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 	}
 
 	/*Ex:
@@ -3301,7 +3300,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14862, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14829, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
