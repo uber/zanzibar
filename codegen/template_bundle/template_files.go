@@ -2390,7 +2390,6 @@ func InitializeDependencies(
 		Tracer:               g.Tracer,
 		Config:               g.Config,
 		Gateway:              g,
-		ServerTChannel:       g.ServerTChannel,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:		  g.JSONWrapper,
 	}
@@ -2424,7 +2423,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2564, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2522, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2490,7 +2489,6 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
-		ServerTChannel:       g.ServerTChannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
@@ -2546,7 +2544,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4472, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4430, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2960,7 +2958,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		channel = gateway.SetupClientTChannel(deps.Default.Config, serviceName)
 		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 	} else {
-		channel = deps.Default.ServerTChannel
+		channel = gateway.ServerTChannel
 		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 	}
 
@@ -3300,7 +3298,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14829, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14824, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -208,7 +208,7 @@ func NewClient(deps *module.Dependencies) Client {
 		channel = gateway.SetupClientTChannel(deps.Default.Config, serviceName)
 		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 	} else {
-		channel = deps.Default.ServerTChannel
+		channel = gateway.ServerTChannel
 		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 	}
 
