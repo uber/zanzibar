@@ -833,7 +833,7 @@ func (gateway *Gateway) setupServerTChannel(config *StaticConfig) error {
 // from the generated clients if "dedicated.tchannel.client: true"
 func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName string) *tchannel.Channel {
 	if ch, ok := gateway.ClientTChannels[serviceName]; ok {
-		gateway.Logger.Info(fmt.Sprintf("Returning already initialised TChannel client for [%v]", serviceName))
+		gateway.Logger.Info(fmt.Sprintf("returning already initialised TChannel client for [%v]", serviceName))
 		return ch
 	}
 	processName := config.MustGetString("tchannel.processName")
@@ -853,6 +853,7 @@ func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName st
 	})
 	if err != nil {
 		scope.Gauge("tchannel.client.running").Update(0)
+		gateway.Logger.Info(fmt.Sprintf("failed to initialise TChannel client for [%v]", serviceName))
 	} else {
 		scope.Gauge("tchannel.client.running").Update(1)
 	}
