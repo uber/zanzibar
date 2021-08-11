@@ -202,15 +202,15 @@ func NewClient(deps *module.Dependencies) Client {
 	var channel *tchannel.Channel
 
 	// If dedicated.tchannel.client : true, each tchannel client will create a
-	// dedicated connection with local Muttley, else it will use a shared connection
+	// dedicated connection with local sidecar, else it will use a shared connection
 	if deps.Default.Config.ContainsKey("dedicated.tchannel.client") &&
 		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
 		channel = deps.Default.ServerTChannel
 		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+		gateway.ClientTChannels[serviceName] = channel
 	} else {
 		channel = createNewTchannelForClient(deps, serviceName)
 		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
-		gateway.ClientTChannels[serviceName] = channel
 	}
 
 	/*Ex:

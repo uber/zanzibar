@@ -85,10 +85,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
 		channel = deps.Default.ServerTChannel
 		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+		gateway.ClientTChannels[serviceName] = channel
 	} else {
 		channel = createNewTchannelForClient(deps, serviceName)
 		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
-		gateway.ClientTChannels[serviceName] = channel
 	}
 
 	/*Ex:

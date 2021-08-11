@@ -917,16 +917,7 @@ func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) er
 	ticker := time.NewTicker(shutdownPollInterval)
 	defer ticker.Stop()
 
-	for serviceName, clientTchannel := range gateway.ClientTChannels {
-		go func(service string, ch *tchannel.Channel) {
-			gateway.Logger.Info(fmt.Sprintf("Closing tchannel client for [%v]", service))
-			ch.Close()
-			scope := gateway.RootScope.Tagged(map[string]string{
-				"client": service,
-			})
-			scope.Gauge("tchannel.client.running").Update(0)
-		}(serviceName, clientTchannel)
-	}
+	gateway.Logger.Info("Closing the TChannel server")
 	gateway.tchannelServer.Close()
 
 	for {
@@ -935,9 +926,21 @@ func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) er
 			return ctx.Err()
 		case <-ticker.C:
 			if gateway.tchannelServer.Closed() {
-				return nil
+				gateway.Logger.Info("TChannel server closed successfully")
+				for serviceName, clientTchannel := range gateway.ClientTChannels {
+					go func(service string, ch *tchannel.Channel) {
+						gateway.Logger.Info(fmt.Sprintf("Closing TChannel client for [%v]", service))
+						ch.Close()
+						scope := gateway.RootScope.Tagged(map[string]string{
+							"client": service,
+						})
+						scope.Gauge("tchannel.client.running").Update(0)
+					}(serviceName, clientTchannel)
+				}
+			} else {
+				gateway.Logger.Info(fmt.Sprintf("Failed to close TChannel server within %v ms", shutdownPollInterval))
 			}
+			return nil
 		}
 	}
-
 }
