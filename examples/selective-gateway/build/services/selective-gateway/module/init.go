@@ -42,8 +42,8 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Echo   echoclientgenerated.Client
 	Mirror mirrorclientgenerated.Client
+	Echo   echoclientgenerated.Client
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -66,6 +66,7 @@ func InitializeDependencies(
 		Scope:                g.RootScope,
 		Tracer:               g.Tracer,
 		Config:               g.Config,
+		ServerTChannel:       g.ServerTChannel,
 		Gateway:              g,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
@@ -73,10 +74,10 @@ func InitializeDependencies(
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
+	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
+	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 

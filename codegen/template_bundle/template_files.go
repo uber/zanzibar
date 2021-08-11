@@ -2389,6 +2389,7 @@ func InitializeDependencies(
 		Scope:                g.RootScope,
 		Tracer:               g.Tracer,
 		Config:               g.Config,
+		ServerTChannel:       g.ServerTChannel,
 		Gateway:              g,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:		  g.JSONWrapper,
@@ -2423,7 +2424,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2522, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2564, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2489,6 +2490,7 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
+		ServerTChannel:   	  g.ServerTChannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
@@ -2544,7 +2546,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4430, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4471, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3065,34 +3067,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 }
 
-func createNewTchannelForClient(deps *module.Dependencies, serviceName string) *tchannel.Channel {
-	processName := deps.Default.Config.MustGetString("tchannel.processName")
-	gateway := deps.Default.Gateway
-	level := gateway.TChannelSubLoggerLevel
-
-	channel, err := tchannel.NewChannel(
-		serviceName,
-		&tchannel.ChannelOptions{
-			ProcessName: processName,
-			Tracer:      deps.Default.Tracer,
-			Logger:      zanzibar.NewTChannelLogger(gateway.SubLogger("tchannel", level)),
-			StatsReporter: zanzibar.NewTChannelStatsReporter(
-			deps.Default.Scope,
-			),
-		})
-
-	scope := deps.Default.Scope.Tagged(map[string]string{
-		"client": serviceName,
-	})
-
-	if err != nil {
-		scope.Gauge("tchannel.client.running").Update(0)
-	} else {
-		scope.Gauge("tchannel.client.running").Update(1)
-	}
-	return channel
-}
-
 func initializeDynamicChannel(channel *tchannel.Channel, deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
@@ -3298,7 +3272,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14824, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14023, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

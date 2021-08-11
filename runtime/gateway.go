@@ -141,11 +141,12 @@ type DefaultDependencies struct {
 	// ContextMetrics emit metrics from context
 	ContextMetrics ContextMetrics
 
-	Logger  *zap.Logger
-	Scope   tally.Scope
-	Tracer  opentracing.Tracer
-	Config  *StaticConfig
-	Gateway *Gateway
+	Logger         *zap.Logger
+	Scope          tally.Scope
+	Tracer         opentracing.Tracer
+	Config         *StaticConfig
+	ServerTChannel *tchannel.Channel
+	Gateway        *Gateway
 
 	// dispatcher for managing gRPC clients
 	GRPCClientDispatcher *yarpc.Dispatcher
