@@ -44,7 +44,7 @@ type BarArgWithParamsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgWithParams_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithParamsWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgWithParamsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgWithParams_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgWithParamsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithParams(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithParams(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barArgWithParamsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -130,7 +130,7 @@ func (w barArgWithParamsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithParamsClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToArgWithParamsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithParams_Args) *clientsIDlClientsBarBar.Bar_ArgWithParams_Args {

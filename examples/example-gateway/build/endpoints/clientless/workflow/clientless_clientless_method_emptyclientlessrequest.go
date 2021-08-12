@@ -40,7 +40,7 @@ type ClientlessEmptyclientlessRequestWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewClientlessEmptyclientlessRequestWorkflow creates a workflow
@@ -61,7 +61,7 @@ func (w clientlessEmptyclientlessRequestWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsClientlessClientless.Clientless_EmptyclientlessRequest_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 
 	clientlessHeaders := map[string]string{}
 
@@ -75,5 +75,5 @@ func (w clientlessEmptyclientlessRequestWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }

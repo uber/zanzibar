@@ -44,11 +44,11 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	CheckCredentials(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 }
 
 // googleNowClient is the http client.
@@ -167,7 +167,7 @@ func (c *googleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -186,12 +186,12 @@ func (c *googleNowClient) AddCredentials(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return nil, headerErr
+		return ctx, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -215,7 +215,7 @@ func (c *googleNowClient) AddCredentials(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -230,17 +230,17 @@ func (c *googleNowClient) AddCredentials(
 	case 202:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -250,7 +250,7 @@ func (c *googleNowClient) AddCredentials(
 func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -269,12 +269,12 @@ func (c *googleNowClient) CheckCredentials(
 
 	err := req.WriteJSON("POST", fullURL, headers, nil)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return nil, headerErr
+		return ctx, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -298,7 +298,7 @@ func (c *googleNowClient) CheckCredentials(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -313,17 +313,17 @@ func (c *googleNowClient) CheckCredentials(
 	case 202:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

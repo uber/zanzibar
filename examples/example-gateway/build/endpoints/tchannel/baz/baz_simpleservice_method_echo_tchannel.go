@@ -75,7 +75,7 @@ func (h *SimpleServiceEchoHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -101,7 +101,7 @@ func (h *SimpleServiceEchoHandler) Handle(
 	var req endpointsIDlEndpointsTchannelBazBaz.SimpleService_Echo_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -114,7 +114,7 @@ func (h *SimpleServiceEchoHandler) Handle(
 	}
 	workflow := customBaz.NewSimpleServiceEchoWorkflow(h.Deps)
 
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
 	resHeaders := map[string]string{}
 	if wfResHeaders != nil {
@@ -125,11 +125,11 @@ func (h *SimpleServiceEchoHandler) Handle(
 
 	if err != nil {
 		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-		return false, nil, resHeaders, err
+		return ctx, false, nil, resHeaders, err
 	}
 	res.Success = &r
 
-	return err == nil, &res, resHeaders, nil
+	return ctx, err == nil, &res, resHeaders, nil
 }
 
 // redirectToDeputy sends the request to deputy hostPort
@@ -139,7 +139,7 @@ func (h *SimpleServiceEchoHandler) redirectToDeputy(
 	hostPort string,
 	req *endpointsIDlEndpointsTchannelBazBaz.SimpleService_Echo_Args,
 	res *endpointsIDlEndpointsTchannelBazBaz.SimpleService_Echo_Result,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
 		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
@@ -180,5 +180,5 @@ func (h *SimpleServiceEchoHandler) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "SimpleService", "Echo", reqHeaders, req, res)
-	return success, res, respHeaders, err
+	return ctx, success, res, respHeaders, err
 }

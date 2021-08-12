@@ -86,7 +86,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -122,11 +122,11 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	}
 	requestNameOk := req.CheckQueryValue("request.name")
 	if !requestNameOk {
-		return
+		return ctx
 	}
 	requestNameQuery, ok := req.GetQueryValue("request.name")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.Request.Name = requestNameQuery
 
@@ -134,18 +134,18 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	if requestUserUUIDOk {
 		requestUserUUIDQuery, ok := req.GetQueryValue("request.userUUID")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
 	}
 
 	requestFooOk := req.CheckQueryValue("request.foo")
 	if !requestFooOk {
-		return
+		return ctx
 	}
 	requestFooQuery, ok := req.GetQueryValueList("request.foo")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.Request.Foo = requestFooQuery
 
@@ -161,11 +161,11 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		}
 		optNameOk := req.CheckQueryValue("opt.name")
 		if !optNameOk {
-			return
+			return ctx
 		}
 		optNameQuery, ok := req.GetQueryValue("opt.name")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Opt.Name = optNameQuery
 
@@ -173,7 +173,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		if optUserUUIDOk {
 			optUserUUIDQuery, ok := req.GetQueryValue("opt.userUUID")
 			if !ok {
-				return
+				return ctx
 			}
 			requestBody.Opt.UserUUID = ptr.String(optUserUUIDQuery)
 		}
@@ -182,7 +182,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		if optAuthUUIDOk {
 			optAuthUUIDQuery, ok := req.GetQueryValue("opt.authUUID")
 			if !ok {
-				return
+				return ctx
 			}
 			requestBody.Opt.AuthUUID = ptr.String(optAuthUUIDQuery)
 		}
@@ -191,7 +191,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		if optAuthUUID2Ok {
 			optAuthUUID2Query, ok := req.GetQueryValue("opt.authUUID2")
 			if !ok {
-				return
+				return ctx
 			}
 			requestBody.Opt.AuthUUID2 = ptr.String(optAuthUUID2Query)
 		}
@@ -217,7 +217,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -242,9 +242,10 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

@@ -44,7 +44,7 @@ type BarNormalWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_Normal_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarNormalWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barNormalWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_Normal_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barNormalWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.Normal(
+	ctx, clientRespBody, _, err := w.Clients.Bar.Normal(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -120,7 +120,7 @@ func (w barNormalWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -128,7 +128,7 @@ func (w barNormalWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -137,7 +137,7 @@ func (w barNormalWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarNormalClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToNormalClientRequest(in *endpointsIDlEndpointsBarBar.Bar_Normal_Args) *clientsIDlClientsBarBar.Bar_Normal_Args {

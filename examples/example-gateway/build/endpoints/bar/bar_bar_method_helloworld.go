@@ -84,7 +84,7 @@ func (h *BarHelloWorldHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -119,7 +119,7 @@ func (h *BarHelloWorldHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 
 		switch errValue := err.(type) {
@@ -128,15 +128,15 @@ func (h *BarHelloWorldHandler) HandleRequest(
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		case *endpointsIDlEndpointsBarBar.SeeOthersRedirection:
 			res.WriteJSONBytes(303, cliRespHeaders, nil)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
@@ -144,7 +144,8 @@ func (h *BarHelloWorldHandler) HandleRequest(
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
-		return
+		return ctx
 	}
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
+	return ctx
 }

@@ -82,7 +82,7 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -100,7 +100,7 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	}()
 
 	if !req.CheckHeaders([]string{"X-Token", "X-Uuid"}) {
-		return
+		return ctx
 	}
 
 	// log endpoint request to downstream services
@@ -121,12 +121,13 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSONBytes(202, cliRespHeaders, nil)
+	return ctx
 }

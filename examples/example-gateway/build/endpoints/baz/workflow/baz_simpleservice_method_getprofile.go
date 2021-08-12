@@ -44,7 +44,7 @@ type SimpleServiceGetProfileWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_GetProfile_Args,
-	) (*endpointsIDlEndpointsBazBaz.GetProfileResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.GetProfileResponse, zanzibar.Header, error)
 }
 
 // NewSimpleServiceGetProfileWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_GetProfile_Args,
-) (*endpointsIDlEndpointsBazBaz.GetProfileResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.GetProfileResponse, zanzibar.Header, error) {
 	clientRequest := convertToGetProfileClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.GetProfile(
+	ctx, clientRespBody, _, err := w.Clients.Baz.GetProfile(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -120,7 +120,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -128,7 +128,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -137,7 +137,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceGetProfileClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToGetProfileClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_GetProfile_Args) *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args {

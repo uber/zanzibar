@@ -43,7 +43,7 @@ type Client interface {
 	Func1(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error)
+	) (context.Context, *clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error)
 }
 
 // withexceptionsClient is the http client.
@@ -160,7 +160,7 @@ func (c *withexceptionsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error) {
+) (context.Context, *clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -180,7 +180,7 @@ func (c *withexceptionsClient) Func1(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -204,7 +204,7 @@ func (c *withexceptionsClient) Func1(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -219,14 +219,14 @@ func (c *withexceptionsClient) Func1(
 		var responseBody clientsIDlClientsWithexceptionsWithexceptions.Response
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 401:
 		allOptions := []interface{}{
@@ -234,18 +234,18 @@ func (c *withexceptionsClient) Func1(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

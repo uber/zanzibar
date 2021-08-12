@@ -45,7 +45,7 @@ type SimpleServiceTransHeadersTypeWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_TransHeadersType_Args,
-	) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
 }
 
 // NewSimpleServiceTransHeadersTypeWorkflow creates a workflow
@@ -78,7 +78,7 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_TransHeadersType_Args,
-) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := convertToTransHeadersTypeClientRequest(r)
 	clientRequest = propagateHeadersTransHeadersTypeClientRequests(clientRequest, reqHeaders)
 
@@ -110,7 +110,7 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.TransHeadersType(
+	ctx, clientRespBody, _, err := w.Clients.Baz.TransHeadersType(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -122,14 +122,14 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertTransHeadersTypeOtherAuthErr(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -137,7 +137,7 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -146,7 +146,7 @@ func (w simpleServiceTransHeadersTypeWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceTransHeadersTypeClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToTransHeadersTypeClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_TransHeadersType_Args) *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args {

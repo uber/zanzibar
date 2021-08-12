@@ -1248,9 +1248,9 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 				statements.appendf("if r%s == nil {", longFieldName)
 				// Generate correct number of nils...
 				if isVoidReturn {
-					statements.append("\treturn nil, errors.New(")
+					statements.append("\treturn ctx, nil, errors.New(")
 				} else {
-					statements.append("\treturn nil, nil, errors.New(")
+					statements.append("\treturn ctx, nil, nil, errors.New(")
 				}
 				statements.appendf("\t\t\"The field %s is required\",",
 					longFieldName,
@@ -1437,7 +1437,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)", okIdentifierName, shortQueryParam)
 			statements.appendf("if !%s {", okIdentifierName)
-			statements.append("return")
+			statements.append("return ctx")
 			statements.append("}")
 		} else {
 			statements.appendf("%s := req.HasQueryValue(%q)", okIdentifierName, shortQueryParam)
@@ -1464,7 +1464,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		}
 
 		statements.append("if !ok {")
-		statements.append("return")
+		statements.append("return ctx")
 		statements.append("}")
 
 		target := identifierName
@@ -1487,7 +1487,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 						tmpVar, valVar)
 					statements.appendf("req.LogAndSendQueryError(err, %q, %q, %s)",
 						"enum", shortQueryParam, valVar)
-					statements.append("return")
+					statements.append("return ctx")
 					statements.append("}")
 					valVar = tmpVar
 				}
@@ -1506,7 +1506,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 						tmpVar, valVar)
 					statements.appendf("req.LogAndSendQueryError(err, %q, %q, %s)",
 						"enum", shortQueryParam, valVar)
-					statements.append("return")
+					statements.append("return ctx")
 					statements.append("}")
 					valVar = tmpVar
 				}

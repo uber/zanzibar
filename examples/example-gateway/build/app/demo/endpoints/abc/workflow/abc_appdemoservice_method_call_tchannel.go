@@ -34,5 +34,5 @@ type AppDemoServiceCallWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (int32, zanzibar.Header, error)
+	) (context.Context, int32, zanzibar.Header, error)
 }

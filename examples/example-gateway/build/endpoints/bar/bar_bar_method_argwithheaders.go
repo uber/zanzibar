@@ -86,7 +86,7 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -104,11 +104,11 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 	}()
 
 	if !req.CheckHeaders([]string{"X-Uuid"}) {
-		return
+		return ctx
 	}
 	var requestBody endpointsIDlEndpointsBarBar.Bar_ArgWithHeaders_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 
 	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
@@ -135,7 +135,7 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -160,9 +160,10 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

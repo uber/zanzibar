@@ -92,7 +92,7 @@ func (h *BarNormalHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -111,7 +111,7 @@ func (h *BarNormalHandler) HandleRequest(
 
 	var requestBody endpointsIDlEndpointsBarBar.Bar_Normal_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 
 	// log endpoint request to downstream services
@@ -133,7 +133,7 @@ func (h *BarNormalHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -164,14 +164,15 @@ func (h *BarNormalHandler) HandleRequest(
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

@@ -85,7 +85,7 @@ func (h *BarArgWithParamsAndDuplicateFieldsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -104,7 +104,7 @@ func (h *BarArgWithParamsAndDuplicateFieldsHandler) HandleRequest(
 
 	var requestBody endpointsIDlEndpointsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 
 	requestBody.EntityUUID = req.Params.Get("uuid")
@@ -128,7 +128,7 @@ func (h *BarArgWithParamsAndDuplicateFieldsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -153,9 +153,10 @@ func (h *BarArgWithParamsAndDuplicateFieldsHandler) HandleRequest(
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

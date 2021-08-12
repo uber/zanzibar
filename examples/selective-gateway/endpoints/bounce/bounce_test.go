@@ -28,9 +28,9 @@ func TestEcho(t *testing.T) {
 
 	ms.MockClients().Echo.ExpectEchoEcho().Success()
 	ms.MockClients().Mirror.EXPECT().MirrorMirror(gomock.Any(), &mirror.Request{Message: message}).
-		Return(&mirror.Response{Message: message}, nil)
+		Return(ctx, &mirror.Response{Message: message}, nil)
 	ms.MockClients().Mirror.EXPECT().MirrorInternalMirror(gomock.Any(), &mirror.InternalRequest{Message: message}).
-		Return(&mirror.InternalResponse{Message: message}, nil)
+		Return(ctx, &mirror.InternalResponse{Message: message}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
 		ctx, "Bounce", "bounce", nil, args, &result,

@@ -48,22 +48,22 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 	NoContent(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	NoContentNoException(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	CorgeNoContentOnException(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
-	) (*clientsIDlClientsCorgeCorge.Foo, map[string]string, error)
+	) (context.Context, *clientsIDlClientsCorgeCorge.Foo, map[string]string, error)
 }
 
 // corgeHTTPClient is the http client.
@@ -217,7 +217,7 @@ func (c *corgeHTTPClient) EchoString(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -257,7 +257,7 @@ func (c *corgeHTTPClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -281,7 +281,7 @@ func (c *corgeHTTPClient) EchoString(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -296,22 +296,22 @@ func (c *corgeHTTPClient) EchoString(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -322,7 +322,7 @@ func (c *corgeHTTPClient) NoContent(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -361,7 +361,7 @@ func (c *corgeHTTPClient) NoContent(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -385,7 +385,7 @@ func (c *corgeHTTPClient) NoContent(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -398,19 +398,19 @@ func (c *corgeHTTPClient) NoContent(
 	switch res.StatusCode {
 	case 204:
 
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	case 304:
 
-		return respHeaders, &clientsIDlClientsCorgeCorge.NotModified{}
+		return ctx, respHeaders, &clientsIDlClientsCorgeCorge.NotModified{}
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -421,7 +421,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -460,7 +460,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -484,7 +484,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -496,15 +496,15 @@ func (c *corgeHTTPClient) NoContentNoException(
 
 	switch res.StatusCode {
 	case 204:
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -515,7 +515,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
-) (*clientsIDlClientsCorgeCorge.Foo, map[string]string, error) {
+) (context.Context, *clientsIDlClientsCorgeCorge.Foo, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -555,7 +555,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -579,7 +579,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -594,27 +594,27 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		var responseBody clientsIDlClientsCorgeCorge.Foo
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 304:
 
-		return defaultRes, respHeaders, &clientsIDlClientsCorgeCorge.NotModified{}
+		return ctx, defaultRes, respHeaders, &clientsIDlClientsCorgeCorge.NotModified{}
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

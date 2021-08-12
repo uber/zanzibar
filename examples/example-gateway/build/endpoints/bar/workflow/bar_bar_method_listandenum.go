@@ -44,7 +44,7 @@ type BarListAndEnumWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args,
-	) (string, zanzibar.Header, error)
+	) (context.Context, string, zanzibar.Header, error)
 }
 
 // NewBarListAndEnumWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barListAndEnumWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args,
-) (string, zanzibar.Header, error) {
+) (context.Context, string, zanzibar.Header, error) {
 	clientRequest := convertToListAndEnumClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barListAndEnumWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ListAndEnum(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ListAndEnum(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -120,7 +120,7 @@ func (w barListAndEnumWorkflow) Handle(
 				errValue,
 			)
 
-			return "", nil, serverErr
+			return ctx, "", nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -128,7 +128,7 @@ func (w barListAndEnumWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return "", nil, err
+			return ctx, "", nil, err
 
 		}
 	}
@@ -137,7 +137,7 @@ func (w barListAndEnumWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarListAndEnumClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToListAndEnumClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ListAndEnum_Args) *clientsIDlClientsBarBar.Bar_ListAndEnum_Args {

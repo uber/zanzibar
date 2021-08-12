@@ -39,7 +39,8 @@ func TestBarListAndEnumEndpoint(t *testing.T) {
 		DemoType: &demoType,
 		Demos:    []bar.DemoType{bar.DemoTypeFirst, bar.DemoTypeSecond},
 	}
-	ms.MockClients().Bar.EXPECT().ListAndEnum(gomock.Any(), gomock.Any(), args).Return("demo", nil, nil).AnyTimes()
+	ctx := context.Background()
+	ms.MockClients().Bar.EXPECT().ListAndEnum(gomock.Any(), gomock.Any(), args).Return(ctx, "demo", nil, nil).AnyTimes()
 
 	res, err := ms.MakeHTTPRequest(
 		"GET", "/bar/list-and-enum?demoIds=abc&demoIds=def&demoType=FIRST&demos=FIRST&demos=SECOND", nil, nil,
@@ -79,7 +80,7 @@ func TestBarListAndEnumClient(t *testing.T) {
 
 	demoType := bar.DemoTypeFirst
 	demos := []bar.DemoType{bar.DemoTypeFirst, bar.DemoTypeSecond}
-	body, _, err := bClient.ListAndEnum(
+	_, body, _, err := bClient.ListAndEnum(
 		context.Background(),
 		nil,
 		&clientsBarBar.Bar_ListAndEnum_Args{

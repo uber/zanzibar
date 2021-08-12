@@ -56,7 +56,7 @@ func (w Workflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	req *endpointBaz.SimpleService_Call_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 	clientReqHeaders := make(map[string]string)
 	// passing endpoint reqHeaders to downstream client
 	for _, k := range reqHeaders.Keys() {
@@ -72,22 +72,22 @@ func (w Workflow) Handle(
 		Arg: (*clientBaz.BazRequest)(req.Arg),
 	}
 
-	clientRespHeaders, err := w.Clients.Baz.Call(ctx, clientReqHeaders, clientReq)
+	ctx, clientRespHeaders, err := w.Clients.Baz.Call(ctx, clientReqHeaders, clientReq)
 	respHeaders := zanzibar.ServerTChannelHeader(clientRespHeaders)
 	if err != nil {
 		switch v := err.(type) {
 		case *clientBaz.AuthErr:
-			return respHeaders, (*endpointBaz.AuthErr)(v)
+			return ctx, respHeaders, (*endpointBaz.AuthErr)(v)
 		default:
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
 	if val, ok := clientReqHeaders["x-nil-response-header"]; ok {
 		if val == "true" {
-			return nil, nil
+			return ctx, nil, nil
 		}
 	}
 
-	return respHeaders, nil
+	return ctx, respHeaders, nil
 }

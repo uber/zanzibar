@@ -16,6 +16,6 @@ func NewAppDemoServiceCallWorkflow(deps *module.Dependencies) workflow.AppDemoSe
 
 type demo struct{}
 
-func (h *demo) Handle(ctx context.Context, reqHeaders zanzibar.Header) (int32, zanzibar.Header, error) {
-	return 0, nil, nil
+func (h *demo) Handle(ctx context.Context, reqHeaders zanzibar.Header) (context.Context, int32, zanzibar.Header, error) {
+	return ctx, 0, nil, nil
 }

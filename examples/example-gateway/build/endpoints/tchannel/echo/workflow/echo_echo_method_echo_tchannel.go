@@ -37,5 +37,5 @@ type EchoEchoWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsTchannelEchoEcho.Echo_Echo_Args,
-	) (string, zanzibar.Header, error)
+	) (context.Context, string, zanzibar.Header, error)
 }

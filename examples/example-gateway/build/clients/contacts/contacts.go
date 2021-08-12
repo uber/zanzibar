@@ -44,11 +44,11 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
-	) (*clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error)
 	TestURLURL(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 }
 
 // contactsClient is the http client.
@@ -167,7 +167,7 @@ func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
-) (*clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -187,7 +187,7 @@ func (c *contactsClient) SaveContacts(
 
 	err := req.WriteJSON("POST", fullURL, headers, r.SaveContactsRequest)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -211,7 +211,7 @@ func (c *contactsClient) SaveContacts(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -226,28 +226,28 @@ func (c *contactsClient) SaveContacts(
 		var responseBody clientsIDlClientsContactsContacts.SaveContactsResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 400:
-		return defaultRes, respHeaders, &clientsIDlClientsContactsContacts.BadRequest{}
+		return ctx, defaultRes, respHeaders, &clientsIDlClientsContactsContacts.BadRequest{}
 	case 404:
-		return defaultRes, respHeaders, &clientsIDlClientsContactsContacts.NotFound{}
+		return ctx, defaultRes, respHeaders, &clientsIDlClientsContactsContacts.NotFound{}
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -257,7 +257,7 @@ func (c *contactsClient) SaveContacts(
 func (c *contactsClient) TestURLURL(
 	ctx context.Context,
 	headers map[string]string,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -277,7 +277,7 @@ func (c *contactsClient) TestURLURL(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -301,7 +301,7 @@ func (c *contactsClient) TestURLURL(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -316,22 +316,22 @@ func (c *contactsClient) TestURLURL(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

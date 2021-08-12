@@ -37,5 +37,5 @@ type SimpleServiceAnotherCallWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }

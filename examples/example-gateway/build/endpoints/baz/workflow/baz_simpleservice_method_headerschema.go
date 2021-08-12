@@ -44,7 +44,7 @@ type SimpleServiceHeaderSchemaWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args,
-	) (*endpointsIDlEndpointsBazBaz.HeaderSchema, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.HeaderSchema, zanzibar.Header, error)
 }
 
 // NewSimpleServiceHeaderSchemaWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args,
-) (*endpointsIDlEndpointsBazBaz.HeaderSchema, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.HeaderSchema, zanzibar.Header, error) {
 	clientRequest := convertToHeaderSchemaClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -124,7 +124,7 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.HeaderSchema(
+	ctx, clientRespBody, _, err := w.Clients.Baz.HeaderSchema(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -136,14 +136,14 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertHeaderSchemaOtherAuthErr(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -151,7 +151,7 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -160,7 +160,7 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceHeaderSchemaClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToHeaderSchemaClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_HeaderSchema_Args) *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args {

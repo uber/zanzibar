@@ -41,6 +41,6 @@ func (w echoWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	req *echo.Echo_Echo_Args,
-) (string, zanzibar.Header, error) {
-	return req.Msg, nil, nil
+) (context.Context, string, zanzibar.Header, error) {
+	return ctx, req.Msg, nil, nil
 }

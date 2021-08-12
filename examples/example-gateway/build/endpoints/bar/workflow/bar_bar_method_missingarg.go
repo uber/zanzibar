@@ -43,7 +43,7 @@ type BarMissingArgWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarMissingArgWorkflow creates a workflow
@@ -75,7 +75,7 @@ type barMissingArgWorkflow struct {
 func (w barMissingArgWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -105,7 +105,7 @@ func (w barMissingArgWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.MissingArg(
+	ctx, clientRespBody, _, err := w.Clients.Bar.MissingArg(
 		ctx, clientHeaders,
 	)
 
@@ -117,7 +117,7 @@ func (w barMissingArgWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -125,7 +125,7 @@ func (w barMissingArgWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -134,7 +134,7 @@ func (w barMissingArgWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarMissingArgClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertMissingArgBarException(

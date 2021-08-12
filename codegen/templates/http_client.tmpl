@@ -41,7 +41,7 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -217,7 +217,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if ne .RequestType "" -}}
 	r {{.RequestType}},
 	{{end -}}
-) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
+) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -284,16 +284,16 @@ func (c *{{$clientName}}) {{$methodName}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
+		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
 	}
 
 	{{if .ReqHeaders }}
 	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
 	if headerErr != nil {
 		return {{ if eq .ResponseType "" -}}
-			nil, headerErr
+			ctx, nil, headerErr
 			{{- else -}}
-			defaultRes, nil, headerErr
+			ctx, defaultRes, nil, headerErr
 			{{- end}}
 	}
 	{{- end}}
@@ -319,7 +319,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		}
 	}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
+		return ctx, {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
 	respHeaders := make(map[string]string)
@@ -343,50 +343,50 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 			{{- end}}
-			return respHeaders, nil
+			return ctx, respHeaders, nil
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 	}
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) -}}
-			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
+			return ctx, {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
 
-		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		return ctx, {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end -}}
 		{{end -}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return defaultRes, respHeaders, err
+				return ctx, defaultRes, respHeaders, err
 			}
 	}
 	{{else if eq .ResponseType ""}}
@@ -395,21 +395,21 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 			{{- end}}
 
-			return respHeaders, nil
+			return ctx, respHeaders, nil
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			{{- if or (eq $code 204) (eq $code 304) }}
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
-				return respHeaders, &{{$val.Type}}{}
+				return ctx, respHeaders, &{{$val.Type}}{}
 			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
-				return respHeaders, &{{$val.Type}}{}
+				return ctx, respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 			{{range $idx, $exception := $exceptions -}}
@@ -418,45 +418,45 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
-			return respHeaders, v.(error)
+			return ctx, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 	}
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}
-			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
+			return ctx, {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
 
-		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		return ctx, {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end -}}
 		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
@@ -465,10 +465,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
-				return defaultRes, respHeaders, &{{$val.Type}}{}
+				return ctx, defaultRes, respHeaders, &{{$val.Type}}{}
 			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
-				return defaultRes, respHeaders, &{{$val.Type}}{}
+				return ctx, defaultRes, respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 				{{range $idx, $exception := $exceptions -}}
@@ -477,20 +477,20 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
-				return defaultRes, respHeaders, err
+				return ctx, defaultRes, respHeaders, err
 			}
-			return defaultRes, respHeaders, v.(error)
+			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return defaultRes, respHeaders, err
+				return ctx, defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
 	}

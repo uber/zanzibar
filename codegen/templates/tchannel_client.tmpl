@@ -45,7 +45,7 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -249,7 +249,7 @@ type {{$clientName}} struct {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
@@ -312,20 +312,20 @@ type {{$clientName}} struct {
 		if err != nil {
 			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
-			return respHeaders, err
+			return ctx, respHeaders, err
 		{{else -}}
-			return resp, respHeaders, err
+			return ctx, resp, respHeaders, err
 		{{end -}}
 		}
 
 		{{if eq .ResponseType "" -}}
-			return respHeaders, err
+			return ctx, respHeaders, err
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
 				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
-			return resp, respHeaders, err
+			return ctx, resp, respHeaders, err
 		{{end -}}
 	}
 {{end -}}

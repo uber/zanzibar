@@ -73,7 +73,7 @@ func (h *AppDemoServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -98,7 +98,7 @@ func (h *AppDemoServiceCallHandler) Handle(
 
 	workflow := customAbc.NewAppDemoServiceCallWorkflow(h.Deps)
 
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 
 	resHeaders := map[string]string{}
 	if wfResHeaders != nil {
@@ -109,9 +109,9 @@ func (h *AppDemoServiceCallHandler) Handle(
 
 	if err != nil {
 		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-		return false, nil, resHeaders, err
+		return ctx, false, nil, resHeaders, err
 	}
 	res.Success = &r
 
-	return err == nil, &res, resHeaders, nil
+	return ctx, err == nil, &res, resHeaders, nil
 }

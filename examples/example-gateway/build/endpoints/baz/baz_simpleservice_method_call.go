@@ -85,7 +85,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -104,7 +104,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 
 	var requestBody endpointsIDlEndpointsBazBaz.SimpleService_Call_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 
 	if requestBody.Arg == nil {
@@ -140,7 +140,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 
 		switch errValue := err.(type) {
@@ -149,14 +149,15 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
+	return ctx
 }

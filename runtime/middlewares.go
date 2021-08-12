@@ -57,14 +57,14 @@ type MiddlewareHandle interface {
 		req *ServerHTTPRequest,
 		res *ServerHTTPResponse,
 		shared SharedState,
-	) bool
+	) (context.Context, bool)
 	// implement HandleResponse for your middleware. Return false
 	// if the handler writes to the response body.
 	HandleResponse(
 		ctx context.Context,
 		res *ServerHTTPResponse,
 		shared SharedState,
-	)
+	) context.Context
 	// return any shared state for this middleware.
 	JSONSchema() *jsonschema.Document
 	Name() string
@@ -100,12 +100,12 @@ func (s SharedState) SetState(m MiddlewareHandle, state interface{}) {
 func (m *MiddlewareStack) Handle(
 	ctx context.Context,
 	req *ServerHTTPRequest,
-	res *ServerHTTPResponse) {
+	res *ServerHTTPResponse) context.Context {
 
 	shared := NewSharedState(m.middlewares)
 
 	for i := 0; i < len(m.middlewares); i++ {
-		ok := m.middlewares[i].HandleRequest(ctx, req, res, shared)
+		ctx, ok := m.middlewares[i].HandleRequest(ctx, req, res, shared)
 		// If a middleware errors and writes to the response header
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the middlewares seen so far.
@@ -113,13 +113,14 @@ func (m *MiddlewareStack) Handle(
 			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}
-			return
+			return ctx
 		}
 	}
 
-	m.handle(ctx, req, res)
+	ctx = m.handle(ctx, req, res)
 
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
 		m.middlewares[i].HandleResponse(ctx, res, shared)
 	}
+	return ctx
 }

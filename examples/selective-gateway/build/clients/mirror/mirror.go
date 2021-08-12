@@ -41,13 +41,13 @@ type Client interface {
 		ctx context.Context,
 		request *gen.Request,
 		opts ...yarpc.CallOption,
-	) (*gen.Response, error)
+	) (context.Context, *gen.Response, error)
 
 	MirrorInternalMirror(
 		ctx context.Context,
 		request *gen.InternalRequest,
 		opts ...yarpc.CallOption,
-	) (*gen.InternalResponse, error)
+	) (context.Context, *gen.InternalResponse, error)
 }
 
 // mirrorClient is the gRPC client for downstream service.
@@ -141,7 +141,7 @@ func (e *mirrorClient) MirrorMirror(
 	ctx context.Context,
 	request *gen.Request,
 	opts ...yarpc.CallOption,
-) (*gen.Response, error) {
+) (context.Context, *gen.Response, error) {
 	var result *gen.Response
 	var err error
 
@@ -172,7 +172,7 @@ func (e *mirrorClient) MirrorMirror(
 	}
 	callHelper.Finish(ctx, err)
 
-	return result, err
+	return ctx, result, err
 }
 
 // MirrorInternalMirror is a client RPC call for method MirrorInternal::Mirror.
@@ -180,7 +180,7 @@ func (e *mirrorClient) MirrorInternalMirror(
 	ctx context.Context,
 	request *gen.InternalRequest,
 	opts ...yarpc.CallOption,
-) (*gen.InternalResponse, error) {
+) (context.Context, *gen.InternalResponse, error) {
 	var result *gen.InternalResponse
 	var err error
 
@@ -211,5 +211,5 @@ func (e *mirrorClient) MirrorInternalMirror(
 	}
 	callHelper.Finish(ctx, err)
 
-	return result, err
+	return ctx, result, err
 }

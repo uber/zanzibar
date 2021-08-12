@@ -37,5 +37,5 @@ type BounceBounceWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsBounceBounce.Bounce_Bounce_Args,
-	) (string, zanzibar.Header, error)
+	) (context.Context, string, zanzibar.Header, error)
 }

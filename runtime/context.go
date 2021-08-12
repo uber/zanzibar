@@ -174,9 +174,11 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 // GetLogFieldsFromCtx returns the log fields attached to the context.Context
 func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
 	var fields []zap.Field
-	v := ctx.Value(requestLogFields)
-	if v != nil {
-		fields = v.([]zap.Field)
+	if ctx != nil {
+		v := ctx.Value(requestLogFields)
+		if v != nil {
+			fields = v.([]zap.Field)
+		}
 	}
 	return fields
 }

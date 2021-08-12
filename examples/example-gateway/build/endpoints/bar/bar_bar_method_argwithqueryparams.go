@@ -86,7 +86,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -107,11 +107,11 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 
 	nameOk := req.CheckQueryValue("name")
 	if !nameOk {
-		return
+		return ctx
 	}
 	nameQuery, ok := req.GetQueryValue("name")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.Name = nameQuery
 
@@ -119,7 +119,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	if userUUIDOk {
 		userUUIDQuery, ok := req.GetQueryValue("userUUID")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.UserUUID = ptr.String(userUUIDQuery)
 	}
@@ -128,18 +128,18 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	if fooOk {
 		fooQuery, ok := req.GetQueryValueList("foo")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Foo = fooQuery
 	}
 
 	barOk := req.CheckQueryValue("bar")
 	if !barOk {
-		return
+		return ctx
 	}
 	barQuery, ok := req.GetQueryInt8List("bar")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.Bar = barQuery
 
@@ -162,7 +162,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -187,9 +187,10 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

@@ -37,13 +37,14 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // CorgeNoContentOnException mocks base method.
-func (m *MockClient) CorgeNoContentOnException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentOnException_Args) (*corge.Foo, map[string]string, error) {
+func (m *MockClient) CorgeNoContentOnException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentOnException_Args) (context.Context, *corge.Foo, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CorgeNoContentOnException", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*corge.Foo)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(*corge.Foo)
+	ret2, _ := ret[2].(map[string]string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // CorgeNoContentOnException indicates an expected call of CorgeNoContentOnException.
@@ -53,13 +54,14 @@ func (mr *MockClientMockRecorder) CorgeNoContentOnException(arg0, arg1, arg2 int
 }
 
 // EchoString mocks base method.
-func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args) (string, map[string]string, error) {
+func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(map[string]string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // EchoString indicates an expected call of EchoString.
@@ -83,12 +85,13 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // NoContent mocks base method.
-func (m *MockClient) NoContent(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContent_Args) (map[string]string, error) {
+func (m *MockClient) NoContent(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContent_Args) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NoContent", arg0, arg1, arg2)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // NoContent indicates an expected call of NoContent.
@@ -98,12 +101,13 @@ func (mr *MockClientMockRecorder) NoContent(arg0, arg1, arg2 interface{}) *gomoc
 }
 
 // NoContentNoException mocks base method.
-func (m *MockClient) NoContentNoException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentNoException_Args) (map[string]string, error) {
+func (m *MockClient) NoContentNoException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentNoException_Args) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NoContentNoException", arg0, arg1, arg2)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // NoContentNoException indicates an expected call of NoContentNoException.

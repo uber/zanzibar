@@ -51,13 +51,14 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // SaveContacts mocks base method.
-func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.Contacts_SaveContacts_Args) (*contacts.SaveContactsResponse, map[string]string, error) {
+func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.Contacts_SaveContacts_Args) (context.Context, *contacts.SaveContactsResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveContacts", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*contacts.SaveContactsResponse)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(*contacts.SaveContactsResponse)
+	ret2, _ := ret[2].(map[string]string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // SaveContacts indicates an expected call of SaveContacts.
@@ -67,13 +68,14 @@ func (mr *MockClientMockRecorder) SaveContacts(arg0, arg1, arg2 interface{}) *go
 }
 
 // TestURLURL mocks base method.
-func (m *MockClient) TestURLURL(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
+func (m *MockClient) TestURLURL(arg0 context.Context, arg1 map[string]string) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TestURLURL", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(map[string]string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // TestURLURL indicates an expected call of TestURLURL.

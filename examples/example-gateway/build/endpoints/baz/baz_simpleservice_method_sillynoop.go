@@ -83,7 +83,7 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -118,7 +118,7 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 
 		switch errValue := err.(type) {
@@ -127,20 +127,21 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		case *endpointsIDlEndpointsBazBaz.ServerErr:
 			res.WriteJSON(
 				500, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
+	return ctx
 }

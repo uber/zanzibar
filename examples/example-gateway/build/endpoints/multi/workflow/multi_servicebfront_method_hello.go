@@ -40,7 +40,7 @@ type ServiceBFrontHelloWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (string, zanzibar.Header, error)
+	) (context.Context, string, zanzibar.Header, error)
 }
 
 // NewServiceBFrontHelloWorkflow creates a workflow
@@ -72,7 +72,7 @@ type serviceBFrontHelloWorkflow struct {
 func (w serviceBFrontHelloWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (string, zanzibar.Header, error) {
+) (context.Context, string, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -102,7 +102,7 @@ func (w serviceBFrontHelloWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Multi.HelloB(
+	ctx, clientRespBody, _, err := w.Clients.Multi.HelloB(
 		ctx, clientHeaders,
 	)
 
@@ -115,7 +115,7 @@ func (w serviceBFrontHelloWorkflow) Handle(
 				zap.String("client", "Multi"),
 			)
 
-			return "", nil, err
+			return ctx, "", nil, err
 
 		}
 	}
@@ -124,7 +124,7 @@ func (w serviceBFrontHelloWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertServiceBBackHelloClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertServiceBBackHelloClientResponse(in string) string {

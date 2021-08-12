@@ -37,5 +37,5 @@ type ContactsSaveContactsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsContactsContacts.Contacts_SaveContacts_Args,
-	) (*endpointsIDlEndpointsContactsContacts.SaveContactsResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsContactsContacts.SaveContactsResponse, zanzibar.Header, error)
 }

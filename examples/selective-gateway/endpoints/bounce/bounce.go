@@ -53,18 +53,18 @@ func (w bounceWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	req *bounce.Bounce_Bounce_Args,
-) (string, zanzibar.Header, error) {
-	res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg}, yarpc.WithRoutingKey("echo"))
+) (context.Context, string, zanzibar.Header, error) {
+	ctx, res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg}, yarpc.WithRoutingKey("echo"))
 	if err != nil {
-		return "", nil, err
+		return ctx, "", nil, err
 	}
-	_, err = w.mirror.MirrorMirror(ctx, &mirror.Request{Message: req.Msg})
+	ctx, _, err = w.mirror.MirrorMirror(ctx, &mirror.Request{Message: req.Msg})
 	if err != nil {
-		return "", nil, err
+		return ctx, "", nil, err
 	}
-	_, err = w.mirror.MirrorInternalMirror(ctx, &mirror.InternalRequest{Message: req.Msg})
+	ctx, _, err = w.mirror.MirrorInternalMirror(ctx, &mirror.InternalRequest{Message: req.Msg})
 	if err != nil {
-		return "", nil, err
+		return ctx, "", nil, err
 	}
-	return res.Message, nil, nil
+	return ctx, res.Message, nil, nil
 }

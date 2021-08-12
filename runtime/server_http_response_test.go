@@ -60,8 +60,9 @@ func TestInvalidStatusCode(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSONBytes(999, nil, []byte("true"))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -115,8 +116,9 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSON(200, nil, nil)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -175,8 +177,9 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSON(200, nil, failingJsonObj{})
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -245,7 +248,7 @@ func TestResponsePeekBody(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSON(200, nil, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
@@ -262,6 +265,8 @@ func TestResponsePeekBody(t *testing.T) {
 				assert.NoError(t, err, "do not expect error")
 				assert.Equal(t, []byte(`myClientToken`), value)
 				assert.Equal(t, vType, jsonparser.String)
+
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -311,13 +316,14 @@ func TestResponseSetHeaders(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSON(200, headers, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
 						Token: "myClientToken",
 					},
 				})
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -369,13 +375,14 @@ func TestWriteJSONWithContentType(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSON(200, headers, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
 						Token: "myClientToken",
 					},
 				})
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -423,7 +430,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSON(200, nil, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
@@ -434,6 +441,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 				_, _, err := res.PeekBody("Token2")
 				assert.Error(t, err)
 				assert.Equal(t, "Key path not found", err.Error())
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -480,7 +488,7 @@ func TestPendingResponseBody(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				obj := &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
@@ -498,6 +506,7 @@ func TestPendingResponseBody(t *testing.T) {
 
 				headers := res.Headers()
 				assert.NotNil(t, headers)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -544,7 +553,7 @@ func TestPendingResponseBody204StatusNoContent(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				obj := &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
@@ -562,6 +571,8 @@ func TestPendingResponseBody204StatusNoContent(t *testing.T) {
 
 				headers := res.Headers()
 				assert.NotNil(t, headers)
+
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -614,7 +625,7 @@ func TestPendingResponseBody304StatusNoContent(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				obj := &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
@@ -632,6 +643,8 @@ func TestPendingResponseBody304StatusNoContent(t *testing.T) {
 
 				headers := res.Headers()
 				assert.NotNil(t, headers)
+
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -684,7 +697,7 @@ func TestPendingResponseObject(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				obj := MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
@@ -701,6 +714,8 @@ func TestPendingResponseObject(t *testing.T) {
 				assert.Equal(t, true, ok)
 				assert.Equal(t, "myToken", pendingObjectFetched.Token)
 				assert.Equal(t, "myClientToken", pendingObjectFetched.Client.Token)
+
+				return ctx
 			},
 		).HandleRequest),
 	)

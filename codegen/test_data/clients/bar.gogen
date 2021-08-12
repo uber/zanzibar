@@ -523,7 +523,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
 
 	if r.Request == nil {
-		return nil, nil, errors.New(
+		return ctx, nil, nil, errors.New(
 			"The field .Request is required",
 		)
 	}
@@ -565,12 +565,12 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	res, err := req.Do()
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -585,15 +585,15 @@ func (c *barClient) ArgWithNestedQueryParams(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 

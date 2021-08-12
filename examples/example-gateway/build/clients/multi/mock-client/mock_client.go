@@ -50,13 +50,14 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // HelloA mocks base method.
-func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
+func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HelloA", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(map[string]string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // HelloA indicates an expected call of HelloA.
@@ -66,13 +67,14 @@ func (mr *MockClientMockRecorder) HelloA(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // HelloB mocks base method.
-func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
+func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HelloB", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(map[string]string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // HelloB indicates an expected call of HelloB.

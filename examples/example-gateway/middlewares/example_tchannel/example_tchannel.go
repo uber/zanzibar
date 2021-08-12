@@ -61,8 +61,8 @@ func (m *exampleTchannelMiddleware) HandleRequest(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
-) (bool, error) {
-	return true, nil
+) (context.Context, bool, error) {
+	return ctx, true, nil
 }
 
 func (m *exampleTchannelMiddleware) HandleResponse(

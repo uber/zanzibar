@@ -44,7 +44,7 @@ type SimpleServiceCallWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_Call_Args,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewSimpleServiceCallWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w simpleServiceCallWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_Call_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -116,7 +116,7 @@ func (w simpleServiceCallWorkflow) Handle(
 		}
 	}
 
-	cliRespHeaders, err := w.Clients.Baz.Call(
+	ctx, cliRespHeaders, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -128,7 +128,7 @@ func (w simpleServiceCallWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, serverErr
+			return ctx, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -136,7 +136,7 @@ func (w simpleServiceCallWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, err
+			return ctx, nil, err
 
 		}
 	}
@@ -147,7 +147,7 @@ func (w simpleServiceCallWorkflow) Handle(
 		resHeaders.Set("Some-Res-Header", cliRespHeaders["Some-Res-Header"])
 	}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }
 
 func convertToCallClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_Call_Args) *clientsIDlClientsBazBaz.SimpleService_Call_Args {

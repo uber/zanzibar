@@ -86,7 +86,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
@@ -107,11 +107,11 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 
 	oneNameOk := req.CheckQueryValue("oneName")
 	if !oneNameOk {
-		return
+		return ctx
 	}
 	oneNameQuery, ok := req.GetQueryValue("oneName")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.One = oneNameQuery
 
@@ -119,7 +119,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	if oneName1Ok {
 		oneName1Query, ok := req.GetQueryInt32("one_name")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Two = ptr.Int32(oneName1Query)
 	}
@@ -128,7 +128,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	if oneNamEOk {
 		oneNamEQuery, ok := req.GetQueryValue("One_NamE")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Three = ptr.String(oneNamEQuery)
 	}
@@ -137,7 +137,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	if oneName2Ok {
 		oneName2Query, ok := req.GetQueryValue("one-Name")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Four = ptr.String(oneName2Query)
 	}
@@ -161,7 +161,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -186,9 +186,10 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

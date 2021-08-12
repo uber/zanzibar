@@ -48,175 +48,175 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	ArgWithHeaders(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithHeaders_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithManyQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithNearDupQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithNestedQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithParams_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithParamsAndDuplicateFields(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryHeader(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithQueryParams_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	DeleteFoo(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_DeleteFoo_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	DeleteWithBody(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	DeleteWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_DeleteWithQueryParams_Args,
-	) (map[string]string, error)
+	) (context.Context, map[string]string, error)
 	Hello(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 	ListAndEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ListAndEnum_Args,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 	MissingArg(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	NoRequest(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	Normal(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_Normal_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	NormalRecur(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_NormalRecur_Args,
-	) (*clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error)
 	TooManyArgs(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_TooManyArgs_Args,
-	) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoBinary(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoBinary_Args,
-	) ([]byte, map[string]string, error)
+	) (context.Context, []byte, map[string]string, error)
 	EchoBool(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoBool_Args,
-	) (bool, map[string]string, error)
+	) (context.Context, bool, map[string]string, error)
 	EchoDouble(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoDouble_Args,
-	) (float64, map[string]string, error)
+	) (context.Context, float64, map[string]string, error)
 	EchoEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoEnum_Args,
-	) (clientsIDlClientsBarBar.Fruit, map[string]string, error)
+	) (context.Context, clientsIDlClientsBarBar.Fruit, map[string]string, error)
 	EchoI16(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI16_Args,
-	) (int16, map[string]string, error)
+	) (context.Context, int16, map[string]string, error)
 	EchoI32(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI32_Args,
-	) (int32, map[string]string, error)
+	) (context.Context, int32, map[string]string, error)
 	EchoI32Map(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI32Map_Args,
-	) (map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI64_Args,
-	) (int64, map[string]string, error)
+	) (context.Context, int64, map[string]string, error)
 	EchoI8(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI8_Args,
-	) (int8, map[string]string, error)
+	) (context.Context, int8, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoString_Args,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 	EchoStringList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStringList_Args,
-	) ([]string, map[string]string, error)
+	) (context.Context, []string, map[string]string, error)
 	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStringMap_Args,
-	) (map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoStringSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStringSet_Args,
-	) (map[string]struct{}, map[string]string, error)
+	) (context.Context, map[string]struct{}, map[string]string, error)
 	EchoStructList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStructList_Args,
-	) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStructSet_Args,
-	) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
+	) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoTypedef(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoTypedef_Args,
-	) (clientsIDlClientsBarBar.UUID, map[string]string, error)
+	) (context.Context, clientsIDlClientsBarBar.UUID, map[string]string, error)
 }
 
 // barClient is the http client.
@@ -368,7 +368,7 @@ func (c *barClient) ArgNotStruct(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -387,7 +387,7 @@ func (c *barClient) ArgNotStruct(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -411,7 +411,7 @@ func (c *barClient) ArgNotStruct(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -425,28 +425,28 @@ func (c *barClient) ArgNotStruct(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	case 403:
 		allOptions := []interface{}{
 			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
-		return respHeaders, v.(error)
+		return ctx, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -457,7 +457,7 @@ func (c *barClient) ArgWithHeaders(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithHeaders_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -488,12 +488,12 @@ func (c *barClient) ArgWithHeaders(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -517,7 +517,7 @@ func (c *barClient) ArgWithHeaders(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -532,23 +532,23 @@ func (c *barClient) ArgWithHeaders(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -559,7 +559,7 @@ func (c *barClient) ArgWithManyQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -674,7 +674,7 @@ func (c *barClient) ArgWithManyQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -698,7 +698,7 @@ func (c *barClient) ArgWithManyQueryParams(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -713,23 +713,23 @@ func (c *barClient) ArgWithManyQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -740,7 +740,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -777,7 +777,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -801,7 +801,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -816,23 +816,23 @@ func (c *barClient) ArgWithNearDupQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -843,7 +843,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -863,7 +863,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	queryValues := &url.Values{}
 	if r.Request == nil {
-		return nil, nil, errors.New(
+		return ctx, nil, nil, errors.New(
 			"The field .Request is required",
 		)
 	}
@@ -904,7 +904,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -928,7 +928,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -943,23 +943,23 @@ func (c *barClient) ArgWithNestedQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -970,7 +970,7 @@ func (c *barClient) ArgWithParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithParams_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -990,7 +990,7 @@ func (c *barClient) ArgWithParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1014,7 +1014,7 @@ func (c *barClient) ArgWithParams(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1029,23 +1029,23 @@ func (c *barClient) ArgWithParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1056,7 +1056,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1076,7 +1076,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1100,7 +1100,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1115,23 +1115,23 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1142,7 +1142,7 @@ func (c *barClient) ArgWithQueryHeader(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1162,7 +1162,7 @@ func (c *barClient) ArgWithQueryHeader(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1186,7 +1186,7 @@ func (c *barClient) ArgWithQueryHeader(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1201,23 +1201,23 @@ func (c *barClient) ArgWithQueryHeader(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1228,7 +1228,7 @@ func (c *barClient) ArgWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithQueryParams_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1265,7 +1265,7 @@ func (c *barClient) ArgWithQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1289,7 +1289,7 @@ func (c *barClient) ArgWithQueryParams(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1304,23 +1304,23 @@ func (c *barClient) ArgWithQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1331,7 +1331,7 @@ func (c *barClient) DeleteFoo(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_DeleteFoo_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1352,12 +1352,12 @@ func (c *barClient) DeleteFoo(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return nil, headerErr
+		return ctx, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1381,7 +1381,7 @@ func (c *barClient) DeleteFoo(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1395,17 +1395,17 @@ func (c *barClient) DeleteFoo(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1416,7 +1416,7 @@ func (c *barClient) DeleteWithBody(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1435,7 +1435,7 @@ func (c *barClient) DeleteWithBody(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1459,7 +1459,7 @@ func (c *barClient) DeleteWithBody(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1473,17 +1473,17 @@ func (c *barClient) DeleteWithBody(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1494,7 +1494,7 @@ func (c *barClient) DeleteWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_DeleteWithQueryParams_Args,
-) (map[string]string, error) {
+) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1522,7 +1522,7 @@ func (c *barClient) DeleteWithQueryParams(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1546,7 +1546,7 @@ func (c *barClient) DeleteWithQueryParams(
 		}
 	}
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1560,17 +1560,17 @@ func (c *barClient) DeleteWithQueryParams(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
-		return respHeaders, nil
+		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return respHeaders, err
+			return ctx, respHeaders, err
 		}
 	}
 
-	return respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1580,7 +1580,7 @@ func (c *barClient) DeleteWithQueryParams(
 func (c *barClient) Hello(
 	ctx context.Context,
 	headers map[string]string,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1600,7 +1600,7 @@ func (c *barClient) Hello(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1624,7 +1624,7 @@ func (c *barClient) Hello(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1639,35 +1639,35 @@ func (c *barClient) Hello(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 
 	case 303:
-		return defaultRes, respHeaders, &clientsIDlClientsBarBar.SeeOthersRedirection{}
+		return ctx, defaultRes, respHeaders, &clientsIDlClientsBarBar.SeeOthersRedirection{}
 	case 403:
 		allOptions := []interface{}{
 			&clientsIDlClientsBarBar.BarException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1678,7 +1678,7 @@ func (c *barClient) ListAndEnum(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ListAndEnum_Args,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1713,7 +1713,7 @@ func (c *barClient) ListAndEnum(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1737,7 +1737,7 @@ func (c *barClient) ListAndEnum(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1752,14 +1752,14 @@ func (c *barClient) ListAndEnum(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 
 	case 403:
 		allOptions := []interface{}{
@@ -1767,18 +1767,18 @@ func (c *barClient) ListAndEnum(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1788,7 +1788,7 @@ func (c *barClient) ListAndEnum(
 func (c *barClient) MissingArg(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1808,7 +1808,7 @@ func (c *barClient) MissingArg(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1832,7 +1832,7 @@ func (c *barClient) MissingArg(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1847,15 +1847,15 @@ func (c *barClient) MissingArg(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 403:
 		allOptions := []interface{}{
@@ -1863,18 +1863,18 @@ func (c *barClient) MissingArg(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1884,7 +1884,7 @@ func (c *barClient) MissingArg(
 func (c *barClient) NoRequest(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1904,7 +1904,7 @@ func (c *barClient) NoRequest(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -1928,7 +1928,7 @@ func (c *barClient) NoRequest(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -1943,15 +1943,15 @@ func (c *barClient) NoRequest(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 403:
 		allOptions := []interface{}{
@@ -1959,18 +1959,18 @@ func (c *barClient) NoRequest(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1981,7 +1981,7 @@ func (c *barClient) Normal(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_Normal_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2001,7 +2001,7 @@ func (c *barClient) Normal(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2025,7 +2025,7 @@ func (c *barClient) Normal(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2040,15 +2040,15 @@ func (c *barClient) Normal(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 403:
 		allOptions := []interface{}{
@@ -2056,18 +2056,18 @@ func (c *barClient) Normal(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2078,7 +2078,7 @@ func (c *barClient) NormalRecur(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_NormalRecur_Args,
-) (*clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2098,7 +2098,7 @@ func (c *barClient) NormalRecur(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2122,7 +2122,7 @@ func (c *barClient) NormalRecur(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2137,14 +2137,14 @@ func (c *barClient) NormalRecur(
 		var responseBody clientsIDlClientsBarBar.BarResponseRecur
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 403:
 		allOptions := []interface{}{
@@ -2152,18 +2152,18 @@ func (c *barClient) NormalRecur(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2174,7 +2174,7 @@ func (c *barClient) TooManyArgs(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_TooManyArgs_Args,
-) (*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2194,7 +2194,7 @@ func (c *barClient) TooManyArgs(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2218,7 +2218,7 @@ func (c *barClient) TooManyArgs(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2233,15 +2233,15 @@ func (c *barClient) TooManyArgs(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
-		return &responseBody, respHeaders, nil
+		return ctx, &responseBody, respHeaders, nil
 
 	case 403:
 		allOptions := []interface{}{
@@ -2249,27 +2249,27 @@ func (c *barClient) TooManyArgs(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 	case 418:
 		allOptions := []interface{}{
 			&clientsIDlClientsFooFoo.FooException{},
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, v.(error)
+		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2280,7 +2280,7 @@ func (c *barClient) EchoBinary(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoBinary_Args,
-) ([]byte, map[string]string, error) {
+) (context.Context, []byte, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2300,12 +2300,12 @@ func (c *barClient) EchoBinary(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2329,7 +2329,7 @@ func (c *barClient) EchoBinary(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2343,17 +2343,17 @@ func (c *barClient) EchoBinary(
 	case 200:
 		responseBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2364,7 +2364,7 @@ func (c *barClient) EchoBool(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoBool_Args,
-) (bool, map[string]string, error) {
+) (context.Context, bool, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2384,12 +2384,12 @@ func (c *barClient) EchoBool(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2413,7 +2413,7 @@ func (c *barClient) EchoBool(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2428,22 +2428,22 @@ func (c *barClient) EchoBool(
 		var responseBody bool
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2454,7 +2454,7 @@ func (c *barClient) EchoDouble(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoDouble_Args,
-) (float64, map[string]string, error) {
+) (context.Context, float64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2474,12 +2474,12 @@ func (c *barClient) EchoDouble(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2503,7 +2503,7 @@ func (c *barClient) EchoDouble(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2518,22 +2518,22 @@ func (c *barClient) EchoDouble(
 		var responseBody float64
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2544,7 +2544,7 @@ func (c *barClient) EchoEnum(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoEnum_Args,
-) (clientsIDlClientsBarBar.Fruit, map[string]string, error) {
+) (context.Context, clientsIDlClientsBarBar.Fruit, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2564,12 +2564,12 @@ func (c *barClient) EchoEnum(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2593,7 +2593,7 @@ func (c *barClient) EchoEnum(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2608,22 +2608,22 @@ func (c *barClient) EchoEnum(
 		var responseBody clientsIDlClientsBarBar.Fruit
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2634,7 +2634,7 @@ func (c *barClient) EchoI16(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI16_Args,
-) (int16, map[string]string, error) {
+) (context.Context, int16, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2654,12 +2654,12 @@ func (c *barClient) EchoI16(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2683,7 +2683,7 @@ func (c *barClient) EchoI16(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2698,22 +2698,22 @@ func (c *barClient) EchoI16(
 		var responseBody int16
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2724,7 +2724,7 @@ func (c *barClient) EchoI32(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI32_Args,
-) (int32, map[string]string, error) {
+) (context.Context, int32, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2744,12 +2744,12 @@ func (c *barClient) EchoI32(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2773,7 +2773,7 @@ func (c *barClient) EchoI32(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2788,22 +2788,22 @@ func (c *barClient) EchoI32(
 		var responseBody int32
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2814,7 +2814,7 @@ func (c *barClient) EchoI32Map(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI32Map_Args,
-) (map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2834,12 +2834,12 @@ func (c *barClient) EchoI32Map(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2863,7 +2863,7 @@ func (c *barClient) EchoI32Map(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2878,22 +2878,22 @@ func (c *barClient) EchoI32Map(
 		var responseBody map[int32]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2904,7 +2904,7 @@ func (c *barClient) EchoI64(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI64_Args,
-) (int64, map[string]string, error) {
+) (context.Context, int64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -2924,12 +2924,12 @@ func (c *barClient) EchoI64(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -2953,7 +2953,7 @@ func (c *barClient) EchoI64(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -2968,22 +2968,22 @@ func (c *barClient) EchoI64(
 		var responseBody int64
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -2994,7 +2994,7 @@ func (c *barClient) EchoI8(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI8_Args,
-) (int8, map[string]string, error) {
+) (context.Context, int8, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3014,12 +3014,12 @@ func (c *barClient) EchoI8(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3043,7 +3043,7 @@ func (c *barClient) EchoI8(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3058,22 +3058,22 @@ func (c *barClient) EchoI8(
 		var responseBody int8
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3084,7 +3084,7 @@ func (c *barClient) EchoString(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoString_Args,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3104,12 +3104,12 @@ func (c *barClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3133,7 +3133,7 @@ func (c *barClient) EchoString(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3148,22 +3148,22 @@ func (c *barClient) EchoString(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3174,7 +3174,7 @@ func (c *barClient) EchoStringList(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStringList_Args,
-) ([]string, map[string]string, error) {
+) (context.Context, []string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3194,12 +3194,12 @@ func (c *barClient) EchoStringList(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3223,7 +3223,7 @@ func (c *barClient) EchoStringList(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3238,22 +3238,22 @@ func (c *barClient) EchoStringList(
 		var responseBody []string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3264,7 +3264,7 @@ func (c *barClient) EchoStringMap(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStringMap_Args,
-) (map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3284,12 +3284,12 @@ func (c *barClient) EchoStringMap(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3313,7 +3313,7 @@ func (c *barClient) EchoStringMap(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3328,22 +3328,22 @@ func (c *barClient) EchoStringMap(
 		var responseBody map[string]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3354,7 +3354,7 @@ func (c *barClient) EchoStringSet(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStringSet_Args,
-) (map[string]struct{}, map[string]string, error) {
+) (context.Context, map[string]struct{}, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3374,12 +3374,12 @@ func (c *barClient) EchoStringSet(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3403,7 +3403,7 @@ func (c *barClient) EchoStringSet(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3418,22 +3418,22 @@ func (c *barClient) EchoStringSet(
 		var responseBody map[string]struct{}
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3444,7 +3444,7 @@ func (c *barClient) EchoStructList(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStructList_Args,
-) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3464,12 +3464,12 @@ func (c *barClient) EchoStructList(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3493,7 +3493,7 @@ func (c *barClient) EchoStructList(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3508,22 +3508,22 @@ func (c *barClient) EchoStructList(
 		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3534,7 +3534,7 @@ func (c *barClient) EchoStructSet(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStructSet_Args,
-) ([]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
+) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3554,12 +3554,12 @@ func (c *barClient) EchoStructSet(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3583,7 +3583,7 @@ func (c *barClient) EchoStructSet(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3598,22 +3598,22 @@ func (c *barClient) EchoStructSet(
 		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -3624,7 +3624,7 @@ func (c *barClient) EchoTypedef(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoTypedef_Args,
-) (clientsIDlClientsBarBar.UUID, map[string]string, error) {
+) (context.Context, clientsIDlClientsBarBar.UUID, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -3644,12 +3644,12 @@ func (c *barClient) EchoTypedef(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
-		return defaultRes, nil, headerErr
+		return ctx, defaultRes, nil, headerErr
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -3673,7 +3673,7 @@ func (c *barClient) EchoTypedef(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -3688,22 +3688,22 @@ func (c *barClient) EchoTypedef(
 		var responseBody clientsIDlClientsBarBar.UUID
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

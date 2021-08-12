@@ -106,6 +106,7 @@ func (s *SaveContactsMock) Success() Call {
 	ret0 := f.Ret0
 	ret1 := f.Ret1
 	ret2 := f.Ret2
+	ret3 := f.Ret3
 
-	return Call{call: s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2)}
+	return Call{call: s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2, ret3)}
 }
