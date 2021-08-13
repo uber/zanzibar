@@ -3,6 +3,7 @@ clients.bar.defaultHeaders:
 clients.bar.ip: 127.0.0.1
 clients.bar.port: 4001
 clients.bar.timeout: 10000
+contextlogger.zanzibar.skiplogs: true
 envVarsToTagInRootScope: []
 http.defaultHeaders:
   Accept: application/json

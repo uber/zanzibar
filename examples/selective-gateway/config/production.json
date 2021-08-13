@@ -7,6 +7,7 @@
 	"clients.bar.timeout": 10000,
 	"clients.baz.ip": "127.0.0.1",
 	"clients.baz.port": 4002,
+	"contextlogger.zanzibar.skiplogs": true,
 	"envVarsToTagInRootScope": [],
 	"http.port": 7783,
 	"http.clients.requestUUIDHeaderKey": "x-request-uuid",
