@@ -2382,17 +2382,17 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:         g.Logger,
-		ContextExtractor: g.ContextExtractor,
-		ContextLogger:  g.ContextLogger,
-		ContextMetrics: zanzibar.NewContextMetrics(g.RootScope),
-		Scope:          g.RootScope,
-		Tracer:         g.Tracer,
-		Config:         g.Config,
-		Channel:        g.Channel,
-
+		Logger:               g.Logger,
+		ContextExtractor:     g.ContextExtractor,
+		ContextLogger:        g.ContextLogger,
+		ContextMetrics:       zanzibar.NewContextMetrics(g.RootScope),
+		Scope:                g.RootScope,
+		Tracer:               g.Tracer,
+		Config:               g.Config,
+		ServerTChannel:       g.ServerTChannel,
+		Gateway:              g,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
-		JSONWrapper:		g.JSONWrapper,
+		JSONWrapper:		  g.JSONWrapper,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -2424,7 +2424,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2483, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2564, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2490,7 +2490,7 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
-		Channel:              g.Channel,
+		ServerTChannel:   	  g.ServerTChannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
@@ -2546,7 +2546,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4465, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4471, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2727,7 +2727,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 	timeoutPerAttempt := time.Duration(1) * time.Minute
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
-		server.Channel,
+		server.ServerTChannel,
 		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
@@ -2815,7 +2815,7 @@ func (m *mockService) MakeTChannelRequest(
 		return false, nil, errors.New("mock server is not started")
 	}
 
-	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
+	sc := m.server.ServerTChannel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
 	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
@@ -2831,7 +2831,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5410, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5424, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2941,16 +2941,28 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
 		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
-	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+		ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+		port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
 	{{else -}}
-	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+		ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+		port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	{{end -}}
-	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+
+	gateway := deps.Default.Gateway
+	var channel *tchannel.Channel
+
+	// If dedicated.tchannel.client : true, each tchannel client will create a
+	// dedicated connection with local sidecar, else it will use a shared connection
+	if deps.Default.Config.ContainsKey("dedicated.tchannel.client") &&
+		deps.Default.Config.MustGetBoolean("dedicated.tchannel.client") {
+		channel = gateway.SetupClientTChannel(deps.Default.Config, serviceName)
+		channel.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	} else {
+		channel = gateway.ServerTChannel
+		channel.GetSubChannel(serviceName, tchannel.Isolated).Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	}
 
 	/*Ex:
 	{
@@ -2982,7 +2994,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
 	altChannelMap  := make(map[string]*tchannel.SubChannel)
-	headerPatterns, re = initializeDynamicChannel(deps, headerPatterns, altChannelMap, re)
+	headerPatterns, re = initializeDynamicChannel(channel, deps, headerPatterns, altChannelMap, re)
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
@@ -3004,6 +3016,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 		{{ end -}}
 	}
+
 
 	qpsLevels := map[string]string{
 				{{range $methodName, $qpsLevel := $QPSLevels -}}
@@ -3029,7 +3042,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 
 	client := zanzibar.NewTChannelClientContext(
-		deps.Default.Channel,
+		channel,
 		deps.Default.ContextLogger,
 		deps.Default.ContextMetrics,
 		deps.Default.ContextExtractor,
@@ -3054,7 +3067,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 }
 
-func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
+func initializeDynamicChannel(channel *tchannel.Channel, deps *module.Dependencies, headerPatterns []string, altChannelMap map[string]*tchannel.SubChannel, re ruleengine.RuleEngine) ([]string, ruleengine.RuleEngine) {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
 		var alternateServiceDetail config.AlternateServiceDetail
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &alternateServiceDetail)
@@ -3071,7 +3084,7 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 			headerPatterns = append(headerPatterns, textproto.CanonicalMIMEHeaderKey(routingConfig.HeaderName))
 			ruleWrapper.Rules = append(ruleWrapper.Rules, rawRule)
 
-			scAlt := deps.Default.Channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
+			scAlt := channel.GetSubChannel(routingConfig.ServiceName, tchannel.Isolated)
 			serviceRouting, ok := alternateServiceDetail.ServicesDetailMap[routingConfig.ServiceName]
 			if !ok {
 				panic("service routing mapping incorrect for service: " + routingConfig.ServiceName)
@@ -3259,7 +3272,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13490, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14023, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3458,7 +3471,7 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.TChannelRouter.Register(h.endpoint)
+	return g.ServerTChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".
@@ -3668,7 +3681,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8797, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8803, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

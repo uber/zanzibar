@@ -121,7 +121,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 	timeoutPerAttempt := time.Duration(1) * time.Minute
 
 	tchannelClient := zanzibar.NewRawTChannelClient(
-		server.Channel,
+		server.ServerTChannel,
 		server.ContextLogger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
@@ -209,7 +209,7 @@ func (m *mockService) MakeTChannelRequest(
 		return false, nil, errors.New("mock server is not started")
 	}
 
-	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
+	sc := m.server.ServerTChannel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
 	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }

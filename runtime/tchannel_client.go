@@ -262,7 +262,7 @@ func (c *TChannelClient) call(
 	return call.success, call.resHeaders, err
 }
 
-// first rule match, would be the choosen channel. if nothing matches fallback to default channel
+// first rule match, would be the chosen channel. if nothing matches fallback to default channel
 func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
 	sc *tchannel.SubChannel, ctx netContext.Context) (*tchannel.SubChannel, netContext.Context) {
 	ch := sc

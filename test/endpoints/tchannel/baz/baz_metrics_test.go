@@ -76,7 +76,7 @@ func TestCallMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	numMetrics := 10
+	numMetrics := 11
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
@@ -168,7 +168,7 @@ func TestCallMetrics(t *testing.T) {
 		// this host tag is added by tchannel library, which we don't have control with
 		"host":            zanzibar.GetHostname(),
 		"env":             "test",
-		"service":         "test-gateway",
+		"service":         "bazService",
 		"target-endpoint": "SimpleService__call",
 		"target-service":  "bazService",
 		"dc":              "unknown",

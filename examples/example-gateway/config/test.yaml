@@ -122,3 +122,4 @@ circuitbreaking-configurations:
       errorPercentThreshold: 30
       requestVolumeThreshold: 25
       maxConcurrentRequests: 30
+dedicated.tchannel.client: true

@@ -35,7 +35,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// TestTChannelBackend will pretend to be a http backend
+// TestTChannelBackend will pretend to be a tchannel backend
 type TestTChannelBackend struct {
 	Channel     *tchannel.Channel
 	Router      *zanzibar.TChannelRouter

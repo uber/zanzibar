@@ -65,7 +65,7 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
-		Channel:              g.Channel,
+		ServerTChannel:       g.ServerTChannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,

@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 - 2021-08-05
+### Changed
+- **BREAKING** `gateway.Channel` has been renamed to `gateway.ServerTChannel` to distinguish between client and server TChannels.
+
+
+- **BREAKING** `gateway.TChannelRouter` has been renamed to `gateway.ServerTChannelRouter`
+
+### Added
+- A new boolean flag `dedicated.tchannel.client` is introduced. When set to `true`, each TChannel client creates a dedicated connection instead of registering on the default shared server connection.
+Clients need not do anything as the default behaviour is to use a shared connection.([#778](https://github.com/uber/zanzibar/pull/778))
+
+  
+- A new field has been added to the gateway to propagate the `TChannelSubLoggerLevel` for clients with dedicated connections.
+
+
 ## 0.6.7 - 2021-02-05
 ### Changed
 - **BREAKING** runtime/client_http_request.go, runtime/grpc_client.go, runtime/http_client.go, runtime/router.go, 
