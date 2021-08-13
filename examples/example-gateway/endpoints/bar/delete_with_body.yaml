@@ -3,6 +3,7 @@ clientMethod: DeleteWithBody
 endpointId: bar
 endpointType: http
 handleId: deleteWithBody
+qpsLevel: 3
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

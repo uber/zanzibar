@@ -3,6 +3,7 @@ clientMethod: Call
 endpointId: baz
 endpointType: http
 handleId: call
+qpsLevel: 4
 middlewares: []
 reqHeaderMap:
   X-Token: X-Token

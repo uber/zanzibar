@@ -1219,8 +1219,12 @@ import (
 
 {{$clientID := $instance.InstanceName -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
+
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -1271,6 +1275,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{- end}}
 	}
 
+	qpsLevels := map[string]string{
+			{{range $methodName, $qpsLevel := $QPSLevels -}}
+			"{{$methodName}}": "{{$qpsLevel}}",
+			{{end}}
+	}
+
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -1279,7 +1289,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if !circuitBreakerDisabled {
 		for _, methodName := range methodNames {
 			circuitBreakerName := "{{$clientID}}"  + "-" + methodName
-			configureCircuitBreaker(deps, timeoutInMS, circuitBreakerName)
+			qpsLevel := "default"
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, timeoutInMS, circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -1301,27 +1315,55 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
+type CircuitBreakerConfig struct {
+	Parameters map[string]map[string]int
+}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
-		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
-	}
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
 	maxConcurrentRequests := 20
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
-		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
-	}
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
 	errorPercentThreshold := 20
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
-		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
-	}
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	requestVolumeThreshold := 20
+	// parses circuit breaker configurations
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
+		var config CircuitBreakerConfig
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
+		parameters := config.Parameters
+		// first checks if level exists in configurations then assigns parameters
+		// if "default" qps level assigns default parameters from circuit breaker configurations
+		if settings, ok := parameters[qpsLevel]; ok {
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
+	}
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
@@ -1392,7 +1434,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 6871, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8439, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1422,9 +1464,13 @@ import (
 
 {{- $clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
+
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -1518,10 +1564,19 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 	}
+	qpsLevels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
+	}
 	if !circuitBreakerDisabled {
 		for methodName := range methodNames {
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
+			qpsLevel := "default"
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -1564,27 +1619,55 @@ func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map
 }
 {{end -}}
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
+type CircuitBreakerConfig struct {
+	Parameters map[string]map[string]int
+}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
-		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
-	}
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
 	maxConcurrentRequests := 20
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
-		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
-	}
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
 	errorPercentThreshold := 20
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
-		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
-	}
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	requestVolumeThreshold := 20
+	// parses circuit breaker configurations
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
+		var config CircuitBreakerConfig
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
+		parameters := config.Parameters
+		// first checks if level exists in configurations then assigns parameters
+		// if "default" qps level assigns default parameters from circuit breaker configurations
+		if settings, ok := parameters[qpsLevel]; ok {
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
+	}
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
@@ -1909,7 +1992,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 17221, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 18791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2820,9 +2903,13 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
+
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2919,6 +3006,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
+	qpsLevels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
+	}
+
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
@@ -2928,7 +3021,11 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if !circuitBreakerDisabled {
 		for _, methodName := range methodNames {
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
+			qpsLevel := "default"
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -2989,27 +3086,55 @@ func initializeDynamicChannel(deps *module.Dependencies, headerPatterns []string
 	return headerPatterns, re
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
+type CircuitBreakerConfig struct {
+	Parameters map[string]map[string]int
+}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
-		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
-	}
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
 	maxConcurrentRequests := 20
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
-		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
-	}
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
 	errorPercentThreshold := 20
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
-		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
-	}
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	requestVolumeThreshold := 20
+	// parses circuit breaker configurations
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
+		var config CircuitBreakerConfig
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
+		parameters := config.Parameters
+		// first checks if level exists in configurations then assigns parameters
+		// if "default" qps level assigns default parameters from circuit breaker configurations
+		if settings, ok := parameters[qpsLevel]; ok {
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
+	}
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
 	}
@@ -3135,7 +3260,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 11991, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 13562, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

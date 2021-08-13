@@ -3,6 +3,7 @@ clientMethod: ArgWithParams
 endpointId: bar
 endpointType: http
 handleId: argWithParams
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

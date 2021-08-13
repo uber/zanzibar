@@ -3,6 +3,7 @@ clientMethod: GetProfile
 endpointId: baz
 endpointType: http
 handleId: getProfile
+qpsLevel: 2
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

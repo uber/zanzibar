@@ -3,6 +3,7 @@ clientMethod: ArgWithNestedQueryParams
 endpointId: bar
 endpointType: http
 handleId: argWithNestedQueryParams
+qpsLevel: 2
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

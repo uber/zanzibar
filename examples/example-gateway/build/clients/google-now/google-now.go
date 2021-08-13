@@ -37,6 +37,9 @@ import (
 	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
 )
 
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
 // Client defines google-now client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
@@ -99,10 +102,18 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.google-now.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.google-now.circuitBreakerDisabled")
 	}
+	qpsLevels := map[string]string{
+		"google-now-AddCredentials":   "2",
+		"google-now-CheckCredentials": "1",
+	}
 	if !circuitBreakerDisabled {
 		for methodName := range methodNames {
 			circuitBreakerName := "google-now" + "-" + methodName
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName)
+			qpsLevel := "default"
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -123,27 +134,55 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string) {
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
+type CircuitBreakerConfig struct {
+	Parameters map[string]map[string]int
+}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000
-	if deps.Default.Config.ContainsKey("clients.google-now.sleepWindowInMilliseconds") {
-		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.google-now.sleepWindowInMilliseconds"))
-	}
 	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
 	maxConcurrentRequests := 20
-	if deps.Default.Config.ContainsKey("clients.google-now.maxConcurrentRequests") {
-		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.google-now.maxConcurrentRequests"))
-	}
 	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
 	errorPercentThreshold := 20
-	if deps.Default.Config.ContainsKey("clients.google-now.errorPercentThreshold") {
-		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.google-now.errorPercentThreshold"))
-	}
 	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
 	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
 	// the circuit will not trip open even if all 19 failed.
 	requestVolumeThreshold := 20
+	// parses circuit breaker configurations
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
+		var config CircuitBreakerConfig
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
+		parameters := config.Parameters
+		// first checks if level exists in configurations then assigns parameters
+		// if "default" qps level assigns default parameters from circuit breaker configurations
+		if settings, ok := parameters[qpsLevel]; ok {
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.google-now.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.google-now.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.google-now.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.google-now.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.google-now.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.google-now.errorPercentThreshold"))
+	}
 	if deps.Default.Config.ContainsKey("clients.google-now.requestVolumeThreshold") {
 		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.google-now.requestVolumeThreshold"))
 	}

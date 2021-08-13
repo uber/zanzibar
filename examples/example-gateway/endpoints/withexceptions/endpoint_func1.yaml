@@ -3,6 +3,7 @@ clientMethod: Func1
 endpointId: withexceptions
 endpointType: http
 handleId: Func1
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

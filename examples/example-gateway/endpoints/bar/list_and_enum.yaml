@@ -3,6 +3,7 @@ clientMethod: ListAndEnum
 endpointId: bar
 endpointType: http
 handleId: listAndEnum
+qpsLevel: 1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

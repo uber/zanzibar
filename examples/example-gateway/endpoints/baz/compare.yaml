@@ -3,6 +3,7 @@ clientMethod: Compare
 endpointId: baz
 endpointType: http
 handleId: compare
+qpsLevel: 2
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

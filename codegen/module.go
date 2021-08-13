@@ -1267,7 +1267,13 @@ func (system *ModuleSystem) IncrementalBuild(
 	for _, moduleList := range toBeBuiltModules {
 		moduleCount += len(moduleList)
 	}
-
+	qpsLevels, err := PopulateQPSLevels(baseDirectory + "/endpoints")
+	if err != nil {
+		return nil, errors.Errorf(
+			"error in populating qps levels for base directory %q",
+			baseDirectory,
+		)
+	}
 	for _, class := range system.classOrder {
 		var wg sync.WaitGroup
 		wg.Add(len(toBeBuiltModules[class]))
@@ -1279,6 +1285,7 @@ func (system *ModuleSystem) IncrementalBuild(
 				prettyDir, _ := filepath.Rel(baseDirectory, physicalGenDir)
 				PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName,
 					prettyDir, int(atomic.AddInt32(&moduleIndex, 1)), moduleCount)
+				moduleInstance.QPSLevels = qpsLevels
 				if err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange); err != nil {
 					ch <- err
 				}
@@ -1433,7 +1440,6 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 		)
 		return nil
 	}
-
 	buildResult, err := generator.Generate(instance)
 
 	if err != nil {
@@ -1735,6 +1741,8 @@ type ModuleInstance struct {
 	// SelectiveBuilding allows the module to be built with subset of dependencies
 	SelectiveBuilding bool
 	mu                sync.RWMutex
+	// QPSLevels is map of circuit breaker name to qps level for all circuit breakers
+	QPSLevels map[string]int
 }
 
 func (instance *ModuleInstance) String() string {

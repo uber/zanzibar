@@ -3,6 +3,7 @@ clientMethod: DeliberateDiffNoop
 endpointId: baz
 endpointType: http
 handleId: sillyNoop
+qpsLevel: 3
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

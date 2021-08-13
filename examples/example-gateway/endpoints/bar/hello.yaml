@@ -3,6 +3,7 @@ clientMethod: Hello
 endpointId: bar
 endpointType: http
 handleId: helloWorld
+qpsLevel: 2
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}

@@ -3,6 +3,7 @@ clientMethod: MissingArg
 endpointId: bar
 endpointType: http
 handleId: missingArg
+qpsLevel: 2
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}
