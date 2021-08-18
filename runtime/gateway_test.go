@@ -143,6 +143,7 @@ func TestGatewaySetupClientTChannelWhenServiceNameAlreadyExists(t *testing.T) {
 func TestGatewaySetupClientTChannel(t *testing.T) {
 	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
 		"tchannel.processName": "test-proc",
+		"tchannel.serviceName": "test-gateway",
 	})
 	g := Gateway{
 		TChannelSubLoggerLevel: zapcore.ErrorLevel,
