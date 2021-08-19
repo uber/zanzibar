@@ -27,6 +27,7 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 )
 
@@ -323,8 +324,10 @@ func TestExtractLogField(t *testing.T) {
 }
 
 func TestAccumulateLogMsgAndFieldsInContext(t *testing.T) {
-	ctx := accumulateLogMsgAndFieldsInContext(context.TODO(), "message1", []zap.Field{zap.String("ctxField1", "ctxFieldValue1")})
-	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message2", []zap.Field{zap.String("ctxField1", "ctxFieldValue2")})
+	ctx := accumulateLogMsgAndFieldsInContext(context.TODO(), "message1",
+		[]zap.Field{zap.String("ctxField1", "ctxFieldValue1")}, zapcore.ErrorLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message2",
+		[]zap.Field{zap.String("ctxField1", "ctxFieldValue2")}, zapcore.ErrorLevel)
 	logFields := GetLogFieldsFromCtx(ctx)
 	assert.Equal(t, []zap.Field{
 		zap.String("msg1", "message1"),
@@ -332,4 +335,63 @@ func TestAccumulateLogMsgAndFieldsInContext(t *testing.T) {
 		zap.String("msg2", "message2"),
 		zap.String("ctxField1", "ctxFieldValue2"),
 	}, logFields)
+}
+
+func TestAccumulateLogMsgAndFieldsInContextWithLogLevel(t *testing.T) {
+	ctx := accumulateLogMsgAndFieldsInContext(context.TODO(), "message",
+		[]zap.Field{}, zapcore.DebugLevel)
+	logLevel := ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.DebugLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.ErrorLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.ErrorLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.DebugLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.ErrorLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.InfoLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.ErrorLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.WarnLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.ErrorLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.DPanicLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.DPanicLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.PanicLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.PanicLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.FatalLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.FatalLevel, logLevel)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.PanicLevel)
+	logLevel = ctx.Value(ctxLogLevel).(zapcore.Level)
+	assert.Equal(t, zapcore.FatalLevel, logLevel)
+}
+
+func TestGetCtxLogLevelOrDebugLevelFromCtx(t *testing.T) {
+	ctx := accumulateLogMsgAndFieldsInContext(context.TODO(), "message",
+		[]zap.Field{}, zapcore.DebugLevel)
+	logLevel := GetCtxLogLevelOrDebugLevelFromCtx(ctx)
+	logCounter := GetCtxLogCounterFromCtx(ctx)
+	assert.Equal(t, zapcore.DebugLevel, logLevel)
+	assert.Equal(t, 1, logCounter)
+	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message",
+		[]zap.Field{}, zapcore.ErrorLevel)
+	logCounter = GetCtxLogCounterFromCtx(ctx)
+	logLevel = GetCtxLogLevelOrDebugLevelFromCtx(ctx)
+	assert.Equal(t, zapcore.ErrorLevel, logLevel)
+	assert.Equal(t, 2, logCounter)
+	ctx = context.TODO()
+	logCounter = GetCtxLogCounterFromCtx(ctx)
+	logLevel = GetCtxLogLevelOrDebugLevelFromCtx(ctx)
+	assert.Equal(t, zapcore.DebugLevel, logLevel)
+	assert.Equal(t, 0, logCounter)
 }
