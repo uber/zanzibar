@@ -42,8 +42,8 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Mirror mirrorclientgenerated.Client
 	Echo   echoclientgenerated.Client
+	Mirror mirrorclientgenerated.Client
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -59,25 +59,25 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:           g.Logger,
-		ContextExtractor: g.ContextExtractor,
-		ContextLogger:    g.ContextLogger,
-		ContextMetrics:   zanzibar.NewContextMetrics(g.RootScope),
-		Scope:            g.RootScope,
-		Tracer:           g.Tracer,
-		Config:           g.Config,
-		Channel:          g.Channel,
-
+		Logger:               g.Logger,
+		ContextExtractor:     g.ContextExtractor,
+		ContextLogger:        g.ContextLogger,
+		ContextMetrics:       zanzibar.NewContextMetrics(g.RootScope),
+		Scope:                g.RootScope,
+		Tracer:               g.Tracer,
+		Config:               g.Config,
+		ServerTChannel:       g.ServerTChannel,
+		Gateway:              g,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
+	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
+	initializedClientDependencies.Mirror = mirrorclientgenerated.NewClient(&mirrorclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 

@@ -114,7 +114,7 @@ func TestHealthMetrics(t *testing.T) {
 	defer gateway.Close()
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
-	numMetrics := 9
+	numMetrics := 11
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
 	headers := make(map[string]string)

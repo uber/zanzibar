@@ -79,15 +79,15 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:           g.Logger,
-		ContextExtractor: g.ContextExtractor,
-		ContextLogger:    g.ContextLogger,
-		ContextMetrics:   zanzibar.NewContextMetrics(g.RootScope),
-		Scope:            g.RootScope,
-		Tracer:           g.Tracer,
-		Config:           g.Config,
-		Channel:          g.Channel,
-
+		Logger:               g.Logger,
+		ContextExtractor:     g.ContextExtractor,
+		ContextLogger:        g.ContextLogger,
+		ContextMetrics:       zanzibar.NewContextMetrics(g.RootScope),
+		Scope:                g.RootScope,
+		Tracer:               g.Tracer,
+		Config:               g.Config,
+		ServerTChannel:       g.ServerTChannel,
+		Gateway:              g,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
 	}

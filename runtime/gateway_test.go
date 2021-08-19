@@ -21,8 +21,13 @@
 package zanzibar
 
 import (
+	"context"
 	"os"
 	"testing"
+
+	"go.uber.org/zap/zapcore"
+
+	"github.com/uber/tchannel-go"
 
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
@@ -118,8 +123,81 @@ func TestCreateGatewayBadLoggingConfig(t *testing.T) {
 	g := Gateway{
 		Config: cfg,
 	}
-
 	err := g.setupLogger(cfg)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "unknown log level for gateway logger: invalid")
+}
+
+func TestGatewaySetupClientTChannelWhenServiceNameAlreadyExists(t *testing.T) {
+	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{})
+	g := Gateway{
+		ClientTChannels: map[string]*tchannel.Channel{
+			"service-foo": {},
+		},
+		Logger: zap.NewNop(),
+	}
+	ch := g.SetupClientTChannel(cfg, "service-foo")
+	assert.Equal(t, ch, &tchannel.Channel{})
+}
+
+func TestGatewaySetupClientTChannel(t *testing.T) {
+	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
+		"tchannel.processName": "test-proc",
+		"tchannel.serviceName": "test-gateway",
+	})
+	g := Gateway{
+		TChannelSubLoggerLevel: zapcore.ErrorLevel,
+		RootScope:              tally.NoopScope,
+		ClientTChannels:        map[string]*tchannel.Channel{},
+		Logger:                 zap.NewNop(),
+		logEncoder:             zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+	}
+
+	ch := g.SetupClientTChannel(cfg, "service-foo")
+	assert.Equal(t, ch, g.ClientTChannels["service-foo"])
+	assert.NotEqual(t, ch, &tchannel.Channel{})
+
+	gauge := g.RootScope.Tagged(map[string]string{
+		"client": "service-foo",
+	}).Gauge("tchannel.client.running")
+	assert.NotNil(t, gauge)
+}
+
+func TestGatewaySetupServerTChannelThrowsErrorWhenLoggerLevelIsIncorrect(t *testing.T) {
+	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
+		"tchannel.serviceName":    "test-gateway",
+		"tchannel.processName":    "proc",
+		"subLoggerLevel.tchannel": "non-compliant",
+	})
+	g := Gateway{
+		Config: cfg,
+	}
+	err := g.setupServerTChannel(cfg)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unknown sub logger level for tchannel server: non-compliant")
+}
+
+func TestGatewaySetupServerTChannelWithShutdown(t *testing.T) {
+	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
+		"tchannel.serviceName":    "test-gateway",
+		"tchannel.processName":    "proc",
+		"subLoggerLevel.tchannel": "error",
+	})
+	g := Gateway{
+		Config:     cfg,
+		Logger:     zap.NewNop(),
+		logEncoder: zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+	}
+	err := g.setupServerTChannel(cfg)
+	assert.NoError(t, err)
+	assert.NotNil(t, g.ServerTChannel)
+	assert.NotNil(t, g.ClientTChannels)
+	assert.False(t, g.tchannelServer.Closed())
+	assert.NotNil(t, g.ServerTChannelRouter)
+	assert.Equal(t, g.tchannelServer, g.ServerTChannel)
+
+	// now shut down the tchannel server
+	err = g.shutdownTChannelServerAndClients(context.Background())
+	assert.NoError(t, err)
+	assert.True(t, g.tchannelServer.Closed())
 }

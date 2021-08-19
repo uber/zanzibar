@@ -90,25 +90,27 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort         int32
-	TChannelPort     int32
-	RealHTTPPort     int32
-	RealHTTPAddr     string
-	RealTChannelPort int32
-	RealTChannelAddr string
-	WaitGroup        *sync.WaitGroup
-	Channel          *tchannel.Channel
-	ContextLogger    ContextLogger
-	ContextMetrics   ContextMetrics
-	ContextExtractor ContextExtractor
-	RootScope        tally.Scope
-	Logger           *zap.Logger
-	ServiceName      string
-	Config           *StaticConfig
-	HTTPRouter       HTTPRouter
-	TChannelRouter   *TChannelRouter
-	Tracer           opentracing.Tracer
-	JSONWrapper      jsonwrapper.JSONWrapper
+	HTTPPort               int32
+	TChannelPort           int32
+	RealHTTPPort           int32
+	RealHTTPAddr           string
+	RealTChannelPort       int32
+	RealTChannelAddr       string
+	WaitGroup              *sync.WaitGroup
+	ServerTChannel         *tchannel.Channel
+	ClientTChannels        map[string]*tchannel.Channel
+	ContextLogger          ContextLogger
+	ContextMetrics         ContextMetrics
+	ContextExtractor       ContextExtractor
+	RootScope              tally.Scope
+	Logger                 *zap.Logger
+	ServiceName            string
+	Config                 *StaticConfig
+	HTTPRouter             HTTPRouter
+	ServerTChannelRouter   *TChannelRouter
+	TChannelSubLoggerLevel zapcore.Level
+	Tracer                 opentracing.Tracer
+	JSONWrapper            jsonwrapper.JSONWrapper
 
 	// gRPC client dispatcher for gRPC client lifecycle management
 	GRPCClientDispatcher *yarpc.Dispatcher
@@ -140,11 +142,12 @@ type DefaultDependencies struct {
 	// ContextMetrics emit metrics from context
 	ContextMetrics ContextMetrics
 
-	Logger  *zap.Logger
-	Scope   tally.Scope
-	Tracer  opentracing.Tracer
-	Config  *StaticConfig
-	Channel *tchannel.Channel
+	Logger         *zap.Logger
+	Scope          tally.Scope
+	Tracer         opentracing.Tracer
+	Config         *StaticConfig
+	ServerTChannel *tchannel.Channel
+	Gateway        *Gateway
 
 	// dispatcher for managing gRPC clients
 	GRPCClientDispatcher *yarpc.Dispatcher
@@ -255,7 +258,7 @@ func CreateGateway(
 		return nil, err
 	}
 
-	if err := gateway.setupTChannel(config); err != nil {
+	if err := gateway.setupServerTChannel(config); err != nil {
 		return nil, err
 	}
 
@@ -424,8 +427,8 @@ func (gateway *Gateway) Shutdown() {
 	swg.Add(1)
 	go func() {
 		defer swg.Done()
-		if err := gateway.shutdownTChannelServer(ctx); err != nil {
-			ec <- errors.Wrap(err, "error shutting down tchannel server")
+		if err := gateway.shutdownTChannelServerAndClients(ctx); err != nil {
+			ec <- errors.Wrap(err, "error shutting down tchannel server or clients")
 		}
 	}()
 
@@ -799,7 +802,7 @@ func (gateway *Gateway) setupHTTPServer() error {
 	return nil
 }
 
-func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
+func (gateway *Gateway) setupServerTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 	levelString := gateway.Config.MustGetString("subLoggerLevel.tchannel")
@@ -807,6 +810,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	if !ok {
 		return errors.Errorf("unknown sub logger level for tchannel server: %s", levelString)
 	}
+	gateway.TChannelSubLoggerLevel = level
 
 	channel, err := tchannel.NewChannel(
 		serviceName,
@@ -817,25 +821,55 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 			StatsReporter: NewTChannelStatsReporter(
 				gateway.RootScope,
 			),
-
-			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
-			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
-			//RelayHost:                opts.RelayHost,
-			//RelayLocalHandlers:       opts.RelayLocalHandlers,
-			//RelayMaxTimeout:          opts.RelayMaxTimeout,
 		})
 
 	if err != nil {
-		return errors.Errorf(
-			"Error creating top channel:\n    %s",
-			err)
+		return errors.Errorf("Error creating top channel:\n%s", err)
 	}
 
-	gateway.Channel = channel
-	gateway.tchannelServer = channel
-	gateway.TChannelRouter = NewTChannelRouter(channel, gateway)
-
+	gateway.ServerTChannel = channel
+	gateway.tchannelServer = gateway.ServerTChannel
+	gateway.ServerTChannelRouter = NewTChannelRouter(channel, gateway)
+	// client tchannels are created explicitly for each client if "dedicated.tchannel.client: true"
+	gateway.ClientTChannels = make(map[string]*tchannel.Channel)
 	return nil
+}
+
+// SetupClientTChannel sets up a dedicated tchannel for each client with a given service name
+// If multiple backends with the same service name exist (for e.g. presentation service), then
+// all of them would receive the same channel. The method is exported because it is called from
+// the generated clients if "dedicated.tchannel.client: true" else server tchannel is reused
+func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName string) *tchannel.Channel {
+	if ch, ok := gateway.ClientTChannels[serviceName]; ok {
+		gateway.Logger.Info(fmt.Sprintf("returning already initialised TChannel client for [%v]", serviceName))
+		return ch
+	}
+	processName := config.MustGetString("tchannel.processName")
+	level := gateway.TChannelSubLoggerLevel
+
+	channel, err := tchannel.NewChannel(
+		// when specifying the service name for the channel, we reuse the server service
+		// name else calls from other unauthorised sources may be blocked
+		config.MustGetString("tchannel.serviceName"),
+		&tchannel.ChannelOptions{
+			ProcessName:   processName,
+			Tracer:        gateway.Tracer,
+			Logger:        NewTChannelLogger(gateway.SubLogger("tchannel", level)),
+			StatsReporter: NewTChannelStatsReporter(gateway.RootScope),
+		})
+
+	scope := gateway.RootScope.Tagged(map[string]string{
+		"client": serviceName,
+	})
+	if err != nil {
+		scope.Gauge("tchannel.client.running").Update(0)
+		gateway.Logger.Info(fmt.Sprintf("Failed to initiate dedicated TChannel client for [%v]", serviceName))
+	} else {
+		gateway.Logger.Info(fmt.Sprintf("Dedicated TChannel client initiated for client [%v]", serviceName))
+		scope.Gauge("tchannel.client.running").Update(1)
+	}
+	gateway.ClientTChannels[serviceName] = channel
+	return channel
 }
 
 func (gateway *Gateway) setupGRPCClientDispatcher(config *StaticConfig) error {
@@ -916,9 +950,10 @@ func GetHostname() string {
 	return host
 }
 
-// shutdownTChannelServer gracefully shuts down the tchannel server, blocks until the shutdown is
+// shutdownTChannelServerAndClients gracefully shuts down the tchannel server, blocks until the shutdown is
 // complete or the timeout has reached if there is one associated with the given context
-func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
+// It also shuts down all the dedicated client tchannel connections on a best effort basis
+func (gateway *Gateway) shutdownTChannelServerAndClients(ctx context.Context) error {
 	shutdownPollInterval := defaultShutdownPollInterval
 	if gateway.Config.ContainsKey("shutdown.pollInterval") {
 		shutdownPollInterval = time.Duration(gateway.Config.MustGetInt("shutdown.pollInterval")) * time.Millisecond
@@ -926,16 +961,31 @@ func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
 	ticker := time.NewTicker(shutdownPollInterval)
 	defer ticker.Stop()
 
+	gateway.Logger.Info("Closing the TChannel server")
 	gateway.tchannelServer.Close()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
 			if gateway.tchannelServer.Closed() {
-				return nil
+				gateway.Logger.Info("TChannel server closed successfully")
+
+				for serviceName, clientTchannel := range gateway.ClientTChannels {
+					go func(service string, ch *tchannel.Channel) {
+						gateway.Logger.Info(fmt.Sprintf("Closing TChannel client for [%v]", service))
+						ch.Close()
+						gateway.RootScope.Tagged(map[string]string{
+							"client": service,
+						}).Gauge("tchannel.client.running").Update(0)
+
+					}(serviceName, clientTchannel)
+				}
+			} else {
+				gateway.Logger.Info(fmt.Sprintf("Failed to close TChannel server within %v ms", shutdownPollInterval))
 			}
+			return nil
 		}
 	}
-
 }

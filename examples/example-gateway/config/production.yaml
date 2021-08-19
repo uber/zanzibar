@@ -91,7 +91,7 @@ grpc.clientServiceNameMapping:
   echo: echo
 router.whitelistedPaths:
   - /path/whitelisted
-service.shadow.env.override.enable: true
+
 circuitbreaking-configurations:
   levels:
     '1': '0-99'
@@ -124,3 +124,6 @@ circuitbreaking-configurations:
       errorPercentThreshold: 30
       requestVolumeThreshold: 25
       maxConcurrentRequests: 30
+
+service.shadow.env.override.enable: true
+dedicated.tchannel.client: false

@@ -37,8 +37,8 @@ import (
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Mirror *mirrorclientgenerated.MockClient
 	Echo   *echoclientgenerated.MockClientWithFixture
+	Mirror *mirrorclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -56,20 +56,20 @@ func InitializeDependenciesMock(
 		Logger:               g.Logger,
 		Scope:                g.RootScope,
 		Config:               g.Config,
-		Channel:              g.Channel,
+		ServerTChannel:       g.ServerTChannel,
 		Tracer:               g.Tracer,
 		GRPCClientDispatcher: g.GRPCClientDispatcher,
 		JSONWrapper:          g.JSONWrapper,
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Mirror: mirrorclientgenerated.NewMockClient(ctrl),
 		Echo:   echoclientgenerated.New(ctrl, fixtureechoclientgenerated.Fixture),
+		Mirror: mirrorclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Mirror = mockClientNodes.Mirror
 	initializedClientDependencies.Echo = mockClientNodes.Echo
+	initializedClientDependencies.Mirror = mockClientNodes.Mirror
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
