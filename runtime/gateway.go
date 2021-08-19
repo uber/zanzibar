@@ -829,9 +829,9 @@ func (gateway *Gateway) setupServerTChannel(config *StaticConfig) error {
 }
 
 // SetupClientTChannel sets up a dedicated tchannel for each client with a given service name
-// If multiple backends with the same service name exist (for e.g presentation service), then
-// all of them would receive the same channel. The method is exported because it is called
-// from the generated clients if "dedicated.tchannel.client: true"
+// If multiple backends with the same service name exist (for e.g. presentation service), then
+// all of them would receive the same channel. The method is exported because it is called from
+// the generated clients if "dedicated.tchannel.client: true" else server tchannel is reused
 func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName string) *tchannel.Channel {
 	if ch, ok := gateway.ClientTChannels[serviceName]; ok {
 		gateway.Logger.Info(fmt.Sprintf("returning already initialised TChannel client for [%v]", serviceName))
@@ -841,7 +841,9 @@ func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName st
 	level := gateway.TChannelSubLoggerLevel
 
 	channel, err := tchannel.NewChannel(
-		serviceName,
+		// when specifying the service name for the channel, we reuse the server service
+		// name else calls from other unauthorised sources may be blocked
+		config.MustGetString("tchannel.serviceName"),
 		&tchannel.ChannelOptions{
 			ProcessName:   processName,
 			Tracer:        gateway.Tracer,
@@ -854,8 +856,9 @@ func (gateway *Gateway) SetupClientTChannel(config *StaticConfig, serviceName st
 	})
 	if err != nil {
 		scope.Gauge("tchannel.client.running").Update(0)
-		gateway.Logger.Info(fmt.Sprintf("failed to initialise TChannel client for [%v]", serviceName))
+		gateway.Logger.Info(fmt.Sprintf("Failed to initiate dedicated TChannel client for [%v]", serviceName))
 	} else {
+		gateway.Logger.Info(fmt.Sprintf("Dedicated TChannel client initiated for client [%v]", serviceName))
 		scope.Gauge("tchannel.client.running").Update(1)
 	}
 	gateway.ClientTChannels[serviceName] = channel
