@@ -168,7 +168,7 @@ func TestCallMetrics(t *testing.T) {
 		// this host tag is added by tchannel library, which we don't have control with
 		"host":            zanzibar.GetHostname(),
 		"env":             "test",
-		"service":         "bazService",
+		"service":         "test-gateway",
 		"target-endpoint": "SimpleService__call",
 		"target-service":  "bazService",
 		"dc":              "unknown",
