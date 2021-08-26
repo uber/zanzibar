@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"github.com/uber/tchannel-go"
 	"testing"
 	"time"
 
@@ -72,4 +73,31 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 	assert.True(t, reqKey, "Client-Req-Header-header-key key not present")
 	assert.True(t, resKey, "Client-Res-Header-header-key key not present")
 	assert.True(t, foo, "foo key not present")
+}
+
+func TestMaxAttempts(t *testing.T) {
+	t.Run("MaxAttempts value should be set to 2 in RetryOptions", func(t *testing.T) {
+		methodName := map[string]string{
+			"methodKey": "methodValue",
+		}
+		tChannelClient := &TChannelClient{maxAttempts: 2, serviceName: "test", methodNames: methodName, timeout: 1}
+		ctx := context.TODO()
+		retryOpts := tchannel.RetryOptions{
+			MaxAttempts: 2,
+		}
+		contextBuilder := tchannel.NewContextBuilder(tChannelClient.timeout).SetParentContext(ctx).SetRetryOptions(&retryOpts)
+		maxAttempts := contextBuilder.RetryOptions.MaxAttempts
+		assert.Equal(t, 2, maxAttempts)
+	})
+	t.Run("MaxAttempts value should be default in RetryOptions", func(t *testing.T) {
+		methodName := map[string]string{
+			"methodKey": "methodValue",
+		}
+		tChannelClient := &TChannelClient{maxAttempts: 2, serviceName: "test", methodNames: methodName, timeout: 1}
+		ctx := context.TODO()
+		retryOpts := tchannel.RetryOptions{}
+		contextBuilder := tchannel.NewContextBuilder(tChannelClient.timeout).SetParentContext(ctx).SetRetryOptions(&retryOpts)
+		maxAttempts := contextBuilder.RetryOptions.MaxAttempts
+		assert.Equal(t, maxAttempts, 0)
+	})
 }

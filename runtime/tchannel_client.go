@@ -72,6 +72,9 @@ type TChannelClientOption struct {
 
 	// AltChannelMap is a map for dynamic lookup of alternative channels
 	AltChannelMap map[string]*tchannel.SubChannel
+
+	//RetryCount is the maximum retry count for a client
+	MaxAttempts int
 }
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
@@ -95,6 +98,7 @@ type TChannelClient struct {
 	ruleEngine           ruleengine.RuleEngine
 	headerPatterns       []string
 	altChannelMap        map[string]*tchannel.SubChannel
+	maxAttempts          int
 }
 
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
@@ -139,6 +143,7 @@ func NewTChannelClientContext(
 		ruleEngine:           opt.RuleEngine,
 		headerPatterns:       opt.HeaderPatterns,
 		altChannelMap:        opt.AltChannelMap,
+		maxAttempts:          opt.MaxAttempts,
 	}
 	return client
 }
@@ -189,6 +194,7 @@ func (c *TChannelClient) call(
 
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
+		MaxAttempts:       c.maxAttempts,
 	}
 	ctxBuilder := tchannel.NewContextBuilder(c.timeout).
 		SetParentContext(ctx).
