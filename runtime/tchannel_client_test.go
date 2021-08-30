@@ -110,3 +110,19 @@ func TestMaxAttemptsDefault(t *testing.T) {
 	maxAttempts := contextBuilder.RetryOptions.MaxAttempts
 	assert.Equal(t, maxAttempts, 0)
 }
+
+func TestMaxAttemptsNoMaxAttempts(t *testing.T) {
+	methodName := map[string]string{
+		"methodKey": "methodValue",
+	}
+	tChannelClient := &TChannelClient{
+		serviceName: "test",
+		methodNames: methodName,
+		timeout:     1,
+	}
+	ctx := context.TODO()
+	retryOpts := tchannel.RetryOptions{}
+	contextBuilder := tchannel.NewContextBuilder(tChannelClient.timeout).SetParentContext(ctx).SetRetryOptions(&retryOpts)
+	maxAttempts := contextBuilder.RetryOptions.MaxAttempts
+	assert.Equal(t, maxAttempts, 0)
+}
