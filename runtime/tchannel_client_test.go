@@ -111,7 +111,7 @@ func TestMaxAttemptsDefault(t *testing.T) {
 	assert.Equal(t, maxAttempts, 0)
 }
 
-func TestMaxAttemptsNoMaxAttempts(t *testing.T) {
+func TestMaxAttemptFieldWithNoSet(t *testing.T) {
 	methodName := map[string]string{
 		"methodKey": "methodValue",
 	}

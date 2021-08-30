@@ -191,10 +191,9 @@ func (c *TChannelClient) call(
 		reqHeaders[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	//In edge gateway system, there are multiple clients for which retry count override configuration is present in the production.json
-	//MaxAttempts override the retry count (which is 5 by default) with the value provided by the client present in the Edge Gateway.
-	//In case client does not provide the retry count value it will be 5 by default.
-	//JIRA ticket link - https://t3.uberinternal.com/browse/EDGE-8526
+	//Start passing the MaxAttempt field which will be used while creating the RetryOptions.
+	//Note : No impact on the existing clients because MaxAttempt will be passed as 0 and it will default to 5 while retrying the execution.
+	//More details can be found at https://t3.uberinternal.com/browse/EDGE-8526
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 		MaxAttempts:       c.maxAttempts,
