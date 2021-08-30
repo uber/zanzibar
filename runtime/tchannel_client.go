@@ -72,7 +72,7 @@ type TChannelClientOption struct {
 	// AltChannelMap is a map for dynamic lookup of alternative channels
 	AltChannelMap map[string]*tchannel.SubChannel
 
-	//RetryCount is the maximum retry count for a client
+	//MaxAttempts is the maximum retry count for a client
 	MaxAttempts int
 }
 
@@ -191,6 +191,10 @@ func (c *TChannelClient) call(
 		reqHeaders[c.requestUUIDHeaderKey] = reqUUID
 	}
 
+	//In edge gateway system, there are multiple clients for which retry count override configuration is present in the production.json
+	//MaxAttempts override the retry count (which is 5 by default) with the value provided by the client present in the Edge Gateway.
+	//In case client does not provide the retry count value it will be 5 by default.
+	//JIRA ticket link - https://t3.uberinternal.com/browse/EDGE-8526
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 		MaxAttempts:       c.maxAttempts,
