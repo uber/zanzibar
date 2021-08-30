@@ -50,7 +50,8 @@ type SaveContactsFixture struct {
 	Arg1Any bool
 	Arg2Any bool
 
-	Ret0 *contacts.SaveContactsResponse
-	Ret1 map[string]string
-	Ret2 error
+	Ret0 context.Context
+	Ret1 *contacts.SaveContactsResponse
+	Ret2 map[string]string
+	Ret3 error
 }

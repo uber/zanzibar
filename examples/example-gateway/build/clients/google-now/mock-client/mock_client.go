@@ -37,12 +37,13 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // AddCredentials mocks base method.
-func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string, arg2 *googlenow.GoogleNowService_AddCredentials_Args) (map[string]string, error) {
+func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string, arg2 *googlenow.GoogleNowService_AddCredentials_Args) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddCredentials", arg0, arg1, arg2)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // AddCredentials indicates an expected call of AddCredentials.
@@ -52,12 +53,13 @@ func (mr *MockClientMockRecorder) AddCredentials(arg0, arg1, arg2 interface{}) *
 }
 
 // CheckCredentials mocks base method.
-func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]string) (map[string]string, error) {
+func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]string) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckCredentials", arg0, arg1)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // CheckCredentials indicates an expected call of CheckCredentials.

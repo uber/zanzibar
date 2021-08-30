@@ -72,7 +72,7 @@ func TestHelloWorld(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.Hello(
+	_, result, _, err := bar.Hello(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		},
@@ -120,7 +120,7 @@ func TestEchoI8(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoI8(
+	_, result, _, err := bar.EchoI8(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI8_Args{Arg: arg},
@@ -168,7 +168,7 @@ func TestEchoI16(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoI16(
+	_, result, _, err := bar.EchoI16(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI16_Args{Arg: arg},
@@ -216,7 +216,7 @@ func TestEchoI32(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoI32(
+	_, result, _, err := bar.EchoI32(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI32_Args{Arg: arg},
@@ -264,7 +264,7 @@ func TestEchoI64(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoI64(
+	_, result, _, err := bar.EchoI64(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI64_Args{Arg: arg},
@@ -312,7 +312,7 @@ func TestEchoDouble(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoDouble(
+	_, result, _, err := bar.EchoDouble(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoDouble_Args{Arg: arg},
@@ -360,7 +360,7 @@ func TestEchoBool(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoBool(
+	_, result, _, err := bar.EchoBool(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoBool_Args{Arg: arg},
@@ -408,7 +408,7 @@ func TestEchoString(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoString(
+	_, result, _, err := bar.EchoString(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoString_Args{Arg: arg},
@@ -455,7 +455,7 @@ func TestEchoBinary(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoBinary(
+	_, result, _, err := bar.EchoBinary(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoBinary_Args{Arg: arg},
@@ -504,7 +504,7 @@ func TestEchoEnum(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoEnum(
+	_, result, _, err := bar.EchoEnum(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoEnum_Args{Arg: arg},
@@ -552,7 +552,7 @@ func TestEchoTypedef(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoTypedef(
+	_, result, _, err := bar.EchoTypedef(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoTypedef_Args{Arg: arg},
@@ -603,7 +603,7 @@ func TestEchoStringSet(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoStringSet(
+	_, result, _, err := bar.EchoStringSet(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStringSet_Args{Arg: arg},
@@ -664,7 +664,7 @@ func TestEchoStructSet(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoStructSet(
+	_, result, _, err := bar.EchoStructSet(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStructSet_Args{Arg: arg},
@@ -712,7 +712,7 @@ func TestEchoStringList(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoStringList(
+	_, result, _, err := bar.EchoStringList(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStringList_Args{Arg: arg},
@@ -773,7 +773,7 @@ func TestEchoStructList(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoStructList(
+	_, result, _, err := bar.EchoStructList(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStructList_Args{Arg: arg},
@@ -834,7 +834,7 @@ func TestEchoI32Map(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoI32Map(
+	_, result, _, err := bar.EchoI32Map(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI32Map_Args{Arg: arg},
@@ -895,7 +895,7 @@ func TestEchoStringMap(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.EchoStringMap(
+	_, result, _, err := bar.EchoStringMap(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStringMap_Args{Arg: arg},
@@ -985,7 +985,7 @@ func TestNestedQueryParamCallWithNil(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.ArgWithNestedQueryParams(
+	_, result, _, err := bar.ArgWithNestedQueryParams(
 		context.Background(), nil, &barGen.Bar_ArgWithNestedQueryParams_Args{
 			Request: nil,
 		},
@@ -1052,7 +1052,7 @@ func TestNormalRecur(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	result, _, err := bar.NormalRecur(
+	_, result, _, err := bar.NormalRecur(
 		context.Background(),
 		nil,
 		&barGen.Bar_NormalRecur_Args{
@@ -1088,7 +1088,7 @@ func TestDeleteFoo(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	_, err = bar.DeleteFoo(
+	_, _, err = bar.DeleteFoo(
 		context.Background(),
 		map[string]string{"x-uuid": "a-uuid"},
 		&barGen.Bar_DeleteFoo_Args{UserUUID: "a-uuid"},
@@ -1121,7 +1121,7 @@ func TestDeleteWithQueryParams(t *testing.T) {
 	bar := deps.Client.Bar
 	var count int32 = 3
 
-	_, err = bar.DeleteWithQueryParams(
+	_, _, err = bar.DeleteWithQueryParams(
 		context.Background(),
 		nil,
 		&barGen.Bar_DeleteWithQueryParams_Args{Filter: "foo", Count: &count},

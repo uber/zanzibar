@@ -86,12 +86,12 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -107,11 +107,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 
 	aStrOk := req.CheckQueryValue("aStr")
 	if !aStrOk {
-		return
+		return ctx
 	}
 	aStrQuery, ok := req.GetQueryValue("aStr")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AStr = aStrQuery
 
@@ -119,18 +119,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptStrOk {
 		anOptStrQuery, ok := req.GetQueryValue("anOptStr")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptStr = ptr.String(anOptStrQuery)
 	}
 
 	aBoolOk := req.CheckQueryValue("aBool")
 	if !aBoolOk {
-		return
+		return ctx
 	}
 	aBoolQuery, ok := req.GetQueryBool("aBool")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.ABool = aBoolQuery
 
@@ -138,18 +138,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptBoolOk {
 		anOptBoolQuery, ok := req.GetQueryBool("anOptBool")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptBool = ptr.Bool(anOptBoolQuery)
 	}
 
 	aInt8Ok := req.CheckQueryValue("aInt8")
 	if !aInt8Ok {
-		return
+		return ctx
 	}
 	aInt8Query, ok := req.GetQueryInt8("aInt8")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AInt8 = aInt8Query
 
@@ -157,18 +157,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptInt8Ok {
 		anOptInt8Query, ok := req.GetQueryInt8("anOptInt8")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptInt8 = ptr.Int8(anOptInt8Query)
 	}
 
 	aInt16Ok := req.CheckQueryValue("aInt16")
 	if !aInt16Ok {
-		return
+		return ctx
 	}
 	aInt16Query, ok := req.GetQueryInt16("aInt16")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AInt16 = aInt16Query
 
@@ -176,18 +176,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptInt16Ok {
 		anOptInt16Query, ok := req.GetQueryInt16("anOptInt16")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptInt16 = ptr.Int16(anOptInt16Query)
 	}
 
 	aInt32Ok := req.CheckQueryValue("aInt32")
 	if !aInt32Ok {
-		return
+		return ctx
 	}
 	aInt32Query, ok := req.GetQueryInt32("aInt32")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AInt32 = aInt32Query
 
@@ -195,18 +195,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptInt32Ok {
 		anOptInt32Query, ok := req.GetQueryInt32("anOptInt32")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptInt32 = ptr.Int32(anOptInt32Query)
 	}
 
 	aInt64Ok := req.CheckQueryValue("aInt64")
 	if !aInt64Ok {
-		return
+		return ctx
 	}
 	aInt64Query, ok := req.GetQueryInt64("aInt64")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AInt64 = aInt64Query
 
@@ -214,18 +214,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptInt64Ok {
 		anOptInt64Query, ok := req.GetQueryInt64("anOptInt64")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptInt64 = ptr.Int64(anOptInt64Query)
 	}
 
 	aFloat64Ok := req.CheckQueryValue("aFloat64")
 	if !aFloat64Ok {
-		return
+		return ctx
 	}
 	aFloat64Query, ok := req.GetQueryFloat64("aFloat64")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AFloat64 = aFloat64Query
 
@@ -233,18 +233,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptFloat64Ok {
 		anOptFloat64Query, ok := req.GetQueryFloat64("anOptFloat64")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptFloat64 = ptr.Float64(anOptFloat64Query)
 	}
 
 	aUUIDOk := req.CheckQueryValue("aUUID")
 	if !aUUIDOk {
-		return
+		return ctx
 	}
 	aUUIDQuery, ok := req.GetQueryValue("aUUID")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AUUID = (endpointsIDlEndpointsBarBar.UUID)(aUUIDQuery)
 
@@ -252,18 +252,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptUUIDOk {
 		anOptUUIDQuery, ok := req.GetQueryValue("anOptUUID")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptUUID = (*endpointsIDlEndpointsBarBar.UUID)(ptr.String(string(anOptUUIDQuery)))
 	}
 
 	aListUUIDOk := req.CheckQueryValue("aListUUID")
 	if !aListUUIDOk {
-		return
+		return ctx
 	}
 	aListUUIDQuery, ok := req.GetQueryValueList("aListUUID")
 	if !ok {
-		return
+		return ctx
 	}
 	aListUUIDQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(aListUUIDQuery))
 	for i, v := range aListUUIDQuery {
@@ -275,7 +275,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptListUUIDOk {
 		anOptListUUIDQuery, ok := req.GetQueryValueList("anOptListUUID")
 		if !ok {
-			return
+			return ctx
 		}
 		anOptListUUIDQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(anOptListUUIDQuery))
 		for i, v := range anOptListUUIDQuery {
@@ -286,11 +286,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 
 	aStringListOk := req.CheckQueryValue("aStringList")
 	if !aStringListOk {
-		return
+		return ctx
 	}
 	aStringListQuery, ok := req.GetQueryValueList("aStringList")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AStringList = (endpointsIDlEndpointsBarBar.StringList)(aStringListQuery)
 
@@ -298,18 +298,18 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptStringListOk {
 		anOptStringListQuery, ok := req.GetQueryValueList("anOptStringList")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptStringList = (endpointsIDlEndpointsBarBar.StringList)(anOptStringListQuery)
 	}
 
 	aUUIDListOk := req.CheckQueryValue("aUUIDList")
 	if !aUUIDListOk {
-		return
+		return ctx
 	}
 	aUUIDListQuery, ok := req.GetQueryValueList("aUUIDList")
 	if !ok {
-		return
+		return ctx
 	}
 	aUUIDListQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(aUUIDListQuery))
 	for i, v := range aUUIDListQuery {
@@ -321,7 +321,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptUUIDListOk {
 		anOptUUIDListQuery, ok := req.GetQueryValueList("anOptUUIDList")
 		if !ok {
-			return
+			return ctx
 		}
 		anOptUUIDListQueryFinal := make([]endpointsIDlEndpointsBarBar.UUID, len(anOptUUIDListQuery))
 		for i, v := range anOptUUIDListQuery {
@@ -332,11 +332,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 
 	aTsOk := req.CheckQueryValue("aTs")
 	if !aTsOk {
-		return
+		return ctx
 	}
 	aTsQuery, ok := req.GetQueryInt64("aTs")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.ATs = (endpointsIDlEndpointsBarBar.Timestamp)(aTsQuery)
 
@@ -344,14 +344,14 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptTsOk {
 		anOptTsQuery, ok := req.GetQueryInt64("anOptTs")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptTs = (*endpointsIDlEndpointsBarBar.Timestamp)(ptr.Int64(int64(anOptTsQuery)))
 	}
 
 	aReqDemoOk := req.CheckQueryValue("aReqDemo")
 	if !aReqDemoOk {
-		return
+		return ctx
 	}
 	var aReqDemoQuery endpointsIDlEndpointsBarBar.DemoType
 	_tmpaReqDemoQuery, ok := req.GetQueryValue("aReqDemo")
@@ -362,7 +362,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		}
 	}
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.AReqDemo = (endpointsIDlEndpointsBarBar.DemoType)(aReqDemoQuery)
 
@@ -377,25 +377,25 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 			}
 		}
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.AnOptFruit = (*endpointsIDlEndpointsBarBar.Fruit)(ptr.Int32(int32(anOptFruitQuery)))
 	}
 
 	aReqFruitsOk := req.CheckQueryValue("aReqFruits")
 	if !aReqFruitsOk {
-		return
+		return ctx
 	}
 	aReqFruitsQuery, ok := req.GetQueryValueList("aReqFruits")
 	if !ok {
-		return
+		return ctx
 	}
 	aReqFruitsQueryFinal := make([]endpointsIDlEndpointsBarBar.Fruit, len(aReqFruitsQuery))
 	for i, v := range aReqFruitsQuery {
 		var _tmpv endpointsIDlEndpointsBarBar.Fruit
 		if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
 			req.LogAndSendQueryError(err, "enum", "aReqFruits", v)
-			return
+			return ctx
 		}
 		aReqFruitsQueryFinal[i] = endpointsIDlEndpointsBarBar.Fruit(_tmpv)
 	}
@@ -405,14 +405,14 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	if anOptDemosOk {
 		anOptDemosQuery, ok := req.GetQueryValueList("anOptDemos")
 		if !ok {
-			return
+			return ctx
 		}
 		anOptDemosQueryFinal := make([]endpointsIDlEndpointsBarBar.DemoType, len(anOptDemosQuery))
 		for i, v := range anOptDemosQuery {
 			var _tmpv endpointsIDlEndpointsBarBar.DemoType
 			if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
 				req.LogAndSendQueryError(err, "enum", "anOptDemos", v)
-				return
+				return ctx
 			}
 			anOptDemosQueryFinal[i] = endpointsIDlEndpointsBarBar.DemoType(_tmpv)
 		}
@@ -430,7 +430,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewBarArgWithManyQueryParamsWorkflow(h.Dependencies)
@@ -438,7 +438,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -458,14 +458,15 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
 			zfields = append(zfields, zap.String("x-trace-id", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

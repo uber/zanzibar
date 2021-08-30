@@ -105,21 +105,22 @@ func (c *countMiddleware) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) bool {
+) (context.Context, bool) {
 	c.reqCounter++
 	if !c.reqBail {
 		res.WriteJSONBytes(200, nil, []byte(""))
 	}
 
-	return !c.reqBail
+	return ctx, !c.reqBail
 }
 
 func (c *countMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) {
+) context.Context {
 	c.resCounter++
+	return ctx
 }
 
 func (c *countMiddleware) JSONSchema() *jsonschema.Document {
@@ -341,7 +342,7 @@ func TestMiddlewareSharedStateSet(t *testing.T) {
 func noopHandlerFn(ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	res.WriteJSONBytes(200, nil, []byte(""))
-	return
+	return ctx
 }

@@ -37,16 +37,17 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // MirrorInternalMirror mocks base method.
-func (m *MockClient) MirrorInternalMirror(arg0 context.Context, arg1 *mirror.InternalRequest, arg2 ...yarpc.CallOption) (*mirror.InternalResponse, error) {
+func (m *MockClient) MirrorInternalMirror(arg0 context.Context, arg1 *mirror.InternalRequest, arg2 ...yarpc.CallOption) (context.Context, *mirror.InternalResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "MirrorInternalMirror", varargs...)
-	ret0, _ := ret[0].(*mirror.InternalResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(*mirror.InternalResponse)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // MirrorInternalMirror indicates an expected call of MirrorInternalMirror.
@@ -57,16 +58,17 @@ func (mr *MockClientMockRecorder) MirrorInternalMirror(arg0, arg1 interface{}, a
 }
 
 // MirrorMirror mocks base method.
-func (m *MockClient) MirrorMirror(arg0 context.Context, arg1 *mirror.Request, arg2 ...yarpc.CallOption) (*mirror.Response, error) {
+func (m *MockClient) MirrorMirror(arg0 context.Context, arg1 *mirror.Request, arg2 ...yarpc.CallOption) (context.Context, *mirror.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "MirrorMirror", varargs...)
-	ret0, _ := ret[0].(*mirror.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(*mirror.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // MirrorMirror indicates an expected call of MirrorMirror.

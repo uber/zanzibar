@@ -86,12 +86,12 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -107,11 +107,11 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 
 	oneNameOk := req.CheckQueryValue("oneName")
 	if !oneNameOk {
-		return
+		return ctx
 	}
 	oneNameQuery, ok := req.GetQueryValue("oneName")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.One = oneNameQuery
 
@@ -119,7 +119,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	if oneName1Ok {
 		oneName1Query, ok := req.GetQueryInt32("one_name")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Two = ptr.Int32(oneName1Query)
 	}
@@ -128,7 +128,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	if oneNamEOk {
 		oneNamEQuery, ok := req.GetQueryValue("One_NamE")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Three = ptr.String(oneNamEQuery)
 	}
@@ -137,7 +137,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 	if oneName2Ok {
 		oneName2Query, ok := req.GetQueryValue("one-Name")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.Four = ptr.String(oneName2Query)
 	}
@@ -153,7 +153,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewBarArgWithNearDupQueryParamsWorkflow(h.Dependencies)
@@ -161,7 +161,7 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -181,14 +181,15 @@ func (h *BarArgWithNearDupQueryParamsHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
 			zfields = append(zfields, zap.String("x-trace-id", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

@@ -45,7 +45,7 @@ type SimpleServiceCompareWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_Compare_Args,
-	) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error)
 }
 
 // NewSimpleServiceCompareWorkflow creates a workflow
@@ -78,7 +78,7 @@ func (w simpleServiceCompareWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_Compare_Args,
-) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error) {
 	clientRequest := convertToCompareClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -109,7 +109,7 @@ func (w simpleServiceCompareWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.Compare(
+	ctx, clientRespBody, _, err := w.Clients.Baz.Compare(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,14 +121,14 @@ func (w simpleServiceCompareWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertCompareOtherAuthErr(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -136,7 +136,7 @@ func (w simpleServiceCompareWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -145,7 +145,7 @@ func (w simpleServiceCompareWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceCompareClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToCompareClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_Compare_Args) *clientsIDlClientsBazBaz.SimpleService_Compare_Args {

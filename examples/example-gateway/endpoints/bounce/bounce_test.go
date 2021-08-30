@@ -26,7 +26,7 @@ func TestEcho(t *testing.T) {
 	var result bounce.Bounce_Bounce_Result
 
 	ms.MockClients().Echo.EXPECT().EchoEcho(gomock.Any(), &echo.Request{Message: message}).
-		Return(&echo.Response{Message: message}, nil)
+		Return(ctx, &echo.Response{Message: message}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
 		ctx, "Bounce", "bounce", nil, args, &result,

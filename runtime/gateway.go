@@ -70,6 +70,7 @@ const (
 	testenv                  = "test"
 	metricsServiceFromEnvKey = "metrics.serviceNameEnv"
 	serviceFromEnvKey        = "serviceNameEnv"
+	skipZanzibarLogsKey      = "contextlogger.zanzibar.skiplogs"
 )
 
 // Options configures the gateway
@@ -374,14 +375,14 @@ func (gateway *Gateway) handleHealthRequest(
 	ctx context.Context,
 	req *ServerHTTPRequest,
 	res *ServerHTTPResponse,
-) {
+) context.Context {
 	if gateway.isUnhealthy {
 		message := "Unhealthy, from " + gateway.ServiceName
 		bytes := []byte(
 			"{\"ok\":false,\"message\":\"" + message + "\"}\n",
 		)
 		res.WriteJSONBytes(503, nil, bytes)
-		return
+		return ctx
 	}
 	message := "Healthy, from " + gateway.ServiceName
 	bytes := []byte(
@@ -389,6 +390,7 @@ func (gateway *Gateway) handleHealthRequest(
 	)
 
 	res.WriteJSONBytes(200, nil, bytes)
+	return ctx
 }
 
 // Shutdown starts the graceful shutdown, blocks until it is complete
@@ -706,6 +708,11 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	)
 
 	gateway.ContextLogger = NewContextLogger(gateway.Logger)
+
+	if config.ContainsKey(skipZanzibarLogsKey) {
+		skipZanzibarLogs := config.MustGetBoolean(skipZanzibarLogsKey)
+		gateway.ContextLogger.SetSkipZanzibarLogs(skipZanzibarLogs)
+	}
 
 	return nil
 }

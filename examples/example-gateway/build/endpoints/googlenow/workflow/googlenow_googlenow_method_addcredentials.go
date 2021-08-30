@@ -44,7 +44,7 @@ type GoogleNowAddCredentialsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewGoogleNowAddCredentialsWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -116,7 +116,7 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 		}
 	}
 
-	cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
+	ctx, cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -129,7 +129,7 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 				zap.String("client", "GoogleNow"),
 			)
 
-			return nil, err
+			return ctx, nil, err
 
 		}
 	}
@@ -140,7 +140,7 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 		resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 	}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }
 
 func convertToAddCredentialsClientRequest(in *endpointsIDlEndpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args {

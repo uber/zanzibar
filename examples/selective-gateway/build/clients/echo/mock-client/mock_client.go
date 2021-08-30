@@ -37,16 +37,17 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // EchoEcho mocks base method.
-func (m *MockClient) EchoEcho(arg0 context.Context, arg1 *echo.Request, arg2 ...yarpc.CallOption) (*echo.Response, error) {
+func (m *MockClient) EchoEcho(arg0 context.Context, arg1 *echo.Request, arg2 ...yarpc.CallOption) (context.Context, *echo.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "EchoEcho", varargs...)
-	ret0, _ := ret[0].(*echo.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(*echo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // EchoEcho indicates an expected call of EchoEcho.

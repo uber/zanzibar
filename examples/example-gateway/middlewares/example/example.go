@@ -64,20 +64,21 @@ func (m *exampleMiddleware) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) bool {
+) (context.Context, bool) {
 	shared.SetState(
 		m,
 		MiddlewareState{
 			Baz: m.options.Foo,
 		})
-	return true
+	return ctx, true
 }
 
 func (m *exampleMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) {
+) context.Context {
+	return ctx
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware

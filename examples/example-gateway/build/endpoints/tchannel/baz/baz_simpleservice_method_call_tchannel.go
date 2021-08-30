@@ -82,12 +82,12 @@ func (h *SimpleServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Deps.Default.ContextLogger.ErrorZ(
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -103,7 +103,7 @@ func (h *SimpleServiceCallHandler) Handle(
 
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	if err := wfReqHeaders.EnsureContext(ctx, []string{"x-uuid", "x-token"}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -113,8 +113,8 @@ func (h *SimpleServiceCallHandler) Handle(
 
 	var req endpointsIDlEndpointsTchannelBazBaz.SimpleService_Call_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
-		return false, nil, nil, errors.Wrapf(
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -127,7 +127,7 @@ func (h *SimpleServiceCallHandler) Handle(
 	}
 	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Deps)
 
-	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
 	resHeaders := map[string]string{}
 	if wfResHeaders != nil {
@@ -144,12 +144,12 @@ func (h *SimpleServiceCallHandler) Handle(
 			})
 			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 			if v == nil {
-				h.Deps.Default.ContextLogger.ErrorZ(
+				ctx = h.Deps.Default.ContextLogger.ErrorZ(
 					ctx,
 					"Endpoint failure: handler returned non-nil error type *endpointsIDlEndpointsTchannelBazBaz.AuthErr but nil value",
 					zap.Error(err),
 				)
-				return false, nil, resHeaders, errors.Errorf(
+				return ctx, false, nil, resHeaders, errors.Errorf(
 					"%s.%s (%s) handler returned non-nil error type *endpointsIDlEndpointsTchannelBazBaz.AuthErr but nil value",
 					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 				)
@@ -160,15 +160,15 @@ func (h *SimpleServiceCallHandler) Handle(
 				"app-error": "unknown",
 			})
 			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
-			h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-			return false, nil, resHeaders, errors.Wrapf(
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+			return ctx, false, nil, resHeaders, errors.Wrapf(
 				err, "%s.%s (%s) handler returned error",
 				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 			)
 		}
 	}
 	if wfResHeaders == nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			errors.Errorf(
 				"Missing mandatory headers: %s",
 				strings.Join([]string{"some-res-header"}, ", "),
@@ -179,13 +179,13 @@ func (h *SimpleServiceCallHandler) Handle(
 	}
 
 	if err := wfResHeaders.EnsureContext(ctx, []string{"some-res-header"}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
 
-	return err == nil, &res, resHeaders, nil
+	return ctx, err == nil, &res, resHeaders, nil
 }
 
 // redirectToDeputy sends the request to deputy hostPort
@@ -195,7 +195,7 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 	hostPort string,
 	req *endpointsIDlEndpointsTchannelBazBaz.SimpleService_Call_Args,
 	res *endpointsIDlEndpointsTchannelBazBaz.SimpleService_Call_Result,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
 		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
@@ -216,7 +216,7 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 
 	deputyChannel, err := tchannel.NewChannel(serviceName, nil)
 	if err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
 	}
 	defer deputyChannel.Close()
 	deputyChannel.Peers().Add(hostPort)
@@ -236,5 +236,5 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "SimpleService", "Call", reqHeaders, req, res)
-	return success, res, respHeaders, err
+	return ctx, success, res, respHeaders, err
 }

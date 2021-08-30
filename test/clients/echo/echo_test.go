@@ -98,7 +98,7 @@ func TestEcho(t *testing.T) {
 	message := "hello"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
-	res, err := client.EchoEcho(ctx, &echo.Request{Message: message})
+	_, res, err := client.EchoEcho(ctx, &echo.Request{Message: message})
 	assert.NoError(t, err)
 	assert.Equal(t, &echo.Response{Message: message}, res)
 }

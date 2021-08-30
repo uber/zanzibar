@@ -74,7 +74,7 @@ func TestEchoI8(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoI8(
+	_, result, _, err := baz.EchoI8(
 		context.Background(), nil, &bazGen.SecondService_EchoI8_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -112,7 +112,7 @@ func TestEchoI16(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoI16(
+	_, result, _, err := baz.EchoI16(
 		context.Background(), nil, &bazGen.SecondService_EchoI16_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -150,7 +150,7 @@ func TestEchoI32(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoI32(
+	_, result, _, err := baz.EchoI32(
 		context.Background(), nil, &bazGen.SecondService_EchoI32_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -188,7 +188,7 @@ func TestEchoI64(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoI64(
+	_, result, _, err := baz.EchoI64(
 		context.Background(), nil, &bazGen.SecondService_EchoI64_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -226,7 +226,7 @@ func TestEchoDouble(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoDouble(
+	_, result, _, err := baz.EchoDouble(
 		context.Background(), nil, &bazGen.SecondService_EchoDouble_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -264,7 +264,7 @@ func TestEchoBool(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoBool(
+	_, result, _, err := baz.EchoBool(
 		context.Background(), nil, &bazGen.SecondService_EchoBool_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -302,7 +302,7 @@ func TestEchoString(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoString(
+	_, result, _, err := baz.EchoString(
 		context.Background(), nil, &bazGen.SecondService_EchoString_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -340,7 +340,7 @@ func TestEchoBinary(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoBinary(
+	_, result, _, err := baz.EchoBinary(
 		context.Background(), nil, &bazGen.SecondService_EchoBinary_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -379,7 +379,7 @@ func TestEchoEnum(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoEnum(
+	_, result, _, err := baz.EchoEnum(
 		context.Background(), nil, &bazGen.SecondService_EchoEnum_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -417,7 +417,7 @@ func TestEchoTypedef(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoTypedef(
+	_, result, _, err := baz.EchoTypedef(
 		context.Background(), nil, &bazGen.SecondService_EchoTypedef_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -458,7 +458,7 @@ func TestEchoStringSet(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoStringSet(
+	_, result, _, err := baz.EchoStringSet(
 		context.Background(), nil, &bazGen.SecondService_EchoStringSet_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -499,7 +499,7 @@ func TestEchoStructSet(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoStructSet(
+	_, result, _, err := baz.EchoStructSet(
 		context.Background(), nil, &bazGen.SecondService_EchoStructSet_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -537,7 +537,7 @@ func TestEchoStringList(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoStringList(
+	_, result, _, err := baz.EchoStringList(
 		context.Background(), nil, &bazGen.SecondService_EchoStringList_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -579,7 +579,7 @@ func TestEchoStructList(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoStructList(
+	_, result, _, err := baz.EchoStructList(
 		context.Background(), nil, &bazGen.SecondService_EchoStructList_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
@@ -621,7 +621,7 @@ func TestEchoStringMap(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	baz := deps.Client.Baz
 
-	result, _, err := baz.EchoStringMap(
+	_, result, _, err := baz.EchoStringMap(
 		context.Background(), nil, &bazGen.SecondService_EchoStringMap_Args{Arg: arg},
 	)
 	assert.NoError(t, err)

@@ -36,7 +36,7 @@ type Client interface {
 		ctx context.Context,
 		request *gen.{{$method.Request.Name}},
 		opts ...yarpc.CallOption,
-		) (*gen.{{$method.Response.Name}}, error)
+		) (context.Context, *gen.{{$method.Response.Name}}, error)
 	{{ end -}}
 	{{ end -}}
 {{ end -}}
@@ -185,7 +185,7 @@ func (e *{{$clientName}}) {{$methodName}}(
 	ctx context.Context,
 	request *gen.{{$method.Request.Name}},
 	opts ...yarpc.CallOption,
-) (*gen.{{$method.Response.Name}}, error) {
+) (context.Context, *gen.{{$method.Response.Name}}, error) {
 	var result *gen.{{$method.Response.Name}}
 	var err error
 
@@ -216,7 +216,7 @@ func (e *{{$clientName}}) {{$methodName}}(
 	}
 	callHelper.Finish(ctx, err)
 
-	return result, err
+	return ctx, result, err
 }
 {{end -}}
 {{end -}}

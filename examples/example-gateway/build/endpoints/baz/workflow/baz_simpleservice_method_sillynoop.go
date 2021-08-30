@@ -44,7 +44,7 @@ type SimpleServiceSillyNoopWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewSimpleServiceSillyNoopWorkflow creates a workflow
@@ -76,7 +76,7 @@ type simpleServiceSillyNoopWorkflow struct {
 func (w simpleServiceSillyNoopWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -106,7 +106,7 @@ func (w simpleServiceSillyNoopWorkflow) Handle(
 		}
 	}
 
-	_, err := w.Clients.Baz.DeliberateDiffNoop(ctx, clientHeaders)
+	ctx, _, err := w.Clients.Baz.DeliberateDiffNoop(ctx, clientHeaders)
 
 	if err != nil {
 		switch errValue := err.(type) {
@@ -116,14 +116,14 @@ func (w simpleServiceSillyNoopWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, serverErr
+			return ctx, nil, serverErr
 
 		case *clientsIDlClientsBazBase.ServerErr:
 			serverErr := convertSillyNoopServerErr(
 				errValue,
 			)
 
-			return nil, serverErr
+			return ctx, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -131,7 +131,7 @@ func (w simpleServiceSillyNoopWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, err
+			return ctx, nil, err
 
 		}
 	}
@@ -139,7 +139,7 @@ func (w simpleServiceSillyNoopWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }
 
 func convertSillyNoopAuthErr(

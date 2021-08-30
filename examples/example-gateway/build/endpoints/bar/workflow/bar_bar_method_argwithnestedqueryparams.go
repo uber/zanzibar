@@ -44,7 +44,7 @@ type BarArgWithNestedQueryParamsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgWithNestedQueryParams_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithNestedQueryParamsWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgWithNestedQueryParamsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgWithNestedQueryParams_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithNestedQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgWithNestedQueryParamsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithNestedQueryParams(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithNestedQueryParams(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barArgWithNestedQueryParamsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -130,7 +130,7 @@ func (w barArgWithNestedQueryParamsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithNestedQueryParamsClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToArgWithNestedQueryParamsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args {

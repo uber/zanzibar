@@ -40,7 +40,7 @@ type GoogleNowCheckCredentialsWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewGoogleNowCheckCredentialsWorkflow creates a workflow
@@ -72,7 +72,7 @@ type googleNowCheckCredentialsWorkflow struct {
 func (w googleNowCheckCredentialsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -110,7 +110,7 @@ func (w googleNowCheckCredentialsWorkflow) Handle(
 		}
 	}
 
-	cliRespHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
+	ctx, cliRespHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
 
 	if err != nil {
 		switch errValue := err.(type) {
@@ -121,7 +121,7 @@ func (w googleNowCheckCredentialsWorkflow) Handle(
 				zap.String("client", "GoogleNow"),
 			)
 
-			return nil, err
+			return ctx, nil, err
 
 		}
 	}
@@ -132,5 +132,5 @@ func (w googleNowCheckCredentialsWorkflow) Handle(
 		resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 	}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }

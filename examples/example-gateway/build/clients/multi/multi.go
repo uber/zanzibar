@@ -45,11 +45,11 @@ type Client interface {
 	HelloA(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 	HelloB(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 }
 
 // multiClient is the http client.
@@ -203,7 +203,7 @@ func (c *multiClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *multiClient) HelloA(
 	ctx context.Context,
 	headers map[string]string,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -223,7 +223,7 @@ func (c *multiClient) HelloA(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -247,7 +247,7 @@ func (c *multiClient) HelloA(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -262,22 +262,22 @@ func (c *multiClient) HelloA(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -287,7 +287,7 @@ func (c *multiClient) HelloA(
 func (c *multiClient) HelloB(
 	ctx context.Context,
 	headers map[string]string,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -307,7 +307,7 @@ func (c *multiClient) HelloB(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	var res *zanzibar.ClientHTTPResponse
@@ -331,7 +331,7 @@ func (c *multiClient) HelloB(
 		}
 	}
 	if err != nil {
-		return defaultRes, nil, err
+		return ctx, defaultRes, nil, err
 	}
 
 	respHeaders := make(map[string]string)
@@ -346,22 +346,22 @@ func (c *multiClient) HelloB(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

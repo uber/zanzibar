@@ -49,7 +49,7 @@ func TestSaveContactsCallWorkflow(t *testing.T) {
 		},
 	}
 
-	res, resHeaders, err := mh.Handle(context.Background(), nil, endpointRequest)
+	_, res, resHeaders, err := mh.Handle(context.Background(), nil, endpointRequest)
 
 	if !assert.NoError(t, err, "got error") {
 		return

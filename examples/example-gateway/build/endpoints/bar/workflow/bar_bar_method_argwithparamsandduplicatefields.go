@@ -44,7 +44,7 @@ type BarArgWithParamsAndDuplicateFieldsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithParamsAndDuplicateFieldsWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithParamsAndDuplicateFieldsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithParamsAndDuplicateFields(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithParamsAndDuplicateFields(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -130,7 +130,7 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithParamsAndDuplicateFieldsClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToArgWithParamsAndDuplicateFieldsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args) *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args {

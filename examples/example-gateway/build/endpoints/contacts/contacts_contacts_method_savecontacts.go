@@ -85,12 +85,12 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -104,7 +104,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 
 	var requestBody endpointsIDlEndpointsContactsContacts.Contacts_SaveContacts_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 
 	if requestBody.SaveContactsRequest == nil {
@@ -123,7 +123,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := customContacts.NewContactsSaveContactsWorkflow(h.Dependencies)
@@ -131,7 +131,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -151,7 +151,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
 			zfields = append(zfields, zap.String("x-trace-id", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {
@@ -160,18 +160,19 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 
 		case *endpointsIDlEndpointsContactsContacts.BadRequest:
 			res.WriteJSONBytes(400, cliRespHeaders, nil)
-			return
+			return ctx
 
 		case *endpointsIDlEndpointsContactsContacts.NotFound:
 			res.WriteJSONBytes(404, cliRespHeaders, nil)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
 
 	res.WriteJSON(202, cliRespHeaders, response)
+	return ctx
 }

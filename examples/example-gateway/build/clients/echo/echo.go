@@ -44,7 +44,7 @@ type Client interface {
 		ctx context.Context,
 		request *gen.Request,
 		opts ...yarpc.CallOption,
-	) (*gen.Response, error)
+	) (context.Context, *gen.Response, error)
 }
 
 // echoClient is the gRPC client for downstream service.
@@ -171,7 +171,7 @@ func (e *echoClient) EchoEcho(
 	ctx context.Context,
 	request *gen.Request,
 	opts ...yarpc.CallOption,
-) (*gen.Response, error) {
+) (context.Context, *gen.Response, error) {
 	var result *gen.Response
 	var err error
 
@@ -202,5 +202,5 @@ func (e *echoClient) EchoEcho(
 	}
 	callHelper.Finish(ctx, err)
 
-	return result, err
+	return ctx, result, err
 }

@@ -15,7 +15,7 @@ var saveContactsFixtures = &mc.SaveContactsScenarios{
 			},
 		},
 
-		Ret0: &gen.SaveContactsResponse{},
+		Ret1: &gen.SaveContactsResponse{},
 	},
 }
 

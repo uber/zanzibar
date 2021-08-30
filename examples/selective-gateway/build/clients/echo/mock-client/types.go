@@ -52,6 +52,7 @@ type EchoEchoFixture struct {
 	// Arg2Any indicates the variadic argument is a number of gomock.Any
 	Arg2Any int
 
-	Ret0 *echo.Response
-	Ret1 error
+	Ret0 context.Context
+	Ret1 *echo.Response
+	Ret2 error
 }

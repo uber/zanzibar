@@ -44,7 +44,7 @@ type BarDeleteWithBodyWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_DeleteWithBody_Args,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewBarDeleteWithBodyWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barDeleteWithBodyWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_DeleteWithBody_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 	clientRequest := convertToDeleteWithBodyClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barDeleteWithBodyWorkflow) Handle(
 		}
 	}
 
-	_, err := w.Clients.Bar.DeleteWithBody(
+	ctx, _, err := w.Clients.Bar.DeleteWithBody(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barDeleteWithBodyWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, err
+			return ctx, nil, err
 
 		}
 	}
@@ -129,7 +129,7 @@ func (w barDeleteWithBodyWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }
 
 func convertToDeleteWithBodyClientRequest(in *endpointsIDlEndpointsBarBar.Bar_DeleteWithBody_Args) *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args {

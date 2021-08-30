@@ -110,6 +110,7 @@ func (s *EchoEchoMock) Success() Call {
 
 	ret0 := f.Ret0
 	ret1 := f.Ret1
+	ret2 := f.Ret2
 
-	return Call{call: s.mockClient.EXPECT().EchoEcho(arg0, arg1, arg2...).Return(ret0, ret1)}
+	return Call{call: s.mockClient.EXPECT().EchoEcho(arg0, arg1, arg2...).Return(ret0, ret1, ret2)}
 }

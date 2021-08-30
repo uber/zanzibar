@@ -86,12 +86,12 @@ func (h *BarListAndEnumHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -107,11 +107,11 @@ func (h *BarListAndEnumHandler) HandleRequest(
 
 	demoIdsOk := req.CheckQueryValue("demoIds")
 	if !demoIdsOk {
-		return
+		return ctx
 	}
 	demoIdsQuery, ok := req.GetQueryValueList("demoIds")
 	if !ok {
-		return
+		return ctx
 	}
 	requestBody.DemoIds = demoIdsQuery
 
@@ -126,7 +126,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 			}
 		}
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.DemoType = (*endpointsIDlEndpointsBarBar.DemoType)(ptr.Int32(int32(demoTypeQuery)))
 	}
@@ -135,14 +135,14 @@ func (h *BarListAndEnumHandler) HandleRequest(
 	if demosOk {
 		demosQuery, ok := req.GetQueryValueList("demos")
 		if !ok {
-			return
+			return ctx
 		}
 		demosQueryFinal := make([]endpointsIDlEndpointsBarBar.DemoType, len(demosQuery))
 		for i, v := range demosQuery {
 			var _tmpv endpointsIDlEndpointsBarBar.DemoType
 			if err := _tmpv.UnmarshalText([]byte(v)); err != nil {
 				req.LogAndSendQueryError(err, "enum", "demos", v)
-				return
+				return ctx
 			}
 			demosQueryFinal[i] = endpointsIDlEndpointsBarBar.DemoType(_tmpv)
 		}
@@ -160,7 +160,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewBarListAndEnumWorkflow(h.Dependencies)
@@ -168,7 +168,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -188,7 +188,7 @@ func (h *BarListAndEnumHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
 			zfields = append(zfields, zap.String("x-trace-id", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {
@@ -199,11 +199,11 @@ func (h *BarListAndEnumHandler) HandleRequest(
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
@@ -211,7 +211,8 @@ func (h *BarListAndEnumHandler) HandleRequest(
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
-		return
+		return ctx
 	}
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
+	return ctx
 }

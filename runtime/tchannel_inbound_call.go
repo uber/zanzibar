@@ -73,10 +73,10 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 
 	fields := c.logFields(ctx)
 	if err == nil {
-		c.contextLogger.DebugZ(ctx, "Finished an incoming server TChannel request", fields...)
+		c.contextLogger.Debug(ctx, "Finished an incoming server TChannel request", fields...)
 	} else {
 		fields = append(fields, zap.Error(err))
-		c.contextLogger.WarnZ(ctx, "Failed to serve incoming TChannel request", fields...)
+		c.contextLogger.Warn(ctx, "Failed to serve incoming TChannel request", fields...)
 	}
 }
 
@@ -190,20 +190,20 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 		return
 	}
 
-	c.success, resp, c.resHeaders, err = c.endpoint.Handle(ctx, c.reqHeaders, wireValue)
+	ctx, c.success, resp, c.resHeaders, err = c.endpoint.Handle(ctx, c.reqHeaders, wireValue)
 	if c.endpoint.callback != nil {
 		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
 	}
 	if err != nil {
-		c.contextLogger.WarnZ(ctx, "Unexpected tchannel system error", zap.Error(err))
+		c.contextLogger.Warn(ctx, "Unexpected tchannel system error", zap.Error(err))
 		if er := c.call.Response().SendSystemError(errors.New("Server Error")); er != nil {
-			c.contextLogger.WarnZ(ctx, "Error sending server error response", zap.Error(er))
+			c.contextLogger.Warn(ctx, "Error sending server error response", zap.Error(er))
 		}
 		return
 	}
 	if !c.success {
 		if err = c.call.Response().SetApplicationError(); err != nil {
-			c.contextLogger.WarnZ(ctx, "Could not set application error for inbound response", zap.Error(err))
+			c.contextLogger.Warn(ctx, "Could not set application error for inbound response", zap.Error(err))
 			return
 		}
 	}
