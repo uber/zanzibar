@@ -28,9 +28,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	netContext "golang.org/x/net/context"
-
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	netContext "golang.org/x/net/context"
 )
 
 const (
@@ -72,6 +71,9 @@ type TChannelClientOption struct {
 
 	// AltChannelMap is a map for dynamic lookup of alternative channels
 	AltChannelMap map[string]*tchannel.SubChannel
+
+	//MaxAttempts is the maximum retry count for a client
+	MaxAttempts int
 }
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
@@ -95,6 +97,7 @@ type TChannelClient struct {
 	ruleEngine           ruleengine.RuleEngine
 	headerPatterns       []string
 	altChannelMap        map[string]*tchannel.SubChannel
+	maxAttempts          int
 }
 
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
@@ -139,6 +142,7 @@ func NewTChannelClientContext(
 		ruleEngine:           opt.RuleEngine,
 		headerPatterns:       opt.HeaderPatterns,
 		altChannelMap:        opt.AltChannelMap,
+		maxAttempts:          opt.MaxAttempts,
 	}
 	return client
 }
@@ -187,8 +191,12 @@ func (c *TChannelClient) call(
 		reqHeaders[c.requestUUIDHeaderKey] = reqUUID
 	}
 
+	//Start passing the MaxAttempt field which will be used while creating the RetryOptions.
+	//Note : No impact on the existing clients because MaxAttempt will be passed as 0 and it will default to 5 while retrying the execution.
+	//More details can be found at https://t3.uberinternal.com/browse/EDGE-8526
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
+		MaxAttempts:       c.maxAttempts,
 	}
 	ctxBuilder := tchannel.NewContextBuilder(c.timeout).
 		SetParentContext(ctx).
