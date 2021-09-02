@@ -3041,24 +3041,59 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		}
 	}
 
-	client := zanzibar.NewTChannelClientContext(
-		channel,
-		deps.Default.ContextLogger,
-		deps.Default.ContextMetrics,
-		deps.Default.ContextExtractor,
-		&zanzibar.TChannelClientOption{
-			ServiceName:          serviceName,
-			ClientID:             "{{$clientID}}",
-			MethodNames:          methodNames,
-			Timeout:              timeout,
-			TimeoutPerAttempt:    timeoutPerAttempt,
-			RoutingKey:           &routingKey,
-			RuleEngine:           re,
-			HeaderPatterns:       headerPatterns,
-			RequestUUIDHeaderKey: requestUUIDHeaderKey,
-			AltChannelMap:        altChannelMap,
-		},
-	)
+    var client *zanzibar.TChannelClient
+
+    retryCountFeaturePresent := deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled")
+    var retryCountFeatureEnabled bool
+
+    if retryCountFeaturePresent {
+         retryCountFeatureEnabled = deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled")
+    }
+
+    var maxAttempts int
+    if  retryCountFeatureEnabled && deps.Default.Config.ContainsKey("clients.{{$clientID}}.retryCount") {
+        maxAttempts = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
+        client = zanzibar.NewTChannelClientContext(
+        		channel,
+        		deps.Default.ContextLogger,
+        		deps.Default.ContextMetrics,
+        		deps.Default.ContextExtractor,
+        		&zanzibar.TChannelClientOption{
+        			ServiceName:          serviceName,
+        			ClientID:             "{{$clientID}}",
+        			MethodNames:          methodNames,
+        			Timeout:              timeout,
+        			TimeoutPerAttempt:    timeoutPerAttempt,
+        			RoutingKey:           &routingKey,
+        			RuleEngine:           re,
+        			HeaderPatterns:       headerPatterns,
+        			RequestUUIDHeaderKey: requestUUIDHeaderKey,
+        			AltChannelMap:        altChannelMap,
+        			MaxAttempts:          maxAttempts,
+        		},
+        	)
+    }else{
+          client = zanzibar.NewTChannelClientContext(
+					channel,
+					deps.Default.ContextLogger,
+					deps.Default.ContextMetrics,
+					deps.Default.ContextExtractor,
+					&zanzibar.TChannelClientOption{
+						ServiceName:          serviceName,
+						ClientID:             "{{$clientID}}",
+						MethodNames:          methodNames,
+						Timeout:              timeout,
+						TimeoutPerAttempt:    timeoutPerAttempt,
+						RoutingKey:           &routingKey,
+						RuleEngine:           re,
+						HeaderPatterns:       headerPatterns,
+						RequestUUIDHeaderKey: requestUUIDHeaderKey,
+						AltChannelMap:        altChannelMap,
+					},
+				)
+    }
+
+
 
 	return &{{$clientName}}{
 		client: client,
@@ -3272,7 +3307,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14023, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15445, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

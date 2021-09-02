@@ -33,6 +33,7 @@ import (
 	"strings"
 	"time"
 )
+
 type asset struct {
 	bytes []byte
 	info  os.FileInfo
@@ -86,6 +87,8 @@ subLoggerLevel.http: info
 subLoggerLevel.jaeger: info
 subLoggerLevel.tchannel: info
 useDatacenter: false
+#Some tchannel clients have retryCount functionality, this feature will be disabled by default
+tchannelclients.retryCount.feature.enabled: false
 `)
 
 func productionYamlBytes() ([]byte, error) {
@@ -98,7 +101,7 @@ func productionYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.yaml", size: 665, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.yaml", size: 810, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -197,6 +200,7 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"production.yaml": &bintree{productionYaml, map[string]*bintree{}},
 }}
@@ -247,4 +251,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

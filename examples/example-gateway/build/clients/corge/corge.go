@@ -148,24 +148,57 @@ func NewClient(deps *module.Dependencies) Client {
 		}
 	}
 
-	client := zanzibar.NewTChannelClientContext(
-		channel,
-		deps.Default.ContextLogger,
-		deps.Default.ContextMetrics,
-		deps.Default.ContextExtractor,
-		&zanzibar.TChannelClientOption{
-			ServiceName:          serviceName,
-			ClientID:             "corge",
-			MethodNames:          methodNames,
-			Timeout:              timeout,
-			TimeoutPerAttempt:    timeoutPerAttempt,
-			RoutingKey:           &routingKey,
-			RuleEngine:           re,
-			HeaderPatterns:       headerPatterns,
-			RequestUUIDHeaderKey: requestUUIDHeaderKey,
-			AltChannelMap:        altChannelMap,
-		},
-	)
+	var client *zanzibar.TChannelClient
+
+	retryCountFeaturePresent := deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled")
+	var retryCountFeatureEnabled bool
+
+	if retryCountFeaturePresent {
+		retryCountFeatureEnabled = deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled")
+	}
+
+	var maxAttempts int
+	if retryCountFeatureEnabled && deps.Default.Config.ContainsKey("clients.corge.retryCount") {
+		maxAttempts = int(deps.Default.Config.MustGetInt("clients.corge.retryCount"))
+		client = zanzibar.NewTChannelClientContext(
+			channel,
+			deps.Default.ContextLogger,
+			deps.Default.ContextMetrics,
+			deps.Default.ContextExtractor,
+			&zanzibar.TChannelClientOption{
+				ServiceName:          serviceName,
+				ClientID:             "corge",
+				MethodNames:          methodNames,
+				Timeout:              timeout,
+				TimeoutPerAttempt:    timeoutPerAttempt,
+				RoutingKey:           &routingKey,
+				RuleEngine:           re,
+				HeaderPatterns:       headerPatterns,
+				RequestUUIDHeaderKey: requestUUIDHeaderKey,
+				AltChannelMap:        altChannelMap,
+				MaxAttempts:          maxAttempts,
+			},
+		)
+	} else {
+		client = zanzibar.NewTChannelClientContext(
+			channel,
+			deps.Default.ContextLogger,
+			deps.Default.ContextMetrics,
+			deps.Default.ContextExtractor,
+			&zanzibar.TChannelClientOption{
+				ServiceName:          serviceName,
+				ClientID:             "corge",
+				MethodNames:          methodNames,
+				Timeout:              timeout,
+				TimeoutPerAttempt:    timeoutPerAttempt,
+				RoutingKey:           &routingKey,
+				RuleEngine:           re,
+				HeaderPatterns:       headerPatterns,
+				RequestUUIDHeaderKey: requestUUIDHeaderKey,
+				AltChannelMap:        altChannelMap,
+			},
+		)
+	}
 
 	return &corgeClient{
 		client:                 client,
