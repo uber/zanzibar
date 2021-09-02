@@ -23,7 +23,7 @@ func TestServiceCFrontHello(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(res.Body)
+	_, _ = buf.ReadFrom(res.Body)
 	assert.True(t, strings.Contains(buf.String(), "Unexpected workflow panic, recovered at endpoint."))
 	assert.Equal(t, "502 Bad Gateway", res.Status)
 }

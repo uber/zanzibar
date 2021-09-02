@@ -51,7 +51,10 @@ func TestProtoModuleSpec(t *testing.T) {
 func TestProtoModuleSpecParseError(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("../examples/example-gateway/idl/clients-idl/clients/", "temp*.proto")
 	assert.NoError(t, err, "failed to create temp file")
-	defer os.Remove(tmpFile.Name())
+	defer func(name string) {
+		_ = os.Remove(name)
+	}(tmpFile.Name())
+
 	_, err = tmpFile.WriteString("test")
 	assert.NoError(t, err, "failed writing to temp file")
 

@@ -705,7 +705,7 @@ func newTChannelClientGenerator(templates *Template, packageHelper *PackageHelpe
 
 func getExposedMethodValidator() *validator2.Validator {
 	validator := validator2.NewValidator()
-	validator.SetValidationFunc("exposedMethods", validateExposedMethods)
+	_ = validator.SetValidationFunc("exposedMethods", validateExposedMethods)
 	return validator
 }
 
