@@ -154,7 +154,7 @@ func (req *ServerHTTPRequest) StartTime() time.Time {
 func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.contextLogger.ErrorZ(req.Context(),
+		req.contextLogger.Error(req.Context(),
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)

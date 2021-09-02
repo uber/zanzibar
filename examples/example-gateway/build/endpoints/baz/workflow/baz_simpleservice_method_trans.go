@@ -45,7 +45,7 @@ type SimpleServiceTransWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_Trans_Args,
-	) (*endpointsIDlEndpointsBazBaz.TransStruct, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.TransStruct, zanzibar.Header, error)
 }
 
 // NewSimpleServiceTransWorkflow creates a workflow
@@ -78,7 +78,7 @@ func (w simpleServiceTransWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_Trans_Args,
-) (*endpointsIDlEndpointsBazBaz.TransStruct, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.TransStruct, zanzibar.Header, error) {
 	clientRequest := convertToTransClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -109,7 +109,7 @@ func (w simpleServiceTransWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.Trans(
+	ctx, clientRespBody, _, err := w.Clients.Baz.Trans(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,14 +121,14 @@ func (w simpleServiceTransWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertTransOtherAuthErr(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -136,7 +136,7 @@ func (w simpleServiceTransWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -145,7 +145,7 @@ func (w simpleServiceTransWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceTransClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToTransClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_Trans_Args) *clientsIDlClientsBazBaz.SimpleService_Trans_Args {

@@ -44,7 +44,7 @@ type BarArgNotStructWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgNotStruct_Args,
-	) (zanzibar.Header, error)
+	) (context.Context, zanzibar.Header, error)
 }
 
 // NewBarArgNotStructWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgNotStructWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgNotStruct_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgNotStructWorkflow) Handle(
 		}
 	}
 
-	_, err := w.Clients.Bar.ArgNotStruct(
+	ctx, _, err := w.Clients.Bar.ArgNotStruct(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -120,7 +120,7 @@ func (w barArgNotStructWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, serverErr
+			return ctx, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -128,7 +128,7 @@ func (w barArgNotStructWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, err
+			return ctx, nil, err
 
 		}
 	}
@@ -136,7 +136,7 @@ func (w barArgNotStructWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 }
 
 func convertToArgNotStructClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgNotStruct_Args) *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args {

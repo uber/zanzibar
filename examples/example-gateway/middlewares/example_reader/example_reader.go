@@ -62,20 +62,21 @@ func (m *exampleReaderMiddleware) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) bool {
-	return true
+) (context.Context, bool) {
+	return ctx, true
 }
 
 func (m *exampleReaderMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) {
+) context.Context {
 	ss := shared.GetState("example").(example.MiddlewareState)
 	if ss.Baz == m.options.Foo {
 		res.StatusCode = http.StatusOK
 	}
 	res.StatusCode = http.StatusNotFound
+	return ctx
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware

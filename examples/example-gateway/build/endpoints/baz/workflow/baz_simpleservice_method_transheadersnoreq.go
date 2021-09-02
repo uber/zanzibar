@@ -45,7 +45,7 @@ type SimpleServiceTransHeadersNoReqWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
 }
 
 // NewSimpleServiceTransHeadersNoReqWorkflow creates a workflow
@@ -77,7 +77,7 @@ type simpleServiceTransHeadersNoReqWorkflow struct {
 func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := propagateHeadersTransHeadersNoReqClientRequests(nil, reqHeaders)
 
 	clientHeaders := map[string]string{}
@@ -120,7 +120,7 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.TransHeadersNoReq(
+	ctx, clientRespBody, _, err := w.Clients.Baz.TransHeadersNoReq(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -132,7 +132,7 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -140,7 +140,7 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -149,7 +149,7 @@ func (w simpleServiceTransHeadersNoReqWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceTransHeadersNoReqClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertTransHeadersNoReqAuthErr(

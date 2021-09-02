@@ -44,7 +44,7 @@ type BarArgWithNearDupQueryParamsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithNearDupQueryParamsWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgWithNearDupQueryParamsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithNearDupQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgWithNearDupQueryParamsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithNearDupQueryParams(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithNearDupQueryParams(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barArgWithNearDupQueryParamsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -130,7 +130,7 @@ func (w barArgWithNearDupQueryParamsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithNearDupQueryParamsClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToArgWithNearDupQueryParamsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithNearDupQueryParams_Args) *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args {

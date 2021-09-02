@@ -11,7 +11,7 @@ var echoEchoFixtures = &mc.EchoEchoScenarios{
 		Arg1Any: true,
 		Arg2Any: 1,
 
-		Ret0: &gen.Response{Message: "hello"},
+		Ret1: &gen.Response{Message: "hello"},
 	},
 }
 

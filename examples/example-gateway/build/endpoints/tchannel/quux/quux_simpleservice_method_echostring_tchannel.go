@@ -75,12 +75,12 @@ func (h *SimpleServiceEchoStringHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Deps.Default.ContextLogger.ErrorZ(
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -100,8 +100,8 @@ func (h *SimpleServiceEchoStringHandler) Handle(
 
 	var req endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
-		return false, nil, nil, errors.Wrapf(
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -114,7 +114,7 @@ func (h *SimpleServiceEchoStringHandler) Handle(
 	}
 	workflow := customQuux.NewSimpleServiceEchoStringWorkflow(h.Deps)
 
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
 	resHeaders := map[string]string{}
 	if wfResHeaders != nil {
@@ -124,12 +124,12 @@ func (h *SimpleServiceEchoStringHandler) Handle(
 	}
 
 	if err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-		return false, nil, resHeaders, err
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+		return ctx, false, nil, resHeaders, err
 	}
 	res.Success = &r
 
-	return err == nil, &res, resHeaders, nil
+	return ctx, err == nil, &res, resHeaders, nil
 }
 
 // redirectToDeputy sends the request to deputy hostPort
@@ -139,7 +139,7 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 	hostPort string,
 	req *endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Args,
 	res *endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Result,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
 		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
@@ -160,7 +160,7 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 
 	deputyChannel, err := tchannel.NewChannel(serviceName, nil)
 	if err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
 	}
 	defer deputyChannel.Close()
 	deputyChannel.Peers().Add(hostPort)
@@ -180,5 +180,5 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "SimpleService", "EchoString", reqHeaders, req, res)
-	return success, res, respHeaders, err
+	return ctx, success, res, respHeaders, err
 }

@@ -247,21 +247,21 @@ Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error)
+) (context.Context, zanzibar.Header, error)
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error)
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error)
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) (zanzibar.Header, error)
+) (context.Context, zanzibar.Header, error)
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error)
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error)
 {{- end}}
 }
 
@@ -290,21 +290,21 @@ func (w {{$workflowStruct}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error) {
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error) {
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 
 	{{- if ne .ResponseType "" -}}
@@ -339,9 +339,9 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end}}
 
 	{{if eq .ResponseType "" -}}
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 	{{- else -}}
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 	{{end}}
 
 	{{- end -}}
@@ -365,7 +365,7 @@ func clientlessWorkflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4114, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4260, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -521,12 +521,12 @@ func (h *{{$handlerName}}) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -540,7 +540,7 @@ func (h *{{$handlerName}}) HandleRequest(
 
 	{{ if $reqHeaderRequiredKeys -}}
 	if !req.CheckHeaders({{$reqHeaderRequiredKeys | printf "%#v" }}) {
-		return
+		return ctx
 	}
 	{{- end -}}
 
@@ -549,7 +549,7 @@ func (h *{{$handlerName}}) HandleRequest(
 
 	{{- if ne .HTTPMethod "GET"}}
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 	{{end}}
 
@@ -580,7 +580,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
@@ -589,13 +589,13 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .ResponseType ""}}
-	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{else}}
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -617,14 +617,14 @@ func (h *{{$handlerName}}) HandleRequest(
 		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
 			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	{{end -}}
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 		{{ else }}
 		{{$val := false}}
 		{{range $idx, $exception := .Exceptions}}
@@ -646,11 +646,11 @@ func (h *{{$handlerName}}) HandleRequest(
 				{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
 			)
 			{{end -}}
-			return
+			return ctx
 		{{end}}
 		  default:
 			 res.SendError(500, "Unexpected server error", err)
-			 return
+			 return ctx
 		}
 		{{ end }}
 	}
@@ -661,12 +661,13 @@ func (h *{{$handlerName}}) HandleRequest(
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
-		return
+		return ctx
 	}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, bytes)
 	{{- else -}}
 	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
 	{{- end }}
+	return ctx
 }
 
 {{end -}}
@@ -682,7 +683,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7396, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1236,7 +1237,7 @@ type Client interface {
 		ctx context.Context,
 		request *gen.{{$method.Request.Name}},
 		opts ...yarpc.CallOption,
-		) (*gen.{{$method.Response.Name}}, error)
+		) (context.Context, *gen.{{$method.Response.Name}}, error)
 	{{ end -}}
 	{{ end -}}
 {{ end -}}
@@ -1385,7 +1386,7 @@ func (e *{{$clientName}}) {{$methodName}}(
 	ctx context.Context,
 	request *gen.{{$method.Request.Name}},
 	opts ...yarpc.CallOption,
-) (*gen.{{$method.Response.Name}}, error) {
+) (context.Context, *gen.{{$method.Response.Name}}, error) {
 	var result *gen.{{$method.Response.Name}}
 	var err error
 
@@ -1416,7 +1417,7 @@ func (e *{{$clientName}}) {{$methodName}}(
 	}
 	callHelper.Finish(ctx, err)
 
-	return result, err
+	return ctx, result, err
 }
 {{end -}}
 {{end -}}
@@ -1433,7 +1434,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8400, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8439, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1485,7 +1486,7 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -1698,7 +1699,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if ne .RequestType "" -}}
 	r {{.RequestType}},
 	{{end -}}
-) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
+) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
 		headers = make(map[string]string)
@@ -1765,16 +1766,16 @@ func (c *{{$clientName}}) {{$methodName}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
+		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
 	}
 
 	{{if .ReqHeaders }}
 	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
 	if headerErr != nil {
 		return {{ if eq .ResponseType "" -}}
-			nil, headerErr
+			ctx, nil, headerErr
 			{{- else -}}
-			defaultRes, nil, headerErr
+			ctx, defaultRes, nil, headerErr
 			{{- end}}
 	}
 	{{- end}}
@@ -1800,7 +1801,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		}
 	}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
+		return ctx, {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
 	respHeaders := make(map[string]string)
@@ -1824,50 +1825,50 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 			{{- end}}
-			return respHeaders, nil
+			return ctx, respHeaders, nil
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 	}
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) -}}
-			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
+			return ctx, {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
 
-		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		return ctx, {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end -}}
 		{{end -}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return defaultRes, respHeaders, err
+				return ctx, defaultRes, respHeaders, err
 			}
 	}
 	{{else if eq .ResponseType ""}}
@@ -1876,21 +1877,21 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 			{{- end}}
 
-			return respHeaders, nil
+			return ctx, respHeaders, nil
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
 		case {{$code}}:
 			{{- if or (eq $code 204) (eq $code 304) }}
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
-				return respHeaders, &{{$val.Type}}{}
+				return ctx, respHeaders, &{{$val.Type}}{}
 			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
-				return respHeaders, &{{$val.Type}}{}
+				return ctx, respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 			{{range $idx, $exception := $exceptions -}}
@@ -1899,45 +1900,45 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
-			return respHeaders, v.(error)
+			return ctx, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return respHeaders, err
+				return ctx, respHeaders, err
 			}
 	}
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}
-			return {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
+			return ctx, {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
 		{{- else }}
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
-		return responseBody, respHeaders, nil
+		return ctx, responseBody, respHeaders, nil
 		{{ else }}
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
-			return defaultRes, respHeaders, err
+			return ctx, defaultRes, respHeaders, err
 		}
 
 		{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 		{{- end}}
 
-		return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		return ctx, {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{end -}}
 		{{end}}
 		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
@@ -1946,10 +1947,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
 				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
 				{{$val := index $exceptions 0}}
-				return defaultRes, respHeaders, &{{$val.Type}}{}
+				return ctx, defaultRes, respHeaders, &{{$val.Type}}{}
 			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
 				{{$val := index $exceptions 0}}
-				return defaultRes, respHeaders, &{{$val.Type}}{}
+				return ctx, defaultRes, respHeaders, &{{$val.Type}}{}
 			{{else}}
 			allOptions := []interface{}{
 				{{range $idx, $exception := $exceptions -}}
@@ -1958,20 +1959,20 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
-				return defaultRes, respHeaders, err
+				return ctx, defaultRes, respHeaders, err
 			}
-			return defaultRes, respHeaders, v.(error)
+			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
-				return defaultRes, respHeaders, err
+				return ctx, defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
+	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
 	}
@@ -1991,7 +1992,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18587, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 18791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2923,7 +2924,7 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -3211,7 +3212,7 @@ type {{$clientName}} struct {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
@@ -3264,7 +3265,7 @@ type {{$clientName}} struct {
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
 					success = true
 				{{end -}}
 				default:
@@ -3272,22 +3273,22 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
-			return respHeaders, err
+			return ctx, respHeaders, err
 		{{else -}}
-			return resp, respHeaders, err
+			return ctx, resp, respHeaders, err
 		{{end -}}
 		}
 
 		{{if eq .ResponseType "" -}}
-			return respHeaders, err
+			return ctx, respHeaders, err
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
-			return resp, respHeaders, err
+			return ctx, resp, respHeaders, err
 		{{end -}}
 	}
 {{end -}}
@@ -3305,7 +3306,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15265, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14023, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3361,12 +3362,12 @@ func (h *{{$handler}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Args
 	var res {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
-		return false, nil, nil, err
+		return ctx, false, nil, nil, err
 	}
 
 	{{- if and (eq .RequestType "") (eq .ResponseType "")}}
@@ -3381,7 +3382,7 @@ func (h *{{$handler}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			return false, nil, nil, err
+			return ctx, false, nil, nil, err
 		}
 		{{if .ResponseType -}}
 		res.Success = {{.RefResponse "r"}}
@@ -3393,21 +3394,21 @@ func (h *{{$handler}}) Handle(
 			{{range .Exceptions -}}
 				case *{{.Type}}:
 					if v == nil {
-						return false, nil, nil, errors.New(
+						return ctx, false, nil, nil, errors.New(
 							"Handler for {{$method}} returned non-nil error type *{{title .Name}} but nil value",
 						)
 					}
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					return false, nil, nil, err
+					return ctx, false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
 			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 
-	return err == nil, &res, respHeaders, nil
+	return ctx, err == nil, &res, respHeaders, nil
 }
 {{end -}}
 {{end -}}
@@ -3424,7 +3425,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3023, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3065, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3512,12 +3513,12 @@ func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Deps.Default.ContextLogger.ErrorZ(
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -3534,7 +3535,7 @@ func (h *{{$handlerName}}) Handle(
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
 	if err := wfReqHeaders.EnsureContext(ctx, {{.ReqHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -3546,8 +3547,8 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
-		return false, nil, nil, errors.Wrapf(
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -3564,13 +3565,13 @@ func (h *{{$handlerName}}) Handle(
 	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Deps)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	ctx, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 	{{else if eq .RequestType ""}}
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 	{{else if eq .ResponseType ""}}
-	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{else}}
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
 
 	resHeaders := map[string]string{}
@@ -3582,8 +3583,8 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-			return false, nil, resHeaders, err
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+			return ctx, false, nil, resHeaders, err
 		}
 		res.Success = {{.RefResponse "r"}}
 	{{else -}}
@@ -3597,12 +3598,12 @@ func (h *{{$handlerName}}) Handle(
 					})
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					if v == nil {
-						h.Deps.Default.ContextLogger.ErrorZ(
+						ctx = h.Deps.Default.ContextLogger.ErrorZ(
 							ctx,
 							"Endpoint failure: handler returned non-nil error type *{{.Type}} but nil value",
 							zap.Error(err),
 						)
-						return false, nil, resHeaders, errors.Errorf(
+						return ctx, false, nil, resHeaders, errors.Errorf(
 							"%s.%s (%s) handler returned non-nil error type *{{.Type}} but nil value",
 							h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 						)
@@ -3614,8 +3615,8 @@ func (h *{{$handlerName}}) Handle(
 						"app-error": "unknown",
 					})
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
-					h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-					return false, nil, resHeaders, errors.Wrapf(
+					ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+					return ctx, false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 					)
@@ -3627,7 +3628,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{- if .ResHeaders}}
 	if wfResHeaders == nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			errors.Errorf(
 				"Missing mandatory headers: %s",
 				strings.Join({{.ResHeaders | printf "%#v" }}, ", "),
@@ -3638,14 +3639,14 @@ func (h *{{$handlerName}}) Handle(
 	}
 
 	if err := wfResHeaders.EnsureContext(ctx, {{.ResHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
 	{{- end}}
 
-	return err == nil, &res, resHeaders, nil
+	return ctx, err == nil, &res, resHeaders, nil
 }
 
 {{if ne .RequestType "" -}}
@@ -3656,7 +3657,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	hostPort string,
 	req *{{unref .RequestType}},
 	res *{{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
 		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
@@ -3677,7 +3678,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 
 	deputyChannel, err := tchannel.NewChannel(serviceName, nil)
 	if err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
 	}
 	defer deputyChannel.Close()
 	deputyChannel.Peers().Add(hostPort)
@@ -3697,7 +3698,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
-	return success, res, respHeaders, err
+	return ctx, success, res, respHeaders, err
 }
 {{end -}}
 
@@ -3714,7 +3715,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8803, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8945, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3766,21 +3767,21 @@ Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error)
+) (context.Context, zanzibar.Header, error)
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error)
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error)
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) (zanzibar.Header, error)
+) (context.Context, zanzibar.Header, error)
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error)
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error)
 {{- end}}
 }
 
@@ -3826,21 +3827,21 @@ func (w {{$workflowStruct}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error) {
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error) {
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
@@ -3890,37 +3891,37 @@ func (w {{$workflowStruct}}) Handle(
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{- end }}
 	{{else if eq $clientResType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
 	{{else}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
@@ -3935,11 +3936,11 @@ func (w {{$workflowStruct}}) Handle(
 					errValue,
 				)
 				{{if eq $responseType ""}}
-				return nil, serverErr
+				return ctx, nil, serverErr
 				{{else if eq $responseType "string" }}
-				return "", nil, serverErr
+				return ctx, "", nil, serverErr
 				{{else}}
-				return nil, nil, serverErr
+				return ctx, nil, nil, serverErr
 				{{end}}
 			{{end}}
 			default:
@@ -3949,11 +3950,11 @@ func (w {{$workflowStruct}}) Handle(
 				)
 
 				{{if eq $responseType ""}}
-				return nil, err
+				return ctx, nil, err
 				{{else if eq $responseType "string" }}
-				return "", nil, err
+				return ctx, "", nil, err
 				{{else}}
-				return nil, nil, err
+				return ctx, nil, nil, err
 				{{end}}
 		}
 	}
@@ -3972,10 +3973,10 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end}}
 
 	{{if eq .ResponseType "" -}}
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 	{{- else -}}
 	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 	{{- end -}}
 }
 
@@ -4025,7 +4026,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8690, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8906, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

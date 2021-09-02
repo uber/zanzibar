@@ -52,6 +52,6 @@ func (w Workflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	req *endpointBaz.SimpleService_AnotherCall_Args,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 	panic("panic at user's code ...")
 }

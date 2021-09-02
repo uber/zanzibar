@@ -45,7 +45,7 @@ type SimpleServiceTransHeadersWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBazBaz.SimpleService_TransHeaders_Args,
-	) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error)
 }
 
 // NewSimpleServiceTransHeadersWorkflow creates a workflow
@@ -78,7 +78,7 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBazBaz.SimpleService_TransHeaders_Args,
-) (*endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := convertToTransHeadersClientRequest(r)
 	clientRequest = propagateHeadersTransHeadersClientRequests(clientRequest, reqHeaders)
 
@@ -118,7 +118,7 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.TransHeaders(
+	ctx, clientRespBody, _, err := w.Clients.Baz.TransHeaders(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -130,14 +130,14 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
 			serverErr := convertTransHeadersOtherAuthErr(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -145,7 +145,7 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -154,7 +154,7 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceTransHeadersClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToTransHeadersClientRequest(in *endpointsIDlEndpointsBazBaz.SimpleService_TransHeaders_Args) *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args {

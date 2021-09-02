@@ -43,7 +43,7 @@ type SimpleServicePingWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error)
 }
 
 // NewSimpleServicePingWorkflow creates a workflow
@@ -75,7 +75,7 @@ type simpleServicePingWorkflow struct {
 func (w simpleServicePingWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBazBaz.BazResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -105,7 +105,7 @@ func (w simpleServicePingWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.Ping(
+	ctx, clientRespBody, _, err := w.Clients.Baz.Ping(
 		ctx, clientHeaders,
 	)
 
@@ -118,7 +118,7 @@ func (w simpleServicePingWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -127,7 +127,7 @@ func (w simpleServicePingWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServicePingClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertSimpleServicePingClientResponse(in *clientsIDlClientsBazBase.BazResponse) *endpointsIDlEndpointsBazBaz.BazResponse {

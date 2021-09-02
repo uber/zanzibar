@@ -85,12 +85,12 @@ func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -108,7 +108,7 @@ func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 	if testStringOk {
 		testStringQuery, ok := req.GetQueryValue("testString")
 		if !ok {
-			return
+			return ctx
 		}
 		requestBody.TestString = ptr.String(testStringQuery)
 	}
@@ -124,7 +124,7 @@ func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewClientlessEmptyclientlessRequestWorkflow(h.Dependencies)
@@ -132,12 +132,13 @@ func (h *ClientlessEmptyclientlessRequestHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSONBytes(200, cliRespHeaders, nil)
+	return ctx
 }

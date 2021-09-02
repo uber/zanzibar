@@ -52,7 +52,7 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-	) (string, map[string]string, error)
+	) (context.Context, string, map[string]string, error)
 }
 
 // NewClient returns a new TChannel client for service corge.
@@ -311,7 +311,7 @@ func (c *corgeClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-) (string, map[string]string, error) {
+) (context.Context, string, map[string]string, error) {
 	var result clientsIDlClientsCorgeCorge.Corge_EchoString_Result
 	var resp string
 
@@ -354,20 +354,20 @@ func (c *corgeClient) EchoString(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
 		}
 	}
 	if err != nil {
-		logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
-		return resp, respHeaders, err
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
-	return resp, respHeaders, err
+	return ctx, resp, respHeaders, err
 }

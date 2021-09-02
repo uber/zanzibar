@@ -81,12 +81,12 @@ func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Deps.Default.ContextLogger.ErrorZ(
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -103,7 +103,7 @@ func (h *{{$handlerName}}) Handle(
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
 	if err := wfReqHeaders.EnsureContext(ctx, {{.ReqHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -115,8 +115,8 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
-		return false, nil, nil, errors.Wrapf(
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
@@ -133,13 +133,13 @@ func (h *{{$handlerName}}) Handle(
 	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Deps)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	ctx, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 	{{else if eq .RequestType ""}}
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 	{{else if eq .ResponseType ""}}
-	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{else}}
-	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	ctx, r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
 
 	resHeaders := map[string]string{}
@@ -151,8 +151,8 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-			return false, nil, resHeaders, err
+			ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+			return ctx, false, nil, resHeaders, err
 		}
 		res.Success = {{.RefResponse "r"}}
 	{{else -}}
@@ -166,12 +166,12 @@ func (h *{{$handlerName}}) Handle(
 					})
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					if v == nil {
-						h.Deps.Default.ContextLogger.ErrorZ(
+						ctx = h.Deps.Default.ContextLogger.ErrorZ(
 							ctx,
 							"Endpoint failure: handler returned non-nil error type *{{.Type}} but nil value",
 							zap.Error(err),
 						)
-						return false, nil, resHeaders, errors.Errorf(
+						return ctx, false, nil, resHeaders, errors.Errorf(
 							"%s.%s (%s) handler returned non-nil error type *{{.Type}} but nil value",
 							h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 						)
@@ -183,8 +183,8 @@ func (h *{{$handlerName}}) Handle(
 						"app-error": "unknown",
 					})
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
-					h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
-					return false, nil, resHeaders, errors.Wrapf(
+					ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
+					return ctx, false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 					)
@@ -196,7 +196,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{- if .ResHeaders}}
 	if wfResHeaders == nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			errors.Errorf(
 				"Missing mandatory headers: %s",
 				strings.Join({{.ResHeaders | printf "%#v" }}, ", "),
@@ -207,14 +207,14 @@ func (h *{{$handlerName}}) Handle(
 	}
 
 	if err := wfResHeaders.EnsureContext(ctx, {{.ResHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
+		return ctx, false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
 	{{- end}}
 
-	return err == nil, &res, resHeaders, nil
+	return ctx, err == nil, &res, resHeaders, nil
 }
 
 {{if ne .RequestType "" -}}
@@ -225,7 +225,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	hostPort string,
 	req *{{unref .RequestType}},
 	res *{{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
 		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
@@ -246,7 +246,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 
 	deputyChannel, err := tchannel.NewChannel(serviceName, nil)
 	if err != nil {
-		h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
+		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Deputy Failure", zap.Error(err))
 	}
 	defer deputyChannel.Close()
 	deputyChannel.Peers().Add(hostPort)
@@ -266,7 +266,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
-	return success, res, respHeaders, err
+	return ctx, success, res, respHeaders, err
 }
 {{end -}}
 

@@ -75,7 +75,7 @@ type HandlerFn func(
 	context.Context,
 	*ServerHTTPRequest,
 	*ServerHTTPResponse,
-)
+) context.Context
 
 // RouterEndpoint struct represents an endpoint that can be registered
 // into the router itself.

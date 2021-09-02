@@ -48,7 +48,7 @@ func (h *handler) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *thriftQuux.SimpleService_EchoString_Args,
-) (string, zanzibar.Header, error) {
+) (context.Context, string, zanzibar.Header, error) {
 	resp := h.quux.EchoString(r.Msg)
-	return resp, nil, nil
+	return ctx, resp, nil, nil
 }

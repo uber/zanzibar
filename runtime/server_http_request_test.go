@@ -74,8 +74,9 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 			ctx context.Context,
 			req *zanzibar.ServerHTTPRequest,
 			res *zanzibar.ServerHTTPResponse,
-		) {
+		) context.Context {
 			res.WriteJSON(200, nil, nil)
+			return ctx
 		},
 	)
 
@@ -141,12 +142,13 @@ func TestDoubleParseQueryValues(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryValue("foo")
 				assert.Equal(t, "", foo1)
 
 				foo2, _ := req.GetQueryValue("foo")
 				assert.Equal(t, "", foo2)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -206,9 +208,10 @@ func TestFailingGetQueryBool(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryBool("foo")
 				assert.Equal(t, false, foo1)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -268,9 +271,10 @@ func TestFailingGetQueryInt8(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryInt8("foo")
 				assert.Equal(t, int8(0), foo1)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -330,9 +334,10 @@ func TestFailingHasQueryValue(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				ok := req.HasQueryValue("foo")
 				assert.Equal(t, false, ok)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -392,9 +397,10 @@ func TestFailingGetQueryInt16(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryInt16("foo")
 				assert.Equal(t, int16(0), foo1)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -454,9 +460,10 @@ func TestFailingGetQueryInt32(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryInt32("foo")
 				assert.Equal(t, int32(0), foo1)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -516,9 +523,10 @@ func TestFailingGetQueryInt64(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryInt64("foo")
 				assert.Equal(t, int64(0), foo1)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -578,9 +586,10 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				foo1, _ := req.GetQueryFloat64("foo")
 				assert.Equal(t, float64(0), foo1)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -640,9 +649,10 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				ok := req.HasQueryPrefix("foo")
 				assert.Equal(t, false, ok)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -695,11 +705,12 @@ func TestGetQueryBoolList(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryBoolList("a")
 				assert.True(t, ok)
 				assert.Equal(t, []bool{true, true, false}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -733,10 +744,11 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryBoolList("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -796,12 +808,13 @@ func TestGetQueryInt8List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt8List("a")
 				assert.True(t, ok)
 				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, []int8{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -835,10 +848,11 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt8List("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -898,13 +912,14 @@ func TestGetQueryInt8Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt8Set("a")
 				assert.True(t, ok)
 				expected := []int8{42, 49}
 				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -941,10 +956,11 @@ func TestFailingGetQueryInt8Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt8Set("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1004,11 +1020,12 @@ func TestGetQueryInt16List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt16List("a")
 				assert.True(t, ok)
 				assert.Equal(t, []int16{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1042,10 +1059,11 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt16List("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1105,13 +1123,14 @@ func TestGetQueryInt16Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt16Set("a")
 				assert.True(t, ok)
 				expected := []int16{42, 49}
 				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1148,10 +1167,11 @@ func TestFailingGetQueryInt16Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt16Set("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1211,11 +1231,12 @@ func TestGetQueryInt32List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt32List("a")
 				assert.True(t, ok)
 				assert.Equal(t, []int32{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1249,10 +1270,11 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt32List("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1312,13 +1334,14 @@ func TestGetQueryInt32Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt32Set("a")
 				assert.True(t, ok)
 				expected := []int32{42, 49}
 				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1355,10 +1378,11 @@ func TestFailingGetQueryInt32Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt32Set("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1418,11 +1442,12 @@ func TestGetQueryInt64List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt64List("a")
 				assert.True(t, ok)
 				assert.Equal(t, []int64{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1456,10 +1481,11 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt64List("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1519,13 +1545,14 @@ func TestGetQueryInt64Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt64Set("a")
 				assert.True(t, ok)
 				expected := []int64{42, 49}
 				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.Equal(t, expected, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1562,10 +1589,11 @@ func TestFailingGetQueryInt64Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryInt64Set("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1625,11 +1653,12 @@ func TestGetQueryFloat64List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryFloat64List("a")
 				assert.True(t, ok)
 				assert.InEpsilonSlice(t, []float64{42.24, 49.94}, l, float64(0.005))
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1663,10 +1692,11 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryFloat64List("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1726,12 +1756,13 @@ func TestGetQueryFloat64Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryFloat64Set("a")
 				assert.True(t, ok)
 				sort.Slice(l, func(i, j int) bool { return l[i] < l[j] })
 				assert.InEpsilonSlice(t, []float64{42.24, 49.94}, l, float64(0.005))
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1768,10 +1799,11 @@ func TestFailingGetQueryFloat64Set(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryFloat64Set("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1831,10 +1863,11 @@ func TestFailingGetQueryValueList(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryValueList("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1882,14 +1915,15 @@ func TestGetQueryValueList(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				params, ok := req.GetQueryValueList("foo")
 				if !assert.Equal(t, true, ok) {
-					return
+					return ctx
 				}
 
 				lastQueryParam = params
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -1944,13 +1978,14 @@ func TestGetQueryValueSet(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				params, ok := req.GetQueryValueSet("foo")
 				if !assert.True(t, ok) {
-					return
+					return ctx
 				}
 				lastQueryParam = params
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -2003,10 +2038,11 @@ func TestFailingGetQueryValueSet(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				l, ok := req.GetQueryValueSet("a")
 				assert.False(t, ok)
 				assert.Nil(t, l)
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -2054,14 +2090,15 @@ func TestSetQueryValue(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				req.SetQueryValue("foo", "changed")
 				params, ok := req.GetQueryValues("foo")
 				if !assert.Equal(t, true, ok) {
-					return
+					return ctx
 				}
 				lastQueryParam = params
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -2106,7 +2143,7 @@ func TestPeekBody(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				value, _, err := req.PeekBody("arg1", "b1", "c1")
 				assert.Error(t, err, "do not expect error")
 				assert.Nil(t, value)
@@ -2123,6 +2160,7 @@ func TestPeekBody(t *testing.T) {
 				assert.Equal(t, []byte(`result`), value)
 				assert.Equal(t, vType, jsonparser.String)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -2163,7 +2201,7 @@ func TestReplaceBody(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				_, success := req.ReadAll()
 				assert.True(t, success)
 				assert.NotEqual(t, 0, len(req.GetRawBody()))
@@ -2181,6 +2219,7 @@ func TestReplaceBody(t *testing.T) {
 				assert.Equal(t, []byte("foo"), value)
 				assert.Equal(t, jsonparser.String, vType)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -2221,11 +2260,12 @@ func TestSpanCreated(t *testing.T) {
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				assert.NotEmpty(t, req.StartTime(), "startTime is not initialized")
 				span := req.GetSpan()
 				assert.NotNil(t, span)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)
@@ -2267,8 +2307,9 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
-			) {
+			) context.Context {
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+				return ctx
 			},
 		).HandleRequest),
 	)

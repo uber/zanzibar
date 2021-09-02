@@ -102,12 +102,12 @@ func (h *{{$handlerName}}) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -121,7 +121,7 @@ func (h *{{$handlerName}}) HandleRequest(
 
 	{{ if $reqHeaderRequiredKeys -}}
 	if !req.CheckHeaders({{$reqHeaderRequiredKeys | printf "%#v" }}) {
-		return
+		return ctx
 	}
 	{{- end -}}
 
@@ -130,7 +130,7 @@ func (h *{{$handlerName}}) HandleRequest(
 
 	{{- if ne .HTTPMethod "GET"}}
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
+		return ctx
 	}
 	{{end}}
 
@@ -161,7 +161,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
@@ -170,13 +170,13 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .ResponseType ""}}
-	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{else}}
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -198,14 +198,14 @@ func (h *{{$handlerName}}) HandleRequest(
 		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
 			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	{{end -}}
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 		{{ else }}
 		{{$val := false}}
 		{{range $idx, $exception := .Exceptions}}
@@ -227,11 +227,11 @@ func (h *{{$handlerName}}) HandleRequest(
 				{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
 			)
 			{{end -}}
-			return
+			return ctx
 		{{end}}
 		  default:
 			 res.SendError(500, "Unexpected server error", err)
-			 return
+			 return ctx
 		}
 		{{ end }}
 	}
@@ -242,12 +242,13 @@ func (h *{{$handlerName}}) HandleRequest(
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
-		return
+		return ctx
 	}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, bytes)
 	{{- else -}}
 	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
 	{{- end }}
+	return ctx
 }
 
 {{end -}}

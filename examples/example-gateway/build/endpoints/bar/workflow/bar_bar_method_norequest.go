@@ -43,7 +43,7 @@ type BarNoRequestWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarNoRequestWorkflow creates a workflow
@@ -75,7 +75,7 @@ type barNoRequestWorkflow struct {
 func (w barNoRequestWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -105,7 +105,7 @@ func (w barNoRequestWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.NoRequest(
+	ctx, clientRespBody, _, err := w.Clients.Bar.NoRequest(
 		ctx, clientHeaders,
 	)
 
@@ -117,7 +117,7 @@ func (w barNoRequestWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -125,7 +125,7 @@ func (w barNoRequestWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -134,7 +134,7 @@ func (w barNoRequestWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarNoRequestClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertNoRequestBarException(

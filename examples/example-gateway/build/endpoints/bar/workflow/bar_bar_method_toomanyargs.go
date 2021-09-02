@@ -47,7 +47,7 @@ type BarTooManyArgsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarTooManyArgsWorkflow creates a workflow
@@ -80,7 +80,7 @@ func (w barTooManyArgsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -119,7 +119,7 @@ func (w barTooManyArgsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -131,14 +131,14 @@ func (w barTooManyArgsWorkflow) Handle(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsFooFoo.FooException:
 			serverErr := convertTooManyArgsFooException(
 				errValue,
 			)
 
-			return nil, nil, serverErr
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -146,7 +146,7 @@ func (w barTooManyArgsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -161,7 +161,7 @@ func (w barTooManyArgsWorkflow) Handle(
 	}
 
 	response := convertBarTooManyArgsClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToTooManyArgsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_TooManyArgs_Args) *clientsIDlClientsBarBar.Bar_TooManyArgs_Args {

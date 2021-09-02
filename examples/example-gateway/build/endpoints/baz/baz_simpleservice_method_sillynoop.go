@@ -83,12 +83,12 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -110,7 +110,7 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewSimpleServiceSillyNoopWorkflow(h.Dependencies)
@@ -118,7 +118,7 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 
 		switch errValue := err.(type) {
@@ -127,20 +127,21 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 			res.WriteJSON(
 				403, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		case *endpointsIDlEndpointsBazBaz.ServerErr:
 			res.WriteJSON(
 				500, cliRespHeaders, errValue,
 			)
-			return
+			return ctx
 
 		default:
 			res.SendError(500, "Unexpected server error", err)
-			return
+			return ctx
 		}
 
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
+	return ctx
 }

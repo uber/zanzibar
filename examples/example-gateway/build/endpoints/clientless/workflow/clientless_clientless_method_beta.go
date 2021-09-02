@@ -40,7 +40,7 @@ type ClientlessBetaWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsClientlessClientless.Clientless_Beta_Args,
-	) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error)
 }
 
 // NewClientlessBetaWorkflow creates a workflow
@@ -61,7 +61,7 @@ func (w clientlessBetaWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsClientlessClientless.Clientless_Beta_Args,
-) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error) {
 	response := convertBetaDummyResponse(r)
 
 	clientlessHeaders := map[string]string{}
@@ -76,7 +76,7 @@ func (w clientlessBetaWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertBetaDummyResponse(in *endpointsIDlEndpointsClientlessClientless.Clientless_Beta_Args) *endpointsIDlEndpointsClientlessClientless.Response {

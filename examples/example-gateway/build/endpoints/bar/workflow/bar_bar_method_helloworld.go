@@ -43,7 +43,7 @@ type BarHelloWorldWorkflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (string, zanzibar.Header, error)
+	) (context.Context, string, zanzibar.Header, error)
 }
 
 // NewBarHelloWorldWorkflow creates a workflow
@@ -75,7 +75,7 @@ type barHelloWorldWorkflow struct {
 func (w barHelloWorldWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (string, zanzibar.Header, error) {
+) (context.Context, string, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -105,7 +105,7 @@ func (w barHelloWorldWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.Hello(
+	ctx, clientRespBody, _, err := w.Clients.Bar.Hello(
 		ctx, clientHeaders,
 	)
 
@@ -117,14 +117,14 @@ func (w barHelloWorldWorkflow) Handle(
 				errValue,
 			)
 
-			return "", nil, serverErr
+			return ctx, "", nil, serverErr
 
 		case *clientsIDlClientsBarBar.SeeOthersRedirection:
 			serverErr := convertHelloWorldSeeOthersRedirection(
 				errValue,
 			)
 
-			return "", nil, serverErr
+			return ctx, "", nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -132,7 +132,7 @@ func (w barHelloWorldWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return "", nil, err
+			return ctx, "", nil, err
 
 		}
 	}
@@ -141,7 +141,7 @@ func (w barHelloWorldWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarHelloWorldClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertHelloWorldBarException(

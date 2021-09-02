@@ -44,7 +44,7 @@ type BarArgWithQueryHeaderWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgWithQueryHeader_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithQueryHeaderWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgWithQueryHeaderWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgWithQueryHeader_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithQueryHeaderClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgWithQueryHeaderWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithQueryHeader(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithQueryHeader(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barArgWithQueryHeaderWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -130,7 +130,7 @@ func (w barArgWithQueryHeaderWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithQueryHeaderClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToArgWithQueryHeaderClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithQueryHeader_Args) *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args {

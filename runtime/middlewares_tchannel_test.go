@@ -65,7 +65,7 @@ func TestTchannelHandlers(t *testing.T) {
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
 	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
-		Return(map[string]string{"some-res-header": "something"}, nil)
+		Return(ctx, map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
@@ -88,7 +88,7 @@ func TestTchannelHandlers(t *testing.T) {
 	}
 
 	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
-		Return(map[string]string{"some-res-header": "something"}, nil)
+		Return(ctx, map[string]string{"some-res-header": "something"}, nil)
 	success, _, err = ms.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
@@ -140,9 +140,9 @@ func (c *countTchannelMiddleware) HandleRequest(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
-) (bool, error) {
+) (context.Context, bool, error) {
 	c.reqCounter++
-	return c.reqBail, nil
+	return ctx, c.reqBail, nil
 }
 
 func (c *countTchannelMiddleware) HandleResponse(
@@ -162,8 +162,8 @@ func (c *countTchannelMiddleware) Name() string {
 	return c.name
 }
 
-func (c *mockTchannelHandler) Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp zanzibar.RWTStruct, respHeaders map[string]string, err error) {
-	return true, nil, map[string]string{}, err
+func (c *mockTchannelHandler) Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (ctx_resp context.Context, success bool, resp zanzibar.RWTStruct, respHeaders map[string]string, err error) {
+	return ctx, true, nil, map[string]string{}, err
 }
 
 // Ensures that a tchannel middleware stack can correctly return all of its handlers.
@@ -182,7 +182,7 @@ func TestTchannelMiddlewareRequestAbort(t *testing.T) {
 
 	middles := []zanzibar.MiddlewareTchannelHandle{mid1, mid2}
 	middlewareStack := zanzibar.NewTchannelStack(middles, mockTHandler)
-	_, _, _, err := middlewareStack.Handle(context.Background(), map[string]string{}, nil)
+	_, _, _, _, err := middlewareStack.Handle(context.Background(), map[string]string{}, nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, mid1.reqCounter, 1)

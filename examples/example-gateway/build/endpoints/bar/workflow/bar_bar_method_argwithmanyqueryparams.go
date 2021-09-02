@@ -44,7 +44,7 @@ type BarArgWithManyQueryParamsWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args,
-	) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error)
 }
 
 // NewBarArgWithManyQueryParamsWorkflow creates a workflow
@@ -77,7 +77,7 @@ func (w barArgWithManyQueryParamsWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args,
-) (*endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToArgWithManyQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -108,7 +108,7 @@ func (w barArgWithManyQueryParamsWorkflow) Handle(
 		}
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithManyQueryParams(
+	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithManyQueryParams(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -121,7 +121,7 @@ func (w barArgWithManyQueryParamsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			return nil, nil, err
+			return ctx, nil, nil, err
 
 		}
 	}
@@ -130,7 +130,7 @@ func (w barArgWithManyQueryParamsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithManyQueryParamsClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertToArgWithManyQueryParamsClientRequest(in *endpointsIDlEndpointsBarBar.Bar_ArgWithManyQueryParams_Args) *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args {

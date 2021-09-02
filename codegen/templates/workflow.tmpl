@@ -45,21 +45,21 @@ Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error)
+) (context.Context, zanzibar.Header, error)
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error)
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error)
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) (zanzibar.Header, error)
+) (context.Context, zanzibar.Header, error)
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error)
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error)
 {{- end}}
 }
 
@@ -105,21 +105,21 @@ func (w {{$workflowStruct}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error) {
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) (zanzibar.Header, error) {
+) (context.Context, zanzibar.Header, error) {
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error) {
+) (context.Context, {{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
@@ -169,37 +169,37 @@ func (w {{$workflowStruct}}) Handle(
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{- end }}
 	{{else if eq $clientResType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
 	{{else}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
@@ -214,11 +214,11 @@ func (w {{$workflowStruct}}) Handle(
 					errValue,
 				)
 				{{if eq $responseType ""}}
-				return nil, serverErr
+				return ctx, nil, serverErr
 				{{else if eq $responseType "string" }}
-				return "", nil, serverErr
+				return ctx, "", nil, serverErr
 				{{else}}
-				return nil, nil, serverErr
+				return ctx, nil, nil, serverErr
 				{{end}}
 			{{end}}
 			default:
@@ -228,11 +228,11 @@ func (w {{$workflowStruct}}) Handle(
 				)
 
 				{{if eq $responseType ""}}
-				return nil, err
+				return ctx, nil, err
 				{{else if eq $responseType "string" }}
-				return "", nil, err
+				return ctx, "", nil, err
 				{{else}}
-				return nil, nil, err
+				return ctx, nil, nil, err
 				{{end}}
 		}
 	}
@@ -251,10 +251,10 @@ func (w {{$workflowStruct}}) Handle(
 	{{- end}}
 
 	{{if eq .ResponseType "" -}}
-	return resHeaders, nil
+	return ctx, resHeaders, nil
 	{{- else -}}
 	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 	{{- end -}}
 }
 

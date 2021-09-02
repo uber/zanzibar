@@ -86,12 +86,12 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -121,7 +121,7 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewBarArgWithQueryHeaderWorkflow(h.Dependencies)
@@ -129,7 +129,7 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -149,14 +149,15 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
 			zfields = append(zfields, zap.String("x-trace-id", traceKey))
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

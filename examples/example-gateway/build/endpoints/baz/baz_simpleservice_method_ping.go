@@ -82,12 +82,12 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-) {
+) context.Context {
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
-			h.Dependencies.Default.ContextLogger.ErrorZ(
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
@@ -109,7 +109,7 @@ func (h *SimpleServicePingHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewSimpleServicePingWorkflow(h.Dependencies)
@@ -117,12 +117,13 @@ func (h *SimpleServicePingHandler) HandleRequest(
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
 
-	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
-		return
+		return ctx
 
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
+	return ctx
 }

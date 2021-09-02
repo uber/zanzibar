@@ -40,7 +40,7 @@ type ClientlessClientlessArgWithHeadersWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
-	) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error)
+	) (context.Context, *endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error)
 }
 
 // NewClientlessClientlessArgWithHeadersWorkflow creates a workflow
@@ -61,7 +61,7 @@ func (w clientlessClientlessArgWithHeadersWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsIDlEndpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args,
-) (*endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error) {
+) (context.Context, *endpointsIDlEndpointsClientlessClientless.Response, zanzibar.Header, error) {
 	response := convertClientlessArgWithHeadersDummyResponse(r)
 
 	clientlessHeaders := map[string]string{}
@@ -88,7 +88,7 @@ func (w clientlessClientlessArgWithHeadersWorkflow) Handle(
 		resHeaders.Set("X-Uuid", h)
 	}
 
-	return response, resHeaders, nil
+	return ctx, response, resHeaders, nil
 }
 
 func convertClientlessArgWithHeadersDummyResponse(in *endpointsIDlEndpointsClientlessClientless.Clientless_ClientlessArgWithHeaders_Args) *endpointsIDlEndpointsClientlessClientless.Response {

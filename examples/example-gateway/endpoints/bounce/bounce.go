@@ -47,10 +47,10 @@ func (w bounceWorkflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	req *bounce.Bounce_Bounce_Args,
-) (string, zanzibar.Header, error) {
-	res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg})
+) (context.Context, string, zanzibar.Header, error) {
+	ctx, res, err := w.echo.EchoEcho(ctx, &echo.Request{Message: req.Msg})
 	if err != nil {
-		return "", nil, err
+		return ctx, "", nil, err
 	}
-	return res.Message, nil, nil
+	return ctx, res.Message, nil, nil
 }

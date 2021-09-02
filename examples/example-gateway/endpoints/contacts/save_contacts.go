@@ -34,21 +34,21 @@ func (w SaveContactsEndpoint) Handle(
 	ctx context.Context,
 	headers zanzibar.Header,
 	r *endpointContacts.Contacts_SaveContacts_Args,
-) (*endpointContacts.SaveContactsResponse, zanzibar.Header, error) {
+) (context.Context, *endpointContacts.SaveContactsResponse, zanzibar.Header, error) {
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 
 	clientBody := convertToClient(r)
-	cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
+	_, cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
 	if err != nil {
 		w.Logger.Error("Could not make client request", zap.Error(err))
-		return nil, nil, err
+		return ctx, nil, nil, err
 	}
 
 	// TODO: verify IsOKResponse() on client response status code
 
 	response := convertToResponse(cres)
-	return response, nil, nil
+	return ctx, response, nil, nil
 }
 
 func convertToResponse(

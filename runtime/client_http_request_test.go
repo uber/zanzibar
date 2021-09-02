@@ -199,7 +199,7 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
-	_, _, err = bar.EchoI8(
+	_, _, _, err = bar.EchoI8(
 		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
 	)
 
@@ -249,7 +249,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
-	body, headers, err := bClient.Normal(
+	_, body, headers, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.NoError(t, err)
@@ -323,7 +323,7 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
-	body, _, err := bClient.Normal(
+	_, body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
@@ -360,7 +360,7 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
-	body, _, err := bClient.Normal(
+	_, body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
@@ -395,7 +395,7 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
-	_, err = bClient.ArgNotStruct(
+	_, _, err = bClient.ArgNotStruct(
 		context.Background(), nil,
 		&clientsBarBar.Bar_ArgNotStruct_Args{
 			Request: "request",
@@ -434,7 +434,7 @@ func TestMakingClientCallWithServerError(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
-	body, _, err := bClient.Normal(
+	_, body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)

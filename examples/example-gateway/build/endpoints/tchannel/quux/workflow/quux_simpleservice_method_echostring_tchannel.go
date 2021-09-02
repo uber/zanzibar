@@ -37,5 +37,5 @@ type SimpleServiceEchoStringWorkflow interface {
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
 		r *endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Args,
-	) (string, zanzibar.Header, error)
+	) (context.Context, string, zanzibar.Header, error)
 }
