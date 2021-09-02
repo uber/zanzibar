@@ -92,7 +92,7 @@ lint: check-licence eclint-check
 	@go get golang.org/x/lint/golint
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking errcheck..."
-	@go run vendor/github.com/kisielk/errchek/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@go run vendor/github.com/kisielk/errcheck/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
 	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
 	@./vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
