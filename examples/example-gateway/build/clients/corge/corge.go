@@ -150,15 +150,8 @@ func NewClient(deps *module.Dependencies) Client {
 
 	var client *zanzibar.TChannelClient
 
-	retryCountFeaturePresent := deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled")
-	var retryCountFeatureEnabled bool
-
-	if retryCountFeaturePresent {
-		retryCountFeatureEnabled = deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled")
-	}
-
 	var maxAttempts int
-	if retryCountFeatureEnabled && deps.Default.Config.ContainsKey("clients.corge.retryCount") {
+	if deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.corge.retryCount") {
 		maxAttempts = int(deps.Default.Config.MustGetInt("clients.corge.retryCount"))
 		client = zanzibar.NewTChannelClientContext(
 			channel,
