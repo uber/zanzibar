@@ -3044,9 +3044,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 
 	var client *zanzibar.TChannelClient
 
-	var maxAttempts int
 	if  deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.{{$clientID}}.retryCount") {
-		maxAttempts = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
+		maxAttempts := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
 		client = zanzibar.NewTChannelClientContext(
 				channel,
 				deps.Default.ContextLogger,
@@ -3299,7 +3298,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15185, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15165, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
