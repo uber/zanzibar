@@ -20,3 +20,5 @@ subLoggerLevel.http: info
 subLoggerLevel.jaeger: info
 subLoggerLevel.tchannel: info
 useDatacenter: false
+#Some tchannel clients have retryCount functionality, this feature will be disabled by default
+tchannelclients.retryCount.feature.enabled: false

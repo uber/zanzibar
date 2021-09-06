@@ -3042,24 +3042,49 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		}
 	}
 
-	client := zanzibar.NewTChannelClientContext(
-		channel,
-		deps.Default.ContextLogger,
-		deps.Default.ContextMetrics,
-		deps.Default.ContextExtractor,
-		&zanzibar.TChannelClientOption{
-			ServiceName:          serviceName,
-			ClientID:             "{{$clientID}}",
-			MethodNames:          methodNames,
-			Timeout:              timeout,
-			TimeoutPerAttempt:    timeoutPerAttempt,
-			RoutingKey:           &routingKey,
-			RuleEngine:           re,
-			HeaderPatterns:       headerPatterns,
-			RequestUUIDHeaderKey: requestUUIDHeaderKey,
-			AltChannelMap:        altChannelMap,
-		},
-	)
+	var client *zanzibar.TChannelClient
+
+	if  deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.{{$clientID}}.retryCount") && int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount")) > 0{
+		maxAttempts := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
+		client = zanzibar.NewTChannelClientContext(
+				channel,
+				deps.Default.ContextLogger,
+				deps.Default.ContextMetrics,
+				deps.Default.ContextExtractor,
+				&zanzibar.TChannelClientOption{
+					ServiceName:          serviceName,
+					ClientID:             "{{$clientID}}",
+					MethodNames:          methodNames,
+					Timeout:              timeout,
+					TimeoutPerAttempt:    timeoutPerAttempt,
+					RoutingKey:           &routingKey,
+					RuleEngine:           re,
+					HeaderPatterns:       headerPatterns,
+					RequestUUIDHeaderKey: requestUUIDHeaderKey,
+					AltChannelMap:        altChannelMap,
+					MaxAttempts:          maxAttempts,
+				},
+			)
+	}else{
+		client = zanzibar.NewTChannelClientContext(
+				channel,
+				deps.Default.ContextLogger,
+				deps.Default.ContextMetrics,
+				deps.Default.ContextExtractor,
+				&zanzibar.TChannelClientOption{
+					ServiceName:          serviceName,
+					ClientID:             "{{$clientID}}",
+					MethodNames:          methodNames,
+					Timeout:              timeout,
+					TimeoutPerAttempt:    timeoutPerAttempt,
+					RoutingKey:           &routingKey,
+					RuleEngine:           re,
+					HeaderPatterns:       headerPatterns,
+					RequestUUIDHeaderKey: requestUUIDHeaderKey,
+					AltChannelMap:        altChannelMap,
+				},
+			)
+	}
 
 	return &{{$clientName}}{
 		client: client,
@@ -3273,7 +3298,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14095, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15243, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
