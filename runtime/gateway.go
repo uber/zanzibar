@@ -368,7 +368,7 @@ func (gateway *Gateway) registerPredefined() {
 		"health", "health",
 		gateway.handleHealthRequest,
 	)
-	gateway.HTTPRouter.Handle("GET", "/health", http.HandlerFunc(tracer.HandleRequest))
+	_ = gateway.HTTPRouter.Handle("GET", "/health", http.HandlerFunc(tracer.HandleRequest))
 }
 
 func (gateway *Gateway) handleHealthRequest(

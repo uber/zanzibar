@@ -37,13 +37,17 @@ const (
 
 func TestNewRuntimeConfigOrDie(t *testing.T) {
 	httpPortValue := os.Getenv(uberPortHTTPEnv)
-	defer os.Setenv(uberPortHTTPEnv, httpPortValue)
+	defer func(key, value string) {
+		_ = os.Setenv(key, value)
+	}(uberPortHTTPEnv, httpPortValue)
 
 	tchannelPortValue := os.Getenv(uberPortTChannelEnv)
-	defer os.Setenv(uberPortTChannelEnv, tchannelPortValue)
+	defer func(key, value string) {
+		_ = os.Setenv(key, value)
+	}(uberPortTChannelEnv, tchannelPortValue)
 
-	os.Setenv(uberPortHTTPEnv, "1111")
-	os.Setenv(uberPortTChannelEnv, "2222")
+	_ = os.Setenv(uberPortHTTPEnv, "1111")
+	_ = os.Setenv(uberPortTChannelEnv, "2222")
 	cfg := config.NewRuntimeConfigOrDie([]string{"test.yaml"}, nil)
 
 	assert.Equal(t, "my-gateway", cfg.MustGetString("serviceName")) // existing config

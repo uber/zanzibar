@@ -59,15 +59,15 @@ func (s *routerSuite) SetupTest() {
 
 func (s *routerSuite) TestRouter() {
 	err := s.router.Handle("GET", "/noslash", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("noslash\n"))
+		_, _ = w.Write([]byte("noslash\n"))
 	}))
 	s.NoError(err)
 	err = s.router.Handle("GET", "/withslash/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("withslash\n"))
+		_, _ = w.Write([]byte("withslash\n"))
 	}))
 	s.NoError(err)
 	err = s.router.Handle("POST", "/postonly", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("postonly\n"))
+		_, _ = w.Write([]byte("postonly\n"))
 	}))
 	s.NoError(err)
 	err = s.router.Handle("GET", "/panicerror", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -120,12 +120,12 @@ func (s *routerSuite) TestExtractParameters() {
 
 func (s *routerSuite) TestRouteConflict() {
 	err := s.router.Handle("GET", "/foo", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("foo1\n"))
+		_, _ = w.Write([]byte("foo1\n"))
 	}))
 	s.NoError(err)
 
 	err = s.router.Handle("GET", "/foo", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("foo2\n"))
+		_, _ = w.Write([]byte("foo2\n"))
 	}))
 	s.Error(err)
 
@@ -141,12 +141,12 @@ func (s *routerSuite) TestRouteConflict() {
 
 func (s *routerSuite) TestRouteConflictVariable() {
 	err := s.router.Handle("GET", "/foo/:a", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("foo a\n"))
+		_, _ = w.Write([]byte("foo a\n"))
 	}))
 	s.NoError(err)
 
 	err = s.router.Handle("GET", "/foo/:b", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("foo b\n"))
+		_, _ = w.Write([]byte("foo b\n"))
 	}))
 	s.Error(err)
 
