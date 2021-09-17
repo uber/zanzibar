@@ -41,24 +41,11 @@ import (
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		&testGateway.Options{
-			LogWhitelist: map[string]bool{
-				"Could not read request body": true,
-			},
-			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
-			KnownTChannelBackends: []string{"baz"},
-			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
-		},
-		exampleGateway.CreateGateway,
-	)
-
+	gateway, err := createTestGateway()
 	if !assert.NoError(t, err) {
 		return
 	}
 	defer gateway.Close()
-
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         bgateway.ActualGateway.RootScope,
@@ -80,24 +67,30 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 		},
 	)
 
-	httpReq, _ := http.NewRequest(
-		"GET",
-		"/health-check",
-		&corruptReader{},
-	)
-
-	req := zanzibar.NewServerHTTPRequest(
-		httptest.NewRecorder(),
-		httpReq,
-		nil,
-		endpoint,
-	)
+	httpReq, _ := http.NewRequest("GET", "/health-check", &corruptReader{})
+	req := zanzibar.NewServerHTTPRequest(httptest.NewRecorder(), httpReq, nil, endpoint)
 	dJ := &dummyJson{}
 	assert.False(t, req.ReadAndUnmarshalBody(dJ))
 
 	logLines := gateway.Logs("error", "Could not read request body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
+}
+
+func createTestGateway() (testGateway.TestGateway, error) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		&testGateway.Options{
+			LogWhitelist: map[string]bool{
+				"Could not read request body": true,
+			},
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		},
+		exampleGateway.CreateGateway,
+	)
+	return gateway, err
 }
 
 type dummyJson struct {
