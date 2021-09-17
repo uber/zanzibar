@@ -41,24 +41,11 @@ import (
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		&testGateway.Options{
-			LogWhitelist: map[string]bool{
-				"Could not read request body": true,
-			},
-			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
-			KnownTChannelBackends: []string{"baz"},
-			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
-		},
-		exampleGateway.CreateGateway,
-	)
-
+	gateway, err := createTestGateway()
 	if !assert.NoError(t, err) {
 		return
 	}
 	defer gateway.Close()
-
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	deps := &zanzibar.DefaultDependencies{
 		Scope:         bgateway.ActualGateway.RootScope,
@@ -80,24 +67,30 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 		},
 	)
 
-	httpReq, _ := http.NewRequest(
-		"GET",
-		"/health-check",
-		&corruptReader{},
-	)
-
-	req := zanzibar.NewServerHTTPRequest(
-		httptest.NewRecorder(),
-		httpReq,
-		nil,
-		endpoint,
-	)
+	httpReq, _ := http.NewRequest("GET", "/health-check", &corruptReader{})
+	req := zanzibar.NewServerHTTPRequest(httptest.NewRecorder(), httpReq, nil, endpoint)
 	dJ := &dummyJson{}
 	assert.False(t, req.ReadAndUnmarshalBody(dJ))
 
 	logLines := gateway.Logs("error", "Could not read request body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
+}
+
+func createTestGateway() (testGateway.TestGateway, error) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		&testGateway.Options{
+			LogWhitelist: map[string]bool{
+				"Could not read request body": true,
+			},
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		},
+		exampleGateway.CreateGateway,
+	)
+	return gateway, err
 }
 
 type dummyJson struct {
@@ -2278,6 +2271,50 @@ func TestSpanCreated(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 }
 
+func TestGetAPIEnvironment(t *testing.T) {
+	cases := []struct {
+		name                   string
+		config                 *zanzibar.StaticConfig
+		requestAPIEnvironment  string
+		expectedApiEnvironment string
+	}{
+		{
+			name:                   "Endpoint Request with no config and no api environment header",
+			expectedApiEnvironment: "production",
+		},
+		{
+			name:                   "Endpoint Request with no config and api environment header :: is ignored",
+			requestAPIEnvironment:  "sandbox",
+			expectedApiEnvironment: "production",
+		},
+		{
+			name:                   "Endpoint Request with config and matching api environment header :: is used",
+			requestAPIEnvironment:  "sandbox",
+			expectedApiEnvironment: "sandbox",
+			config: zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+				"apiEnvironmentHeader": "x-api-environment",
+			}),
+		},
+		{
+			name:                   "Endpoint Request with config and non matching api environment header :: is ignored",
+			requestAPIEnvironment:  "sandbox",
+			expectedApiEnvironment: "production",
+			config: zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+				"apiEnvironmentHeader": "x-api-environment-mod",
+			}),
+		},
+	}
+
+	for _, tc := range cases {
+		deps := &zanzibar.DefaultDependencies{Config: tc.config}
+		endpoint := zanzibar.NewRouterEndpoint(nil, deps, "", "", nil)
+		request := httptest.NewRequest(http.MethodGet, "/health", nil)
+		request.Header.Add("x-api-environment", tc.requestAPIEnvironment)
+		environment := zanzibar.GetAPIEnvironment(endpoint, request)
+		assert.Equal(t, tc.expectedApiEnvironment, environment)
+	}
+}
+
 func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, environment string) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
@@ -2368,6 +2405,7 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 		"Accept-Encoding":         "gzip",
 		"User-Agent":              "Go-http-client/1.1",
 		"Res-Header-Content-Type": "application/json",
+		"apienvironment":          "production",
 	}
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)

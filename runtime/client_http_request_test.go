@@ -50,6 +50,7 @@ var defaultTestConfig map[string]interface{} = map[string]interface{}{
 	// server closes, it attempts to close the channel for emitting metrics
 	// but the circuit breaker stats report goroutine could still be running
 	"clients.bar.circuitBreakerDisabled": true,
+	"apiEnvironmentHeader":               "x-api-environment",
 }
 
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {

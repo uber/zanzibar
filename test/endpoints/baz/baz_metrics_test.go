@@ -115,15 +115,16 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, numMetrics+5, len(metrics)) // magic number here because there are histogram entries
 
 	endpointTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "baz",
-		"handlerid":     "call",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"protocol":      "HTTP",
+		"env":            "test",
+		"service":        "test-gateway",
+		"endpointid":     "baz",
+		"handlerid":      "call",
+		"regionname":     "san_francisco",
+		"device":         "ios",
+		"deviceversion":  "carbon",
+		"dc":             "unknown",
+		"protocol":       "HTTP",
+		"apienvironment": "production",
 	}
 	statusTags := map[string]string{
 		"status": "204",
@@ -205,6 +206,7 @@ func TestCallMetrics(t *testing.T) {
 		"device":         "ios",
 		"deviceversion":  "carbon",
 		"protocol":       "HTTP",
+		"apienvironment": "production",
 	}
 	for _, name := range clientNames {
 		key := tally.KeyForPrefixedStringMap(name, clientTags)

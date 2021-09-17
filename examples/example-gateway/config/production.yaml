@@ -127,3 +127,4 @@ circuitbreaking-configurations:
 
 service.shadow.env.override.enable: true
 dedicated.tchannel.client: false
+apiEnvironmentHeader: x-api-environment

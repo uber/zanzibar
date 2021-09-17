@@ -55,6 +55,7 @@ const (
 	// shadow headers and environment
 	shadowEnvironment = "shadow"
 	environmentKey    = "env"
+	apienvironmentKey = "apienvironment"
 )
 
 var knownMetrics = []string{

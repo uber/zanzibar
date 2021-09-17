@@ -80,6 +80,9 @@ const (
 	scopeTagTChannel        = "TChannel"
 	scopeTagsTargetService  = "targetservice"
 	scopeTagsTargetEndpoint = "targetendpoint"
+	scopeTagsAPIEnvironment = "apienvironment"
+
+	apiEnvironmentDefault = "production"
 )
 
 // WithEndpointField adds the endpoint information in the
