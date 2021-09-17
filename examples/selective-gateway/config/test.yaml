@@ -82,3 +82,5 @@ circuitbreaking-configurations:
       errorPercentThreshold: 30
       requestVolumeThreshold: 25
       maxConcurrentRequests: 30
+
+apiEnvironmentHeader: x-api-environment

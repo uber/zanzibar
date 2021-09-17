@@ -98,15 +98,16 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, numMetrics+4, len(metrics))
 
 	endpointTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "bar",
-		"handlerid":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"protocol":      "HTTP",
+		"env":            "test",
+		"service":        "test-gateway",
+		"endpointid":     "bar",
+		"handlerid":      "normal",
+		"regionname":     "san_francisco",
+		"device":         "ios",
+		"deviceversion":  "carbon",
+		"dc":             "unknown",
+		"protocol":       "HTTP",
+		"apienvironment": "production",
 	}
 	statusTags := map[string]string{
 		"status": "200",
@@ -154,6 +155,7 @@ func TestCallMetrics(t *testing.T) {
 		"device":         "ios",
 		"deviceversion":  "carbon",
 		"protocol":       "HTTP",
+		"apienvironment": "production",
 	}
 	cStatusTags := map[string]string{
 		"status": "200",
@@ -234,6 +236,7 @@ func TestCallMetrics(t *testing.T) {
 		"Content-Length":  "128",
 		"User-Agent":      "Go-http-client/1.1",
 		"Accept-Encoding": "gzip",
+		"apienvironment":  "production",
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)

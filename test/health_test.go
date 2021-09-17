@@ -121,6 +121,7 @@ func TestHealthMetrics(t *testing.T) {
 	headers["regionname"] = "san_francisco"
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
+
 	res, err := gateway.MakeRequest("GET", "/health", headers, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -132,15 +133,16 @@ func TestHealthMetrics(t *testing.T) {
 	metrics := cgateway.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics))
 	tags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "health",
-		"handlerid":     "health",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"protocol":      "HTTP",
+		"env":            "test",
+		"service":        "test-gateway",
+		"endpointid":     "health",
+		"handlerid":      "health",
+		"regionname":     "san_francisco",
+		"device":         "ios",
+		"deviceversion":  "carbon",
+		"dc":             "unknown",
+		"protocol":       "HTTP",
+		"apienvironment": "production",
 	}
 	statusTags := map[string]string{
 		"status": "200",

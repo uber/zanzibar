@@ -102,7 +102,7 @@ func NewServerHTTPRequest(
 	}
 
 	// Overriding the api-environment and default to production
-	apiEnvironment := APIEnvironmentDefault
+	apiEnvironment := apiEnvironmentDefault
 	if endpoint.config != nil &&
 		endpoint.config.ContainsKey("apiEnvironmentHeader") &&
 		r.Header.Get(endpoint.config.MustGetString("apiEnvironmentHeader")) != "" {

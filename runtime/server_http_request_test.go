@@ -2361,6 +2361,7 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 		"Accept-Encoding":         "gzip",
 		"User-Agent":              "Go-http-client/1.1",
 		"Res-Header-Content-Type": "application/json",
+		"apienvironment":          "production",
 	}
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)

@@ -82,7 +82,7 @@ const (
 	scopeTagsTargetEndpoint = "targetendpoint"
 	scopeTagsAPIEnvironment = "apienvironment"
 
-	APIEnvironmentDefault = "production"
+	apiEnvironmentDefault = "production"
 )
 
 // WithEndpointField adds the endpoint information in the
