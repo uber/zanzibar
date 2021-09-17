@@ -102,12 +102,7 @@ func NewServerHTTPRequest(
 	}
 
 	// Overriding the api-environment and default to production
-	apiEnvironment := apiEnvironmentDefault
-	if endpoint.config != nil &&
-		endpoint.config.ContainsKey("apiEnvironmentHeader") &&
-		r.Header.Get(endpoint.config.MustGetString("apiEnvironmentHeader")) != "" {
-		apiEnvironment = r.Header.Get(endpoint.config.MustGetString("apiEnvironmentHeader"))
-	}
+	apiEnvironment := GetAPIEnvironment(endpoint, r)
 	scopeTags[scopeTagsAPIEnvironment] = apiEnvironment
 	logFields = append(logFields, zap.String(apienvironmentKey, apiEnvironment))
 
@@ -148,6 +143,20 @@ func NewServerHTTPRequest(
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
 	return req
+}
+
+// GetAPIEnvironment returns the api environment for a given request.
+// By default, the api environment is set to production. However, there may be
+// use cases where a different environment may be required for monitoring purposes.
+// This may be overridden by a non-empty environment value in the request header.
+func GetAPIEnvironment(endpoint *RouterEndpoint, r *http.Request) string {
+	apiEnvironment := apiEnvironmentDefault
+	if endpoint.config != nil &&
+		endpoint.config.ContainsKey("apiEnvironmentHeader") &&
+		r.Header.Get(endpoint.config.MustGetString("apiEnvironmentHeader")) != "" {
+		apiEnvironment = r.Header.Get(endpoint.config.MustGetString("apiEnvironmentHeader"))
+	}
+	return apiEnvironment
 }
 
 // Context returns the request's context.

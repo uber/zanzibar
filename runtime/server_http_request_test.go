@@ -2271,6 +2271,50 @@ func TestSpanCreated(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 }
 
+func TestGetAPIEnvironment(t *testing.T) {
+	cases := []struct {
+		name                   string
+		config                 *zanzibar.StaticConfig
+		requestAPIEnvironment  string
+		expectedApiEnvironment string
+	}{
+		{
+			name:                   "Endpoint Request with no config and no api environment header",
+			expectedApiEnvironment: "production",
+		},
+		{
+			name:                   "Endpoint Request with no config and api environment header :: is ignored",
+			requestAPIEnvironment:  "sandbox",
+			expectedApiEnvironment: "production",
+		},
+		{
+			name:                   "Endpoint Request with config and matching api environment header :: is used",
+			requestAPIEnvironment:  "sandbox",
+			expectedApiEnvironment: "sandbox",
+			config: zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+				"apiEnvironmentHeader": "x-api-environment",
+			}),
+		},
+		{
+			name:                   "Endpoint Request with config and non matching api environment header :: is ignored",
+			requestAPIEnvironment:  "sandbox",
+			expectedApiEnvironment: "production",
+			config: zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+				"apiEnvironmentHeader": "x-api-environment-mod",
+			}),
+		},
+	}
+
+	for _, tc := range cases {
+		deps := &zanzibar.DefaultDependencies{Config: tc.config}
+		endpoint := zanzibar.NewRouterEndpoint(nil, deps, "", "", nil)
+		request := httptest.NewRequest(http.MethodGet, "/health", nil)
+		request.Header.Add("x-api-environment", tc.requestAPIEnvironment)
+		environment := zanzibar.GetAPIEnvironment(endpoint, request)
+		assert.Equal(t, tc.expectedApiEnvironment, environment)
+	}
+}
+
 func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, environment string) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,

@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "eclint": "^1.1.5",
+    "istanbul": "^0.4.5",
     "uber-licence": "^3.1.1"
   }
 }
