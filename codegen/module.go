@@ -1269,7 +1269,8 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 	qpsLevels, err := PopulateQPSLevels(baseDirectory + "/endpoints")
 	if err != nil {
-		return nil, errors.Errorf(
+		return nil, errors.Wrapf(
+			err,
 			"error in populating qps levels for base directory %q",
 			baseDirectory,
 		)
