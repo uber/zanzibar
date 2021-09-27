@@ -146,6 +146,7 @@ type DefaultDependencies struct {
 	Scope          tally.Scope
 	Tracer         opentracing.Tracer
 	Config         *StaticConfig
+	Channel 	   *tchannel.Channel
 	ServerTChannel *tchannel.Channel
 	Gateway        *Gateway
 

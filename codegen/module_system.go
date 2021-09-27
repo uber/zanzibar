@@ -654,7 +654,8 @@ func UnmarshalEndpointFile(endpointFile string) (map[string]interface{}, error) 
 func GetListOfAllFilesInEndpointDir(filePath string, filesList []string) ([]string, error) {
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		return nil, errors.Errorf(
+		return nil, errors.Wrapf(
+			err,
 			"error in getting file info for file path %q",
 			filePath,
 		)
@@ -662,7 +663,8 @@ func GetListOfAllFilesInEndpointDir(filePath string, filesList []string) ([]stri
 	if fileInfo.IsDir() {
 		items, err := ioutil.ReadDir(filePath)
 		if err != nil {
-			return nil, errors.Errorf(
+			return nil, errors.Wrapf(
+				err,
 				"error in reading base directory %q",
 				filePath,
 			)

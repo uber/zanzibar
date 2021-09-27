@@ -1269,10 +1269,8 @@ func (system *ModuleSystem) IncrementalBuild(
 	}
 	qpsLevels, err := PopulateQPSLevels(baseDirectory + "/endpoints")
 	if err != nil {
-		return nil, errors.Errorf(
-			"error in populating qps levels for base directory %q",
-			baseDirectory,
-		)
+		fmt.Errorf("error in populating qps levels for base directory %q: %w", baseDirectory, err)
+		qpsLevels = make(map[string]int)
 	}
 	for _, class := range system.classOrder {
 		var wg sync.WaitGroup
