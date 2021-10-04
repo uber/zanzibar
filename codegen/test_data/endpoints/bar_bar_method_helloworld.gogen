@@ -30,14 +30,14 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	workflow "github.com/uber/zanzibar/v1/.tmp_gen/endpoints/bar/workflow"
+	endpointsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
-	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
+	module "github.com/uber/zanzibar/v1/.tmp_gen/endpoints/bar/module"
 )
 
 // BarHelloWorldHandler is the handler for "/bar/hello"

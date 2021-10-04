@@ -198,7 +198,7 @@ func createTestBinaryFile(mainPath string) (*testBinaryInfo, error) {
 			continue
 		}
 
-		allPackages = append(allPackages, path.Join("github.com/uber/zanzibar", folder))
+		allPackages = append(allPackages, path.Join("github.com/uber/zanzibar/v1", folder))
 	}
 
 	allPackagesString := strings.Join(allPackages, ",")

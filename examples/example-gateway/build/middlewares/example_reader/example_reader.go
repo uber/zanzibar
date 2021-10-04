@@ -24,9 +24,9 @@
 package examplereadermiddleware
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_reader/module"
-	handle "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/example_reader/module"
+	handle "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/example_reader"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // Middleware is a container for module.Deps and factory for MiddlewareHandle

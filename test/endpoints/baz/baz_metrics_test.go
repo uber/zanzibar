@@ -29,11 +29,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	bazClient "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/baz"
+	clientsBazBaz "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 func TestCallMetrics(t *testing.T) {

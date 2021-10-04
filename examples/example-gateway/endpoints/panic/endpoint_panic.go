@@ -3,9 +3,9 @@ package panic
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/panic/module"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/panic/workflow"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // NewServiceCFrontHelloWorkflow ...

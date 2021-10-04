@@ -27,14 +27,14 @@ import (
 	"context"
 	"net/textproto"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v1/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
-	endpointsIDlEndpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/googlenow/googlenow"
+	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
+	endpointsIDlEndpointsGooglenowGooglenow "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/googlenow/googlenow"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/googlenow/module"
 	"go.uber.org/zap"
 )
 

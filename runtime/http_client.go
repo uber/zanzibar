@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/uber-go/tally"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
 )
 
 // HTTPClient defines a http client.

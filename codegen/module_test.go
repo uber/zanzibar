@@ -247,7 +247,7 @@ func TestExampleService(t *testing.T) {
 
 	// TODO: this should return a collection of errors if they occur
 	instances, err := moduleSystem.GenerateBuild(
-		"github.com/uber/zanzibar/codegen/test-service",
+		"github.com/uber/zanzibar/v1/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
@@ -268,11 +268,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampledependencyClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-dependency",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampledependencyClientStatic",
 			PackageName:           "exampledependencyClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-dependency",
 		},
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
@@ -291,11 +291,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -327,11 +327,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-grpc",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-grpc",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -363,11 +363,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "embeddedClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health/embedded-client",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/endpoints/health/embedded-client",
 			IsExportGenerated:     true,
 			PackageAlias:          "embeddedClientStatic",
 			PackageName:           "embeddedClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health/embedded-client",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/endpoints/health/embedded-client",
 		},
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
@@ -386,11 +386,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "healthendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/endpoints/health",
 			IsExportGenerated:     true,
 			PackageAlias:          "healthendpointstatic",
 			PackageName:           "healthendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/endpoints/health",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -424,11 +424,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "fooendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/more-endpoints/foo",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/more-endpoints/foo",
 			IsExportGenerated:     true,
 			PackageAlias:          "fooendpointstatic",
 			PackageName:           "fooendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/more-endpoints/foo",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/more-endpoints/foo",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -462,11 +462,11 @@ func TestExampleService(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "barendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/another/bar",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/another/bar",
 			IsExportGenerated:     true,
 			PackageAlias:          "barendpointstatic",
 			PackageName:           "barendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/another/bar",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/another/bar",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -634,7 +634,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
+	packageRoot := "github.com/uber/zanzibar/v1/codegen/test-service"
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
@@ -677,11 +677,11 @@ func TestExampleServiceIncremental(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampledependencyClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-dependency",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampledependencyClientStatic",
 			PackageName:           "exampledependencyClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-dependency",
 		},
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
@@ -700,11 +700,11 @@ func TestExampleServiceIncremental(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -736,11 +736,11 @@ func TestExampleServiceIncremental(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-grpc",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-grpc",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -772,11 +772,11 @@ func TestExampleServiceIncremental(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "healthendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/endpoints/health",
 			IsExportGenerated:     true,
 			PackageAlias:          "healthendpointstatic",
 			PackageName:           "healthendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/endpoints/health",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -810,11 +810,11 @@ func TestExampleServiceIncremental(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "fooendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/more-endpoints/foo",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/more-endpoints/foo",
 			IsExportGenerated:     true,
 			PackageAlias:          "fooendpointstatic",
 			PackageName:           "fooendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/more-endpoints/foo",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/more-endpoints/foo",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -848,11 +848,11 @@ func TestExampleServiceIncremental(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "barendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/another/bar",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/another/bar",
 			IsExportGenerated:     true,
 			PackageAlias:          "barendpointstatic",
 			PackageName:           "barendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/another/bar",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/another/bar",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1023,7 +1023,7 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
+	packageRoot := "github.com/uber/zanzibar/v1/codegen/test-service"
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
@@ -1066,11 +1066,11 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampledependencyClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-dependency",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampledependencyClientStatic",
 			PackageName:           "exampledependencyClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-dependency",
 		},
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
@@ -1089,11 +1089,11 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1125,11 +1125,11 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-grpc",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-grpc",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1316,7 +1316,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 		t.Errorf("Unexpected error registering service class type: %s", err)
 	}
 
-	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
+	packageRoot := "github.com/uber/zanzibar/v1/codegen/test-service"
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
@@ -1359,11 +1359,11 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampledependencyClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-dependency",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampledependencyClientStatic",
 			PackageName:           "exampledependencyClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-dependency",
 		},
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
@@ -1382,11 +1382,11 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1418,11 +1418,11 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example-grpc",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example-grpc",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1454,11 +1454,11 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "healthendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/endpoints/health",
 			IsExportGenerated:     true,
 			PackageAlias:          "healthendpointstatic",
 			PackageName:           "healthendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/endpoints/health",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1492,11 +1492,11 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "fooendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/more-endpoints/foo",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/more-endpoints/foo",
 			IsExportGenerated:     true,
 			PackageAlias:          "fooendpointstatic",
 			PackageName:           "fooendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/more-endpoints/foo",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/more-endpoints/foo",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1530,11 +1530,11 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
 			GeneratedPackageAlias: "barendpointgenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/another/bar",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/another/bar",
 			IsExportGenerated:     true,
 			PackageAlias:          "barendpointstatic",
 			PackageName:           "barendpoint",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/another/bar",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/another/bar",
 		},
 		Dependencies: []ModuleDependency{
 			{
@@ -1686,7 +1686,7 @@ func TestDefaultDependency(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 
 	instances, err := moduleSystem.GenerateBuild(
-		"github.com/uber/zanzibar/codegen/test-service",
+		"github.com/uber/zanzibar/v1/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
@@ -1808,7 +1808,7 @@ func TestSingleDefaultDependency(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 
 	instances, err := moduleSystem.GenerateBuild(
-		"github.com/uber/zanzibar/codegen/test-service",
+		"github.com/uber/zanzibar/v1/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
@@ -1927,7 +1927,7 @@ func TestNoClassDefaultDependency(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 
 	_, err = moduleSystem.GenerateBuild(
-		"github.com/uber/zanzibar/codegen/test-service",
+		"github.com/uber/zanzibar/v1/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
@@ -1988,7 +1988,7 @@ func TestNoClassDefaultDependency(t *testing.T) {
 // 	testServiceDir := path.Join(currentDir, "test-service-cycle")
 //
 // 	_, err = moduleSystem.GenerateBuild(
-// 		"github.com/uber/zanzibar/codegen/test-service",
+// 		"github.com/uber/zanzibar/v1/codegen/test-service",
 // 		testServiceDir,
 // 		path.Join(testServiceDir, "build"),
 // 		true,
@@ -2294,11 +2294,11 @@ func createTestInstance(name string, depInstances ...*ModuleInstance) *ModuleIns
 			ExportName:            "NewClient",
 			ExportType:            "Client",
 			GeneratedPackageAlias: "exampleClientGenerated",
-			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/v1/codegen/test-service/build/clients/example",
 			IsExportGenerated:     true,
 			PackageAlias:          "exampleClientStatic",
 			PackageName:           "exampleClient",
-			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+			PackagePath:           "github.com/uber/zanzibar/v1/codegen/test-service/clients/example",
 		},
 		Dependencies:          dependencies,
 		ResolvedDependencies:  resolvedDependencies,
@@ -2684,7 +2684,7 @@ func TestModuleSearchDuplicateGlobs(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 
 	instances, err := moduleSystem.GenerateBuild(
-		"github.com/uber/zanzibar/codegen/test-service",
+		"github.com/uber/zanzibar/v1/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		false,

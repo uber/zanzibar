@@ -30,16 +30,16 @@ import (
 
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	endpointsIDlEndpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
-	customBounce "github.com/uber/zanzibar/examples/example-gateway/endpoints/bounce"
+	endpointsIDlEndpointsBounceBounce "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
+	customBounce "github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/bounce"
 
-	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
+	defaultExampleTchannel "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example_tchannel"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/bounce/module"
 )
 
 // NewBounceBounceHandler creates a handler to be registered with a thrift server.

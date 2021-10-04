@@ -34,7 +34,7 @@ import (
 	customtransport "github.com/uber-go/tally/m3/customtransports"
 	m3 "github.com/uber-go/tally/m3/thrift/v2"
 	"github.com/uber-go/tally/thirdparty/github.com/apache/thrift/lib/go/thrift"
-	"github.com/uber/zanzibar/test/lib"
+	"github.com/uber/zanzibar/v1/test/lib"
 )
 
 var localListenAddr = &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)}

@@ -53,7 +53,7 @@
 							"type": "string",
 							"description": "Package import path for concrete fixtures",
 							"examples": [
-								"github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
+								"github.com/uber/zanzibar/v1/examples/example-gateway/clients/contacts/fixture"
 							]
 						},
 						"scenarios": {

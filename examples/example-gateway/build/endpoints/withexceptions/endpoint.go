@@ -24,8 +24,8 @@
 package withexceptionsendpoint
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/withexceptions/module"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // Endpoint registers a request handler on a gateway

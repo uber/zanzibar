@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
-	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
+	ms "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway/mock-service"
 
 	// "github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

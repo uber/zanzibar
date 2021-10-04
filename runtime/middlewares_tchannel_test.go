@@ -27,10 +27,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
-	exampletchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	ms "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway/mock-service"
+	exampletchannel "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/example_tchannel"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/thriftrw/wire"
 )
 

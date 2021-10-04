@@ -65,7 +65,7 @@
 			"type": "string",
 			"description": "Workflow import path if workflow type is custom",
 			"examples": [
-				"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+				"github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/contacts"
 			]
 		},
 		"clientId": {

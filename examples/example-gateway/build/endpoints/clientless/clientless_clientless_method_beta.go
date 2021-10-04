@@ -32,17 +32,17 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/workflow"
-	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
+	workflow "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/clientless/workflow"
+	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
 
-	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
-	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+	defaultExample "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/clientless/module"
 )
 
 // ClientlessBetaHandler is the handler for "/clientless/post-request"

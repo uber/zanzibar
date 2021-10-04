@@ -31,16 +31,16 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	customMulti "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
+	customMulti "github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/panic"
 
-	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
-	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+	defaultExample "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/panic/module"
 )
 
 // ServiceCFrontHelloHandler is the handler for "/multi/serviceC_f/hello"

@@ -23,11 +23,11 @@ package quuxhandler
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux/workflow"
-	thriftQuux "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
-	"github.com/uber/zanzibar/examples/example-gateway/clients/quux"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/quux/module"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/quux/workflow"
+	thriftQuux "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/clients/quux"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 type handler struct {

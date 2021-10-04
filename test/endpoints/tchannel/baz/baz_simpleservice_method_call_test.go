@@ -30,11 +30,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	bazClient "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/baz"
+	clientsBaz "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsBaz "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
@@ -289,7 +289,7 @@ func TestCallTChannelTimeout(t *testing.T) {
 }
 
 func TestMetricsAppError(t *testing.T) {
-	// https://github.com/uber/zanzibar/issues/547
+	// https://github.com/uber/zanzibar/v1/issues/547
 	t.Skip()
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{

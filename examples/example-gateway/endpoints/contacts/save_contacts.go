@@ -3,11 +3,11 @@ package contacts
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
-	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
-	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/contacts/module"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/contacts/workflow"
+	contactsClientStructs "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
+	endpointContacts "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	"go.uber.org/zap"
 )

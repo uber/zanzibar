@@ -27,11 +27,11 @@ import (
 	"context"
 	"errors"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/thriftrw/wire"
 
-	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
-	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	clientsIDlClientsBazBaz "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 )
 
 // SecondServiceEchoBinaryFunc is the handler function for "echoBinary" method of thrift service "SecondService".

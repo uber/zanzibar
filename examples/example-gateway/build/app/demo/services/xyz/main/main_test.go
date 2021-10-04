@@ -29,7 +29,7 @@ import (
 	"syscall"
 	"testing"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

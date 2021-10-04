@@ -8,7 +8,7 @@ import (
 	fmt "fmt"
 	strings "strings"
 
-	base "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/foo/base/base"
+	base "github.com/uber/zanzibar/v1/examples/selective-gateway/build/gen-code/clients/foo/base/base"
 	multierr "go.uber.org/multierr"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"

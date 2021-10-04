@@ -1,5 +1,5 @@
 config:
-  path: github.com/uber/zanzibar/examples/selective-gateway/middlewares/default/default_example
+  path: github.com/uber/zanzibar/v1/examples/selective-gateway/middlewares/default/default_example
   schema: ./middlewares/default/default_example/default_example_schema.json
 dependencies:
   client:

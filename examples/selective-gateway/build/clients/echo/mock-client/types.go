@@ -26,7 +26,7 @@ package clientmock
 import (
 	context "context"
 
-	echo "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
+	echo "github.com/uber/zanzibar/v1/examples/selective-gateway/build/proto-gen/clients/echo"
 	yarpc "go.uber.org/yarpc"
 )
 

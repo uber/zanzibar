@@ -16,10 +16,10 @@ import (
 	{{end}}
 
 	"github.com/stretchr/testify/assert"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
-	"github.com/uber/zanzibar/config"
-	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
+	"github.com/uber/zanzibar/v1/config"
+	testbackend "github.com/uber/zanzibar/v1/test/lib/test_backend"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"

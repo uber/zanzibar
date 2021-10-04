@@ -30,8 +30,8 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
-	zrouter "github.com/uber/zanzibar/runtime/router"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
+	zrouter "github.com/uber/zanzibar/v1/runtime/router"
 	"go.uber.org/zap"
 )
 

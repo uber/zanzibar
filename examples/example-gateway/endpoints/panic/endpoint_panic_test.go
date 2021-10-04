@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
+	ms "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
 func TestServiceCFrontHello(t *testing.T) {

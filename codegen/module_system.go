@@ -35,7 +35,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/parallelize"
+	"github.com/uber/zanzibar/v1/parallelize"
 	"go.uber.org/thriftrw/compile"
 )
 

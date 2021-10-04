@@ -29,10 +29,10 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"go.uber.org/yarpc"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
-	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/echo/module"
+	gen "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping

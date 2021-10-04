@@ -3,12 +3,12 @@ clientConfig: ./clients
 copyrightHeader: ./copyright_header.txt
 endpointConfig: ./endpoints
 genCodePackage:
-  .thrift: github.com/uber/zanzibar/examples/selective-gateway/build/gen-code
-  .proto: github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen
+  .thrift: github.com/uber/zanzibar/v1/examples/selective-gateway/build/gen-code
+  .proto: github.com/uber/zanzibar/v1/examples/selective-gateway/build/proto-gen
 genMock: true
 middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
-packageRoot: github.com/uber/zanzibar/examples/selective-gateway
+packageRoot: github.com/uber/zanzibar/v1/examples/selective-gateway
 targetGenDir: ./build
 idlRootDir: ./idl
 moduleIdlSubDir:

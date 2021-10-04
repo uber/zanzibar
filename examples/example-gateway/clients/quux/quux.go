@@ -21,8 +21,8 @@
 package quux
 
 import (
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/quux/module"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
 )
 
 // IClient is a custom client that does nothing yet

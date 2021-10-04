@@ -26,7 +26,7 @@ package contactsendpoint
 import (
 	"runtime"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 func getDirName() string {

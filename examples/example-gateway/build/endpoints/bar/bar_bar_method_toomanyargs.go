@@ -32,18 +32,18 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
-	endpointsIDlEndpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/foo/foo"
+	workflow "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/bar/workflow"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	endpointsIDlEndpointsFooFoo "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/foo/foo"
 
-	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
-	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+	defaultExample "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"

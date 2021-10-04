@@ -29,8 +29,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 func TestCallMetrics(t *testing.T) {

@@ -34,7 +34,7 @@ import (
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/parallelize"
+	"github.com/uber/zanzibar/v1/parallelize"
 )
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains

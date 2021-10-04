@@ -28,19 +28,19 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 
-	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	panictchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
+	bazclientgeneratedmock "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/baz/mock-client"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	workflow "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	panictchannelendpointstatic "github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/tchannel/panic"
 )
 
 // NewSimpleServiceAnotherCallWorkflowMock creates a workflow with mock clients

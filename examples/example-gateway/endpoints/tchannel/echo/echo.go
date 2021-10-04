@@ -23,10 +23,10 @@ package echo
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/workflow"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/echo/echo"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/echo/module"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/echo/workflow"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/echo/echo"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // NewEchoEchoWorkflow ...

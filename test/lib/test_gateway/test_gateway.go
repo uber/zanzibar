@@ -37,11 +37,11 @@ import (
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/test/lib"
-	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
-	testM3Server "github.com/uber/zanzibar/test/lib/test_m3_server"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	"github.com/uber/zanzibar/v1/test/lib"
+	testBackend "github.com/uber/zanzibar/v1/test/lib/test_backend"
+	testM3Server "github.com/uber/zanzibar/v1/test/lib/test_m3_server"
 )
 
 // TestGateway interface

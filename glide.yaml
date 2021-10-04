@@ -1,4 +1,4 @@
-package: github.com/uber/zanzibar
+package: github.com/uber/zanzibar/v1
 import:
   - package: golang.org/x/net
     version: master
@@ -99,7 +99,7 @@ import:
       - vanity
       - vanity/command
 
-  # https://github.com/uber/zanzibar/issues/583
+  # https://github.com/uber/zanzibar/v1/issues/583
   - package: honnef.co/go/tools/cmd/staticcheck
     version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
 

@@ -9,5 +9,5 @@ testFixtures: {}
 thriftFile: endpoints/contacts/contacts.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Contacts::saveContacts
-workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts
+workflowImportPath: github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/contacts
 workflowType: custom

@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
 
 	"go.uber.org/multierr"
 	"go.uber.org/zap"

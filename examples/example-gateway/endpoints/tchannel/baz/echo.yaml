@@ -5,5 +5,5 @@ qpsLevel: 2
 thriftFile: endpoints/tchannel/baz/baz.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: SimpleService::Echo
-workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz
+workflowImportPath: github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/tchannel/baz
 workflowType: custom

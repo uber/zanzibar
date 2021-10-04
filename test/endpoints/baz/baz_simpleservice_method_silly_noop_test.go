@@ -25,13 +25,13 @@ import (
 	"context"
 	"testing"
 
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	benchGateway "github.com/uber/zanzibar/v1/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 
-	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazServer "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/baz"
 
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	exampleGateway "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway"
 )
 
 var testSillyNoopCounter int

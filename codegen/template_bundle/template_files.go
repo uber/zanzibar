@@ -221,9 +221,9 @@ package clientlessworkflow
 import (
 	"context"
 	"net/textproto"
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v1/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -380,7 +380,7 @@ import (
 	{{end -}}
 	{{end}}
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
@@ -450,7 +450,7 @@ import (
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -695,7 +695,7 @@ package {{$instance.PackageInfo.PackageName}}
 
 import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // Endpoint registers a request handler on a gateway
@@ -768,9 +768,9 @@ import (
 	"runtime"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/bench_gateway"
-	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/bench_gateway"
+	testBackend "github.com/uber/zanzibar/v1/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
 )
 
 {{- $clientID := .ClientID }}
@@ -925,10 +925,10 @@ import (
 	{{end}}
 
 	"github.com/stretchr/testify/assert"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
-	"github.com/uber/zanzibar/config"
-	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
+	"github.com/uber/zanzibar/v1/config"
+	testbackend "github.com/uber/zanzibar/v1/test/lib/test_backend"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -1214,7 +1214,7 @@ import (
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 {{$clientID := $instance.InstanceName -}}
@@ -1452,9 +1452,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -2014,8 +2014,8 @@ import (
 	"go.uber.org/fx"
 	_ "go.uber.org/automaxprocs"
 
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	app "{{$instance.PackageInfo.PackageRoot}}"
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
@@ -2131,7 +2131,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -2215,7 +2215,7 @@ var _middleware_httpTmpl = []byte(`{{$instance := . -}}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	handle "{{index .Config "path"}}"
 )
@@ -2260,7 +2260,7 @@ var _middleware_tchannelTmpl = []byte(`{{$instance := . -}}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	handle "{{index .Config "path"}}"
 )
@@ -2355,7 +2355,7 @@ import (
 	{{end -}}
 	{{end}}
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // DependenciesTree contains all deps for this service.
@@ -2442,7 +2442,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	{{$classPkg}} "{{$instance.PackageInfo.ModulePackagePath}}"
 
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
@@ -2562,7 +2562,7 @@ import (
 	"path/filepath"
 
 	"go.uber.org/zap"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -2641,8 +2641,8 @@ import (
 
 
 	"github.com/golang/mock/gomock"
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 )
@@ -2846,7 +2846,7 @@ import (
 	"runtime"
 	"path/filepath"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	{{range $idx, $pkg := .Spec.IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -2887,10 +2887,10 @@ import (
 
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime/ruleengine"
+	"github.com/uber/zanzibar/v1/config"
+	"github.com/uber/zanzibar/v1/runtime/ruleengine"
 
 
 	"go.uber.org/zap"
@@ -3312,7 +3312,7 @@ import (
 	"errors"
 	"time"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/thriftrw/wire"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -3437,7 +3437,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -3733,9 +3733,9 @@ package workflow
 import (
 	"context"
 	"net/textproto"
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v1/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -4041,7 +4041,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}

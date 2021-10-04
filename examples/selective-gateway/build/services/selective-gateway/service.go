@@ -24,9 +24,9 @@
 package selectivegatewayservicegenerated
 
 import (
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	module "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/module"
+	module "github.com/uber/zanzibar/v1/examples/selective-gateway/build/services/selective-gateway/module"
 )
 
 // DependenciesTree re-exported for convenience.

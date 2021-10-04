@@ -28,8 +28,8 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/codegen"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/codegen"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 const _defaultParallelizeFactor = 2

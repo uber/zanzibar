@@ -33,12 +33,12 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
-	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	clientsIDlClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/bar/module"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	clientsIDlClientsFooFoo "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
 )
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping

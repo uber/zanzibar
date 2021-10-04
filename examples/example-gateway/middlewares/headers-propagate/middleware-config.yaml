@@ -1,5 +1,5 @@
 config:
-  path: github.com/uber/zanzibar/codegen
+  path: github.com/uber/zanzibar/v1/codegen
   schema: ./middlewares/headers-propagate/headers_propagate_schema.json
 dependencies: {}
 name: headers_propagate

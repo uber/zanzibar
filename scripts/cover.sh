@@ -26,7 +26,7 @@ fi
 rm -f ./test/.cached_binary_test_info.json
 
 REAL_TEST_FILES=$(git grep -l 'func Test.' | \
-	xargs -I{} dirname github.com/uber/zanzibar/{} | sort | uniq)
+	xargs -I{} dirname github.com/uber/zanzibar/v1/{} | sort | uniq)
 
 FILES_ARR=($FILES)
 
@@ -41,7 +41,7 @@ for file in "${FILES_ARR[@]}"; do
 	RAND=$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)
 	COVERNAME="./coverage/cover-unit-$RAND.out"
 
-	relativeName=$(echo $file | sed s#github.com/uber/zanzibar#.#)
+	relativeName=$(echo $file | sed s#github.com/uber/zanzibar/v1#.#)
 
     # TODO: need better solution for coverage from different package
     if [[ "$relativeName" == *"test/clients"* ]] || [[ "$relativeName" == *"test/endpoints"* ]]; then

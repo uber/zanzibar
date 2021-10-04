@@ -23,7 +23,7 @@ package config
 import (
 	"os"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // EnvConfig map from environment variable to config key and data type

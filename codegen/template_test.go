@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/v1/codegen"
 )
 
 func TestGenerateBar(t *testing.T) {
@@ -50,7 +50,7 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	packageRoot := "github.com/uber/zanzibar/examples/example-gateway"
+	packageRoot := "github.com/uber/zanzibar/v1/examples/example-gateway"
 	options := &codegen.PackageHelperOptions{
 		RelTargetGenDir:               tmpDir,
 		RelMiddlewareConfigDir:        "./middlewares",
@@ -87,7 +87,7 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	resolvedModules, buildErr := moduleSystem.GenerateBuild(
-		"github.com/uber/zanzibar/examples/example-gateway",
+		"github.com/uber/zanzibar/v1/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 		true,

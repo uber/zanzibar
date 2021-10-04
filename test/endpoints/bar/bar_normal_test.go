@@ -29,8 +29,8 @@ import (
 	"net"
 
 	"github.com/stretchr/testify/assert"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 func TestBarNormalFailingJSONInBackend(t *testing.T) {

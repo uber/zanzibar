@@ -32,12 +32,12 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/stretchr/testify/assert"
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	exampleGateway "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway"
+	ms "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway/mock-service"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	benchGateway "github.com/uber/zanzibar/v1/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {

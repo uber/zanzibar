@@ -24,8 +24,8 @@ import (
 	"context"
 
 	"github.com/mcuadros/go-jsonschema-generator"
-	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example2/module"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 type defaultExample2Middleware struct {

@@ -32,13 +32,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/config"
-	testbackend "github.com/uber/zanzibar/test/lib/test_backend"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/uber/zanzibar/v1/config"
+	testbackend "github.com/uber/zanzibar/v1/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 
-	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	bazclient "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/baz"
+	clientsIDlClientsBazBase "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 )
 
 func TestPingSuccessfulRequestOKResponse(t *testing.T) {

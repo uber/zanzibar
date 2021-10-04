@@ -83,7 +83,7 @@ func (m *MockClientWithFixture) ExpectEchoEcho() *EchoEchoMock {
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package
-// github.com/uber/zanzibar/examples/selective-gateway/clients/echo/fixture
+// github.com/uber/zanzibar/v1/examples/selective-gateway/clients/echo/fixture
 func (s *EchoEchoMock) Success() Call {
 	f := s.scenarios.Success
 

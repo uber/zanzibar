@@ -1,5 +1,5 @@
 config:
-  path: github.com/uber/zanzibar/codegen
+  path: github.com/uber/zanzibar/v1/codegen
   schema: ./middlewares/transform-request/transform_request_schema.json
 dependencies: {}
 name: transform_request

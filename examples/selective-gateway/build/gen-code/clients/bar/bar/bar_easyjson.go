@@ -12,8 +12,8 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	base "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/foo/base/base"
-	foo "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/foo/foo"
+	base "github.com/uber/zanzibar/v1/examples/selective-gateway/build/gen-code/clients/foo/base/base"
+	foo "github.com/uber/zanzibar/v1/examples/selective-gateway/build/gen-code/clients/foo/foo"
 )
 
 // suppress unused package warning

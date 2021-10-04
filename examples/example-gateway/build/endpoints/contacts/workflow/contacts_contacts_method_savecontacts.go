@@ -26,9 +26,9 @@ package workflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	endpointsIDlEndpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
+	endpointsIDlEndpointsContactsContacts "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 )
 
 // ContactsSaveContactsWorkflow defines the interface for ContactsSaveContacts workflow

@@ -46,7 +46,7 @@
 					"type": "string",
 					"description": "Package path to import the middleware",
 					"examples": [
-						"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+						"github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/example"
 					]
 				}
 			}

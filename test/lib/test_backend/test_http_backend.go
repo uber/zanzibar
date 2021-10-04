@@ -25,8 +25,8 @@ import (
 	"strconv"
 	"sync"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-	zrouter "github.com/uber/zanzibar/runtime/router"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	zrouter "github.com/uber/zanzibar/v1/runtime/router"
 	"go.uber.org/zap"
 )
 

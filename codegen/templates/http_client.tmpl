@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}

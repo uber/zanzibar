@@ -428,7 +428,7 @@ func newTestPackageHelper(t *testing.T) *PackageHelper {
 	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
 	assert.NoError(t, err, "failed to get abs path %s", relativeGatewayPath)
 
-	packageRoot := "github.com/uber/zanzibar/examples/example-gateway"
+	packageRoot := "github.com/uber/zanzibar/v1/examples/example-gateway"
 	options := &PackageHelperOptions{
 		RelTargetGenDir: "tmpDir",
 		CopyrightHeader: "copyright",

@@ -27,9 +27,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	endpointClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	endpointClientless "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 func TestClientlessEndpointCall(t *testing.T) {

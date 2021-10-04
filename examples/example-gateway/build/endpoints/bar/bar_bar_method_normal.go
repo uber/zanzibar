@@ -32,18 +32,18 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	workflow "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/bar/workflow"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
-	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
-	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
-	example "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	defaultExample "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example2"
+	example "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/example"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // BarNormalHandler is the handler for "/bar/bar-path"

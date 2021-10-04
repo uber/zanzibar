@@ -31,11 +31,11 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
+	benchGateway "github.com/uber/zanzibar/v1/test/lib/bench_gateway"
 
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	exampleGateway "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestInvalidStatusCode(t *testing.T) {

@@ -118,7 +118,7 @@ The `ModuleClass` struct has `DependsOn` and `DependedBy` public fields, which m
 Configurations are the interface that developers interact with when using the Zanzibar framework, they make up most of Zazibar's API. Various configurarions contain essential meta information of a Zanzibar application and its components. They are source of truth of the application.
 
 #### Config Layout
-Because configurations are the core of a Zanzibar application, we create a root directory to host configuration files when starting a Zanzibar application. There are a few typical directories and files under the root directory. Take [example-gateway](https://github.com/uber/zanzibar/tree/master/examples/example-gateway) for example:
+Because configurations are the core of a Zanzibar application, we create a root directory to host configuration files when starting a Zanzibar application. There are a few typical directories and files under the root directory. Take [example-gateway](https://github.com/uber/zanzibar/v1/tree/master/examples/example-gateway) for example:
 ```
 example-gateway                 # root directory
 ├── bin                         # directory for generated application binaries
@@ -155,14 +155,14 @@ example-gateway                 # root directory
 Each module must have a config file so that it can be recognized by Zanzibar. This section explains how the module config files are organized and what goes into them.
 
 ##### General Layout
- Under the application root directory, there should be a corresponding top level config directory for each module class. For Zanzibar builtin module classes, the name of the directory is the plural of the module class name, e.g., a `clients` directory for `client` module class. The directory name is used when registering generator for a module class ([example](https://github.com/uber/zanzibar/blob/master/codegen/module_system.go#L248-L254)). While it is not required,  the same directory naming convention should be followed when defining custom module classes.
+ Under the application root directory, there should be a corresponding top level config directory for each module class. For Zanzibar builtin module classes, the name of the directory is the plural of the module class name, e.g., a `clients` directory for `client` module class. The directory name is used when registering generator for a module class ([example](https://github.com/uber/zanzibar/v1/blob/master/codegen/module_system.go#L248-L254)). While it is not required,  the same directory naming convention should be followed when defining custom module classes.
 
  Under a module class directory, there should be a corresponding config directory for each module, e.g., the `clients` directory has a few subdirectories and each of them corresponds to a module.
 
  Under a module directory, there should be a YAML file that contains the meta information of that module. It is required that the file is named of `{$ModuleClass}-config.yaml`, e.g. the path to the YAML config file of `bar` client module is `clients/bar/client-config.yaml`, similarly the path to the YAML config file of `bar` endpoint module is `endpoints/bar/endpoint-config.yaml`.
 
 ##### Non-Config Content
-Besides the YAML config file, the module directory also contains other necessary directories/files. For example, the [quux](https://github.com/uber/zanzibar/tree/master/examples/example-gateway/clients/quux) client is a custom (non-generated) client, its module config directory has following layout:
+Besides the YAML config file, the module directory also contains other necessary directories/files. For example, the [quux](https://github.com/uber/zanzibar/v1/tree/master/examples/example-gateway/clients/quux) client is a custom (non-generated) client, its module config directory has following layout:
 ```
 quxx                        # client module config directory
 ├── client-config.yaml      # client module config file
@@ -173,11 +173,11 @@ quxx                        # client module config directory
 For client and endpoint modules of builtin type `custom`, Zanzibar expects user code to be placed in the module directory. This is important because Zaznibar-generated code refers to user code by importing the package of the module directory path. Furthermore, user code of custom client and endpoint modules must also define and implement necessary **public** types and interfaces so that Zanzibar can wire up the modules.
 
 ###### Custom Client
-For client module of custom type, user code must define a `Client` interface and a `NewClient` constructor that returns the `Client` interface. Below is the example code [snippet](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/clients/quux/quux.go) for the `quux` custom client:
+For client module of custom type, user code must define a `Client` interface and a `NewClient` constructor that returns the `Client` interface. Below is the example code [snippet](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/clients/quux/quux.go) for the `quux` custom client:
 ```golang
 package quux
 
-import "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+import "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/quux/module"
 
 type Client interface {
 	Echo(string) string
@@ -228,18 +228,18 @@ before allowing attempts again to determine if the circuit should again be close
 
 
 ###### Custom Workflow
-For endpoint module of custom workflow type, user code must define a `New{$endpoint}{$method}Workflow` constructor that returns the Zanzibar-generated `{$endpoint}{$method}Workflow` interface which has a sole `Handle` method. Below is the example code [snippet](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/contacts/save_contacts.go) for the `contacts` custom endpoint:
+For endpoint module of custom workflow type, user code must define a `New{$endpoint}{$method}Workflow` constructor that returns the Zanzibar-generated `{$endpoint}{$method}Workflow` interface which has a sole `Handle` method. Below is the example code [snippet](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/endpoints/contacts/save_contacts.go) for the `contacts` custom endpoint:
 ```go
 package contacts
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
-	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/contacts/module"
+	"github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/contacts/workflow"
+	contacts "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/zap"
 )
 
@@ -263,7 +263,7 @@ The idea of the workflow constructor is similar to the client constructor, with 
 
 
 ##### Grouping
-Zanzibar allows nesting module config directories in the sub-directories of a module class config directory. This is useful to group related modules under a sub-directory. For example, the [tchannel](https://github.com/uber/zanzibar/tree/master/examples/example-gateway/endpoints/tchannel) directory groups all [TChannel](https://github.com/uber/tchannel) endpoint modules:
+Zanzibar allows nesting module config directories in the sub-directories of a module class config directory. This is useful to group related modules under a sub-directory. For example, the [tchannel](https://github.com/uber/zanzibar/v1/tree/master/examples/example-gateway/endpoints/tchannel) directory groups all [TChannel](https://github.com/uber/tchannel) endpoint modules:
 ```
 endpoints
 ├── ...
@@ -275,7 +275,7 @@ endpoints
         └── endpoint-config.yaml
 ```
 ##### Config Schema
-Modules of different `ModuleClass` and `type` are likely to have different fields in their config files. Developers are expected to write module config files according to the [schemas](https://github.com/uber/zanzibar/tree/master/docs).
+Modules of different `ModuleClass` and `type` are likely to have different fields in their config files. Developers are expected to write module config files according to the [schemas](https://github.com/uber/zanzibar/v1/tree/master/docs).
 
 **Note**: fields are absent in config schemas but present in examples are experimental.
 
@@ -289,9 +289,9 @@ endpoints/multi
 The reason for such layout is to avoid a large endpoint-config.yaml file when an endpoint has many methods.
 
 #### Application Config
-Besides the module configs, Zanzibar also expects a YAML file that configures necessary properties to boostrap the code generation process of a Zanzibar application. The schema for application config is defined [here](https://github.com/uber/zanzibar/tree/master/docs/application_config_schema.json).
+Besides the module configs, Zanzibar also expects a YAML file that configures necessary properties to boostrap the code generation process of a Zanzibar application. The schema for application config is defined [here](https://github.com/uber/zanzibar/v1/tree/master/docs/application_config_schema.json).
 
-Unlike the module configs, there is no restriction on how this config file should be named. It can be named `{$appName}.yaml` or `build.yaml` as it is in [example-gateway](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/build.yaml), as long as it is passed correctly as an argument to the code generation [runner](https://github.com/uber/zanzibar/blob/master/codegen/runner/runner.go).
+Unlike the module configs, there is no restriction on how this config file should be named. It can be named `{$appName}.yaml` or `build.yaml` as it is in [example-gateway](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/build.yaml), as long as it is passed correctly as an argument to the code generation [runner](https://github.com/uber/zanzibar/v1/blob/master/codegen/runner/runner.go).
 
 In this config file, you can specify the paths from which to discover modules. You can also specify `default dependencies`.
 
@@ -303,15 +303,15 @@ Note that these paths support `Glob` patterns.
 Zanzibar provides HTTP and TChannel runtime components for both clients and servers. Once all the configs are properly defined, Zanzibar is able to parse the config files and generate code and wire it up with the runime components to produce a full application. All generated code is placed in the `build` directory.
 
 #### Go Structs and (de)serializers
-Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanzibar Thrift file semantics](https://github.com/uber/zanzibar/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/idl/endpoints-idl/endpoints/bar/bar.thrift) as specified in [hello.yaml](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/bar/hello.yaml#L5). The data types in such thrift files must have their equivalents in Go.
+Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanzibar Thrift file semantics](https://github.com/uber/zanzibar/v1/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/idl/endpoints-idl/endpoints/bar/bar.thrift) as specified in [hello.yaml](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/endpoints/bar/hello.yaml#L5). The data types in such thrift files must have their equivalents in Go.
 
 - For tchannel clients/endpoints, network communication is Thrift over TChannel. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and thrift (de)serializers;
 - For http clients/endpoints, network communication is JSON over HTTP. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and then uses [easyjson](https://github.com/mailru/easyjson) to generate JSON (de)serializers.
 
-The [pre-steps.sh](https://github.com/uber/zanzibar/blob/master/codegen/runner/pre-steps.sh) script takes care of this part of the code generation, and places the generated code under `build/gen-code` directory.
+The [pre-steps.sh](https://github.com/uber/zanzibar/v1/blob/master/codegen/runner/pre-steps.sh) script takes care of this part of the code generation, and places the generated code under `build/gen-code` directory.
 
 #### Zanzibar-generated Code
-Everything except `gen-code` under `build` directory is generated by Zanzibar. Zanzibar parses config files for each module to gathers meta information and then executing various [templates](https://github.com/uber/zanzibar/tree/master/codegen/templates) by applying them to the meta data. Here is what is generated for each builtin module class:
+Everything except `gen-code` under `build` directory is generated by Zanzibar. Zanzibar parses config files for each module to gathers meta information and then executing various [templates](https://github.com/uber/zanzibar/v1/tree/master/codegen/templates) by applying them to the meta data. Here is what is generated for each builtin module class:
 
 - client: dependency type, client interface and constructor if non-custom, mock client constructor
 - middleware: dependency type, middleware type and constructor (unstable)
@@ -326,7 +326,7 @@ Assuming you are using a vendor package management tool like Glide, then the min
   version: ^1.8.0
 - package: github.com/mailru/easyjson
   version: master
-- package: github.com/uber/zanzibar
+- package: github.com/uber/zanzibar/v1
   version: master
 ```
 ### Code Gen
@@ -351,12 +351,12 @@ for config_file in ${config_files}; do
 	done
 done
 
-bash ./vendor/github.com/uber/zanzibar/codegen/runner/pre-steps.sh "$BUILD_DIR" "$CONFIG_DIR" "zanzibar" "$THRIFTRW_SRCS"
-go run ./vendor/github.com/uber/zanzibar/codegen/runner/runner.go --config="$CONFIG_DIR/build.yaml"
+bash ./vendor/github.com/uber/zanzibar/v1/codegen/runner/pre-steps.sh "$BUILD_DIR" "$CONFIG_DIR" "zanzibar" "$THRIFTRW_SRCS"
+go run ./vendor/github.com/uber/zanzibar/v1/codegen/runner/runner.go --config="$CONFIG_DIR/build.yaml"
 ```
 Note the above script will be abstracted for easier usage in the future.
 ### Testing
-Zanzibar comes with builtin integration testing frameworks to help test business logic with ease. Setting [genMock](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/build.yaml#L16) to true will trigger Zanzibar to generate mock client, workflow and service constructors. The mock clients, being the leaf nodes in the dependency graph, are wired with the rest modules to create a testing application, which you can test against by setting expectations of the mock clients. The generated test helpers make writing tests straightforward and concise.
+Zanzibar comes with builtin integration testing frameworks to help test business logic with ease. Setting [genMock](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/build.yaml#L16) to true will trigger Zanzibar to generate mock client, workflow and service constructors. The mock clients, being the leaf nodes in the dependency graph, are wired with the rest modules to create a testing application, which you can test against by setting expectations of the mock clients. The generated test helpers make writing tests straightforward and concise.
 
 #### Entry Points
 Currently Zanzibar provides two entry points to write integration tests: service and endpoint.
@@ -407,25 +407,25 @@ func TestSaveContactsCallWorkflow(t *testing.T) {
 	assert.Equal(t, &endpointContacts.SaveContactsResponse{}, res)
 }
 ```
-The above snippets can be found in [save_contacts_test.go](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/contacts/save_contacts_test.go).
+The above snippets can be found in [save_contacts_test.go](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/endpoints/contacts/save_contacts_test.go).
 
 #### Fixture
-Zanzibar uses [gomock](https://github.com/golang/mock) to generate client mocks. To avoid manually setting the same fixture expectations again and again, Zanzibar augments gomock-generated mocks with fixture support. For example, the client-config.yaml file of `contacts` client has a `fixture` [field](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/clients/contacts/client-config.yaml#L11-L18):
+Zanzibar uses [gomock](https://github.com/golang/mock) to generate client mocks. To avoid manually setting the same fixture expectations again and again, Zanzibar augments gomock-generated mocks with fixture support. For example, the client-config.yaml file of `contacts` client has a `fixture` [field](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/clients/contacts/client-config.yaml#L11-L18):
 ```yaml
 fixture:
-  importPath: github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
+  importPath: github.com/uber/zanzibar/v1/examples/example-gateway/clients/contacts/fixture
   scenarios:
     SaveContacts:
     - success
 
 ```
-This basically says the `saveContacts` method has a `success` scenario which is defined in the [fixture package](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/clients/contacts/fixture/fixture.go) indicated by the `importPath`. The fixture package is provided by users and here is what it looks like:
+This basically says the `saveContacts` method has a `success` scenario which is defined in the [fixture package](https://github.com/uber/zanzibar/v1/blob/master/examples/example-gateway/clients/contacts/fixture/fixture.go) indicated by the `importPath`. The fixture package is provided by users and here is what it looks like:
 ```go
 package fixture
 
 import (
-	mc "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
-	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
+	mc "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/contacts/mock-client"
+	gen "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
 )
 
 var saveContactsFixtures = &mc.SaveContactsScenarios{
@@ -462,19 +462,19 @@ To extend Zanzibar with new module class or type is simply to extend each of its
 
 - module: understand what meta information is needed for each task module;
 - config: add a `tasks` directory under the application root directory, define proper schema for task module class;
-- code generation: add templates for task if necessary, create a code generator that implements the [BuildGenerator](https://github.com/uber/zanzibar/blob/master/codegen/module.go#L1041) interface and [register](https://github.com/uber/zanzibar/blob/master/codegen/module_system.go#L248) it onto the module system for the task module class.
+- code generation: add templates for task if necessary, create a code generator that implements the [BuildGenerator](https://github.com/uber/zanzibar/v1/blob/master/codegen/module.go#L1041) interface and [register](https://github.com/uber/zanzibar/v1/blob/master/codegen/module_system.go#L248) it onto the module system for the task module class.
 
 The same idea applies for adding new types of an existing module class.
 #### PostGenHook
-Zanzibar provides post-generation [hooks](https://github.com/uber/zanzibar/blob/master/codegen/module.go#L68) which has access to the meta information of all modules. You can do whatever (mutating the input is probably not a good idea) suits your needs within a post-generation hook. Zanzibar invokes post-generation hooks as the very last step of code generation. In fact, mocks are all generated via post-generation [hooks](https://github.com/uber/zanzibar/blob/master/codegen/module_system.go#L226).
+Zanzibar provides post-generation [hooks](https://github.com/uber/zanzibar/v1/blob/master/codegen/module.go#L68) which has access to the meta information of all modules. You can do whatever (mutating the input is probably not a good idea) suits your needs within a post-generation hook. Zanzibar invokes post-generation hooks as the very last step of code generation. In fact, mocks are all generated via post-generation [hooks](https://github.com/uber/zanzibar/v1/blob/master/codegen/module_system.go#L226).
 
 ## Development
 ### Installation
 
 ```
 mkdir -p $GOPATH/src/github.com/uber
-git clone git@github.com:uber/zanzibar $GOPATH/src/github.com/uber/zanzibar
-cd $GOPATH/src/github.com/uber/zanzibar
+git clone git@github.com:uber/zanzibar $GOPATH/src/github.com/uber/zanzibar/v1
+cd $GOPATH/src/github.com/uber/zanzibar/v1
 GO111MODULE=off make install
 ```
 ### Running make generate
@@ -549,11 +549,11 @@ If you want to update a dependency:
  - run `glide up --quick`
  - check in the `glide.yaml` and `glide.lock`
 
-[doc-img]: https://godoc.org/github.com/uber/zanzibar?status.svg
-[doc]: https://godoc.org/github.com/uber/zanzibar
-[ci-img]: https://github.com/uber/zanzibar/actions/workflows/build.yml/badge.svg
-[ci]: https://github.com/uber/zanzibar/actions
+[doc-img]: https://godoc.org/github.com/uber/zanzibar/v1?status.svg
+[doc]: https://godoc.org/github.com/uber/zanzibar/v1
+[ci-img]: https://github.com/uber/zanzibar/v1/actions/workflows/build.yml/badge.svg
+[ci]: https://github.com/uber/zanzibar/v1/actions
 [cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
 [cov]: https://coveralls.io/github/uber/zanzibar?branch=master
-[go-report-img]: https://goreportcard.com/badge/github.com/uber/zanzibar
-[go-report]: https://goreportcard.com/report/github.com/uber/zanzibar
+[go-report-img]: https://goreportcard.com/badge/github.com/uber/zanzibar/v1
+[go-report]: https://goreportcard.com/report/github.com/uber/zanzibar/v1

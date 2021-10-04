@@ -83,7 +83,7 @@ func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package
-// github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
+// github.com/uber/zanzibar/v1/examples/example-gateway/clients/contacts/fixture
 func (s *SaveContactsMock) Success() Call {
 	f := s.scenarios.Success
 

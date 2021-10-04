@@ -24,12 +24,12 @@
 package module
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	echoclientgenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/echo"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // Dependencies contains dependencies for the bounce endpoint module

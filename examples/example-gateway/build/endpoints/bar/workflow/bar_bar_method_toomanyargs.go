@@ -27,17 +27,17 @@ import (
 	"context"
 	"net/textproto"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v1/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	clientsIDlClientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
-	clientsIDlClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
-	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
-	endpointsIDlEndpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/foo/foo"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	clientsIDlClientsFooBaseBase "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
+	clientsIDlClientsFooFoo "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	endpointsIDlEndpointsFooFoo "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/foo/foo"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
 )
 

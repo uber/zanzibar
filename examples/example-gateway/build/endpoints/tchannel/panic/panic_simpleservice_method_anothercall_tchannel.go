@@ -31,16 +31,16 @@ import (
 
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
+	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	customBaz "github.com/uber/zanzibar/v1/examples/example-gateway/endpoints/tchannel/panic"
 
-	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
+	defaultExampleTchannel "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example_tchannel"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/tchannel/panic/module"
 )
 
 // NewSimpleServiceAnotherCallHandler creates a handler to be registered with a thrift server.

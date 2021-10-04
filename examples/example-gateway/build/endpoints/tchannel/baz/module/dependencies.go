@@ -24,14 +24,14 @@
 package module
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
-	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+	bazclientgenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/clients/baz"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v1/examples/example-gateway/build/middlewares/example_tchannel"
+	quuxclientstatic "github.com/uber/zanzibar/v1/examples/example-gateway/clients/quux"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // Dependencies contains dependencies for the tchannel/baz endpoint module

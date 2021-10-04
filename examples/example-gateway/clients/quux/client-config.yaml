@@ -1,7 +1,7 @@
 config:
-  customImportPath: github.com/uber/zanzibar/examples/example-gateway/clients/quux
+  customImportPath: github.com/uber/zanzibar/v1/examples/example-gateway/clients/quux
   fixture:
-    importPath: github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
+    importPath: github.com/uber/zanzibar/v1/examples/example-gateway/clients/quux/fixture
     scenarios:
       EchoMessage:
       - success

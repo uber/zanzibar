@@ -26,11 +26,11 @@ package clientlessworkflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
+	endpointsIDlEndpointsClientlessClientless "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/clientless/clientless"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/clientless/module"
 	"go.uber.org/zap"
 )
 

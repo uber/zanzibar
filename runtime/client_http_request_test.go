@@ -28,13 +28,13 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	clientsBarBar "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	exampleGateway "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
+	benchGateway "github.com/uber/zanzibar/v1/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 var defaultTestOptions *testGateway.Options = &testGateway.Options{

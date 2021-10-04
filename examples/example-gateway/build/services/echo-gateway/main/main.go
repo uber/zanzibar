@@ -34,11 +34,11 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	app "github.com/uber/zanzibar/examples/example-gateway"
-	service "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway"
+	app "github.com/uber/zanzibar/v1/examples/example-gateway"
+	service "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/echo-gateway"
 )
 
 var configFiles *string

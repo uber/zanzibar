@@ -27,11 +27,11 @@ import (
 	"context"
 	"net/textproto"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v1/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/endpoints/multi/module"
 	"go.uber.org/zap"
 )
 

@@ -34,10 +34,10 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	service "github.com/uber/zanzibar/v1/examples/example-gateway/build/services/example-gateway"
 )
 
 // MockService interface
@@ -79,7 +79,7 @@ type mockService struct {
 // - "config/test.yaml" where current dir is the project root
 func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService {
 	if len(testConfigPaths) == 0 {
-		configPath := filepath.Join("src", "github.com/uber/zanzibar/examples/example-gateway/config/test.yaml")
+		configPath := filepath.Join("src", "github.com/uber/zanzibar/v1/examples/example-gateway/config/test.yaml")
 		defaultPath := filepath.Join(os.Getenv("GOPATH"), configPath)
 
 		// This is a temporary solution for running tests using bazel

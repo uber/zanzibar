@@ -33,7 +33,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v1/runtime/jsonwrapper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

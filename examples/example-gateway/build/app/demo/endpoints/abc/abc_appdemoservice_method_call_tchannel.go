@@ -28,16 +28,16 @@ import (
 	"runtime/debug"
 
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	customAbc "github.com/uber/zanzibar/examples/example-gateway/app/demo/endpoints/abc"
-	endpointsIDlEndpointsAppDemoEndpointsAbc "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/app/demo/endpoints/abc"
+	customAbc "github.com/uber/zanzibar/v1/examples/example-gateway/app/demo/endpoints/abc"
+	endpointsIDlEndpointsAppDemoEndpointsAbc "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/app/demo/endpoints/abc"
 
-	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
+	defaultExampleTchannel "github.com/uber/zanzibar/v1/examples/example-gateway/middlewares/default/default_example_tchannel"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
+	module "github.com/uber/zanzibar/v1/examples/example-gateway/build/app/demo/endpoints/abc/module"
 )
 
 // NewAppDemoServiceCallHandler creates a handler to be registered with a thrift server.

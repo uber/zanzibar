@@ -16,7 +16,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}

@@ -26,9 +26,9 @@ package workflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
-	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/v1/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 )
 
 // SimpleServiceEchoWorkflow defines the interface for SimpleServiceEcho workflow

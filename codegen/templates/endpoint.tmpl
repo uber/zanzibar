@@ -31,7 +31,7 @@ import (
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"

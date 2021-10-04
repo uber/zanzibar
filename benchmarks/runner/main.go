@@ -37,7 +37,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 )
 
 var logger = zap.New(

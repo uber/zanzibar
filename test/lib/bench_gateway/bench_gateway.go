@@ -31,12 +31,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/uber/zanzibar/v1/test/lib/util"
 
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v1/config"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
+	testBackend "github.com/uber/zanzibar/v1/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/v1/test/lib/test_gateway"
 	"go.uber.org/zap/zapcore"
 )
 

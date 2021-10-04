@@ -28,7 +28,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime/ruleengine"
+	"github.com/uber/zanzibar/v1/runtime/ruleengine"
 	netContext "golang.org/x/net/context"
 )
 

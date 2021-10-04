@@ -1,19 +1,19 @@
 {
 	"Name": "bar",
-	"ThriftPath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+	"ThriftPath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 	"Includes": {
 		"foo": {
 			"Name": "foo",
 			"Module": {
 				"Name": "foo",
-				"ThriftPath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/foo/foo.thrift",
+				"ThriftPath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/foo/foo.thrift",
 				"Includes": {},
 				"Constants": {},
 				"Types": {
 					"FooName": {
 						"linkOnce": true,
 						"Name": "FooName",
-						"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/foo/foo.thrift",
+						"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/foo/foo.thrift",
 						"Type": 1,
 						"Fields": [
 							{
@@ -32,7 +32,7 @@
 					"FooStruct": {
 						"linkOnce": true,
 						"Name": "FooStruct",
-						"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/foo/foo.thrift",
+						"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/foo/foo.thrift",
 						"Type": 1,
 						"Fields": [
 							{
@@ -96,7 +96,7 @@
 									"ValueSpec": {
 										"linkOnce": true,
 										"Name": "FooName",
-										"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/foo/foo.thrift",
+										"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/foo/foo.thrift",
 										"Type": 1,
 										"Fields": [
 											{
@@ -131,7 +131,7 @@
 		"BarException": {
 			"linkOnce": true,
 			"Name": "BarException",
-			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 			"Type": 3,
 			"Fields": [
 				{
@@ -152,7 +152,7 @@
 		"BarRequest": {
 			"linkOnce": true,
 			"Name": "BarRequest",
-			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 			"Type": 1,
 			"Fields": [
 				{
@@ -209,7 +209,7 @@
 		"BarResponse": {
 			"linkOnce": true,
 			"Name": "BarResponse",
-			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 			"Type": 1,
 			"Fields": [
 				{
@@ -301,7 +301,7 @@
 		"Foo": {
 			"linkOnce": true,
 			"Name": "Foo",
-			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+			"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 			"Parent": null,
 			"Functions": {
 				"argNotStruct": {
@@ -328,7 +328,7 @@
 								"Type": {
 									"linkOnce": true,
 									"Name": "BarException",
-									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 									"Type": 3,
 									"Fields": [
 										{
@@ -374,7 +374,7 @@
 							"Type": {
 								"linkOnce": true,
 								"Name": "BarRequest",
-								"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 								"Type": 1,
 								"Fields": [
 									{
@@ -437,7 +437,7 @@
 						"ReturnType": {
 							"linkOnce": true,
 							"Name": "BarResponse",
-							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 							"Type": 1,
 							"Fields": [
 								{
@@ -531,7 +531,7 @@
 								"Type": {
 									"linkOnce": true,
 									"Name": "BarException",
-									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 									"Type": 3,
 									"Fields": [
 										{
@@ -575,7 +575,7 @@
 						"ReturnType": {
 							"linkOnce": true,
 							"Name": "BarResponse",
-							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 							"Type": 1,
 							"Fields": [
 								{
@@ -669,7 +669,7 @@
 								"Type": {
 									"linkOnce": true,
 									"Name": "BarException",
-									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 									"Type": 3,
 									"Fields": [
 										{
@@ -713,7 +713,7 @@
 						"ReturnType": {
 							"linkOnce": true,
 							"Name": "BarResponse",
-							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 							"Type": 1,
 							"Fields": [
 								{
@@ -807,7 +807,7 @@
 								"Type": {
 									"linkOnce": true,
 									"Name": "BarException",
-									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 									"Type": 3,
 									"Fields": [
 										{
@@ -853,7 +853,7 @@
 							"Type": {
 								"linkOnce": true,
 								"Name": "BarRequest",
-								"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 								"Type": 1,
 								"Fields": [
 									{
@@ -917,7 +917,7 @@
 							"Type": {
 								"linkOnce": true,
 								"Name": "FooStruct",
-								"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/foo/foo.thrift",
+								"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/foo/foo.thrift",
 								"Type": 1,
 								"Fields": [
 									{
@@ -981,7 +981,7 @@
 											"ValueSpec": {
 												"linkOnce": true,
 												"Name": "FooName",
-												"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/foo/foo.thrift",
+												"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/foo/foo.thrift",
 												"Type": 1,
 												"Fields": [
 													{
@@ -1015,7 +1015,7 @@
 						"ReturnType": {
 							"linkOnce": true,
 							"Name": "BarResponse",
-							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+							"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 							"Type": 1,
 							"Fields": [
 								{
@@ -1109,7 +1109,7 @@
 								"Type": {
 									"linkOnce": true,
 									"Name": "BarException",
-									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+									"File": "/Users/zhenghui/go/src/github.com/uber/zanzibar/v1/idl/github.com/uber/zanzibar/v1/clients/bar/bar.thrift",
 									"Type": 3,
 									"Fields": [
 										{

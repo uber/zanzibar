@@ -25,14 +25,14 @@ import (
 
 	"go.uber.org/yarpc"
 
-	echoclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
-	mirrorclient "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/workflow"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	echoclient "github.com/uber/zanzibar/v1/examples/selective-gateway/build/clients/echo"
+	mirrorclient "github.com/uber/zanzibar/v1/examples/selective-gateway/build/clients/mirror"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/endpoints/bounce/module"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/endpoints/bounce/workflow"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/proto-gen/clients/echo"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/proto-gen/clients/mirror"
+	zanzibar "github.com/uber/zanzibar/v1/runtime"
 )
 
 // NewBounceBounceWorkflow ...

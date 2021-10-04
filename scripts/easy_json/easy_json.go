@@ -33,7 +33,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/uber/zanzibar/parallelize"
+	"github.com/uber/zanzibar/v1/parallelize"
 
 	"github.com/mailru/easyjson/parser"
 	// Reference the gen package to be friendly to vendoring tools,

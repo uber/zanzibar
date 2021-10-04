@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	mock "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/mock-service"
+	mock "github.com/uber/zanzibar/v1/examples/selective-gateway/build/services/selective-gateway/mock-service"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/v1/examples/selective-gateway/build/proto-gen/clients/mirror"
 )
 
 func TestEcho(t *testing.T) {
