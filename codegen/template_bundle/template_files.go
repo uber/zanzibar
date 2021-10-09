@@ -648,9 +648,9 @@ func (h *{{$handlerName}}) HandleRequest(
 			{{end -}}
 			return ctx
 		{{end}}
-		  default:
-			 res.SendError(500, "Unexpected server error", err)
-			 return ctx
+			default:
+				res.SendError(500, "Unexpected server error", err)
+				return ctx
 		}
 		{{ end }}
 	}
@@ -683,7 +683,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7485, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2967,30 +2967,30 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 
 	/*Ex:
 	{
-	  "clients.rider-presentation.alternates": {
-		"routingConfigs": [
-		  {
-			"headerName": "x-test-env",
-			"headerValue": "*",
-			"serviceName": "testservice"
-		  },
-		  {
-			"headerName": "x-container",
-			"headerValue": "container*",
-			"serviceName": "relayer"
-		  }
-		],
-		"servicesDetail": {
-		  "testservice": {
-			"ip": "127.0.0.1",
-			"port": 5000
-		  },
-		  "relayer": {
-			"ip": "127.0.0.1",
-			"port": 12000
-		  }
-		}
-	  }
+		"clients.rider-presentation.alternates": {
+			"routingConfigs": [
+				{
+					"headerName": "x-test-env",
+					"headerValue": "*",
+					"serviceName": "testservice"
+				},
+				{
+					"headerName": "x-container",
+					"headerValue": "container*",
+					"serviceName": "relayer"
+				}
+			],
+			"servicesDetail": {
+				"testservice": {
+					"ip": "127.0.0.1",
+					"port": 5000
+				},
+				"relayer": {
+					"ip": "127.0.0.1",
+					"port": 12000
+				}
+			}
+	  	}
 	}*/
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
@@ -3298,7 +3298,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15243, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
