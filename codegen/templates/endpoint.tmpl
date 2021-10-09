@@ -229,9 +229,9 @@ func (h *{{$handlerName}}) HandleRequest(
 			{{end -}}
 			return ctx
 		{{end}}
-		  default:
-			 res.SendError(500, "Unexpected server error", err)
-			 return ctx
+			default:
+				res.SendError(500, "Unexpected server error", err)
+				return ctx
 		}
 		{{ end }}
 	}
