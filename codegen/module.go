@@ -1180,12 +1180,13 @@ func instanceFQN(instance *ModuleInstance) string {
 
 // IncrementalBuild is like Build but filtered to only the given module instances.
 func (system *ModuleSystem) IncrementalBuild(
-	packageRoot string,
-	baseDirectory string,
+	packageRoot,
+	baseDirectory,
 	targetGenDir string,
 	instances []ModuleDependency,
 	resolvedModules map[string][]*ModuleInstance,
-	commitChange bool,
+	commitChange,
+	qpsLevelsEnabled bool,
 ) (map[string][]*ModuleInstance, error) {
 
 	skipModuleMap := map[*ModuleInstance]struct{}{}
@@ -1267,7 +1268,7 @@ func (system *ModuleSystem) IncrementalBuild(
 	for _, moduleList := range toBeBuiltModules {
 		moduleCount += len(moduleList)
 	}
-	qpsLevels, err := PopulateQPSLevels(baseDirectory + "/endpoints")
+	qpsLevels, err := PopulateQPSLevels(baseDirectory+"/endpoints", qpsLevelsEnabled)
 	if err != nil {
 		return nil, errors.Errorf(
 			"error in populating qps levels for base directory %q",

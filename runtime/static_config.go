@@ -115,11 +115,15 @@ func NewStaticConfigOrDie(
 	return config
 }
 
+func (conf *StaticConfig) checkConfDestroyed(key string) {
+	if conf.destroyed {
+		panic(errors.Errorf("cannot get(%s) because destroyed", key))
+	}
+}
+
 // MustGetBoolean returns the value as a boolean or panics.
 func (conf *StaticConfig) MustGetBoolean(key string) bool {
-	if conf.destroyed {
-		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
-	}
+	conf.checkConfDestroyed(key)
 
 	if value, contains := conf.seedConfig[key]; contains {
 		return value.(bool)
@@ -141,9 +145,7 @@ func mustConvertableToFloat(value interface{}, key string) float64 {
 
 // MustGetFloat returns the value as a float or panics.
 func (conf *StaticConfig) MustGetFloat(key string) float64 {
-	if conf.destroyed {
-		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
-	}
+	conf.checkConfDestroyed(key)
 
 	if value, contains := conf.seedConfig[key]; contains {
 		return mustConvertableToFloat(value, key)
@@ -172,9 +174,7 @@ func mustConvertableToInt(value interface{}, key string) int64 {
 
 // MustGetInt returns the value as a int or panics.
 func (conf *StaticConfig) MustGetInt(key string) int64 {
-	if conf.destroyed {
-		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
-	}
+	conf.checkConfDestroyed(key)
 
 	if value, contains := conf.seedConfig[key]; contains {
 		return mustConvertableToInt(value, key)
@@ -204,9 +204,7 @@ func (conf *StaticConfig) ContainsKey(key string) bool {
 
 // MustGetString returns the value as a string or panics.
 func (conf *StaticConfig) MustGetString(key string) string {
-	if conf.destroyed {
-		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
-	}
+	conf.checkConfDestroyed(key)
 
 	if value, contains := conf.seedConfig[key]; contains {
 		return value.(string)
@@ -222,9 +220,7 @@ func (conf *StaticConfig) MustGetString(key string) string {
 // MustGetStruct reads the value into an interface{} or panics.
 // Recommended that this is used with pointers to structs
 func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
-	if conf.destroyed {
-		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
-	}
+	conf.checkConfDestroyed(key)
 
 	rptr := reflect.ValueOf(ptr)
 	if rptr.Kind() != reflect.Ptr || rptr.IsNil() {
