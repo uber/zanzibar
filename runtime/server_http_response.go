@@ -143,9 +143,9 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		jc, ok := span.Context().(jaeger.SpanContext)
 		if ok {
 			fields = append(fields,
-				zap.String("trace.span", jc.SpanID().String()),
-				zap.String("trace.traceId", jc.TraceID().String()),
-				zap.Bool("trace.sampled", jc.IsSampled()),
+				zap.String(TraceSpanKey, jc.SpanID().String()),
+				zap.String(TraceIDKey, jc.TraceID().String()),
+				zap.Bool(TraceSampledKey, jc.IsSampled()),
 			)
 		}
 	}

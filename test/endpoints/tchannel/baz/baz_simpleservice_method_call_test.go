@@ -33,6 +33,7 @@ import (
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -159,6 +160,9 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"timestamp-finished",
 		"Client-Req-Header-x-request-uuid",
 		"Client-Req-Header-$tracing$uber-trace-id",
+		zanzibar.TraceIDKey,
+		zanzibar.TraceSpanKey,
+		zanzibar.TraceSampledKey,
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)

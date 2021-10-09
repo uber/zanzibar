@@ -2375,9 +2375,9 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 		"host",
 		"pid",
 		"timestamp-finished",
-		"trace.span",
-		"trace.traceId",
-		"trace.sampled",
+		zanzibar.TraceIDKey,
+		zanzibar.TraceSpanKey,
+		zanzibar.TraceSampledKey,
 	}
 
 	if isShadowRequest {

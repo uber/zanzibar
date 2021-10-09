@@ -56,6 +56,13 @@ const (
 	shadowEnvironment = "shadow"
 	environmentKey    = "env"
 	apienvironmentKey = "apienvironment"
+
+	// TraceIDKey is the log field key containing the associated trace id
+	TraceIDKey = "trace.traceId"
+	// TraceSpanKey is the log field key containing the associated span id
+	TraceSpanKey = "trace.span"
+	// TraceSampledKey is the log field key for whether a trace was sampled or not
+	TraceSampledKey = "trace.sampled"
 )
 
 var knownMetrics = []string{
