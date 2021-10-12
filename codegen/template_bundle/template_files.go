@@ -2990,7 +2990,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 					"port": 12000
 				}
 			}
-	  	}
+		}
 	}*/
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
@@ -3229,11 +3229,11 @@ type {{$clientName}} struct {
 			"client" : "{{$clientID}}",
 			"methodName" : "{{$methodName}}",
 			})
-		  start := time.Now()
+			start := time.Now()
 			circuitBreakerName := "{{$clientID}}" + "-" + "{{$methodName}}"
 			err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
-			  elapsed := time.Now().Sub(start)
-			  scope.Timer("hystrix-timer").Record(elapsed)
+				elapsed := time.Now().Sub(start)
+				scope.Timer("hystrix-timer").Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
@@ -3298,7 +3298,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15262, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

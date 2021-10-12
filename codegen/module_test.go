@@ -21,6 +21,7 @@
 package codegen
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -29,9 +30,10 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-
 	"github.com/stretchr/testify/assert"
 )
+
+const packageRoot = "github.com/uber/zanzibar/codegen/test-service"
 
 type TestClientSpec struct {
 	Info string
@@ -501,44 +503,7 @@ func TestExampleService(t *testing.T) {
 		&expectedFooEndpointInstance,
 	}
 
-	for className, classInstances := range instances {
-		if className == "client" {
-			if len(classInstances) != len(expectedClients) {
-				t.Errorf(
-					"Expected %d client class instance but found %d",
-					len(expectedClients),
-					len(classInstances),
-				)
-			}
-
-			for _, instance := range expectedClients {
-				compareInstances(t, instance, expectedClients)
-			}
-		} else if className == "endpoint" {
-			if len(classInstances) != len(expectedEndpoints) {
-				t.Errorf(
-					"Expected %d endpoint class instance but found %d",
-					len(expectedEndpoints),
-					len(classInstances),
-				)
-			}
-
-			for _, instance := range classInstances {
-				compareInstances(t, instance, expectedEndpoints)
-
-				clientDependency := instance.ResolvedDependencies["client"][0]
-				clientSpec := clientDependency.GeneratedSpec().(*TestClientSpec)
-
-				if clientSpec.Info != instance.ClassType {
-					t.Errorf(
-						"Expected client spec info on generated client spec",
-					)
-				}
-			}
-		} else {
-			t.Errorf("Unexpected resolved class type %s", className)
-		}
-	}
+	assertInstances(t, expectedClients, expectedEndpoints, instances)
 }
 
 func TestExampleServiceIncremental(t *testing.T) {
@@ -634,7 +599,6 @@ func TestExampleServiceIncremental(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
@@ -660,11 +624,14 @@ func TestExampleServiceIncremental(t *testing.T) {
 		},
 		resolvedModules,
 		true,
+		true,
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
 	}
-
+	expectedQPSLevels := map[string]int{
+		"embeddedClientTest-TestMethod": 1,
+	}
 	expectedClientDependency := ModuleInstance{
 		BaseDirectory: testServiceDir,
 		ClassName:     "client",
@@ -686,6 +653,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
+		QPSLevels:             expectedQPSLevels,
 	}
 
 	expectedClientInstance := ModuleInstance{
@@ -722,6 +690,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 				&expectedClientDependency,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedGRPCClientInstance := ModuleInstance{
@@ -758,6 +727,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 				&expectedClientDependency,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedHealthEndpointInstance := ModuleInstance{
@@ -796,6 +766,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 				&expectedClientInstance,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedFooEndpointInstance := ModuleInstance{
@@ -834,6 +805,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 				&expectedClientInstance,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedBarEndpointInstance := ModuleInstance{
@@ -872,6 +844,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 				&expectedClientInstance,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedClients := []*ModuleInstance{
@@ -883,60 +856,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 		&expectedFooEndpointInstance,
 		&expectedBarEndpointInstance,
 	}
-
-	for className, classInstances := range instances {
-		sort.Slice(classInstances, func(i, j int) bool {
-			return classInstances[i].InstanceName < classInstances[j].InstanceName
-		})
-
-		sort.Slice(expectedEndpoints, func(i, j int) bool {
-			return expectedEndpoints[i].InstanceName < expectedEndpoints[j].InstanceName
-		})
-
-		sort.Slice(expectedClients, func(i, j int) bool {
-			return expectedClients[i].InstanceName < expectedClients[j].InstanceName
-		})
-
-		if className == "client" {
-			if len(classInstances) != len(expectedClients) {
-				t.Errorf(
-					"Expected %d client class instance but found %d",
-					len(expectedClients),
-					len(classInstances),
-				)
-			}
-
-			for _, instance := range expectedClients {
-				compareInstances(t, instance, expectedClients)
-			}
-		} else if className == "endpoint" {
-			if len(classInstances) != len(expectedEndpoints) {
-				t.Errorf(
-					"Expected %d endpoint class instance but found %d",
-					len(expectedEndpoints),
-					len(classInstances),
-				)
-			}
-
-			for _, instance := range classInstances {
-				compareInstances(t, instance, expectedEndpoints)
-
-				clientDependency := instance.ResolvedDependencies["client"][0]
-				clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
-				if !ok {
-					t.Errorf("type casting failed %s\n", clientDependency)
-				}
-
-				if clientSpec.Info != instance.ClassType {
-					t.Errorf(
-						"Expected client spec info on generated client spec",
-					)
-				}
-			}
-		} else {
-			t.Errorf("Unexpected resolved class type %s", className)
-		}
-	}
+	assertInstances(t, expectedClients, expectedEndpoints, instances)
 }
 
 func TestExampleServiceIncrementalSkip(t *testing.T) {
@@ -1023,7 +943,6 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
@@ -1048,6 +967,7 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 			},
 		},
 		resolvedModules,
+		true,
 		true,
 	)
 	if err != nil {
@@ -1154,59 +1074,7 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 		&expectedGRPCClientInstance,
 	}
 	var expectedEndpoints []*ModuleInstance
-
-	for _, classInstances := range instances {
-		sort.Slice(classInstances, func(i, j int) bool {
-			return classInstances[i].InstanceName < classInstances[j].InstanceName
-		})
-	}
-
-	sort.Slice(expectedEndpoints, func(i, j int) bool {
-		return expectedEndpoints[i].InstanceName < expectedEndpoints[j].InstanceName
-	})
-
-	sort.Slice(expectedClients, func(i, j int) bool {
-		return expectedClients[i].InstanceName < expectedClients[j].InstanceName
-	})
-
-	classInstances := instances["client"]
-	if len(classInstances) != len(expectedClients) {
-		t.Errorf(
-			"Expected %d client class instance but found %d",
-			len(expectedClients),
-			len(classInstances),
-		)
-	}
-
-	for _, instance := range expectedClients {
-		compareInstances(t, instance, expectedClients)
-	}
-
-	classInstances = instances["endpoint"]
-
-	if len(classInstances) != len(expectedEndpoints) {
-		t.Errorf(
-			"Expected %d endpoint class instance but found %d",
-			len(expectedEndpoints),
-			len(classInstances),
-		)
-	}
-
-	for _, instance := range classInstances {
-		compareInstances(t, instance, expectedEndpoints)
-
-		clientDependency := instance.ResolvedDependencies["client"][0]
-		clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
-		if !ok {
-			t.Errorf("type casting failed %s\n", clientDependency)
-		}
-
-		if clientSpec.Info != instance.ClassType {
-			t.Errorf(
-				"Expected client spec info on generated client spec",
-			)
-		}
-	}
+	assertInstances(t, expectedClients, expectedEndpoints, instances)
 }
 
 func TestExampleServiceIncrementalSelective(t *testing.T) {
@@ -1316,7 +1184,6 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 		t.Errorf("Unexpected error registering service class type: %s", err)
 	}
 
-	packageRoot := "github.com/uber/zanzibar/codegen/test-service"
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
@@ -1342,11 +1209,15 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 		},
 		resolvedModules,
 		true,
+		true,
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
 	}
 
+	expectedQPSLevels := map[string]int{
+		"embeddedClientTest-TestMethod": 1,
+	}
 	expectedClientDependency := ModuleInstance{
 		BaseDirectory: testServiceDir,
 		ClassName:     "client",
@@ -1368,6 +1239,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 		Dependencies:          []ModuleDependency{},
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
+		QPSLevels:             expectedQPSLevels,
 	}
 
 	expectedClientInstance := ModuleInstance{
@@ -1404,6 +1276,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 				&expectedClientDependency,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedGRPCClientInstance := ModuleInstance{
@@ -1440,6 +1313,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 				&expectedClientDependency,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedHealthEndpointInstance := ModuleInstance{
@@ -1478,6 +1352,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 				&expectedClientInstance,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedFooEndpointInstance := ModuleInstance{
@@ -1516,6 +1391,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 				&expectedClientInstance,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedBarEndpointInstance := ModuleInstance{
@@ -1554,6 +1430,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 				&expectedClientInstance,
 			},
 		},
+		QPSLevels: expectedQPSLevels,
 	}
 
 	expectedClients := []*ModuleInstance{
@@ -1565,67 +1442,287 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 		&expectedFooEndpointInstance,
 		&expectedBarEndpointInstance,
 	}
+	assertInstances(t, expectedClients, expectedEndpoints, instances)
+}
 
-	for className, classInstances := range instances {
-		sort.Slice(classInstances, func(i, j int) bool {
-			return classInstances[i].InstanceName < classInstances[j].InstanceName
-		})
+func TestExampleServiceIncrementalWithDisabledQPSLevels(t *testing.T) {
+	m := NewModuleSystem(
+		map[string][]string{
+			"client": {
+				"clients/*",
+				"endpoints/*/*",
+			},
+			"endpoint": {
+				"endpoints/*",
+				"another/*",
+				"more-endpoints/*",
+			},
+			"middleware": {"middlewares/*"},
+			"service":    {"services/*"},
+		},
+		map[string][]string{},
+		true,
+	)
+	registerClass(t, m, "client", "clients", MultiModule, []string{})
+	registerClassType(t, m, "client", "http", &TestHTTPClientGenerator{})
+	registerClassType(t, m, "client", "tchannel", &TestTChannelClientGenerator{})
+	registerClassType(t, m, "client", "grpc", &TestGRPCClientGenerator{})
+	registerClass(t, m, "endpoint", "endpoints", MultiModule, []string{"client"})
+	registerClassType(t, m, "endpoint", "http", &TestHTTPEndpointGenerator{})
 
-		sort.Slice(expectedEndpoints, func(i, j int) bool {
-			return expectedEndpoints[i].InstanceName < expectedEndpoints[j].InstanceName
-		})
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+	targetGenDir := path.Join(testServiceDir, "build")
 
-		sort.Slice(expectedClients, func(i, j int) bool {
-			return expectedClients[i].InstanceName < expectedClients[j].InstanceName
-		})
-
-		if className == "client" {
-			if len(classInstances) != len(expectedClients) {
-				t.Errorf(
-					"Expected %d client class instance but found %d",
-					len(expectedClients),
-					len(classInstances),
-				)
-			}
-
-			for _, instance := range expectedClients {
-				compareInstances(t, instance, expectedClients)
-			}
-		} else if className == "endpoint" {
-			if len(classInstances) != len(expectedEndpoints) {
-				t.Errorf(
-					"Expected %d endpoint class instance but found %d",
-					len(expectedEndpoints),
-					len(classInstances),
-				)
-			}
-
-			for _, instance := range classInstances {
-				compareInstances(t, instance, expectedEndpoints)
-
-				clientDependency := instance.ResolvedDependencies["client"][0]
-				clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
-				if !ok {
-					t.Errorf("type casting failed %s\n", clientDependency)
-				}
-
-				if clientSpec.Info != instance.ClassType {
-					t.Errorf(
-						"Expected client spec info on generated client spec",
-					)
-				}
-			}
-		} else if className == "service" {
-			if len(classInstances) != 1 {
-				t.Errorf(
-					"Expected 1 service class instance but found %d",
-					len(classInstances),
-				)
-			}
-		} else {
-			t.Errorf("Unexpected resolved class type %s", className)
-		}
+	resolvedModules, err := m.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	if err != nil {
+		t.Errorf("Unexpected error generating modules %s", err)
 	}
+
+	instances, err := m.IncrementalBuild(
+		packageRoot, testServiceDir, targetGenDir, []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+			{
+				ClassName:    "client",
+				InstanceName: "example-grpc",
+			},
+		},
+		resolvedModules,
+		true,
+		false,
+	)
+	if err != nil {
+		t.Errorf("Unexpected error generating build %s", err)
+	}
+
+	expectedQPSLevels := map[string]int{}
+	expectedClientDependency := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "tchannel",
+		Directory:     "clients/example-dependency",
+		InstanceName:  "example-dependency",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampledependencyClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampledependencyClientStatic",
+			PackageName:           "exampledependencyClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+		},
+		Dependencies:          []ModuleDependency{},
+		ResolvedDependencies:  map[string][]*ModuleInstance{},
+		RecursiveDependencies: map[string][]*ModuleInstance{},
+		QPSLevels:             expectedQPSLevels,
+	}
+
+	expectedClientInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "http",
+		Directory:     "clients/example",
+		InstanceName:  "example",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		QPSLevels: expectedQPSLevels,
+	}
+
+	expectedGRPCClientInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "grpc",
+		Directory:     "clients/example-example",
+		InstanceName:  "example-grpc",
+		JSONFileName:  "",
+		YAMLFileName:  "client-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-grpc",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-grpc",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		QPSLevels: expectedQPSLevels,
+	}
+
+	expectedHealthEndpointInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "endpoint",
+		ClassType:     "http",
+		Directory:     "endpoints/health",
+		InstanceName:  "health",
+		JSONFileName:  "endpoint-config.json",
+		YAMLFileName:  "",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewEndpoint",
+			ExportType:            "Endpoint",
+			GeneratedPackageAlias: "healthendpointgenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health",
+			IsExportGenerated:     true,
+			PackageAlias:          "healthendpointstatic",
+			PackageName:           "healthendpoint",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientInstance,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+				&expectedClientInstance,
+			},
+		},
+		QPSLevels: expectedQPSLevels,
+	}
+
+	expectedFooEndpointInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "endpoint",
+		ClassType:     "http",
+		Directory:     "more-endpoints/foo",
+		InstanceName:  "more-endpoints/foo",
+		JSONFileName:  "",
+		YAMLFileName:  "endpoint-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewEndpoint",
+			ExportType:            "Endpoint",
+			GeneratedPackageAlias: "fooendpointgenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/more-endpoints/foo",
+			IsExportGenerated:     true,
+			PackageAlias:          "fooendpointstatic",
+			PackageName:           "fooendpoint",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/more-endpoints/foo",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientInstance,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				// Note that the dependencies are ordered
+				&expectedClientDependency,
+				&expectedClientInstance,
+			},
+		},
+		QPSLevels: expectedQPSLevels,
+	}
+
+	expectedBarEndpointInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "endpoint",
+		ClassType:     "http",
+		Directory:     "another/bar",
+		InstanceName:  "another/bar",
+		JSONFileName:  "",
+		YAMLFileName:  "endpoint-config.yaml",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewEndpoint",
+			ExportType:            "Endpoint",
+			GeneratedPackageAlias: "barendpointgenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/another/bar",
+			IsExportGenerated:     true,
+			PackageAlias:          "barendpointstatic",
+			PackageName:           "barendpoint",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/another/bar",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientInstance,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				// Note that the dependencies are ordered
+				&expectedClientDependency,
+				&expectedClientInstance,
+			},
+		},
+		QPSLevels: expectedQPSLevels,
+	}
+
+	expectedClients := []*ModuleInstance{
+		&expectedClientInstance,
+		&expectedGRPCClientInstance,
+	}
+	expectedEndpoints := []*ModuleInstance{
+		&expectedHealthEndpointInstance,
+		&expectedFooEndpointInstance,
+		&expectedBarEndpointInstance,
+	}
+	assertInstances(t, expectedClients, expectedEndpoints, instances)
 }
 
 func TestDefaultDependency(t *testing.T) {
@@ -2369,6 +2466,13 @@ func compareInstances(
 	}
 	expected := expectedMap[actual.InstanceName]
 
+	assert.Equal(
+		t,
+		expected.QPSLevels,
+		actual.QPSLevels,
+		fmt.Sprintf("Expected qps levels %v but found %v", expected.QPSLevels, actual.QPSLevels),
+	)
+
 	if actual.ClassName != expected.ClassName {
 		t.Errorf(
 			"Expected class name of %q %q to be %q but found %q",
@@ -2853,4 +2957,89 @@ func TestTransitiveDoesntBuildUnrelated(t *testing.T) {
 
 	assert.Len(t, results["endpoint"], 1)
 	assert.Equal(t, "getLocation", results["endpoint"][0].InstanceName)
+}
+
+func TestDisabledPopulateQPSLevel(t *testing.T) {
+	qpsLevels, err := PopulateQPSLevels("endpoint-path", false)
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]int{}, qpsLevels)
+}
+
+// TODO: refactor other tests to call this to register classes
+func registerClass(t *testing.T, m *ModuleSystem, name, pluralName string, moduleClassType moduleClassType, dependencies []string) {
+	if err := m.RegisterClass(ModuleClass{
+		Name:       name,
+		NamePlural: pluralName,
+		ClassType:  moduleClassType,
+		DependsOn:  dependencies,
+	}); err != nil {
+		t.Errorf("Unexpected error registering %s class: %s", name, err)
+	}
+}
+
+// TODO: refactor other tests to call this to register class types
+func registerClassType(t *testing.T, m *ModuleSystem, className, classType string, generator BuildGenerator) {
+	if err := m.RegisterClassType(className, classType, generator); err != nil {
+		t.Errorf("Unexpected error registering %s %s class type %s", className, classType, err)
+	}
+}
+
+func assertInstances(t *testing.T, expectedClients, expectedEndpoints []*ModuleInstance, instances map[string][]*ModuleInstance) {
+	for className, classInstances := range instances {
+		sort.Slice(classInstances, func(i, j int) bool {
+			return classInstances[i].InstanceName < classInstances[j].InstanceName
+		})
+
+		sort.Slice(expectedEndpoints, func(i, j int) bool {
+			return expectedEndpoints[i].InstanceName < expectedEndpoints[j].InstanceName
+		})
+
+		sort.Slice(expectedClients, func(i, j int) bool {
+			return expectedClients[i].InstanceName < expectedClients[j].InstanceName
+		})
+
+		if className == "client" {
+			if len(classInstances) != len(expectedClients) {
+				t.Errorf(
+					"Expected %d client class instance but found %d",
+					len(expectedClients),
+					len(classInstances),
+				)
+			}
+
+			for _, instance := range expectedClients {
+				compareInstances(t, instance, expectedClients)
+			}
+		} else if className == "endpoint" {
+			if len(classInstances) != len(expectedEndpoints) {
+				t.Errorf(
+					"Expected %d endpoint class instance but found %d",
+					len(expectedEndpoints),
+					len(classInstances),
+				)
+			}
+
+			for _, instance := range classInstances {
+				compareInstances(t, instance, expectedEndpoints)
+
+				clientDependency := instance.ResolvedDependencies["client"][0]
+				clientSpec, ok := clientDependency.GeneratedSpec().(*TestClientSpec)
+				if !ok {
+					t.Errorf("type casting failed %s\n", clientDependency)
+				}
+
+				if clientSpec.Info != instance.ClassType {
+					t.Errorf(
+						"Expected client spec info on generated client spec",
+					)
+				}
+			}
+		} else if className == "service" {
+			if len(classInstances) != 1 {
+				t.Errorf("Expected 1 service class instance but found %d", len(classInstances))
+			}
+		} else {
+			t.Errorf("Unexpected resolved class type %s", className)
+		}
+	}
 }

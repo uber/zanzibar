@@ -143,6 +143,11 @@ func main() {
 		DefaultHeaders:                defaultHeaders,
 	}
 
+	options.QPSLevelsEnabled = true
+	if config.ContainsKey("qpsLevelsEnabled") {
+		options.QPSLevelsEnabled = config.MustGetBoolean("qpsLevelsEnabled")
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
 		configRoot,
@@ -195,8 +200,10 @@ func main() {
 			packageHelper.PackageRoot(),
 			configRoot,
 			packageHelper.CodeGenTargetPath(),
-			dependencies, resolvedModules,
+			dependencies,
+			resolvedModules,
 			true,
+			options.QPSLevelsEnabled,
 		)
 		checkError(err, "Failed to generate module system components")
 	}

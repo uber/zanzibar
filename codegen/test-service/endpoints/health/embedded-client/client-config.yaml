@@ -3,3 +3,6 @@ config:
     x-service-name: example
 name: embedded
 type: http
+clientId: "embeddedClientTest"
+clientMethod: "TestMethod"
+qpsLevel: 1

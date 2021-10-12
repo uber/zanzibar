@@ -568,8 +568,11 @@ func (g *httpClientGenerator) Generate(
 }
 
 // PopulateQPSLevels loops through endpoint dir and gets qps levels
-func PopulateQPSLevels(EndpointsBaseDir string) (map[string]int, error) {
+func PopulateQPSLevels(EndpointsBaseDir string, isEnabled bool) (map[string]int, error) {
 	qpsLevels := make(map[string]int)
+	if !isEnabled {
+		return qpsLevels, nil
+	}
 	filesList := []string{}
 	endpointFiles, err := GetListOfAllFilesInEndpointDir(EndpointsBaseDir, filesList)
 	if err != nil {

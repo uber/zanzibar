@@ -116,6 +116,9 @@ type PackageHelperOptions struct {
 	ModuleSearchPaths map[string][]string
 	// DefaultDependencies is a dictionary of glob patterns for folders that contain default dependencies
 	DefaultDependencies map[string][]string
+
+	// key to read qps levels or not in the endpoint levels
+	QPSLevelsEnabled bool
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {
