@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -139,7 +140,9 @@ func PascalCase(src string) string {
 	// the RequestType/ResponseType we use in the endpoint/client templates.
 	// https://github.com/thriftrw/thriftrw-go/blob/1c52f516bdc5ca90dc090ba2a8ee0bd11bf04f96/gen/string.go#L48
 	words := strings.Split(src, "_")
-	return pascalCase(len(words) == 1 /* all caps */, words...)
+	res := pascalCase(len(words) == 1 /* all caps */, words...)
+	fmt.Printf("--> conversion from %s -> %s\n", src, res)
+	return res
 }
 
 // pascalCase combines the given words using PascalCase.
