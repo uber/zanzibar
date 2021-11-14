@@ -24,9 +24,12 @@ import (
 	"bytes"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 )
+
+var pascalCaseMap *sync.Map
 
 // CommonInitialisms is taken from https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
 var CommonInitialisms = map[string]bool{
@@ -134,12 +137,20 @@ func ensureGolangAncronymCasing(segment []byte) []byte {
 
 // PascalCase converts the given string to pascal case
 func PascalCase(src string) string {
+	if pascalCaseMap == nil {
+		pascalCaseMap = &sync.Map{}
+	}
+	if res, ok := pascalCaseMap.Load(src); ok {
+		return res.(string)
+	}
 	// borrow pascal casing logic from thriftrw-go since the two implementations
 	// must match otherwise the thriftrw-go generated field name does not match
 	// the RequestType/ResponseType we use in the endpoint/client templates.
 	// https://github.com/thriftrw/thriftrw-go/blob/1c52f516bdc5ca90dc090ba2a8ee0bd11bf04f96/gen/string.go#L48
 	words := strings.Split(src, "_")
-	return pascalCase(len(words) == 1 /* all caps */, words...)
+	res := pascalCase(len(words) == 1 /* all caps */, words...)
+	pascalCaseMap.Store(src, res)
+	return res
 }
 
 // pascalCase combines the given words using PascalCase.
