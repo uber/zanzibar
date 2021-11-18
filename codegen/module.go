@@ -1146,15 +1146,6 @@ func (system *ModuleSystem) collectTransitiveDependencies(
 						continue
 					}
 					toBeBuiltModules[instance.AsModuleDependency()] = instance
-					fmt.Printf(
-						"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
-						instance.InstanceName,
-						instance.ClassName,
-						instance.ClassType,
-						dependentInstance.InstanceName,
-						dependentInstance.ClassName,
-						dependentInstance.ClassType,
-					)
 					break
 				}
 			}
