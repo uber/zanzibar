@@ -22,5 +22,6 @@ dependencies:
   - bar
   middleware:
   - example
+  - example_custom
 name: bar
 type: http

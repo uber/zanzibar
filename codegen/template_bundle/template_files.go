@@ -2315,16 +2315,29 @@ tree.{{$className | title}} = {{$initializedDeps}}
 
 {{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
-	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
-	Default: initializedDefaultDependencies,
-	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
-	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
-		{{- range $idy, $subDependency := $moduleInstances}}
-		{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+	{{- if eq $pkgInfo.IsCustomInitialisation true}}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ImportPackageAlias}}.Dependencies{
+		Default: initializedDefaultDependencies,
+		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$pkgInfo.ImportPackageAlias}}.{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
 		{{- end}}
-	},
-	{{- end}}
-})
+	})
+	{{- else }}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+		Default: initializedDefaultDependencies,
+		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
+		{{- end}}
+	})
+{{- end}}
 {{- end}}
 `)
 
@@ -2338,7 +2351,7 @@ func module_class_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1191, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1902, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

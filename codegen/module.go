@@ -1028,6 +1028,11 @@ func readPackageInfo(
 		isExportGenerated = *config.IsExportGenerated
 	}
 
+	isCustomInitialisation := false
+	if config.IsCustomInitialisation != nil && *config.IsCustomInitialisation == true {
+		isCustomInitialisation = true
+	}
+
 	return &PackageInfo{
 		// The package name is assumed to be the lower case of the instance
 		// Name plus the titular class name, such as fooClient
@@ -1054,11 +1059,12 @@ func readPackageInfo(
 			instanceDirectory,
 			"module",
 		),
-		ExportName:            "New" + qualifiedClassName,
-		InitializerName:       "Initialize" + qualifiedClassName,
-		QualifiedInstanceName: qualifiedInstanceName,
-		ExportType:            qualifiedClassName,
-		IsExportGenerated:     isExportGenerated,
+		ExportName:             "New" + qualifiedClassName,
+		InitializerName:        "Initialize" + qualifiedClassName,
+		QualifiedInstanceName:  qualifiedInstanceName,
+		ExportType:             qualifiedClassName,
+		IsExportGenerated:      isExportGenerated,
+		IsCustomInitialisation: isCustomInitialisation,
 	}, nil
 }
 
@@ -1191,6 +1197,8 @@ func (system *ModuleSystem) IncrementalBuild(
 			go func(instance *ModuleInstance) {
 				defer wg.Done()
 				if err := system.populateSpec(instance); err != nil {
+					// populate spec error
+					fmt.Println("Populate spec error", err)
 					baseErr := errors.Cause(err)
 					if _, ok := baseErr.(*IgnorePopulateSpecStageErr); ok {
 						return
@@ -1657,7 +1665,8 @@ type PackageInfo struct {
 	// IsExportGenerated is true if the export type is provided by the
 	// generated package, otherwise it is assumed that the export type resides
 	// in the non-generated package
-	IsExportGenerated bool
+	IsExportGenerated      bool
+	IsCustomInitialisation bool
 }
 
 // ImportPackagePath returns the correct package path for the module's exported
@@ -1785,7 +1794,8 @@ type ClassConfigBase struct {
 	Type string `yaml:"type" json:"type"`
 	// IsExportGenerated determines whether or not the export lives in
 	// IsExportGenerated defaults to true if not set.
-	IsExportGenerated *bool `yaml:"IsExportGenerated,omitempty" json:"IsExportGenerated"`
+	IsExportGenerated      *bool `yaml:"IsExportGenerated,omitempty" json:"IsExportGenerated"`
+	IsCustomInitialisation *bool `yaml:"IsCustomInitialisation,omitempty" json:"isCustomInitialisation"`
 	// Owner is the Name of the class instance owner
 	Owner string `yaml:"owner,omitempty"`
 	// SelectiveBuilding allows the module to be built with subset of dependencies

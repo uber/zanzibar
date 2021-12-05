@@ -70,6 +70,7 @@ import (
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+	examplecustommiddlewarestatic "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_custom"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -98,6 +99,7 @@ type MiddlewareDependenciesNodes struct {
 	DefaultExample2        defaultexample2middlewaregenerated.Middleware
 	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 	Example                examplemiddlewaregenerated.Middleware
+	ExampleCustom          examplecustommiddlewarestatic.Middleware
 	ExampleTchannel        exampletchannelmiddlewaregenerated.Middleware
 }
 
@@ -184,6 +186,9 @@ func InitializeDependencies(
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
+	initializedMiddlewareDependencies.ExampleCustom = examplecustommiddlewarestatic.NewMiddleware(&examplecustommiddlewarestatic.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
@@ -200,6 +205,7 @@ func InitializeDependencies(
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 			Example:                initializedMiddlewareDependencies.Example,
+			ExampleCustom:          initializedMiddlewareDependencies.ExampleCustom,
 		},
 	})
 	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointmodule.Dependencies{

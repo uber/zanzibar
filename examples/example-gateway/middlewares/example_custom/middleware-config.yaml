@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/examples/example-gateway/middlewares/examplecustom
+  schema: ./middlewares/example_custom/example_custom_schema.json
+name: example_custom
+type: custom
+isCustomInitialisation: true

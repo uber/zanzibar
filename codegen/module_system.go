@@ -357,6 +357,13 @@ func NewDefaultModuleSystem(
 		)
 	}
 
+	if err := system.RegisterClassType("middleware", "custom", &CustomMiddlewareGenerator{}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Gateway middleware class type",
+		)
+	}
+
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass(ModuleClass{
 		Name:       "endpoint",
@@ -1691,6 +1698,31 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 
 	return &BuildResult{
 		Files: files,
+	}, nil
+}
+
+/*
+ * Custom Middleware Generator
+ */
+
+// CustomMiddlewareGenerator generates a group of zanzibar endpoints that proxy corresponding clients
+type CustomMiddlewareGenerator struct{}
+
+// ComputeSpec computes the spec for a middleware
+func (g *CustomMiddlewareGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return nil, nil
+}
+
+// Generate returns the endpoint build result, which contains a file per
+// endpoint handler and a list of handler specs
+func (g *CustomMiddlewareGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	return &BuildResult{
+		Files: map[string][]byte{},
+		Spec:  nil,
 	}, nil
 }
 

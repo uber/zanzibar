@@ -42,6 +42,7 @@ import (
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	examplecustommiddlewarestatic "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_custom"
 )
 
 // MockClientNodes contains mock client dependencies
@@ -103,6 +104,9 @@ func InitializeDependenciesMock(
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
+	initializedMiddlewareDependencies.ExampleCustom = examplecustommiddlewarestatic.NewMiddleware(&examplecustommiddlewarestatic.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
@@ -127,6 +131,7 @@ func InitializeDependenciesMock(
 			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 			Example:                initializedMiddlewareDependencies.Example,
+			ExampleCustom:          initializedMiddlewareDependencies.ExampleCustom,
 		},
 	})
 
