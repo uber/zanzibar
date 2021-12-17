@@ -85,30 +85,30 @@ func NewClient(deps *module.Dependencies) Client {
 
 	/*Ex:
 	{
-	  "clients.rider-presentation.alternates": {
-		"routingConfigs": [
-		  {
-			"headerName": "x-test-env",
-			"headerValue": "*",
-			"serviceName": "testservice"
-		  },
-		  {
-			"headerName": "x-container",
-			"headerValue": "container*",
-			"serviceName": "relayer"
-		  }
-		],
-		"servicesDetail": {
-		  "testservice": {
-			"ip": "127.0.0.1",
-			"port": 5000
-		  },
-		  "relayer": {
-			"ip": "127.0.0.1",
-			"port": 12000
-		  }
+		"clients.rider-presentation.alternates": {
+			"routingConfigs": [
+				{
+					"headerName": "x-test-env",
+					"headerValue": "*",
+					"serviceName": "testservice"
+				},
+				{
+					"headerName": "x-container",
+					"headerValue": "container*",
+					"serviceName": "relayer"
+				}
+			],
+			"servicesDetail": {
+				"testservice": {
+					"ip": "127.0.0.1",
+					"port": 5000
+				},
+				"relayer": {
+					"ip": "127.0.0.1",
+					"port": 12000
+				}
+			}
 		}
-	  }
 	}*/
 	var re ruleengine.RuleEngine
 	var headerPatterns []string
