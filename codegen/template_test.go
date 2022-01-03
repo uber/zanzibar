@@ -91,6 +91,7 @@ func TestGenerateBar(t *testing.T) {
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 		true,
+		false,
 	)
 	t.Logf("resolved moduels: %+v", resolvedModules)
 	if !assert.NoError(t, buildErr, "failed to create clients init %s", buildErr) {

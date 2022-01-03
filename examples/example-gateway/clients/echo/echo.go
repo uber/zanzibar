@@ -29,7 +29,6 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"go.uber.org/yarpc"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
 	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -37,6 +36,11 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+// Dependencies contains dependencies for the echo client module
+type Dependencies struct {
+	Default *zanzibar.DefaultDependencies
+}
 
 // Client defines echo client interface.
 type Client interface {
@@ -54,7 +58,7 @@ type echoClient struct {
 }
 
 // NewClient returns a new gRPC client for service echo
-func NewClient(deps *module.Dependencies) Client {
+func NewClient(deps *Dependencies) Client {
 	oc := deps.Default.GRPCClientDispatcher.MustOutboundConfig("echo")
 	var routingKey string
 	if deps.Default.Config.ContainsKey("clients.echo.routingKey") {
@@ -110,7 +114,7 @@ type CircuitBreakerConfig struct {
 	Parameters map[string]map[string]int
 }
 
-func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
+func configureCircuitBreaker(deps *Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
 	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
 	// to reject requests before allowing attempts again to determine if the circuit should again be closed
 	sleepWindowInMilliseconds := 5000

@@ -253,6 +253,7 @@ func TestExampleService(t *testing.T) {
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
+		false,
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -603,7 +604,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir, false)
 	if err != nil {
 		t.Errorf("Unexpected error generating modukes %s", err)
 	}
@@ -947,7 +948,7 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir, false)
 	if err != nil {
 		t.Errorf("Unexpected error generating modukes %s", err)
 	}
@@ -1188,7 +1189,7 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir, false)
 	if err != nil {
 		t.Errorf("Unexpected error generating modukes %s", err)
 	}
@@ -1474,7 +1475,7 @@ func TestExampleServiceIncrementalWithDisabledQPSLevels(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := m.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := m.ResolveModules(packageRoot, testServiceDir, targetGenDir, false)
 	if err != nil {
 		t.Errorf("Unexpected error generating modules %s", err)
 	}
@@ -1787,6 +1788,7 @@ func TestDefaultDependency(t *testing.T) {
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
+		false,
 	)
 	if err != nil {
 		t.Errorf("Unexpected generation failure")
@@ -1909,6 +1911,7 @@ func TestSingleDefaultDependency(t *testing.T) {
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
+		false,
 	)
 	if err != nil {
 		t.Errorf("Unexpected generation failure")
@@ -2028,6 +2031,7 @@ func TestNoClassDefaultDependency(t *testing.T) {
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 		true,
+		false,
 	)
 	if err == nil {
 		t.Errorf("Expected failure due to default dependency directory which is not a dependency")
@@ -2791,6 +2795,7 @@ func TestModuleSearchDuplicateGlobs(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
+		false,
 		false,
 	)
 	assert.NoError(t, err)

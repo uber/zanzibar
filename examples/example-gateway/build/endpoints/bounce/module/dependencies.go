@@ -24,10 +24,10 @@
 package module
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
 	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	echoclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -41,7 +41,7 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Echo echoclientgenerated.Client
+	Echo echoclientstatic.Client
 }
 
 // MiddlewareDependencies contains middleware dependencies

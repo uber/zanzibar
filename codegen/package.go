@@ -118,7 +118,8 @@ type PackageHelperOptions struct {
 	DefaultDependencies map[string][]string
 
 	// key to read qps levels or not in the endpoint levels
-	QPSLevelsEnabled bool
+	QPSLevelsEnabled            bool
+	CustomInitialisationEnabled bool
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {

@@ -148,6 +148,11 @@ func main() {
 		options.QPSLevelsEnabled = config.MustGetBoolean("qpsLevelsEnabled")
 	}
 
+	options.CustomInitialisationEnabled = false
+	if config.ContainsKey("customInitialisationEnabled") {
+		options.CustomInitialisationEnabled = config.MustGetBoolean("customInitialisationEnabled")
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
 		configRoot,
@@ -179,7 +184,7 @@ func main() {
 	fmt.Printf("Generating module system components:\n")
 
 	if *moduleClass != "" && *moduleName != "" {
-		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath())
+		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath(), options.CustomInitialisationEnabled)
 		checkError(err, "error resolving modules")
 
 		for _, instance := range resolvedModules[*moduleClass] {
@@ -190,7 +195,7 @@ func main() {
 			}
 		}
 	} else {
-		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath())
+		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath(), options.CustomInitialisationEnabled)
 		checkError(err, "error resolving modules")
 		var dependencies []codegen.ModuleDependency
 		if *selectiveModule {
