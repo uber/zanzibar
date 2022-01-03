@@ -100,7 +100,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template, parallelizeFactor int) (Po
 					)
 				}
 
-				importPath := instance.PackageInfo.GeneratedPackagePath
+				importPath := instance.PackageInfo.ImportPackagePath()
 				customInterface := client.Config.CustomInterface
 				if instance.ClassType == custom {
 					importPath = client.Config.CustomImportPath

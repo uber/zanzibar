@@ -26,8 +26,6 @@ package module
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
-	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
-	echoclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
 	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
 	bounceendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
@@ -38,6 +36,7 @@ import (
 	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	echoclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -52,7 +51,7 @@ type DependenciesTree struct {
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
 	Baz  bazclientgenerated.Client
-	Echo echoclientgenerated.Client
+	Echo echoclientstatic.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -94,7 +93,7 @@ func InitializeDependencies(
 	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Echo = echoclientgenerated.NewClient(&echoclientmodule.Dependencies{
+	initializedClientDependencies.Echo = echoclientstatic.NewClient(&echoclientstatic.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 

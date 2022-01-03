@@ -36,3 +36,4 @@ defaultDependencies:
   endpoint:
     - middlewares/default/*
 shadowRequestHeader: x-shadow-request
+customInitialisationEnabled: true

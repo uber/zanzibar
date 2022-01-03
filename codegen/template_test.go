@@ -90,7 +90,9 @@ func TestGenerateBar(t *testing.T) {
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
-		true,
+		codegen.Options{
+			CommitChange: true,
+		},
 	)
 	t.Logf("resolved moduels: %+v", resolvedModules)
 	if !assert.NoError(t, buildErr, "failed to create clients init %s", buildErr) {

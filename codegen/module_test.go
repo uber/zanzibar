@@ -252,7 +252,9 @@ func TestExampleService(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
-		true,
+		Options{
+			CommitChange: true,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -603,7 +605,12 @@ func TestExampleServiceIncremental(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := moduleSystem.ResolveModules(
+		packageRoot,
+		testServiceDir,
+		targetGenDir,
+		Options{},
+	)
 	if err != nil {
 		t.Errorf("Unexpected error generating modukes %s", err)
 	}
@@ -623,8 +630,10 @@ func TestExampleServiceIncremental(t *testing.T) {
 			},
 		},
 		resolvedModules,
-		true,
-		true,
+		Options{
+			CommitChange:     true,
+			QPSLevelsEnabled: true,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -947,7 +956,12 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := moduleSystem.ResolveModules(
+		packageRoot,
+		testServiceDir,
+		targetGenDir,
+		Options{},
+	)
 	if err != nil {
 		t.Errorf("Unexpected error generating modukes %s", err)
 	}
@@ -967,8 +981,10 @@ func TestExampleServiceIncrementalSkip(t *testing.T) {
 			},
 		},
 		resolvedModules,
-		true,
-		true,
+		Options{
+			CommitChange:     true,
+			QPSLevelsEnabled: true,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -1188,7 +1204,12 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := moduleSystem.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := moduleSystem.ResolveModules(
+		packageRoot,
+		testServiceDir,
+		targetGenDir,
+		Options{},
+	)
 	if err != nil {
 		t.Errorf("Unexpected error generating modukes %s", err)
 	}
@@ -1208,8 +1229,10 @@ func TestExampleServiceIncrementalSelective(t *testing.T) {
 			},
 		},
 		resolvedModules,
-		true,
-		true,
+		Options{
+			CommitChange:     true,
+			QPSLevelsEnabled: true,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -1474,7 +1497,14 @@ func TestExampleServiceIncrementalWithDisabledQPSLevels(t *testing.T) {
 	testServiceDir := path.Join(currentDir, "test-service")
 	targetGenDir := path.Join(testServiceDir, "build")
 
-	resolvedModules, err := m.ResolveModules(packageRoot, testServiceDir, targetGenDir)
+	resolvedModules, err := m.ResolveModules(
+		packageRoot,
+		testServiceDir,
+		targetGenDir,
+		Options{
+			CommitChange: true,
+		},
+	)
 	if err != nil {
 		t.Errorf("Unexpected error generating modules %s", err)
 	}
@@ -1491,8 +1521,10 @@ func TestExampleServiceIncrementalWithDisabledQPSLevels(t *testing.T) {
 			},
 		},
 		resolvedModules,
-		true,
-		false,
+		Options{
+			CommitChange:     true,
+			QPSLevelsEnabled: false,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -1786,7 +1818,9 @@ func TestDefaultDependency(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
-		true,
+		Options{
+			CommitChange: true,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected generation failure")
@@ -1908,7 +1942,9 @@ func TestSingleDefaultDependency(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
-		true,
+		Options{
+			CommitChange: true,
+		},
 	)
 	if err != nil {
 		t.Errorf("Unexpected generation failure")
@@ -2027,7 +2063,9 @@ func TestNoClassDefaultDependency(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
-		true,
+		Options{
+			CommitChange: true,
+		},
 	)
 	if err == nil {
 		t.Errorf("Expected failure due to default dependency directory which is not a dependency")
@@ -2791,7 +2829,9 @@ func TestModuleSearchDuplicateGlobs(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
-		false,
+		Options{
+			CommitChange: false,
+		},
 	)
 	assert.NoError(t, err)
 

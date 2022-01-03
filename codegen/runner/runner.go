@@ -148,6 +148,11 @@ func main() {
 		options.QPSLevelsEnabled = config.MustGetBoolean("qpsLevelsEnabled")
 	}
 
+	options.CustomInitialisationEnabled = false
+	if config.ContainsKey("customInitialisationEnabled") {
+		options.CustomInitialisationEnabled = config.MustGetBoolean("customInitialisationEnabled")
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
 		configRoot,
@@ -179,18 +184,40 @@ func main() {
 	fmt.Printf("Generating module system components:\n")
 
 	if *moduleClass != "" && *moduleName != "" {
-		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath())
+		resolvedModules, err := moduleSystem.ResolveModules(
+			packageHelper.PackageRoot(),
+			configRoot,
+			packageHelper.CodeGenTargetPath(),
+			codegen.Options{
+				EnableCustomInitialisation: options.CustomInitialisationEnabled,
+			},
+		)
 		checkError(err, "error resolving modules")
 
 		for _, instance := range resolvedModules[*moduleClass] {
 			if instance.InstanceName == *moduleName {
 				physicalGenDir := filepath.Join(packageHelper.CodeGenTargetPath(), instance.Directory)
-				err := moduleSystem.Build(packageHelper.PackageRoot(), configRoot, physicalGenDir, instance, true)
+				err := moduleSystem.Build(
+					packageHelper.PackageRoot(),
+					configRoot,
+					physicalGenDir,
+					instance,
+					codegen.Options{
+						CommitChange: true,
+					},
+				)
 				checkError(err, "error generating code")
 			}
 		}
 	} else {
-		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath())
+		resolvedModules, err := moduleSystem.ResolveModules(
+			packageHelper.PackageRoot(),
+			configRoot,
+			packageHelper.CodeGenTargetPath(),
+			codegen.Options{
+				EnableCustomInitialisation: options.CustomInitialisationEnabled,
+			},
+		)
 		checkError(err, "error resolving modules")
 		var dependencies []codegen.ModuleDependency
 		if *selectiveModule {
@@ -202,8 +229,10 @@ func main() {
 			packageHelper.CodeGenTargetPath(),
 			dependencies,
 			resolvedModules,
-			true,
-			options.QPSLevelsEnabled,
+			codegen.Options{
+				CommitChange:     true,
+				QPSLevelsEnabled: options.QPSLevelsEnabled,
+			},
 		)
 		checkError(err, "Failed to generate module system components")
 	}

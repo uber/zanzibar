@@ -119,6 +119,9 @@ type PackageHelperOptions struct {
 
 	// key to read qps levels or not in the endpoint levels
 	QPSLevelsEnabled bool
+
+	// key to enable custom initialisation
+	CustomInitialisationEnabled bool
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {
