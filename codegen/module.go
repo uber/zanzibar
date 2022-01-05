@@ -78,6 +78,13 @@ type ModuleSystem struct {
 	selectiveBuilding   bool
 }
 
+// Options Provides the features that are enabled while generating the build.
+type Options struct {
+	EnableCustomInitialisation bool
+	CommitChange               bool
+	QPSLevelsEnabled           bool
+}
+
 // PostGenHook provides a way to do work after the build is generated,
 // useful to augment the build, e.g. generate mocks after interfaces are generated
 type PostGenHook func(map[string][]*ModuleInstance) error
@@ -549,6 +556,7 @@ func (system *ModuleSystem) ResolveModules(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
+	options Options,
 ) (map[string][]*ModuleInstance, error) {
 	// resolve module class order before read and resolve each module
 	if err := system.resolveClassOrder(); err != nil {
@@ -578,8 +586,7 @@ func (system *ModuleSystem) ResolveModules(
 
 			runner := parallelize.NewUnboundedRunner(len(moduleDirectoriesAbs))
 			for _, moduleDirAbs := range moduleDirectoriesAbs {
-				f := system.getInstanceFunc(baseDirectory, className, packageRoot, targetGenDir, defaultDependencies,
-					moduleDirectoryGlob)
+				f := system.getInstanceFunc(baseDirectory, className, packageRoot, targetGenDir, defaultDependencies, moduleDirectoryGlob, options)
 				wrk := &parallelize.SingleParamWork{Data: moduleDirAbs, Func: f}
 				runner.SubmitWork(wrk)
 			}
@@ -627,7 +634,7 @@ func (system *ModuleSystem) ResolveModules(
 	return classArrayModuleMap, nil
 }
 
-func (system *ModuleSystem) getInstanceFunc(baseDirectory string, className string, packageRoot string, targetGenDir string, defaultDependencies []ModuleDependency, moduleDirectoryGlob string) func(moduleDirAbsInf interface{}) (interface{}, error) {
+func (system *ModuleSystem) getInstanceFunc(baseDirectory string, className string, packageRoot string, targetGenDir string, defaultDependencies []ModuleDependency, moduleDirectoryGlob string, options Options) func(moduleDirAbsInf interface{}) (interface{}, error) {
 	f := func(moduleDirAbsInf interface{}) (interface{}, error) {
 		moduleDirAbs := moduleDirAbsInf.(string)
 		stat, err := os.Stat(moduleDirAbs)
@@ -670,6 +677,7 @@ func (system *ModuleSystem) getInstanceFunc(baseDirectory string, className stri
 			moduleDir,
 			moduleDirAbs,
 			defaultDependencies,
+			options,
 		)
 		if instanceErr != nil {
 			return nil, errors.Wrapf(
@@ -891,6 +899,7 @@ func (system *ModuleSystem) readInstance(
 	instanceDirectory string,
 	classConfigDir string,
 	defaultDependencies []ModuleDependency,
+	options Options,
 ) (*ModuleInstance, error) {
 	classConfigPath, yamlFileName, jsonFileName := getConfigFilePath(classConfigDir, className)
 
@@ -935,6 +944,7 @@ func (system *ModuleSystem) readInstance(
 		className,
 		instanceDirectory,
 		config,
+		options,
 	)
 
 	if err != nil {
@@ -998,6 +1008,7 @@ func readPackageInfo(
 	className string,
 	instanceDirectory string,
 	config *ClassConfig,
+	options Options,
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(CamelCase(className))
 	qualifiedInstanceName := strings.Title(CamelCase(config.Name))
@@ -1028,6 +1039,13 @@ func readPackageInfo(
 		isExportGenerated = *config.IsExportGenerated
 	}
 
+	var customInitialisation bool
+	if config.CustomInitialisation == nil || options.EnableCustomInitialisation == false {
+		customInitialisation = false
+	} else {
+		customInitialisation = *config.CustomInitialisation
+	}
+
 	return &PackageInfo{
 		// The package name is assumed to be the lower case of the instance
 		// Name plus the titular class name, such as fooClient
@@ -1035,10 +1053,10 @@ func readPackageInfo(
 		// The prefixes "Static" and "Generated" are used to ensure global
 		// uniqueness of the provided package aliases. Note that the default
 		// package is "PackageName".
-		PackageAlias:          defaultAlias + "static",
-		PackageRoot:           packageRoot,
-		GeneratedPackageAlias: defaultAlias + "generated",
-		ModulePackageAlias:    defaultAlias + "module",
+		PackageAlias:                defaultAlias + "static",
+		PackageRoot:                 packageRoot,
+		GeneratedPackageAlias:       defaultAlias + "generated",
+		GeneratedModulePackageAlias: defaultAlias + "module",
 		PackagePath: path.Join(
 			packageRoot,
 			instanceDirectory,
@@ -1048,7 +1066,7 @@ func readPackageInfo(
 			relativeGeneratedPath,
 			instanceDirectory,
 		),
-		ModulePackagePath: filepath.Join(
+		GeneratedModulePackagePath: filepath.Join(
 			packageRoot,
 			relativeGeneratedPath,
 			instanceDirectory,
@@ -1059,6 +1077,7 @@ func readPackageInfo(
 		QualifiedInstanceName: qualifiedInstanceName,
 		ExportType:            qualifiedClassName,
 		IsExportGenerated:     isExportGenerated,
+		CustomInitialisation:  customInitialisation,
 	}, nil
 }
 
@@ -1176,8 +1195,7 @@ func (system *ModuleSystem) IncrementalBuild(
 	targetGenDir string,
 	instances []ModuleDependency,
 	resolvedModules map[string][]*ModuleInstance,
-	commitChange,
-	qpsLevelsEnabled bool,
+	options Options,
 ) (map[string][]*ModuleInstance, error) {
 
 	skipModuleMap := map[*ModuleInstance]struct{}{}
@@ -1259,7 +1277,7 @@ func (system *ModuleSystem) IncrementalBuild(
 	for _, moduleList := range toBeBuiltModules {
 		moduleCount += len(moduleList)
 	}
-	qpsLevels, err := PopulateQPSLevels(baseDirectory+"/endpoints", qpsLevelsEnabled)
+	qpsLevels, err := PopulateQPSLevels(baseDirectory+"/endpoints", options.QPSLevelsEnabled)
 	if err != nil {
 		return nil, errors.Errorf(
 			"error in populating qps levels for base directory %q",
@@ -1278,7 +1296,7 @@ func (system *ModuleSystem) IncrementalBuild(
 				PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName,
 					prettyDir, int(atomic.AddInt32(&moduleIndex, 1)), moduleCount)
 				moduleInstance.QPSLevels = qpsLevels
-				if err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange); err != nil {
+				if err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, options); err != nil {
 					ch <- err
 				}
 			}(moduleInstance)
@@ -1417,11 +1435,11 @@ func flattenInstances(resolvedModules map[string][]*ModuleInstance) map[string]*
 
 // Build invokes the generator for a module instance and optionally writes the files to disk
 func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, physicalGenDir string,
-	instance *ModuleInstance, commitChange bool) error {
+	instance *ModuleInstance, options Options) error {
 	classGenerators := system.classes[instance.ClassName]
 	generator := classGenerators.types[instance.ClassType]
 
-	if generator == nil {
+	if generator == nil || instance.PackageInfo.CustomInitialisation {
 		fmt.Fprintf(
 			os.Stderr,
 			"Skipping generation of %q %q class of type %q "+
@@ -1452,7 +1470,7 @@ func (system *ModuleSystem) Build(packageRoot string, baseDirectory string, phys
 	instance.mu.Lock()
 	instance.genSpec = buildResult.Spec
 	instance.mu.Unlock()
-	if !commitChange {
+	if !options.CommitChange {
 		return nil
 	}
 	runner := parallelize.NewUnboundedRunner(len(buildResult.Files))
@@ -1511,12 +1529,13 @@ func (system *ModuleSystem) GenerateBuild(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
-	commitChange bool,
+	options Options,
 ) (map[string][]*ModuleInstance, error) {
 	resolvedModules, err := system.ResolveModules(
 		packageRoot,
 		baseDirectory,
 		targetGenDir,
+		options,
 	)
 
 	if err != nil {
@@ -1536,13 +1555,12 @@ func (system *ModuleSystem) GenerateBuild(
 			physicalGenDir := filepath.Join(targetGenDir, moduleInstance.Directory)
 			prettyDir, _ := filepath.Rel(baseDirectory, physicalGenDir)
 			PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName, prettyDir, moduleIndex, moduleCount)
-			err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange)
+			err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, options)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-
 	for i, hook := range system.postGenHook {
 		if err := hook(resolvedModules); err != nil {
 			return resolvedModules, errors.Wrapf(err, "error running %dth post generation hook", i)
@@ -1635,16 +1653,16 @@ type PackageInfo struct {
 	PackageRoot string
 	// GeneratedPackageAlias is the unique import alias for generated packages
 	GeneratedPackageAlias string
-	// ModulePackageAlias is the unique import alias for the module system's,
+	// GeneratedModulePackageAlias is the unique import alias for the module system's,
 	// generated subpackage
-	ModulePackageAlias string
+	GeneratedModulePackageAlias string
 	// PackagePath is the full package path for the non-generated code
 	PackagePath string
 	// GeneratedPackagePath is the full package path for the generated code
 	GeneratedPackagePath string
-	// ModulePacakgePath is the full package path for the generated dependency
+	// GeneratedModulePackagePath is the full package path for the generated dependency
 	// structs and initializers
-	ModulePackagePath string
+	GeneratedModulePackagePath string
 	// QualifiedInstanceName for this package. Pascal case name for this module.
 	QualifiedInstanceName string
 	// ExportName is the name on the module initializer function
@@ -1658,11 +1676,24 @@ type PackageInfo struct {
 	// generated package, otherwise it is assumed that the export type resides
 	// in the non-generated package
 	IsExportGenerated bool
+	// CustomInitialisation if CustomInitialisation is true it basically changes the
+	// import path of the module. For e.g. if the import path of a module is
+	//   package import path: "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
+	//   module import path: "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
+	// then with CustomInitialisation=true the new import path are
+	//   package import path: "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
+	//   module import path: "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
+	// hence the new import path are outside of the build folder or generated code, giving developer control over
+	// the constructors of the module.
+	CustomInitialisation bool
 }
 
 // ImportPackagePath returns the correct package path for the module's exported
 // type, depending on which package (generated or not) the type lives in
 func (info *PackageInfo) ImportPackagePath() string {
+	if info.CustomInitialisation {
+		return info.PackagePath
+	}
 	if info.IsExportGenerated {
 		return info.GeneratedPackagePath
 	}
@@ -1673,11 +1704,32 @@ func (info *PackageInfo) ImportPackagePath() string {
 // ImportPackageAlias returns the correct package alias for referencing the
 // module's exported type, depending on whether or not the export is generated
 func (info *PackageInfo) ImportPackageAlias() string {
+	if info.CustomInitialisation {
+		return info.PackageAlias
+	}
 	if info.IsExportGenerated {
 		return info.GeneratedPackageAlias
 	}
 
 	return info.PackageAlias
+}
+
+// ModulePackagePath returns the correct package path for the module's exported
+// type, depending on which package (generated or not) the type lives in
+func (info *PackageInfo) ModulePackagePath() string {
+	if info.CustomInitialisation {
+		return info.PackagePath
+	}
+	return info.GeneratedModulePackagePath
+}
+
+// ModulePackageAlias returns the correct package path for the module's exported
+// type, depending on which package (generated or not) the type lives in
+func (info *PackageInfo) ModulePackageAlias() string {
+	if info.CustomInitialisation {
+		return info.PackageAlias
+	}
+	return info.GeneratedModulePackageAlias
 }
 
 // ModuleInstance is a configured module inside a module class directory.
@@ -1786,6 +1838,8 @@ type ClassConfigBase struct {
 	// IsExportGenerated determines whether or not the export lives in
 	// IsExportGenerated defaults to true if not set.
 	IsExportGenerated *bool `yaml:"IsExportGenerated,omitempty" json:"IsExportGenerated"`
+	// CustomInitialisation defaults to false if not set.
+	CustomInitialisation *bool `yaml:"CustomInitialisation,omitempty" json:"CustomInitialisation"`
 	// Owner is the Name of the class instance owner
 	Owner string `yaml:"owner,omitempty"`
 	// SelectiveBuilding allows the module to be built with subset of dependencies

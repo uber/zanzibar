@@ -26,11 +26,11 @@ package mockbounceworkflow
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
 	echoclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/mock-client"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
 	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	echoclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
 )
 
 // MockClientNodes contains mock client dependencies for the bounce endpoint module
@@ -42,7 +42,7 @@ type MockClientNodes struct {
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
 	Baz  bazclientgenerated.Client
-	Echo echoclientgenerated.Client
+	Echo echoclientstatic.Client
 }
 
 // middlewareDependenciesNodes contains middleware dependencies

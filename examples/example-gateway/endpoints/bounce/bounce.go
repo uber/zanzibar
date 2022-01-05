@@ -23,11 +23,11 @@ package bounce
 import (
 	"context"
 
-	echoclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/workflow"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
+	echoclient "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

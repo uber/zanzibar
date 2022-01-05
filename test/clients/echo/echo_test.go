@@ -36,9 +36,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/config"
-	echoclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
+	echoclient "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -78,7 +77,7 @@ func TestEcho(t *testing.T) {
 	handler := echo.BuildEchoYARPCProcedures(&echoServer{})
 	dispatcher.Register(handler)
 
-	client := echoclient.NewClient(&module.Dependencies{
+	client := echoclient.NewClient(&echoclient.Dependencies{
 		Default: &zanzibar.DefaultDependencies{
 			GRPCClientDispatcher: dispatcher,
 			Config:               sc,
