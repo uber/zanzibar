@@ -126,9 +126,6 @@ func (w {{$workflowStruct}}) Handle(
 	// Filter and map response headers from client to server response.
 	{{if eq $endpointType "tchannel" -}}
 	resHeaders := zanzibar.ServerTChannelHeader{}
-	for k, v := range cliRespHeaders {
-		resHeaders.Set(k, v)
-	}
 	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{- end -}}
