@@ -43,6 +43,8 @@ type Header interface {
 	Values(key string) ([]string, bool)
 	Add(key string, value string)
 	Set(key string, value string)
+	// Unset unsets the value for a given header. Can be safely called multiple times
+	Unset(key string)
 	Keys() []string
 	// Deprecated: Use EnsureContext instead
 	Ensure(keys []string, logger *zap.Logger) error
@@ -107,6 +109,12 @@ func (zh ServerHTTPHeader) Add(key string, value string) {
 func (zh ServerHTTPHeader) Set(key string, value string) {
 	httpKey := textproto.CanonicalMIMEHeaderKey(key)
 	zh[httpKey] = []string{value}
+}
+
+// Unset unsets the value for a given header. Can be safely called multiple times
+func (zh ServerHTTPHeader) Unset(key string) {
+	httpKey := textproto.CanonicalMIMEHeaderKey(key)
+	delete(zh, httpKey)
 }
 
 // Keys returns a slice of header keys.
@@ -190,6 +198,11 @@ func (th ServerTChannelHeader) Add(key string, value string) {
 // Set sets a value for a given header, overwriting the previous value.
 func (th ServerTChannelHeader) Set(key string, value string) {
 	th[key] = value
+}
+
+// Unset unsets the value for a given header. Can be safely called multiple times
+func (th ServerTChannelHeader) Unset(key string) {
+	delete(th, key)
 }
 
 // Keys returns a slice of header keys.

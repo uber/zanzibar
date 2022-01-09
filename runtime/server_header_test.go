@@ -181,6 +181,17 @@ func TestSetNewKey(t *testing.T) {
 	assert.Equal(t, "headOne", zh.GetOrEmptyStr("foo"))
 }
 
+func TestUnsetKey(t *testing.T) {
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "bar")
+	assert.Equal(t, "bar", zh.GetOrEmptyStr("foo"))
+
+	zh.Unset("foo")
+	v, ok := zh.Get("foo")
+	assert.False(t, ok)
+	assert.Equal(t, "", v)
+}
+
 func TestSetOverwriteMultiKey(t *testing.T) {
 	zh := zanzibar.NewServerHTTPHeader(http.Header{})
 	zh.Set("foo", "headOne")
@@ -322,6 +333,19 @@ func TestSTHSetNewKey(t *testing.T) {
 	v, ok := zh.Get("foo")
 	assert.True(t, ok)
 	assert.Equal(t, "headOne", v)
+}
+
+func TestSTHUnset(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+	zh.Add("foo", "bar")
+	v, ok := zh.Get("foo")
+	assert.True(t, ok)
+	assert.Equal(t, "bar", v)
+
+	zh.Unset("foo")
+	v, ok = zh.Get("foo")
+	assert.False(t, ok)
+	assert.Equal(t, "", v)
 }
 
 func TestSTHMissingKey(t *testing.T) {
