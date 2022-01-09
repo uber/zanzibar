@@ -631,6 +631,10 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 
 	res.CheckOKResponse([]int{200, 304})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsIDlClientsCorgeCorge.Foo

@@ -327,6 +327,9 @@ func (w {{$workflowStruct}}) Handle(
 	// Filter and map response headers from client to server response.
 	{{if eq $endpointType "tchannel" -}}
 	resHeaders := zanzibar.ServerTChannelHeader{}
+	for k, v := range cliRespHeaders {
+		resHeaders.Set(k, v)
+	}
 	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{- end -}}
@@ -365,7 +368,7 @@ func clientlessWorkflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4260, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4322, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1912,6 +1915,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 	}
 	{{else}}
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}
@@ -1992,7 +1999,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 18887, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3954,6 +3961,9 @@ func (w {{$workflowStruct}}) Handle(
 	// Filter and map response headers from client to server response.
 	{{if eq $endpointType "tchannel" -}}
 	resHeaders := zanzibar.ServerTChannelHeader{}
+	for k, v := range cliRespHeaders {
+		resHeaders.Set(k, v)
+	}
 	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{- end -}}
@@ -4018,7 +4028,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8906, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 8968, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

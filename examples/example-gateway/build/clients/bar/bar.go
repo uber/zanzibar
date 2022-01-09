@@ -1706,6 +1706,10 @@ func (c *barClient) Hello(
 
 	res.CheckOKResponse([]int{200, 303, 403})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 200:
 		var responseBody string
@@ -1819,6 +1823,10 @@ func (c *barClient) ListAndEnum(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 200:
 		var responseBody string
@@ -1913,6 +1921,10 @@ func (c *barClient) MissingArg(
 	}
 
 	res.CheckOKResponse([]int{200, 403})
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	switch res.StatusCode {
 	case 200:
@@ -2009,6 +2021,10 @@ func (c *barClient) NoRequest(
 	}
 
 	res.CheckOKResponse([]int{200, 403})
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	switch res.StatusCode {
 	case 200:
@@ -2107,6 +2123,10 @@ func (c *barClient) Normal(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsIDlClientsBarBar.BarResponse
@@ -2204,6 +2224,10 @@ func (c *barClient) NormalRecur(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsIDlClientsBarBar.BarResponseRecur
@@ -2299,6 +2323,10 @@ func (c *barClient) TooManyArgs(
 	}
 
 	res.CheckOKResponse([]int{200, 403, 418})
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	switch res.StatusCode {
 	case 200:

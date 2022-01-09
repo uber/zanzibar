@@ -471,6 +471,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 	}
 	{{else}}
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}

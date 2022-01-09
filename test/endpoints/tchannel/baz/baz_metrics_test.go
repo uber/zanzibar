@@ -99,6 +99,13 @@ func TestCallMetrics(t *testing.T) {
 	success, resHeaders, err := gateway.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
+	dynamicRespHeaders := []string{
+		"client.response.duration",
+	}
+	for _, dynamicValue := range dynamicRespHeaders {
+		assert.Contains(t, resHeaders, dynamicValue)
+		delete(resHeaders, dynamicValue)
+	}
 
 	if !assert.NoError(t, err, "got tchannel error") {
 		return

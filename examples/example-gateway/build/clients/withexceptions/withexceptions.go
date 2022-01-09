@@ -252,6 +252,10 @@ func (c *withexceptionsClient) Func1(
 
 	res.CheckOKResponse([]int{200, 401})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 200:
 		var responseBody clientsIDlClientsWithexceptionsWithexceptions.Response

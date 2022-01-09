@@ -94,6 +94,13 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	success, resHeaders, err := gateway.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
+	dynamicRespHeaders := []string{
+		"client.response.duration",
+	}
+	for _, dynamicValue := range dynamicRespHeaders {
+		assert.Contains(t, resHeaders, dynamicValue)
+		delete(resHeaders, dynamicValue)
+	}
 
 	if !assert.NoError(t, err, "got tchannel error") {
 		return
@@ -119,6 +126,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"ts",
 		"hostname",
 		"pid",
+		"Res-Header-client.response.duration",
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)
@@ -126,20 +134,19 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	expectedValues := map[string]string{
-		"level":                "debug",
-		"msg":                  "Finished an incoming server TChannel request",
-		"env":                  "test",
-		"service":              "example-gateway",
-		"endpointID":           "bazTChannel",
-		"endpointHandler":      "call",
-		"endpointThriftMethod": "SimpleService::Call",
-		"x-uuid":               "uuid",
-		"calling-service":      "test-gateway",
-		"zone":                 "unknown",
-		"Device":               "ios",
-		"Regionname":           "sf",
-		"Deviceversion":        "1.0",
-
+		"level":                      "debug",
+		"msg":                        "Finished an incoming server TChannel request",
+		"env":                        "test",
+		"service":                    "example-gateway",
+		"endpointID":                 "bazTChannel",
+		"endpointHandler":            "call",
+		"endpointThriftMethod":       "SimpleService::Call",
+		"x-uuid":                     "uuid",
+		"calling-service":            "test-gateway",
+		"zone":                       "unknown",
+		"Device":                     "ios",
+		"Regionname":                 "sf",
+		"Deviceversion":              "1.0",
 		"Res-Header-some-res-header": "something",
 	}
 	for actualKey, actualValue := range logs {

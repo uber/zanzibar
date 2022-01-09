@@ -260,6 +260,10 @@ func (c *contactsClient) SaveContacts(
 
 	res.CheckOKResponse([]int{202, 400, 404})
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	switch res.StatusCode {
 	case 202:
 		var responseBody clientsIDlClientsContactsContacts.SaveContactsResponse

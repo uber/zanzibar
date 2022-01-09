@@ -40,20 +40,20 @@ import (
 
 // ServerHTTPResponse struct manages server http response
 type ServerHTTPResponse struct {
-	Request    *ServerHTTPRequest
-	StatusCode int
-
-	responseWriter    http.ResponseWriter
-	flushed           bool
-	finished          bool
-	finishTime        time.Time
-	pendingBodyBytes  []byte
-	pendingBodyObj    interface{}
-	pendingStatusCode int
-	contextLogger     ContextLogger
-	scope             tally.Scope
-	jsonWrapper       jsonwrapper.JSONWrapper
-	Err               error
+	Request              *ServerHTTPRequest
+	StatusCode           int
+	responseWriter       http.ResponseWriter
+	flushed              bool
+	finished             bool
+	finishTime           time.Time
+	DownstreamFinishTime time.Duration
+	pendingBodyBytes     []byte
+	pendingBodyObj       interface{}
+	pendingStatusCode    int
+	contextLogger        ContextLogger
+	scope                tally.Scope
+	jsonWrapper          jsonwrapper.JSONWrapper
+	Err                  error
 }
 
 // NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
@@ -102,6 +102,13 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	delta := res.finishTime.Sub(res.Request.startTime)
 	tagged.Timer(endpointLatency).Record(delta)
 	tagged.Histogram(endpointLatencyHist, tally.DefaultBuckets).RecordDuration(delta)
+
+	if res.DownstreamFinishTime != 0 {
+		overhead := delta - res.DownstreamFinishTime
+		tagged.Timer(endpointOverheadLatency).Record(overhead)
+		tagged.Histogram(endpointOverheadLatencyHist, tally.DefaultBuckets).RecordDuration(overhead)
+	}
+
 	if !known {
 		res.contextLogger.Error(ctx,
 			"Unknown status code",
@@ -281,7 +288,6 @@ func (res *ServerHTTPResponse) PeekBody(
 	value, valueType, _, err := jsonparser.Get(
 		res.pendingBodyBytes, keys...,
 	)
-
 	if err != nil {
 		return nil, -1, err
 	}

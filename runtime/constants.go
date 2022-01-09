@@ -23,12 +23,14 @@ package zanzibar
 import "net/http"
 
 const (
-	endpointRequest      = "endpoint.request"
-	endpointSuccess      = "endpoint.success"
-	endpointStatus       = "endpoint.status"
-	endpointSystemErrors = "endpoint.system-errors"
-	endpointLatency      = "endpoint.latency"
-	endpointLatencyHist  = "endpoint.latency-hist"
+	endpointRequest             = "endpoint.request"
+	endpointSuccess             = "endpoint.success"
+	endpointStatus              = "endpoint.status"
+	endpointSystemErrors        = "endpoint.system-errors"
+	endpointLatency             = "endpoint.latency"
+	endpointLatencyHist         = "endpoint.latency-hist"
+	endpointOverheadLatency     = "endpoint.overhead.latency"
+	endpointOverheadLatencyHist = "endpoint.overhead.latency-hist"
 
 	// MetricEndpointPanics is endpoint level panic counter
 	MetricEndpointPanics = "endpoint.panic"
@@ -63,6 +65,9 @@ const (
 	TraceSpanKey = "trace.span"
 	// TraceSampledKey is the log field key for whether a trace was sampled or not
 	TraceSampledKey = "trace.sampled"
+
+	// ClientResponseDurationKey is the key denoting a downstream response duration
+	ClientResponseDurationKey = "client.response.duration"
 )
 
 var knownMetrics = []string{
@@ -151,6 +156,6 @@ var knownStatusCodes = map[int]bool{
 }
 
 var noContentStatusCodes = map[int]bool{
-	http.StatusNoContent:   true, //204
-	http.StatusNotModified: true, //304
+	http.StatusNoContent:   true, // 204
+	http.StatusNotModified: true, // 304
 }
