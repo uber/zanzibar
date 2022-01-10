@@ -258,11 +258,11 @@ func (c *contactsClient) SaveContacts(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{202, 400, 404})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{202, 400, 404})
 
 	switch res.StatusCode {
 	case 202:
@@ -351,6 +351,10 @@ func (c *contactsClient) TestURLURL(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 

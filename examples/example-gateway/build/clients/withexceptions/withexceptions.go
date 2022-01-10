@@ -250,11 +250,11 @@ func (c *withexceptionsClient) Func1(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 401})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 401})
 
 	switch res.StatusCode {
 	case 200:

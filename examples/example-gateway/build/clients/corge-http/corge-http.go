@@ -331,6 +331,10 @@ func (c *corgeHTTPClient) EchoString(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -435,6 +439,10 @@ func (c *corgeHTTPClient) NoContent(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{204, 304})
 
 	switch res.StatusCode {
@@ -534,6 +542,10 @@ func (c *corgeHTTPClient) NoContentNoException(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{204})
 
 	switch res.StatusCode {
@@ -629,11 +641,11 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 304})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 304})
 
 	switch res.StatusCode {
 	case 200:

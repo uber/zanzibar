@@ -368,6 +368,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	{{- if .ResHeaders }}
 	// TODO(jakev): verify mandatory response headers
 	{{- end}}
@@ -471,9 +475,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 	}
 	{{else}}
-	defer func() {
-		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
-	}()
 
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:

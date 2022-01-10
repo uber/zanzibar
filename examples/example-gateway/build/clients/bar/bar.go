@@ -491,6 +491,10 @@ func (c *barClient) ArgNotStruct(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
@@ -596,6 +600,10 @@ func (c *barClient) ArgWithHeaders(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -778,6 +786,10 @@ func (c *barClient) ArgWithManyQueryParams(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -880,6 +892,10 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -1008,6 +1024,10 @@ func (c *barClient) ArgWithNestedQueryParams(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -1093,6 +1113,10 @@ func (c *barClient) ArgWithParams(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -1180,6 +1204,10 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -1265,6 +1293,10 @@ func (c *barClient) ArgWithQueryHeader(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -1369,6 +1401,10 @@ func (c *barClient) ArgWithQueryParams(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -1461,6 +1497,10 @@ func (c *barClient) DeleteFoo(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -1538,6 +1578,10 @@ func (c *barClient) DeleteWithBody(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -1626,6 +1670,10 @@ func (c *barClient) DeleteWithQueryParams(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -1704,11 +1752,11 @@ func (c *barClient) Hello(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 303, 403})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 303, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -1821,11 +1869,11 @@ func (c *barClient) ListAndEnum(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -1920,11 +1968,11 @@ func (c *barClient) MissingArg(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -2020,11 +2068,11 @@ func (c *barClient) NoRequest(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -2121,11 +2169,11 @@ func (c *barClient) Normal(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -2222,11 +2270,11 @@ func (c *barClient) NormalRecur(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
 	case 200:
@@ -2322,11 +2370,11 @@ func (c *barClient) TooManyArgs(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403, 418})
-
 	defer func() {
 		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
 	}()
+
+	res.CheckOKResponse([]int{200, 403, 418})
 
 	switch res.StatusCode {
 	case 200:
@@ -2437,6 +2485,10 @@ func (c *barClient) EchoBinary(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -2520,6 +2572,10 @@ func (c *barClient) EchoBool(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -2611,6 +2667,10 @@ func (c *barClient) EchoDouble(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -2700,6 +2760,10 @@ func (c *barClient) EchoEnum(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -2791,6 +2855,10 @@ func (c *barClient) EchoI16(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -2880,6 +2948,10 @@ func (c *barClient) EchoI32(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -2971,6 +3043,10 @@ func (c *barClient) EchoI32Map(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -3060,6 +3136,10 @@ func (c *barClient) EchoI64(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -3151,6 +3231,10 @@ func (c *barClient) EchoI8(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -3240,6 +3324,10 @@ func (c *barClient) EchoString(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -3331,6 +3419,10 @@ func (c *barClient) EchoStringList(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -3420,6 +3512,10 @@ func (c *barClient) EchoStringMap(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -3511,6 +3607,10 @@ func (c *barClient) EchoStringSet(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -3600,6 +3700,10 @@ func (c *barClient) EchoStructList(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
@@ -3691,6 +3795,10 @@ func (c *barClient) EchoStructSet(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -3780,6 +3888,10 @@ func (c *barClient) EchoTypedef(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 
