@@ -44,6 +44,7 @@ type ClientHTTPResponse struct {
 	rawResponse      *http.Response
 	rawResponseBytes []byte
 	StatusCode       int
+	Duration         time.Duration
 	Header           http.Header
 	jsonWrapper      jsonwrapper.JSONWrapper
 }
@@ -182,6 +183,8 @@ func (res *ClientHTTPResponse) finish() {
 	delta := res.finishTime.Sub(res.req.startTime)
 	res.req.Metrics.RecordTimer(res.req.ctx, clientLatency, delta)
 	res.req.Metrics.RecordHistogramDuration(res.req.ctx, clientLatencyHist, delta)
+	res.Duration = delta
+
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
 		res.req.ContextLogger.Error(res.req.ctx,

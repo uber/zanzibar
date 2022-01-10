@@ -261,6 +261,10 @@ func (c *googleNowClient) AddCredentials(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 	// TODO(jakev): verify mandatory response headers
 
 	res.CheckOKResponse([]int{202})
@@ -344,6 +348,10 @@ func (c *googleNowClient) CheckCredentials(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 	// TODO(jakev): verify mandatory response headers
 
 	res.CheckOKResponse([]int{202})

@@ -40,6 +40,7 @@ type tchannelOutboundCall struct {
 	success       bool
 	startTime     time.Time
 	finishTime    time.Time
+	duration      time.Duration
 	reqHeaders    map[string]string
 	resHeaders    map[string]string
 	contextLogger ContextLogger
@@ -67,6 +68,7 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	delta := c.finishTime.Sub(c.startTime)
 	c.metrics.RecordTimer(ctx, clientLatency, delta)
 	c.metrics.RecordHistogramDuration(ctx, clientLatencyHist, delta)
+	c.duration = delta
 
 	// write logs
 	fields := c.logFields(ctx)

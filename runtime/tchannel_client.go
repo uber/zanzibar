@@ -72,7 +72,7 @@ type TChannelClientOption struct {
 	// AltChannelMap is a map for dynamic lookup of alternative channels
 	AltChannelMap map[string]*tchannel.SubChannel
 
-	//MaxAttempts is the maximum retry count for a client
+	// MaxAttempts is the maximum retry count for a client
 	MaxAttempts int
 }
 
@@ -180,7 +180,13 @@ func (c *TChannelClient) call(
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
-	defer func() { call.finish(ctx, err) }()
+	defer func() {
+		call.finish(ctx, err)
+		if call.resHeaders == nil {
+			call.resHeaders = make(map[string]string)
+		}
+		call.resHeaders[ClientResponseDurationKey] = call.duration.String()
+	}()
 	call.start()
 
 	reqUUID := RequestUUIDFromCtx(ctx)
@@ -191,9 +197,9 @@ func (c *TChannelClient) call(
 		reqHeaders[c.requestUUIDHeaderKey] = reqUUID
 	}
 
-	//Start passing the MaxAttempt field which will be used while creating the RetryOptions.
-	//Note : No impact on the existing clients because MaxAttempt will be passed as 0 and it will default to 5 while retrying the execution.
-	//More details can be found at https://t3.uberinternal.com/browse/EDGE-8526
+	// Start passing the MaxAttempt field which will be used while creating the RetryOptions.
+	// Note : No impact on the existing clients because MaxAttempt will be passed as 0 and it will default to 5 while retrying the execution.
+	// More details can be found at https://t3.uberinternal.com/browse/EDGE-8526
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 		MaxAttempts:       c.maxAttempts,

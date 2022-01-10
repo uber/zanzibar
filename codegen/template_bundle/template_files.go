@@ -1809,6 +1809,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	{{- if .ResHeaders }}
 	// TODO(jakev): verify mandatory response headers
 	{{- end}}
@@ -1912,6 +1916,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 	}
 	{{else}}
+
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}
@@ -1992,7 +1997,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18791, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 18888, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

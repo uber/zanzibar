@@ -255,6 +255,10 @@ func (c *multiClient) HelloA(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
 	res.CheckOKResponse([]int{200})
 
 	switch res.StatusCode {
@@ -338,6 +342,10 @@ func (c *multiClient) HelloB(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
 
 	res.CheckOKResponse([]int{200})
 

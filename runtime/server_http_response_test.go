@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
@@ -148,8 +149,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	assert.Equal(t, 1, len(logLines))
 }
 
-type failingJsonObj struct {
-}
+type failingJsonObj struct{}
 
 func (f failingJsonObj) MarshalJSON() ([]byte, error) {
 	return nil, errors.New("cannot serialize")
@@ -499,6 +499,7 @@ func TestPendingResponseBody(t *testing.T) {
 				statusCode := 200
 				assert.NoError(t, err)
 				res.WriteJSON(statusCode, nil, obj)
+				res.DownstreamFinishTime = 1 * time.Microsecond
 
 				pendingBytes, pendingStatusCode := res.GetPendingResponse()
 				assert.Equal(t, bytes, pendingBytes)
@@ -589,7 +590,7 @@ func TestPendingResponseBody204StatusNoContent(t *testing.T) {
 		return
 	}
 
-	//The body would become blank
+	// The body would become blank
 	assert.Equal(
 		t,
 		"",
@@ -661,7 +662,7 @@ func TestPendingResponseBody304StatusNoContent(t *testing.T) {
 		return
 	}
 
-	//The body would become blank
+	// The body would become blank
 	assert.Equal(
 		t,
 		``,
