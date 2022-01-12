@@ -105,8 +105,10 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 
 	if res.DownstreamFinishTime != 0 {
 		overhead := delta - res.DownstreamFinishTime
+		overheadRatio := overhead.Seconds() / delta.Seconds()
 		tagged.Timer(endpointOverheadLatency).Record(overhead)
 		tagged.Histogram(endpointOverheadLatencyHist, tally.DefaultBuckets).RecordDuration(overhead)
+		tagged.Gauge(endpointOverheadRatio).Update(overheadRatio)
 	}
 
 	if !known {

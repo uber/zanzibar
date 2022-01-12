@@ -31,6 +31,7 @@ const (
 	endpointLatencyHist         = "endpoint.latency-hist"
 	endpointOverheadLatency     = "endpoint.overhead.latency"
 	endpointOverheadLatencyHist = "endpoint.overhead.latency-hist"
+	endpointOverheadRatio       = "endpoint.overhead.latency.ratio"
 
 	// MetricEndpointPanics is endpoint level panic counter
 	MetricEndpointPanics = "endpoint.panic"
