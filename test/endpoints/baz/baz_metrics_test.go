@@ -127,7 +127,8 @@ func TestCallMetrics(t *testing.T) {
 		"apienvironment": "production",
 	}
 	statusTags := map[string]string{
-		"status": "204",
+		"status":     "204",
+		"clienttype": "",
 	}
 	for k, v := range endpointTags {
 		statusTags[k] = v

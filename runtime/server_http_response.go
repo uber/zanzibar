@@ -47,6 +47,7 @@ type ServerHTTPResponse struct {
 	finished             bool
 	finishTime           time.Time
 	DownstreamFinishTime time.Duration
+	ClientType           string
 	pendingBodyBytes     []byte
 	pendingBodyObj       interface{}
 	pendingStatusCode    int
@@ -96,9 +97,11 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	res.finishTime = time.Now()
 
 	_, known := knownStatusCodes[res.StatusCode]
-	// no need to put this tag on the context because this is the end of response life cycle
-	statusTag := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
-	tagged := res.scope.Tagged(statusTag)
+
+	tagged := res.scope.Tagged(map[string]string{
+		scopeTagStatus:     fmt.Sprintf("%d", res.StatusCode), // no need to put this tag on the context because this is the end of response life cycle
+		scopeTagClientType: res.ClientType,
+	})
 	delta := res.finishTime.Sub(res.Request.startTime)
 	tagged.Timer(endpointLatency).Record(delta)
 	tagged.Histogram(endpointLatencyHist, tally.DefaultBuckets).RecordDuration(delta)

@@ -68,7 +68,6 @@ func BenchmarkHealthCall(b *testing.B) {
 		},
 		exampleGateway.CreateGateway,
 	)
-
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
@@ -145,7 +144,8 @@ func TestHealthMetrics(t *testing.T) {
 		"apienvironment": "production",
 	}
 	statusTags := map[string]string{
-		"status": "200",
+		"status":     "200",
+		"clienttype": "",
 	}
 	for k, v := range tags {
 		statusTags[k] = v
@@ -160,6 +160,7 @@ func TestHealthMetrics(t *testing.T) {
 
 	key := tally.KeyForPrefixedStringMap("endpoint.request", tags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
+
 	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)

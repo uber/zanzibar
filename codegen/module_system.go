@@ -48,6 +48,7 @@ type EndpointMeta struct {
 	Method                 *MethodSpec
 	ClientName             string
 	ClientID               string
+	ClientType             string
 	ClientMethodName       string
 	WorkflowPkg            string
 	ReqHeaders             map[string]*TypedHeader
@@ -142,7 +143,6 @@ func (fb *FixtureBody) String() string {
 		return fb.BodyString
 	case "json":
 		if fb.BodyJSON == nil {
-
 			panic(errors.New("invalid http body type"))
 		}
 		return fb.BodyJSON.String()
@@ -1396,8 +1396,10 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 
 	clientID := e.ClientID
 	clientName := ""
+	clientType := "clientless"
 	if e.ClientSpec != nil {
 		clientName = e.ClientSpec.ClientName
+		clientType = e.ClientSpec.ClientType
 	}
 
 	// TODO: http client needs to support multiple thrift services
@@ -1416,6 +1418,7 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		ResHeaders:             e.ResHeaders,
 		ClientID:               clientID,
 		ClientName:             clientName,
+		ClientType:             clientType,
 		ClientMethodName:       e.ClientMethod,
 		WorkflowPkg:            workflowPkg,
 		TraceKey:               g.packageHelper.traceKey,
@@ -1859,9 +1862,11 @@ type sortByClientName []*ClientSpec
 func (c sortByClientName) Len() int {
 	return len(c)
 }
+
 func (c sortByClientName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
+
 func (c sortByClientName) Less(i, j int) bool {
 	return c[i].ClientName < c[j].ClientName
 }
