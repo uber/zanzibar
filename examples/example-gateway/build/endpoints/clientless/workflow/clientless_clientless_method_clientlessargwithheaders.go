@@ -88,6 +88,7 @@ func (w clientlessClientlessArgWithHeadersWorkflow) Handle(
 		resHeaders.Set("X-Uuid", h)
 	}
 
+	resHeaders.Set(zanzibar.ClientTypeKey, "clientless")
 	return ctx, response, resHeaders, nil
 }
 

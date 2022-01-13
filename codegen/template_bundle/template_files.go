@@ -212,6 +212,7 @@ package clientlessworkflow
 {{- $clientlessEndpoint := .IsClientlessEndpoint }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
+{{- $clientType := .ClientType }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
@@ -330,6 +331,7 @@ func (w {{$workflowStruct}}) Handle(
 	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{- end -}}
+
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
 	h, ok = clientlessHeaders["{{$k}}"]
@@ -341,6 +343,8 @@ func (w {{$workflowStruct}}) Handle(
 	{{if eq .ResponseType "" -}}
 	return ctx, resHeaders, nil
 	{{- else -}}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "{{$clientType}}")
 	return ctx, response, resHeaders, nil
 	{{end}}
 
@@ -365,7 +369,7 @@ func clientlessWorkflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4260, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "clientless-workflow.tmpl", size: 4355, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -597,6 +601,20 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{else}}
 	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
+	// map useful client response headers to server response
+	if cliRespHeaders != nil {
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
+			if duration, err := time.ParseDuration(val); err == nil {
+				res.DownstreamFinishTime = duration
+			}
+			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
+		}
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
+			res.ClientType = val
+			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
+		}
+	}
+
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
@@ -683,7 +701,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7485, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7963, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3730,6 +3748,7 @@ package workflow
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
+{{- $clientType := .ClientType }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
@@ -3894,7 +3913,7 @@ func (w {{$workflowStruct}}) Handle(
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{else}}
@@ -3914,7 +3933,7 @@ func (w {{$workflowStruct}}) Handle(
 		{{- end }}
 	{{else}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
@@ -3973,6 +3992,11 @@ func (w {{$workflowStruct}}) Handle(
 	return ctx, resHeaders, nil
 	{{- else -}}
 	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "{{$clientType}}")
 	return ctx, response, resHeaders, nil
 	{{- end -}}
 }
@@ -4023,7 +4047,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 8906, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 9159, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

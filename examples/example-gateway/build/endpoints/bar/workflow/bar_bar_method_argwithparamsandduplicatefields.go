@@ -108,7 +108,7 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithParamsAndDuplicateFields(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.ArgWithParamsAndDuplicateFields(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -130,6 +130,11 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithParamsAndDuplicateFieldsClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

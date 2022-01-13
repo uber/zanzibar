@@ -105,7 +105,7 @@ func (w barNoRequestWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Bar.NoRequest(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.NoRequest(
 		ctx, clientHeaders,
 	)
 
@@ -134,6 +134,11 @@ func (w barNoRequestWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarNoRequestClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

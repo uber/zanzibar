@@ -105,7 +105,7 @@ func (w withExceptionsFunc1Workflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Withexceptions.Func1(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Withexceptions.Func1(
 		ctx, clientHeaders,
 	)
 
@@ -141,6 +141,11 @@ func (w withExceptionsFunc1Workflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertWithExceptionsFunc1ClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

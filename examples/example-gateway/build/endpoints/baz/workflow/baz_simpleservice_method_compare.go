@@ -109,7 +109,7 @@ func (w simpleServiceCompareWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Baz.Compare(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Baz.Compare(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -145,6 +145,11 @@ func (w simpleServiceCompareWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceCompareClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "tchannel")
 	return ctx, response, resHeaders, nil
 }
 

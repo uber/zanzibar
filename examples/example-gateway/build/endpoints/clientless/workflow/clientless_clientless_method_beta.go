@@ -76,6 +76,7 @@ func (w clientlessBetaWorkflow) Handle(
 	// Filter and map response headers from client to server response.
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
+	resHeaders.Set(zanzibar.ClientTypeKey, "clientless")
 	return ctx, response, resHeaders, nil
 }
 
