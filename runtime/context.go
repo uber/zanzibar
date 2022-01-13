@@ -71,6 +71,7 @@ const (
 	scopeTagClientMethod    = "clientmethod"
 	scopeTagEndpointMethod  = "endpointmethod"
 	scopeTagClient          = "clientid"
+	scopeTagClientType      = "clienttype"
 	scopeTagEndpoint        = "endpointid"
 	scopeTagHandler         = "handlerid"
 	scopeTagError           = "error"
@@ -292,7 +293,7 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
-//In cases it also updates the context instead of logging
+// In cases it also updates the context instead of logging
 type ContextLogger interface {
 	Debug(ctx context.Context, msg string, fields ...zap.Field) context.Context
 	Error(ctx context.Context, msg string, fields ...zap.Field) context.Context

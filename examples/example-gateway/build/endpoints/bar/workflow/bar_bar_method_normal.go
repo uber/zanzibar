@@ -108,7 +108,7 @@ func (w barNormalWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Bar.Normal(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.Normal(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -137,6 +137,11 @@ func (w barNormalWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarNormalClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

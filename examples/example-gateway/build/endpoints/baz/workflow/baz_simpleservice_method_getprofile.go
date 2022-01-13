@@ -108,7 +108,7 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Baz.GetProfile(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Baz.GetProfile(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -137,6 +137,11 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceGetProfileClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "tchannel")
 	return ctx, response, resHeaders, nil
 }
 

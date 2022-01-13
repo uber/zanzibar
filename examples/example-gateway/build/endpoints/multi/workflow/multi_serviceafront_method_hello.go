@@ -102,7 +102,7 @@ func (w serviceAFrontHelloWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Multi.HelloA(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Multi.HelloA(
 		ctx, clientHeaders,
 	)
 
@@ -124,6 +124,11 @@ func (w serviceAFrontHelloWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertServiceABackHelloClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

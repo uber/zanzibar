@@ -108,7 +108,7 @@ func (w barListAndEnumWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Bar.ListAndEnum(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.ListAndEnum(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -137,6 +137,11 @@ func (w barListAndEnumWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarListAndEnumClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

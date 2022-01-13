@@ -161,6 +161,11 @@ func (w barTooManyArgsWorkflow) Handle(
 	}
 
 	response := convertBarTooManyArgsClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

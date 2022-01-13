@@ -69,6 +69,8 @@ const (
 
 	// ClientResponseDurationKey is the key denoting a downstream response duration
 	ClientResponseDurationKey = "client.response.duration"
+	// ClientTypeKey denotes the type of the client, usually http / tchannel / client-less / custom
+	ClientTypeKey = "client.type"
 )
 
 var knownMetrics = []string{

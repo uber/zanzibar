@@ -105,7 +105,7 @@ func (w barMissingArgWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Bar.MissingArg(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.MissingArg(
 		ctx, clientHeaders,
 	)
 
@@ -134,6 +134,11 @@ func (w barMissingArgWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarMissingArgClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

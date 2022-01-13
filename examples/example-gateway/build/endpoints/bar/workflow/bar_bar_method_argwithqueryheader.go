@@ -108,7 +108,7 @@ func (w barArgWithQueryHeaderWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Bar.ArgWithQueryHeader(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.ArgWithQueryHeader(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -130,6 +130,11 @@ func (w barArgWithQueryHeaderWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarArgWithQueryHeaderClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "http")
 	return ctx, response, resHeaders, nil
 }
 

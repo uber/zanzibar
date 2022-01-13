@@ -62,7 +62,7 @@ func TestCallMetrics(t *testing.T) {
 		},
 	)
 
-	numMetrics := 13
+	numMetrics := 16
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
@@ -110,7 +110,8 @@ func TestCallMetrics(t *testing.T) {
 		"apienvironment": "production",
 	}
 	statusTags := map[string]string{
-		"status": "200",
+		"status":     "200",
+		"clienttype": "http",
 	}
 	for k, v := range endpointTags {
 		statusTags[k] = v

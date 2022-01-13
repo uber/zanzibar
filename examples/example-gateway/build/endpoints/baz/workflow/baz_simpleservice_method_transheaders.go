@@ -118,7 +118,7 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 		}
 	}
 
-	ctx, clientRespBody, _, err := w.Clients.Baz.TransHeaders(
+	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Baz.TransHeaders(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -154,6 +154,11 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceTransHeadersClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "tchannel")
 	return ctx, response, resHeaders, nil
 }
 

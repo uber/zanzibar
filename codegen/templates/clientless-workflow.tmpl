@@ -11,6 +11,7 @@ package clientlessworkflow
 {{- $clientlessEndpoint := .IsClientlessEndpoint }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
+{{- $clientType := .ClientType }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
@@ -129,6 +130,7 @@ func (w {{$workflowStruct}}) Handle(
 	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{- end -}}
+
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
 	h, ok = clientlessHeaders["{{$k}}"]
@@ -140,6 +142,8 @@ func (w {{$workflowStruct}}) Handle(
 	{{if eq .ResponseType "" -}}
 	return ctx, resHeaders, nil
 	{{- else -}}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "{{$clientType}}")
 	return ctx, response, resHeaders, nil
 	{{end}}
 

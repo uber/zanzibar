@@ -11,6 +11,7 @@ package workflow
 {{- $resHeaderMapKeys := .ResHeadersKeys }}
 {{- $clientID := .ClientID }}
 {{- $clientName := title .ClientName }}
+{{- $clientType := .ClientType }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
@@ -175,7 +176,7 @@ func (w {{$workflowStruct}}) Handle(
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{else}}
@@ -195,7 +196,7 @@ func (w {{$workflowStruct}}) Handle(
 		{{- end }}
 	{{else}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		ctx, clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
@@ -254,6 +255,11 @@ func (w {{$workflowStruct}}) Handle(
 	return ctx, resHeaders, nil
 	{{- else -}}
 	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
+	if val, ok := cliRespHeaders[zanzibar.ClientResponseDurationKey]; ok {
+		resHeaders.Set(zanzibar.ClientResponseDurationKey, val)
+	}
+
+	resHeaders.Set(zanzibar.ClientTypeKey, "{{$clientType}}")
 	return ctx, response, resHeaders, nil
 	{{- end -}}
 }
