@@ -96,49 +96,65 @@ func readFlags() {
 	flag.Parse()
 }
 
-func main() {
-	fx.New(
-		append(
-			[]fx.Option{fx.Invoke(zanzibarMain)},
-			app.GetOverrideFxOptions()...,
-		)...,
-	).Run()
+func opts() fx.Option {
+	options := []fx.Option{
+		fx.Provide(NewZanzibar),
+		fx.Invoke(run),
+	}
+	options = append(options, app.GetOverrideFxOptions()...)
+	return fx.Options(options...)
 }
 
+func main() {
+	fx.New(opts()).Run()
+}
+
+// Params defines the dependencies of the NewZanzibar module.
 type Params struct {
 	fx.In
 	Lifecycle fx.Lifecycle
 }
 
-func zanzibarMain(p Params) {
+// Result defines the objects that the NewZanzibar module provides
+type Result struct {
+	fx.Out
+	Gateway *zanzibar.Gateway
+}
+
+// run is the invocation point for the FX graph
+func run(gateway *zanzibar.Gateway) {
+	gateway.Logger.Info("started example-gateway",
+		zap.String("realHTTPAddr", gateway.RealHTTPAddr),
+		zap.String("realTChannelAddr", gateway.RealTChannelAddr),
+		zap.Any("config", gateway.InspectOrDie()),
+	)
+}
+
+func NewZanzibar(p Params) (Result, error) {
 	readFlags()
-	server, err := createGateway()
+	gateway, err := createGateway()
 	if err != nil {
 		panic(errors.Wrap(err, "failed to create gateway server"))
 	}
 
 	p.Lifecycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			err = server.Bootstrap()
+			err = gateway.Bootstrap()
 			if err != nil {
 				panic(errors.Wrap(err, "failed to bootstrap gateway server"))
 			}
-			server.Logger.Info("started example-gateway",
-				zap.String("realHTTPAddr", server.RealHTTPAddr),
-				zap.String("realTChannelAddr", server.RealTChannelAddr),
-				zap.Any("config", server.InspectOrDie()),
-			)
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			if server == nil {
-				return nil
-			}
-			server.Logger.Info("fx OnStop() hook activated")
-			server.WaitGroup.Add(1)
-			server.Shutdown()
-			server.WaitGroup.Done()
+			gateway.Logger.Info("fx OnStop() hook activated")
+			gateway.WaitGroup.Add(1)
+			gateway.Shutdown()
+			gateway.WaitGroup.Done()
 			return nil
 		},
 	})
+
+	return Result{
+		Gateway: gateway,
+	}, nil
 }

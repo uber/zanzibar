@@ -21,6 +21,7 @@
 package app
 
 import (
+	"context"
 	"net/textproto"
 
 	"go.uber.org/fx"
@@ -28,8 +29,6 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
 	"go.uber.org/zap"
-
-	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -41,7 +40,7 @@ var AppOptions = &zanzibar.Options{
 	JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
 }
 
-// GetOverrideFxOptions provides a hook to configure a non zero number of fx options
+// GetOverrideFxOptions provides a hook to configure a non-zero number of fx options
 func GetOverrideFxOptions() []fx.Option {
 	return []fx.Option{}
 }
