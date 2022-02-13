@@ -26,10 +26,7 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/pkg/errors"
 
@@ -46,67 +43,19 @@ import (
 
 var configFiles *string
 
-func getConfig() *zanzibar.StaticConfig {
-	var files []string
-
-	if configFiles == nil {
-		files = []string{}
-	} else {
-		files = strings.Split(*configFiles, ";")
-	}
-
-	return config.NewRuntimeConfigOrDie(files, nil)
-}
-
-func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
-
-	gateway, _, err := service.CreateGateway(config, app.AppOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	return gateway, nil
-}
-
-func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started App/demo/xyz",
-		zap.String("realHTTPAddr", server.RealHTTPAddr),
-		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
-	)
-
-	go func() {
-		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-		<-sig
-		server.WaitGroup.Add(1)
-		server.Shutdown()
-		server.WaitGroup.Done()
-	}()
-	server.Wait()
-}
-
-func readFlags() {
-	configFiles = flag.String(
-		"config",
-		"",
-		"an ordered, semi-colon separated list of configuration files to use",
-	)
-	flag.Parse()
-}
+// Module defines the Zanzibar application module for App/demo/xyz
+var Module = fx.Options(
+	fx.Provide(New),
+	fx.Invoke(run),
+)
 
 func opts() fx.Option {
-	options := []fx.Option{
-		fx.Provide(New),
-		fx.Invoke(run),
-	}
-	options = append(options, app.GetOverrideFxOptions()...)
-	return fx.Options(options...)
-}
-
-func main() {
-	fx.New(opts()).Run()
+	return fx.Options(
+		append(
+			[]fx.Option{Module},
+			app.GetOverrideFxOptions()...,
+		)...,
+	)
 }
 
 // Params defines the dependencies of the New module.
@@ -119,6 +68,10 @@ type Params struct {
 type Result struct {
 	fx.Out
 	Gateway *zanzibar.Gateway
+}
+
+func main() {
+	fx.New(opts()).Run()
 }
 
 // run is the main entry point for App/demo/xyz
@@ -159,4 +112,36 @@ func New(p Params) (Result, error) {
 	return Result{
 		Gateway: gateway,
 	}, nil
+}
+
+func createGateway() (*zanzibar.Gateway, error) {
+	config := getConfig()
+
+	gateway, _, err := service.CreateGateway(config, app.AppOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return gateway, nil
+}
+
+func getConfig() *zanzibar.StaticConfig {
+	var files []string
+
+	if configFiles == nil {
+		files = []string{}
+	} else {
+		files = strings.Split(*configFiles, ";")
+	}
+
+	return config.NewRuntimeConfigOrDie(files, nil)
+}
+
+func readFlags() {
+	configFiles = flag.String(
+		"config",
+		"",
+		"an ordered, semi-colon separated list of configuration files to use",
+	)
+	flag.Parse()
 }

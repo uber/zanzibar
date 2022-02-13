@@ -91,3 +91,21 @@ func TestStartGateway(t *testing.T) {
 	}
 	logAndWait(gateway)
 }
+
+func logAndWait(server *zanzibar.Gateway) {
+	server.Logger.Info("Started Echo-gateway",
+		zap.String("realHTTPAddr", server.RealHTTPAddr),
+		zap.String("realTChannelAddr", server.RealTChannelAddr),
+		zap.Any("config", server.InspectOrDie()),
+	)
+
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Shutdown()
+		server.WaitGroup.Done()
+	}()
+	server.Wait()
+}

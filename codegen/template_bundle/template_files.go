@@ -2049,67 +2049,19 @@ import (
 
 var configFiles *string
 
-func getConfig() *zanzibar.StaticConfig {
-	var files []string
-
-	if configFiles == nil {
-		files = []string{}
-	} else {
-		files = strings.Split(*configFiles, ";")
-	}
-
-	return config.NewRuntimeConfigOrDie(files, nil)
-}
-
-func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
-
-	gateway, _, err := service.CreateGateway(config, app.AppOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	return gateway, nil
-}
-
-func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
-		zap.String("realHTTPAddr", server.RealHTTPAddr),
-		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
-	)
-
-	go func(){
-		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-		<-sig
-		server.WaitGroup.Add(1)
-		server.Shutdown()
-		server.WaitGroup.Done()
-	}()
-	server.Wait()
-}
-
-func readFlags() {
-	configFiles = flag.String(
-		"config",
-		"",
-		"an ordered, semi-colon separated list of configuration files to use",
-	)
-	flag.Parse()
-}
+// Module defines the Zanzibar application module for {{$instance.InstanceName | pascal}}
+var Module = fx.Options(
+	fx.Provide(New),
+	fx.Invoke(run),
+)
 
 func opts() fx.Option {
-	options := []fx.Option{
-		fx.Provide(New),
-		fx.Invoke(run),
-	}
-	options = append(options, app.GetOverrideFxOptions()...)
-	return fx.Options(options...)
-}
-
-func main() {
-	fx.New(opts()).Run()
+	return fx.Options(
+		append(
+			[]fx.Option{Module},
+			app.GetOverrideFxOptions()...,
+		)...,
+	)
 }
 
 // Params defines the dependencies of the New module.
@@ -2122,6 +2074,10 @@ type Params struct {
 type Result struct {
 	fx.Out
 	Gateway *zanzibar.Gateway
+}
+
+func main() {
+	fx.New(opts()).Run()
 }
 
 // run is the main entry point for {{$instance.InstanceName | pascal}}
@@ -2163,6 +2119,38 @@ func New(p Params) (Result, error) {
 		Gateway: gateway,
 	}, nil
 }
+
+func createGateway() (*zanzibar.Gateway, error) {
+	config := getConfig()
+
+	gateway, _, err := service.CreateGateway(config, app.AppOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return gateway, nil
+}
+
+func getConfig() *zanzibar.StaticConfig {
+	var files []string
+
+	if configFiles == nil {
+		files = []string{}
+	} else {
+		files = strings.Split(*configFiles, ";")
+	}
+
+	return config.NewRuntimeConfigOrDie(files, nil)
+}
+
+func readFlags() {
+	configFiles = flag.String(
+		"config",
+		"",
+		"an ordered, semi-colon separated list of configuration files to use",
+	)
+	flag.Parse()
+}
 `)
 
 func mainTmplBytes() ([]byte, error) {
@@ -2175,7 +2163,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 3119, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 2746, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2259,6 +2247,24 @@ func TestStartGateway(t *testing.T) {
 	}
 	logAndWait(gateway)
 }
+
+func logAndWait(server *zanzibar.Gateway) {
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
+		zap.String("realHTTPAddr", server.RealHTTPAddr),
+		zap.String("realTChannelAddr", server.RealTChannelAddr),
+		zap.Any("config", server.InspectOrDie()),
+	)
+
+	go func(){
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Shutdown()
+		server.WaitGroup.Done()
+	}()
+	server.Wait()
+}
 `)
 
 func main_testTmplBytes() ([]byte, error) {
@@ -2271,7 +2277,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1828, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
