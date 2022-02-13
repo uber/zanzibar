@@ -98,7 +98,7 @@ func readFlags() {
 
 func opts() fx.Option {
 	options := []fx.Option{
-		fx.Provide(NewZanzibar),
+		fx.Provide(New),
 		fx.Invoke(run),
 	}
 	options = append(options, app.GetOverrideFxOptions()...)
@@ -130,7 +130,7 @@ func run(gateway *zanzibar.Gateway) {
 	)
 }
 
-func NewZanzibar(p Params) (Result, error) {
+func New(p Params) (Result, error) {
 	readFlags()
 	gateway, err := createGateway()
 	if err != nil {
