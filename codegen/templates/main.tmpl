@@ -104,10 +104,10 @@ type Result struct {
 
 // run is the main entry point for {{$instance.InstanceName | pascal}}
 func run(gateway *zanzibar.Gateway) {
-	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
-		zap.String("realHTTPAddr", server.RealHTTPAddr),
-		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
+	gateway.Logger.Info("Started {{$instance.InstanceName | pascal}}",
+		zap.String("realHTTPAddr", gateway.RealHTTPAddr),
+		zap.String("realTChannelAddr", gateway.RealTChannelAddr),
+		zap.Any("config", gateway.InspectOrDie()),
 	)
 }
 

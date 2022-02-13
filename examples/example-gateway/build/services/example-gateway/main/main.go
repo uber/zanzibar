@@ -109,27 +109,29 @@ func main() {
 	fx.New(opts()).Run()
 }
 
-// Params defines the dependencies of the NewZanzibar module.
+// Params defines the dependencies of the New module.
 type Params struct {
 	fx.In
 	Lifecycle fx.Lifecycle
 }
 
-// Result defines the objects that the NewZanzibar module provides
+// Result defines the objects that the New module provides
 type Result struct {
 	fx.Out
 	Gateway *zanzibar.Gateway
 }
 
-// run is the invocation point for the FX graph
+// run is the main entry point for Example-gateway
 func run(gateway *zanzibar.Gateway) {
-	gateway.Logger.Info("started example-gateway",
+	gateway.Logger.Info("Started Example-gateway",
 		zap.String("realHTTPAddr", gateway.RealHTTPAddr),
 		zap.String("realTChannelAddr", gateway.RealTChannelAddr),
 		zap.Any("config", gateway.InspectOrDie()),
 	)
 }
 
+// New exports functionality similar to Module, but allows the caller to wrap
+// or modify Result. Most users should use Module instead.
 func New(p Params) (Result, error) {
 	readFlags()
 	gateway, err := createGateway()

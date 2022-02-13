@@ -24,11 +24,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/pkg/errors"
 
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/fx"
@@ -93,26 +96,67 @@ func readFlags() {
 	flag.Parse()
 }
 
-func main() {
-	fx.New(
-		append(
-			[]fx.Option{fx.Invoke(zanzibarMain)},
-			app.GetOverrideFxOptions()...,
-		)...,
-	).Run()
+func opts() fx.Option {
+	options := []fx.Option{
+		fx.Provide(New),
+		fx.Invoke(run),
+	}
+	options = append(options, app.GetOverrideFxOptions()...)
+	return fx.Options(options...)
 }
 
-func zanzibarMain() {
+func main() {
+	fx.New(opts()).Run()
+}
+
+// Params defines the dependencies of the New module.
+type Params struct {
+	fx.In
+	Lifecycle fx.Lifecycle
+}
+
+// Result defines the objects that the New module provides
+type Result struct {
+	fx.Out
+	Gateway *zanzibar.Gateway
+}
+
+// run is the main entry point for Echo-gateway
+func run(gateway *zanzibar.Gateway) {
+	gateway.Logger.Info("Started Echo-gateway",
+		zap.String("realHTTPAddr", gateway.RealHTTPAddr),
+		zap.String("realTChannelAddr", gateway.RealTChannelAddr),
+		zap.Any("config", gateway.InspectOrDie()),
+	)
+}
+
+// New exports functionality similar to Module, but allows the caller to wrap
+// or modify Result. Most users should use Module instead.
+func New(p Params) (Result, error) {
 	readFlags()
-	server, err := createGateway()
+	gateway, err := createGateway()
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "failed to create gateway server"))
 	}
 
-	err = server.Bootstrap()
-	if err != nil {
-		panic(err)
-	}
+	p.Lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			err = gateway.Bootstrap()
+			if err != nil {
+				panic(errors.Wrap(err, "failed to bootstrap gateway server"))
+			}
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			gateway.Logger.Info("fx OnStop() hook activated")
+			gateway.WaitGroup.Add(1)
+			gateway.Shutdown()
+			gateway.WaitGroup.Done()
+			return nil
+		},
+	})
 
-	logAndWait(server)
+	return Result{
+		Gateway: gateway,
+	}, nil
 }

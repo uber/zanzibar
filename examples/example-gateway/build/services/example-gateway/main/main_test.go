@@ -34,8 +34,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// todo fix test and then its template and then main tmpl phew
-// maybe tests aren't required. Why not get rid of them or find a ?
 var cachedServer *zanzibar.Gateway
 
 func TestMain(m *testing.M) {
