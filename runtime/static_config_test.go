@@ -917,21 +917,21 @@ func TestReadFromDict(t *testing.T) {
 func TestAsYaml(t *testing.T) {
 	testCases := []struct {
 		freeze           bool
-		destroyed        bool
+		destroy          bool
 		wantErrorString  string
 		wantNonEmptyYaml bool
 	}{
 		{
 			freeze:           true,
-			destroyed:        false,
+			destroy:          false,
 			wantNonEmptyYaml: true,
 		}, {
 			freeze:          true,
-			destroyed:       true,
+			destroy:         true,
 			wantErrorString: "error representing as YAML, config is destroyed",
 		}, {
 			freeze:          false,
-			destroyed:       false,
+			destroy:         false,
 			wantErrorString: "error representing as YAML, config is not frozen yet",
 		},
 	}
@@ -947,7 +947,7 @@ func TestAsYaml(t *testing.T) {
 		if tc.freeze {
 			cfg.Freeze()
 		}
-		if tc.destroyed {
+		if tc.destroy {
 			cfg.Destroy()
 		}
 		asYaml, err := cfg.AsYaml()

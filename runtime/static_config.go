@@ -354,11 +354,11 @@ func (conf *StaticConfig) AsYaml() ([]byte, error) {
 	if !conf.frozen {
 		return nil, errors.New("error representing as YAML, config is not frozen yet. Use Freeze() to mark the config as frozen")
 	}
-	if yamlBytes, err := yaml.Marshal(conf.InspectOrDie()); err != nil {
+	yamlBytes, err := yaml.Marshal(conf.InspectOrDie())
+	if err != nil {
 		return nil, errors.Wrap(err, "error representing as YAML, failed to serialize values")
-	} else {
-		return yamlBytes, err
 	}
+	return yamlBytes, nil
 }
 
 func (conf *StaticConfig) initializeConfigValues() {
