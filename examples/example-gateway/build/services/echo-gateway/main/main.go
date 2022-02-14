@@ -24,9 +24,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"strings"
+
+	"github.com/uber/zanzibar/config"
 
 	"github.com/pkg/errors"
 
@@ -34,11 +37,11 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	app "github.com/uber/zanzibar/examples/example-gateway"
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway"
+	uberconfig "go.uber.org/config"
 )
 
 var configFiles *string
@@ -67,7 +70,10 @@ type Params struct {
 // Result defines the objects that the New module provides
 type Result struct {
 	fx.Out
+	// Gateway corresponds to the fully built server gateway
 	Gateway *zanzibar.Gateway
+	// Provider is an abstraction over the Zanzibar config store
+	Provider uberconfig.Provider `name:"zanzibarConfig"`
 }
 
 func main() {
@@ -89,7 +95,21 @@ func New(p Params) (Result, error) {
 	readFlags()
 	gateway, err := createGateway()
 	if err != nil {
-		panic(errors.Wrap(err, "failed to create gateway server"))
+		return Result{}, errors.Wrap(err, "failed to create gateway server")
+	}
+
+	// Represent the zanzibar config in YAML that will be used to expose a config provider
+	yamlCfg, err := gateway.Config.AsYaml()
+	if err != nil {
+		return Result{}, errors.Wrap(err, "unable to marshal Zanzibar config to YAML")
+	}
+	provider, err := uberconfig.NewYAML(
+		[]uberconfig.YAMLOption{
+			uberconfig.Source(bytes.NewReader(yamlCfg)),
+		}...,
+	)
+	if err != nil {
+		return Result{}, errors.Wrap(err, "unable to provide a YAML view from Zanzibar config")
 	}
 
 	p.Lifecycle.Append(fx.Hook{
@@ -110,19 +130,19 @@ func New(p Params) (Result, error) {
 	})
 
 	return Result{
-		Gateway: gateway,
+		Gateway:  gateway,
+		Provider: provider,
 	}, nil
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
+	cfg := getConfig()
 
-	gateway, _, err := service.CreateGateway(config, app.AppOptions)
-	if err != nil {
+	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
 		return nil, err
+	} else {
+		return gateway, nil
 	}
-
-	return gateway, nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
