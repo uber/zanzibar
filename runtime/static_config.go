@@ -345,13 +345,29 @@ func (conf *StaticConfig) InspectOrDie() map[string]interface{} {
 	return result
 }
 
+// AsYaml returns a YAML serialized version of the StaticConfig
+// If the StaticConfig is destroyed or frozen, this method returns an error
+func (conf *StaticConfig) AsYaml() ([]byte, error) {
+	if conf.destroyed {
+		return nil, errors.New("error representing as YAML, config is destroyed")
+	}
+	if !conf.frozen {
+		return nil, errors.New("error representing as YAML, config is not frozen yet. Use Freeze() to mark the config as frozen")
+	}
+	if yamlBytes, err := yaml.Marshal(conf.InspectOrDie()); err != nil {
+		return nil, errors.Wrap(err, "error representing as YAML, failed to serialize values")
+	} else {
+		return yamlBytes, err
+	}
+}
+
 func (conf *StaticConfig) initializeConfigValues() {
 	values := conf.collectConfigMaps()
 	conf.assignConfigValues(values)
 }
 
 func (conf *StaticConfig) collectConfigMaps() []map[string]interface{} {
-	var maps = make([]map[string]interface{}, len(conf.configOptions))
+	maps := make([]map[string]interface{}, len(conf.configOptions))
 
 	for i := 0; i < len(conf.configOptions); i++ {
 		fileObject := conf.parseFile(conf.configOptions[i])

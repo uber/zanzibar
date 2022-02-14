@@ -913,3 +913,49 @@ func TestReadFromDict(t *testing.T) {
 	floatActual := testConfig.MustGetFloat("floatFromDict")
 	assert.Equal(t, float64(1), floatActual)
 }
+
+func TestAsYaml(t *testing.T) {
+	testCases := []struct {
+		freeze           bool
+		destroyed        bool
+		wantErrorString  string
+		wantNonEmptyYaml bool
+	}{
+		{
+			freeze:           true,
+			destroyed:        false,
+			wantNonEmptyYaml: true,
+		}, {
+			freeze:          true,
+			destroyed:       true,
+			wantErrorString: "error representing as YAML, config is destroyed",
+		}, {
+			freeze:          false,
+			destroyed:       false,
+			wantErrorString: "error representing as YAML, config is not frozen yet",
+		},
+	}
+	for _, tc := range testCases {
+		cfg := zanzibar.NewStaticConfigOrDie(nil, map[string]interface{}{
+			"a": 500,
+			"b": "sd",
+			"c": map[string]interface{}{
+				"d": false,
+				"e": -13,
+			},
+		})
+		if tc.freeze {
+			cfg.Freeze()
+		}
+		if tc.destroyed {
+			cfg.Destroy()
+		}
+		asYaml, err := cfg.AsYaml()
+		if tc.wantErrorString != "" {
+			assert.Error(t, err, tc.wantErrorString)
+		}
+		if tc.wantNonEmptyYaml {
+			assert.True(t, len(asYaml) != 0)
+		}
+	}
+}

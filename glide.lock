@@ -211,6 +211,8 @@ imports:
   subpackages:
   - internal/runtime
   - maxprocs
+- name: go.uber.org/config
+  version: c917157c9ba905e1c93f74a2611bc4356abe94d0
 - name: go.uber.org/dig
   version: 627535aad4ae507da807d9e0ff981fc30b5057bb
   subpackages:
