@@ -137,12 +137,11 @@ func New(p Params) (Result, error) {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	cfg := getConfig()
-
-	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
+	if err != nil {
 		return nil, err
-	} else {
-		return gateway, nil
 	}
+	return gateway, nil
 }
 
 func getConfig() *zanzibar.StaticConfig {

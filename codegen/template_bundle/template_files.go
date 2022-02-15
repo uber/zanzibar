@@ -2140,12 +2140,11 @@ func New(p Params) (Result, error) {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	cfg := getConfig()
-
-	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
+	if err != nil {
 		return nil, err
-	} else {
-		return gateway, nil
 	}
+	return gateway, nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
@@ -2180,7 +2179,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 3428, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 3416, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
