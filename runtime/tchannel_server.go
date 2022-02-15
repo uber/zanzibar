@@ -238,7 +238,7 @@ func (s *TChannelRouter) handleBody(
 	ctx context.Context,
 	c *tchannelInboundCall,
 ) (err error) {
-	wireValue, err := c.readReqBody(ctx)
+	sr, err := c.readReqBody(ctx)
 	if err != nil {
 		return err
 	}
@@ -258,13 +258,13 @@ func (s *TChannelRouter) handleBody(
 	}
 
 	// handle request
-	resp, err := c.handle(ctx, &wireValue)
+	resp, err := c.handle(ctx, sr)
 	if err != nil {
 		return err
 	}
 
 	// TODO: put response headers on ctx for final metrics and logs
-	//ctx = WithEndpointResponseHeadersField(ctx, c.resHeaders)
+	// ctx = WithEndpointResponseHeadersField(ctx, c.resHeaders)
 
 	// write response
 	if err = c.writeResHeaders(ctx); err != nil {

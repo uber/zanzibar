@@ -25,9 +25,12 @@ import (
 	"fmt"
 	"time"
 
+	stream "go.uber.org/thriftrw/protocol/stream"
+
+	"go.uber.org/thriftrw/protocol/binary"
+
 	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -148,14 +151,6 @@ func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) err
 
 // writeReqBody writes request body to arg3
 func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) error {
-	structWireValue, err := req.ToWire()
-	if err != nil {
-		return errors.Wrapf(
-			err, "Could not write request for outbound %s.%s (%s %s) request",
-			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
-		)
-	}
-
 	twriter, err := c.call.Arg3Writer()
 	if err != nil {
 		return errors.Wrapf(
@@ -163,7 +158,16 @@ func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) 
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
-	if err := protocol.Binary.Encode(structWireValue, twriter); err != nil {
+	sw := binary.Default.Writer(twriter)
+	defer func(sw stream.Writer) {
+		e := sw.Close()
+		if e != nil {
+			err = errors.Wrapf(e, "Could not close stream writer for outbound %s.%s (%s %s) request",
+				c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod)
+		}
+	}(sw)
+
+	if err := req.Encode(sw); err != nil {
 		_ = twriter.Close()
 		return errors.Wrapf(
 			err, "Could not write request for outbound %s.%s (%s %s) request",

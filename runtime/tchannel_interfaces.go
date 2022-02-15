@@ -47,5 +47,5 @@ type TChannelCaller interface {
 type TChannelHandler interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
-	Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (ctxRes context.Context, success bool, resp RWTStruct, respHeaders map[string]string, err error)
+	Handle(ctx context.Context, reqHeaders map[string]string, sr stream.Reader) (ctxRes context.Context, success bool, resp RWTStruct, respHeaders map[string]string, err error)
 }
