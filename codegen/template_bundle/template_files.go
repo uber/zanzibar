@@ -2026,26 +2026,127 @@ var _mainTmpl = []byte(`{{- /* template to render gateway main.go */ -}}
 package main
 
 import (
+	"bytes"
+	"context"
 	"flag"
-	"os"
-	"os/signal"
-	"path/filepath"
 	"strings"
-	"syscall"
-
-	"go.uber.org/zap"
-	"go.uber.org/fx"
-	_ "go.uber.org/automaxprocs"
 
 	"github.com/uber/zanzibar/config"
+
+	"github.com/pkg/errors"
+
+	_ "go.uber.org/automaxprocs"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	app "{{$instance.PackageInfo.PackageRoot}}"
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	uberconfig "go.uber.org/config"
 )
 
 var configFiles *string
+
+// Module defines the Zanzibar application module for {{$instance.InstanceName | pascal}}
+var Module = fx.Options(
+	fx.Provide(New),
+	fx.Invoke(run),
+)
+
+func opts() fx.Option {
+	return fx.Options(
+		append(
+			[]fx.Option{Module},
+			app.GetOverrideFxOptions()...,
+		)...,
+	)
+}
+
+// Params defines the dependencies of the New module.
+type Params struct {
+	fx.In
+	Lifecycle fx.Lifecycle
+}
+
+// Result defines the objects that the New module provides
+type Result struct {
+	fx.Out
+	// Gateway corresponds to the fully built server gateway
+	Gateway *zanzibar.Gateway
+	// Provider is an abstraction over the Zanzibar config store
+	Provider uberconfig.Provider ` + "`" + `name:"zanzibarConfig"` + "`" + `
+}
+
+func main() {
+	fx.New(opts()).Run()
+}
+
+// run is the main entry point for {{$instance.InstanceName | pascal}}
+func run(gateway *zanzibar.Gateway) {
+	gateway.Logger.Info("Started {{$instance.InstanceName | pascal}}",
+		zap.String("realHTTPAddr", gateway.RealHTTPAddr),
+		zap.String("realTChannelAddr", gateway.RealTChannelAddr),
+		zap.Any("config", gateway.InspectOrDie()),
+	)
+}
+
+// New exports functionality similar to Module, but allows the caller to wrap
+// or modify Result. Most users should use Module instead.
+func New(p Params) (Result, error) {
+	readFlags()
+	gateway, err := createGateway()
+	if err != nil {
+		return Result{}, errors.Wrap(err, "failed to create gateway server")
+	}
+
+	// Represent the zanzibar config in YAML that will be used to expose a config provider
+	yamlCfg, err := gateway.Config.AsYaml()
+	if err != nil {
+		return Result{}, errors.Wrap(err, "unable to marshal Zanzibar config to YAML")
+	}
+	provider, err := uberconfig.NewYAML(
+		[]uberconfig.YAMLOption{
+			uberconfig.Source(bytes.NewReader(yamlCfg)),
+		}...,
+	)
+	if err != nil {
+		return Result{}, errors.Wrap(err, "unable to provide a YAML view from Zanzibar config")
+	}
+
+	p.Lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			err = gateway.Bootstrap()
+			if err != nil {
+				panic(errors.Wrap(err, "failed to bootstrap gateway server"))
+			}
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			gateway.Logger.Info("fx OnStop() hook activated")
+			gateway.WaitGroup.Add(1)
+			gateway.Shutdown()
+			gateway.WaitGroup.Done()
+			return nil
+		},
+	})
+
+	return Result{
+		Gateway: gateway,
+		Provider: provider,
+	}, nil
+}
+
+func createGateway() (*zanzibar.Gateway, error) {
+	cfg := getConfig()
+
+	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
+		return nil, err
+	} else {
+		return gateway, nil
+	}
+}
 
 func getConfig() *zanzibar.StaticConfig {
 	var files []string
@@ -2059,35 +2160,6 @@ func getConfig() *zanzibar.StaticConfig {
 	return config.NewRuntimeConfigOrDie(files, nil)
 }
 
-func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
-
-	gateway, _, err := service.CreateGateway(config, app.AppOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	return gateway, nil
-}
-
-func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
-		zap.String("realHTTPAddr", server.RealHTTPAddr),
-		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
-	)
-
-	go func(){
-		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-		<-sig
-		server.WaitGroup.Add(1)
-		server.Shutdown()
-		server.WaitGroup.Done()
-	}()
-	server.Wait()
-}
-
 func readFlags() {
 	configFiles = flag.String(
 		"config",
@@ -2095,30 +2167,6 @@ func readFlags() {
 		"an ordered, semi-colon separated list of configuration files to use",
 	)
 	flag.Parse()
-}
-
-func main() {
-	fx.New(
-		append(
-			[]fx.Option{fx.Invoke(zanzibarMain)},
-			app.GetOverrideFxOptions()...,
-		)...,
-	).Run()
-}
-
-func zanzibarMain() {
-	readFlags()
-	server, err := createGateway()
-	if err != nil {
-		panic(err)
-	}
-
-	err = server.Bootstrap()
-	if err != nil {
-		panic(err)
-	}
-
-	logAndWait(server)
 }
 `)
 
@@ -2132,7 +2180,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1858, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 3428, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2216,6 +2264,24 @@ func TestStartGateway(t *testing.T) {
 	}
 	logAndWait(gateway)
 }
+
+func logAndWait(server *zanzibar.Gateway) {
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
+		zap.String("realHTTPAddr", server.RealHTTPAddr),
+		zap.String("realTChannelAddr", server.RealTChannelAddr),
+		zap.Any("config", server.InspectOrDie()),
+	)
+
+	go func(){
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Shutdown()
+		server.WaitGroup.Done()
+	}()
+	server.Wait()
+}
 `)
 
 func main_testTmplBytes() ([]byte, error) {
@@ -2228,7 +2294,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1828, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

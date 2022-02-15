@@ -913,3 +913,59 @@ func TestReadFromDict(t *testing.T) {
 	floatActual := testConfig.MustGetFloat("floatFromDict")
 	assert.Equal(t, float64(1), floatActual)
 }
+
+func TestAsYaml(t *testing.T) {
+	payload := map[string]interface{}{
+		"a": 500,
+		"b": "sd",
+		"c": map[string]interface{}{
+			"d": false,
+			"e": -13,
+		},
+	}
+	testCases := []struct {
+		wantFrozen       bool
+		wantDestroyed    bool
+		wantErrorString  string
+		payloadCfg       map[string]interface{}
+		wantNonEmptyYaml bool
+	}{
+		{
+			wantFrozen:       true,
+			wantDestroyed:    false,
+			wantNonEmptyYaml: true,
+			payloadCfg:       payload,
+		}, {
+			wantFrozen:      true,
+			wantDestroyed:   true,
+			wantErrorString: "error representing as YAML, config is destroyed",
+			payloadCfg:      payload,
+		}, {
+			wantFrozen:      false,
+			wantDestroyed:   false,
+			wantErrorString: "error representing as YAML, config is not frozen yet",
+			payloadCfg:      payload,
+		}, {
+			wantFrozen:      true,
+			wantDestroyed:   false,
+			wantErrorString: "error representing as YAML, failed to serialize values",
+			payloadCfg:      map[string]interface{}{"x": make(chan int)},
+		},
+	}
+	for _, tc := range testCases {
+		cfg := zanzibar.NewStaticConfigOrDie(nil, tc.payloadCfg)
+		if tc.wantFrozen {
+			cfg.Freeze()
+		}
+		if tc.wantDestroyed {
+			cfg.Destroy()
+		}
+		asYaml, err := cfg.AsYaml()
+		if tc.wantErrorString != "" {
+			assert.Error(t, err, tc.wantErrorString)
+		}
+		if tc.wantNonEmptyYaml {
+			assert.True(t, len(asYaml) != 0)
+		}
+	}
+}
