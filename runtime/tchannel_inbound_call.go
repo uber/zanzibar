@@ -134,11 +134,10 @@ func (c *tchannelInboundCall) readReqHeaders(ctx context.Context) error {
 }
 
 // readReqBody reads request body from arg3
-func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.Value, err error) {
+func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wire.Value, error) {
 	// fail fast if timed out
 	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
-		err = context.DeadlineExceeded
-		return
+		return wire.Value{}, context.DeadlineExceeded
 	}
 
 	treader, err := c.call.Arg3Reader()
@@ -146,7 +145,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 		err = errors.Wrapf(err, "Could not create arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return
+		return wire.Value{}, err
 	}
 	buf := GetBuffer()
 	defer PutBuffer(buf)
@@ -155,31 +154,32 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 		err = errors.Wrapf(err, "Could not read from arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return
+		return wire.Value{}, err
 	}
-	wireValue, err = protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
+
+	wireValue, err := protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
 		c.contextLogger.WarnZ(ctx, "Could not decode arg3 for inbound request", zap.Error(err))
 		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return
+		return wireValue, err
 	}
 	if err = EnsureEmpty(treader, "reading request body"); err != nil {
 		_ = treader.Close()
 		err = errors.Wrapf(err, "Could not ensure arg3reader is empty for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return
+		return wireValue, err
 	}
 	if err = treader.Close(); err != nil {
 		err = errors.Wrapf(err, "Could not close arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return
+		return wireValue, err
 	}
 
-	return
+	return wireValue, nil
 }
 
 // handle tchannel server endpoint call
