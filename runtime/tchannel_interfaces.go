@@ -23,6 +23,8 @@ package zanzibar
 import (
 	"context"
 
+	"go.uber.org/thriftrw/protocol/stream"
+
 	"go.uber.org/thriftrw/wire"
 )
 
@@ -30,6 +32,8 @@ import (
 type RWTStruct interface {
 	ToWire() (wire.Value, error)
 	FromWire(wire.Value) error
+	Encode(sw stream.Writer) error
+	Decode(sr stream.Reader) error
 }
 
 // TChannelCaller abstracts calling a Thrift endpoint, and is used by the generated client code.
