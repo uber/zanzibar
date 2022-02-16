@@ -32,3 +32,4 @@ examples/example-gateway/build/example-gateway
 package-lock.json
 gomock_reflect_*
 runtime/foober
+examples/example-gateway/build/gen-code
