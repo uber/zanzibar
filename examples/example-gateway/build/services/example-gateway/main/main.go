@@ -140,6 +140,8 @@ func createGateway() (*zanzibar.Gateway, error) {
 	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
 	if err != nil {
 		return nil, err
+	} else {
+		return gateway, nil
 	}
 	return gateway, nil
 }
