@@ -2140,12 +2140,11 @@ func New(p Params) (Result, error) {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	cfg := getConfig()
-
-	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
+	if err != nil {
 		return nil, err
-	} else {
-		return gateway, nil
 	}
+	return gateway, nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
@@ -2180,7 +2179,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 3428, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 3416, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3442,12 +3441,12 @@ type {{$handler}} struct {
 func (h *{{$handler}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Args
 	var res {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 
@@ -3506,7 +3505,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3065, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3050, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3593,7 +3592,7 @@ func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3627,7 +3626,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
@@ -3796,7 +3795,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8945, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8930, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

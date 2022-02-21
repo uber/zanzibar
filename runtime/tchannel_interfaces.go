@@ -23,6 +23,8 @@ package zanzibar
 import (
 	"context"
 
+	"go.uber.org/thriftrw/protocol/stream"
+
 	"go.uber.org/thriftrw/wire"
 )
 
@@ -30,6 +32,8 @@ import (
 type RWTStruct interface {
 	ToWire() (wire.Value, error)
 	FromWire(wire.Value) error
+	Encode(sw stream.Writer) error
+	Decode(sr stream.Reader) error
 }
 
 // TChannelCaller abstracts calling a Thrift endpoint, and is used by the generated client code.
@@ -43,5 +47,5 @@ type TChannelCaller interface {
 type TChannelHandler interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
-	Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (ctxRes context.Context, success bool, resp RWTStruct, respHeaders map[string]string, err error)
+	Handle(ctx context.Context, reqHeaders map[string]string, sr stream.Reader) (ctxRes context.Context, success bool, resp RWTStruct, respHeaders map[string]string, err error)
 }

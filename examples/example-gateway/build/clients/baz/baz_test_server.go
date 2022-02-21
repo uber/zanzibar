@@ -28,7 +28,7 @@ import (
 	"errors"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/thriftrw/wire"
+	"go.uber.org/thriftrw/protocol/stream"
 
 	clientsIDlClientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 	clientsIDlClientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
@@ -55,12 +55,12 @@ type SecondServiceEchoBinaryHandler struct {
 func (h *SecondServiceEchoBinaryHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoBinary_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoBinary_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echobinary(ctx, reqHeaders, &req)
@@ -94,12 +94,12 @@ type SecondServiceEchoBoolHandler struct {
 func (h *SecondServiceEchoBoolHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoBool_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoBool_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echobool(ctx, reqHeaders, &req)
@@ -133,12 +133,12 @@ type SecondServiceEchoDoubleHandler struct {
 func (h *SecondServiceEchoDoubleHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoDouble_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoDouble_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echodouble(ctx, reqHeaders, &req)
@@ -172,12 +172,12 @@ type SecondServiceEchoEnumHandler struct {
 func (h *SecondServiceEchoEnumHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoEnum_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoEnum_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echoenum(ctx, reqHeaders, &req)
@@ -211,12 +211,12 @@ type SecondServiceEchoI16Handler struct {
 func (h *SecondServiceEchoI16Handler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoI16_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoI16_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echoi16(ctx, reqHeaders, &req)
@@ -250,12 +250,12 @@ type SecondServiceEchoI32Handler struct {
 func (h *SecondServiceEchoI32Handler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoI32_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoI32_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echoi32(ctx, reqHeaders, &req)
@@ -289,12 +289,12 @@ type SecondServiceEchoI64Handler struct {
 func (h *SecondServiceEchoI64Handler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoI64_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoI64_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echoi64(ctx, reqHeaders, &req)
@@ -328,12 +328,12 @@ type SecondServiceEchoI8Handler struct {
 func (h *SecondServiceEchoI8Handler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoI8_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoI8_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echoi8(ctx, reqHeaders, &req)
@@ -367,12 +367,12 @@ type SecondServiceEchoStringHandler struct {
 func (h *SecondServiceEchoStringHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoString_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoString_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echostring(ctx, reqHeaders, &req)
@@ -406,12 +406,12 @@ type SecondServiceEchoStringListHandler struct {
 func (h *SecondServiceEchoStringListHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoStringList_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoStringList_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echostringlist(ctx, reqHeaders, &req)
@@ -445,12 +445,12 @@ type SecondServiceEchoStringMapHandler struct {
 func (h *SecondServiceEchoStringMapHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoStringMap_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echostringmap(ctx, reqHeaders, &req)
@@ -484,12 +484,12 @@ type SecondServiceEchoStringSetHandler struct {
 func (h *SecondServiceEchoStringSetHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoStringSet_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echostringset(ctx, reqHeaders, &req)
@@ -523,12 +523,12 @@ type SecondServiceEchoStructListHandler struct {
 func (h *SecondServiceEchoStructListHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoStructList_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoStructList_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echostructlist(ctx, reqHeaders, &req)
@@ -562,12 +562,12 @@ type SecondServiceEchoStructSetHandler struct {
 func (h *SecondServiceEchoStructSetHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoStructSet_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echostructset(ctx, reqHeaders, &req)
@@ -601,12 +601,12 @@ type SecondServiceEchoTypedefHandler struct {
 func (h *SecondServiceEchoTypedefHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args
 	var res clientsIDlClientsBazBaz.SecondService_EchoTypedef_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.echotypedef(ctx, reqHeaders, &req)
@@ -640,12 +640,12 @@ type SimpleServiceCallHandler struct {
 func (h *SimpleServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_Call_Args
 	var res clientsIDlClientsBazBaz.SimpleService_Call_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	respHeaders, err := h.call(ctx, reqHeaders, &req)
@@ -688,12 +688,12 @@ type SimpleServiceCompareHandler struct {
 func (h *SimpleServiceCompareHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_Compare_Args
 	var res clientsIDlClientsBazBaz.SimpleService_Compare_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.compare(ctx, reqHeaders, &req)
@@ -745,12 +745,12 @@ type SimpleServiceGetProfileHandler struct {
 func (h *SimpleServiceGetProfileHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_GetProfile_Args
 	var res clientsIDlClientsBazBaz.SimpleService_GetProfile_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.getprofile(ctx, reqHeaders, &req)
@@ -795,12 +795,12 @@ type SimpleServiceHeaderSchemaHandler struct {
 func (h *SimpleServiceHeaderSchemaHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args
 	var res clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.headerschema(ctx, reqHeaders, &req)
@@ -851,12 +851,12 @@ type SimpleServicePingHandler struct {
 func (h *SimpleServicePingHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_Ping_Args
 	var res clientsIDlClientsBazBaz.SimpleService_Ping_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.ping(ctx, reqHeaders)
@@ -889,12 +889,12 @@ type SimpleServiceSillyNoopHandler struct {
 func (h *SimpleServiceSillyNoopHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_SillyNoop_Args
 	var res clientsIDlClientsBazBaz.SimpleService_SillyNoop_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	respHeaders, err := h.sillynoop(ctx, reqHeaders)
@@ -943,12 +943,12 @@ type SimpleServiceTestUUIDHandler struct {
 func (h *SimpleServiceTestUUIDHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_TestUuid_Args
 	var res clientsIDlClientsBazBaz.SimpleService_TestUuid_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	respHeaders, err := h.testuuid(ctx, reqHeaders)
@@ -981,12 +981,12 @@ type SimpleServiceTransHandler struct {
 func (h *SimpleServiceTransHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_Trans_Args
 	var res clientsIDlClientsBazBaz.SimpleService_Trans_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.trans(ctx, reqHeaders, &req)
@@ -1038,12 +1038,12 @@ type SimpleServiceTransHeadersHandler struct {
 func (h *SimpleServiceTransHeadersHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args
 	var res clientsIDlClientsBazBaz.SimpleService_TransHeaders_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.transheaders(ctx, reqHeaders, &req)
@@ -1095,12 +1095,12 @@ type SimpleServiceTransHeadersNoReqHandler struct {
 func (h *SimpleServiceTransHeadersNoReqHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args
 	var res clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.transheadersnoreq(ctx, reqHeaders, &req)
@@ -1145,12 +1145,12 @@ type SimpleServiceTransHeadersTypeHandler struct {
 func (h *SimpleServiceTransHeadersTypeHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args
 	var res clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	r, respHeaders, err := h.transheaderstype(ctx, reqHeaders, &req)
@@ -1201,12 +1201,12 @@ type SimpleServiceURLTestHandler struct {
 func (h *SimpleServiceURLTestHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req clientsIDlClientsBazBaz.SimpleService_UrlTest_Args
 	var res clientsIDlClientsBazBaz.SimpleService_UrlTest_Result
 
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		return ctx, false, nil, nil, err
 	}
 	respHeaders, err := h.urltest(ctx, reqHeaders)

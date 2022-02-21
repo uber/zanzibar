@@ -31,7 +31,7 @@ import (
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/thriftrw/wire"
+	"go.uber.org/thriftrw/protocol/stream"
 	"go.uber.org/zap"
 
 	endpointsIDlEndpointsTchannelQuuxQuux "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
@@ -74,7 +74,7 @@ func (h *SimpleServiceEchoStringHandler) Register(g *zanzibar.Gateway) error {
 func (h *SimpleServiceEchoStringHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	wireValue *wire.Value,
+	sr stream.Reader,
 ) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -99,7 +99,7 @@ func (h *SimpleServiceEchoStringHandler) Handle(
 	var res endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Result
 
 	var req endpointsIDlEndpointsTchannelQuuxQuux.SimpleService_EchoString_Args
-	if err := req.FromWire(*wireValue); err != nil {
+	if err := req.Decode(sr); err != nil {
 		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
