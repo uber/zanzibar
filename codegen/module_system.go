@@ -387,6 +387,16 @@ func NewDefaultModuleSystem(
 		)
 	}
 
+	if err := system.RegisterClassType("endpoint", "proto", &EndpointGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Proto endpoint class type",
+		)
+	}
+
 	if err := system.RegisterClass(ModuleClass{
 		Name:       "service",
 		NamePlural: "services",
@@ -1443,6 +1453,8 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 			endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
 		} else if e.EndpointType == "tchannel" {
 			endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
+		} else if e.EndpointType == "proto" {
+			endpoint, err = g.templates.ExecTemplate("proto_endpoint.tmpl", meta, g.packageHelper)
 		} else {
 			err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
 		}

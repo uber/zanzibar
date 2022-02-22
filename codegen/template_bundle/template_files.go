@@ -17,6 +17,7 @@
 // codegen/templates/module_class_initializer.tmpl
 // codegen/templates/module_initializer.tmpl
 // codegen/templates/module_mock_initializer.tmpl
+// codegen/templates/proto_endpoint.tmpl
 // codegen/templates/service.tmpl
 // codegen/templates/service_mock.tmpl
 // codegen/templates/structs.tmpl
@@ -2140,12 +2141,11 @@ func New(p Params) (Result, error) {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	cfg := getConfig()
-
-	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
+	if err != nil {
 		return nil, err
-	} else {
-		return gateway, nil
 	}
+	return gateway, nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
@@ -2180,7 +2180,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 3428, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 3416, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2637,6 +2637,291 @@ func module_mock_initializerTmpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4471, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _proto_endpointTmpl = []byte(`{{/* template to render gateway http endpoint code */ -}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
+
+{{- $reqHeaderMap := .ReqHeaders }}
+{{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
+{{- $resHeaderMap := .ResHeaders }}
+{{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
+{{- $clientName := title .ClientName }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $handlerName := printf "%sHandler" $serviceMethod }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $endpointId := .Spec.EndpointID }}
+{{- $handleId := .Spec.HandleID }}
+{{- $middlewares := .Spec.Middlewares }}
+{{- $workflowPkg := .WorkflowPkg }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $traceKey := .TraceKey }}
+
+import (
+	"context"
+	"runtime/debug"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
+	"go.uber.org/thriftrw/ptr"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end -}}
+
+	{{if .Method.Downstream }}
+	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
+	{{$file := basePath $pkg.PackageName -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+	{{- end}}
+
+	{{- if len $middlewares | ne 0 }}
+	{{- range $idx, $middleware := $middlewares }}
+	{{$middleware.Name | camel}} "{{$middleware.ImportPath}}"
+	{{- end}}
+	{{- end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+{{with .Method -}}
+
+// {{$handlerName}} is the handler for "{{.HTTPPath}}"
+type {{$handlerName}} struct {
+	Dependencies  *module.Dependencies
+	endpoint      *zanzibar.RouterEndpoint
+}
+
+// New{{$handlerName}} creates a handler
+func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
+	handler := &{{$handlerName}}{
+		Dependencies: deps,
+	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.ContextExtractor, deps.Default,
+		"{{$endpointId}}", "{{$handleId}}",
+		{{ if len $middlewares | ne 0 -}}
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			{{range $idx, $middleware := $middlewares -}}
+			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
+				{{$middleware.Name | camel}}.Options{
+				{{range $key, $value := $middleware.PrettyOptions -}}
+					{{$key}} : {{$value}},
+				{{end -}}
+				},
+			),
+			{{end -}}
+		}, handler.HandleRequest).Handle,
+		{{- else -}}
+		handler.HandleRequest,
+		{{- end}}
+	)
+
+	return handler
+}
+
+// Register adds the http handler to the gateway's http router
+func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+	return g.HTTPRouter.Handle(
+		"{{.HTTPMethod}}", "{{.HTTPPath}}",
+		http.HandlerFunc(h.endpoint.HandleRequest),
+	)
+}
+
+// HandleRequest handles "{{.HTTPPath}}".
+func (h *{{$handlerName}}) HandleRequest(
+	ctx context.Context,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse,
+) context.Context {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			ctx = h.Dependencies.Default.ContextLogger.ErrorZ(
+				ctx,
+				"Endpoint failure: endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			h.Dependencies.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
+		}
+	}()
+
+	{{ if $reqHeaderRequiredKeys -}}
+	if !req.CheckHeaders({{$reqHeaderRequiredKeys | printf "%#v" }}) {
+		return ctx
+	}
+	{{- end -}}
+
+	{{if ne .RequestType ""}}
+	var requestBody {{unref .RequestType}}
+
+	{{- if ne .HTTPMethod "GET"}}
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
+		return ctx
+	}
+	{{end}}
+
+	{{range $index, $line := .RequestParamGoStatements -}}
+	{{$line}}
+	{{end}}
+
+	{{end}}
+
+	{{range $index, $line := .ReqHeaderGoStatements -}}
+	{{$line}}
+	{{end}}
+
+	{{range $index, $line := .ParseQueryParamGoStatements -}}
+	{{$line}}
+	{{end}}
+
+	// log endpoint request to downstream services
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		{{- if ne .RequestType ""}}
+		zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", req.GetRawBody())))
+		{{- end}}
+		for _, k := range req.Header.Keys() {
+			if val, ok := req.Header.Get(k); ok {
+				zfields = append(zfields, zap.String(k, val))
+			}
+		}
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "endpoint request to downstream", zfields...)
+	}
+
+	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
+
+	{{if and (eq .RequestType "") (eq .ResponseType "")}}
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header)
+	{{else if eq .RequestType ""}}
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header)
+	{{else if eq .ResponseType ""}}
+	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	{{else}}
+	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+
+	// map useful client response headers to server response
+	if cliRespHeaders != nil {
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
+			if duration, err := time.ParseDuration(val); err == nil {
+				res.DownstreamFinishTime = duration
+			}
+			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
+		}
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
+			res.ClientType = val
+			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
+		}
+	}
+
+	// log downstream response to endpoint
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		{{- if ne .ResponseType ""}}
+		if body, err := json.Marshal(response); err == nil {
+			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
+		}
+		{{- end}}
+		if cliRespHeaders != nil {
+			for _, k := range cliRespHeaders.Keys() {
+				if val, ok := cliRespHeaders.Get(k); ok {
+					zfields = append(zfields, zap.String(k, val))
+				}
+			}
+		}
+		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
+			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
+		}
+		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
+	}
+
+	{{end -}}
+	if err != nil {
+		{{- if eq (len .Exceptions) 0 -}}
+		res.SendError(500, "Unexpected server error", err)
+		return ctx
+		{{ else }}
+		{{$val := false}}
+		{{range $idx, $exception := .Exceptions}}
+			{{if not $exception.IsBodyDisallowed}}
+				{{$val = true}}
+			{{ end}}
+		{{end}}
+		{{ if $val -}}
+		switch errValue := err.(type) {
+		{{else -}}
+		switch err.(type) {
+		{{end -}}
+		{{range $idx, $exception := .Exceptions}}
+		case *{{$exception.Type}}:
+			{{if $exception.IsBodyDisallowed -}}
+			res.WriteJSONBytes({{$exception.StatusCode.Code}}, cliRespHeaders, nil)
+			{{else -}}
+			res.WriteJSON(
+				{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
+			)
+			{{end -}}
+			return ctx
+		{{end}}
+			default:
+				res.SendError(500, "Unexpected server error", err)
+				return ctx
+		}
+		{{ end }}
+	}
+
+	{{if eq .ResponseType "" -}}
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
+	{{- else if eq .ResponseType "string" -}}
+	bytes, err := json.Marshal(response)
+	if err != nil {
+		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
+		return ctx
+	}
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, bytes)
+	{{- else -}}
+	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
+	{{- end }}
+	return ctx
+}
+
+{{end -}}
+`)
+
+func proto_endpointTmplBytes() ([]byte, error) {
+	return _proto_endpointTmpl, nil
+}
+
+func proto_endpointTmpl() (*asset, error) {
+	bytes, err := proto_endpointTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "proto_endpoint.tmpl", size: 7963, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4365,6 +4650,7 @@ var _bindata = map[string]func() (*asset, error){
 	"module_class_initializer.tmpl":      module_class_initializerTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
 	"module_mock_initializer.tmpl":       module_mock_initializerTmpl,
+	"proto_endpoint.tmpl":                proto_endpointTmpl,
 	"service.tmpl":                       serviceTmpl,
 	"service_mock.tmpl":                  service_mockTmpl,
 	"structs.tmpl":                       structsTmpl,
@@ -4434,6 +4720,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"module_class_initializer.tmpl":      &bintree{module_class_initializerTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            &bintree{module_initializerTmpl, map[string]*bintree{}},
 	"module_mock_initializer.tmpl":       &bintree{module_mock_initializerTmpl, map[string]*bintree{}},
+	"proto_endpoint.tmpl":                &bintree{proto_endpointTmpl, map[string]*bintree{}},
 	"service.tmpl":                       &bintree{serviceTmpl, map[string]*bintree{}},
 	"service_mock.tmpl":                  &bintree{service_mockTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       &bintree{structsTmpl, map[string]*bintree{}},

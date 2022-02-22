@@ -221,11 +221,13 @@ type EndpointSpec struct {
 	// HandleID, used in metrics and logging, lowercase.
 	HandleID string `yaml:"handleId" validate:"nonzero"`
 	// ThriftFile, the thrift file for this endpoint
-	ThriftFile string `yaml:"thriftFile" validate:"nonzero"`
+	ThriftFile string `yaml:"thriftFile,omitempty"`
+	// ProtoFile, the proto file for this endpoint
+	ProtoFile string `yaml:"protoFile,omitempty"`
 	// ThriftFileSha, the SHA of the thrift file for this endpoint
 	ThriftFileSha string `yaml:"thriftFileSha,omitempty"`
 	// ThriftMethodName, which thrift method to use.
-	ThriftMethodName string `yaml:"thriftMethodName" validate:"nonzero"`
+	ThriftMethodName string `yaml:"thriftMethodName,omitempty"`
 	// ThriftServiceName, which thrift service to use.
 	ThriftServiceName string `yaml:"-"`
 	// TestFixtures, meta data to generate tests,
@@ -318,11 +320,13 @@ func NewEndpointSpec(
 		}
 
 	}
-	if endpointType != "http" && endpointType != "tchannel" {
+	if endpointType != "http" && endpointType != "tchannel" && endpointType != "proto" {
 		return nil, errors.Errorf(
 			"Cannot support unknown endpointType for endpoint: %s", yamlFile,
 		)
 	}
+
+	if _, ok; endpointConfigObj["thriftFile"]
 
 	thriftFile := filepath.Join(
 		h.IdlPath(), h.GetModuleIdlSubDir(true), endpointConfigObj["thriftFile"].(string),
