@@ -30,7 +30,6 @@ import (
 	"net/http"
 	"runtime/debug"
 	"time"
-	_ "time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"

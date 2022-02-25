@@ -445,7 +445,6 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"runtime/debug"
-	_ "time"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -626,7 +625,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 	{{end -}}
 
-    // map useful client response headers to server response
+	// map useful client response headers to server response
 	if cliRespHeaders != nil {
 		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
 			if duration, err := time.ParseDuration(val); err == nil {
@@ -702,7 +701,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7976, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7963, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

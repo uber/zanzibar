@@ -30,7 +30,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"time"
-	_ "time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
