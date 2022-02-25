@@ -445,6 +445,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"runtime/debug"
+	_ "time"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -601,20 +602,6 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{else}}
 	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
-	// map useful client response headers to server response
-	if cliRespHeaders != nil {
-		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
-			if duration, err := time.ParseDuration(val); err == nil {
-				res.DownstreamFinishTime = duration
-			}
-			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
-		}
-		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
-			res.ClientType = val
-			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
-		}
-	}
-
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
@@ -637,8 +624,22 @@ func (h *{{$handlerName}}) HandleRequest(
 		}
 		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
-
 	{{end -}}
+
+    // map useful client response headers to server response
+	if cliRespHeaders != nil {
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
+			if duration, err := time.ParseDuration(val); err == nil {
+				res.DownstreamFinishTime = duration
+			}
+			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
+		}
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
+			res.ClientType = val
+			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
+		}
+	}
+
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
 		res.SendError(500, "Unexpected server error", err)
@@ -701,7 +702,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7963, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7976, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2140,12 +2141,11 @@ func New(p Params) (Result, error) {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	cfg := getConfig()
-
-	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
+	if err != nil {
 		return nil, err
-	} else {
-		return gateway, nil
 	}
+	return gateway, nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
@@ -2180,7 +2180,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 3428, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 3416, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
