@@ -203,7 +203,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 	{{end -}}
 
-    // map useful client response headers to server response
+	// map useful client response headers to server response
 	if cliRespHeaders != nil {
 		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
 			if duration, err := time.ParseDuration(val); err == nil {
