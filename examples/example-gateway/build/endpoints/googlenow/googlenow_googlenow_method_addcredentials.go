@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
@@ -129,6 +130,20 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	}
 
 	ctx, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+	// map useful client response headers to server response
+	if cliRespHeaders != nil {
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
+			if duration, err := time.ParseDuration(val); err == nil {
+				res.DownstreamFinishTime = duration
+			}
+			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
+		}
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
+			res.ClientType = val
+			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
+		}
+	}
+
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return ctx

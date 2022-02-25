@@ -601,20 +601,6 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{else}}
 	ctx, response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
-	// map useful client response headers to server response
-	if cliRespHeaders != nil {
-		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
-			if duration, err := time.ParseDuration(val); err == nil {
-				res.DownstreamFinishTime = duration
-			}
-			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
-		}
-		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
-			res.ClientType = val
-			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
-		}
-	}
-
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
@@ -637,8 +623,22 @@ func (h *{{$handlerName}}) HandleRequest(
 		}
 		ctx = h.Dependencies.Default.ContextLogger.DebugZ(ctx, "downstream service response", zfields...)
 	}
-
 	{{end -}}
+
+	// map useful client response headers to server response
+	if cliRespHeaders != nil {
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientResponseDurationKey); ok {
+			if duration, err := time.ParseDuration(val); err == nil {
+				res.DownstreamFinishTime = duration
+			}
+			cliRespHeaders.Unset(zanzibar.ClientResponseDurationKey)
+		}
+		if val, ok := cliRespHeaders.Get(zanzibar.ClientTypeKey); ok {
+			res.ClientType = val
+			cliRespHeaders.Unset(zanzibar.ClientTypeKey)
+		}
+	}
+
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
 		res.SendError(500, "Unexpected server error", err)
