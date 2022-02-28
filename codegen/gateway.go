@@ -326,7 +326,7 @@ func NewEndpointSpec(
 		)
 	}
 
-	if _, ok; endpointConfigObj["thriftFile"]
+	//if _, ok; endpointConfigObj["thriftFile"]
 
 	thriftFile := filepath.Join(
 		h.IdlPath(), h.GetModuleIdlSubDir(true), endpointConfigObj["thriftFile"].(string),
