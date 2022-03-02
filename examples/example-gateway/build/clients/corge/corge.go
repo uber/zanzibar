@@ -45,6 +45,7 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+const DefaultMaxAttempts = 5
 
 // Client defines corge client interface.
 type Client interface {
@@ -147,11 +148,9 @@ func NewClient(deps *module.Dependencies) Client {
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
-	var maxAttempts int
+	var maxAttempts = DefaultMaxAttempts
 	if deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.corge.retryCount") && int(deps.Default.Config.MustGetInt("clients.corge.retryCount")) > 0 {
 		maxAttempts = int(deps.Default.Config.MustGetInt("clients.corge.retryCount"))
-	} else {
-		maxAttempts = 5
 	}
 	client := zanzibar.NewTChannelClientContext(
 		channel,

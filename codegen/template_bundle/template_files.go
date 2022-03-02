@@ -2998,6 +2998,7 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+const DefaultMaxAttempts = 5
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -3129,11 +3130,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
-	var maxAttempts int
+	var maxAttempts = DefaultMaxAttempts
 	if  deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.{{$clientID}}.retryCount") && int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount")) > 0{
 		maxAttempts = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
-	}else{
-		maxAttempts = 5
 	}
 	client := zanzibar.NewTChannelClientContext(
 		channel,
@@ -3366,7 +3365,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14606, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 14626, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
