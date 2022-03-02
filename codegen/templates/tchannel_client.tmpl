@@ -170,7 +170,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if  deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.{{$clientID}}.retryCount") && int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount")) > 0{
 		maxAttempts = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
 	}else{
-	    maxAttempts = 5
+		maxAttempts = 5
 	}
 	client := zanzibar.NewTChannelClientContext(
 		channel,
