@@ -46,6 +46,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+// DefaultMaxAttempts is the default retries for a client
 const DefaultMaxAttempts = 5
 
 // Client defines baz client interface.
