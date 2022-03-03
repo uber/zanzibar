@@ -47,9 +47,6 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
-// DefaultMaxAttempts is the default retries for a client
-const DefaultMaxAttempts = 5
-
 // Client defines baz client interface.
 type Client interface {
 	EchoBinary(
@@ -331,29 +328,51 @@ func NewClient(deps *module.Dependencies) Client {
 			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
-	var maxAttempts = DefaultMaxAttempts
+
+	var client *zanzibar.TChannelClient
+
 	if deps.Default.Config.ContainsKey("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.MustGetBoolean("tchannelclients.retryCount.feature.enabled") && deps.Default.Config.ContainsKey("clients.baz.retryCount") && int(deps.Default.Config.MustGetInt("clients.baz.retryCount")) > 0 {
-		maxAttempts = int(deps.Default.Config.MustGetInt("clients.baz.retryCount"))
+		maxAttempts := int(deps.Default.Config.MustGetInt("clients.baz.retryCount"))
+		client = zanzibar.NewTChannelClientContext(
+			channel,
+			deps.Default.ContextLogger,
+			deps.Default.ContextMetrics,
+			deps.Default.ContextExtractor,
+			&zanzibar.TChannelClientOption{
+				ServiceName:          serviceName,
+				ClientID:             "baz",
+				MethodNames:          methodNames,
+				Timeout:              timeout,
+				TimeoutPerAttempt:    timeoutPerAttempt,
+				RoutingKey:           &routingKey,
+				RuleEngine:           re,
+				HeaderPatterns:       headerPatterns,
+				RequestUUIDHeaderKey: requestUUIDHeaderKey,
+				AltChannelMap:        altChannelMap,
+				MaxAttempts:          maxAttempts,
+			},
+		)
+	} else {
+		client = zanzibar.NewTChannelClientContext(
+			channel,
+			deps.Default.ContextLogger,
+			deps.Default.ContextMetrics,
+			deps.Default.ContextExtractor,
+			&zanzibar.TChannelClientOption{
+				ServiceName:          serviceName,
+				ClientID:             "baz",
+				MethodNames:          methodNames,
+				Timeout:              timeout,
+				TimeoutPerAttempt:    timeoutPerAttempt,
+				RoutingKey:           &routingKey,
+				RuleEngine:           re,
+				HeaderPatterns:       headerPatterns,
+				RequestUUIDHeaderKey: requestUUIDHeaderKey,
+				AltChannelMap:        altChannelMap,
+			},
+		)
 	}
-	client := zanzibar.NewTChannelClientContext(
-		channel,
-		deps.Default.ContextLogger,
-		deps.Default.ContextMetrics,
-		deps.Default.ContextExtractor,
-		&zanzibar.TChannelClientOption{
-			ServiceName:          serviceName,
-			ClientID:             "baz",
-			MethodNames:          methodNames,
-			Timeout:              timeout,
-			TimeoutPerAttempt:    timeoutPerAttempt,
-			RoutingKey:           &routingKey,
-			RuleEngine:           re,
-			HeaderPatterns:       headerPatterns,
-			RequestUUIDHeaderKey: requestUUIDHeaderKey,
-			AltChannelMap:        altChannelMap,
-			MaxAttempts:          maxAttempts,
-		},
-	)
+
 	return &bazClient{
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
