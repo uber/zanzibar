@@ -1,7 +1,6 @@
 config:
   endpoints:
   - get_auth_token.yaml
-  - multi_calls.yaml
 dependencies:
   client:
     - authtoken

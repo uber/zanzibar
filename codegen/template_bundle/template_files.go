@@ -1764,7 +1764,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end}}
 
 	// Generate full URL.
-	fullURL := c.httpClient.BaseURL
+	type FastPlatformCredentials struct {
+    	HostServer string ` + "`" + `json:"host_server,required"` + "`" + `
+    }
+	var fastPlatformCredentials FastPlatformCredentials
+	json.Unmarshal([]byte(headers["x-fast-platform-credentials"]), &fastPlatformCredentials)
+	fullURL := fastPlatformCredentials.HostServer
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+string({{- if not $segment.Required }} * {{- end -}}r{{$segment.BodyIdentifier | title}})
@@ -2016,7 +2021,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18888, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 19143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

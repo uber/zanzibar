@@ -304,7 +304,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end}}
 
 	// Generate full URL.
-	fullURL := c.httpClient.BaseURL
+	type FastPlatformCredentials struct {
+    	HostServer string `json:"host_server,required"`
+    }
+	var fastPlatformCredentials FastPlatformCredentials
+	json.Unmarshal([]byte(headers["x-fast-platform-credentials"]), &fastPlatformCredentials)
+	fullURL := fastPlatformCredentials.HostServer
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+string({{- if not $segment.Required }} * {{- end -}}r{{$segment.BodyIdentifier | title}})

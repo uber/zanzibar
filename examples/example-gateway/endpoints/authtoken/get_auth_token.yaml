@@ -10,9 +10,9 @@ reqHeaderMap:
   X-Fast-Platform-Credentials: x-fast-platform-credentials
 resHeaderMap: {}
 testFixtures: {}
-# thriftFile: endpoints/authtoken/authtoken.thrift
-protoFile: endpoints/authtoken/authtoken.proto
+thriftFile: endpoints/authtoken/authtoken.thrift
+#protoFile: endpoints/authtoken/authtoken.proto
 # thriftFileSha: '{{placeholder}}'
-# thriftMethodName: AuthToken::getAuthToken
-protoMethodName: AuthToken::getAuthToken
+thriftMethodName: AuthToken::getAuthToken
+#protoMethodName: AuthToken::getAuthToken
 workflowType: httpClient

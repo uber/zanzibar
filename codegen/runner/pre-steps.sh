@@ -74,7 +74,8 @@ mkdir -p "$BUILD_DIR/gen-code"
 for tfile in ${THRIFTRW_SRCS}; do
 	"$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
 		--no-embed-idl \
-		--thrift-root="$IDL_DIR" "$tfile"
+		--thrift-root="$IDL_DIR" "$tfile" \
+		--pkg-prefix=$BUILD_DIR
 done
 
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
