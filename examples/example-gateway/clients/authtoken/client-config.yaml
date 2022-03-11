@@ -1,9 +1,0 @@
-config:
-  exposedMethods:
-    GetAuthTokenFromSalesforce: AuthToken::getAuthToken
-    GetProducts: Products::getProducts
-    GetProduct: Products::getProduct
-  idlFile: clients/authtoken/authtoken.thrift
-  idlFileSha: '{{placeholder}}'
-name: authtoken
-type: http

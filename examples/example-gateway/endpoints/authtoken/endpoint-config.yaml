@@ -1,8 +1,0 @@
-config:
-  endpoints:
-  - get_auth_token.yaml
-dependencies:
-  client:
-    - authtoken
-name: authtoken
-type: http
