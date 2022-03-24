@@ -29,10 +29,11 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/protocol/stream"
 	"go.uber.org/zap"
+
+	tchannel "github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	endpointsBounceBounce "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
 	customBounce "github.com/uber/zanzibar/examples/selective-gateway/endpoints/bounce"
