@@ -30,10 +30,11 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/protocol/stream"
 	"go.uber.org/zap"
+
+	tchannel "github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"

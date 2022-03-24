@@ -28,9 +28,10 @@ import (
 	"runtime/debug"
 
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/protocol/stream"
 	"go.uber.org/zap"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	customAbc "github.com/uber/zanzibar/examples/example-gateway/app/demo/endpoints/abc"
 	endpointsIDlEndpointsAppDemoEndpointsAbc "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/app/demo/endpoints/abc"

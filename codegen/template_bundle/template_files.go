@@ -3522,8 +3522,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.uber.org/thriftrw/wire"
+	"go.uber.org/thriftrw/protocol/stream"
 	"go.uber.org/zap"
+
 	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -3795,7 +3796,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8930, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8942, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
