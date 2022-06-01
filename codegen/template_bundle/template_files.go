@@ -2077,6 +2077,8 @@ type Result struct {
 	Gateway *zanzibar.Gateway
 	// Provider is an abstraction over the Zanzibar config store
 	Provider uberconfig.Provider ` + "`" + `name:"zanzibarConfig"` + "`" + `
+	// Deps is a reference to the dependency tree inside zanzibar gateway
+	Deps *service.DependenciesTree
 }
 
 func main() {
@@ -2096,7 +2098,7 @@ func run(gateway *zanzibar.Gateway) {
 // or modify Result. Most users should use Module instead.
 func New(p Params) (Result, error) {
 	readFlags()
-	gateway, err := createGateway()
+	gateway, deps, err := createGateway()
 	if err != nil {
 		return Result{}, errors.Wrap(err, "failed to create gateway server")
 	}
@@ -2135,17 +2137,17 @@ func New(p Params) (Result, error) {
 	return Result{
 		Gateway: gateway,
 		Provider: provider,
+		Deps: deps,
 	}, nil
 }
 
-func createGateway() (*zanzibar.Gateway, error) {
+func createGateway() (*zanzibar.Gateway, *service.DependenciesTree, error) {
 	cfg := getConfig()
-
-	if gateway, _, err := service.CreateGateway(cfg, app.AppOptions); err != nil {
-		return nil, err
-	} else {
-		return gateway, nil
+	gateway, deps, err := service.CreateGateway(cfg, app.AppOptions)
+	if err != nil {
+		return nil, nil, err
 	}
+	return gateway, deps.(*service.DependenciesTree), nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
@@ -2180,7 +2182,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 3428, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 3608, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2200,6 +2202,7 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -2244,7 +2247,7 @@ func TestStartGateway(t *testing.T) {
 		),
 	)
 
-	gateway, err := createGateway()
+	gateway, deps, err := createGateway()
 	if err != nil {
 		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
@@ -2252,6 +2255,7 @@ func TestStartGateway(t *testing.T) {
 		)
 		return
 	}
+	assert.NotNil(t, deps)
 
 	cachedServer = gateway
 	err = gateway.Bootstrap()
@@ -2294,7 +2298,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1828, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1896, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
