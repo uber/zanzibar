@@ -22,19 +22,18 @@ package zanzibar
 
 import (
 	"context"
+	"net/http"
 	"os"
+	"strings"
+	"sync"
 	"testing"
 
-	"go.uber.org/zap/zapcore"
-
-	"github.com/uber/tchannel-go"
-
-	"github.com/uber-go/tally"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
-
-	"go.uber.org/zap"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
+	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestCreateGatewayLoggingConfig(t *testing.T) {
@@ -175,6 +174,34 @@ func TestGatewaySetupServerTChannelThrowsErrorWhenLoggerLevelIsIncorrect(t *test
 	err := g.setupServerTChannel(cfg)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "unknown sub logger level for tchannel server: non-compliant")
+}
+
+func TestGatewaySetupServerTChannelCanSpecifyServerIPThroughConfig(t *testing.T) {
+	cfg := NewStaticConfigOrDie(nil, map[string]interface{}{
+		"tchannel.serviceName":    "test-g",
+		"tchannel.processName":    "proc",
+		"subLoggerLevel.tchannel": "error",
+		"env":                     "test-bootstrap",
+		"tchannel.server.ip":      "127.0.0.1",
+	})
+
+	s := &HTTPServer{Server: &http.Server{Addr: "127.0.0.1:0"}}
+	g := Gateway{
+		Config:          cfg,
+		RootScope:       tally.NoopScope,
+		localHTTPServer: s,
+		httpServer:      s,
+		WaitGroup:       &sync.WaitGroup{},
+		Logger:          zap.NewNop(),
+		logEncoder:      zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+	}
+
+	err := g.setupServerTChannel(cfg)
+	assert.NoError(t, err)
+
+	err = g.Bootstrap()
+	assert.NoError(t, err)
+	assert.Equal(t, "127.0.0.1", strings.Split(g.RealTChannelAddr, ":")[0])
 }
 
 func TestGatewaySetupServerTChannelWithShutdown(t *testing.T) {

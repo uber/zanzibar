@@ -305,7 +305,9 @@ func (gateway *Gateway) Bootstrap() error {
 
 	// start TChannel server
 	ip := localhost
-	if env != testenv {
+	if gateway.Config.ContainsKey("tchannel.server.ip") {
+		ip = gateway.Config.MustGetString("tchannel.server.ip")
+	} else if env != testenv {
 		tchannelIP, err := tchannel.ListenIP()
 		if err != nil {
 			return errors.Wrap(err, "error finding the best IP for tchannel")
