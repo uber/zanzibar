@@ -62,6 +62,7 @@ func NewBarListAndEnumWorkflow(deps *module.Dependencies) BarListAndEnumWorkflow
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
+		defaultDeps:               deps.Default,
 	}
 }
 
@@ -70,6 +71,7 @@ type barListAndEnumWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
+	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -108,8 +110,22 @@ func (w barListAndEnumWorkflow) Handle(
 		}
 	}
 
+	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
+	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
+
+	//when endpoint level timeout information is available, override it with client level config
+	if w.defaultDeps.Config.ContainsKey("endpoints.bar.listAndEnum.timeoutPerAttempt") {
+		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.bar.listAndEnum.scaleFactor")
+		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.listAndEnum.retryCount"))
+
+		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.listAndEnum.backOffTimeAcrossRetries"))
+		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.listAndEnum.timeoutPerAttempt"))
+
+		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
+	}
+
 	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.ListAndEnum(
-		ctx, clientHeaders, clientRequest,
+		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
 	)
 
 	if err != nil {

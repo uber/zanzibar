@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
@@ -96,7 +97,12 @@ func TestCallMetrics(t *testing.T) {
 	var result endpointsBaz.SimpleService_Call_Result
 
 	success, resHeaders, err := gateway.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  0,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	dynamicRespHeaders := []string{
 		"client.response.duration",

@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -28,6 +29,13 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 )
+
+// CheckRetry specifies a policy for handling retries. It is called
+// following each request with the response and error values returned by
+// the http.Client. If CheckRetry returns false, the Client stops retrying
+// and returns the response to the caller. If CheckRetry returns an error,
+// that error value is returned in lieu of the error from the request.
+type CheckRetry func(ctx context.Context, timeoutAndRetryOptions *TimeoutAndRetryOptions, resp *http.Response, err error) bool
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
@@ -37,6 +45,7 @@ type HTTPClient struct {
 	JSONWrapper    jsonwrapper.JSONWrapper
 	ContextLogger  ContextLogger
 	contextMetrics ContextMetrics
+	CheckRetry     CheckRetry
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -109,5 +118,21 @@ func NewHTTPClientContext(
 		ContextLogger:  contextLogger,
 		contextMetrics: ContextMetrics,
 		JSONWrapper:    jsonWrapper,
+		CheckRetry:     DefaultRetryPolicy,
 	}
+}
+
+// DefaultRetryPolicy allows retries for any type of server error
+func DefaultRetryPolicy(ctx context.Context, timeoutAndRetryOptions *TimeoutAndRetryOptions, resp *http.Response, err error) bool {
+	// do not retry on context.Canceled or context.DeadlineExceeded
+	if ctx.Err() != nil {
+		return false
+	}
+	//wait for the backoff time
+	timer := time.NewTimer(timeoutAndRetryOptions.BackOffTimeAcrossRetriesInMs)
+	select {
+	case <-timer.C:
+	}
+
+	return true
 }

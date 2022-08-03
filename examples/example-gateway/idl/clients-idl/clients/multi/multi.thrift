@@ -1,7 +1,7 @@
 namespace java com.uber.zanzibar.clients.multi
 
 service ServiceABack {
-    string hello (
+    string helloA (
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/multi/serviceA_b/hello"
@@ -10,7 +10,7 @@ service ServiceABack {
 }
 
 service ServiceBBack {
-    string hello (
+    string helloB (
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/multi/serviceB_b/hello"

@@ -26,6 +26,7 @@ package withexceptionsclient
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
@@ -46,6 +47,7 @@ type Client interface {
 	Func1(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error)
 }
 
@@ -96,17 +98,31 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.withexceptions.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.withexceptions.circuitBreakerDisabled")
 	}
+
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.withexceptions.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.withexceptions.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		//override the client overall-timeout with the client's method level timeout
+		for _, serviceMethodName := range methodNames {
+			methodName := strings.Split(serviceMethodName, "::")[1]
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
 		"withexceptions-Func1": "1",
 	}
 	if !circuitBreakerDisabled {
-		for methodName := range methodNames {
+		for methodName, methodTimeout := range clientMethodTimeoutMapping {
 			circuitBreakerName := "withexceptions" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -198,6 +214,7 @@ func (c *withexceptionsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -211,7 +228,7 @@ func (c *withexceptionsClient) Func1(
 	}
 
 	var defaultRes *clientsIDlClientsWithexceptionsWithexceptions.Response
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", "WithExceptions::Func1", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", "WithExceptions::Func1", c.httpClient, timeoutAndRetryCfg)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/withexceptions" + "/func1"

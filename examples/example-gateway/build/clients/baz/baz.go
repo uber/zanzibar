@@ -53,134 +53,161 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []byte, map[string]string, error)
 	EchoBool(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, bool, map[string]string, error)
 	EchoDouble(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, float64, map[string]string, error)
 	EchoEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, clientsIDlClientsBazBaz.Fruit, map[string]string, error)
 	EchoI16(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int16, map[string]string, error)
 	EchoI32(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int32, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int64, map[string]string, error)
 	EchoI8(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int8, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	EchoStringList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []string, map[string]string, error)
 	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	EchoStringSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]struct{}, map[string]string, error)
 	EchoStructList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	EchoTypedef(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, clientsIDlClientsBazBase.UUID, map[string]string, error)
 
 	Call(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	Compare(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	GetProfile(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error)
 	HeaderSchema(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error)
 	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	DeliberateDiffNoop(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	TestUUID(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	Trans(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.TransStruct, map[string]string, error)
 	TransHeaders(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersNoReq(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersType(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error)
 	URLTest(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 }
 
@@ -282,6 +309,18 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all the methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.baz.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.baz.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		for serviceMethodName := range methodNames {
+			methodName := strings.Split(serviceMethodName, "::")[1]
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
 		"baz-Call":               "4",
 		"baz-Compare":            "2",
@@ -319,13 +358,13 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	if !circuitBreakerDisabled {
-		for _, methodName := range methodNames {
+		for methodName, methodTimeoutVal := range clientMethodTimeoutMapping {
 			circuitBreakerName := "baz" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeoutVal), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -484,6 +523,7 @@ func (c *bazClient) EchoBinary(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []byte, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoBinary_Result
 	var resp []byte
@@ -495,7 +535,7 @@ func (c *bazClient) EchoBinary(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
+			ctx, "SecondService", "echoBinary", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -510,7 +550,7 @@ func (c *bazClient) EchoBinary(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
+				ctx, "SecondService", "echoBinary", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -550,6 +590,7 @@ func (c *bazClient) EchoBool(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, bool, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoBool_Result
 	var resp bool
@@ -561,7 +602,7 @@ func (c *bazClient) EchoBool(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
+			ctx, "SecondService", "echoBool", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -576,7 +617,7 @@ func (c *bazClient) EchoBool(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoBool", reqHeaders, args, &result,
+				ctx, "SecondService", "echoBool", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -616,6 +657,7 @@ func (c *bazClient) EchoDouble(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, float64, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoDouble_Result
 	var resp float64
@@ -627,7 +669,7 @@ func (c *bazClient) EchoDouble(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
+			ctx, "SecondService", "echoDouble", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -642,7 +684,7 @@ func (c *bazClient) EchoDouble(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
+				ctx, "SecondService", "echoDouble", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -682,6 +724,7 @@ func (c *bazClient) EchoEnum(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, clientsIDlClientsBazBaz.Fruit, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoEnum_Result
 	var resp clientsIDlClientsBazBaz.Fruit
@@ -693,7 +736,7 @@ func (c *bazClient) EchoEnum(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
+			ctx, "SecondService", "echoEnum", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -708,7 +751,7 @@ func (c *bazClient) EchoEnum(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
+				ctx, "SecondService", "echoEnum", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -748,6 +791,7 @@ func (c *bazClient) EchoI16(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int16, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI16_Result
 	var resp int16
@@ -759,7 +803,7 @@ func (c *bazClient) EchoI16(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
+			ctx, "SecondService", "echoI16", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -774,7 +818,7 @@ func (c *bazClient) EchoI16(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI16", reqHeaders, args, &result,
+				ctx, "SecondService", "echoI16", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -814,6 +858,7 @@ func (c *bazClient) EchoI32(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int32, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI32_Result
 	var resp int32
@@ -825,7 +870,7 @@ func (c *bazClient) EchoI32(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
+			ctx, "SecondService", "echoI32", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -840,7 +885,7 @@ func (c *bazClient) EchoI32(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI32", reqHeaders, args, &result,
+				ctx, "SecondService", "echoI32", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -880,6 +925,7 @@ func (c *bazClient) EchoI64(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int64, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI64_Result
 	var resp int64
@@ -891,7 +937,7 @@ func (c *bazClient) EchoI64(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
+			ctx, "SecondService", "echoI64", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -906,7 +952,7 @@ func (c *bazClient) EchoI64(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI64", reqHeaders, args, &result,
+				ctx, "SecondService", "echoI64", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -946,6 +992,7 @@ func (c *bazClient) EchoI8(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int8, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI8_Result
 	var resp int8
@@ -957,7 +1004,7 @@ func (c *bazClient) EchoI8(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
+			ctx, "SecondService", "echoI8", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -972,7 +1019,7 @@ func (c *bazClient) EchoI8(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI8", reqHeaders, args, &result,
+				ctx, "SecondService", "echoI8", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1012,6 +1059,7 @@ func (c *bazClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoString_Result
 	var resp string
@@ -1023,7 +1071,7 @@ func (c *bazClient) EchoString(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoString", reqHeaders, args, &result,
+			ctx, "SecondService", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1038,7 +1086,7 @@ func (c *bazClient) EchoString(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoString", reqHeaders, args, &result,
+				ctx, "SecondService", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1078,6 +1126,7 @@ func (c *bazClient) EchoStringList(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []string, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStringList_Result
 	var resp []string
@@ -1089,7 +1138,7 @@ func (c *bazClient) EchoStringList(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
+			ctx, "SecondService", "echoStringList", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1104,7 +1153,7 @@ func (c *bazClient) EchoStringList(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
+				ctx, "SecondService", "echoStringList", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1144,6 +1193,7 @@ func (c *bazClient) EchoStringMap(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStringMap_Result
 	var resp map[string]*clientsIDlClientsBazBase.BazResponse
@@ -1155,7 +1205,7 @@ func (c *bazClient) EchoStringMap(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
+			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1170,7 +1220,7 @@ func (c *bazClient) EchoStringMap(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
+				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1210,6 +1260,7 @@ func (c *bazClient) EchoStringSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]struct{}, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStringSet_Result
 	var resp map[string]struct{}
@@ -1221,7 +1272,7 @@ func (c *bazClient) EchoStringSet(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
+			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1236,7 +1287,7 @@ func (c *bazClient) EchoStringSet(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
+				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1276,6 +1327,7 @@ func (c *bazClient) EchoStructList(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStructList_Result
 	var resp []*clientsIDlClientsBazBase.BazResponse
@@ -1287,7 +1339,7 @@ func (c *bazClient) EchoStructList(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
+			ctx, "SecondService", "echoStructList", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1302,7 +1354,7 @@ func (c *bazClient) EchoStructList(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
+				ctx, "SecondService", "echoStructList", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1342,6 +1394,7 @@ func (c *bazClient) EchoStructSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStructSet_Result
 	var resp []*clientsIDlClientsBazBase.BazResponse
@@ -1353,7 +1406,7 @@ func (c *bazClient) EchoStructSet(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
+			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1368,7 +1421,7 @@ func (c *bazClient) EchoStructSet(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
+				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1408,6 +1461,7 @@ func (c *bazClient) EchoTypedef(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, clientsIDlClientsBazBase.UUID, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoTypedef_Result
 	var resp clientsIDlClientsBazBase.UUID
@@ -1419,7 +1473,7 @@ func (c *bazClient) EchoTypedef(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
+			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1434,7 +1488,7 @@ func (c *bazClient) EchoTypedef(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
+				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1474,6 +1528,7 @@ func (c *bazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Call_Result
 
@@ -1484,7 +1539,7 @@ func (c *bazClient) Call(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "call", reqHeaders, args, &result,
+			ctx, "SimpleService", "call", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1499,7 +1554,7 @@ func (c *bazClient) Call(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "call", reqHeaders, args, &result,
+				ctx, "SimpleService", "call", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1534,6 +1589,7 @@ func (c *bazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Compare_Result
 	var resp *clientsIDlClientsBazBase.BazResponse
@@ -1545,7 +1601,7 @@ func (c *bazClient) Compare(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "compare", reqHeaders, args, &result,
+			ctx, "SimpleService", "compare", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1560,7 +1616,7 @@ func (c *bazClient) Compare(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "compare", reqHeaders, args, &result,
+				ctx, "SimpleService", "compare", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1604,6 +1660,7 @@ func (c *bazClient) GetProfile(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_GetProfile_Result
 	var resp *clientsIDlClientsBazBaz.GetProfileResponse
@@ -1615,7 +1672,7 @@ func (c *bazClient) GetProfile(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
+			ctx, "SimpleService", "getProfile", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1630,7 +1687,7 @@ func (c *bazClient) GetProfile(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
+				ctx, "SimpleService", "getProfile", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1672,6 +1729,7 @@ func (c *bazClient) HeaderSchema(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Result
 	var resp *clientsIDlClientsBazBaz.HeaderSchema
@@ -1683,7 +1741,7 @@ func (c *bazClient) HeaderSchema(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
+			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1698,7 +1756,7 @@ func (c *bazClient) HeaderSchema(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
+				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1741,6 +1799,7 @@ func (c *bazClient) HeaderSchema(
 func (c *bazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Ping_Result
 	var resp *clientsIDlClientsBazBase.BazResponse
@@ -1753,7 +1812,7 @@ func (c *bazClient) Ping(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "ping", reqHeaders, args, &result,
+			ctx, "SimpleService", "ping", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1768,7 +1827,7 @@ func (c *bazClient) Ping(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "ping", reqHeaders, args, &result,
+				ctx, "SimpleService", "ping", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1807,6 +1866,7 @@ func (c *bazClient) Ping(
 func (c *bazClient) DeliberateDiffNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_SillyNoop_Result
 
@@ -1818,7 +1878,7 @@ func (c *bazClient) DeliberateDiffNoop(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
+			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1833,7 +1893,7 @@ func (c *bazClient) DeliberateDiffNoop(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
+				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1869,6 +1929,7 @@ func (c *bazClient) DeliberateDiffNoop(
 func (c *bazClient) TestUUID(
 	ctx context.Context,
 	reqHeaders map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TestUuid_Result
 
@@ -1880,7 +1941,7 @@ func (c *bazClient) TestUUID(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
+			ctx, "SimpleService", "testUuid", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1895,7 +1956,7 @@ func (c *bazClient) TestUUID(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
+				ctx, "SimpleService", "testUuid", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1928,6 +1989,7 @@ func (c *bazClient) Trans(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.TransStruct, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Trans_Result
 	var resp *clientsIDlClientsBazBase.TransStruct
@@ -1939,7 +2001,7 @@ func (c *bazClient) Trans(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "trans", reqHeaders, args, &result,
+			ctx, "SimpleService", "trans", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -1954,7 +2016,7 @@ func (c *bazClient) Trans(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "trans", reqHeaders, args, &result,
+				ctx, "SimpleService", "trans", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1998,6 +2060,7 @@ func (c *bazClient) TransHeaders(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TransHeaders_Result
 	var resp *clientsIDlClientsBazBase.TransHeaders
@@ -2009,7 +2072,7 @@ func (c *bazClient) TransHeaders(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
+			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -2024,7 +2087,7 @@ func (c *bazClient) TransHeaders(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
+				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -2068,6 +2131,7 @@ func (c *bazClient) TransHeadersNoReq(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Result
 	var resp *clientsIDlClientsBazBase.TransHeaders
@@ -2079,7 +2143,7 @@ func (c *bazClient) TransHeadersNoReq(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
+			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -2094,7 +2158,7 @@ func (c *bazClient) TransHeadersNoReq(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
+				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -2136,6 +2200,7 @@ func (c *bazClient) TransHeadersType(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Result
 	var resp *clientsIDlClientsBazBaz.TransHeaderType
@@ -2147,7 +2212,7 @@ func (c *bazClient) TransHeadersType(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
+			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -2162,7 +2227,7 @@ func (c *bazClient) TransHeadersType(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
+				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -2205,6 +2270,7 @@ func (c *bazClient) TransHeadersType(
 func (c *bazClient) URLTest(
 	ctx context.Context,
 	reqHeaders map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_UrlTest_Result
 
@@ -2216,7 +2282,7 @@ func (c *bazClient) URLTest(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
+			ctx, "SimpleService", "urlTest", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -2231,7 +2297,7 @@ func (c *bazClient) URLTest(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
+				ctx, "SimpleService", "urlTest", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error

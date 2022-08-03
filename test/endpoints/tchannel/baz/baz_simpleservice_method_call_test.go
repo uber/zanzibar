@@ -92,7 +92,12 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	var result endpointsBaz.SimpleService_Call_Result
 
 	success, resHeaders, err := gateway.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  0,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	dynamicRespHeaders := []string{
 		"client.response.duration",
@@ -277,7 +282,12 @@ func TestCallTChannelTimeout(t *testing.T) {
 	var result endpointsBaz.SimpleService_Call_Result
 
 	success, _, err := gateway.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  0,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.Error(t, err, "excepting tchannel error")
 	assert.False(t, success)
@@ -344,7 +354,12 @@ func TestMetricsAppError(t *testing.T) {
 		"x-token": "token",
 	}
 	_, _, err = gateway.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	require.NoError(t, err, "got unexpected tchannel error")
 
