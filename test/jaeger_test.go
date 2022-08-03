@@ -38,6 +38,7 @@ import (
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
@@ -397,7 +398,12 @@ func TestTChannelEndpoint(t *testing.T) {
 	var result endpointsBaz.SimpleService_Call_Result
 
 	_, _, err = gateway.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	if !assert.NoError(t, err, "got tchannel error") {
 		return

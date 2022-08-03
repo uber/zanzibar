@@ -22,11 +22,16 @@ package zanzibar_test
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
@@ -37,12 +42,12 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 )
 
-var defaultTestOptions *testGateway.Options = &testGateway.Options{
+var defaultTestOptions = &testGateway.Options{
 	KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 	KnownTChannelBackends: []string{"baz"},
 	ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 }
-var defaultTestConfig map[string]interface{} = map[string]interface{}{
+var defaultTestConfig = map[string]interface{}{
 	"clients.baz.serviceName": "baz",
 
 	// disable circuit breaker to avoid race condition when running tests
@@ -51,6 +56,12 @@ var defaultTestConfig map[string]interface{} = map[string]interface{}{
 	// but the circuit breaker stats report goroutine could still be running
 	"clients.bar.circuitBreakerDisabled": true,
 	"apiEnvironmentHeader":               "x-api-environment",
+}
+var retryOptions = zanzibar.TimeoutAndRetryOptions{
+	OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+	RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+	MaxAttempts:                  0,
+	BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
 }
 
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
@@ -79,7 +90,8 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		true,
 	)
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff", "clientID::DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff",
+		"clientID::DoStuff", client, &retryOptions)
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
@@ -117,7 +129,8 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		time.Second,
 	)
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff", "clientID::DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff",
+		"clientID::DoStuff", client, &retryOptions)
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
@@ -159,7 +172,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	client := barClient.HTTPClient()
 
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptions)
 
 	err = req.WriteJSON(
 		"POST",
@@ -184,6 +197,79 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
+func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetries(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	serverProcessingTime := 700 * time.Millisecond //to mimic the server processing time, always > reqTimeout
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			bodyBytes, _ := ioutil.ReadAll(r.Body)
+			time.Sleep(serverProcessingTime) //mimic processing time
+			w.WriteHeader(200)
+			response := map[string]string{"Example-Header": r.Header.Get("Example-Header"), "body": string(bodyBytes)}
+			responseBytes, _ := json.Marshal(response)
+			_, _ = w.Write(responseBytes)
+			// Check that the default header got set and actually sent to the server.
+			assert.Equal(t, r.Header.Get("X-Client-ID"), "bar")
+			assert.Equal(t, r.Header.Get("Accept"), "application/test+json")
+		},
+	)
+
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	barClient := deps.Client.Bar
+	client := barClient.HTTPClient()
+
+	//keep reqTimeout < serverProcessingTIme
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.RequestTimeoutPerAttemptInMs = 500 * time.Millisecond
+	retryOptionsCopy.MaxAttempts = 2
+
+	ctx := context.Background()
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptionsCopy)
+
+	err = req.WriteJSON(
+		"POST",
+		client.BaseURL+"/bar-path",
+		map[string]string{
+			"Example-Header": "Example-Value",
+			"Accept":         "application/test+json",
+		},
+		"dummy body",
+	)
+	assert.NoError(t, err)
+
+	startTime := time.Now()
+
+	_, err = req.Do()
+
+	executionTime := time.Now().Sub(startTime).Milliseconds()
+
+	//1 is subtracted because, after pre-last attempt it doesn't wait for back off time
+	expectedExecTime := ((retryOptionsCopy.RequestTimeoutPerAttemptInMs+retryOptionsCopy.BackOffTimeAcrossRetriesInMs)*
+		time.Duration(retryOptionsCopy.MaxAttempts-1) + retryOptionsCopy.RequestTimeoutPerAttemptInMs).Milliseconds()
+
+	assert.Error(t, err)
+
+	assert.True(t, executionTime >= expectedExecTime, fmt.Sprintf("total execution time must be greater than %d", expectedExecTime))
+
+	assert.True(t, strings.Contains(err.Error(), "errors while making outbound bar.Normal request"),
+		"error message not matching")
+	assert.True(t, strings.Contains(err.Error(), "context deadline exceeded"),
+		"the request should have failed due to context deadline (timeout)")
+}
+
 func TestBarClientWithoutHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
@@ -200,8 +286,12 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bar := deps.Client.Bar
 
+	//override MaxAttempts
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.MaxAttempts = 1
+
 	_, _, _, err = bar.EchoI8(
-		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
+		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42}, &retryOptionsCopy,
 	)
 
 	assert.NotNil(t, err)
@@ -250,8 +340,12 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
+	//override MaxAttempts
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.MaxAttempts = 1
+
 	_, body, headers, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{}, &retryOptionsCopy,
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, body)
@@ -324,8 +418,12 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
+	//override MaxAttempts
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.MaxAttempts = 1
+
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{}, &retryOptionsCopy,
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -361,8 +459,12 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
+	//override MaxAttempts
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.MaxAttempts = 1
+
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{}, &retryOptionsCopy,
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -396,11 +498,16 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
+	//override MaxAttempts
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.MaxAttempts = 1
+
 	_, _, err = bClient.ArgNotStruct(
 		context.Background(), nil,
 		&clientsBarBar.Bar_ArgNotStruct_Args{
 			Request: "request",
 		},
+		&retryOptionsCopy,
 	)
 	assert.Error(t, err)
 
@@ -435,8 +542,13 @@ func TestMakingClientCallWithServerError(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	bClient := deps.Client.Bar
 
+	//override MaxAttempts
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.MaxAttempts = 1
+
 	_, body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		&retryOptionsCopy,
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -473,7 +585,7 @@ func TestInjectSpan(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptions)
 	err = req.WriteJSON(
 		"POST",
 		client.BaseURL+"/bar-path",
@@ -490,4 +602,23 @@ func TestInjectSpan(t *testing.T) {
 	assert.NoError(t, err, "failed to inject span context")
 	err = req.InjectSpanToHeader(span, "invalid format")
 	assert.Error(t, err, "should return error")
+}
+
+func TestDefaultRetryPolicy(t *testing.T) {
+	backOffTimeAcrossRetriesInMs := time.Duration(15) * time.Millisecond
+	options := zanzibar.TimeoutAndRetryOptions{
+		OverallTimeoutInMs:           time.Duration(1000) * time.Millisecond,
+		RequestTimeoutPerAttemptInMs: time.Duration(1000) * time.Millisecond,
+		BackOffTimeAcrossRetriesInMs: backOffTimeAcrossRetriesInMs,
+		MaxAttempts:                  1,
+	}
+	response := http.Response{}
+	error := errors.New("simple new error")
+
+	startTime := time.Now()
+	shouldRetry := zanzibar.DefaultRetryPolicy(context.Background(), &options, &response, error)
+
+	assert.True(t, shouldRetry, "Expected shouldRetry to be true")
+	assert.True(t, time.Now().Sub(startTime).Milliseconds() >= backOffTimeAcrossRetriesInMs.Milliseconds(),
+		fmt.Sprintf("expected runtime duration for DefaultRetryPolicy method is >= %d MS", backOffTimeAcrossRetriesInMs.Milliseconds()))
 }

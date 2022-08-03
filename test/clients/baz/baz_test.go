@@ -23,23 +23,25 @@ package baz_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 	bazGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
 
-var defaultTestOptions *testGateway.Options = &testGateway.Options{
+var defaultTestOptions = &testGateway.Options{
 	KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 	KnownTChannelBackends: []string{"baz"},
 	ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 }
-var defaultTestConfig map[string]interface{} = map[string]interface{}{
+var defaultTestConfig = map[string]interface{}{
 	"clients.baz.serviceName": "baz",
 }
 
@@ -75,7 +77,12 @@ func TestEchoI8(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoI8(
-		context.Background(), nil, &bazGen.SecondService_EchoI8_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoI8_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -113,7 +120,12 @@ func TestEchoI16(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoI16(
-		context.Background(), nil, &bazGen.SecondService_EchoI16_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoI16_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -151,7 +163,12 @@ func TestEchoI32(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoI32(
-		context.Background(), nil, &bazGen.SecondService_EchoI32_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoI32_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -189,7 +206,12 @@ func TestEchoI64(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoI64(
-		context.Background(), nil, &bazGen.SecondService_EchoI64_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoI64_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -208,7 +230,7 @@ func TestEchoDouble(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	var arg float64 = 42.0
+	var arg = 42.0
 	fake := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -227,7 +249,12 @@ func TestEchoDouble(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoDouble(
-		context.Background(), nil, &bazGen.SecondService_EchoDouble_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoDouble_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -265,7 +292,12 @@ func TestEchoBool(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoBool(
-		context.Background(), nil, &bazGen.SecondService_EchoBool_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoBool_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -303,7 +335,12 @@ func TestEchoString(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoString(
-		context.Background(), nil, &bazGen.SecondService_EchoString_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoString_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -341,7 +378,12 @@ func TestEchoBinary(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoBinary(
-		context.Background(), nil, &bazGen.SecondService_EchoBinary_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoBinary_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -380,7 +422,12 @@ func TestEchoEnum(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoEnum(
-		context.Background(), nil, &bazGen.SecondService_EchoEnum_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoEnum_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, *arg, result)
@@ -418,7 +465,12 @@ func TestEchoTypedef(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoTypedef(
-		context.Background(), nil, &bazGen.SecondService_EchoTypedef_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoTypedef_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -459,7 +511,12 @@ func TestEchoStringSet(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoStringSet(
-		context.Background(), nil, &bazGen.SecondService_EchoStringSet_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoStringSet_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -500,7 +557,12 @@ func TestEchoStructSet(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoStructSet(
-		context.Background(), nil, &bazGen.SecondService_EchoStructSet_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoStructSet_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -538,7 +600,12 @@ func TestEchoStringList(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoStringList(
-		context.Background(), nil, &bazGen.SecondService_EchoStringList_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoStringList_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -580,7 +647,12 @@ func TestEchoStructList(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoStructList(
-		context.Background(), nil, &bazGen.SecondService_EchoStructList_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoStructList_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -622,7 +694,12 @@ func TestEchoStringMap(t *testing.T) {
 	baz := deps.Client.Baz
 
 	_, result, _, err := baz.EchoStringMap(
-		context.Background(), nil, &bazGen.SecondService_EchoStringMap_Args{Arg: arg},
+		context.Background(), nil, &bazGen.SecondService_EchoStringMap_Args{Arg: arg}, &zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  2,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)

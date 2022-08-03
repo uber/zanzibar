@@ -20,7 +20,10 @@
 
 package zanzibar
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 const (
 	endpointRequest             = "endpoint.request"
@@ -162,3 +165,12 @@ var noContentStatusCodes = map[int]bool{
 	http.StatusNoContent:   true, // 204
 	http.StatusNotModified: true, // 304
 }
+
+//DefaultBackOffTimeAcrossRetriesConf is the time to wait before attempting new attempt
+var DefaultBackOffTimeAcrossRetriesConf = 10
+
+//DefaultBackOffTimeAcrossRetries is the time in MS to wait before attempting new attempt
+var DefaultBackOffTimeAcrossRetries = time.Duration(DefaultBackOffTimeAcrossRetriesConf) * time.Millisecond
+
+//DefaultScaleFactor is multiplied with timeoutPerAttempt
+var DefaultScaleFactor = 1.1

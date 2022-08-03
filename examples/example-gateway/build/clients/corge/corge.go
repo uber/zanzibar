@@ -52,6 +52,7 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -127,6 +128,18 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all the methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.corge.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.corge.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		for serviceMethodName := range methodNames {
+			methodName := strings.Split(serviceMethodName, "::")[1]
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
 		"corge-EchoString": "default",
 	}
@@ -138,13 +151,13 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	if !circuitBreakerDisabled {
-		for _, methodName := range methodNames {
+		for methodName, methodTimeoutVal := range clientMethodTimeoutMapping {
 			circuitBreakerName := "corge" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeoutVal), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -303,6 +316,7 @@ func (c *corgeClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	var result clientsIDlClientsCorgeCorge.Corge_EchoString_Result
 	var resp string
@@ -314,7 +328,7 @@ func (c *corgeClient) EchoString(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "Corge", "echoString", reqHeaders, args, &result,
+			ctx, "Corge", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
 		)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
@@ -329,7 +343,7 @@ func (c *corgeClient) EchoString(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "Corge", "echoString", reqHeaders, args, &result,
+				ctx, "Corge", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
 			)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error

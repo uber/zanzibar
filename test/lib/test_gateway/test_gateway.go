@@ -67,6 +67,7 @@ type TestGateway interface {
 		method string,
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
+		timeoutAndRetryOptions *zanzibar.TimeoutAndRetryOptions,
 	) (bool, map[string]string, error)
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
@@ -391,11 +392,12 @@ func (gateway *ChildProcessGateway) MakeTChannelRequest(
 	method string,
 	headers map[string]string,
 	req, res zanzibar.RWTStruct,
+	timeoutAndRetryOptions *zanzibar.TimeoutAndRetryOptions,
 ) (bool, map[string]string, error) {
 	sc := gateway.channel.GetSubChannel(gateway.serviceName)
 	sc.Peers().Add(gateway.RealTChannelAddr)
 
-	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res)
+	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res, timeoutAndRetryOptions)
 }
 
 // HTTPBackends returns the HTTP backends

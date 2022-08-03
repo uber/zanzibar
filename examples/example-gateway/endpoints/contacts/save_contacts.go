@@ -2,6 +2,7 @@ package contacts
 
 import (
 	"context"
+	"time"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
@@ -39,7 +40,12 @@ func (w SaveContactsEndpoint) Handle(
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 
 	clientBody := convertToClient(r)
-	_, cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
+	_, cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody, &zanzibar.TimeoutAndRetryOptions{
+		OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
+		RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+		MaxAttempts:                  2,
+		BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+	})
 	if err != nil {
 		w.Logger.Error("Could not make client request", zap.Error(err))
 		return ctx, nil, nil, err

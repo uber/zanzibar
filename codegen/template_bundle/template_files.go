@@ -1504,6 +1504,7 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
+		timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
@@ -1582,19 +1583,32 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 	}
+
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		for _, serviceMethodName := range methodNames {
+			methodName := strings.Split(serviceMethodName, "::")[1]
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
 				{{range $methodName, $qpsLevel := $QPSLevels -}}
 				"{{$methodName}}": "{{$qpsLevel}}",
 				{{end}}
 	}
 	if !circuitBreakerDisabled {
-		for methodName := range methodNames {
+		for methodName, methodTimeoutVal := range clientMethodTimeoutMapping{
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeoutVal), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -1717,6 +1731,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if ne .RequestType "" -}}
 	r {{.RequestType}},
 	{{end -}}
+	timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1732,7 +1747,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", "{{$serviceMethod}}", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", "{{$serviceMethod}}", c.httpClient,timeoutAndRetryOps)
 
 	{{if .ReqHeaderGoStatements }}
 	{{range $index, $line := .ReqClientHeaderGoStatements -}}
@@ -2015,7 +2030,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 18888, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 19615, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2749,6 +2764,7 @@ type MockService interface {
 		method string,
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
+		timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 	) (bool, map[string]string, error)
 	{{$mock}}() *{{$mockType}}
 	Server() *zanzibar.Gateway
@@ -2899,6 +2915,7 @@ func (m *mockService) MakeTChannelRequest(
 	method string,
 	headers map[string]string,
 	req, res zanzibar.RWTStruct,
+	timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 ) (bool, map[string]string, error) {
 	if !m.started {
 		return false, nil, errors.New("mock server is not started")
@@ -2906,7 +2923,7 @@ func (m *mockService) MakeTChannelRequest(
 
 	sc := m.server.ServerTChannel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
-	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
+	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res, timeoutAndRetryOps)
 }
 `)
 
@@ -2920,7 +2937,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5424, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5553, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3012,6 +3029,7 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
+		timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
@@ -3085,7 +3103,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	altChannelMap  := make(map[string]*tchannel.SubChannel)
 	headerPatterns, re = initializeDynamicChannel(channel, deps, headerPatterns, altChannelMap, re)
 
-	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
 	timeout := time.Millisecond * time.Duration(
 		timeoutVal,
@@ -3106,6 +3123,17 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all the methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		for serviceMethodName, _ := range methodNames {
+			methodName := strings.Split(serviceMethodName, "::")[1]
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
 
 	qpsLevels := map[string]string{
 				{{range $methodName, $qpsLevel := $QPSLevels -}}
@@ -3120,13 +3148,13 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 
 	if !circuitBreakerDisabled {
-		for _, methodName := range methodNames {
+		for methodName, methodTimeoutVal := range clientMethodTimeoutMapping{
 			circuitBreakerName := "{{$clientID}}" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeoutVal), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -3292,6 +3320,7 @@ type {{$clientName}} struct {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
+		timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
 		{{if .ResponseType -}}
@@ -3308,7 +3337,7 @@ type {{$clientName}} struct {
 		var err error
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = c.client.Call(
-				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, timeoutAndRetryOps,
 			)
 		} else {
 			// We want hystrix ckt-breaker to count errors only for system issues
@@ -3323,7 +3352,7 @@ type {{$clientName}} struct {
 				elapsed := time.Now().Sub(start)
 				scope.Timer("hystrix-timer").Record(elapsed)
 				success, respHeaders, clientErr = c.client.Call(
-					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, timeoutAndRetryOps,
 				)
 				if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 					// Declare ok if it is not a system-error
@@ -3386,7 +3415,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15262, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15950, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3753,6 +3782,8 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
 	)
 
+	maxAttempts := int(h.Deps.Default.Config.MustGetInt("clients.{{$clientID}}.retryCount"))
+
 	methodNames := map[string]string{
 		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
@@ -3778,7 +3809,13 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
+	timeoutAndRetryOps := zanzibar.TimeoutAndRetryOptions{
+		OverallTimeoutInMs: 			(timeoutPerAttempt + zanzibar.DefaultBackOffTimeAcrossRetries) * time.Duration(maxAttempts),
+		RequestTimeoutPerAttemptInMs:	timeoutPerAttempt,
+		MaxAttempts:					maxAttempts,
+		BackOffTimeAcrossRetriesInMs: 	zanzibar.DefaultBackOffTimeAcrossRetries,
+	}
+	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res, &timeoutAndRetryOps)
 	return ctx, success, res, respHeaders, err
 }
 {{end -}}
@@ -3796,7 +3833,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8942, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9389, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3894,6 +3931,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 		Clients: deps.Client,
 		Logger:  deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
+		defaultDeps: deps.Default,
 	}
 }
 
@@ -3902,6 +3940,7 @@ type {{$workflowStruct}} struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	whitelistedDynamicHeaders []string
+	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -3971,40 +4010,49 @@ func (w {{$workflowStruct}}) Handle(
 		}
 	}
 
+	//maxAttempts value 0 will execute all previous code and doesn't changes anything
+	//maxAttempts value 0 will not use requestTimeoutPerAttemptInMs information
+	timeoutAndRetryOps := zanzibar.TimeoutAndRetryOptions{
+		OverallTimeoutInMs: 			time.Duration(3000) * time.Millisecond,
+		RequestTimeoutPerAttemptInMs:	time.Duration(2000) * time.Millisecond,
+		MaxAttempts:					0,
+		BackOffTimeAcrossRetriesInMs: 	zanzibar.DefaultBackOffTimeAcrossRetries,
+	}
+
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders, &timeoutAndRetryOps)
 		{{else}}
-		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders, &timeoutAndRetryOps)
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders,
+			ctx, clientHeaders, &timeoutAndRetryOps,
 		)
 		{{else}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders,
+			ctx, clientHeaders, &timeoutAndRetryOps,
 		)
 		{{- end }}
 	{{else if eq $clientResType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
+			ctx, clientHeaders, clientRequest, &timeoutAndRetryOps,
 		)
 		{{else}}
 		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
+			ctx, clientHeaders, clientRequest, &timeoutAndRetryOps,
 		)
 		{{- end }}
 	{{else}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
+			ctx, clientHeaders, clientRequest, &timeoutAndRetryOps,
 		)
 		{{else}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
+			ctx, clientHeaders, clientRequest, &timeoutAndRetryOps,
 		)
 		{{- end }}
 	{{end -}}
@@ -4113,7 +4161,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 9159, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 9867, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

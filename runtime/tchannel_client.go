@@ -153,6 +153,7 @@ func (c *TChannelClient) Call(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
+	timeoutAndRetryOptions *TimeoutAndRetryOptions,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 	scopeTags := map[string]string{
@@ -171,7 +172,7 @@ func (c *TChannelClient) Call(
 		metrics:       c.metrics,
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp)
+	return c.call(ctx, call, reqHeaders, req, resp, timeoutAndRetryOptions)
 }
 
 func (c *TChannelClient) call(
@@ -179,6 +180,7 @@ func (c *TChannelClient) call(
 	call *tchannelOutboundCall,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
+	timeoutAndRetryOptions *TimeoutAndRetryOptions,
 ) (success bool, resHeaders map[string]string, err error) {
 	defer func() {
 		call.finish(ctx, err)
@@ -204,7 +206,20 @@ func (c *TChannelClient) call(
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 		MaxAttempts:       c.maxAttempts,
 	}
-	ctxBuilder := tchannel.NewContextBuilder(c.timeout).
+
+	//override timeout and retry config with endpoint level’s config
+	//when retryCount is 0, we assume endpoint level’s config is not provided
+
+	timeout := c.timeout
+	if timeoutAndRetryOptions != nil && timeoutAndRetryOptions.MaxAttempts != 0 {
+		retryOpts = tchannel.RetryOptions{
+			TimeoutPerAttempt: timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs,
+			MaxAttempts:       timeoutAndRetryOptions.MaxAttempts,
+		}
+		timeout = timeoutAndRetryOptions.OverallTimeoutInMs
+	}
+
+	ctxBuilder := tchannel.NewContextBuilder(timeout).
 		SetParentContext(ctx).
 		SetRetryOptions(&retryOpts)
 	if c.routingKey != nil {

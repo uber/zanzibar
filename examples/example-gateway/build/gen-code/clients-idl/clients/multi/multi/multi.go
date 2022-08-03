@@ -13,13 +13,13 @@ import (
 	zapcore "go.uber.org/zap/zapcore"
 )
 
-// ServiceABack_Hello_Args represents the arguments for the ServiceABack.hello function.
+// ServiceABack_HelloA_Args represents the arguments for the ServiceABack.helloA function.
 //
-// The arguments for hello are sent and received over the wire as this struct.
-type ServiceABack_Hello_Args struct {
+// The arguments for helloA are sent and received over the wire as this struct.
+type ServiceABack_HelloA_Args struct {
 }
 
-// ToWire translates a ServiceABack_Hello_Args struct into a Thrift-level intermediate
+// ToWire translates a ServiceABack_HelloA_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
 //
@@ -34,7 +34,7 @@ type ServiceABack_Hello_Args struct {
 //   if err := binaryProtocol.Encode(x, writer); err != nil {
 //     return err
 //   }
-func (v *ServiceABack_Hello_Args) ToWire() (wire.Value, error) {
+func (v *ServiceABack_HelloA_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
 		i      int = 0
@@ -43,11 +43,11 @@ func (v *ServiceABack_Hello_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-// FromWire deserializes a ServiceABack_Hello_Args struct from its Thrift-level
+// FromWire deserializes a ServiceABack_HelloA_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
 //
-// An error is returned if we were unable to build a ServiceABack_Hello_Args struct
+// An error is returned if we were unable to build a ServiceABack_HelloA_Args struct
 // from the provided intermediate representation.
 //
 //   x, err := binaryProtocol.Decode(reader, wire.TStruct)
@@ -55,12 +55,12 @@ func (v *ServiceABack_Hello_Args) ToWire() (wire.Value, error) {
 //     return nil, err
 //   }
 //
-//   var v ServiceABack_Hello_Args
+//   var v ServiceABack_HelloA_Args
 //   if err := v.FromWire(x); err != nil {
 //     return nil, err
 //   }
 //   return &v, nil
-func (v *ServiceABack_Hello_Args) FromWire(w wire.Value) error {
+func (v *ServiceABack_HelloA_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -70,11 +70,11 @@ func (v *ServiceABack_Hello_Args) FromWire(w wire.Value) error {
 	return nil
 }
 
-// Encode serializes a ServiceABack_Hello_Args struct directly into bytes, without going
+// Encode serializes a ServiceABack_HelloA_Args struct directly into bytes, without going
 // through an intermediary type.
 //
-// An error is returned if a ServiceABack_Hello_Args struct could not be encoded.
-func (v *ServiceABack_Hello_Args) Encode(sw stream.Writer) error {
+// An error is returned if a ServiceABack_HelloA_Args struct could not be encoded.
+func (v *ServiceABack_HelloA_Args) Encode(sw stream.Writer) error {
 	if err := sw.WriteStructBegin(); err != nil {
 		return err
 	}
@@ -82,12 +82,12 @@ func (v *ServiceABack_Hello_Args) Encode(sw stream.Writer) error {
 	return sw.WriteStructEnd()
 }
 
-// Decode deserializes a ServiceABack_Hello_Args struct directly from its Thrift-level
+// Decode deserializes a ServiceABack_HelloA_Args struct directly from its Thrift-level
 // representation, without going through an intemediary type.
 //
-// An error is returned if a ServiceABack_Hello_Args struct could not be generated from the wire
+// An error is returned if a ServiceABack_HelloA_Args struct could not be generated from the wire
 // representation.
-func (v *ServiceABack_Hello_Args) Decode(sr stream.Reader) error {
+func (v *ServiceABack_HelloA_Args) Decode(sr stream.Reader) error {
 
 	if err := sr.ReadStructBegin(); err != nil {
 		return err
@@ -122,9 +122,9 @@ func (v *ServiceABack_Hello_Args) Decode(sr stream.Reader) error {
 	return nil
 }
 
-// String returns a readable string representation of a ServiceABack_Hello_Args
+// String returns a readable string representation of a ServiceABack_HelloA_Args
 // struct.
-func (v *ServiceABack_Hello_Args) String() string {
+func (v *ServiceABack_HelloA_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -132,14 +132,14 @@ func (v *ServiceABack_Hello_Args) String() string {
 	var fields [0]string
 	i := 0
 
-	return fmt.Sprintf("ServiceABack_Hello_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("ServiceABack_HelloA_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-// Equals returns true if all the fields of this ServiceABack_Hello_Args match the
-// provided ServiceABack_Hello_Args.
+// Equals returns true if all the fields of this ServiceABack_HelloA_Args match the
+// provided ServiceABack_HelloA_Args.
 //
 // This function performs a deep comparison.
-func (v *ServiceABack_Hello_Args) Equals(rhs *ServiceABack_Hello_Args) bool {
+func (v *ServiceABack_HelloA_Args) Equals(rhs *ServiceABack_HelloA_Args) bool {
 	if v == nil {
 		return rhs == nil
 	} else if rhs == nil {
@@ -150,8 +150,8 @@ func (v *ServiceABack_Hello_Args) Equals(rhs *ServiceABack_Hello_Args) bool {
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling
-// fast logging of ServiceABack_Hello_Args.
-func (v *ServiceABack_Hello_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+// fast logging of ServiceABack_HelloA_Args.
+func (v *ServiceABack_HelloA_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
 	if v == nil {
 		return nil
 	}
@@ -161,81 +161,81 @@ func (v *ServiceABack_Hello_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (e
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
-// This will always be "hello" for this struct.
-func (v *ServiceABack_Hello_Args) MethodName() string {
-	return "hello"
+// This will always be "helloA" for this struct.
+func (v *ServiceABack_HelloA_Args) MethodName() string {
+	return "helloA"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
 //
 // This will always be Call for this struct.
-func (v *ServiceABack_Hello_Args) EnvelopeType() wire.EnvelopeType {
+func (v *ServiceABack_HelloA_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-// ServiceABack_Hello_Helper provides functions that aid in handling the
-// parameters and return values of the ServiceABack.hello
+// ServiceABack_HelloA_Helper provides functions that aid in handling the
+// parameters and return values of the ServiceABack.helloA
 // function.
-var ServiceABack_Hello_Helper = struct {
-	// Args accepts the parameters of hello in-order and returns
+var ServiceABack_HelloA_Helper = struct {
+	// Args accepts the parameters of helloA in-order and returns
 	// the arguments struct for the function.
-	Args func() *ServiceABack_Hello_Args
+	Args func() *ServiceABack_HelloA_Args
 
 	// IsException returns true if the given error can be thrown
-	// by hello.
+	// by helloA.
 	//
-	// An error can be thrown by hello only if the
+	// An error can be thrown by helloA only if the
 	// corresponding exception type was mentioned in the 'throws'
 	// section for it in the Thrift file.
 	IsException func(error) bool
 
-	// WrapResponse returns the result struct for hello
+	// WrapResponse returns the result struct for helloA
 	// given its return value and error.
 	//
 	// This allows mapping values and errors returned by
-	// hello into a serializable result struct.
+	// helloA into a serializable result struct.
 	// WrapResponse returns a non-nil error if the provided
-	// error cannot be thrown by hello
+	// error cannot be thrown by helloA
 	//
-	//   value, err := hello(args)
-	//   result, err := ServiceABack_Hello_Helper.WrapResponse(value, err)
+	//   value, err := helloA(args)
+	//   result, err := ServiceABack_HelloA_Helper.WrapResponse(value, err)
 	//   if err != nil {
-	//     return fmt.Errorf("unexpected error from hello: %v", err)
+	//     return fmt.Errorf("unexpected error from helloA: %v", err)
 	//   }
 	//   serialize(result)
-	WrapResponse func(string, error) (*ServiceABack_Hello_Result, error)
+	WrapResponse func(string, error) (*ServiceABack_HelloA_Result, error)
 
-	// UnwrapResponse takes the result struct for hello
+	// UnwrapResponse takes the result struct for helloA
 	// and returns the value or error returned by it.
 	//
-	// The error is non-nil only if hello threw an
+	// The error is non-nil only if helloA threw an
 	// exception.
 	//
 	//   result := deserialize(bytes)
-	//   value, err := ServiceABack_Hello_Helper.UnwrapResponse(result)
-	UnwrapResponse func(*ServiceABack_Hello_Result) (string, error)
+	//   value, err := ServiceABack_HelloA_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*ServiceABack_HelloA_Result) (string, error)
 }{}
 
 func init() {
-	ServiceABack_Hello_Helper.Args = func() *ServiceABack_Hello_Args {
-		return &ServiceABack_Hello_Args{}
+	ServiceABack_HelloA_Helper.Args = func() *ServiceABack_HelloA_Args {
+		return &ServiceABack_HelloA_Args{}
 	}
 
-	ServiceABack_Hello_Helper.IsException = func(err error) bool {
+	ServiceABack_HelloA_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
 
-	ServiceABack_Hello_Helper.WrapResponse = func(success string, err error) (*ServiceABack_Hello_Result, error) {
+	ServiceABack_HelloA_Helper.WrapResponse = func(success string, err error) (*ServiceABack_HelloA_Result, error) {
 		if err == nil {
-			return &ServiceABack_Hello_Result{Success: &success}, nil
+			return &ServiceABack_HelloA_Result{Success: &success}, nil
 		}
 
 		return nil, err
 	}
-	ServiceABack_Hello_Helper.UnwrapResponse = func(result *ServiceABack_Hello_Result) (success string, err error) {
+	ServiceABack_HelloA_Helper.UnwrapResponse = func(result *ServiceABack_HelloA_Result) (success string, err error) {
 
 		if result.Success != nil {
 			success = *result.Success
@@ -248,17 +248,17 @@ func init() {
 
 }
 
-// ServiceABack_Hello_Result represents the result of a ServiceABack.hello function call.
+// ServiceABack_HelloA_Result represents the result of a ServiceABack.helloA function call.
 //
-// The result of a hello execution is sent and received over the wire as this struct.
+// The result of a helloA execution is sent and received over the wire as this struct.
 //
 // Success is set only if the function did not throw an exception.
-type ServiceABack_Hello_Result struct {
-	// Value returned by hello after a successful execution.
+type ServiceABack_HelloA_Result struct {
+	// Value returned by helloA after a successful execution.
 	Success *string `json:"success,omitempty"`
 }
 
-// ToWire translates a ServiceABack_Hello_Result struct into a Thrift-level intermediate
+// ToWire translates a ServiceABack_HelloA_Result struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
 //
@@ -273,7 +273,7 @@ type ServiceABack_Hello_Result struct {
 //   if err := binaryProtocol.Encode(x, writer); err != nil {
 //     return err
 //   }
-func (v *ServiceABack_Hello_Result) ToWire() (wire.Value, error) {
+func (v *ServiceABack_HelloA_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -291,17 +291,17 @@ func (v *ServiceABack_Hello_Result) ToWire() (wire.Value, error) {
 	}
 
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("ServiceABack_Hello_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("ServiceABack_HelloA_Result should have exactly one field: got %v fields", i)
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-// FromWire deserializes a ServiceABack_Hello_Result struct from its Thrift-level
+// FromWire deserializes a ServiceABack_HelloA_Result struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
 //
-// An error is returned if we were unable to build a ServiceABack_Hello_Result struct
+// An error is returned if we were unable to build a ServiceABack_HelloA_Result struct
 // from the provided intermediate representation.
 //
 //   x, err := binaryProtocol.Decode(reader, wire.TStruct)
@@ -309,12 +309,12 @@ func (v *ServiceABack_Hello_Result) ToWire() (wire.Value, error) {
 //     return nil, err
 //   }
 //
-//   var v ServiceABack_Hello_Result
+//   var v ServiceABack_HelloA_Result
 //   if err := v.FromWire(x); err != nil {
 //     return nil, err
 //   }
 //   return &v, nil
-func (v *ServiceABack_Hello_Result) FromWire(w wire.Value) error {
+func (v *ServiceABack_HelloA_Result) FromWire(w wire.Value) error {
 	var err error
 
 	for _, field := range w.GetStruct().Fields {
@@ -337,17 +337,17 @@ func (v *ServiceABack_Hello_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("ServiceABack_Hello_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("ServiceABack_HelloA_Result should have exactly one field: got %v fields", count)
 	}
 
 	return nil
 }
 
-// Encode serializes a ServiceABack_Hello_Result struct directly into bytes, without going
+// Encode serializes a ServiceABack_HelloA_Result struct directly into bytes, without going
 // through an intermediary type.
 //
-// An error is returned if a ServiceABack_Hello_Result struct could not be encoded.
-func (v *ServiceABack_Hello_Result) Encode(sw stream.Writer) error {
+// An error is returned if a ServiceABack_HelloA_Result struct could not be encoded.
+func (v *ServiceABack_HelloA_Result) Encode(sw stream.Writer) error {
 	if err := sw.WriteStructBegin(); err != nil {
 		return err
 	}
@@ -370,18 +370,18 @@ func (v *ServiceABack_Hello_Result) Encode(sw stream.Writer) error {
 	}
 
 	if count != 1 {
-		return fmt.Errorf("ServiceABack_Hello_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("ServiceABack_HelloA_Result should have exactly one field: got %v fields", count)
 	}
 
 	return sw.WriteStructEnd()
 }
 
-// Decode deserializes a ServiceABack_Hello_Result struct directly from its Thrift-level
+// Decode deserializes a ServiceABack_HelloA_Result struct directly from its Thrift-level
 // representation, without going through an intemediary type.
 //
-// An error is returned if a ServiceABack_Hello_Result struct could not be generated from the wire
+// An error is returned if a ServiceABack_HelloA_Result struct could not be generated from the wire
 // representation.
-func (v *ServiceABack_Hello_Result) Decode(sr stream.Reader) error {
+func (v *ServiceABack_HelloA_Result) Decode(sr stream.Reader) error {
 
 	if err := sr.ReadStructBegin(); err != nil {
 		return err
@@ -426,15 +426,15 @@ func (v *ServiceABack_Hello_Result) Decode(sr stream.Reader) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("ServiceABack_Hello_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("ServiceABack_HelloA_Result should have exactly one field: got %v fields", count)
 	}
 
 	return nil
 }
 
-// String returns a readable string representation of a ServiceABack_Hello_Result
+// String returns a readable string representation of a ServiceABack_HelloA_Result
 // struct.
-func (v *ServiceABack_Hello_Result) String() string {
+func (v *ServiceABack_HelloA_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -446,7 +446,7 @@ func (v *ServiceABack_Hello_Result) String() string {
 		i++
 	}
 
-	return fmt.Sprintf("ServiceABack_Hello_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("ServiceABack_HelloA_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
 func _String_EqualsPtr(lhs, rhs *string) bool {
@@ -459,11 +459,11 @@ func _String_EqualsPtr(lhs, rhs *string) bool {
 	return lhs == nil && rhs == nil
 }
 
-// Equals returns true if all the fields of this ServiceABack_Hello_Result match the
-// provided ServiceABack_Hello_Result.
+// Equals returns true if all the fields of this ServiceABack_HelloA_Result match the
+// provided ServiceABack_HelloA_Result.
 //
 // This function performs a deep comparison.
-func (v *ServiceABack_Hello_Result) Equals(rhs *ServiceABack_Hello_Result) bool {
+func (v *ServiceABack_HelloA_Result) Equals(rhs *ServiceABack_HelloA_Result) bool {
 	if v == nil {
 		return rhs == nil
 	} else if rhs == nil {
@@ -477,8 +477,8 @@ func (v *ServiceABack_Hello_Result) Equals(rhs *ServiceABack_Hello_Result) bool 
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling
-// fast logging of ServiceABack_Hello_Result.
-func (v *ServiceABack_Hello_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+// fast logging of ServiceABack_HelloA_Result.
+func (v *ServiceABack_HelloA_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
 	if v == nil {
 		return nil
 	}
@@ -490,7 +490,7 @@ func (v *ServiceABack_Hello_Result) MarshalLogObject(enc zapcore.ObjectEncoder) 
 
 // GetSuccess returns the value of Success if it is set or its
 // zero value if it is unset.
-func (v *ServiceABack_Hello_Result) GetSuccess() (o string) {
+func (v *ServiceABack_HelloA_Result) GetSuccess() (o string) {
 	if v != nil && v.Success != nil {
 		return *v.Success
 	}
@@ -499,32 +499,32 @@ func (v *ServiceABack_Hello_Result) GetSuccess() (o string) {
 }
 
 // IsSetSuccess returns true if Success is not nil.
-func (v *ServiceABack_Hello_Result) IsSetSuccess() bool {
+func (v *ServiceABack_HelloA_Result) IsSetSuccess() bool {
 	return v != nil && v.Success != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the result.
 //
-// This will always be "hello" for this struct.
-func (v *ServiceABack_Hello_Result) MethodName() string {
-	return "hello"
+// This will always be "helloA" for this struct.
+func (v *ServiceABack_HelloA_Result) MethodName() string {
+	return "helloA"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
 //
 // This will always be Reply for this struct.
-func (v *ServiceABack_Hello_Result) EnvelopeType() wire.EnvelopeType {
+func (v *ServiceABack_HelloA_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
 
-// ServiceBBack_Hello_Args represents the arguments for the ServiceBBack.hello function.
+// ServiceBBack_HelloB_Args represents the arguments for the ServiceBBack.helloB function.
 //
-// The arguments for hello are sent and received over the wire as this struct.
-type ServiceBBack_Hello_Args struct {
+// The arguments for helloB are sent and received over the wire as this struct.
+type ServiceBBack_HelloB_Args struct {
 }
 
-// ToWire translates a ServiceBBack_Hello_Args struct into a Thrift-level intermediate
+// ToWire translates a ServiceBBack_HelloB_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
 //
@@ -539,7 +539,7 @@ type ServiceBBack_Hello_Args struct {
 //   if err := binaryProtocol.Encode(x, writer); err != nil {
 //     return err
 //   }
-func (v *ServiceBBack_Hello_Args) ToWire() (wire.Value, error) {
+func (v *ServiceBBack_HelloB_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
 		i      int = 0
@@ -548,11 +548,11 @@ func (v *ServiceBBack_Hello_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-// FromWire deserializes a ServiceBBack_Hello_Args struct from its Thrift-level
+// FromWire deserializes a ServiceBBack_HelloB_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
 //
-// An error is returned if we were unable to build a ServiceBBack_Hello_Args struct
+// An error is returned if we were unable to build a ServiceBBack_HelloB_Args struct
 // from the provided intermediate representation.
 //
 //   x, err := binaryProtocol.Decode(reader, wire.TStruct)
@@ -560,12 +560,12 @@ func (v *ServiceBBack_Hello_Args) ToWire() (wire.Value, error) {
 //     return nil, err
 //   }
 //
-//   var v ServiceBBack_Hello_Args
+//   var v ServiceBBack_HelloB_Args
 //   if err := v.FromWire(x); err != nil {
 //     return nil, err
 //   }
 //   return &v, nil
-func (v *ServiceBBack_Hello_Args) FromWire(w wire.Value) error {
+func (v *ServiceBBack_HelloB_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -575,11 +575,11 @@ func (v *ServiceBBack_Hello_Args) FromWire(w wire.Value) error {
 	return nil
 }
 
-// Encode serializes a ServiceBBack_Hello_Args struct directly into bytes, without going
+// Encode serializes a ServiceBBack_HelloB_Args struct directly into bytes, without going
 // through an intermediary type.
 //
-// An error is returned if a ServiceBBack_Hello_Args struct could not be encoded.
-func (v *ServiceBBack_Hello_Args) Encode(sw stream.Writer) error {
+// An error is returned if a ServiceBBack_HelloB_Args struct could not be encoded.
+func (v *ServiceBBack_HelloB_Args) Encode(sw stream.Writer) error {
 	if err := sw.WriteStructBegin(); err != nil {
 		return err
 	}
@@ -587,12 +587,12 @@ func (v *ServiceBBack_Hello_Args) Encode(sw stream.Writer) error {
 	return sw.WriteStructEnd()
 }
 
-// Decode deserializes a ServiceBBack_Hello_Args struct directly from its Thrift-level
+// Decode deserializes a ServiceBBack_HelloB_Args struct directly from its Thrift-level
 // representation, without going through an intemediary type.
 //
-// An error is returned if a ServiceBBack_Hello_Args struct could not be generated from the wire
+// An error is returned if a ServiceBBack_HelloB_Args struct could not be generated from the wire
 // representation.
-func (v *ServiceBBack_Hello_Args) Decode(sr stream.Reader) error {
+func (v *ServiceBBack_HelloB_Args) Decode(sr stream.Reader) error {
 
 	if err := sr.ReadStructBegin(); err != nil {
 		return err
@@ -627,9 +627,9 @@ func (v *ServiceBBack_Hello_Args) Decode(sr stream.Reader) error {
 	return nil
 }
 
-// String returns a readable string representation of a ServiceBBack_Hello_Args
+// String returns a readable string representation of a ServiceBBack_HelloB_Args
 // struct.
-func (v *ServiceBBack_Hello_Args) String() string {
+func (v *ServiceBBack_HelloB_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -637,14 +637,14 @@ func (v *ServiceBBack_Hello_Args) String() string {
 	var fields [0]string
 	i := 0
 
-	return fmt.Sprintf("ServiceBBack_Hello_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("ServiceBBack_HelloB_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-// Equals returns true if all the fields of this ServiceBBack_Hello_Args match the
-// provided ServiceBBack_Hello_Args.
+// Equals returns true if all the fields of this ServiceBBack_HelloB_Args match the
+// provided ServiceBBack_HelloB_Args.
 //
 // This function performs a deep comparison.
-func (v *ServiceBBack_Hello_Args) Equals(rhs *ServiceBBack_Hello_Args) bool {
+func (v *ServiceBBack_HelloB_Args) Equals(rhs *ServiceBBack_HelloB_Args) bool {
 	if v == nil {
 		return rhs == nil
 	} else if rhs == nil {
@@ -655,8 +655,8 @@ func (v *ServiceBBack_Hello_Args) Equals(rhs *ServiceBBack_Hello_Args) bool {
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling
-// fast logging of ServiceBBack_Hello_Args.
-func (v *ServiceBBack_Hello_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+// fast logging of ServiceBBack_HelloB_Args.
+func (v *ServiceBBack_HelloB_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
 	if v == nil {
 		return nil
 	}
@@ -666,81 +666,81 @@ func (v *ServiceBBack_Hello_Args) MarshalLogObject(enc zapcore.ObjectEncoder) (e
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
-// This will always be "hello" for this struct.
-func (v *ServiceBBack_Hello_Args) MethodName() string {
-	return "hello"
+// This will always be "helloB" for this struct.
+func (v *ServiceBBack_HelloB_Args) MethodName() string {
+	return "helloB"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
 //
 // This will always be Call for this struct.
-func (v *ServiceBBack_Hello_Args) EnvelopeType() wire.EnvelopeType {
+func (v *ServiceBBack_HelloB_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-// ServiceBBack_Hello_Helper provides functions that aid in handling the
-// parameters and return values of the ServiceBBack.hello
+// ServiceBBack_HelloB_Helper provides functions that aid in handling the
+// parameters and return values of the ServiceBBack.helloB
 // function.
-var ServiceBBack_Hello_Helper = struct {
-	// Args accepts the parameters of hello in-order and returns
+var ServiceBBack_HelloB_Helper = struct {
+	// Args accepts the parameters of helloB in-order and returns
 	// the arguments struct for the function.
-	Args func() *ServiceBBack_Hello_Args
+	Args func() *ServiceBBack_HelloB_Args
 
 	// IsException returns true if the given error can be thrown
-	// by hello.
+	// by helloB.
 	//
-	// An error can be thrown by hello only if the
+	// An error can be thrown by helloB only if the
 	// corresponding exception type was mentioned in the 'throws'
 	// section for it in the Thrift file.
 	IsException func(error) bool
 
-	// WrapResponse returns the result struct for hello
+	// WrapResponse returns the result struct for helloB
 	// given its return value and error.
 	//
 	// This allows mapping values and errors returned by
-	// hello into a serializable result struct.
+	// helloB into a serializable result struct.
 	// WrapResponse returns a non-nil error if the provided
-	// error cannot be thrown by hello
+	// error cannot be thrown by helloB
 	//
-	//   value, err := hello(args)
-	//   result, err := ServiceBBack_Hello_Helper.WrapResponse(value, err)
+	//   value, err := helloB(args)
+	//   result, err := ServiceBBack_HelloB_Helper.WrapResponse(value, err)
 	//   if err != nil {
-	//     return fmt.Errorf("unexpected error from hello: %v", err)
+	//     return fmt.Errorf("unexpected error from helloB: %v", err)
 	//   }
 	//   serialize(result)
-	WrapResponse func(string, error) (*ServiceBBack_Hello_Result, error)
+	WrapResponse func(string, error) (*ServiceBBack_HelloB_Result, error)
 
-	// UnwrapResponse takes the result struct for hello
+	// UnwrapResponse takes the result struct for helloB
 	// and returns the value or error returned by it.
 	//
-	// The error is non-nil only if hello threw an
+	// The error is non-nil only if helloB threw an
 	// exception.
 	//
 	//   result := deserialize(bytes)
-	//   value, err := ServiceBBack_Hello_Helper.UnwrapResponse(result)
-	UnwrapResponse func(*ServiceBBack_Hello_Result) (string, error)
+	//   value, err := ServiceBBack_HelloB_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*ServiceBBack_HelloB_Result) (string, error)
 }{}
 
 func init() {
-	ServiceBBack_Hello_Helper.Args = func() *ServiceBBack_Hello_Args {
-		return &ServiceBBack_Hello_Args{}
+	ServiceBBack_HelloB_Helper.Args = func() *ServiceBBack_HelloB_Args {
+		return &ServiceBBack_HelloB_Args{}
 	}
 
-	ServiceBBack_Hello_Helper.IsException = func(err error) bool {
+	ServiceBBack_HelloB_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
 
-	ServiceBBack_Hello_Helper.WrapResponse = func(success string, err error) (*ServiceBBack_Hello_Result, error) {
+	ServiceBBack_HelloB_Helper.WrapResponse = func(success string, err error) (*ServiceBBack_HelloB_Result, error) {
 		if err == nil {
-			return &ServiceBBack_Hello_Result{Success: &success}, nil
+			return &ServiceBBack_HelloB_Result{Success: &success}, nil
 		}
 
 		return nil, err
 	}
-	ServiceBBack_Hello_Helper.UnwrapResponse = func(result *ServiceBBack_Hello_Result) (success string, err error) {
+	ServiceBBack_HelloB_Helper.UnwrapResponse = func(result *ServiceBBack_HelloB_Result) (success string, err error) {
 
 		if result.Success != nil {
 			success = *result.Success
@@ -753,17 +753,17 @@ func init() {
 
 }
 
-// ServiceBBack_Hello_Result represents the result of a ServiceBBack.hello function call.
+// ServiceBBack_HelloB_Result represents the result of a ServiceBBack.helloB function call.
 //
-// The result of a hello execution is sent and received over the wire as this struct.
+// The result of a helloB execution is sent and received over the wire as this struct.
 //
 // Success is set only if the function did not throw an exception.
-type ServiceBBack_Hello_Result struct {
-	// Value returned by hello after a successful execution.
+type ServiceBBack_HelloB_Result struct {
+	// Value returned by helloB after a successful execution.
 	Success *string `json:"success,omitempty"`
 }
 
-// ToWire translates a ServiceBBack_Hello_Result struct into a Thrift-level intermediate
+// ToWire translates a ServiceBBack_HelloB_Result struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
 //
@@ -778,7 +778,7 @@ type ServiceBBack_Hello_Result struct {
 //   if err := binaryProtocol.Encode(x, writer); err != nil {
 //     return err
 //   }
-func (v *ServiceBBack_Hello_Result) ToWire() (wire.Value, error) {
+func (v *ServiceBBack_HelloB_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -796,17 +796,17 @@ func (v *ServiceBBack_Hello_Result) ToWire() (wire.Value, error) {
 	}
 
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("ServiceBBack_Hello_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("ServiceBBack_HelloB_Result should have exactly one field: got %v fields", i)
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-// FromWire deserializes a ServiceBBack_Hello_Result struct from its Thrift-level
+// FromWire deserializes a ServiceBBack_HelloB_Result struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
 //
-// An error is returned if we were unable to build a ServiceBBack_Hello_Result struct
+// An error is returned if we were unable to build a ServiceBBack_HelloB_Result struct
 // from the provided intermediate representation.
 //
 //   x, err := binaryProtocol.Decode(reader, wire.TStruct)
@@ -814,12 +814,12 @@ func (v *ServiceBBack_Hello_Result) ToWire() (wire.Value, error) {
 //     return nil, err
 //   }
 //
-//   var v ServiceBBack_Hello_Result
+//   var v ServiceBBack_HelloB_Result
 //   if err := v.FromWire(x); err != nil {
 //     return nil, err
 //   }
 //   return &v, nil
-func (v *ServiceBBack_Hello_Result) FromWire(w wire.Value) error {
+func (v *ServiceBBack_HelloB_Result) FromWire(w wire.Value) error {
 	var err error
 
 	for _, field := range w.GetStruct().Fields {
@@ -842,17 +842,17 @@ func (v *ServiceBBack_Hello_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("ServiceBBack_Hello_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("ServiceBBack_HelloB_Result should have exactly one field: got %v fields", count)
 	}
 
 	return nil
 }
 
-// Encode serializes a ServiceBBack_Hello_Result struct directly into bytes, without going
+// Encode serializes a ServiceBBack_HelloB_Result struct directly into bytes, without going
 // through an intermediary type.
 //
-// An error is returned if a ServiceBBack_Hello_Result struct could not be encoded.
-func (v *ServiceBBack_Hello_Result) Encode(sw stream.Writer) error {
+// An error is returned if a ServiceBBack_HelloB_Result struct could not be encoded.
+func (v *ServiceBBack_HelloB_Result) Encode(sw stream.Writer) error {
 	if err := sw.WriteStructBegin(); err != nil {
 		return err
 	}
@@ -875,18 +875,18 @@ func (v *ServiceBBack_Hello_Result) Encode(sw stream.Writer) error {
 	}
 
 	if count != 1 {
-		return fmt.Errorf("ServiceBBack_Hello_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("ServiceBBack_HelloB_Result should have exactly one field: got %v fields", count)
 	}
 
 	return sw.WriteStructEnd()
 }
 
-// Decode deserializes a ServiceBBack_Hello_Result struct directly from its Thrift-level
+// Decode deserializes a ServiceBBack_HelloB_Result struct directly from its Thrift-level
 // representation, without going through an intemediary type.
 //
-// An error is returned if a ServiceBBack_Hello_Result struct could not be generated from the wire
+// An error is returned if a ServiceBBack_HelloB_Result struct could not be generated from the wire
 // representation.
-func (v *ServiceBBack_Hello_Result) Decode(sr stream.Reader) error {
+func (v *ServiceBBack_HelloB_Result) Decode(sr stream.Reader) error {
 
 	if err := sr.ReadStructBegin(); err != nil {
 		return err
@@ -931,15 +931,15 @@ func (v *ServiceBBack_Hello_Result) Decode(sr stream.Reader) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("ServiceBBack_Hello_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("ServiceBBack_HelloB_Result should have exactly one field: got %v fields", count)
 	}
 
 	return nil
 }
 
-// String returns a readable string representation of a ServiceBBack_Hello_Result
+// String returns a readable string representation of a ServiceBBack_HelloB_Result
 // struct.
-func (v *ServiceBBack_Hello_Result) String() string {
+func (v *ServiceBBack_HelloB_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -951,14 +951,14 @@ func (v *ServiceBBack_Hello_Result) String() string {
 		i++
 	}
 
-	return fmt.Sprintf("ServiceBBack_Hello_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("ServiceBBack_HelloB_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-// Equals returns true if all the fields of this ServiceBBack_Hello_Result match the
-// provided ServiceBBack_Hello_Result.
+// Equals returns true if all the fields of this ServiceBBack_HelloB_Result match the
+// provided ServiceBBack_HelloB_Result.
 //
 // This function performs a deep comparison.
-func (v *ServiceBBack_Hello_Result) Equals(rhs *ServiceBBack_Hello_Result) bool {
+func (v *ServiceBBack_HelloB_Result) Equals(rhs *ServiceBBack_HelloB_Result) bool {
 	if v == nil {
 		return rhs == nil
 	} else if rhs == nil {
@@ -972,8 +972,8 @@ func (v *ServiceBBack_Hello_Result) Equals(rhs *ServiceBBack_Hello_Result) bool 
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaler, enabling
-// fast logging of ServiceBBack_Hello_Result.
-func (v *ServiceBBack_Hello_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+// fast logging of ServiceBBack_HelloB_Result.
+func (v *ServiceBBack_HelloB_Result) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
 	if v == nil {
 		return nil
 	}
@@ -985,7 +985,7 @@ func (v *ServiceBBack_Hello_Result) MarshalLogObject(enc zapcore.ObjectEncoder) 
 
 // GetSuccess returns the value of Success if it is set or its
 // zero value if it is unset.
-func (v *ServiceBBack_Hello_Result) GetSuccess() (o string) {
+func (v *ServiceBBack_HelloB_Result) GetSuccess() (o string) {
 	if v != nil && v.Success != nil {
 		return *v.Success
 	}
@@ -994,22 +994,22 @@ func (v *ServiceBBack_Hello_Result) GetSuccess() (o string) {
 }
 
 // IsSetSuccess returns true if Success is not nil.
-func (v *ServiceBBack_Hello_Result) IsSetSuccess() bool {
+func (v *ServiceBBack_HelloB_Result) IsSetSuccess() bool {
 	return v != nil && v.Success != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the result.
 //
-// This will always be "hello" for this struct.
-func (v *ServiceBBack_Hello_Result) MethodName() string {
-	return "hello"
+// This will always be "helloB" for this struct.
+func (v *ServiceBBack_HelloB_Result) MethodName() string {
+	return "helloB"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
 //
 // This will always be Reply for this struct.
-func (v *ServiceBBack_Hello_Result) EnvelopeType() wire.EnvelopeType {
+func (v *ServiceBBack_HelloB_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
 
