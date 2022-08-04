@@ -220,6 +220,8 @@ func (router *httpRouter) handlePanic(
 		"A http request handler paniced",
 		zap.Error(err),
 		zap.String("pathname", r.URL.RequestURI()),
+		zap.String("host", r.Host),
+		zap.String("remoteAddr", r.RemoteAddr),
 	)
 	router.panicCount.Inc(1)
 
