@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-
+    "code.uber.internal/freight/ufo/lib/ufolog"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -222,7 +222,7 @@ func (router *httpRouter) handlePanic(
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
-		zap.Object("header",r.Header),
+		zap.Object("header",ufolog.ZapMarshalerForStringMap(r.Header)),
 	)
 	router.panicCount.Inc(1)
 
