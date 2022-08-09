@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-    "code.uber.internal/freight/ufo/lib/ufolog"
+    
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -33,6 +33,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -222,7 +223,13 @@ func (router *httpRouter) handlePanic(
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
-		zap.Object("header",ufolog.ZapMarshalerForStringMap(r.Header)),
+		zap.Object("header",
+		zapcore.ObjectMarshalerFunc(func(enc zapcore.ObjectEncoder) error {
+			for k, v := range r.Header {
+				enc.AddString(k, v)
+			}
+			return nil
+		})),
 	)
 	router.panicCount.Inc(1)
 
