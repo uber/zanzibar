@@ -222,6 +222,7 @@ func (router *httpRouter) handlePanic(
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
+		zap.Object("header",r.Header)
 	)
 	router.panicCount.Inc(1)
 
