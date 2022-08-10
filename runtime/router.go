@@ -216,17 +216,17 @@ func (router *httpRouter) handlePanic(
 	if !ok {
 		err = errors.Wrap(err, "wrapped")
 	}
-   header zapcore.ObjectEncoder
-		for k, v := range r.Header {
-			header.AddString(k, v)
-		}
+	var header zapcore.ObjectEncoder
+	for k, v := range r.Header {
+		header.AddString(k, v)
+	}
 	router.gateway.Logger.Error(
 		"A http request handler paniced",
 		zap.Error(err),
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
-		zap.Object("header",header),
+		zap.Object("header", header),
 	)
 	router.panicCount.Inc(1)
 
