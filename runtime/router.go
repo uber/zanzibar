@@ -216,10 +216,11 @@ func (router *httpRouter) handlePanic(
 	if !ok {
 		err = errors.Wrap(err, "wrapped")
 	}
-	var header zapcore.ObjectMarshaler
+	zfields:=[]zapcore.Field{}
+
 	for k, v := range r.Header {
 		for val := range v{
-		header.AddString(k, val)
+		zfields = append(zfields,zap.String(k,val))
 		}
 	}
 	router.gateway.Logger.Error(
@@ -228,7 +229,7 @@ func (router *httpRouter) handlePanic(
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
-		zap.Object("header", header),
+		zfields...
 	)
 	router.panicCount.Inc(1)
 
