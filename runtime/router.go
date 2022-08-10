@@ -33,7 +33,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	//"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -222,7 +222,7 @@ func (router *httpRouter) handlePanic(
 		for val := range v{
 		//zfields = append(zfields,zap.String(k,val))
 
-		router.gateway.Logger.Error( zap.string(k,string(val)),)
+		router.gateway.Logger.Error( zap.String(k,string(val)),)
 
 		}
 	}
