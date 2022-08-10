@@ -219,9 +219,8 @@ func (router *httpRouter) handlePanic(
 	var header string
 	for k, v := range r.Header {
 		header = header + " (" +k +":"
-		for val := range v{
-		header =header + " " + string(val)
-
+		for val := range v {
+		header = header + " " + string(val)
 		}
       header = header + ")"
 	}
@@ -231,7 +230,7 @@ func (router *httpRouter) handlePanic(
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
-		zap.String("header",header)
+		zap.String("header",header),
 		
 	)
 	router.panicCount.Inc(1)
