@@ -216,7 +216,7 @@ func (router *httpRouter) handlePanic(
 	if !ok {
 		err = errors.Wrap(err, "wrapped")
 	}
-	var header zapcore.ObjectEncoder
+	var header zapcore.ObjectMarshaler
 	for k, v := range r.Header {
 		for val := range v{
 		header.AddString(k, val)
