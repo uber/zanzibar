@@ -220,7 +220,7 @@ func (router *httpRouter) handlePanic(
 	for k, v := range r.Header {
 		header = header + " (" +k +":"
 		for val := range v {
-		header = header + " " + string(val)
+		header = header + " " + val
 		}
       header = header + ")"
 	}
