@@ -207,6 +207,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {
+		println("hello...")
 		req.ContextLogger.ErrorZ(req.ctx, "Could not make outbound request", zap.Error(err))
 		return nil, err
 	}
