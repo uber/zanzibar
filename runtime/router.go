@@ -218,7 +218,9 @@ func (router *httpRouter) handlePanic(
 	}
 	var header zapcore.ObjectEncoder
 	for k, v := range r.Header {
-		header.AddString(k, v)
+		for val := range v{
+		header.AddString(k, val)
+		}
 	}
 	router.gateway.Logger.Error(
 		"A http request handler paniced",
