@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-    
+    "encoding/json"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -33,7 +33,7 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
-	//"go.uber.org/zap/zapcore"
+	
 )
 
 const (
@@ -218,13 +218,15 @@ func (router *httpRouter) handlePanic(
 	}
 	var header map[string][]string
 	header =r.Header
+	jsonheader , _ := json.Marshal(header)
+
 	router.gateway.Logger.Error(
 		"A http request handler paniced",
 		zap.Error(err),
 		zap.String("pathname", r.URL.RequestURI()),
 		zap.String("host", r.Host),
 		zap.String("remoteAddr", r.RemoteAddr),
-		zap.String("header",fmt.Sprintf("%#v",header)),
+		zap.String("header",string(jsonheader)),
 		
 	)
 	router.panicCount.Inc(1)
