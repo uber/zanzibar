@@ -216,13 +216,24 @@ func (router *httpRouter) handlePanic(
 		err = errors.Wrap(err, "wrapped")
 	}
 
-	router.gateway.Logger.Error(
-		"A http request handler paniced",
-		zap.Error(err),
-		zap.String("pathname", r.URL.RequestURI()),
-		zap.String("host", r.Host),
-		zap.String("remoteAddr", r.RemoteAddr),
-	)
+	if reqheaderBytes, err2 := json.Marshal(r.Header); err2 != nil {
+		router.gateway.Logger.Error(
+			"A http request handler paniced",
+			zap.Error(err),
+			zap.String("pathname", r.URL.RequestURI()),
+			zap.String("host", r.Host),
+			zap.String("remoteAddr", r.RemoteAddr),
+			zap.String("header", string(reqheaderBytes)),
+		)
+	} else {
+		router.gateway.Logger.Error(
+			"A http request handler paniced",
+			zap.Error(err),
+			zap.String("pathname", r.URL.RequestURI()),
+			zap.String("host", r.Host),
+			zap.String("remoteAddr", r.RemoteAddr),
+		)
+	}
 	router.panicCount.Inc(1)
 
 	http.Error(w,
