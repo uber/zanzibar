@@ -22,16 +22,15 @@ package zanzibar
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/opentracing/opentracing-go"
-	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 )
 
@@ -216,7 +215,7 @@ func (router *httpRouter) handlePanic(
 		err = errors.Wrap(err, "wrapped")
 	}
 
-	if reqheaderBytes, err2 := json.Marshal(r.Header); err2 != nil {
+	if reqheaderBytes, err2 := httputil.DumpRequestOut(r, true); err2 != nil {
 		router.gateway.Logger.Error(
 			"A http request handler paniced",
 			zap.Error(err),
