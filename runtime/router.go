@@ -22,10 +22,8 @@ package zanzibar
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
-    "encoding/json"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -33,6 +31,8 @@ import (
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
 	"go.uber.org/zap"
+	"net/http"
+	"net/url"
 )
 
 const (
