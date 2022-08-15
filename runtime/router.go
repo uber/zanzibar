@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pborman/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
