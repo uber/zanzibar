@@ -23,7 +23,7 @@ package zanzibar
 import (
 	"context"
 	"fmt"
-	"github.com/opentracing/opentracing-go"
+	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
