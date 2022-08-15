@@ -29,6 +29,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	zrouter "github.com/uber/zanzibar/runtime/router"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
@@ -231,7 +232,6 @@ func (router *httpRouter) handlePanic(
 			zap.String("pathname", r.URL.RequestURI()),
 			zap.String("host", r.Host),
 			zap.String("remoteAddr", r.RemoteAddr),
-
 		)
 	}
 
