@@ -227,3 +227,11 @@ func TestNotFoundCustom(t *testing.T) {
 	assert.True(t, handled)
 	assert.Equal(t, http.StatusNotFound, res.Result().StatusCode)
 }
+
+func TestUrlFailureError(t *testing.T) {
+	e := &urlFailure{
+		method: "testmethod",
+		url:    "example",
+	}
+	assert.Equalf(t, "panic: path: \"example\" method: \"testmethod\" conflicts with an existing path", e.Error(), "Error()")
+}
