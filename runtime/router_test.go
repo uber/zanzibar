@@ -92,7 +92,10 @@ func (s *routerSuite) TestRouter() {
 		{"GET", "/withslash", nil, http.StatusOK, []byte("withslash\n")},
 		{"GET", "/withslash/", nil, http.StatusOK, []byte("withslash\n")},
 		{"GET", "/postonly", nil, http.StatusMethodNotAllowed, []byte("Method Not Allowed\n")},
-		{"GET", "/panicerror", nil, http.StatusInternalServerError, []byte("Internal Server Error\n")},
+		{"GET", "/panicerror", []byte(`
+		{
+			"test": "body"
+		}`), http.StatusInternalServerError, []byte("Internal Server Error\n")},
 		{"GET", "/panicstring", nil, http.StatusInternalServerError, []byte("Internal Server Error\n")},
 	}
 
