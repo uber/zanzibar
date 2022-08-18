@@ -98,6 +98,7 @@ func (s *routerSuite) TestRouter() {
 
 	for i, testCase := range cases {
 		req := httptest.NewRequest(testCase.RequestMethod, testCase.RequestPath, bytes.NewBuffer(testCase.RequestBody))
+		req.Header.Set("Test_Key", "Test_Value")
 		w := httptest.NewRecorder()
 		s.router.ServeHTTP(w, req)
 		s.Equal(testCase.ResponseCode, w.Code, "expected response code for %dth test case to be equal", i)
