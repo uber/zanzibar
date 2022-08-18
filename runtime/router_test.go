@@ -96,7 +96,10 @@ func (s *routerSuite) TestRouter() {
 		{
 			"test": "body"
 		}`), http.StatusInternalServerError, []byte("Internal Server Error\n")},
-		{"GET", "/panicstring", nil, http.StatusInternalServerError, []byte("Internal Server Error\n")},
+		{"GET", "/panicstring", []byte(`
+		{
+			"test": "body"
+		}`), http.StatusInternalServerError, []byte("Internal Server Error\n")},
 	}
 
 	for i, testCase := range cases {
