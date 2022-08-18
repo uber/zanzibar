@@ -22,9 +22,9 @@ package zanzibar
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 
 	"github.com/opentracing/opentracing-go"
@@ -45,13 +45,12 @@ const (
 //
 // This router has support for decoding path "parameters" in the URL into named values. An example:
 //
-//   var r zanzibar.HTTPRouter
+//	var r zanzibar.HTTPRouter
 //
-//   r.Handle("GET", "/foo/:bar", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//       params := zanzibar.ParamsFromContext(r.Context())
-//       w.Write("%s", params.Get("bar"))
-//   }))
-//
+//	r.Handle("GET", "/foo/:bar", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//	    params := zanzibar.ParamsFromContext(r.Context())
+//	    w.Write("%s", params.Get("bar"))
+//	}))
 type HTTPRouter interface {
 	// HTTPRouter implements a http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
 	http.Handler
@@ -216,24 +215,21 @@ func (router *httpRouter) handlePanic(
 	if !ok {
 		err = errors.Wrap(err, "wrapped")
 	}
-	if reqheaderBytes, err2 := httputil.DumpRequestOut(r, true); err2 != nil {
-		router.gateway.Logger.Error(
-			"A http request handler paniced",
-			zap.Error(err),
-			zap.String("pathname", r.URL.RequestURI()),
-			zap.String("host", r.Host),
-			zap.String("remoteAddr", r.RemoteAddr),
-			zap.String("request", string(reqheaderBytes)),
-		)
-	} else {
-		router.gateway.Logger.Error(
-			"A http request handler paniced",
-			zap.Error(err),
-			zap.String("pathname", r.URL.RequestURI()),
-			zap.String("host", r.Host),
-			zap.String("remoteAddr", r.RemoteAddr),
-		)
+
+	logger := router.gateway.Logger
+
+	header := r.Header
+
+	for k, v := range header {
+		val, _ := json.Marshal(v)
+		logger = logger.With(zap.String(k, string(val)))
 	}
+	logger = logger.With(
+		zap.Error(err),
+		zap.String("pathname", r.URL.RequestURI()))
+
+	logger.Error("A http request handler paniced")
+
 	router.panicCount.Inc(1)
 
 	http.Error(w,
