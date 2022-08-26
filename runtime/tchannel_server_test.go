@@ -21,12 +21,15 @@
 package zanzibar_test
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
+	"go.uber.org/thriftrw/wire"
 )
 
 func TestCreatingTChannel(t *testing.T) {
@@ -41,4 +44,52 @@ func TestCreatingTChannel(t *testing.T) {
 	assert.Error(t, err)
 
 	assert.Contains(t, err.Error(), "no service name provided")
+}
+
+func TestDecorateWithRecover(t *testing.T) {
+	testCases := map[string]struct {
+		handleFn     func(context.Context, *wire.Value) (zanzibar.RWTStruct, error)
+		expectedResp zanzibar.RWTStruct
+		expectedErr  error
+	}{
+		"Success: decorate returns response when no panic occurs": {
+			handleFn: func(context.Context, *wire.Value) (zanzibar.RWTStruct, error) {
+				return mockRWTStruct{}, nil
+			},
+			expectedResp: mockRWTStruct{},
+			expectedErr:  nil,
+		},
+		"Error: decorate returns error when error without panic occurs": {
+			handleFn: func(context.Context, *wire.Value) (zanzibar.RWTStruct, error) {
+				return nil, fmt.Errorf("handle function failed")
+			},
+			expectedResp: nil,
+			expectedErr:  fmt.Errorf("handle function failed"),
+		},
+		"Error: decorate returns error when panic occurs": {
+			handleFn: func(context.Context, *wire.Value) (zanzibar.RWTStruct, error) {
+				panic("handle function fails")
+			},
+			expectedResp: nil,
+			expectedErr:  fmt.Errorf("panic: handle function fails"),
+		},
+	}
+
+	for tc, tt := range testCases {
+		t.Run(tc, func(t *testing.T) {
+			resp, err := zanzibar.DecorateWithRecover(context.Background(), nil, nil, tt.handleFn)
+			assert.Equal(t, tt.expectedResp, resp)
+			assert.Equal(t, tt.expectedErr, err)
+		})
+	}
+}
+
+type mockRWTStruct struct{}
+
+func (m mockRWTStruct) ToWire() (wire.Value, error) {
+	return wire.Value{}, nil
+}
+
+func (m mockRWTStruct) FromWire(wire.Value) error {
+	return nil
 }
