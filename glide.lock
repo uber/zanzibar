@@ -106,7 +106,7 @@ imports:
 - name: github.com/mcuadros/go-jsonschema-generator
   version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
 - name: github.com/mitchellh/mapstructure
-  version: 4664f9ee512b4dfa71b501c4960d469c205b2cf1
+  version: bf980b35cac4dfd34e05254ee5aba086504c3f96
 - name: github.com/opentracing/opentracing-go
   version: d34af3eaa63c4d08ab54863a4bdd0daa45212e12
   subpackages:
