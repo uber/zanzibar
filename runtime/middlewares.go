@@ -22,8 +22,15 @@ package zanzibar
 
 import (
 	"context"
+	"time"
 
 	jsonschema "github.com/mcuadros/go-jsonschema-generator"
+)
+
+const (
+	middlewareRequestLatencyTag  = "middleware.requests.latency"
+	middlewareResponseLatencyTag = "middleware.responses.latency"
+	middlewareRequestStatusTag   = "middleware.requests.status"
 )
 
 // MiddlewareStack is a stack of Middleware Handlers that can be invoked as an Handle.
@@ -103,6 +110,7 @@ func (m *MiddlewareStack) Handle(
 	res *ServerHTTPResponse) context.Context {
 
 	shared := NewSharedState(m.middlewares)
+	start := time.Now()
 
 	for i := 0; i < len(m.middlewares); i++ {
 		ctx, ok := m.middlewares[i].HandleRequest(ctx, req, res, shared)
@@ -110,17 +118,51 @@ func (m *MiddlewareStack) Handle(
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the middlewares seen so far.
 		if ok == false {
+			//record latency for middlewares requests in unsuccesful case as the middleware requests calls are terminated
+			m.recordLatency(middlewareRequestLatencyTag, start, req)
+
+			start = time.Now() // start the timer for middleware responses
 			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
+			}
+			//record latency for middlewares responses in unsuccesful case
+			m.recordLatency(middlewareResponseLatencyTag, start, req)
+
+			//for error metrics only emit when there is gateway error and not request error
+			if res.pendingStatusCode >= 500 {
+				m.emitAvailability(middlewareRequestStatusTag, "error", req)
+			} else {
+				m.emitAvailability(middlewareRequestStatusTag, "success", req)
 			}
 			return ctx
 		}
 	}
+	// record latency for middlewares requests in successful case
+	m.recordLatency(middlewareRequestLatencyTag, start, req)
+	//emit success metric for middleware requests
+	m.emitAvailability(middlewareRequestStatusTag, "success", req)
 
 	ctx = m.handle(ctx, req, res)
 
+	start = time.Now()
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
 		m.middlewares[i].HandleResponse(ctx, res, shared)
 	}
+	// record latency for middlewares responses in successful case
+	m.recordLatency(middlewareResponseLatencyTag, start, req)
 	return ctx
+}
+
+// recordLatency measures the latency as per the tagName and start time given.
+func (m *MiddlewareStack) recordLatency(tagName string, start time.Time, req *ServerHTTPRequest) {
+	elapsed := time.Now().Sub(start)
+	req.scope.Timer(tagName).Record(elapsed)
+}
+
+// emitAvailability is used to increment the success/error counter for a particular tagName.
+func (m *MiddlewareStack) emitAvailability(tagName string, status string, req *ServerHTTPRequest) {
+	tagged := req.scope.Tagged(map[string]string{
+		scopeTagStatus: status,
+	})
+	tagged.Counter(tagName).Inc(1)
 }
