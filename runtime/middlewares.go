@@ -96,7 +96,7 @@ func (s SharedState) SetState(m MiddlewareHandle, state interface{}) {
 	s.middlewareDict[m.Name()] = state
 }
 
-// Handle executes the middlewares in a stack and underlying handler.
+// Handle executes the middlewares in stack and underlying handler.
 func (m *MiddlewareStack) Handle(
 	ctx context.Context,
 	req *ServerHTTPRequest,
