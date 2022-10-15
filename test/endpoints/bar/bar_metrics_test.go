@@ -22,13 +22,13 @@ package bar_test
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
-	"github.com/uber-go/tally/m3"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -116,13 +116,7 @@ func TestCallMetrics(t *testing.T) {
 	for k, v := range endpointTags {
 		statusTags[k] = v
 	}
-	histogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0001",
-	}
-	for k, v := range statusTags {
-		histogramTags[k] = v
-	}
+
 	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	assert.Equal(t, int64(1), metrics[key].Value.Count)
@@ -130,12 +124,21 @@ func TestCallMetrics(t *testing.T) {
 	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	value := metrics[key].Value.Timer
-	assert.True(t, value > 1000, "expected latency > 1000 nano seconds")
-	assert.True(t, value < 10*1000*1000, "expected latency < 10 milli seconds")
 
-	key = tally.KeyForPrefixedStringMap("endpoint.latency-hist", histogramTags)
-	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), metrics[key].Value.Count)
+	assert.True(t, value > 1000, fmt.Sprintf("expected latency > 1000 nano seconds but found to be: %d", value))
+	assert.True(t, value < 50*1000*1000, fmt.Sprintf("expected latency < 50 milli seconds but found to be: %d", value))
+
+	key = "endpoint.latency-hist"
+	keyFound := false
+	for metricKeyName := range metrics {
+		if strings.Contains(metricKeyName, key) {
+			if mapValue, ok := metrics[metricKeyName]; ok {
+				assert.Equal(t, int64(1), mapValue.Value.Count, fmt.Sprintf("key: %s, metric: %v\n", key, metrics[key]))
+				keyFound = true
+			}
+		}
+	}
+	assert.True(t, keyFound, fmt.Sprintf("expected the key: %s to be in metrics", key))
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
@@ -164,13 +167,6 @@ func TestCallMetrics(t *testing.T) {
 	for k, v := range httpClientTags {
 		cStatusTags[k] = v
 	}
-	cHistogramTags := map[string]string{
-		m3.DefaultHistogramBucketName:   "0-10ms", // TODO(argouber): Remove the ugly hardcoding
-		m3.DefaultHistogramBucketIDName: "0001",
-	}
-	for k, v := range httpClientTags {
-		cHistogramTags[k] = v
-	}
 
 	key = tally.KeyForPrefixedStringMap("client.request", httpClientTags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
@@ -184,11 +180,19 @@ func TestCallMetrics(t *testing.T) {
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
 	value = metrics[key].Value.Timer
 	assert.True(t, value > 1000, "expected latency > 1000 nano second")
-	assert.True(t, value < 10*1000*1000, "expected latency < 10 milli second")
+	assert.True(t, value < 50*1000*1000, "expected latency < 50 milli second")
 
-	key = tally.KeyForPrefixedStringMap("client.latency-hist", cHistogramTags)
-	assert.Contains(t, metrics, key, "expected metric: %s", key)
-	assert.Equal(t, int64(1), metrics[key].Value.Count)
+	key = "client.latency-hist"
+	keyFound = false
+	for metricKeyName := range metrics {
+		if strings.Contains(metricKeyName, key) {
+			if mapValue, ok := metrics[metricKeyName]; ok {
+				assert.Equal(t, int64(1), mapValue.Value.Count, fmt.Sprintf("key: %s, metric: %v\n", key, metrics[key]))
+				keyFound = true
+			}
+		}
+	}
+	assert.True(t, keyFound, fmt.Sprintf("expected the key: %s to be in metrics", key))
 
 	allLogs := gateway.AllLogs()
 
