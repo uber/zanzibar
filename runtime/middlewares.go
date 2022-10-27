@@ -154,6 +154,7 @@ func (m *MiddlewareStack) Handle(
 // recordLatency measures the latency as per the tagName and start time given.
 func (m *MiddlewareStack) recordLatency(tagName string, startTime time.Time, scope tally.Scope) {
 	elapsed := time.Now().Sub(startTime)
+	scope.Timer(tagName).Record(elapsed)
 	scope.Histogram(tagName, tally.DefaultBuckets).RecordDuration(elapsed)
 }
 
