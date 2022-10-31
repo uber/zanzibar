@@ -119,14 +119,14 @@ func (m *MiddlewareStack) Handle(
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the middlewares seen so far.
 		if ok == false {
-			//record latency for middlewares requests in unsuccesful case as the middleware requests calls are terminated
+			//record latency for middlewares requests in unsuccessful case as the middleware requests calls are terminated
 			m.recordLatency(middlewareRequestLatencyTag, middlewareRequestStartTime, req.scope)
 
 			middlewareResponseStartTime := time.Now() // start the timer for middleware responses
 			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}
-			//record latency for middlewares responses in unsuccesful case
+			//record latency for middlewares responses in unsuccessful case
 			m.recordLatency(middlewareResponseLatencyTag, middlewareResponseStartTime, req.scope)
 
 			//for error metrics only emit when there is gateway error and not request error
