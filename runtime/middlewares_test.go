@@ -110,6 +110,7 @@ func (c *countMiddleware) HandleRequest(
 	if !c.reqBail {
 		res.WriteJSONBytes(200, nil, []byte(""))
 	}
+	res.WriteJSONBytes(500, nil, []byte(""))
 
 	return ctx, !c.reqBail
 }
@@ -183,7 +184,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	assert.Equal(t, resp.StatusCode, http.StatusOK)
+	assert.Equal(t, resp.StatusCode, http.StatusInternalServerError)
 
 	assert.Equal(t, mid1.reqCounter, 1)
 	assert.Equal(t, mid1.resCounter, 1)
