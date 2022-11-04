@@ -161,7 +161,7 @@ func (m *MiddlewareStack) recordLatency(tagName string, startTime time.Time, sco
 // emitAvailability is used to increment the error counter for a particular tagName.
 func (m *MiddlewareStack) emitAvailabilityError(tagName string, middlewareName string, scope tally.Scope) {
 	tagged := scope.Tagged(map[string]string{
-		scopeTagStatus: "error",
+		scopeTagStatus:     "error",
 		scopeTagMiddleWare: middlewareName,
 	})
 	tagged.Counter(tagName).Inc(1)
