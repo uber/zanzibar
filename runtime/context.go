@@ -74,6 +74,7 @@ const (
 	scopeTagClientType      = "clienttype"
 	scopeTagEndpoint        = "endpointid"
 	scopeTagHandler         = "handlerid"
+	scopeTagMiddleWare      = "middlewarename"
 	scopeTagError           = "error"
 	scopeTagStatus          = "status"
 	scopeTagProtocol        = "protocol"
