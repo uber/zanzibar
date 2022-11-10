@@ -144,4 +144,3 @@ func (m *MiddlewareStack) emitAvailabilityError(tagName string, middlewareName s
 	})
 	tagged.Counter(tagName).Inc(1)
 }
-
