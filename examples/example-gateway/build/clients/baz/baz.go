@@ -315,8 +315,7 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.baz.methodTimeoutMapping") {
 		deps.Default.Config.MustGetStruct("clients.baz.methodTimeoutMapping", &clientMethodTimeoutMapping)
 	} else {
-		for serviceMethodName := range methodNames {
-			methodName := strings.Split(serviceMethodName, "::")[1]
+		for _, methodName := range methodNames {
 			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
 		}
 	}

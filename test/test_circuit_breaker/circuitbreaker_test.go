@@ -60,11 +60,11 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		assert.True(t, strings.Contains(circuitBreakerName, "-"), "Circuit breaker name should have '-")
 	}
 	// circuit breaker names for multi client
-	multiCircuitBreakerNames := [2]string{"multi-helloA", "multi-helloB"}
+	multiCircuitBreakerNames := [2]string{"multi-HelloA", "multi-HelloB"}
 	// map circuit breaker name to qps level
 	methodToQPSLevel := map[string]string{
-		"multi-helloA": "default",
-		"multi-helloB": "default",
+		"multi-HelloA": "default",
+		"multi-HelloB": "default",
 	}
 	// circuit breaker parameters from test.yaml
 	circuitBreakerConfig := map[string]map[string]int{
@@ -116,7 +116,7 @@ func TestCircuitBreakerSettings(t *testing.T) {
 		assert.Equal(t, settings[name], expectedSettings)
 	}
 	// circuit breakers with default qps levels
-	bazCircuitBreakers := [17]string{"baz-echoBinary", "baz-echoBool", "baz-echoDouble", "baz-echoEnum", "baz-echoI16", "baz-echoI32", "baz-echoI64", "baz-echoI8", "baz-echoString", "baz-echoStringList", "baz-echoStringMap", "baz-echoStringSet", "baz-echoStructList", "baz-echoStructSet", "baz-echoTypedef", "baz-testUuid", "baz-urlTest"}
+	bazCircuitBreakers := [17]string{"baz-EchoBinary", "baz-EchoBool", "baz-EchoDouble", "baz-EchoEnum", "baz-EchoI16", "baz-EchoI32", "baz-EchoI64", "baz-EchoI8", "baz-EchoString", "baz-EchoStringList", "baz-EchoStringMap", "baz-EchoStringSet", "baz-EchoStructList", "baz-EchoStructSet", "baz-EchoTypedef", "baz-TestUUID", "baz-URLTest"}
 
 	for _, name := range bazCircuitBreakers {
 		// client overrides for baz

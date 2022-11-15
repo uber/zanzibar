@@ -149,8 +149,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.methodTimeoutMapping") {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.methodTimeoutMapping", &clientMethodTimeoutMapping)
 	} else {
-		for serviceMethodName := range methodNames {
-			methodName := strings.Split(serviceMethodName, "::")[1]
+		for _, methodName := range methodNames {
 			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
 		}
 	}

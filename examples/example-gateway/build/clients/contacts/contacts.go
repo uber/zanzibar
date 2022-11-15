@@ -26,7 +26,6 @@ package contactsclient
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
@@ -113,8 +112,7 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.contacts.methodTimeoutMapping", &clientMethodTimeoutMapping)
 	} else {
 		//override the client overall-timeout with the client's method level timeout
-		for _, serviceMethodName := range methodNames {
-			methodName := strings.Split(serviceMethodName, "::")[1]
+		for methodName := range methodNames {
 			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
 		}
 	}

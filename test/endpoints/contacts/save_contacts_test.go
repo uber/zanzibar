@@ -91,7 +91,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 
 	// Test http method circuit breaker settings
 	settings := hystrix.GetCircuitSettings()
-	names := [2]string{"contacts-saveContacts", "contacts-testUrlUrl"}
+	names := [2]string{"contacts-SaveContacts", "contacts-TestURLURL"}
 	// contacts config values from production.json
 	timeout := 10000
 	max := 1000
