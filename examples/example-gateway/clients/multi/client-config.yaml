@@ -1,7 +1,7 @@
 config:
   exposedMethods:
-    HelloA: ServiceABack::helloA
-    HelloB: ServiceBBack::helloB
+    HelloA: ServiceABack::hello
+    HelloB: ServiceBBack::hello
   idlFile: clients/multi/multi.thrift
   idlFileSha: '{{placeholder}}'
 name: multi

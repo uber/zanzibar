@@ -54,7 +54,6 @@ type MockService interface {
 		method string,
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
-		timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 	) (bool, map[string]string, error)
 	MockClients() *MockClientNodes
 	Server() *zanzibar.Gateway
@@ -205,7 +204,6 @@ func (m *mockService) MakeTChannelRequest(
 	method string,
 	headers map[string]string,
 	req, res zanzibar.RWTStruct,
-	timeoutAndRetryOps *zanzibar.TimeoutAndRetryOptions,
 ) (bool, map[string]string, error) {
 	if !m.started {
 		return false, nil, errors.New("mock server is not started")
@@ -213,5 +211,5 @@ func (m *mockService) MakeTChannelRequest(
 
 	sc := m.server.ServerTChannel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
-	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res, timeoutAndRetryOps)
+	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }

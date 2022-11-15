@@ -29,13 +29,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ghodss/yaml"
+	yaml "github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-var testDir = getDirName()
+var testDir string = getDirName()
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
@@ -352,11 +352,6 @@ func DoCanReadFromFileTest(t *testing.T, filePath string) {
 	expectedArray := []string{"a", "b"}
 	config.MustGetStruct("array", &actualArray)
 	assert.Equal(t, expectedArray, actualArray)
-
-	actualMap := make(map[string]int64)
-	expectedMap := map[string]int64{"key1": 10, "key2": 100, "key3": 10000, "key4": 9999999}
-	config.MustGetStruct("mapStringInt", &actualMap)
-	assert.Equal(t, expectedMap, actualMap)
 }
 
 func TestCanReadJSONFromFile(t *testing.T) {
@@ -374,8 +369,7 @@ func TestCanReadJSONFromFile(t *testing.T) {
 				"Float":   float64(1.2),
 				"String":  "Science",
 			},
-			"array":        []string{"a", "b"},
-			"mapStringInt": map[string]int64{"key1": 10, "key2": 100, "key3": 10000, "key4": 9999999},
+			"array": []string{"a", "b"},
 		}),
 	})
 	DoCanReadFromFileTest(t, filepath.Join(testDir, "config", "test.json"))
@@ -397,8 +391,7 @@ func TestCanReadYAMLFromFile(t *testing.T) {
 				"Float":   float64(1.2),
 				"String":  "Science",
 			},
-			"array":        []string{"a", "b"},
-			"mapStringInt": map[string]int64{"key1": 10, "key2": 100, "key3": 10000, "key4": 9999999},
+			"array": []string{"a", "b"},
 		}),
 	})
 	DoCanReadFromFileTest(t, filepath.Join(testDir, "config", "test.yaml"))

@@ -26,7 +26,6 @@ package contactsclient
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
@@ -48,12 +47,10 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error)
 	TestURLURL(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -105,32 +102,18 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
 	}
-
-	//get mapping of client method and it's timeout
-	//if mapping is not provided, use client's timeout for all methods
-	clientMethodTimeoutMapping := make(map[string]int64)
-	if deps.Default.Config.ContainsKey("clients.contacts.methodTimeoutMapping") {
-		deps.Default.Config.MustGetStruct("clients.contacts.methodTimeoutMapping", &clientMethodTimeoutMapping)
-	} else {
-		//override the client overall-timeout with the client's method level timeout
-		for _, serviceMethodName := range methodNames {
-			methodName := strings.Split(serviceMethodName, "::")[1]
-			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
-		}
-	}
-
 	qpsLevels := map[string]string{
 		"contacts-SaveContacts": "default",
 		"contacts-TestURLURL":   "default",
 	}
 	if !circuitBreakerDisabled {
-		for methodName, methodTimeout := range clientMethodTimeoutMapping {
+		for methodName := range methodNames {
 			circuitBreakerName := "contacts" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -223,7 +206,6 @@ func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -237,7 +219,7 @@ func (c *contactsClient) SaveContacts(
 	}
 
 	var defaultRes *clientsIDlClientsContactsContacts.SaveContactsResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.SaveContactsRequest.UserUUID) + "/contacts"
@@ -318,7 +300,6 @@ func (c *contactsClient) SaveContacts(
 func (c *contactsClient) TestURLURL(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -332,7 +313,7 @@ func (c *contactsClient) TestURLURL(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", "Contacts::testUrlUrl", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", "Contacts::testUrlUrl", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/contacts" + "/testUrl"
