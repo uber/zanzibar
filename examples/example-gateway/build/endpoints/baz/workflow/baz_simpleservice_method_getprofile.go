@@ -62,7 +62,6 @@ func NewSimpleServiceGetProfileWorkflow(deps *module.Dependencies) SimpleService
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
-		defaultDeps:               deps.Default,
 	}
 }
 
@@ -71,7 +70,6 @@ type simpleServiceGetProfileWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
-	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -110,22 +108,8 @@ func (w simpleServiceGetProfileWorkflow) Handle(
 		}
 	}
 
-	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
-	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
-
-	//when endpoint level timeout information is available, override it with client level config
-	if w.defaultDeps.Config.ContainsKey("endpoints.baz.getProfile.timeoutPerAttempt") {
-		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.baz.getProfile.scaleFactor")
-		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.baz.getProfile.retryCount"))
-
-		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.baz.getProfile.backOffTimeAcrossRetries"))
-		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.baz.getProfile.timeoutPerAttempt"))
-
-		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
-	}
-
 	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Baz.GetProfile(
-		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+		ctx, clientHeaders, clientRequest,
 	)
 
 	if err != nil {

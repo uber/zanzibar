@@ -26,7 +26,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
-	"time"
 
 	barGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -36,15 +35,14 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-var defaultTestOptions = &testGateway.Options{
+var defaultTestOptions *testGateway.Options = &testGateway.Options{
 	KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 	KnownTChannelBackends: []string{"baz"},
 	ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 }
-var defaultTestConfig = map[string]interface{}{
+var defaultTestConfig map[string]interface{} = map[string]interface{}{
 	"clients.baz.serviceName": "baz",
 }
 
@@ -77,12 +75,6 @@ func TestHelloWorld(t *testing.T) {
 	_, result, _, err := bar.Hello(
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
-		},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
 		},
 	)
 	assert.Equal(t, new(barGen.SeeOthersRedirection), err)
@@ -132,12 +124,6 @@ func TestEchoI8(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI8_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -186,12 +172,6 @@ func TestEchoI16(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI16_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -240,12 +220,6 @@ func TestEchoI32(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI32_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -294,12 +268,6 @@ func TestEchoI64(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI64_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -318,7 +286,7 @@ func TestEchoDouble(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	var arg = 42.0
+	var arg float64 = 42.0
 	marshaled, err := json.Marshal(arg)
 	assert.NoError(t, err)
 
@@ -348,12 +316,6 @@ func TestEchoDouble(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoDouble_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -402,12 +364,6 @@ func TestEchoBool(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoBool_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -456,12 +412,6 @@ func TestEchoString(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoString_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -509,12 +459,6 @@ func TestEchoBinary(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoBinary_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -564,12 +508,6 @@ func TestEchoEnum(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoEnum_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, barGen.FruitApple, result)
@@ -618,12 +556,6 @@ func TestEchoTypedef(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoTypedef_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -675,12 +607,6 @@ func TestEchoStringSet(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStringSet_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -742,12 +668,6 @@ func TestEchoStructSet(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStructSet_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -796,12 +716,6 @@ func TestEchoStringList(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStringList_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -863,12 +777,6 @@ func TestEchoStructList(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStructList_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -930,12 +838,6 @@ func TestEchoI32Map(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoI32Map_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -997,12 +899,6 @@ func TestEchoStringMap(t *testing.T) {
 		context.Background(), map[string]string{
 			"x-uuid": "a-uuid",
 		}, &barGen.Echo_EchoStringMap_Args{Arg: arg},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -1093,12 +989,6 @@ func TestNestedQueryParamCallWithNil(t *testing.T) {
 		context.Background(), nil, &barGen.Bar_ArgWithNestedQueryParams_Args{
 			Request: nil,
 		},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NotNil(t, err)
 	assert.Equal(t, "The field .Request is required", err.Error())
@@ -1168,12 +1058,6 @@ func TestNormalRecur(t *testing.T) {
 		&barGen.Bar_NormalRecur_Args{
 			Request: &arg,
 		},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, int32(3), result.Height)
@@ -1208,12 +1092,6 @@ func TestDeleteFoo(t *testing.T) {
 		context.Background(),
 		map[string]string{"x-uuid": "a-uuid"},
 		&barGen.Bar_DeleteFoo_Args{UserUUID: "a-uuid"},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 }
@@ -1247,12 +1125,6 @@ func TestDeleteWithQueryParams(t *testing.T) {
 		context.Background(),
 		nil,
 		&barGen.Bar_DeleteWithQueryParams_Args{Filter: "foo", Count: &count},
-		&zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(2) * time.Duration(2000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
 	)
 	assert.NoError(t, err)
 }

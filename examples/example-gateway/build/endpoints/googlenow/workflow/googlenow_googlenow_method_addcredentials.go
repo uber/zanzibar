@@ -62,7 +62,6 @@ func NewGoogleNowAddCredentialsWorkflow(deps *module.Dependencies) GoogleNowAddC
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
-		defaultDeps:               deps.Default,
 	}
 }
 
@@ -71,7 +70,6 @@ type googleNowAddCredentialsWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
-	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -118,22 +116,8 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 		}
 	}
 
-	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
-	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
-
-	//when endpoint level timeout information is available, override it with client level config
-	if w.defaultDeps.Config.ContainsKey("endpoints.googlenow.addCredentials.timeoutPerAttempt") {
-		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.googlenow.addCredentials.scaleFactor")
-		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.googlenow.addCredentials.retryCount"))
-
-		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.googlenow.addCredentials.backOffTimeAcrossRetries"))
-		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.googlenow.addCredentials.timeoutPerAttempt"))
-
-		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
-	}
-
 	ctx, cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
-		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+		ctx, clientHeaders, clientRequest,
 	)
 
 	if err != nil {

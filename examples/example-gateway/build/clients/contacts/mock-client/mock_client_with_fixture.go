@@ -102,16 +102,11 @@ func (s *SaveContactsMock) Success() Call {
 	if f.Arg2Any {
 		arg2 = gomock.Any()
 	}
-	var arg3 interface{}
-	arg3 = f.Arg3
-	if f.Arg3Any {
-		arg3 = gomock.Any()
-	}
 
 	ret0 := f.Ret0
 	ret1 := f.Ret1
 	ret2 := f.Ret2
 	ret3 := f.Ret3
 
-	return Call{call: s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2, arg3).Return(ret0, ret1, ret2, ret3)}
+	return Call{call: s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2, ret3)}
 }

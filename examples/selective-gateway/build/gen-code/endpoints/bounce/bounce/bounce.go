@@ -27,14 +27,14 @@ type Bounce_Bounce_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Bounce_Bounce_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -60,16 +60,16 @@ func (v *Bounce_Bounce_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Bounce_Bounce_Args struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Bounce_Bounce_Args
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Bounce_Bounce_Args
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Bounce_Bounce_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -333,14 +333,14 @@ type Bounce_Bounce_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Bounce_Bounce_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -372,16 +372,16 @@ func (v *Bounce_Bounce_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Bounce_Bounce_Result struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Bounce_Bounce_Result
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Bounce_Bounce_Result
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Bounce_Bounce_Result) FromWire(w wire.Value) error {
 	var err error
 

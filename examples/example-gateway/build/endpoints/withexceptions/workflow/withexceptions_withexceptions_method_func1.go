@@ -61,7 +61,6 @@ func NewWithExceptionsFunc1Workflow(deps *module.Dependencies) WithExceptionsFun
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
-		defaultDeps:               deps.Default,
 	}
 }
 
@@ -70,7 +69,6 @@ type withExceptionsFunc1Workflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
-	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -107,22 +105,8 @@ func (w withExceptionsFunc1Workflow) Handle(
 		}
 	}
 
-	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
-	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
-
-	//when endpoint level timeout information is available, override it with client level config
-	if w.defaultDeps.Config.ContainsKey("endpoints.withexceptions.Func1.timeoutPerAttempt") {
-		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.withexceptions.Func1.scaleFactor")
-		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.withexceptions.Func1.retryCount"))
-
-		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.withexceptions.Func1.backOffTimeAcrossRetries"))
-		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.withexceptions.Func1.timeoutPerAttempt"))
-
-		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
-	}
-
 	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Withexceptions.Func1(
-		ctx, clientHeaders, &timeoutAndRetryConfig,
+		ctx, clientHeaders,
 	)
 
 	if err != nil {

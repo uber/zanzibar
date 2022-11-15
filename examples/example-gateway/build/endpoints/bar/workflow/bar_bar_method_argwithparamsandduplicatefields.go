@@ -62,7 +62,6 @@ func NewBarArgWithParamsAndDuplicateFieldsWorkflow(deps *module.Dependencies) Ba
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
-		defaultDeps:               deps.Default,
 	}
 }
 
@@ -71,7 +70,6 @@ type barArgWithParamsAndDuplicateFieldsWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
-	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -110,22 +108,8 @@ func (w barArgWithParamsAndDuplicateFieldsWorkflow) Handle(
 		}
 	}
 
-	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
-	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
-
-	//when endpoint level timeout information is available, override it with client level config
-	if w.defaultDeps.Config.ContainsKey("endpoints.bar.argWithParamsAndDuplicateFields.timeoutPerAttempt") {
-		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.bar.argWithParamsAndDuplicateFields.scaleFactor")
-		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.argWithParamsAndDuplicateFields.retryCount"))
-
-		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.argWithParamsAndDuplicateFields.backOffTimeAcrossRetries"))
-		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.argWithParamsAndDuplicateFields.timeoutPerAttempt"))
-
-		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
-	}
-
 	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.ArgWithParamsAndDuplicateFields(
-		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+		ctx, clientHeaders, clientRequest,
 	)
 
 	if err != nil {

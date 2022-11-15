@@ -26,7 +26,6 @@ package multiclient
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
@@ -46,12 +45,10 @@ type Client interface {
 	HelloA(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	HelloB(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -95,40 +92,26 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	methodNames := map[string]string{
-		"HelloA": "ServiceABack::helloA",
-		"HelloB": "ServiceBBack::helloB",
+		"HelloA": "ServiceABack::hello",
+		"HelloB": "ServiceBBack::hello",
 	}
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.multi.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.multi.circuitBreakerDisabled")
 	}
-
-	//get mapping of client method and it's timeout
-	//if mapping is not provided, use client's timeout for all methods
-	clientMethodTimeoutMapping := make(map[string]int64)
-	if deps.Default.Config.ContainsKey("clients.multi.methodTimeoutMapping") {
-		deps.Default.Config.MustGetStruct("clients.multi.methodTimeoutMapping", &clientMethodTimeoutMapping)
-	} else {
-		//override the client overall-timeout with the client's method level timeout
-		for _, serviceMethodName := range methodNames {
-			methodName := strings.Split(serviceMethodName, "::")[1]
-			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
-		}
-	}
-
 	qpsLevels := map[string]string{
-		"multi-HelloA": "default",
+		"multi-HelloA": "1",
 		"multi-HelloB": "default",
 	}
 	if !circuitBreakerDisabled {
-		for methodName, methodTimeout := range clientMethodTimeoutMapping {
+		for methodName := range methodNames {
 			circuitBreakerName := "multi" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -220,7 +203,6 @@ func (c *multiClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *multiClient) HelloA(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -230,11 +212,11 @@ func (c *multiClient) HelloA(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 	if c.requestProcedureHeaderKey != "" {
-		headers[c.requestProcedureHeaderKey] = "ServiceABack::helloA"
+		headers[c.requestProcedureHeaderKey] = "ServiceABack::hello"
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::helloA", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::hello", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceA_b" + "/hello"
@@ -309,7 +291,6 @@ func (c *multiClient) HelloA(
 func (c *multiClient) HelloB(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -319,11 +300,11 @@ func (c *multiClient) HelloB(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 	if c.requestProcedureHeaderKey != "" {
-		headers[c.requestProcedureHeaderKey] = "ServiceBBack::helloB"
+		headers[c.requestProcedureHeaderKey] = "ServiceBBack::hello"
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::helloB", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::hello", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceB_b" + "/hello"

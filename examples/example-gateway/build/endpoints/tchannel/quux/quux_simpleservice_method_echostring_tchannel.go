@@ -150,10 +150,10 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 	timeout := time.Millisecond * time.Duration(
 		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
 	)
-	timeoutPerAttemptConf := int(h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"))
-	timeoutPerAttempt := time.Millisecond * time.Duration(timeoutPerAttemptConf)
 
-	maxAttempts := int(h.Deps.Default.Config.MustGetInt("clients..retryCount"))
+	timeoutPerAttempt := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
+	)
 
 	methodNames := map[string]string{
 		"SimpleService::EchoString": "EchoString",
@@ -180,9 +180,6 @@ func (h *SimpleServiceEchoStringHandler) redirectToDeputy(
 		},
 	)
 
-	timeoutAndRetryConfig := zanzibar.BuildTimeoutAndRetryConfig(timeoutPerAttemptConf, zanzibar.DefaultBackOffTimeAcrossRetriesConf,
-		maxAttempts, zanzibar.DefaultScaleFactor)
-
-	success, respHeaders, err := client.Call(ctx, "SimpleService", "EchoString", reqHeaders, req, res, &timeoutAndRetryConfig)
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "EchoString", reqHeaders, req, res)
 	return ctx, success, res, respHeaders, err
 }
