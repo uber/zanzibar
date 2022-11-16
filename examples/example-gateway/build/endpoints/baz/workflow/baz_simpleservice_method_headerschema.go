@@ -62,6 +62,7 @@ func NewSimpleServiceHeaderSchemaWorkflow(deps *module.Dependencies) SimpleServi
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
+		defaultDeps:               deps.Default,
 	}
 }
 
@@ -70,6 +71,7 @@ type simpleServiceHeaderSchemaWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
+	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -124,8 +126,22 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 		}
 	}
 
+	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
+	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
+
+	//when endpoint level timeout information is available, override it with client level config
+	if w.defaultDeps.Config.ContainsKey("endpoints.baz.headerSchema.timeoutPerAttempt") {
+		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.baz.headerSchema.scaleFactor")
+		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.baz.headerSchema.retryCount"))
+
+		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.baz.headerSchema.backOffTimeAcrossRetries"))
+		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.baz.headerSchema.timeoutPerAttempt"))
+
+		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
+	}
+
 	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Baz.HeaderSchema(
-		ctx, clientHeaders, clientRequest,
+		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
 	)
 
 	if err != nil {

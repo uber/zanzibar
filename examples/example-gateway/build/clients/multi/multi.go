@@ -45,10 +45,12 @@ type Client interface {
 	HelloA(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	HelloB(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -92,26 +94,39 @@ func NewClient(deps *module.Dependencies) Client {
 	}
 
 	methodNames := map[string]string{
-		"HelloA": "ServiceABack::hello",
-		"HelloB": "ServiceBBack::hello",
+		"HelloA": "ServiceABack::helloA",
+		"HelloB": "ServiceBBack::helloB",
 	}
 	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
 	circuitBreakerDisabled := false
 	if deps.Default.Config.ContainsKey("clients.multi.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.multi.circuitBreakerDisabled")
 	}
+
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.multi.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.multi.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		//override the client overall-timeout with the client's method level timeout
+		for methodName := range methodNames {
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
-		"multi-HelloA": "1",
+		"multi-HelloA": "default",
 		"multi-HelloB": "default",
 	}
 	if !circuitBreakerDisabled {
-		for methodName := range methodNames {
+		for methodName, methodTimeout := range clientMethodTimeoutMapping {
 			circuitBreakerName := "multi" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -203,6 +218,7 @@ func (c *multiClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *multiClient) HelloA(
 	ctx context.Context,
 	headers map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -212,11 +228,11 @@ func (c *multiClient) HelloA(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 	if c.requestProcedureHeaderKey != "" {
-		headers[c.requestProcedureHeaderKey] = "ServiceABack::hello"
+		headers[c.requestProcedureHeaderKey] = "ServiceABack::helloA"
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::hello", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::helloA", c.httpClient, timeoutAndRetryCfg)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceA_b" + "/hello"
@@ -291,6 +307,7 @@ func (c *multiClient) HelloA(
 func (c *multiClient) HelloB(
 	ctx context.Context,
 	headers map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -300,11 +317,11 @@ func (c *multiClient) HelloB(
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 	if c.requestProcedureHeaderKey != "" {
-		headers[c.requestProcedureHeaderKey] = "ServiceBBack::hello"
+		headers[c.requestProcedureHeaderKey] = "ServiceBBack::helloB"
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::hello", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::helloB", c.httpClient, timeoutAndRetryCfg)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceB_b" + "/hello"

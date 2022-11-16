@@ -51,21 +51,25 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	NoContent(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	NoContentNoException(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	CorgeNoContentOnException(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsCorgeCorge.Foo, map[string]string, error)
 }
 
@@ -135,6 +139,19 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.corge-http.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge-http.circuitBreakerDisabled")
 	}
+
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.corge-http.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.corge-http.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		//override the client overall-timeout with the client's method level timeout
+		for methodName := range methodNames {
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
 		"corge-http-CorgeNoContentOnException": "default",
 		"corge-http-EchoString":                "default",
@@ -142,13 +159,13 @@ func NewClient(deps *module.Dependencies) Client {
 		"corge-http-NoContentNoException":      "default",
 	}
 	if !circuitBreakerDisabled {
-		for methodName := range methodNames {
+		for methodName, methodTimeout := range clientMethodTimeoutMapping {
 			circuitBreakerName := "corge-http" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -259,6 +276,7 @@ func (c *corgeHTTPClient) EchoString(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -272,7 +290,7 @@ func (c *corgeHTTPClient) EchoString(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Corge::echoString", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Corge::echoString", c.httpClient, timeoutAndRetryCfg)
 
 	headers[c.callerHeader] = c.callerName
 
@@ -368,6 +386,7 @@ func (c *corgeHTTPClient) NoContent(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -380,7 +399,7 @@ func (c *corgeHTTPClient) NoContent(
 		headers[c.requestProcedureHeaderKey] = "Corge::noContent"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContent", "Corge::noContent", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContent", "Corge::noContent", c.httpClient, timeoutAndRetryCfg)
 
 	headers[c.callerHeader] = c.callerName
 
@@ -471,6 +490,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -483,7 +503,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 		headers[c.requestProcedureHeaderKey] = "Corge::noContentNoException"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContentNoException", "Corge::noContentNoException", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContentNoException", "Corge::noContentNoException", c.httpClient, timeoutAndRetryCfg)
 
 	headers[c.callerHeader] = c.callerName
 
@@ -569,6 +589,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsCorgeCorge.Foo, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -582,7 +603,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	}
 
 	var defaultRes *clientsIDlClientsCorgeCorge.Foo
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CorgeNoContentOnException", "Corge::noContentOnException", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CorgeNoContentOnException", "Corge::noContentOnException", c.httpClient, timeoutAndRetryCfg)
 
 	headers[c.callerHeader] = c.callerName
 

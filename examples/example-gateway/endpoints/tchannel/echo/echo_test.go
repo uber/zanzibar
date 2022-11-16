@@ -3,10 +3,12 @@ package echo_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/echo/echo"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/mock-service"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
 func TestEcho(t *testing.T) {
@@ -23,7 +25,12 @@ func TestEcho(t *testing.T) {
 	var result echo.Echo_Echo_Result
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
-		ctx, "Echo", "echo", nil, args, &result,
+		ctx, "Echo", "echo", nil, args, &result, &runtime.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: runtime.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	if !assert.NoError(t, err, "got tchannel error") {
 		return

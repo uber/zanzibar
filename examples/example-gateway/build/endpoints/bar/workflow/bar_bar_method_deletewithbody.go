@@ -62,6 +62,7 @@ func NewBarDeleteWithBodyWorkflow(deps *module.Dependencies) BarDeleteWithBodyWo
 		Clients:                   deps.Client,
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
+		defaultDeps:               deps.Default,
 	}
 }
 
@@ -70,6 +71,7 @@ type barDeleteWithBodyWorkflow struct {
 	Clients                   *module.ClientDependencies
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
+	defaultDeps               *zanzibar.DefaultDependencies
 }
 
 // Handle calls thrift client.
@@ -108,8 +110,22 @@ func (w barDeleteWithBodyWorkflow) Handle(
 		}
 	}
 
+	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
+	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
+
+	//when endpoint level timeout information is available, override it with client level config
+	if w.defaultDeps.Config.ContainsKey("endpoints.bar.deleteWithBody.timeoutPerAttempt") {
+		scaleFactor := w.defaultDeps.Config.MustGetFloat("endpoints.bar.deleteWithBody.scaleFactor")
+		maxRetry := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.deleteWithBody.retryCount"))
+
+		backOffTimeAcrossRetriesCfg := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.deleteWithBody.backOffTimeAcrossRetries"))
+		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.deleteWithBody.timeoutPerAttempt"))
+
+		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
+	}
+
 	ctx, _, err := w.Clients.Bar.DeleteWithBody(
-		ctx, clientHeaders, clientRequest,
+		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
 	)
 
 	if err != nil {

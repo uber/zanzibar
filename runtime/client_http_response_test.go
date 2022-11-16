@@ -82,7 +82,13 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	)
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client,
+		&zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		})
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
@@ -144,7 +150,13 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	)
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client,
+		&zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		})
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
@@ -215,7 +227,13 @@ func TestUnknownStatusCode(t *testing.T) {
 
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client,
+		&zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		})
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
@@ -290,7 +308,13 @@ func TestNotFollowRedirect(t *testing.T) {
 
 	ctx := context.Background()
 
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client,
+		&zanzibar.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
+		})
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)

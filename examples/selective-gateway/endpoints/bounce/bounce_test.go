@@ -3,6 +3,7 @@ package bounce_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	mock "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/mock-service"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
 func TestEcho(t *testing.T) {
@@ -33,7 +35,12 @@ func TestEcho(t *testing.T) {
 		Return(ctx, &mirror.InternalResponse{Message: message}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
-		ctx, "Bounce", "bounce", nil, args, &result,
+		ctx, "Bounce", "bounce", nil, args, &result, &runtime.TimeoutAndRetryOptions{
+			OverallTimeoutInMs:           time.Duration(2000) * time.Millisecond,
+			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+			MaxAttempts:                  1,
+			BackOffTimeAcrossRetriesInMs: runtime.DefaultBackOffTimeAcrossRetries,
+		},
 	)
 	require.NoError(t, err, "got tchannel error")
 
