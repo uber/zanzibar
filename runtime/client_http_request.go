@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -39,21 +40,22 @@ var metricNormalizer = strings.NewReplacer("::", "--")
 
 // ClientHTTPRequest is the struct for making a single client request using an outbound http client.
 type ClientHTTPRequest struct {
-	ClientID             string
-	ClientTargetEndpoint string
-	MethodName           string
-	Metrics              ContextMetrics
-	client               *HTTPClient
-	httpReq              *http.Request
-	res                  *ClientHTTPResponse
-	started              bool
-	startTime            time.Time
-	Logger               *zap.Logger
-	ContextLogger        ContextLogger
-	rawBody              []byte
-	defaultHeaders       map[string]string
-	ctx                  context.Context
-	jsonWrapper          jsonwrapper.JSONWrapper
+	ClientID               string
+	ClientTargetEndpoint   string
+	MethodName             string
+	Metrics                ContextMetrics
+	client                 *HTTPClient
+	httpReq                *http.Request
+	res                    *ClientHTTPResponse
+	started                bool
+	startTime              time.Time
+	Logger                 *zap.Logger
+	ContextLogger          ContextLogger
+	rawBody                []byte
+	defaultHeaders         map[string]string
+	ctx                    context.Context
+	jsonWrapper            jsonwrapper.JSONWrapper
+	timeoutAndRetryOptions *TimeoutAndRetryOptions
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
@@ -63,6 +65,7 @@ func NewClientHTTPRequest(
 	clientMethod string,
 	clientTargetEndpoint string,
 	client *HTTPClient,
+	timeoutAndRetryOptions *TimeoutAndRetryOptions,
 ) *ClientHTTPRequest {
 	scopeTags := map[string]string{
 		scopeTagClientMethod:    clientMethod,
@@ -72,16 +75,22 @@ func NewClientHTTPRequest(
 
 	ctx = WithScopeTags(ctx, scopeTags)
 	req := &ClientHTTPRequest{
-		ClientID:             clientID,
-		MethodName:           clientMethod,
-		ClientTargetEndpoint: clientTargetEndpoint,
-		Metrics:              client.contextMetrics,
-		client:               client,
-		ContextLogger:        client.ContextLogger,
-		defaultHeaders:       client.DefaultHeaders,
-		ctx:                  ctx,
-		jsonWrapper:          client.JSONWrapper,
+		ClientID:               clientID,
+		MethodName:             clientMethod,
+		ClientTargetEndpoint:   clientTargetEndpoint,
+		Metrics:                client.contextMetrics,
+		client:                 client,
+		ContextLogger:          client.ContextLogger,
+		defaultHeaders:         client.DefaultHeaders,
+		ctx:                    ctx,
+		jsonWrapper:            client.JSONWrapper,
+		timeoutAndRetryOptions: timeoutAndRetryOptions,
 	}
+	req.ContextLogger.Debug(req.ctx, "ClientHTTPRequest definition",
+		zap.String("clientId", req.ClientID), zap.String("methodName", req.MethodName),
+		zap.Int64("req.RequestTimeoutPerAttemptInMs", int64(req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)),
+		zap.Int("req.maxAttempts", req.timeoutAndRetryOptions.MaxAttempts))
+
 	req.res = NewClientHTTPResponse(req)
 	req.start()
 	return req
@@ -203,19 +212,78 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 		/* coverage ignore next line */
 		return nil, err
 	}
+	var retryCount int64 = 1
+	var res *http.Response
 
-	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
+	//when timeoutAndRetryOptions per request is not configured, use default client level timeout
+	if req.timeoutAndRetryOptions == nil || req.timeoutAndRetryOptions.MaxAttempts == 0 {
+		res, err = req.client.Client.Do(req.httpReq.WithContext(ctx))
+	} else {
+		res, retryCount, err = req.executeDoWithRetry(ctx) //new code for retry and timeout per ep level
+	}
+
 	span.Finish()
+
 	if err != nil {
-		req.ContextLogger.ErrorZ(req.ctx, "Could not make outbound request", zap.Error(err))
-		return nil, err
+		req.ContextLogger.ErrorZ(req.ctx, fmt.Sprintf("Could not make http outbound %s.%s request",
+			req.ClientID, req.MethodName), zap.Error(err))
+		return nil, errors.Wrapf(err, "errors while making outbound %s.%s request", req.ClientID, req.MethodName)
 	}
 
 	// emit metrics
-	req.Metrics.IncCounter(req.ctx, clientRequest, 1)
+	req.Metrics.IncCounter(req.ctx, clientRequest, retryCount)
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil
+}
+
+//executeDoWithRetry will execute executeDo with retries
+func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Response, int64, error) {
+	var err error
+	var res *http.Response
+	var retryCount int64 = 0
+
+	for i := 0; i < req.timeoutAndRetryOptions.MaxAttempts; i++ {
+		retryCount++
+		res, err = req.executeDo(ctx)
+
+		if err == nil {
+			return res, retryCount, nil
+		}
+
+		var shouldRetry = false
+		// if attempts are pending, wait for backoff duration before next attempt
+		if i+1 < req.timeoutAndRetryOptions.MaxAttempts {
+			shouldRetry = req.client.CheckRetry(ctx, req.timeoutAndRetryOptions, res, err)
+		}
+
+		req.ContextLogger.GetLogger().Warn("errors while making http outbound request",
+			zap.Error(err),
+			zap.String("clientId", req.ClientID), zap.String("methodName", req.MethodName),
+			zap.Int64("attempt", retryCount),
+			zap.Int("maxAttempts", req.timeoutAndRetryOptions.MaxAttempts),
+			zap.Bool("shouldRetry", shouldRetry))
+
+		//TODO (future releases) - make retry conditional, inspect error/response and then retry
+
+		//reassign body
+		if req.rawBody != nil && len(req.rawBody) > 0 {
+			req.httpReq.Body = ioutil.NopCloser(bytes.NewBuffer(req.rawBody))
+		}
+
+		//Break loop if no retries
+		if !shouldRetry {
+			break
+		}
+	}
+	return nil, retryCount, err
+}
+
+//executeDo will send the request out with a timeout
+func (req *ClientHTTPRequest) executeDo(ctx context.Context) (*http.Response, error) {
+	attemptCtx, cancelFn := context.WithTimeout(ctx, req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)
+	defer cancelFn()
+	return req.client.Client.Do(req.httpReq.WithContext(attemptCtx))
 }
 
 // InjectSpanToHeader will inject span to request header

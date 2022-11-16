@@ -309,6 +309,9 @@ type ContextLogger interface {
 	PanicZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
 	WarnZ(ctx context.Context, msg string, fields ...zap.Field) context.Context
 
+	//GetLogger returns the raw logger
+	GetLogger() Logger
+
 	// Other utility methods on the logger
 	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
 
@@ -321,6 +324,11 @@ func NewContextLogger(log *zap.Logger) ContextLogger {
 		log:              log,
 		skipZanzibarLogs: false,
 	}
+}
+
+//GetLogger returns the logger
+func (c *contextLogger) GetLogger() Logger {
+	return c.log
 }
 
 func (c *contextLogger) SetSkipZanzibarLogs(skipZanzibarLogs bool) {

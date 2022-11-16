@@ -47,10 +47,12 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	CheckCredentials(
 		ctx context.Context,
 		reqHeaders map[string]string,
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 }
 
@@ -102,18 +104,31 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.google-now.circuitBreakerDisabled") {
 		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.google-now.circuitBreakerDisabled")
 	}
+
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.google-now.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.google-now.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		//override the client overall-timeout with the client's method level timeout
+		for methodName := range methodNames {
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
 	qpsLevels := map[string]string{
 		"google-now-AddCredentials":   "2",
 		"google-now-CheckCredentials": "1",
 	}
 	if !circuitBreakerDisabled {
-		for methodName := range methodNames {
+		for methodName, methodTimeout := range clientMethodTimeoutMapping {
 			circuitBreakerName := "google-now" + "-" + methodName
 			qpsLevel := "default"
 			if level, ok := qpsLevels[circuitBreakerName]; ok {
 				qpsLevel = level
 			}
-			configureCircuitBreaker(deps, timeoutVal, circuitBreakerName, qpsLevel)
+			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
 		}
 	}
 
@@ -206,6 +221,7 @@ func (c *googleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -218,7 +234,7 @@ func (c *googleNowClient) AddCredentials(
 		headers[c.requestProcedureHeaderKey] = "GoogleNowService::addCredentials"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", "GoogleNowService::addCredentials", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", "GoogleNowService::addCredentials", c.httpClient, timeoutAndRetryCfg)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/add-credentials"
@@ -293,6 +309,7 @@ func (c *googleNowClient) AddCredentials(
 func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -305,7 +322,7 @@ func (c *googleNowClient) CheckCredentials(
 		headers[c.requestProcedureHeaderKey] = "GoogleNowService::checkCredentials"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", "GoogleNowService::checkCredentials", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", "GoogleNowService::checkCredentials", c.httpClient, timeoutAndRetryCfg)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/check-credentials"

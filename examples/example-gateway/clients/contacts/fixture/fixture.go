@@ -14,6 +14,7 @@ var saveContactsFixtures = &mc.SaveContactsScenarios{
 				UserUUID: "foo",
 			},
 		},
+		Arg3Any: true,
 
 		Ret1: &gen.SaveContactsResponse{},
 	},

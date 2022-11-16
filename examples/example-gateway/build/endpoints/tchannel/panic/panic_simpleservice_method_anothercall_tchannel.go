@@ -200,10 +200,10 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 	timeout := time.Millisecond * time.Duration(
 		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
 	)
+	timeoutPerAttemptConf := int(h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"))
+	timeoutPerAttempt := time.Millisecond * time.Duration(timeoutPerAttemptConf)
 
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
-	)
+	maxAttempts := int(h.Deps.Default.Config.MustGetInt("clients..retryCount"))
 
 	methodNames := map[string]string{
 		"SimpleService::AnotherCall": "AnotherCall",
@@ -230,6 +230,9 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res)
+	timeoutAndRetryConfig := zanzibar.BuildTimeoutAndRetryConfig(timeoutPerAttemptConf, zanzibar.DefaultBackOffTimeAcrossRetriesConf,
+		maxAttempts, zanzibar.DefaultScaleFactor)
+
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res, &timeoutAndRetryConfig)
 	return ctx, success, res, respHeaders, err
 }

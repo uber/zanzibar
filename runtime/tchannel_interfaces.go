@@ -40,7 +40,7 @@ type RWTStruct interface {
 type TChannelCaller interface {
 	// Call should be passed the method to call, headers and the request/response thriftrw structs.
 	// The arguments returned are (whether there was an application error, unexpected error)
-	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (success bool, respHeaders map[string]string, err error)
+	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct, timeoutAndRetryOptions *TimeoutAndRetryOptions) (success bool, respHeaders map[string]string, err error)
 }
 
 // TChannelHandler abstracts handling of an RPC that is implemented by the generated server code.

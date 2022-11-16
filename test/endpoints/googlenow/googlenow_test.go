@@ -330,7 +330,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
 		LogWhitelist: map[string]bool{
-			"Could not make outbound request": true,
+			"Could not make http outbound google-now.AddCredentials request": true,
 		},
 		TestBinary:  util.DefaultMainFile("example-gateway"),
 		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
@@ -560,7 +560,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
 		LogWhitelist: map[string]bool{
-			"Could not make outbound request": true,
+			"Could not make http outbound google-now.CheckCredentials request": true,
 		},
 		TestBinary:  util.DefaultMainFile("example-gateway"),
 		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
