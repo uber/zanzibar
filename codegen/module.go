@@ -1844,6 +1844,8 @@ type ClassConfigBase struct {
 	Owner string `yaml:"owner,omitempty"`
 	// SelectiveBuilding allows the module to be built with subset of dependencies
 	SelectiveBuilding bool `yaml:"selectiveBuilding,omitempty" json:"selectiveBuilding"`
+	// BlockingReviewes contains the list of blocking reviewers for the particular module
+	BlockingReviewers []string `yaml:"blockingReviewers" json:"blockingReviewers"`
 }
 
 // ClassConfig maps onto a YAML configuration for a class type

@@ -8,5 +8,6 @@
 		]
 	},
 	"name": "health",
-	"type": "http"
+	"type": "http",
+	"blockingReviewers": ["abc@uber.com", "xyz@uber.com"]
 }
