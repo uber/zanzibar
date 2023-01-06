@@ -78,7 +78,7 @@ cyclo-check:
 	@gocyclo -over 15 $(filter-out examples ,$(PKG_FILES))
 
 .PHONY: lint
-lint: eclint-check
+lint: check-licence eclint-check
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
