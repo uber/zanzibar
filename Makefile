@@ -78,7 +78,7 @@ cyclo-check:
 	@gocyclo -over 15 $(filter-out examples ,$(PKG_FILES))
 
 .PHONY: lint
-lint: fix-licence check-licence eclint-check
+lint: check-licence eclint-check
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
@@ -285,6 +285,7 @@ jenkins-install:
 .PHONY: jenkins-test
 jenkins-test:
 	make check-generate
+	#make fix-licence
 	make lint
 	make test-only
 
