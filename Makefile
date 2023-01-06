@@ -40,6 +40,11 @@ install:
 	go build -o $(GOGOSLICK)/protoc-gen-gogoslick ./vendor/github.com/gogo/protobuf/protoc-gen-gogoslick/
 	go build -o $(YARPCGO)/protoc-gen-yarpc-go ./vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go/
 
+.PHONY: check-licence
+check-licence:
+	@echo "Checking uber-licence..."
+	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
+	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
@@ -73,7 +78,7 @@ cyclo-check:
 	@gocyclo -over 15 $(filter-out examples ,$(PKG_FILES))
 
 .PHONY: lint
-lint: check-licence eclint-check
+lint: fix-licence check-licence eclint-check
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
@@ -287,3 +292,4 @@ jenkins-test:
 jenkins:
 	$(MAKE) jenkins-install
 	$(MAKE) jenkins-test
+
