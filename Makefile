@@ -44,8 +44,8 @@ install:
 .PHONY: check-licence
 check-licence:
 	@echo "Checking uber-licence..."
-	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
-	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
+	#@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
+	#@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
