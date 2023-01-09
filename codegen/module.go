@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2023 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1844,6 +1844,8 @@ type ClassConfigBase struct {
 	Owner string `yaml:"owner,omitempty"`
 	// SelectiveBuilding allows the module to be built with subset of dependencies
 	SelectiveBuilding bool `yaml:"selectiveBuilding,omitempty" json:"selectiveBuilding"`
+	// BlockingReviewes contains the list of blocking reviewers for the particular module
+	BlockingReviewers []string `yaml:"blockingReviewers,omitempty" json:"blockingReviewers"`
 }
 
 // ClassConfig maps onto a YAML configuration for a class type

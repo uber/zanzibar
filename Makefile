@@ -285,6 +285,7 @@ jenkins-install:
 .PHONY: jenkins-test
 jenkins-test:
 	make check-generate
+	make fix-licence
 	make lint
 	make test-only
 
@@ -292,3 +293,4 @@ jenkins-test:
 jenkins:
 	$(MAKE) jenkins-install
 	$(MAKE) jenkins-test
+
