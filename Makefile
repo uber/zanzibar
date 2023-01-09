@@ -285,7 +285,7 @@ jenkins-install:
 .PHONY: jenkins-test
 jenkins-test:
 	make check-generate
-	#make lint
+	make lint
 	make test-only
 
 .PHONY: jenkins
