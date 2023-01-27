@@ -110,7 +110,6 @@ func NewHTTPClientContext(
 				MaxIdleConns:        500,
 				MaxIdleConnsPerHost: 500,
 			},
-			Timeout:       timeout,
 			CheckRedirect: checkRedirect,
 		},
 		BaseURL:        baseURL,
