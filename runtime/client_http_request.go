@@ -281,8 +281,7 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 
 //executeDo will send the request out with a timeout
 func (req *ClientHTTPRequest) executeDo(ctx context.Context) (*http.Response, error) {
-	attemptCtx, cancelFn := context.WithTimeout(ctx, req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)
-	defer cancelFn()
+	attemptCtx, _ := context.WithTimeout(ctx, req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)
 	return req.client.Client.Do(req.httpReq.WithContext(attemptCtx))
 }
 
