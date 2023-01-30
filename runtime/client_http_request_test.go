@@ -270,6 +270,60 @@ func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetries(t *testing
 		"the request should have failed due to context deadline (timeout)")
 }
 
+func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetriesSuccess(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			bodyBytes, _ := io.ReadAll(r.Body)
+			w.WriteHeader(200)
+			response := map[string]string{"Example-Header": r.Header.Get("Example-Header"), "body": string(bodyBytes)}
+			responseBytes, _ := json.Marshal(response)
+			_, _ = w.Write(responseBytes)
+			// Check that the default header got set and actually sent to the server.
+			assert.Equal(t, r.Header.Get("X-Client-ID"), "bar")
+			assert.Equal(t, r.Header.Get("Accept"), "application/test+json")
+		},
+	)
+
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	barClient := deps.Client.Bar
+	client := barClient.HTTPClient()
+
+	retryOptionsCopy := retryOptions
+	retryOptionsCopy.RequestTimeoutPerAttemptInMs = 500 * time.Millisecond
+	retryOptionsCopy.MaxAttempts = 2
+
+	ctx := context.Background()
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptionsCopy)
+
+	err = req.WriteJSON(
+		"POST",
+		client.BaseURL+"/bar-path",
+		map[string]string{
+			"Example-Header": "Example-Value",
+			"Accept":         "application/test+json",
+		},
+		"dummy body",
+	)
+	assert.NoError(t, err)
+
+	_, err = req.Do()
+
+	assert.NoError(t, err)
+}
+
 func TestBarClientWithoutHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,

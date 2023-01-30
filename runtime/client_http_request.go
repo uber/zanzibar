@@ -215,11 +215,11 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	var retryCount int64 = 1
 	var res *http.Response
 
-	//when timeoutAndRetryOptions per request is not configured, use default client level timeout
+	// when timeoutAndRetryOptions per request is not configured, use default client level timeout
 	if req.timeoutAndRetryOptions == nil || req.timeoutAndRetryOptions.MaxAttempts == 0 {
 		res, err = req.client.Client.Do(req.httpReq.WithContext(ctx))
 	} else {
-		res, retryCount, err = req.executeDoWithRetry(ctx) //new code for retry and timeout per ep level
+		res, retryCount, err = req.executeDoWithRetry(ctx) // new code for retry and timeout per ep level
 	}
 
 	span.Finish()
@@ -237,7 +237,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	return req.res, nil
 }
 
-//executeDoWithRetry will execute executeDo with retries
+// executeDoWithRetry will execute executeDo with retries
 func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Response, int64, error) {
 	var err error
 	var res *http.Response
@@ -264,14 +264,14 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 			zap.Int("maxAttempts", req.timeoutAndRetryOptions.MaxAttempts),
 			zap.Bool("shouldRetry", shouldRetry))
 
-		//TODO (future releases) - make retry conditional, inspect error/response and then retry
+		// TODO (future releases) - make retry conditional, inspect error/response and then retry
 
-		//reassign body
+		// reassign body
 		if req.rawBody != nil && len(req.rawBody) > 0 {
 			req.httpReq.Body = io.NopCloser(bytes.NewBuffer(req.rawBody))
 		}
 
-		//Break loop if no retries
+		// Break loop if no retries
 		if !shouldRetry {
 			break
 		}
@@ -279,10 +279,20 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 	return nil, retryCount, err
 }
 
-//executeDo will send the request out with a timeout
+// executeDo will send the request out with a timeout
 func (req *ClientHTTPRequest) executeDo(ctx context.Context) (*http.Response, error) {
-	attemptCtx, _ := context.WithTimeout(ctx, req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)
-	return req.client.Client.Do(req.httpReq.WithContext(attemptCtx))
+	ctx, cancel := context.WithTimeout(ctx, req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)
+	defer cancel()
+	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
+	// when no error, read body and capture before closing the connection
+	if err == nil {
+		req.res.setRawHTTPResponse(res)
+		_, err = req.res.ReadAll()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, err
 }
 
 // InjectSpanToHeader will inject span to request header
