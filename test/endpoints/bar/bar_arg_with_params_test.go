@@ -21,7 +21,7 @@
 package bar_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -48,7 +48,7 @@ func TestBarCallWithParams(t *testing.T) {
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"GET", "/bar/argWithParams/:uuid/segment/:user-uuid",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
+			bytes, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t, 0, len(bytes))
 			assert.Equal(
@@ -75,7 +75,7 @@ func TestBarCallWithParams(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}

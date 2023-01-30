@@ -23,7 +23,7 @@ package zanzibar
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,7 +102,7 @@ func (s *routerSuite) TestRouter() {
 		w := httptest.NewRecorder()
 		s.router.ServeHTTP(w, req)
 		s.Equal(testCase.ResponseCode, w.Code, "expected response code for %dth test case to be equal", i)
-		body, _ := ioutil.ReadAll(w.Result().Body)
+		body, _ := io.ReadAll(w.Result().Body)
 		s.Equal(testCase.ResponseBody, body, "expected response body for %dth test case to be equal", i)
 	}
 }
@@ -136,7 +136,7 @@ func (s *routerSuite) TestRouteConflict() {
 	w := httptest.NewRecorder()
 	s.router.ServeHTTP(w, req)
 	s.Equal(http.StatusOK, w.Code)
-	body, _ := ioutil.ReadAll(w.Result().Body)
+	body, _ := io.ReadAll(w.Result().Body)
 	s.Equal([]byte("foo1\n"), body)
 }
 
@@ -157,7 +157,7 @@ func (s *routerSuite) TestRouteConflictVariable() {
 	w := httptest.NewRecorder()
 	s.router.ServeHTTP(w, req)
 	s.Equal(http.StatusOK, w.Code)
-	body, _ := ioutil.ReadAll(w.Result().Body)
+	body, _ := io.ReadAll(w.Result().Body)
 	s.Equal([]byte("foo a\n"), body)
 }
 

@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"testing"
 	"testing/iotest"
@@ -149,7 +150,7 @@ func TestReadHeadersLeftoverBytes(t *testing.T) {
 	assert.NoError(t, err, "ReadHeaders failed")
 	assert.Equal(t, map[string]string(nil), headers, "Headers mismatch")
 
-	leftover, err := ioutil.ReadAll(r)
+	leftover, err := io.ReadAll(r)
 	assert.NoError(t, err, "ReadAll failed")
 	assert.Equal(t, []byte{1, 2, 3}, leftover, "Reader consumed leftover bytes")
 }

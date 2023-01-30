@@ -6,12 +6,11 @@ package clientless
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 type Request struct {
@@ -26,14 +25,14 @@ type Request struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Request) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -69,16 +68,16 @@ func (v *Request) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Request struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Request
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Request
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Request) FromWire(w wire.Value) error {
 	var err error
 
@@ -310,14 +309,14 @@ type Response struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Response) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -353,16 +352,16 @@ func (v *Response) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Response struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Response
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Response
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Response) FromWire(w wire.Value) error {
 	var err error
 
@@ -587,14 +586,14 @@ type Clientless_Beta_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Clientless_Beta_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -636,16 +635,16 @@ func _Request_Read(w wire.Value) (*Request, error) {
 // An error is returned if we were unable to build a Clientless_Beta_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Clientless_Beta_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Clientless_Beta_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Clientless_Beta_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -973,14 +972,14 @@ type Clientless_Beta_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Clientless_Beta_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1018,16 +1017,16 @@ func _Response_Read(w wire.Value) (*Response, error) {
 // An error is returned if we were unable to build a Clientless_Beta_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Clientless_Beta_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Clientless_Beta_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Clientless_Beta_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -1239,14 +1238,14 @@ type Clientless_ClientlessArgWithHeaders_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Clientless_ClientlessArgWithHeaders_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -1280,16 +1279,16 @@ func (v *Clientless_ClientlessArgWithHeaders_Args) ToWire() (wire.Value, error) 
 // An error is returned if we were unable to build a Clientless_ClientlessArgWithHeaders_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Clientless_ClientlessArgWithHeaders_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Clientless_ClientlessArgWithHeaders_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Clientless_ClientlessArgWithHeaders_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -1611,14 +1610,14 @@ type Clientless_ClientlessArgWithHeaders_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Clientless_ClientlessArgWithHeaders_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1650,16 +1649,16 @@ func (v *Clientless_ClientlessArgWithHeaders_Result) ToWire() (wire.Value, error
 // An error is returned if we were unable to build a Clientless_ClientlessArgWithHeaders_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Clientless_ClientlessArgWithHeaders_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Clientless_ClientlessArgWithHeaders_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Clientless_ClientlessArgWithHeaders_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -1864,14 +1863,14 @@ type Clientless_EmptyclientlessRequest_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Clientless_EmptyclientlessRequest_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1899,16 +1898,16 @@ func (v *Clientless_EmptyclientlessRequest_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Clientless_EmptyclientlessRequest_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Clientless_EmptyclientlessRequest_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Clientless_EmptyclientlessRequest_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Clientless_EmptyclientlessRequest_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -2166,14 +2165,14 @@ type Clientless_EmptyclientlessRequest_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Clientless_EmptyclientlessRequest_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -2190,16 +2189,16 @@ func (v *Clientless_EmptyclientlessRequest_Result) ToWire() (wire.Value, error) 
 // An error is returned if we were unable to build a Clientless_EmptyclientlessRequest_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Clientless_EmptyclientlessRequest_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Clientless_EmptyclientlessRequest_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Clientless_EmptyclientlessRequest_Result) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {

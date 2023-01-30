@@ -21,7 +21,7 @@
 package bar_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -90,7 +90,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -139,7 +139,7 @@ func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -188,7 +188,7 @@ func TestBarWithQueryParamsCallWithMalformedQuery(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -255,7 +255,7 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -303,7 +303,7 @@ func TestBarManyQueryParamsWithInvalidBool(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -364,7 +364,7 @@ func TestBarManyQueryParamsWithInvalidInt8(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -425,7 +425,7 @@ func TestBarManyQueryParamsWithInvalidInt16(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -486,7 +486,7 @@ func TestBarManyQueryParamsWithInvalidInt32(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -547,7 +547,7 @@ func TestBarManyQueryParamsWithInvalidInt64(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -608,7 +608,7 @@ func TestBarManyQueryParamsWithInvalidFloat64(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -645,7 +645,7 @@ func TestBarWithQueryHeaders(t *testing.T) {
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar/argWithQueryHeader",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
+			bytes, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
 				`{"userUUID":"a-uuid"}`,
@@ -674,7 +674,7 @@ func TestBarWithQueryHeaders(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -718,7 +718,7 @@ func TestBarWithManyQueryParamsRequiredCall(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -797,7 +797,7 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -851,7 +851,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -906,7 +906,7 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -956,7 +956,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -1007,7 +1007,7 @@ func TestBarWithNearDupQueryParams(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}

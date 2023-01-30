@@ -22,7 +22,7 @@ package bar_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -49,7 +49,7 @@ func TestBarWithHeadersTransformCall(t *testing.T) {
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar/argWithHeaders",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
+			bytes, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
 				[]byte(`{}`),
@@ -84,7 +84,7 @@ func TestBarWithHeadersTransformCall(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -115,7 +115,7 @@ func TestBarWithHeadersTransformFailWithoutHeaders(t *testing.T) {
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar/argWithHeaders",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
+			bytes, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
 				[]byte(`{"name":"foo","userUUID":"b-uuid"}`),
@@ -148,7 +148,7 @@ func TestBarWithHeadersTransformFailWithoutHeaders(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -202,7 +202,7 @@ func TestBarWithHeadersTransformWithDuplicateField(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}

@@ -22,7 +22,7 @@ package bar_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -82,7 +82,7 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	assert.Equal(t, "500 Internal Server Error", res.Status)
 	assert.Equal(t, 2, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -137,7 +137,7 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 		assert.Equal(t, "500 Internal Server Error", res.Status)
 		assert.Equal(t, 0, counter)
 
-		respBytes, err := ioutil.ReadAll(res.Body)
+		respBytes, err := io.ReadAll(res.Body)
 		if !assert.NoError(t, err, "got http resp error") {
 			return
 		}
@@ -163,7 +163,7 @@ func TestBarExceptionCode(t *testing.T) {
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar-path",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
+			bytes, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
 				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}}}`),

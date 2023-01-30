@@ -9,15 +9,14 @@ import (
 	json "encoding/json"
 	errors "errors"
 	fmt "fmt"
-	math "math"
-	strconv "strconv"
-	strings "strings"
-
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	math "math"
+	strconv "strconv"
+	strings "strings"
 )
 
 type AuthErr struct {
@@ -31,14 +30,14 @@ type AuthErr struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *AuthErr) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -64,16 +63,16 @@ func (v *AuthErr) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a AuthErr struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v AuthErr
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v AuthErr
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *AuthErr) FromWire(w wire.Value) error {
 	var err error
 
@@ -247,14 +246,14 @@ type BazRequest struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *BazRequest) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -294,16 +293,16 @@ func (v *BazRequest) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a BazRequest struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v BazRequest
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v BazRequest
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *BazRequest) FromWire(w wire.Value) error {
 	var err error
 
@@ -570,8 +569,8 @@ func Fruit_Values() []Fruit {
 // UnmarshalText tries to decode Fruit from a byte slice
 // containing its name.
 //
-//	var v Fruit
-//	err := v.UnmarshalText([]byte("APPLE"))
+//   var v Fruit
+//   err := v.UnmarshalText([]byte("APPLE"))
 func (v *Fruit) UnmarshalText(value []byte) error {
 	switch s := string(value); s {
 	case "APPLE":
@@ -628,10 +627,10 @@ func (v Fruit) Ptr() *Fruit {
 
 // Encode encodes Fruit directly to bytes.
 //
-//	sWriter := BinaryStreamer.Writer(writer)
+//   sWriter := BinaryStreamer.Writer(writer)
 //
-//	var v Fruit
-//	return v.Encode(sWriter)
+//   var v Fruit
+//   return v.Encode(sWriter)
 func (v Fruit) Encode(sw stream.Writer) error {
 	return sw.WriteInt32(int32(v))
 }
@@ -648,16 +647,16 @@ func (v Fruit) ToWire() (wire.Value, error) {
 // FromWire deserializes Fruit from its Thrift-level
 // representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TI32)
-//	if err != nil {
-//	  return Fruit(0), err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TI32)
+//   if err != nil {
+//     return Fruit(0), err
+//   }
 //
-//	var v Fruit
-//	if err := v.FromWire(x); err != nil {
-//	  return Fruit(0), err
-//	}
-//	return v, nil
+//   var v Fruit
+//   if err := v.FromWire(x); err != nil {
+//     return Fruit(0), err
+//   }
+//   return v, nil
 func (v *Fruit) FromWire(w wire.Value) error {
 	*v = (Fruit)(w.GetI32())
 	return nil
@@ -665,13 +664,13 @@ func (v *Fruit) FromWire(w wire.Value) error {
 
 // Decode reads off the encoded Fruit directly off of the wire.
 //
-//	sReader := BinaryStreamer.Reader(reader)
+//   sReader := BinaryStreamer.Reader(reader)
 //
-//	var v Fruit
-//	if err := v.Decode(sReader); err != nil {
-//	  return Fruit(0), err
-//	}
-//	return v, nil
+//   var v Fruit
+//   if err := v.Decode(sReader); err != nil {
+//     return Fruit(0), err
+//   }
+//   return v, nil
 func (v *Fruit) Decode(sr stream.Reader) error {
 	i, err := sr.ReadInt32()
 	if err != nil {
@@ -762,14 +761,14 @@ type GetProfileRequest struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *GetProfileRequest) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -801,16 +800,16 @@ func _UUID_Read(w wire.Value) (UUID, error) {
 // An error is returned if we were unable to build a GetProfileRequest struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v GetProfileRequest
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v GetProfileRequest
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *GetProfileRequest) FromWire(w wire.Value) error {
 	var err error
 
@@ -1007,14 +1006,14 @@ func (_List_Profile_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *GetProfileResponse) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1064,16 +1063,16 @@ func _List_Profile_Read(l wire.ValueList) ([]*Profile, error) {
 // An error is returned if we were unable to build a GetProfileResponse struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v GetProfileResponse
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v GetProfileResponse
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *GetProfileResponse) FromWire(w wire.Value) error {
 	var err error
 
@@ -1322,14 +1321,14 @@ type HeaderSchema struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *HeaderSchema) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -1346,16 +1345,16 @@ func (v *HeaderSchema) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a HeaderSchema struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v HeaderSchema
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v HeaderSchema
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *HeaderSchema) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -1465,14 +1464,14 @@ type OtherAuthErr struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *OtherAuthErr) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1498,16 +1497,16 @@ func (v *OtherAuthErr) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a OtherAuthErr struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v OtherAuthErr
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v OtherAuthErr
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *OtherAuthErr) FromWire(w wire.Value) error {
 	var err error
 
@@ -1679,14 +1678,14 @@ type Profile struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Profile) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1721,16 +1720,16 @@ func _Recur1_Read(w wire.Value) (*Recur1, error) {
 // An error is returned if we were unable to build a Profile struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Profile
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Profile
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Profile) FromWire(w wire.Value) error {
 	var err error
 
@@ -1944,14 +1943,14 @@ func (_Map_UUID_Recur2_MapItemList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Recur1) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -2014,16 +2013,16 @@ func _Map_UUID_Recur2_Read(m wire.MapItemList) (map[UUID]*Recur2, error) {
 // An error is returned if we were unable to build a Recur1 struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Recur1
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Recur1
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Recur1) FromWire(w wire.Value) error {
 	var err error
 
@@ -2294,14 +2293,14 @@ type Recur2 struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Recur2) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -2344,16 +2343,16 @@ func _Recur3_Read(w wire.Value) (*Recur3, error) {
 // An error is returned if we were unable to build a Recur2 struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Recur2
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Recur2
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Recur2) FromWire(w wire.Value) error {
 	var err error
 
@@ -2580,14 +2579,14 @@ type Recur3 struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Recur3) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -2613,16 +2612,16 @@ func (v *Recur3) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Recur3 struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Recur3
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Recur3
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Recur3) FromWire(w wire.Value) error {
 	var err error
 
@@ -2838,14 +2837,14 @@ type TransHeaderType struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *TransHeaderType) ToWire() (wire.Value, error) {
 	var (
 		fields [7]wire.Field
@@ -2916,16 +2915,16 @@ func (v *TransHeaderType) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a TransHeaderType struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v TransHeaderType
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v TransHeaderType
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *TransHeaderType) FromWire(w wire.Value) error {
 	var err error
 
@@ -3438,14 +3437,14 @@ type SecondService_EchoBinary_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoBinary_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -3474,16 +3473,16 @@ func (v *SecondService_EchoBinary_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoBinary_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoBinary_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoBinary_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoBinary_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -3755,14 +3754,14 @@ type SecondService_EchoBinary_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoBinary_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -3794,16 +3793,16 @@ func (v *SecondService_EchoBinary_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoBinary_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoBinary_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoBinary_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoBinary_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -4008,14 +4007,14 @@ type SecondService_EchoBool_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoBool_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -4041,16 +4040,16 @@ func (v *SecondService_EchoBool_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoBool_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoBool_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoBool_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoBool_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -4314,14 +4313,14 @@ type SecondService_EchoBool_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoBool_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -4353,16 +4352,16 @@ func (v *SecondService_EchoBool_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoBool_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoBool_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoBool_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoBool_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -4581,14 +4580,14 @@ type SecondService_EchoDouble_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoDouble_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -4614,16 +4613,16 @@ func (v *SecondService_EchoDouble_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoDouble_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoDouble_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoDouble_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoDouble_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -4887,14 +4886,14 @@ type SecondService_EchoDouble_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoDouble_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -4926,16 +4925,16 @@ func (v *SecondService_EchoDouble_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoDouble_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoDouble_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoDouble_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoDouble_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -5156,14 +5155,14 @@ func Default_SecondService_EchoEnum_Args() *SecondService_EchoEnum_Args {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoEnum_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -5201,16 +5200,16 @@ func _Fruit_Read(w wire.Value) (Fruit, error) {
 // An error is returned if we were unable to build a SecondService_EchoEnum_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoEnum_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoEnum_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoEnum_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -5506,14 +5505,14 @@ type SecondService_EchoEnum_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoEnum_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -5545,16 +5544,16 @@ func (v *SecondService_EchoEnum_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoEnum_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoEnum_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoEnum_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoEnum_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -5763,14 +5762,14 @@ type SecondService_EchoI16_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI16_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -5796,16 +5795,16 @@ func (v *SecondService_EchoI16_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI16_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI16_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI16_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI16_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -6069,14 +6068,14 @@ type SecondService_EchoI16_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI16_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -6108,16 +6107,16 @@ func (v *SecondService_EchoI16_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI16_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI16_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI16_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI16_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -6336,14 +6335,14 @@ type SecondService_EchoI32_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI32_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -6369,16 +6368,16 @@ func (v *SecondService_EchoI32_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI32_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI32_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI32_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI32_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -6642,14 +6641,14 @@ type SecondService_EchoI32_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI32_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -6681,16 +6680,16 @@ func (v *SecondService_EchoI32_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI32_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI32_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI32_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI32_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -6899,14 +6898,14 @@ type SecondService_EchoI64_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI64_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -6932,16 +6931,16 @@ func (v *SecondService_EchoI64_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI64_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI64_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI64_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI64_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -7205,14 +7204,14 @@ type SecondService_EchoI64_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI64_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -7244,16 +7243,16 @@ func (v *SecondService_EchoI64_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI64_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI64_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI64_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI64_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -7472,14 +7471,14 @@ type SecondService_EchoI8_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI8_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -7505,16 +7504,16 @@ func (v *SecondService_EchoI8_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI8_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI8_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI8_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI8_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -7778,14 +7777,14 @@ type SecondService_EchoI8_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoI8_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -7817,16 +7816,16 @@ func (v *SecondService_EchoI8_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoI8_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoI8_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoI8_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoI8_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -8045,14 +8044,14 @@ type SecondService_EchoString_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoString_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -8078,16 +8077,16 @@ func (v *SecondService_EchoString_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoString_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoString_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoString_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoString_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -8351,14 +8350,14 @@ type SecondService_EchoString_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoString_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -8390,16 +8389,16 @@ func (v *SecondService_EchoString_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoString_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoString_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoString_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoString_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -8644,14 +8643,14 @@ func (_List_String_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStringList_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -8695,16 +8694,16 @@ func _List_String_Read(l wire.ValueList) ([]string, error) {
 // An error is returned if we were unable to build a SecondService_EchoStringList_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStringList_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStringList_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStringList_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -9047,14 +9046,14 @@ type SecondService_EchoStringList_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStringList_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -9086,16 +9085,16 @@ func (v *SecondService_EchoStringList_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoStringList_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStringList_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStringList_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStringList_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -9338,14 +9337,14 @@ func (_Map_String_BazResponse_MapItemList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStringMap_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -9408,16 +9407,16 @@ func _Map_String_BazResponse_Read(m wire.MapItemList) (map[string]*base.BazRespo
 // An error is returned if we were unable to build a SecondService_EchoStringMap_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStringMap_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStringMap_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStringMap_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -9789,14 +9788,14 @@ type SecondService_EchoStringMap_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStringMap_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -9828,16 +9827,16 @@ func (v *SecondService_EchoStringMap_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoStringMap_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStringMap_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStringMap_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStringMap_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -10068,14 +10067,14 @@ func (_Set_String_mapType_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStringSet_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -10123,16 +10122,16 @@ func _Set_String_mapType_Read(s wire.ValueList) (map[string]struct{}, error) {
 // An error is returned if we were unable to build a SecondService_EchoStringSet_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStringSet_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStringSet_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStringSet_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -10480,14 +10479,14 @@ type SecondService_EchoStringSet_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStringSet_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -10519,16 +10518,16 @@ func (v *SecondService_EchoStringSet_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoStringSet_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStringSet_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStringSet_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStringSet_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -10762,14 +10761,14 @@ func (_List_BazResponse_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStructList_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -10813,16 +10812,16 @@ func _List_BazResponse_Read(l wire.ValueList) ([]*base.BazResponse, error) {
 // An error is returned if we were unable to build a SecondService_EchoStructList_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStructList_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStructList_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStructList_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -11168,14 +11167,14 @@ type SecondService_EchoStructList_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStructList_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -11207,16 +11206,16 @@ func (v *SecondService_EchoStructList_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoStructList_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStructList_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStructList_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStructList_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -11467,14 +11466,14 @@ func (_Map_BazResponse_String_MapItemList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStructMap_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -11540,16 +11539,16 @@ func _Map_BazResponse_String_Read(m wire.MapItemList) ([]struct {
 // An error is returned if we were unable to build a SecondService_EchoStructMap_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStructMap_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStructMap_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStructMap_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -11955,14 +11954,10 @@ func init() {
 	SecondService_EchoStructMap_Helper.UnwrapResponse = func(result *SecondService_EchoStructMap_Result) (success []struct {
 		Key   *base.BazResponse
 		Value string
-	}, err error) {
-		if result.Success != nil {
-			success = result.Success
-			return
-		}
-		err = errors.New("expected a non-void result")
+	}, err error) { if result.Success != nil {
+		success = result.Success
 		return
-	}
+	}; err = errors.New("expected a non-void result"); return }
 
 }
 
@@ -11986,14 +11981,14 @@ type SecondService_EchoStructMap_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStructMap_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -12025,16 +12020,16 @@ func (v *SecondService_EchoStructMap_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoStructMap_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStructMap_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStructMap_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStructMap_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -12271,14 +12266,14 @@ func (_Set_BazResponse_sliceType_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStructSet_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -12326,16 +12321,16 @@ func _Set_BazResponse_sliceType_Read(s wire.ValueList) ([]*base.BazResponse, err
 // An error is returned if we were unable to build a SecondService_EchoStructSet_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStructSet_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStructSet_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStructSet_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -12693,14 +12688,14 @@ type SecondService_EchoStructSet_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoStructSet_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -12732,16 +12727,16 @@ func (v *SecondService_EchoStructSet_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoStructSet_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoStructSet_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoStructSet_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoStructSet_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -12946,14 +12941,14 @@ type SecondService_EchoTypedef_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoTypedef_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -12985,16 +12980,16 @@ func _UUID_1_Read(w wire.Value) (base.UUID, error) {
 // An error is returned if we were unable to build a SecondService_EchoTypedef_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoTypedef_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoTypedef_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoTypedef_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -13264,14 +13259,14 @@ type SecondService_EchoTypedef_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SecondService_EchoTypedef_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -13303,16 +13298,16 @@ func (v *SecondService_EchoTypedef_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SecondService_EchoTypedef_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SecondService_EchoTypedef_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SecondService_EchoTypedef_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SecondService_EchoTypedef_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -13533,14 +13528,14 @@ type SimpleService_AnotherCall_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_AnotherCall_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -13591,16 +13586,16 @@ func _BazRequest_Read(w wire.Value) (*BazRequest, error) {
 // An error is returned if we were unable to build a SimpleService_AnotherCall_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_AnotherCall_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_AnotherCall_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_AnotherCall_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -13999,14 +13994,14 @@ type SimpleService_AnotherCall_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_AnotherCall_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -14044,16 +14039,16 @@ func _AuthErr_Read(w wire.Value) (*AuthErr, error) {
 // An error is returned if we were unable to build a SimpleService_AnotherCall_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_AnotherCall_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_AnotherCall_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_AnotherCall_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -14266,14 +14261,14 @@ type SimpleService_Call_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -14318,16 +14313,16 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_Call_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Call_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Call_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Call_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -14720,14 +14715,14 @@ type SimpleService_Call_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -14759,16 +14754,16 @@ func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_Call_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Call_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Call_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Call_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -14974,14 +14969,14 @@ type SimpleService_Compare_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Compare_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -15019,16 +15014,16 @@ func (v *SimpleService_Compare_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_Compare_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Compare_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Compare_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Compare_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -15387,14 +15382,14 @@ type SimpleService_Compare_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -15448,16 +15443,16 @@ func _OtherAuthErr_Read(w wire.Value) (*OtherAuthErr, error) {
 // An error is returned if we were unable to build a SimpleService_Compare_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Compare_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Compare_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Compare_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -15788,14 +15783,14 @@ type SimpleService_GetProfile_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_GetProfile_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -15830,16 +15825,16 @@ func _GetProfileRequest_Read(w wire.Value) (*GetProfileRequest, error) {
 // An error is returned if we were unable to build a SimpleService_GetProfile_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_GetProfile_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_GetProfile_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_GetProfile_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -16132,14 +16127,14 @@ type SimpleService_GetProfile_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_GetProfile_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -16185,16 +16180,16 @@ func _GetProfileResponse_Read(w wire.Value) (*GetProfileResponse, error) {
 // An error is returned if we were unable to build a SimpleService_GetProfile_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_GetProfile_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_GetProfile_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_GetProfile_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -16465,14 +16460,14 @@ type SimpleService_HeaderSchema_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_HeaderSchema_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -16507,16 +16502,16 @@ func _HeaderSchema_Read(w wire.Value) (*HeaderSchema, error) {
 // An error is returned if we were unable to build a SimpleService_HeaderSchema_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_HeaderSchema_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_HeaderSchema_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_HeaderSchema_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -16821,14 +16816,14 @@ type SimpleService_HeaderSchema_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_HeaderSchema_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -16876,16 +16871,16 @@ func (v *SimpleService_HeaderSchema_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_HeaderSchema_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_HeaderSchema_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_HeaderSchema_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_HeaderSchema_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -17209,14 +17204,14 @@ type SimpleService_Ping_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Ping_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -17233,16 +17228,16 @@ func (v *SimpleService_Ping_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_Ping_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Ping_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Ping_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Ping_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -17448,14 +17443,14 @@ type SimpleService_Ping_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Ping_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -17487,16 +17482,16 @@ func (v *SimpleService_Ping_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_Ping_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Ping_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Ping_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Ping_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -17700,14 +17695,14 @@ type SimpleService_SillyNoop_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_SillyNoop_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -17724,16 +17719,16 @@ func (v *SimpleService_SillyNoop_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_SillyNoop_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_SillyNoop_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_SillyNoop_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_SillyNoop_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -17956,14 +17951,14 @@ type SimpleService_SillyNoop_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_SillyNoop_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -18009,16 +18004,16 @@ func _ServerErr_Read(w wire.Value) (*base.ServerErr, error) {
 // An error is returned if we were unable to build a SimpleService_SillyNoop_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_SillyNoop_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_SillyNoop_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_SillyNoop_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -18288,14 +18283,14 @@ type SimpleService_TestUuid_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TestUuid_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -18312,16 +18307,16 @@ func (v *SimpleService_TestUuid_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_TestUuid_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TestUuid_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TestUuid_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TestUuid_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -18517,14 +18512,14 @@ type SimpleService_TestUuid_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TestUuid_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -18541,16 +18536,16 @@ func (v *SimpleService_TestUuid_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_TestUuid_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TestUuid_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TestUuid_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TestUuid_Result) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -18679,14 +18674,14 @@ type SimpleService_Trans_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Trans_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -18729,16 +18724,16 @@ func _TransStruct_Read(w wire.Value) (*base.TransStruct, error) {
 // An error is returned if we were unable to build a SimpleService_Trans_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Trans_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Trans_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Trans_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -19097,14 +19092,14 @@ type SimpleService_Trans_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_Trans_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -19152,16 +19147,16 @@ func (v *SimpleService_Trans_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_Trans_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_Trans_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_Trans_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_Trans_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -19486,14 +19481,14 @@ type SimpleService_TransHeaders_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TransHeaders_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -19528,16 +19523,16 @@ func _TransHeaders_Read(w wire.Value) (*base.TransHeaders, error) {
 // An error is returned if we were unable to build a SimpleService_TransHeaders_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TransHeaders_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TransHeaders_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TransHeaders_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -19842,14 +19837,14 @@ type SimpleService_TransHeaders_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TransHeaders_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -19897,16 +19892,16 @@ func (v *SimpleService_TransHeaders_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_TransHeaders_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TransHeaders_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TransHeaders_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TransHeaders_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -20234,14 +20229,14 @@ type SimpleService_TransHeadersNoReq_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TransHeadersNoReq_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [4]wire.Field
@@ -20299,16 +20294,16 @@ func _NestedStruct_Read(w wire.Value) (*base.NestedStruct, error) {
 // An error is returned if we were unable to build a SimpleService_TransHeadersNoReq_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TransHeadersNoReq_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TransHeadersNoReq_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TransHeadersNoReq_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -20771,14 +20766,14 @@ type SimpleService_TransHeadersNoReq_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TransHeadersNoReq_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -20818,16 +20813,16 @@ func (v *SimpleService_TransHeadersNoReq_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_TransHeadersNoReq_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TransHeadersNoReq_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TransHeadersNoReq_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TransHeadersNoReq_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -21092,14 +21087,14 @@ type SimpleService_TransHeadersType_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TransHeadersType_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -21134,16 +21129,16 @@ func _TransHeaderType_Read(w wire.Value) (*TransHeaderType, error) {
 // An error is returned if we were unable to build a SimpleService_TransHeadersType_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TransHeadersType_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TransHeadersType_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TransHeadersType_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -21448,14 +21443,14 @@ type SimpleService_TransHeadersType_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_TransHeadersType_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -21503,16 +21498,16 @@ func (v *SimpleService_TransHeadersType_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_TransHeadersType_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_TransHeadersType_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_TransHeadersType_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_TransHeadersType_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -21836,14 +21831,14 @@ type SimpleService_UrlTest_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_UrlTest_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -21860,16 +21855,16 @@ func (v *SimpleService_UrlTest_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_UrlTest_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_UrlTest_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_UrlTest_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_UrlTest_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -22065,14 +22060,14 @@ type SimpleService_UrlTest_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_UrlTest_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -22089,16 +22084,16 @@ func (v *SimpleService_UrlTest_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_UrlTest_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_UrlTest_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_UrlTest_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_UrlTest_Result) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {

@@ -21,7 +21,7 @@
 package bar_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -66,7 +66,7 @@ func TestBarHello(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}

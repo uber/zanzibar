@@ -22,7 +22,7 @@ package save_contacts_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -80,7 +80,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 				break
 			}
 
-			_, err = ioutil.ReadAll(res.Body)
+			_, err = io.ReadAll(res.Body)
 			if err != nil {
 				b.Error("could not read response: " + res.Status)
 				break
