@@ -6,10 +6,11 @@ package abc
 import (
 	errors "errors"
 	fmt "fmt"
+	strings "strings"
+
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	strings "strings"
 )
 
 // AppDemoService_Call_Args represents the arguments for the AppDemoService.Call function.
@@ -25,14 +26,14 @@ type AppDemoService_Call_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *AppDemoService_Call_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -49,16 +50,16 @@ func (v *AppDemoService_Call_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a AppDemoService_Call_Args struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v AppDemoService_Call_Args
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v AppDemoService_Call_Args
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *AppDemoService_Call_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -264,14 +265,14 @@ type AppDemoService_Call_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *AppDemoService_Call_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -303,16 +304,16 @@ func (v *AppDemoService_Call_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a AppDemoService_Call_Result struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v AppDemoService_Call_Result
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v AppDemoService_Call_Result
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *AppDemoService_Call_Result) FromWire(w wire.Value) error {
 	var err error
 
