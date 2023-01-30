@@ -27,7 +27,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"strconv"
 	"testing"
 
@@ -145,7 +145,7 @@ func makeRequestAndValidateTransSuccessfulRequest(t *testing.T, gateway testGate
 	}
 
 	defer func() { _ = res.Body.Close() }()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "failed to read response body") {
 		return
 	}

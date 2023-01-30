@@ -6,11 +6,10 @@ package quux
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 // SimpleService_EchoString_Args represents the arguments for the SimpleService.EchoString function.
@@ -27,14 +26,14 @@ type SimpleService_EchoString_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_EchoString_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -60,16 +59,16 @@ func (v *SimpleService_EchoString_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_EchoString_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_EchoString_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_EchoString_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_EchoString_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -333,14 +332,14 @@ type SimpleService_EchoString_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *SimpleService_EchoString_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -372,16 +371,16 @@ func (v *SimpleService_EchoString_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SimpleService_EchoString_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v SimpleService_EchoString_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v SimpleService_EchoString_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *SimpleService_EchoString_Result) FromWire(w wire.Value) error {
 	var err error
 

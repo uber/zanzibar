@@ -1101,7 +1101,7 @@ func makeRequestAndValidate{{title $testFixture.HandleID}}{{title $testFixture.T
 
 	{{if $responseType -}}
 	defer func() { _ = res.Body.Close() }()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "failed to read response body") {
 		return
 	}
@@ -1133,7 +1133,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6333, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 6329, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

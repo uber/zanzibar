@@ -23,7 +23,7 @@ package zanzibar
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -783,7 +783,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	if req.rawBody != nil {
 		return req.rawBody, true
 	}
-	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
+	rawBody, err := io.ReadAll(req.httpRequest.Body)
 	if err != nil {
 		req.contextLogger.ErrorZ(req.Context(), "Could not read request body", zap.Error(err))
 		if !req.parseFailed {

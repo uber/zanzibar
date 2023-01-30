@@ -6,11 +6,10 @@ package multi
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 // ServiceAFront_Hello_Args represents the arguments for the ServiceAFront.hello function.
@@ -26,14 +25,14 @@ type ServiceAFront_Hello_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *ServiceAFront_Hello_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -50,16 +49,16 @@ func (v *ServiceAFront_Hello_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ServiceAFront_Hello_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v ServiceAFront_Hello_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v ServiceAFront_Hello_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *ServiceAFront_Hello_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -265,14 +264,14 @@ type ServiceAFront_Hello_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *ServiceAFront_Hello_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -304,16 +303,16 @@ func (v *ServiceAFront_Hello_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ServiceAFront_Hello_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v ServiceAFront_Hello_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v ServiceAFront_Hello_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *ServiceAFront_Hello_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -531,14 +530,14 @@ type ServiceBFront_Hello_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *ServiceBFront_Hello_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -555,16 +554,16 @@ func (v *ServiceBFront_Hello_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ServiceBFront_Hello_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v ServiceBFront_Hello_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v ServiceBFront_Hello_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *ServiceBFront_Hello_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -770,14 +769,14 @@ type ServiceBFront_Hello_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *ServiceBFront_Hello_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -809,16 +808,16 @@ func (v *ServiceBFront_Hello_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ServiceBFront_Hello_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v ServiceBFront_Hello_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v ServiceBFront_Hello_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *ServiceBFront_Hello_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -1026,14 +1025,14 @@ type ServiceCFront_Hello_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *ServiceCFront_Hello_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -1050,16 +1049,16 @@ func (v *ServiceCFront_Hello_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ServiceCFront_Hello_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v ServiceCFront_Hello_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v ServiceCFront_Hello_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *ServiceCFront_Hello_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -1265,14 +1264,14 @@ type ServiceCFront_Hello_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *ServiceCFront_Hello_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1304,16 +1303,16 @@ func (v *ServiceCFront_Hello_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ServiceCFront_Hello_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v ServiceCFront_Hello_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v ServiceCFront_Hello_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *ServiceCFront_Hello_Result) FromWire(w wire.Value) error {
 	var err error
 

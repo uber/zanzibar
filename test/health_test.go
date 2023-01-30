@@ -21,7 +21,7 @@
 package gateway_test
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/uber-go/tally/m3"
@@ -88,7 +88,7 @@ func BenchmarkHealthCall(b *testing.B) {
 				break
 			}
 
-			_, err = ioutil.ReadAll(res.Body)
+			_, err = io.ReadAll(res.Body)
 			if err != nil {
 				b.Error("could not write response: " + res.Status)
 				break

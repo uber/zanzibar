@@ -23,7 +23,7 @@ package baz
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -102,7 +102,7 @@ func BenchmarkPing(b *testing.B) {
 				b.Error("got bad status error: " + res.Status)
 				break
 			}
-			_, err = ioutil.ReadAll(res.Body)
+			_, err = io.ReadAll(res.Body)
 			if err != nil {
 				b.Error("could not read response: " + res.Status)
 				break
@@ -150,7 +150,7 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, 1, callCounter)
 	assert.Equal(t, 200, res.StatusCode)
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got read error") {
 		return
 	}
@@ -195,7 +195,7 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	assert.Equal(t, 1, callCounter)
 	assert.Equal(t, 500, res.StatusCode)
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got read error") {
 		return
 	}

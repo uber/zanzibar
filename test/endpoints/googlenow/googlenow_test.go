@@ -22,7 +22,7 @@ package googlenow_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"testing"
@@ -88,7 +88,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 				break
 			}
 
-			_, err = ioutil.ReadAll(res.Body)
+			_, err = io.ReadAll(res.Body)
 			if err != nil {
 				b.Error("could not write response: " + res.Status)
 				break
@@ -250,7 +250,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", res.Status)
 	assert.Equal(t, 0, counter)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -280,7 +280,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	gateway.HTTPBackends()["google-now"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 
-			bytes, err := ioutil.ReadAll(r.Body)
+			bytes, err := io.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal("Cannot read bytes")
 			}
@@ -354,7 +354,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 
 	assert.Equal(t, "500 Internal Server Error", res.Status)
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got bytes read error") {
 		return
 	}
@@ -407,7 +407,7 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 
 	assert.Equal(t, "500 Internal Server Error", res.Status)
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got bytes read error") {
 		return
 	}
@@ -437,7 +437,7 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 
 	assert.Equal(t, "400 Bad Request", res.Status)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -485,7 +485,7 @@ func TestAddCredentialsMissingOneHeader(t *testing.T) {
 
 	assert.Equal(t, "400 Bad Request", res.Status)
 
-	respBytes, err := ioutil.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
 		return
 	}
@@ -584,7 +584,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 
 	assert.Equal(t, "500 Internal Server Error", res.Status)
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got bytes read error") {
 		return
 	}

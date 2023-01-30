@@ -24,7 +24,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -268,7 +268,7 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 
 		//reassign body
 		if req.rawBody != nil && len(req.rawBody) > 0 {
-			req.httpReq.Body = ioutil.NopCloser(bytes.NewBuffer(req.rawBody))
+			req.httpReq.Body = io.NopCloser(bytes.NewBuffer(req.rawBody))
 		}
 
 		//Break loop if no retries

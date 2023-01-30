@@ -22,7 +22,7 @@ package clientless_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,7 +61,7 @@ func TestClientlessEndpointCall(t *testing.T) {
 	}
 
 	assert.Equal(t, "200 OK", res.Status)
-	respBytes, _ := ioutil.ReadAll(res.Body)
+	respBytes, _ := io.ReadAll(res.Body)
 	assert.Equal(t, string("{\"firstName\":\"FirstName\",\"lastName1\":\"LastName\"}"), string(respBytes))
 }
 

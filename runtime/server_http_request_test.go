@@ -24,7 +24,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sort"
@@ -155,7 +155,7 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -218,7 +218,7 @@ func TestFailingGetQueryBool(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -281,7 +281,7 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -344,7 +344,7 @@ func TestFailingHasQueryValue(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -407,7 +407,7 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -470,7 +470,7 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -533,7 +533,7 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -596,7 +596,7 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -659,7 +659,7 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -753,7 +753,7 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -769,7 +769,7 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -857,7 +857,7 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -873,7 +873,7 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -965,7 +965,7 @@ func TestFailingGetQueryInt8Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -981,7 +981,7 @@ func TestFailingGetQueryInt8Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1068,7 +1068,7 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1084,7 +1084,7 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1176,7 +1176,7 @@ func TestFailingGetQueryInt16Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1192,7 +1192,7 @@ func TestFailingGetQueryInt16Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1279,7 +1279,7 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1295,7 +1295,7 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1387,7 +1387,7 @@ func TestFailingGetQueryInt32Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1403,7 +1403,7 @@ func TestFailingGetQueryInt32Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1490,7 +1490,7 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1506,7 +1506,7 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1598,7 +1598,7 @@ func TestFailingGetQueryInt64Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1614,7 +1614,7 @@ func TestFailingGetQueryInt64Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1701,7 +1701,7 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1717,7 +1717,7 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1808,7 +1808,7 @@ func TestFailingGetQueryFloat64Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1824,7 +1824,7 @@ func TestFailingGetQueryFloat64Set(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	respBytes, err = io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1874,7 +1874,7 @@ func TestFailingGetQueryValueList(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -2049,7 +2049,7 @@ func TestFailingGetQueryValueSet(t *testing.T) {
 	assert.Equal(t, "400 Bad Request", resp.Status)
 	assert.Equal(t, 400, resp.StatusCode)
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}

@@ -24,7 +24,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -215,7 +215,7 @@ func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetries(t *testing
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar-path",
 		func(w http.ResponseWriter, r *http.Request) {
-			bodyBytes, _ := ioutil.ReadAll(r.Body)
+			bodyBytes, _ := io.ReadAll(r.Body)
 			time.Sleep(serverProcessingTime) //mimic processing time
 			w.WriteHeader(200)
 			response := map[string]string{"Example-Header": r.Header.Get("Example-Header"), "body": string(bodyBytes)}

@@ -22,7 +22,7 @@ package zanzibar
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -68,7 +68,7 @@ func (res *ClientHTTPResponse) setRawHTTPResponse(httpRes *http.Response) {
 
 // ReadAll reads bytes from response.
 func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
-	rawBody, err := ioutil.ReadAll(res.rawResponse.Body)
+	rawBody, err := io.ReadAll(res.rawResponse.Body)
 
 	cerr := res.rawResponse.Body.Close()
 	if cerr != nil {

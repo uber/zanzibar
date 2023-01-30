@@ -23,7 +23,7 @@ package zanzibar_test
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"testing"
@@ -77,7 +77,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	assert.Equal(t, resp.Status, "999 status code 999")
 	assert.Equal(t, resp.StatusCode, 999)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -133,7 +133,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	assert.Equal(t, resp.Status, "500 Internal Server Error")
 	assert.Equal(t, resp.StatusCode, 500)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -193,7 +193,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	assert.Equal(t, resp.Status, "500 Internal Server Error")
 	assert.Equal(t, resp.StatusCode, 500)
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -278,7 +278,7 @@ func TestResponsePeekBody(t *testing.T) {
 	}
 
 	assert.Equal(t, resp.StatusCode, 200)
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -453,7 +453,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	}
 
 	assert.Equal(t, resp.StatusCode, 200)
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -519,7 +519,7 @@ func TestPendingResponseBody(t *testing.T) {
 	}
 
 	assert.Equal(t, resp.StatusCode, 200)
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -585,7 +585,7 @@ func TestPendingResponseBody204StatusNoContent(t *testing.T) {
 	}
 
 	assert.Equal(t, resp.StatusCode, 204)
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -657,7 +657,7 @@ func TestPendingResponseBody304StatusNoContent(t *testing.T) {
 	}
 
 	assert.Equal(t, resp.StatusCode, 304)
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if !assert.NoError(t, err) {
 		return
 	}

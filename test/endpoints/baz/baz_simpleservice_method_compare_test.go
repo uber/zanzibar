@@ -24,7 +24,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -98,7 +98,7 @@ func BenchmarkCompare(b *testing.B) {
 				b.Error("got bad status error: " + res.Status)
 				break
 			}
-			_, err = ioutil.ReadAll(res.Body)
+			_, err = io.ReadAll(res.Body)
 			if err != nil {
 				b.Error("could not read response: " + res.Status)
 				break
@@ -153,7 +153,7 @@ func TestCompare(t *testing.T) {
 	assert.Equal(t, 1, callCounter)
 	assert.Equal(t, 200, res.StatusCode)
 
-	bytes, err := ioutil.ReadAll(res.Body)
+	bytes, err := io.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got read error") {
 		return
 	}

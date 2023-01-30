@@ -23,7 +23,7 @@ package bar_test
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -109,7 +109,7 @@ func TestEchoI8(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/i8",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -163,7 +163,7 @@ func TestEchoI16(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/i16",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -217,7 +217,7 @@ func TestEchoI32(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/i32",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -271,7 +271,7 @@ func TestEchoI64(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/i64",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -325,7 +325,7 @@ func TestEchoDouble(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/double",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -379,7 +379,7 @@ func TestEchoBool(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/bool",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -433,7 +433,7 @@ func TestEchoString(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/string",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -486,7 +486,7 @@ func TestEchoBinary(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/binary",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -541,7 +541,7 @@ func TestEchoEnum(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/enum",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -595,7 +595,7 @@ func TestEchoTypedef(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/typedef",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -652,7 +652,7 @@ func TestEchoStringSet(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/string-set",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -719,7 +719,7 @@ func TestEchoStructSet(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/struct-set",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -773,7 +773,7 @@ func TestEchoStringList(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/string-list",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -840,7 +840,7 @@ func TestEchoStructList(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/struct-list",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -907,7 +907,7 @@ func TestEchoI32Map(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/i32-map",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -974,7 +974,7 @@ func TestEchoStringMap(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/echo/string-map",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
@@ -1046,7 +1046,7 @@ func TestEchoStringMap(t *testing.T) {
 //	bgateway.HTTPBackends()["bar"].HandleFunc(
 //		"POST", "/echo/struct-map",
 //		func(w http.ResponseWriter, r *http.Request) {
-//			body, err := ioutil.ReadAll(r.Body)
+//			body, err := io.ReadAll(r.Body)
 //			assert.NoError(t, err)
 //
 //			err = r.Body.Close()
@@ -1131,7 +1131,7 @@ func TestNormalRecur(t *testing.T) {
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar/recur",
 		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			assert.NoError(t, err)
 
 			err = r.Body.Close()
