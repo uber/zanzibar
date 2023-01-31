@@ -42,6 +42,7 @@ type ClientHTTPResponse struct {
 	finishTime       time.Time
 	finished         bool
 	rawResponse      *http.Response
+	responseRead     bool
 	rawResponseBytes []byte
 	StatusCode       int
 	Duration         time.Duration
@@ -68,6 +69,16 @@ func (res *ClientHTTPResponse) setRawHTTPResponse(httpRes *http.Response) {
 
 // ReadAll reads bytes from response.
 func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
+	// if response is already read
+	if res.responseRead {
+		return res.GetRawBody(), nil
+	}
+
+	// mark response read to true
+	defer func() {
+		res.responseRead = true
+	}()
+
 	rawBody, err := io.ReadAll(res.rawResponse.Body)
 
 	cerr := res.rawResponse.Body.Close()

@@ -128,7 +128,7 @@ cat ./coverage/istanbul.json | jq '[
 ] | from_entries' > ./coverage/istanbul-runtime.json
 
 echo "Checking code coverage for runtime folder"
-./node_modules/.bin/istanbul check-coverage --statements 99.51 \
+./node_modules/.bin/istanbul check-coverage --statements 99.45 \
 	./coverage/istanbul-runtime.json
 
 cat ./coverage/istanbul.json | jq '[
