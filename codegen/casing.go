@@ -33,7 +33,6 @@ var pascalCaseMap *sync.Map
 
 // CommonInitialisms is taken from https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
 var CommonInitialisms = map[string]bool{
-	"ACL":   true,
 	"API":   true,
 	"ASCII": true,
 	"CPU":   true,
@@ -48,7 +47,6 @@ var CommonInitialisms = map[string]bool{
 	"IP":    true,
 	"JSON":  true,
 	"LHS":   true,
-	"OS":    true,
 	"QPS":   true,
 	"RAM":   true,
 	"RHS":   true,
@@ -69,7 +67,6 @@ var CommonInitialisms = map[string]bool{
 	"UTF8":  true,
 	"VM":    true,
 	"XML":   true,
-	"XMPP":  true,
 	"XSRF":  true,
 	"XSS":   true,
 }
