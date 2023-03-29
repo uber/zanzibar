@@ -1419,6 +1419,8 @@ func (e *{{$clientName}}) {{$methodName}}(
 			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
 		}
 	}
+	// Creating a new child context with timeout for the yarpc call as this gets cancelled as soon as call is returned
+	// from this client or deadline exceeded after timeout
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
@@ -1452,7 +1454,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8472, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8644, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

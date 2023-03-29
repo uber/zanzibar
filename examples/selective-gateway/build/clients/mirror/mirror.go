@@ -196,6 +196,8 @@ func (e *mirrorClient) MirrorMirror(
 			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
 		}
 	}
+	// Creating a new child context with timeout for the yarpc call as this gets cancelled as soon as call is returned
+	// from this client or deadline exceeded after timeout
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
@@ -235,6 +237,8 @@ func (e *mirrorClient) MirrorInternalMirror(
 			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
 		}
 	}
+	// Creating a new child context with timeout for the yarpc call as this gets cancelled as soon as call is returned
+	// from this client or deadline exceeded after timeout
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
