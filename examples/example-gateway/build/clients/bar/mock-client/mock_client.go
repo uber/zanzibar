@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	runtime "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -37,7 +37,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // ArgNotStruct mocks base method.
-func (m *MockClient) ArgNotStruct(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgNotStruct_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) ArgNotStruct(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgNotStruct_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgNotStruct", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -53,7 +53,7 @@ func (mr *MockClientMockRecorder) ArgNotStruct(arg0, arg1, arg2, arg3 interface{
 }
 
 // ArgWithHeaders mocks base method.
-func (m *MockClient) ArgWithHeaders(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithHeaders_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithHeaders(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithHeaders_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithHeaders", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -70,7 +70,7 @@ func (mr *MockClientMockRecorder) ArgWithHeaders(arg0, arg1, arg2, arg3 interfac
 }
 
 // ArgWithManyQueryParams mocks base method.
-func (m *MockClient) ArgWithManyQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithManyQueryParams_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithManyQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithManyQueryParams_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithManyQueryParams", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -87,7 +87,7 @@ func (mr *MockClientMockRecorder) ArgWithManyQueryParams(arg0, arg1, arg2, arg3 
 }
 
 // ArgWithNearDupQueryParams mocks base method.
-func (m *MockClient) ArgWithNearDupQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNearDupQueryParams_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithNearDupQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNearDupQueryParams_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithNearDupQueryParams", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -104,7 +104,7 @@ func (mr *MockClientMockRecorder) ArgWithNearDupQueryParams(arg0, arg1, arg2, ar
 }
 
 // ArgWithNestedQueryParams mocks base method.
-func (m *MockClient) ArgWithNestedQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNestedQueryParams_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithNestedQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithNestedQueryParams_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithNestedQueryParams", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -121,7 +121,7 @@ func (mr *MockClientMockRecorder) ArgWithNestedQueryParams(arg0, arg1, arg2, arg
 }
 
 // ArgWithParams mocks base method.
-func (m *MockClient) ArgWithParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParams_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParams_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithParams", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -138,7 +138,7 @@ func (mr *MockClientMockRecorder) ArgWithParams(arg0, arg1, arg2, arg3 interface
 }
 
 // ArgWithParamsAndDuplicateFields mocks base method.
-func (m *MockClient) ArgWithParamsAndDuplicateFields(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParamsAndDuplicateFields_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithParamsAndDuplicateFields(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParamsAndDuplicateFields_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithParamsAndDuplicateFields", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -155,7 +155,7 @@ func (mr *MockClientMockRecorder) ArgWithParamsAndDuplicateFields(arg0, arg1, ar
 }
 
 // ArgWithQueryHeader mocks base method.
-func (m *MockClient) ArgWithQueryHeader(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryHeader_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithQueryHeader(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryHeader_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithQueryHeader", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -172,7 +172,7 @@ func (mr *MockClientMockRecorder) ArgWithQueryHeader(arg0, arg1, arg2, arg3 inte
 }
 
 // ArgWithQueryParams mocks base method.
-func (m *MockClient) ArgWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryParams_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) ArgWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryParams_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ArgWithQueryParams", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -189,7 +189,7 @@ func (mr *MockClientMockRecorder) ArgWithQueryParams(arg0, arg1, arg2, arg3 inte
 }
 
 // DeleteFoo mocks base method.
-func (m *MockClient) DeleteFoo(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteFoo_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) DeleteFoo(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteFoo_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteFoo", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -205,7 +205,7 @@ func (mr *MockClientMockRecorder) DeleteFoo(arg0, arg1, arg2, arg3 interface{}) 
 }
 
 // DeleteWithBody mocks base method.
-func (m *MockClient) DeleteWithBody(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithBody_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) DeleteWithBody(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithBody_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteWithBody", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -221,7 +221,7 @@ func (mr *MockClientMockRecorder) DeleteWithBody(arg0, arg1, arg2, arg3 interfac
 }
 
 // DeleteWithQueryParams mocks base method.
-func (m *MockClient) DeleteWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithQueryParams_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) DeleteWithQueryParams(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteWithQueryParams_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteWithQueryParams", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -237,7 +237,7 @@ func (mr *MockClientMockRecorder) DeleteWithQueryParams(arg0, arg1, arg2, arg3 i
 }
 
 // EchoBinary mocks base method.
-func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBinary_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []byte, map[string]string, error) {
+func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBinary_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []byte, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoBinary", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -254,7 +254,7 @@ func (mr *MockClientMockRecorder) EchoBinary(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoBool mocks base method.
-func (m *MockClient) EchoBool(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBool_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, bool, map[string]string, error) {
+func (m *MockClient) EchoBool(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBool_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, bool, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoBool", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -271,7 +271,7 @@ func (mr *MockClientMockRecorder) EchoBool(arg0, arg1, arg2, arg3 interface{}) *
 }
 
 // EchoDouble mocks base method.
-func (m *MockClient) EchoDouble(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoDouble_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, float64, map[string]string, error) {
+func (m *MockClient) EchoDouble(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoDouble_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, float64, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoDouble", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -288,7 +288,7 @@ func (mr *MockClientMockRecorder) EchoDouble(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoEnum mocks base method.
-func (m *MockClient) EchoEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoEnum_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, bar.Fruit, map[string]string, error) {
+func (m *MockClient) EchoEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoEnum_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, bar.Fruit, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoEnum", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -305,7 +305,7 @@ func (mr *MockClientMockRecorder) EchoEnum(arg0, arg1, arg2, arg3 interface{}) *
 }
 
 // EchoI16 mocks base method.
-func (m *MockClient) EchoI16(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI16_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int16, map[string]string, error) {
+func (m *MockClient) EchoI16(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI16_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int16, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI16", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -322,7 +322,7 @@ func (mr *MockClientMockRecorder) EchoI16(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // EchoI32 mocks base method.
-func (m *MockClient) EchoI32(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI32_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int32, map[string]string, error) {
+func (m *MockClient) EchoI32(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI32_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int32, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI32", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -339,7 +339,7 @@ func (mr *MockClientMockRecorder) EchoI32(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // EchoI32Map mocks base method.
-func (m *MockClient) EchoI32Map(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI32Map_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[int32]*bar.BarResponse, map[string]string, error) {
+func (m *MockClient) EchoI32Map(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI32Map_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[int32]*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI32Map", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -356,7 +356,7 @@ func (mr *MockClientMockRecorder) EchoI32Map(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoI64 mocks base method.
-func (m *MockClient) EchoI64(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI64_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int64, map[string]string, error) {
+func (m *MockClient) EchoI64(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI64_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int64, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI64", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -373,7 +373,7 @@ func (mr *MockClientMockRecorder) EchoI64(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // EchoI8 mocks base method.
-func (m *MockClient) EchoI8(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI8_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int8, map[string]string, error) {
+func (m *MockClient) EchoI8(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoI8_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int8, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI8", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -390,7 +390,7 @@ func (mr *MockClientMockRecorder) EchoI8(arg0, arg1, arg2, arg3 interface{}) *go
 }
 
 // EchoString mocks base method.
-func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoString_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoString_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -407,7 +407,7 @@ func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoStringList mocks base method.
-func (m *MockClient) EchoStringList(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringList_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []string, map[string]string, error) {
+func (m *MockClient) EchoStringList(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringList_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringList", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -424,7 +424,7 @@ func (mr *MockClientMockRecorder) EchoStringList(arg0, arg1, arg2, arg3 interfac
 }
 
 // EchoStringMap mocks base method.
-func (m *MockClient) EchoStringMap(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringMap_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]*bar.BarResponse, map[string]string, error) {
+func (m *MockClient) EchoStringMap(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringMap_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringMap", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -441,7 +441,7 @@ func (mr *MockClientMockRecorder) EchoStringMap(arg0, arg1, arg2, arg3 interface
 }
 
 // EchoStringSet mocks base method.
-func (m *MockClient) EchoStringSet(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringSet_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]struct{}, map[string]string, error) {
+func (m *MockClient) EchoStringSet(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStringSet_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]struct{}, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringSet", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -458,7 +458,7 @@ func (mr *MockClientMockRecorder) EchoStringSet(arg0, arg1, arg2, arg3 interface
 }
 
 // EchoStructList mocks base method.
-func (m *MockClient) EchoStructList(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStructList_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []*bar.BarResponse, map[string]string, error) {
+func (m *MockClient) EchoStructList(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStructList_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStructList", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -475,7 +475,7 @@ func (mr *MockClientMockRecorder) EchoStructList(arg0, arg1, arg2, arg3 interfac
 }
 
 // EchoStructSet mocks base method.
-func (m *MockClient) EchoStructSet(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStructSet_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []*bar.BarResponse, map[string]string, error) {
+func (m *MockClient) EchoStructSet(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoStructSet_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStructSet", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -492,7 +492,7 @@ func (mr *MockClientMockRecorder) EchoStructSet(arg0, arg1, arg2, arg3 interface
 }
 
 // EchoTypedef mocks base method.
-func (m *MockClient) EchoTypedef(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoTypedef_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, bar.UUID, map[string]string, error) {
+func (m *MockClient) EchoTypedef(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoTypedef_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, bar.UUID, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoTypedef", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -509,10 +509,10 @@ func (mr *MockClientMockRecorder) EchoTypedef(arg0, arg1, arg2, arg3 interface{}
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*runtime.HTTPClient)
+	ret0, _ := ret[0].(*zanzibar.HTTPClient)
 	return ret0
 }
 
@@ -523,7 +523,7 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // Hello mocks base method.
-func (m *MockClient) Hello(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) Hello(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Hello", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -540,7 +540,7 @@ func (mr *MockClientMockRecorder) Hello(arg0, arg1, arg2 interface{}) *gomock.Ca
 }
 
 // ListAndEnum mocks base method.
-func (m *MockClient) ListAndEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ListAndEnum_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) ListAndEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ListAndEnum_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAndEnum", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -557,7 +557,7 @@ func (mr *MockClientMockRecorder) ListAndEnum(arg0, arg1, arg2, arg3 interface{}
 }
 
 // MissingArg mocks base method.
-func (m *MockClient) MissingArg(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) MissingArg(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MissingArg", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -574,7 +574,7 @@ func (mr *MockClientMockRecorder) MissingArg(arg0, arg1, arg2 interface{}) *gomo
 }
 
 // NoRequest mocks base method.
-func (m *MockClient) NoRequest(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) NoRequest(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NoRequest", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -591,7 +591,7 @@ func (mr *MockClientMockRecorder) NoRequest(arg0, arg1, arg2 interface{}) *gomoc
 }
 
 // Normal mocks base method.
-func (m *MockClient) Normal(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_Normal_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) Normal(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_Normal_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Normal", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -608,7 +608,7 @@ func (mr *MockClientMockRecorder) Normal(arg0, arg1, arg2, arg3 interface{}) *go
 }
 
 // NormalRecur mocks base method.
-func (m *MockClient) NormalRecur(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_NormalRecur_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponseRecur, map[string]string, error) {
+func (m *MockClient) NormalRecur(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_NormalRecur_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponseRecur, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NormalRecur", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -625,7 +625,7 @@ func (mr *MockClientMockRecorder) NormalRecur(arg0, arg1, arg2, arg3 interface{}
 }
 
 // TooManyArgs mocks base method.
-func (m *MockClient) TooManyArgs(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_TooManyArgs_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
+func (m *MockClient) TooManyArgs(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_TooManyArgs_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TooManyArgs", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)

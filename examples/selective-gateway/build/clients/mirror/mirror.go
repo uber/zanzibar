@@ -196,16 +196,16 @@ func (e *mirrorClient) MirrorMirror(
 			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
 		}
 	}
-	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
 	runFunc := e.mirrorClient.Mirror
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
-		result, err = runFunc(ctx, request, opts...)
+		result, err = runFunc(ctxWithTimeout, request, opts...)
 	} else {
 		circuitBreakerName := "mirror" + "-" + "MirrorMirror"
-		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
+		err = hystrix.DoC(ctxWithTimeout, circuitBreakerName, func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)
@@ -235,16 +235,16 @@ func (e *mirrorClient) MirrorInternalMirror(
 			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
 		}
 	}
-	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
 	runFunc := e.mirrorInternalClient.Mirror
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
-		result, err = runFunc(ctx, request, opts...)
+		result, err = runFunc(ctxWithTimeout, request, opts...)
 	} else {
 		circuitBreakerName := "mirror" + "-" + "MirrorInternalMirror"
-		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
+		err = hystrix.DoC(ctxWithTimeout, circuitBreakerName, func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)

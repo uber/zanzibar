@@ -1419,16 +1419,16 @@ func (e *{{$clientName}}) {{$methodName}}(
 			opts = append(opts, yarpc.WithHeader(e.opts.RequestUUIDHeaderKey, reqUUID))
 		}
 	}
-	ctx, cancel := context.WithTimeout(ctx, e.opts.Timeout)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.opts.Timeout)
 	defer cancel()
 
 	runFunc := e.{{camel $svc.Name}}Client.{{$method.Name}}
 	callHelper.Start()
 	if e.opts.CircuitBreakerDisabled {
-		result, err = runFunc(ctx, request, opts...)
+		result, err = runFunc(ctxWithTimeout, request, opts...)
 	} else {
 		circuitBreakerName := "{{$clientID}}" + "-" + "{{$methodName}}"
-		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
+		err = hystrix.DoC(ctxWithTimeout, circuitBreakerName, func(ctx context.Context) error {
 			result, err = runFunc(ctx, request, opts...)
 			return err
 		}, nil)
@@ -1452,7 +1452,7 @@ func grpc_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8439, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "grpc_client.tmpl", size: 8472, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

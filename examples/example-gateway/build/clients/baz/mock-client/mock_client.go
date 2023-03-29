@@ -11,7 +11,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 	baz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	runtime "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -38,7 +38,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // Call mocks base method.
-func (m *MockClient) Call(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_Call_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) Call(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_Call_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Call", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -54,7 +54,7 @@ func (mr *MockClientMockRecorder) Call(arg0, arg1, arg2, arg3 interface{}) *gomo
 }
 
 // Compare mocks base method.
-func (m *MockClient) Compare(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_Compare_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *base.BazResponse, map[string]string, error) {
+func (m *MockClient) Compare(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_Compare_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *base.BazResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Compare", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -71,7 +71,7 @@ func (mr *MockClientMockRecorder) Compare(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // DeliberateDiffNoop mocks base method.
-func (m *MockClient) DeliberateDiffNoop(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) DeliberateDiffNoop(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeliberateDiffNoop", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -87,7 +87,7 @@ func (mr *MockClientMockRecorder) DeliberateDiffNoop(arg0, arg1, arg2 interface{
 }
 
 // EchoBinary mocks base method.
-func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoBinary_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []byte, map[string]string, error) {
+func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoBinary_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []byte, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoBinary", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -104,7 +104,7 @@ func (mr *MockClientMockRecorder) EchoBinary(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoBool mocks base method.
-func (m *MockClient) EchoBool(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoBool_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, bool, map[string]string, error) {
+func (m *MockClient) EchoBool(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoBool_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, bool, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoBool", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -121,7 +121,7 @@ func (mr *MockClientMockRecorder) EchoBool(arg0, arg1, arg2, arg3 interface{}) *
 }
 
 // EchoDouble mocks base method.
-func (m *MockClient) EchoDouble(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoDouble_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, float64, map[string]string, error) {
+func (m *MockClient) EchoDouble(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoDouble_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, float64, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoDouble", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -138,7 +138,7 @@ func (mr *MockClientMockRecorder) EchoDouble(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoEnum mocks base method.
-func (m *MockClient) EchoEnum(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoEnum_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, baz.Fruit, map[string]string, error) {
+func (m *MockClient) EchoEnum(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoEnum_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, baz.Fruit, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoEnum", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -155,7 +155,7 @@ func (mr *MockClientMockRecorder) EchoEnum(arg0, arg1, arg2, arg3 interface{}) *
 }
 
 // EchoI16 mocks base method.
-func (m *MockClient) EchoI16(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI16_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int16, map[string]string, error) {
+func (m *MockClient) EchoI16(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI16_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int16, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI16", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -172,7 +172,7 @@ func (mr *MockClientMockRecorder) EchoI16(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // EchoI32 mocks base method.
-func (m *MockClient) EchoI32(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI32_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int32, map[string]string, error) {
+func (m *MockClient) EchoI32(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI32_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int32, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI32", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -189,7 +189,7 @@ func (mr *MockClientMockRecorder) EchoI32(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // EchoI64 mocks base method.
-func (m *MockClient) EchoI64(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI64_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int64, map[string]string, error) {
+func (m *MockClient) EchoI64(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI64_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int64, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI64", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -206,7 +206,7 @@ func (mr *MockClientMockRecorder) EchoI64(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // EchoI8 mocks base method.
-func (m *MockClient) EchoI8(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI8_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, int8, map[string]string, error) {
+func (m *MockClient) EchoI8(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoI8_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, int8, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoI8", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -223,7 +223,7 @@ func (mr *MockClientMockRecorder) EchoI8(arg0, arg1, arg2, arg3 interface{}) *go
 }
 
 // EchoString mocks base method.
-func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoString_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoString_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -240,7 +240,7 @@ func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2, arg3 interface{})
 }
 
 // EchoStringList mocks base method.
-func (m *MockClient) EchoStringList(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStringList_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []string, map[string]string, error) {
+func (m *MockClient) EchoStringList(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStringList_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringList", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -257,7 +257,7 @@ func (mr *MockClientMockRecorder) EchoStringList(arg0, arg1, arg2, arg3 interfac
 }
 
 // EchoStringMap mocks base method.
-func (m *MockClient) EchoStringMap(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStringMap_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]*base.BazResponse, map[string]string, error) {
+func (m *MockClient) EchoStringMap(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStringMap_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]*base.BazResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringMap", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -274,7 +274,7 @@ func (mr *MockClientMockRecorder) EchoStringMap(arg0, arg1, arg2, arg3 interface
 }
 
 // EchoStringSet mocks base method.
-func (m *MockClient) EchoStringSet(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStringSet_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]struct{}, map[string]string, error) {
+func (m *MockClient) EchoStringSet(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStringSet_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]struct{}, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStringSet", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -291,7 +291,7 @@ func (mr *MockClientMockRecorder) EchoStringSet(arg0, arg1, arg2, arg3 interface
 }
 
 // EchoStructList mocks base method.
-func (m *MockClient) EchoStructList(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStructList_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []*base.BazResponse, map[string]string, error) {
+func (m *MockClient) EchoStructList(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStructList_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []*base.BazResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStructList", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -308,7 +308,7 @@ func (mr *MockClientMockRecorder) EchoStructList(arg0, arg1, arg2, arg3 interfac
 }
 
 // EchoStructSet mocks base method.
-func (m *MockClient) EchoStructSet(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStructSet_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, []*base.BazResponse, map[string]string, error) {
+func (m *MockClient) EchoStructSet(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoStructSet_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, []*base.BazResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoStructSet", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -325,7 +325,7 @@ func (mr *MockClientMockRecorder) EchoStructSet(arg0, arg1, arg2, arg3 interface
 }
 
 // EchoTypedef mocks base method.
-func (m *MockClient) EchoTypedef(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoTypedef_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, base.UUID, map[string]string, error) {
+func (m *MockClient) EchoTypedef(arg0 context.Context, arg1 map[string]string, arg2 *baz.SecondService_EchoTypedef_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, base.UUID, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoTypedef", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -342,7 +342,7 @@ func (mr *MockClientMockRecorder) EchoTypedef(arg0, arg1, arg2, arg3 interface{}
 }
 
 // GetProfile mocks base method.
-func (m *MockClient) GetProfile(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_GetProfile_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *baz.GetProfileResponse, map[string]string, error) {
+func (m *MockClient) GetProfile(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_GetProfile_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *baz.GetProfileResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProfile", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -359,7 +359,7 @@ func (mr *MockClientMockRecorder) GetProfile(arg0, arg1, arg2, arg3 interface{})
 }
 
 // HeaderSchema mocks base method.
-func (m *MockClient) HeaderSchema(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_HeaderSchema_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *baz.HeaderSchema, map[string]string, error) {
+func (m *MockClient) HeaderSchema(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_HeaderSchema_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *baz.HeaderSchema, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderSchema", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -376,7 +376,7 @@ func (mr *MockClientMockRecorder) HeaderSchema(arg0, arg1, arg2, arg3 interface{
 }
 
 // Ping mocks base method.
-func (m *MockClient) Ping(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, *base.BazResponse, map[string]string, error) {
+func (m *MockClient) Ping(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, *base.BazResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Ping", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -393,7 +393,7 @@ func (mr *MockClientMockRecorder) Ping(arg0, arg1, arg2 interface{}) *gomock.Cal
 }
 
 // TestUUID mocks base method.
-func (m *MockClient) TestUUID(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) TestUUID(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TestUUID", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -409,7 +409,7 @@ func (mr *MockClientMockRecorder) TestUUID(arg0, arg1, arg2 interface{}) *gomock
 }
 
 // Trans mocks base method.
-func (m *MockClient) Trans(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_Trans_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *base.TransStruct, map[string]string, error) {
+func (m *MockClient) Trans(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_Trans_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *base.TransStruct, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Trans", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -426,7 +426,7 @@ func (mr *MockClientMockRecorder) Trans(arg0, arg1, arg2, arg3 interface{}) *gom
 }
 
 // TransHeaders mocks base method.
-func (m *MockClient) TransHeaders(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeaders_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *base.TransHeaders, map[string]string, error) {
+func (m *MockClient) TransHeaders(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeaders_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *base.TransHeaders, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransHeaders", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -443,7 +443,7 @@ func (mr *MockClientMockRecorder) TransHeaders(arg0, arg1, arg2, arg3 interface{
 }
 
 // TransHeadersNoReq mocks base method.
-func (m *MockClient) TransHeadersNoReq(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeadersNoReq_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *base.TransHeaders, map[string]string, error) {
+func (m *MockClient) TransHeadersNoReq(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeadersNoReq_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *base.TransHeaders, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransHeadersNoReq", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -460,7 +460,7 @@ func (mr *MockClientMockRecorder) TransHeadersNoReq(arg0, arg1, arg2, arg3 inter
 }
 
 // TransHeadersType mocks base method.
-func (m *MockClient) TransHeadersType(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeadersType_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *baz.TransHeaderType, map[string]string, error) {
+func (m *MockClient) TransHeadersType(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeadersType_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *baz.TransHeaderType, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransHeadersType", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -477,7 +477,7 @@ func (mr *MockClientMockRecorder) TransHeadersType(arg0, arg1, arg2, arg3 interf
 }
 
 // URLTest mocks base method.
-func (m *MockClient) URLTest(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) URLTest(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "URLTest", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
