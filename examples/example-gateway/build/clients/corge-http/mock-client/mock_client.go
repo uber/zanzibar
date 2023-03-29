@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	corge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
-	runtime "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -37,7 +37,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // CorgeNoContentOnException mocks base method.
-func (m *MockClient) CorgeNoContentOnException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentOnException_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *corge.Foo, map[string]string, error) {
+func (m *MockClient) CorgeNoContentOnException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentOnException_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *corge.Foo, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CorgeNoContentOnException", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -54,7 +54,7 @@ func (mr *MockClientMockRecorder) CorgeNoContentOnException(arg0, arg1, arg2, ar
 }
 
 // EchoString mocks base method.
-func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -71,10 +71,10 @@ func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2, arg3 interface{})
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*runtime.HTTPClient)
+	ret0, _ := ret[0].(*zanzibar.HTTPClient)
 	return ret0
 }
 
@@ -85,7 +85,7 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // NoContent mocks base method.
-func (m *MockClient) NoContent(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContent_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) NoContent(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContent_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NoContent", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -101,7 +101,7 @@ func (mr *MockClientMockRecorder) NoContent(arg0, arg1, arg2, arg3 interface{}) 
 }
 
 // NoContentNoException mocks base method.
-func (m *MockClient) NoContentNoException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentNoException_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) NoContentNoException(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_NoContentNoException_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NoContentNoException", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
