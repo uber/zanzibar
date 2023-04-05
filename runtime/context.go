@@ -22,9 +22,9 @@ package zanzibar
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 	"time"
-	"encoding/json"
 
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/encoder"
