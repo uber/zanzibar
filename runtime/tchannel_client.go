@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	"go.uber.org/zap"
 	netContext "golang.org/x/net/context"
 )
 
@@ -238,11 +240,17 @@ func (c *TChannelClient) call(
 	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
 
+	deadline, ok := ctx.Deadline()
+	if ok {
+		call.contextLogger.InfoZ(ctx, "ctxBuilder.Build", zap.Time("tchannel-client-deadline", deadline))
+	}
+
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
 		call.resHeaders = map[string]string{}
 		call.success = false
 
 		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
+		call.contextLogger.InfoZ(ctx, fmt.Sprintf("Initiating tchannel call with attempt : %d", rs.Attempt))
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
