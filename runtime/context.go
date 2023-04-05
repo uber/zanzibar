@@ -28,6 +28,7 @@ import (
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"encoding/json"
 )
 
 type contextFieldKey string
@@ -231,7 +232,8 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 			logLevel = logLevelValue
 		}
 	}
-	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), msg))
+	jsonFields, _ := decodeZapFields(newFields)
+	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), msg + "\n" + string(jsonFields)))
 	ctx = WithLogFields(ctx, newFields...)
 	ctx = context.WithValue(ctx, ctxLogCounterName, ctxLogCounter)
 	ctx = context.WithValue(ctx, ctxLogLevel, logLevel)
@@ -291,6 +293,11 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	}
 
 	return fields
+}
+
+// decode the zapfields to json format
+func decodeZapFields(fields []zap.Field) ([]byte, error) {
+	return json.Marshal(fields)
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
