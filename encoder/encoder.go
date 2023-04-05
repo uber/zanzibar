@@ -28,10 +28,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// list of Tag
+// Tags consists of list of Tag
 type Tags []Tag
 
-// key value pair
+// Tag is a key value pair
 type Tag struct {
 	Key   string `json:"key,required"`
 	Value string `json:"value,required"`

@@ -303,7 +303,7 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	return fields
 }
 
-// Get all tags from zap fields
+// GetTagsFromZapFields Get all tags from zap fields
 func GetTagsFromZapFields(fs ...zapcore.Field) encoder.Tags {
 	enc := encoder.NewStringTagEncoder()
 	tags := encoder.Tags(make([]encoder.Tag, 0, len(fs)))
