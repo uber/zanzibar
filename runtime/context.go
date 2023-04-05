@@ -29,6 +29,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"encoding/json"
+	"github.com/getsentry/raven-go"
+	"github.com/uber/zanzibar/encoder"
 )
 
 type contextFieldKey string
@@ -232,8 +234,13 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 			logLevel = logLevelValue
 		}
 	}
-	jsonFields, _ := decodeZapFields(newFields)
-	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), msg + "\n" + string(jsonFields)))
+	detailedMsg := msg
+	tags := tags(newFields)
+	jsonTags, err := decodeTags(tags)
+	if err == nil {
+		detailedMsg = detailedMsg + "\n" + string(jsonTags)
+	}
+	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),detailedMsg))
 	ctx = WithLogFields(ctx, newFields...)
 	ctx = context.WithValue(ctx, ctxLogCounterName, ctxLogCounter)
 	ctx = context.WithValue(ctx, ctxLogLevel, logLevel)
@@ -295,9 +302,28 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	return fields
 }
 
-// decode the zapfields to json format
-func decodeZapFields(fields []zap.Field) ([]byte, error) {
-	return json.Marshal(fields)
+func tags(fs ...zapcore.Field) raven.Tags {
+	enc := encoder.NewStringTagEncoder()
+	tags := raven.Tags(make([]raven.Tag, 0, len(fs)))
+	for _, f := range fs {
+		f.AddTo(enc)
+	}
+	for _, t := range enc.GetTags() {
+		if t == nil {
+			continue
+		}
+		tag := raven.Tag{
+			Key:   t.Key,
+			Value: t.Value,
+		}
+		tags = append(tags, tag)
+	}
+	return tags
+}
+
+// decode the raven tags to json format
+func decodeTags(tags raven.Tags) ([]byte, error) {
+	return json.Marshal(tags)
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
