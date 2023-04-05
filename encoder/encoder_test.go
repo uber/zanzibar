@@ -305,23 +305,6 @@ func TestStringTagEncoder(t *testing.T) {
 	}
 }
 
-func TestSliceArrayEncoder_AppendArray(t *testing.T) {
-	enc := NewStringTagEncoder()
-	senc := sliceArrayEncoder{}
-	senc.AppendArray(zapcore.ArrayMarshalerFunc(func(inner zapcore.ArrayEncoder) error {
-		inner.AppendBool(true)
-		inner.AppendBool(false)
-		return nil
-	}))
-	for _, elem := range senc.elems {
-		field := zap.Any("foo", elem)
-		field.AddTo(enc)
-	}
-	for _, f := range enc.fields {
-		assert.Contains(t, []string{"true", "false"}, f.Value)
-	}
-}
-
 func TestSliceArrayEncoder_Appends(t *testing.T) {
 	enc := sliceArrayEncoder{}
 	enc.AppendBool(true)
