@@ -233,13 +233,9 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 			logLevel = logLevelValue
 		}
 	}
-	detailedMsg := msg
-	tags := tags(newFields...)
-	jsonTags, err := decodeTags(tags)
-	if err == nil {
-		detailedMsg = detailedMsg + "\n" + string(jsonTags)
-	}
-	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),detailedMsg))
+	newFields = append(newFields, zap.String("msg", msg))
+	detailedMsg, _ := json.Marshal(tags(newFields...))
+	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),string(detailedMsg)))
 	ctx = WithLogFields(ctx, newFields...)
 	ctx = context.WithValue(ctx, ctxLogCounterName, ctxLogCounter)
 	ctx = context.WithValue(ctx, ctxLogLevel, logLevel)
@@ -318,11 +314,6 @@ func tags(fs ...zapcore.Field) encoder.Tags {
 		tags = append(tags, tag)
 	}
 	return tags
-}
-
-// decode the tags to json format
-func decodeTags(tags encoder.Tags) ([]byte, error) {
-	return json.Marshal(tags)
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
