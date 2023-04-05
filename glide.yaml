@@ -66,6 +66,8 @@ import:
     version: ^1.41.0
   - package: github.com/ghodss/yaml
     version: master
+ -  package: github.com/getsentry/raven-go
+    version: master
   - package: github.com/gogo/protobuf
     version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
     subpackages:
