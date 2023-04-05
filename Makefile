@@ -195,7 +195,7 @@ $(EXAMPLE_SERVICES): $(GO_FILES)
 
 run-%: $(EXAMPLE_SERVICES_DIR)%/
 	cd "$(EXAMPLE_BASE_DIR)"; \
-		UBER_ENVIRONMENT=production \
+		UBER_ENVIRONMENT=test \
 		CONFIG_DIR=./config \
 		./bin/$* --config=$(TEST_ENV_CONFIG)
 
