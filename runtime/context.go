@@ -236,7 +236,7 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 	zapFields := make([]zap.Field, len(newFields))
     copy(zapFields, newFields)
 	zapFields = append(zapFields, zap.String("msg", msg))
-	msgBytes, err := json.Marshal(GetTagsFromZapFields(zapFields))
+	msgBytes, err := json.Marshal(GetTagsFromZapFields(zapFields...))
 	if(err != nil) {
 		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),msg))
 	} else {
