@@ -25,11 +25,11 @@ import (
 	"strconv"
 	"time"
 
+	"encoding/json"
 	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/encoder"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"encoding/json"
-	"github.com/uber/zanzibar/encoder"
 )
 
 type contextFieldKey string
@@ -234,11 +234,11 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 		}
 	}
 	zapFields := make([]zap.Field, len(newFields))
-    copy(zapFields, newFields)
+	copy(zapFields, newFields)
 	zapFields = append(zapFields, zap.String("msg", msg))
 	msgBytes, err := json.Marshal(GetTagsFromZapFields(zapFields...))
-	if(err != nil) {
-		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),msg))
+	if err != nil {
+		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), msg))
 	} else {
 		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), string(msgBytes)))
 	}
@@ -356,7 +356,7 @@ func NewContextLogger(log *zap.Logger) ContextLogger {
 	}
 }
 
-//GetLogger returns the logger
+// GetLogger returns the logger
 func (c *contextLogger) GetLogger() Logger {
 	return c.log
 }
