@@ -28,6 +28,8 @@ import (
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"encoding/json"
+	"github.com/uber/zanzibar/encoder"
 )
 
 type contextFieldKey string
@@ -231,7 +233,15 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 			logLevel = logLevelValue
 		}
 	}
-	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), msg))
+	zapFields := make([]zap.Field, len(newFields))
+    copy(zapFields, newFields)
+	zapFields = append(zapFields, zap.String("msg", msg))
+	msgBytes, err := json.Marshal(GetTagsFromZapFields(zapFields...))
+	if(err != nil) {
+		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),msg))
+	} else {
+		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), string(msgBytes)))
+	}
 	ctx = WithLogFields(ctx, newFields...)
 	ctx = context.WithValue(ctx, ctxLogCounterName, ctxLogCounter)
 	ctx = context.WithValue(ctx, ctxLogLevel, logLevel)
@@ -291,6 +301,25 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	}
 
 	return fields
+}
+
+func GetTagsFromZapFields(fs ...zapcore.Field) encoder.Tags {
+	enc := encoder.NewStringTagEncoder()
+	tags := encoder.Tags(make([]encoder.Tag, 0, len(fs)))
+	for _, f := range fs {
+		f.AddTo(enc)
+	}
+	for _, t := range enc.GetTags() {
+		if t == nil {
+			continue
+		}
+		tag := encoder.Tag{
+			Key:   t.Key,
+			Value: t.Value,
+		}
+		tags = append(tags, tag)
+	}
+	return tags
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
