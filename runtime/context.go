@@ -234,8 +234,8 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 		}
 	}
 	detailedMsg := msg
-	tags := tags(newFields)
-	jsonTags, err := decodeTags(tags...)
+	tags := tags(newFields...)
+	jsonTags, err := decodeTags(tags)
 	if err == nil {
 		detailedMsg = detailedMsg + "\n" + string(jsonTags)
 	}
