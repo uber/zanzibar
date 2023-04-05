@@ -233,9 +233,15 @@ func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFiel
 			logLevel = logLevelValue
 		}
 	}
-	newFields = append(newFields, zap.String("msg", msg))
-	detailedMsg, _ := json.Marshal(tags(newFields...))
-	ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),string(detailedMsg)))
+	zapFields := make([]zap.Field, len(newFields))
+    copy(zapFields, newFields)
+	zapFields = append(zapFields, zap.String("msg", msg))
+	msgBytes, err := json.Marshal(GetTagsFromZapFields(zapFields))
+	if(err != nil) {
+		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter),msg))
+	} else {
+		ctx = WithLogFields(ctx, zap.String("msg"+strconv.Itoa(ctxLogCounter), string(msgBytes)))
+	}
 	ctx = WithLogFields(ctx, newFields...)
 	ctx = context.WithValue(ctx, ctxLogCounterName, ctxLogCounter)
 	ctx = context.WithValue(ctx, ctxLogLevel, logLevel)
@@ -297,7 +303,7 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	return fields
 }
 
-func tags(fs ...zapcore.Field) encoder.Tags {
+func GetTagsFromZapFields(fs ...zapcore.Field) encoder.Tags {
 	enc := encoder.NewStringTagEncoder()
 	tags := encoder.Tags(make([]encoder.Tag, 0, len(fs)))
 	for _, f := range fs {
