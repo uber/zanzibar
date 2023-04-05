@@ -24,8 +24,8 @@ import (
 	"context"
 	"strconv"
 	"time"
-
 	"encoding/json"
+
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/encoder"
 	"go.uber.org/zap"
