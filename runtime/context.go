@@ -29,7 +29,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"encoding/json"
-	"github.com/getsentry/raven-go"
 	"github.com/uber/zanzibar/encoder"
 )
 
@@ -302,9 +301,9 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	return fields
 }
 
-func tags(fs ...zapcore.Field) raven.Tags {
+func tags(fs ...zapcore.Field) encoder.Tags {
 	enc := encoder.NewStringTagEncoder()
-	tags := raven.Tags(make([]raven.Tag, 0, len(fs)))
+	tags := encoder.Tags(make([]encoder.Tag, 0, len(fs)))
 	for _, f := range fs {
 		f.AddTo(enc)
 	}
@@ -312,7 +311,7 @@ func tags(fs ...zapcore.Field) raven.Tags {
 		if t == nil {
 			continue
 		}
-		tag := raven.Tag{
+		tag := encoder.Tag{
 			Key:   t.Key,
 			Value: t.Value,
 		}
@@ -321,8 +320,8 @@ func tags(fs ...zapcore.Field) raven.Tags {
 	return tags
 }
 
-// decode the raven tags to json format
-func decodeTags(tags raven.Tags) ([]byte, error) {
+// decode the tags to json format
+func decodeTags(tags encoder.Tags) ([]byte, error) {
 	return json.Marshal(tags)
 }
 
