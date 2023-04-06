@@ -37,3 +37,6 @@ defaultDependencies:
     - middlewares/default/*
 shadowRequestHeader: x-shadow-request
 customInitialisationEnabled: true
+subLoggerLevel.http: info
+subLoggerLevel.jaeger: info
+subLoggerLevel.tchannel: info
