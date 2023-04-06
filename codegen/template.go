@@ -32,6 +32,8 @@ import (
 	templates "github.com/uber/zanzibar/codegen/template_bundle"
 )
 
+const ProxyTemplate = "proxyTemplate"
+
 // AssetProvider provides access to template assets
 type AssetProvider interface {
 	// AssetNames returns a list of named assets available
@@ -189,6 +191,23 @@ func (t *Template) ExecTemplate(
 	}
 	ret = tplBuffer.Bytes()
 	return
+}
+
+// GetDefaultOrProxyTemplate verify and returns overridden template if present
+func GetDefaultOrProxyTemplate(defaultTemplateName string,
+	defaultTemplate *Template,
+	proxyTemplate *Template,
+	config map[string]interface{}) (string, *Template) {
+	// verify if config contains template override
+	if _, ok := config[ProxyTemplate]; !ok {
+		return defaultTemplateName, defaultTemplate
+	}
+	// verify if override template config contains given template
+	templateMap := config[ProxyTemplate].(map[string]string)
+	if _, ok := templateMap[defaultTemplateName]; !ok {
+		return defaultTemplateName, defaultTemplate
+	}
+	return templateMap[defaultTemplateName], proxyTemplate
 }
 
 func openFileOrCreate(file string) (*os.File, error) {
