@@ -395,3 +395,21 @@ func TestGetCtxLogLevelOrDebugLevelFromCtx(t *testing.T) {
 	assert.Equal(t, zapcore.DebugLevel, logLevel)
 	assert.Equal(t, 0, logCounter)
 }
+
+func TestLogLevelWithLogZ(t *testing.T) {
+	zapLoggerCore, _ := observer.New(zap.WarnLevel)
+	zapLogger := zap.New(zapLoggerCore)
+	contextLogger := NewContextLogger(zapLogger)
+	contextLogger.SetSkipZanzibarLogs(true)
+	ctx := context.Background()
+
+	// info logs should not be added as info level < warn level
+	ctx = contextLogger.InfoZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs := GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 0)
+
+	// error logs should be added as errorLevel > warnLevel
+	ctx = contextLogger.ErrorZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 2)
+}

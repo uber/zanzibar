@@ -367,7 +367,7 @@ func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.
 
 func (c *contextLogger) DebugZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if c.skipZanzibarLogs {
-		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, zapcore.DebugLevel)
+		ctx = GetAccumulatedLogContext(c, ctx, msg, zapcore.DebugLevel, userFields...)
 	} else {
 		c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
 	}
@@ -376,7 +376,7 @@ func (c *contextLogger) DebugZ(ctx context.Context, msg string, userFields ...za
 
 func (c *contextLogger) ErrorZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if c.skipZanzibarLogs {
-		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, zapcore.ErrorLevel)
+		ctx = GetAccumulatedLogContext(c, ctx, msg, zapcore.ErrorLevel, userFields...)
 	} else {
 		c.log.Error(msg, accumulateLogFields(ctx, userFields)...)
 	}
@@ -385,7 +385,7 @@ func (c *contextLogger) ErrorZ(ctx context.Context, msg string, userFields ...za
 
 func (c *contextLogger) InfoZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if c.skipZanzibarLogs {
-		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, zapcore.InfoLevel)
+		ctx = GetAccumulatedLogContext(c, ctx, msg, zapcore.InfoLevel, userFields...)
 	} else {
 		c.log.Info(msg, accumulateLogFields(ctx, userFields)...)
 	}
@@ -394,7 +394,7 @@ func (c *contextLogger) InfoZ(ctx context.Context, msg string, userFields ...zap
 
 func (c *contextLogger) PanicZ(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	if c.skipZanzibarLogs {
-		ctx = accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, zapcore.PanicLevel)
+		ctx = GetAccumulatedLogContext(c, ctx, msg, zapcore.PanicLevel, userFields...)
 	} else {
 		c.log.Panic(msg, accumulateLogFields(ctx, userFields)...)
 	}
@@ -455,4 +455,12 @@ func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Du
 // RecordHistogramDuration records the duration with current tags from context in a histogram
 func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name string, d time.Duration) {
 	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
+}
+
+// GetAccumulatedLogContext returns accumulated log context
+func GetAccumulatedLogContext(c *contextLogger, ctx context.Context, msg string, logLevel zapcore.Level, userFields ...zap.Field) context.Context {
+	if !c.log.Core().Enabled(logLevel) {
+		return ctx
+	}
+	return accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, logLevel)
 }
