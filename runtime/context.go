@@ -326,7 +326,7 @@ func NewContextLogger(log *zap.Logger) ContextLogger {
 	}
 }
 
-//GetLogger returns the logger
+// GetLogger returns the logger
 func (c *contextLogger) GetLogger() Logger {
 	return c.log
 }
@@ -458,7 +458,7 @@ func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name strin
 }
 
 // GetAccumulatedLogContext returns accumulated log context
-func GetAccumulatedLogContext(c *contextLogger, ctx context.Context, msg string, logLevel zapcore.Level, userFields ...zap.Field) context.Context {
+func GetAccumulatedLogContext(ctx context.Context, c *contextLogger, msg string, logLevel zapcore.Level, userFields ...zap.Field) context.Context {
 	if !c.log.Core().Enabled(logLevel) {
 		return ctx
 	}
