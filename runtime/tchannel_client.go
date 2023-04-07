@@ -193,6 +193,7 @@ func (c *TChannelClient) call(
 	}()
 	call.start()
 
+	call.contextLogger.InfoZ(ctx, "Tchannel call started")
 	reqUUID := RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
 		if reqHeaders == nil {
@@ -257,6 +258,9 @@ func (c *TChannelClient) call(
 			RequestState:    rs,
 			RoutingDelegate: GetRoutingDelegateFromCtx(ctx),
 		})
+		if call.call == nil {
+			call.contextLogger.WarnZ(ctx, fmt.Sprintf("Could not make tchannel call"), zap.String("call error", cerr.Error()))
+		}
 		if cerr != nil {
 			return errors.Wrapf(
 				err, "Could not begin outbound %s.%s (%s %s) request",
@@ -264,6 +268,9 @@ func (c *TChannelClient) call(
 			)
 		}
 
+		if call.call != nil {
+			call.contextLogger.InfoZ(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
+		}
 		// trace request
 		reqHeaders = tchannel.InjectOutboundSpan(call.call.Response(), reqHeaders)
 
