@@ -268,7 +268,7 @@ func (c *TChannelClient) call(
 			)
 		}
 
-		if call.call != nil {
+		if call.call != nil && call.call.Response() != nil {
 			call.contextLogger.InfoZ(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
 		}
 		// trace request
