@@ -395,3 +395,39 @@ func TestGetCtxLogLevelOrDebugLevelFromCtx(t *testing.T) {
 	assert.Equal(t, zapcore.DebugLevel, logLevel)
 	assert.Equal(t, 0, logCounter)
 }
+
+func TestLogLevelWithLogZ(t *testing.T) {
+	zapLoggerCore, _ := observer.New(zap.WarnLevel)
+	zapLogger := zap.New(zapLoggerCore)
+	contextLogger := NewContextLogger(zapLogger)
+	contextLogger.SetSkipZanzibarLogs(true)
+	ctx := context.Background()
+
+	// debug logs should not be added as debugLevel < warnLevel
+	ctx = contextLogger.DebugZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs := GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 0)
+
+	// info logs should not be added as infoLevel < warnLevel
+	ctx = contextLogger.InfoZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 0)
+
+	// warn logs should be added
+	ctx = context.Background()
+	ctx = contextLogger.WarnZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 2)
+
+	// error logs should be added as errorLevel > warnLevel
+	ctx = context.Background()
+	ctx = contextLogger.ErrorZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 2)
+
+	// panic logs should be added as panicLevel > warnLevel
+	ctx = context.Background()
+	ctx = contextLogger.PanicZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 2)
+}
