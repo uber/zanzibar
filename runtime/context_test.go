@@ -413,7 +413,14 @@ func TestLogLevelWithLogZ(t *testing.T) {
 	logs = GetLogFieldsFromCtx(ctx)
 	assert.Len(t, logs, 0)
 
+	// warn logs should be added
+	ctx = context.Background()
+	ctx = contextLogger.WarnZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 2)
+
 	// error logs should be added as errorLevel > warnLevel
+	ctx = context.Background()
 	ctx = contextLogger.ErrorZ(ctx, "msg", zap.String("argField", "argValue"))
 	logs = GetLogFieldsFromCtx(ctx)
 	assert.Len(t, logs, 2)
