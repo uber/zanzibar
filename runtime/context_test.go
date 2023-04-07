@@ -403,13 +403,24 @@ func TestLogLevelWithLogZ(t *testing.T) {
 	contextLogger.SetSkipZanzibarLogs(true)
 	ctx := context.Background()
 
-	// info logs should not be added as info level < warn level
-	ctx = contextLogger.InfoZ(ctx, "msg", zap.String("argField", "argValue"))
+	// debug logs should not be added as debugLevel < warnLevel
+	ctx = contextLogger.DebugZ(ctx, "msg", zap.String("argField", "argValue"))
 	logs := GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 0)
+
+	// info logs should not be added as infoLevel < warnLevel
+	ctx = contextLogger.InfoZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
 	assert.Len(t, logs, 0)
 
 	// error logs should be added as errorLevel > warnLevel
 	ctx = contextLogger.ErrorZ(ctx, "msg", zap.String("argField", "argValue"))
+	logs = GetLogFieldsFromCtx(ctx)
+	assert.Len(t, logs, 2)
+
+	// panic logs should be added as panicLevel > warnLevel
+	ctx = context.Background()
+	ctx = contextLogger.PanicZ(ctx, "msg", zap.String("argField", "argValue"))
 	logs = GetLogFieldsFromCtx(ctx)
 	assert.Len(t, logs, 2)
 }
