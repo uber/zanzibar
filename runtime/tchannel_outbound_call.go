@@ -57,7 +57,7 @@ func (c *tchannelOutboundCall) start() {
 func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	c.finishTime = time.Now()
 
-	c.contextLogger.InfoZ(ctx, "Finishing tchannel call")
+	ctx = c.contextLogger.InfoZ(ctx, "Finishing tchannel call")
 
 	// emit metrics
 	if err != nil {
