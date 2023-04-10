@@ -32,6 +32,7 @@ import (
 	templates "github.com/uber/zanzibar/codegen/template_bundle"
 )
 
+// ProxyTemplate proxy template representation
 const ProxyTemplate = "proxyTemplate"
 
 // AssetProvider provides access to template assets

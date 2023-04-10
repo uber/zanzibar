@@ -1893,6 +1893,7 @@ func findMethod(
 	return nil
 }
 
+// ExecuteDefaultOrProxyTemplate verify and execute a default or proxy template
 func ExecuteDefaultOrProxyTemplate(
 	defaultTemplateName string,
 	defaultTemplates *Template,
