@@ -239,7 +239,8 @@ func (c *TChannelClient) call(
 		ctxBuilder.SetShardKey(sk)
 	}
 
-	ctx, cancel := ctxBuilder.Build()
+	ctx1, cancel := ctxBuilder.Build()
+	ctx = call.contextLogger.WarnZ(ctx1, "context headers", zap.Any("context-headers1", ctx1.Headers()))
 	defer cancel()
 
 	deadline, ok := ctx.Deadline()
