@@ -251,7 +251,7 @@ func (c *TChannelClient) call(
 		})
 		if cerr != nil {
 			return errors.Wrapf(
-				err, "Could not begin outbound %s.%s (%s %s) request",
+				cerr, "Could not begin outbound %s.%s (%s %s) request",
 				call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
 			)
 		}
