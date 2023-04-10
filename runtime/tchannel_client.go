@@ -193,7 +193,7 @@ func (c *TChannelClient) call(
 	}()
 	call.start()
 
-	call.contextLogger.InfoZ(ctx, "Tchannel call started")
+	call.contextLogger.WarnZ(ctx, "Tchannel call started")
 	reqUUID := RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
 		if reqHeaders == nil {
@@ -243,7 +243,7 @@ func (c *TChannelClient) call(
 
 	deadline, ok := ctx.Deadline()
 	if ok {
-		call.contextLogger.InfoZ(ctx, "ctxBuilder.Build", zap.Time("tchannel-client-deadline", deadline))
+		call.contextLogger.WarnZ(ctx, "ctxBuilder.Build", zap.Time("tchannel-client-deadline", deadline))
 	}
 
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
@@ -251,15 +251,15 @@ func (c *TChannelClient) call(
 		call.success = false
 
 		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
-		call.contextLogger.InfoZ(ctx, fmt.Sprintf("Initiating tchannel call with attempt : %d", rs.Attempt))
+		call.contextLogger.WarnZ(ctx, fmt.Sprintf("Initiating tchannel call with attempt : %d", rs.Attempt))
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
 			RequestState:    rs,
 			RoutingDelegate: GetRoutingDelegateFromCtx(ctx),
 		})
-		if call.call == nil {
-			call.contextLogger.WarnZ(ctx, fmt.Sprintf("Could not make tchannel call"), zap.String("call error", cerr.Error()))
+		if call.call == nil && cerr == nil {
+			call.contextLogger.WarnZ(ctx, "Could not make tchannel call")
 		}
 		if cerr != nil {
 			return errors.Wrapf(
@@ -269,7 +269,7 @@ func (c *TChannelClient) call(
 		}
 
 		if call.call != nil && call.call.Response() != nil {
-			call.contextLogger.InfoZ(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
+			call.contextLogger.WarnZ(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
 		}
 		// trace request
 		reqHeaders = tchannel.InjectOutboundSpan(call.call.Response(), reqHeaders)
