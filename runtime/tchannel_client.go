@@ -251,7 +251,7 @@ func (c *TChannelClient) call(
 		call.success = false
 
 		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
-		ctx = call.contextLogger.WarnZ(ctx, fmt.Sprintf("Initiating tchannel call with attempt : %d", rs.Attempt))
+		ctx = call.contextLogger.Warn(ctx, fmt.Sprintf("Initiating tchannel call with attempt : %d", rs.Attempt))
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
@@ -259,7 +259,7 @@ func (c *TChannelClient) call(
 			RoutingDelegate: GetRoutingDelegateFromCtx(ctx),
 		})
 		if call.call == nil && cerr == nil {
-			ctx = call.contextLogger.WarnZ(ctx, "Could not make tchannel call")
+			ctx = call.contextLogger.Warn(ctx, "Could not make tchannel call")
 		}
 		if cerr != nil {
 			return errors.Wrapf(
@@ -269,7 +269,7 @@ func (c *TChannelClient) call(
 		}
 
 		if call.call != nil && call.call.Response() != nil {
-			ctx = call.contextLogger.WarnZ(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
+			ctx = call.contextLogger.Warn(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
 		}
 		// trace request
 		reqHeaders = tchannel.InjectOutboundSpan(call.call.Response(), reqHeaders)
