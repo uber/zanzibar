@@ -1901,7 +1901,7 @@ func ExecuteDefaultOrProxyTemplate(
 	config map[string]interface{},
 	tplData interface{},
 	packageHelper *PackageHelper,
-	) (ret []byte, rErr error) {
+) (ret []byte, rErr error) {
 	tmplName, templates := GetDefaultOrProxyTemplate(defaultTemplateName, defaultTemplates, proxyTemplates, config)
 	return templates.ExecTemplate(
 		tmplName,

@@ -1788,7 +1788,7 @@ type ModuleInstance struct {
 	// QPSLevels is map of circuit breaker name to qps level for all circuit breakers
 	QPSLevels map[string]int
 	// ProxyTemplates is a collection of extra templates apart from zanzibar
-	ProxyTemplates	*Template
+	ProxyTemplates *Template
 }
 
 func (instance *ModuleInstance) String() string {

@@ -30,7 +30,7 @@ import (
 	"sort"
 	"strings"
 
-	yaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -428,7 +428,7 @@ func NewEndpointSpec(
 		ClientID:             clientID,
 		ClientMethod:         clientMethod,
 		DefaultHeaders:       h.defaultHeaders,
-		Config: 			  config,
+		Config:               config,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(
