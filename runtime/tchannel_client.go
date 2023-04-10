@@ -196,6 +196,7 @@ func (c *TChannelClient) call(
 	ctx = call.contextLogger.WarnZ(ctx, "Tchannel call started")
 	reqUUID := RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		ctx = context.WithValue(ctx, "requestUUID", reqUUID)
 		if reqHeaders == nil {
 			reqHeaders = make(map[string]string)
 		}
@@ -258,10 +259,9 @@ func (c *TChannelClient) call(
 			RequestState:    rs,
 			RoutingDelegate: GetRoutingDelegateFromCtx(ctx),
 		})
-		if call.call == nil && cerr == nil {
-			ctx = call.contextLogger.Warn(ctx, "Could not make tchannel call")
-		}
+		ctx = call.contextLogger.Warn(ctx, "tchannel call tried", zap.Bool("call-nil", call.call == nil), zap.Bool("call-error", cerr != nil))
 		if cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel call", zap.String("cerr", cerr.Error()))
 			return errors.Wrapf(
 				err, "Could not begin outbound %s.%s (%s %s) request",
 				call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
@@ -275,24 +275,30 @@ func (c *TChannelClient) call(
 		reqHeaders = tchannel.InjectOutboundSpan(call.call.Response(), reqHeaders)
 
 		if cerr := call.writeReqHeaders(reqHeaders); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel req headers", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 		if cerr := call.writeReqBody(ctx, req); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel req body", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 
 		response := call.call.Response()
 		if cerr = call.readResHeaders(response); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel res headers", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 		if cerr = call.readResBody(ctx, response, resp); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel res body", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 
+		ctx = call.contextLogger.Warn(ctx, "No Error in tchannel call", zap.Bool("cerr", cerr != nil))
 		return cerr
 	})
 
 	if err != nil {
+		ctx = call.contextLogger.Warn(ctx, "Error in tchannel final", zap.String("tchannel-err", err.Error()))
 		// Do not wrap system errors.
 		if _, ok := err.(tchannel.SystemError); ok {
 			return call.success, call.resHeaders, err
