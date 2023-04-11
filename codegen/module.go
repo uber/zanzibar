@@ -83,6 +83,7 @@ type Options struct {
 	EnableCustomInitialisation bool
 	CommitChange               bool
 	QPSLevelsEnabled           bool
+	ProxyTemplates			   *Template
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -975,6 +976,7 @@ func (system *ModuleSystem) readInstance(
 		YAMLFileRaw:           raw,
 		Config:                config.Config,
 		SelectiveBuilding:     config.SelectiveBuilding,
+		ProxyTemplates: 	   options.ProxyTemplates,
 	}, nil
 }
 
