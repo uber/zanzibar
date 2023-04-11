@@ -80,6 +80,7 @@ type Options struct {
 	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 	GetContextFieldExtractors func() []ContextLogFieldsExtractor
 	JSONWrapper               jsonwrapper.JSONWrapper
+	NotFoundHandler           func(*Gateway) http.HandlerFunc
 
 	// If present, request uuid is retrieved from the incoming request
 	// headers using the key, and put on the context. Otherwise, a new
@@ -127,6 +128,7 @@ type Gateway struct {
 	localHTTPServer       *HTTPServer
 	tchannelServer        *tchannel.Channel
 	tracerCloser          io.Closer
+	notFoundHandler       http.HandlerFunc
 
 	requestUUIDHeaderKey string
 	isUnhealthy          bool
@@ -236,6 +238,12 @@ func CreateGateway(
 
 	gateway.setupConfig(config)
 	config.Freeze()
+
+	if opts.NotFoundHandler != nil &&
+		config.ContainsKey("http.notFoundHandler.custom") &&
+		config.MustGetBoolean("http.notFoundHandler.custom") {
+		gateway.notFoundHandler = opts.NotFoundHandler(gateway)
+	}
 
 	// order matters for following setup method calls
 	if err := gateway.setupMetrics(config); err != nil {

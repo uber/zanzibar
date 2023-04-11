@@ -173,9 +173,19 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		requestUUIDHeaderKey: gateway.requestUUIDHeaderKey,
 	}
 
+	notFoundHandler := http.HandlerFunc(router.handleNotFound)
+	if gateway.notFoundHandler != nil {
+		notFoundHandler = gateway.notFoundHandler
+	}
+
+	handleMethodNotAllowed := true
+	if gateway.Config.ContainsKey("http.handleMethodNotAllowed") {
+		handleMethodNotAllowed = gateway.Config.MustGetBoolean("http.handleMethodNotAllowed")
+	}
+
 	router.httpRouter = &zrouter.Router{
-		HandleMethodNotAllowed: true,
-		NotFound:               http.HandlerFunc(router.handleNotFound),
+		HandleMethodNotAllowed: handleMethodNotAllowed,
+		NotFound:               notFoundHandler,
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
 		PanicHandler:           router.handlePanic,
 		WhitelistedPaths:       router.getWhitelistedPaths(),
