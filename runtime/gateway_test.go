@@ -93,6 +93,8 @@ func TestGetServiceNameFromEnv(t *testing.T) {
 		"metrics.serviceName":                "not-overridden",
 		"serviceNameEnv":                     "TEST",
 		"metrics.serviceNameEnv":             "TEST",
+		"http.notFoundHandler.custom":        true,
+		"http.handleMethodNotAllowed":        true,
 	})
 
 	var metricsBackend tally.CachedStatsReporter
@@ -101,6 +103,9 @@ func TestGetServiceNameFromEnv(t *testing.T) {
 		GetContextFieldExtractors: nil,
 		JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
 		MetricsBackend:            metricsBackend,
+		NotFoundHandler: func(gateway *Gateway) http.HandlerFunc {
+			return func(writer http.ResponseWriter, request *http.Request) {}
+		},
 	}
 
 	if err := os.Setenv("TEST", "overridden"); err != nil {
