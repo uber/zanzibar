@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	withexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/withexceptions/withexceptions"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -37,7 +37,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // Func1 mocks base method.
-func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, *withexceptions.Response, map[string]string, error) {
+func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, *withexceptions.Response, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Func1", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -54,10 +54,10 @@ func (mr *MockClientMockRecorder) Func1(arg0, arg1, arg2 interface{}) *gomock.Ca
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
+func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*zanzibar.HTTPClient)
+	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
 }
 

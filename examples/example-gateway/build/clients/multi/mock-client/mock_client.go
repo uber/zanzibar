@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -36,10 +36,10 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
+func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*zanzibar.HTTPClient)
+	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
 }
 
@@ -50,7 +50,7 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // HelloA mocks base method.
-func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HelloA", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
@@ -67,7 +67,7 @@ func (mr *MockClientMockRecorder) HelloA(arg0, arg1, arg2 interface{}) *gomock.C
 }
 
 // HelloB mocks base method.
-func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HelloB", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
