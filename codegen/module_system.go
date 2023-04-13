@@ -1870,7 +1870,6 @@ func ExecuteDefaultOrProxyTemplate(
 	)
 }
 
-
 /*
  * General client meta
  */
