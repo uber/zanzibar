@@ -239,12 +239,6 @@ func CreateGateway(
 	gateway.setupConfig(config)
 	config.Freeze()
 
-	if opts.NotFoundHandler != nil &&
-		config.ContainsKey("http.notFoundHandler.custom") &&
-		config.MustGetBoolean("http.notFoundHandler.custom") {
-		gateway.notFoundHandler = opts.NotFoundHandler(gateway)
-	}
-
 	// order matters for following setup method calls
 	if err := gateway.setupMetrics(config); err != nil {
 		return nil, err
@@ -256,6 +250,12 @@ func CreateGateway(
 
 	if err := gateway.setupTracer(config); err != nil {
 		return nil, err
+	}
+
+	if opts.NotFoundHandler != nil &&
+		config.ContainsKey("http.notFoundHandler.custom") &&
+		config.MustGetBoolean("http.notFoundHandler.custom") {
+		gateway.notFoundHandler = opts.NotFoundHandler(gateway)
 	}
 
 	// setup router after metrics and logs
