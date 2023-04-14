@@ -143,9 +143,9 @@ func NewServerHTTPRequest(
 		jsonWrapper:   endpoint.JSONWrapper,
 	}
 
+	req.res = NewServerHTTPResponse(w, req)
 	req.start()
 	req.setupLogFields(logFields)
-	req.res = NewServerHTTPResponse(w, req)
 	return req
 }
 
