@@ -34,6 +34,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber-go/tally"
+	"github.com/uber/jaeger-client-go"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	"go.uber.org/zap"
 )
@@ -78,6 +79,10 @@ func NewServerHTTPRequest(
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
 		zap.String(logFieldEndpointHandler, endpoint.HandlerName),
 		zap.String(logFieldRequestURL, r.URL.Path),
+		zap.String(logFieldRequestHTTPMethod, r.Method),
+		zap.String(logFieldRequestRemoteAddr, r.RemoteAddr),
+		zap.String(logFieldRequestPathname, r.URL.RequestURI()),
+		zap.String(logFieldRequestHost, r.Host),
 	}
 
 	// put request scope tags on context
@@ -118,8 +123,6 @@ func NewServerHTTPRequest(
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)
-	ctx = WithLogFields(ctx, logFields...)
-
 	httpRequest := r.WithContext(ctx)
 
 	scope := endpoint.scope.Tagged(scopeTags)
@@ -140,8 +143,9 @@ func NewServerHTTPRequest(
 		jsonWrapper:   endpoint.JSONWrapper,
 	}
 
-	req.res = NewServerHTTPResponse(w, req)
 	req.start()
+	req.setupLogFields(logFields)
+	req.res = NewServerHTTPResponse(w, req)
 	return req
 }
 
@@ -204,6 +208,23 @@ func (req *ServerHTTPRequest) start() {
 		}
 		req.span = span
 	}
+}
+
+func (req *ServerHTTPRequest) setupLogFields(fields []zap.Field) {
+	fields = append(fields, zap.Time(logFieldRequestStartTime, req.startTime))
+	if span := req.GetSpan(); span != nil {
+		jc, ok := span.Context().(jaeger.SpanContext)
+		if ok {
+			fields = append(fields,
+				zap.String(TraceSpanKey, jc.SpanID().String()),
+				zap.String(TraceIDKey, jc.TraceID().String()),
+				zap.Bool(TraceSampledKey, jc.IsSampled()),
+			)
+		}
+	}
+
+	ctx := WithLogFields(req.Context(), fields...)
+	req.httpRequest = req.httpRequest.WithContext(ctx)
 }
 
 // CheckHeaders verifies that request contains required headers.
