@@ -28,8 +28,10 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 
+// CircuitBreakerConfigKey custom comment
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+// Client defines {{$clientID}} custom comment.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
 {{- range $svc := .Services -}}

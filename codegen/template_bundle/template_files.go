@@ -2068,8 +2068,10 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 
+// CircuitBreakerConfigKey custom comment
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+// Client defines {{$clientID}} custom comment.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
 {{- range $svc := .Services -}}
@@ -2609,7 +2611,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19477, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19567, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

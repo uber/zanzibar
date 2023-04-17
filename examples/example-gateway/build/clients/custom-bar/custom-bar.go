@@ -36,13 +36,15 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/custom-bar/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/custom-bar/module"
 	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	clientsIDlClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
 )
 
+// CircuitBreakerConfigKey custom comment
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+// Client defines custom-bar custom comment.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
 	ArgNotStruct(
