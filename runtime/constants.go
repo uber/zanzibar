@@ -65,7 +65,7 @@ const (
 
 	// HTTPStatusClientClosedRequest code describes client closed request as per this doc https://httpstatus.in/499/
 	HTTPStatusClientClosedRequest = 499
-	
+
 	// TraceIDKey is the log field key containing the associated trace id
 	TraceIDKey = "trace.traceId"
 	// TraceSpanKey is the log field key containing the associated span id
@@ -170,11 +170,11 @@ var noContentStatusCodes = map[int]bool{
 	http.StatusNotModified: true, // 304
 }
 
-//DefaultBackOffTimeAcrossRetriesConf is the time to wait before attempting new attempt
+// DefaultBackOffTimeAcrossRetriesConf is the time to wait before attempting new attempt
 var DefaultBackOffTimeAcrossRetriesConf = 10
 
-//DefaultBackOffTimeAcrossRetries is the time in MS to wait before attempting new attempt
+// DefaultBackOffTimeAcrossRetries is the time in MS to wait before attempting new attempt
 var DefaultBackOffTimeAcrossRetries = time.Duration(DefaultBackOffTimeAcrossRetriesConf) * time.Millisecond
 
-//DefaultScaleFactor is multiplied with timeoutPerAttempt
+// DefaultScaleFactor is multiplied with timeoutPerAttempt
 var DefaultScaleFactor = 1.1
