@@ -63,6 +63,8 @@ const (
 	environmentKey    = "env"
 	apienvironmentKey = "apienvironment"
 
+	// HTTPStatusClientClosedRequest code describes client closed request as per this doc https://httpstatus.in/499/
+	HTTPStatusClientClosedRequest = 499
 	// TraceIDKey is the log field key containing the associated trace id
 	TraceIDKey = "trace.traceId"
 	// TraceSpanKey is the log field key containing the associated span id
@@ -148,7 +150,7 @@ var knownStatusCodes = map[int]bool{
 	http.StatusTooManyRequests:               true, // 429
 	http.StatusRequestHeaderFieldsTooLarge:   true, // 431
 	http.StatusUnavailableForLegalReasons:    true, // 451
-	499:                                      true, // 499 client closed request
+	HTTPStatusClientClosedRequest:            true, // 499
 	http.StatusInternalServerError:           true, // 500
 	http.StatusNotImplemented:                true, // 501
 	http.StatusBadGateway:                    true, // 502
