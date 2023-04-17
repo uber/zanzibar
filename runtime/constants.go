@@ -65,6 +65,7 @@ const (
 
 	// HTTPStatusClientClosedRequest code describes client closed request as per this doc https://httpstatus.in/499/
 	HTTPStatusClientClosedRequest = 499
+	
 	// TraceIDKey is the log field key containing the associated trace id
 	TraceIDKey = "trace.traceId"
 	// TraceSpanKey is the log field key containing the associated span id
