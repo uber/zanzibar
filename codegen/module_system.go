@@ -520,10 +520,10 @@ func (g *httpClientGenerator) Generate(
 		SidecarRouter:    clientSpec.SidecarRouter,
 	}
 
-	client, err := ExecuteDefaultOrProxyTemplate(
+	client, err := ExecuteDefaultOrCustomTemplate(
 		"http_client.tmpl",
 		g.templates,
-		instance.ProxyTemplates,
+		instance.CustomTemplates,
 		instance.Config,
 		clientMeta,
 		g.packageHelper,
@@ -777,10 +777,10 @@ func (g *tchannelClientGenerator) Generate(
 		DeputyReqHeader:  g.packageHelper.DeputyReqHeader(),
 	}
 
-	client, err := ExecuteDefaultOrProxyTemplate(
+	client, err := ExecuteDefaultOrCustomTemplate(
 		"tchannel_client.tmpl",
 		g.templates,
-		instance.ProxyTemplates,
+		instance.CustomTemplates,
 		instance.Config,
 		clientMeta,
 		g.packageHelper,
@@ -819,10 +819,10 @@ func (g *tchannelClientGenerator) Generate(
 
 	genTestServer, _ := instance.Config["genTestServer"].(bool)
 	if genTestServer {
-		server, err := ExecuteDefaultOrProxyTemplate(
+		server, err := ExecuteDefaultOrCustomTemplate(
 			"tchannel_client_test_server.tmpl",
 			g.templates,
-			instance.ProxyTemplates,
+			instance.CustomTemplates,
 			instance.Config,
 			clientMeta,
 			g.packageHelper,
@@ -1084,10 +1084,10 @@ func (g *gRPCClientGenerator) Generate(
 		QPSLevels:        clientQPSLevels,
 	}
 
-	client, err := ExecuteDefaultOrProxyTemplate(
+	client, err := ExecuteDefaultOrCustomTemplate(
 		"grpc_client.tmpl",
 		g.templates,
-		instance.ProxyTemplates,
+		instance.CustomTemplates,
 		instance.Config,
 		clientMeta,
 		g.packageHelper,
@@ -1309,10 +1309,10 @@ func (g *EndpointGenerator) Generate(
 		return endpointMeta[i].Spec.HandleID < endpointMeta[j].Spec.HandleID
 	})
 
-	endpointCollection, err := ExecuteDefaultOrProxyTemplate(
+	endpointCollection, err := ExecuteDefaultOrCustomTemplate(
 		"endpoint_collection.tmpl",
 		g.templates,
-		instance.ProxyTemplates,
+		instance.CustomTemplates,
 		instance.Config,
 		&EndpointCollectionMeta{
 			Instance:     instance,
@@ -1372,10 +1372,10 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 				Instance: instance,
 				Spec:     m,
 			}
-			structs, err := ExecuteDefaultOrProxyTemplate(
+			structs, err := ExecuteDefaultOrCustomTemplate(
 				"structs.tmpl",
 				g.templates,
-				instance.ProxyTemplates,
+				instance.CustomTemplates,
 				e.Config,
 				meta,
 				g.packageHelper,
@@ -1458,8 +1458,8 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 	f := func() (interface{}, error) {
 		var endpoint []byte
 		if e.EndpointType == "http" {
-			endpoint, err = ExecuteDefaultOrProxyTemplate("endpoint.tmpl", g.templates,
-				instance.ProxyTemplates, e.Config, meta, g.packageHelper)
+			endpoint, err = ExecuteDefaultOrCustomTemplate("endpoint.tmpl", g.templates,
+				instance.CustomTemplates, e.Config, meta, g.packageHelper)
 		} else if e.EndpointType == "tchannel" {
 			endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
 		} else {
@@ -1480,7 +1480,7 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		} else {
 			tmpl = "workflow.tmpl"
 		}
-		workflow, err := ExecuteDefaultOrProxyTemplate(tmpl, g.templates, instance.ProxyTemplates, e.Config, meta, g.packageHelper)
+		workflow, err := ExecuteDefaultOrCustomTemplate(tmpl, g.templates, instance.CustomTemplates, e.Config, meta, g.packageHelper)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error executing workflow template")
 		}
@@ -1561,7 +1561,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		tempName = "endpoint_test_tchannel_client.tmpl"
 	}
 
-	endpointTest, err := ExecuteDefaultOrProxyTemplate(tempName, g.templates, instance.ProxyTemplates,
+	endpointTest, err := ExecuteDefaultOrCustomTemplate(tempName, g.templates, instance.CustomTemplates,
 		instance.Config, meta, g.packageHelper)
 	if err != nil {
 		return errors.Wrap(err, "Error executing endpoint test template")
@@ -1606,10 +1606,10 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 	runner := parallelize.NewUnboundedRunner(workCount)
 
 	f := func() (interface{}, error) {
-		service, err := ExecuteDefaultOrProxyTemplate(
+		service, err := ExecuteDefaultOrCustomTemplate(
 			"service.tmpl",
 			generator.templates,
-			instance.ProxyTemplates,
+			instance.CustomTemplates,
 			instance.Config,
 			instance,
 			generator.packageHelper,
@@ -1629,10 +1629,10 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 
 	f = func() (interface{}, error) {
 		// generate main.go
-		main, err := ExecuteDefaultOrProxyTemplate(
+		main, err := ExecuteDefaultOrCustomTemplate(
 			"main.tmpl",
 			generator.templates,
-			instance.ProxyTemplates,
+			instance.CustomTemplates,
 			instance.Config,
 			instance,
 			generator.packageHelper,
@@ -1652,10 +1652,10 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 
 	f = func() (interface{}, error) {
 		// generate main_test.go
-		mainTest, err := ExecuteDefaultOrProxyTemplate(
+		mainTest, err := ExecuteDefaultOrCustomTemplate(
 			"main_test.tmpl",
 			generator.templates,
-			instance.ProxyTemplates,
+			instance.CustomTemplates,
 			instance.Config,
 			instance,
 			generator.packageHelper,
@@ -1789,7 +1789,7 @@ func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, o
 		templateName = "middleware_tchannel.tmpl"
 	}
 
-	bytes, err := ExecuteDefaultOrProxyTemplate(templateName, g.templates, instance.ProxyTemplates, instance.Config, instance, g.packageHelper)
+	bytes, err := ExecuteDefaultOrCustomTemplate(templateName, g.templates, instance.CustomTemplates, instance.Config, instance, g.packageHelper)
 	if err != nil {
 		return err
 	}
@@ -1825,10 +1825,10 @@ func GenerateDependencyStruct(
 	if genCustom != "" {
 		instance.PackageInfo.ExportType = instance.Config["customInterface"].(string)
 	}
-	return ExecuteDefaultOrProxyTemplate(
+	return ExecuteDefaultOrCustomTemplate(
 		"dependency_struct.tmpl",
 		template,
-		instance.ProxyTemplates,
+		instance.CustomTemplates,
 		instance.Config,
 		instance,
 		packageHelper,
@@ -1843,26 +1843,26 @@ func GenerateInitializer(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
-	return ExecuteDefaultOrProxyTemplate(
+	return ExecuteDefaultOrCustomTemplate(
 		"module_initializer.tmpl",
 		template,
-		instance.ProxyTemplates,
+		instance.CustomTemplates,
 		instance.Config,
 		instance,
 		packageHelper,
 	)
 }
 
-// ExecuteDefaultOrProxyTemplate verify and execute a default or proxy template
-func ExecuteDefaultOrProxyTemplate(
+// ExecuteDefaultOrCustomTemplate verify and execute a default or custom template
+func ExecuteDefaultOrCustomTemplate(
 	defaultTemplateName string,
 	defaultTemplates *Template,
-	proxyTemplates *Template,
+	customTemplates *Template,
 	config map[string]interface{},
 	tplData interface{},
 	packageHelper *PackageHelper,
 ) (ret []byte, rErr error) {
-	tmplName, templates := GetDefaultOrProxyTemplate(defaultTemplateName, defaultTemplates, proxyTemplates, config)
+	tmplName, templates := GetDefaultOrCustomTemplate(defaultTemplateName, defaultTemplates, customTemplates, config)
 	return templates.ExecTemplate(
 		tmplName,
 		tplData,

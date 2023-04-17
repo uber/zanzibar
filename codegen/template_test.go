@@ -86,12 +86,14 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
+	customTemplates, _ := codegen.NewDefaultTemplate()
 	resolvedModules, buildErr := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 		codegen.Options{
 			CommitChange: true,
+			CustomTemplates: customTemplates,
 		},
 	)
 	t.Logf("resolved moduels: %+v", resolvedModules)

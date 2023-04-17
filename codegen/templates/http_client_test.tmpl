@@ -1,0 +1,559 @@
+{{- /* template to render edge gateway http client code */ -}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	"context"
+	"fmt"
+	"net/textproto"
+	"github.com/afex/hystrix-go/hystrix"
+	"strconv"
+	"time"
+
+	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/config"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/jsonwrapper"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+)
+
+{{- $clientID := .ClientID -}}
+{{$exposedMethods := .ExposedMethods -}}
+{{$QPSLevels := .QPSLevels -}}
+{{- $clientName := printf "%sClient" (camel $clientID) }}
+{{- $exportName := .ExportName}}
+{{- $sidecarRouter := .SidecarRouter}}
+
+const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+type Client interface {
+	HTTPClient() *zanzibar.HTTPClient
+{{- range $svc := .Services -}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{- if $methodName -}}
+	{{$methodName}}(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne .RequestType "" -}}
+		args {{.RequestType}},
+		{{end -}}
+		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
+	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+{{- end -}}
+{{- end -}}
+{{- end -}}
+}
+
+// {{$clientName}} is the http client.
+type {{$clientName}} struct {
+	clientID string
+	httpClient   *zanzibar.HTTPClient
+	jsonWrapper   jsonwrapper.JSONWrapper
+	circuitBreakerDisabled bool
+	requestUUIDHeaderKey string
+	requestProcedureHeaderKey string
+
+	{{if $sidecarRouter -}}
+	calleeHeader string
+	callerHeader string
+	callerName   string
+	calleeName   string
+	altRoutingMap map[string]map[string]string
+	{{end -}}
+}
+
+// {{$exportName}} returns a new http client.
+func {{$exportName}}(deps *module.Dependencies) Client {
+	{{if $sidecarRouter -}}
+	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.http.port")
+	callerHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.callerHeader")
+	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
+	callerName := deps.Default.Config.MustGetString("serviceName")
+	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+
+	var altServiceDetail = config.AlternateServiceDetail{}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.alternates") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.alternates", &altServiceDetail)
+	}
+
+	{{else -}}
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	{{end -}}
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
+	timeoutVal := int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"))
+	timeout := time.Millisecond * time.Duration(
+		timeoutVal,
+	)
+	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("http.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("http.defaultHeaders", &defaultHeaders)
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
+	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
+	}
+	var requestProcedureHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestProcedureHeaderKey"){
+		requestProcedureHeaderKey = deps.Default.Config.MustGetString("http.clients.requestProcedureHeaderKey")
+	}
+	followRedirect := true
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.followRedirect") {
+		followRedirect = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.followRedirect")
+	}
+
+	methodNames := map[string]string{
+				{{range $serviceMethod, $methodName := $exposedMethods -}}
+				"{{$methodName}}": "{{$serviceMethod}}",
+				{{end}}
+	}
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	}
+
+	//get mapping of client method and it's timeout
+	//if mapping is not provided, use client's timeout for all methods
+	clientMethodTimeoutMapping := make(map[string]int64)
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.methodTimeoutMapping") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.methodTimeoutMapping", &clientMethodTimeoutMapping)
+	} else {
+		//override the client overall-timeout with the client's method level timeout
+		for methodName := range methodNames {
+			clientMethodTimeoutMapping[methodName] = int64(timeoutVal)
+		}
+	}
+
+	qpsLevels := map[string]string{
+				{{range $methodName, $qpsLevel := $QPSLevels -}}
+				"{{$methodName}}": "{{$qpsLevel}}",
+				{{end}}
+	}
+	if !circuitBreakerDisabled {
+		for methodName, methodTimeout := range clientMethodTimeoutMapping{
+			circuitBreakerName := "{{$clientID}}" + "-" + methodName
+			qpsLevel := "default"
+			if level, ok := qpsLevels[circuitBreakerName]; ok {
+				qpsLevel = level
+			}
+			configureCircuitBreaker(deps, int(methodTimeout), circuitBreakerName, qpsLevel)
+		}
+	}
+
+	return &{{$clientName}}{
+		clientID: "{{$clientID}}",
+		{{if $sidecarRouter -}}
+		callerHeader: callerHeader,
+		calleeHeader: calleeHeader,
+		callerName: callerName,
+		calleeName: calleeName,
+		altRoutingMap: initializeAltRoutingMap(altServiceDetail),
+		{{end -}}
+		httpClient: zanzibar.NewHTTPClientContext(
+			deps.Default.ContextLogger, deps.Default.ContextMetrics, deps.Default.JSONWrapper,
+			"{{$clientID}}",
+			methodNames,
+			baseURL,
+			defaultHeaders,
+			timeout,
+			followRedirect,
+		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
+		requestUUIDHeaderKey: requestUUIDHeaderKey,
+		requestProcedureHeaderKey: requestProcedureHeaderKey,
+	}
+}
+
+{{if $sidecarRouter -}}
+func initializeAltRoutingMap(altServiceDetail config.AlternateServiceDetail) map[string]map[string]string {
+	// The goal is to support for each header key, multiple values that point to different services
+	routingMap := make(map[string]map[string]string)
+	for _, alt := range altServiceDetail.RoutingConfigs {
+		if headerValueToServiceMap, ok := routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)]; ok {
+			headerValueToServiceMap[alt.HeaderValue] = alt.ServiceName
+		} else {
+			routingMap[textproto.CanonicalMIMEHeaderKey(alt.HeaderName)] = map[string]string{alt.HeaderValue:alt.ServiceName}
+		}
+	}
+	return routingMap
+}
+{{end -}}
+
+// CircuitBreakerConfig is used for storing the circuit breaker parameters for each qps level
+type CircuitBreakerConfig struct {
+	Parameters map[string]map[string]int
+}
+
+func configureCircuitBreaker(deps *module.Dependencies, timeoutVal int, circuitBreakerName string, qpsLevel string) {
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	// parses circuit breaker configurations
+	if deps.Default.Config.ContainsKey(CircuitBreakerConfigKey) {
+		var config CircuitBreakerConfig
+		deps.Default.Config.MustGetStruct(CircuitBreakerConfigKey, &config)
+		parameters := config.Parameters
+		// first checks if level exists in configurations then assigns parameters
+		// if "default" qps level assigns default parameters from circuit breaker configurations
+		if settings, ok := parameters[qpsLevel]; ok {
+			if sleep, ok := settings["sleepWindowInMilliseconds"]; ok {
+				sleepWindowInMilliseconds = sleep
+			}
+			if max, ok := settings["maxConcurrentRequests"]; ok {
+				maxConcurrentRequests = max
+			}
+			if errorPercent, ok := settings["errorPercentThreshold"]; ok {
+				errorPercentThreshold = errorPercent
+			}
+			if reqVolThreshold, ok := settings["requestVolumeThreshold"]; ok {
+				requestVolumeThreshold = reqVolThreshold
+			}
+		}
+	}
+	// client settings override parameters
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.sleepWindowInMilliseconds"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold"))
+	}
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.{{$clientID}}.requestVolumeThreshold"))
+	}
+	hystrix.ConfigureCommand(circuitBreakerName, hystrix.CommandConfig{
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			ErrorPercentThreshold:  errorPercentThreshold,
+			SleepWindow:            sleepWindowInMilliseconds,
+			RequestVolumeThreshold: requestVolumeThreshold,
+			Timeout:                timeoutVal,
+		})
+}
+
+// HTTPClient returns the underlying HTTP client, should only be
+// used for internal testing.
+func (c *{{$clientName}}) HTTPClient() *zanzibar.HTTPClient {
+	return c.httpClient
+}
+
+{{range $svc := .Services}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{if $methodName -}}
+
+// {{$methodName}} calls "{{.HTTPPath}}" endpoint.
+func (c *{{$clientName}}) {{$methodName}}(
+	ctx context.Context,
+	headers map[string]string,
+	{{if ne .RequestType "" -}}
+	r {{.RequestType}},
+	{{end -}}
+	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
+) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+	if reqUUID != "" {
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+	if c.requestProcedureHeaderKey != "" {
+		headers[c.requestProcedureHeaderKey] = "{{$serviceMethod}}"
+	}
+
+	{{if .ResponseType -}}
+	var defaultRes  {{.ResponseType}}
+	{{end -}}
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", "{{$serviceMethod}}", c.httpClient,timeoutAndRetryCfg)
+
+	{{if .ReqHeaderGoStatements }}
+	{{range $index, $line := .ReqClientHeaderGoStatements -}}
+	{{$line}}
+	{{end -}}
+	{{- end}}
+
+	{{if $sidecarRouter -}}
+	headers[c.callerHeader] = c.callerName
+
+	// Set the service name if dynamic routing header is present
+	for routeHeaderKey, routeMap := range c.altRoutingMap {
+		if headerVal, ok := headers[routeHeaderKey]; ok {
+			for routeRegex, altServiceName := range routeMap {
+				//if headerVal matches routeRegex regex, set the alternative service name
+				if matchFound, _ := regexp.MatchString(routeRegex, headerVal); matchFound {
+					headers[c.calleeHeader] = altServiceName
+					break
+				}
+			}
+		}
+	}
+
+	// If serviceName was not set in the dynamic routing section above, set as the default
+	if _, ok := headers[c.calleeHeader]; !ok {
+		headers[c.calleeHeader] = c.calleeName
+	}
+	{{end}}
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL
+	{{- range $k, $segment := .PathSegments -}}
+	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
+	{{- else -}}+"/"+string({{- if not $segment.Required }} * {{- end -}}r{{$segment.BodyIdentifier | title}})
+	{{- end -}}
+	{{- end}}
+
+	{{range $index, $line := .WriteQueryParamGoStatements -}}
+	{{$line}}
+	{{end}}
+
+	{{if (and (ne .RequestType "") (ne .HTTPMethod "GET"))}}
+	{{if and (.RequestBoxed) (eq .BoxedRequestType "[]byte")}}
+		err := req.WriteBytes("{{.HTTPMethod}}", fullURL, headers, r.{{.BoxedRequestName}})
+	{{else}}
+		err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, {{if .RequestBoxed -}}r.{{.BoxedRequestName}}{{- else -}}r{{- end -}})
+	{{end -}}
+	{{else}}
+	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
+	{{end}} {{- /* <if .RequestType ne ""> */ -}}
+	if err != nil {
+		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
+	}
+
+	{{if .ReqHeaders }}
+	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
+	if headerErr != nil {
+		return {{ if eq .ResponseType "" -}}
+			ctx, nil, headerErr
+			{{- else -}}
+			ctx, defaultRes, nil, headerErr
+			{{- end}}
+	}
+	{{- end}}
+
+	var res *zanzibar.ClientHTTPResponse
+	if (c.circuitBreakerDisabled) {
+		res, err = req.Do()
+	} else {
+		// We want hystrix ckt-breaker to count errors only for system issues
+		var clientErr error
+		circuitBreakerName := "{{$clientID}}" + "-" + "{{$methodName}}"
+		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
+			res, clientErr = req.Do()
+			if res != nil {
+				// This is not a system error/issue. Downstream responded
+				return nil
+			}
+			return clientErr
+		}, nil)
+		if err == nil {
+			// ckt-breaker was ok, bubble up client error if set
+			err = clientErr
+		}
+	}
+	if err != nil {
+		return ctx, {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
+	}
+
+	respHeaders := make(map[string]string)
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	defer func() {
+		respHeaders[zanzibar.ClientResponseDurationKey] = res.Duration.String()
+	}()
+
+	{{- if .ResHeaders }}
+	// TODO(jakev): verify mandatory response headers
+	{{- end}}
+
+	res.CheckOKResponse([]int{
+		{{- range $index, $code := .ValidStatusCodes -}}
+		{{if $index}},{{end}}{{$code}}
+		{{- end -}}
+	})
+
+	{{if and (eq .ResponseType "") (eq (len .Exceptions) 0)}}
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
+			_, err = res.ReadAll()
+			if err != nil {
+				return ctx, respHeaders, err
+			}
+			{{- end}}
+			return ctx, respHeaders, nil
+		default:
+			_, err = res.ReadAll()
+			if err != nil {
+				return ctx, respHeaders, err
+			}
+	}
+	{{else if eq (len .Exceptions) 0}}
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) -}}
+			return ctx, {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
+		{{- else }}
+		{{- if eq .ResponseType "[]byte"}}
+		responseBody, err := res.ReadAll()
+		if err != nil {
+			return ctx, defaultRes, respHeaders, err
+		}
+		return ctx, responseBody, respHeaders, nil
+		{{ else }}
+		var responseBody {{unref .ResponseType}}
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return ctx, defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
+		if err != nil {
+			return ctx, defaultRes, respHeaders, err
+		}
+
+		{{- if .ResHeaderFields }}
+			// TODO(jakev): read response headers and put them in body
+		{{- end}}
+
+		return ctx, {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		{{end -}}
+		{{end -}}
+		default:
+			_, err = res.ReadAll()
+			if err != nil {
+				return ctx, defaultRes, respHeaders, err
+			}
+	}
+	{{else if eq .ResponseType ""}}
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
+			_, err = res.ReadAll()
+			if err != nil {
+				return ctx, respHeaders, err
+			}
+			{{- end}}
+
+			return ctx, respHeaders, nil
+		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
+		case {{$code}}:
+			{{- if or (eq $code 204) (eq $code 304) }}
+				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
+				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
+				{{$val := index $exceptions 0}}
+				return ctx, respHeaders, &{{$val.Type}}{}
+			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+				{{$val := index $exceptions 0}}
+				return ctx, respHeaders, &{{$val.Type}}{}
+			{{else}}
+			allOptions := []interface{}{
+			{{range $idx, $exception := $exceptions -}}
+				&{{$exception.Type}}{},
+			{{- end}}
+			}
+			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
+			if err != nil {
+				return ctx, respHeaders, err
+			}
+			return ctx, respHeaders, v.(error)
+			{{end}}
+		{{- end}}
+		default:
+			_, err = res.ReadAll()
+			if err != nil {
+				return ctx, respHeaders, err
+			}
+	}
+	{{else}}
+
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+		{{- if or (eq (.OKStatusCode.Code) 204) (eq (.OKStatusCode.Code) 304) }}
+			return ctx, {{if isPointerType .ResponseType}}&{{end}}{{unref .ResponseType}}{}, respHeaders, nil
+		{{- else }}
+		{{- if eq .ResponseType "[]byte"}}
+		responseBody, err := res.ReadAll()
+		if err != nil {
+			return ctx, defaultRes, respHeaders, err
+		}
+		return ctx, responseBody, respHeaders, nil
+		{{ else }}
+		var responseBody {{unref .ResponseType}}
+		rawBody, err := res.ReadAll()
+		if err != nil {
+			return ctx, defaultRes, respHeaders, err
+		}
+		err = res.UnmarshalBody(&responseBody, rawBody)
+		if err != nil {
+			return ctx, defaultRes, respHeaders, err
+		}
+
+		{{- if .ResHeaderFields }}
+			// TODO(jakev): read response headers and put them in body
+		{{- end}}
+
+		return ctx, {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		{{end -}}
+		{{end}}
+		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
+		case {{$code}}:
+			{{- if or (eq $code 204) (eq $code 304) }}
+				{{/* If multiple exceptions have 204/304 status code mapped, we aren't able to distinguish between them */}}
+				{{/* so we'll just return the first exception that has 204/304 status code set. */}}
+				{{$val := index $exceptions 0}}
+				return ctx, defaultRes, respHeaders, &{{$val.Type}}{}
+			{{ else if and (eq (len $exceptions) 1) (eq  (index $exceptions 0).IsBodyDisallowed true) -}}
+				{{$val := index $exceptions 0}}
+				return ctx, defaultRes, respHeaders, &{{$val.Type}}{}
+			{{else}}
+			allOptions := []interface{}{
+				{{range $idx, $exception := $exceptions -}}
+				&{{$exception.Type}}{},
+				{{- end}}
+			}
+			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
+			if err != nil {
+				return ctx, defaultRes, respHeaders, err
+			}
+			return ctx, defaultRes, respHeaders, v.(error)
+			{{end}}
+		{{- end}}
+		default:
+			_, err = res.ReadAll()
+			if err != nil {
+				return ctx, defaultRes, respHeaders, err
+			}
+	}
+	{{end}}
+
+	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody: res.GetRawBody(),
+	}
+}
+{{end}}
+{{end}}
+{{end}}

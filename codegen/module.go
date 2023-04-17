@@ -83,7 +83,7 @@ type Options struct {
 	EnableCustomInitialisation bool
 	CommitChange               bool
 	QPSLevelsEnabled           bool
-	ProxyTemplates             *Template
+	CustomTemplates            *Template
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -976,7 +976,7 @@ func (system *ModuleSystem) readInstance(
 		YAMLFileRaw:           raw,
 		Config:                config.Config,
 		SelectiveBuilding:     config.SelectiveBuilding,
-		ProxyTemplates:        options.ProxyTemplates,
+		CustomTemplates:       options.CustomTemplates,
 	}, nil
 }
 
@@ -1789,8 +1789,8 @@ type ModuleInstance struct {
 	mu                sync.RWMutex
 	// QPSLevels is map of circuit breaker name to qps level for all circuit breakers
 	QPSLevels map[string]int
-	// ProxyTemplates is a collection of proxy templates apart from zanzibar
-	ProxyTemplates *Template
+	// CustomTemplates if using custom templates. we can write collection of custom templates that can be passed to zanzibar
+	CustomTemplates *Template
 }
 
 func (instance *ModuleInstance) String() string {
