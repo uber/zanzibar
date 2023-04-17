@@ -217,7 +217,7 @@ func main() {
 			packageHelper.CodeGenTargetPath(),
 			codegen.Options{
 				EnableCustomInitialisation: options.CustomInitialisationEnabled,
-				CustomTemplates: customTemplates,
+				CustomTemplates:            customTemplates,
 			},
 		)
 		checkError(err, "error resolving modules")

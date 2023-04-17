@@ -92,7 +92,7 @@ func TestGenerateBar(t *testing.T) {
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 		codegen.Options{
-			CommitChange: true,
+			CommitChange:    true,
 			CustomTemplates: customTemplates,
 		},
 	)
