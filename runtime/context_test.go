@@ -431,3 +431,21 @@ func TestLogLevelWithLogZ(t *testing.T) {
 	logs = GetLogFieldsFromCtx(ctx)
 	assert.Len(t, logs, 2)
 }
+
+func TestAccumulateLogField(t *testing.T) {
+	ctxFields := []zapcore.Field{zap.String("ctxField1", "ctxValue1"), zap.String("ctxField2", "ctxValue2")}
+	ctx := context.Background()
+	// append fields in a way s.t. len(log fields) != cap(log fields)
+	ctxWithField := WithLogFields(ctx, ctxFields...)
+	ctxWithField = WithLogFields(ctxWithField, zap.String("ctxField3", "ctxValue3"))
+
+	fields1 := accumulateLogFields(ctxWithField, []zapcore.Field{zap.String("argField", "one")})
+	fields2 := accumulateLogFields(ctxWithField, []zapcore.Field{zap.String("argField", "two")})
+
+	assert.Len(t, fields1, 4)
+	assert.Len(t, fields2, 4)
+
+	// concurrent logs shouldn't affect each other
+	assert.Equal(t, "one", fields1[3].String)
+	assert.Equal(t, "two", fields2[3].String)
+}
