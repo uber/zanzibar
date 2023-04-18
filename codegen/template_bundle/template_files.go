@@ -2038,7 +2038,8 @@ func http_clientTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _http_client_testTmpl = []byte(`{{- /* template to render edge gateway http client code */ -}}
+var _http_client_testTmpl = []byte(`// Package generated for testing of custom template feature
+{{- /* template to render edge gateway http client code */ -}}
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
 
@@ -2068,10 +2069,10 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 
-// CircuitBreakerConfigKey custom comment
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
-// Client defines {{$clientID}} custom comment.
+// Client defines {{$clientID}} client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
 {{- range $svc := .Services -}}
@@ -2611,7 +2612,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19567, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19679, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -1,3 +1,4 @@
+// Package generated for testing of custom template feature
 {{- /* template to render edge gateway http client code */ -}}
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
@@ -28,10 +29,10 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 
-// CircuitBreakerConfigKey custom comment
+// CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
-// Client defines {{$clientID}} custom comment.
+// Client defines {{$clientID}} client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
 {{- range $svc := .Services -}}
