@@ -194,7 +194,7 @@ func TestGenerateCustomTemplate(t *testing.T) {
 		return
 	}
 	fileContent := string(fileByteContent)
-	if !assert.Contains(t, fileContent, "Package generated for testing of custom template feature") {
+	if !assert.Contains(t, fileContent, "CustomTemplateTesting generated for testing of custom template feature") {
 		return
 	}
 }
