@@ -1,4 +1,3 @@
-// Package generated for testing of custom template feature
 {{- /* template to render edge gateway http client code */ -}}
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
@@ -29,6 +28,8 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 
+// CustomTemplateTesting generated for testing of custom template feature
+const CustomTemplateTesting = "test"
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 

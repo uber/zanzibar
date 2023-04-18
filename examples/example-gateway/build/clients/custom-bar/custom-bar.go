@@ -21,7 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Package generated for testing of custom template feature
 package custombarclient
 
 import (
@@ -33,8 +32,11 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/custom-bar/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/custom-bar/module"
 )
+
+// CustomTemplateTesting generated for testing of custom template feature
+const CustomTemplateTesting = "test"
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
