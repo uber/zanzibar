@@ -30,7 +30,7 @@ import (
 	"sort"
 	"strings"
 
-	yaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -263,6 +263,8 @@ type EndpointSpec struct {
 	ClientID string `yaml:"clientId,omitempty"`
 	// if "httpClient", which client method to call.
 	ClientMethod string `yaml:"clientMethod,omitempty"`
+	// Config additional configs for this endpoint
+	Config map[string]interface{} `yaml:"config, omitempty"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
 	// IsClientlessEndpoint checks if the endpoint is clientless
@@ -401,6 +403,12 @@ func NewEndpointSpec(
 			thriftInfo, yamlFile,
 		)
 	}
+	var config map[string]interface{}
+	if _, ok := endpointConfigObj["config"]; !ok {
+		config = make(map[string]interface{})
+	} else {
+		config = endpointConfigObj["config"].(map[string]interface{})
+	}
 
 	espec := &EndpointSpec{
 		ModuleSpec:           mspec,
@@ -420,6 +428,7 @@ func NewEndpointSpec(
 		ClientID:             clientID,
 		ClientMethod:         clientMethod,
 		DefaultHeaders:       h.defaultHeaders,
+		Config:               config,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(
