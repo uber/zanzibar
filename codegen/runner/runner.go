@@ -210,12 +210,14 @@ func main() {
 			}
 		}
 	} else {
+		customTemplates, _ := codegen.NewDefaultTemplate()
 		resolvedModules, err := moduleSystem.ResolveModules(
 			packageHelper.PackageRoot(),
 			configRoot,
 			packageHelper.CodeGenTargetPath(),
 			codegen.Options{
 				EnableCustomInitialisation: options.CustomInitialisationEnabled,
+				CustomTemplates:            customTemplates,
 			},
 		)
 		checkError(err, "error resolving modules")

@@ -86,12 +86,14 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
+	customTemplates, _ := codegen.NewDefaultTemplate()
 	resolvedModules, buildErr := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 		codegen.Options{
-			CommitChange: true,
+			CommitChange:    true,
+			CustomTemplates: customTemplates,
 		},
 	)
 	t.Logf("resolved moduels: %+v", resolvedModules)
@@ -107,6 +109,92 @@ func TestGenerateBar(t *testing.T) {
 		filepath.Join(absGatewayPath, tmpDir, "endpoints", "bar"),
 	)
 	if !assert.NoError(t, err, "cannot read dir %s", err) {
+		return
+	}
+}
+
+func TestGenerateCustomTemplate(t *testing.T) {
+	assert.NoError(t, os.RemoveAll(tmpDir), "failed to clean temporary directory")
+	if err := os.MkdirAll(tmpDir, os.ModePerm); !assert.NoError(t, err, "failed to create temporary directory", err) {
+		return
+	}
+
+	defer func() {
+		err := os.RemoveAll(tmpDir)
+		if err != nil {
+			t.Logf("error removing temporary directory %q: %s", tmpDir, err.Error())
+			t.Fail()
+		}
+	}()
+
+	relativeGatewayPath := "../examples/example-gateway"
+	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
+	if !assert.NoError(t, err, "failed to get abs path %s", err) {
+		return
+	}
+
+	packageRoot := "github.com/uber/zanzibar/examples/example-gateway"
+	options := &codegen.PackageHelperOptions{
+		RelTargetGenDir:               tmpDir,
+		RelMiddlewareConfigDir:        "./middlewares",
+		RelDefaultMiddlewareConfigDir: "./middlewares/default",
+		CopyrightHeader:               testCopyrightHeader,
+		GenCodePackage: map[string]string{
+			".thrift": packageRoot + "/build/gen-code",
+			".proto":  packageRoot + "/build/gen-code",
+		},
+		TraceKey: "trace-key",
+		ModuleSearchPaths: map[string][]string{
+			"client":     {"clients/*"},
+			"middleware": {"middlewares/*"},
+			"endpoint":   {"endpoints/*"},
+		},
+		ModuleIdlSubDir: map[string]string{
+			"endpoints": "endpoints-idl",
+			"default":   "clients-idl",
+		},
+	}
+
+	packageHelper, err := codegen.NewPackageHelper(
+		packageRoot,
+		absGatewayPath,
+		options,
+	)
+	if !assert.NoError(t, err, "failed to create package helper", err) {
+		return
+	}
+
+	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper, false)
+	if !assert.NoError(t, err, "failed to create module system", err) {
+		return
+	}
+
+	customTemplates, _ := codegen.NewDefaultTemplate()
+	resolvedModules, buildErr := moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/examples/example-gateway",
+		absGatewayPath,
+		packageHelper.CodeGenTargetPath(),
+		codegen.Options{
+			CommitChange:    true,
+			CustomTemplates: customTemplates,
+		},
+	)
+	t.Logf("resolved moduels: %+v", resolvedModules)
+	if !assert.NoError(t, buildErr, "failed to create clients init %s", buildErr) {
+		return
+	}
+
+	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
+		return
+	}
+	fileByteContent, err := ioutil.ReadFile(
+		filepath.Join(absGatewayPath, tmpDir, "clients", "custom-bar/custom-bar.go"),
+	)
+	if !assert.NoError(t, err, "cannot read file %s", err) {
+		return
+	}
+	fileContent := string(fileByteContent)
+	if !assert.Contains(t, fileContent, "CustomTemplateTesting generated for testing of custom template feature") {
 		return
 	}
 }

@@ -82,9 +82,9 @@ metrics.runtime.enableGCMetrics: true
 metrics.runtime.enableMemMetrics: true
 metrics.type: m3
 service.env.config: {}
-subLoggerLevel.http: info
-subLoggerLevel.jaeger: info
-subLoggerLevel.tchannel: info
+subLoggerLevel.http: warn
+subLoggerLevel.jaeger: warn
+subLoggerLevel.tchannel: warn
 useDatacenter: false
 #Some tchannel clients have retryCount functionality, this feature will be disabled by default
 tchannelclients.retryCount.feature.enabled: false

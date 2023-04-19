@@ -30,7 +30,7 @@ import (
 	"sort"
 	"strings"
 
-	yaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -259,6 +259,8 @@ type EndpointSpec struct {
 	WorkflowType string `yaml:"workflowType" validate:"nonzero"`
 	// If "custom" then where to import custom code from
 	WorkflowImportPath string `yaml:"workflowImportPath"`
+	// Config additional configs for the endpoint
+	Config map[string]interface{} `yaml:"config, omitempty"`
 	// if "httpClient", which client to call.
 	ClientID string `yaml:"clientId,omitempty"`
 	// if "httpClient", which client method to call.
@@ -401,6 +403,12 @@ func NewEndpointSpec(
 			thriftInfo, yamlFile,
 		)
 	}
+	var config map[string]interface{}
+	if _, ok := endpointConfigObj["config"]; !ok {
+		config = make(map[string]interface{})
+	} else {
+		config = endpointConfigObj["config"].(map[string]interface{})
+	}
 
 	espec := &EndpointSpec{
 		ModuleSpec:           mspec,
@@ -420,6 +428,7 @@ func NewEndpointSpec(
 		ClientID:             clientID,
 		ClientMethod:         clientMethod,
 		DefaultHeaders:       h.defaultHeaders,
+		Config:               config,
 	}
 
 	defaultMidSpecs, err := getOrderedDefaultMiddlewareSpecs(

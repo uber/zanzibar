@@ -520,8 +520,11 @@ func (g *httpClientGenerator) Generate(
 		SidecarRouter:    clientSpec.SidecarRouter,
 	}
 
-	client, err := g.templates.ExecTemplate(
+	client, err := ExecuteDefaultOrCustomTemplate(
 		"http_client.tmpl",
+		g.templates,
+		instance.CustomTemplates,
+		instance.Config,
 		clientMeta,
 		g.packageHelper,
 	)
@@ -774,8 +777,11 @@ func (g *tchannelClientGenerator) Generate(
 		DeputyReqHeader:  g.packageHelper.DeputyReqHeader(),
 	}
 
-	client, err := g.templates.ExecTemplate(
+	client, err := ExecuteDefaultOrCustomTemplate(
 		"tchannel_client.tmpl",
+		g.templates,
+		instance.CustomTemplates,
+		instance.Config,
 		clientMeta,
 		g.packageHelper,
 	)
@@ -813,8 +819,11 @@ func (g *tchannelClientGenerator) Generate(
 
 	genTestServer, _ := instance.Config["genTestServer"].(bool)
 	if genTestServer {
-		server, err := g.templates.ExecTemplate(
+		server, err := ExecuteDefaultOrCustomTemplate(
 			"tchannel_client_test_server.tmpl",
+			g.templates,
+			instance.CustomTemplates,
+			instance.Config,
 			clientMeta,
 			g.packageHelper,
 		)
@@ -1075,8 +1084,11 @@ func (g *gRPCClientGenerator) Generate(
 		QPSLevels:        clientQPSLevels,
 	}
 
-	client, err := g.templates.ExecTemplate(
+	client, err := ExecuteDefaultOrCustomTemplate(
 		"grpc_client.tmpl",
+		g.templates,
+		instance.CustomTemplates,
+		instance.Config,
 		clientMeta,
 		g.packageHelper,
 	)
@@ -1297,8 +1309,11 @@ func (g *EndpointGenerator) Generate(
 		return endpointMeta[i].Spec.HandleID < endpointMeta[j].Spec.HandleID
 	})
 
-	endpointCollection, err := g.templates.ExecTemplate(
+	endpointCollection, err := ExecuteDefaultOrCustomTemplate(
 		"endpoint_collection.tmpl",
+		g.templates,
+		instance.CustomTemplates,
+		instance.Config,
 		&EndpointCollectionMeta{
 			Instance:     instance,
 			EndpointMeta: endpointMeta,
@@ -1357,8 +1372,11 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 				Instance: instance,
 				Spec:     m,
 			}
-			structs, err := g.templates.ExecTemplate(
+			structs, err := ExecuteDefaultOrCustomTemplate(
 				"structs.tmpl",
+				g.templates,
+				instance.CustomTemplates,
+				e.Config,
 				meta,
 				g.packageHelper,
 			)
@@ -1440,7 +1458,8 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 	f := func() (interface{}, error) {
 		var endpoint []byte
 		if e.EndpointType == "http" {
-			endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
+			endpoint, err = ExecuteDefaultOrCustomTemplate("endpoint.tmpl", g.templates,
+				instance.CustomTemplates, e.Config, meta, g.packageHelper)
 		} else if e.EndpointType == "tchannel" {
 			endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
 		} else {
@@ -1461,7 +1480,7 @@ func (g *EndpointGenerator) generateEndpointFile(e *EndpointSpec, instance *Modu
 		} else {
 			tmpl = "workflow.tmpl"
 		}
-		workflow, err := g.templates.ExecTemplate(tmpl, meta, g.packageHelper)
+		workflow, err := ExecuteDefaultOrCustomTemplate(tmpl, g.templates, instance.CustomTemplates, e.Config, meta, g.packageHelper)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error executing workflow template")
 		}
@@ -1542,7 +1561,8 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		tempName = "endpoint_test_tchannel_client.tmpl"
 	}
 
-	endpointTest, err := g.templates.ExecTemplate(tempName, meta, g.packageHelper)
+	endpointTest, err := ExecuteDefaultOrCustomTemplate(tempName, g.templates, instance.CustomTemplates,
+		instance.Config, meta, g.packageHelper)
 	if err != nil {
 		return errors.Wrap(err, "Error executing endpoint test template")
 	}
@@ -1586,8 +1606,11 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 	runner := parallelize.NewUnboundedRunner(workCount)
 
 	f := func() (interface{}, error) {
-		service, err := generator.templates.ExecTemplate(
+		service, err := ExecuteDefaultOrCustomTemplate(
 			"service.tmpl",
+			generator.templates,
+			instance.CustomTemplates,
+			instance.Config,
 			instance,
 			generator.packageHelper,
 		)
@@ -1606,8 +1629,11 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 
 	f = func() (interface{}, error) {
 		// generate main.go
-		main, err := generator.templates.ExecTemplate(
+		main, err := ExecuteDefaultOrCustomTemplate(
 			"main.tmpl",
+			generator.templates,
+			instance.CustomTemplates,
+			instance.Config,
 			instance,
 			generator.packageHelper,
 		)
@@ -1626,8 +1652,11 @@ func (generator *GatewayServiceGenerator) Generate(instance *ModuleInstance) (*B
 
 	f = func() (interface{}, error) {
 		// generate main_test.go
-		mainTest, err := generator.templates.ExecTemplate(
+		mainTest, err := ExecuteDefaultOrCustomTemplate(
 			"main_test.tmpl",
+			generator.templates,
+			instance.CustomTemplates,
+			instance.Config,
 			instance,
 			generator.packageHelper,
 		)
@@ -1760,7 +1789,7 @@ func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, o
 		templateName = "middleware_tchannel.tmpl"
 	}
 
-	bytes, err := g.templates.ExecTemplate(templateName, instance, g.packageHelper)
+	bytes, err := ExecuteDefaultOrCustomTemplate(templateName, g.templates, instance.CustomTemplates, instance.Config, instance, g.packageHelper)
 	if err != nil {
 		return err
 	}
@@ -1796,8 +1825,11 @@ func GenerateDependencyStruct(
 	if genCustom != "" {
 		instance.PackageInfo.ExportType = instance.Config["customInterface"].(string)
 	}
-	return template.ExecTemplate(
+	return ExecuteDefaultOrCustomTemplate(
 		"dependency_struct.tmpl",
+		template,
+		instance.CustomTemplates,
+		instance.Config,
 		instance,
 		packageHelper,
 	)
@@ -1811,9 +1843,29 @@ func GenerateInitializer(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
-	return template.ExecTemplate(
+	return ExecuteDefaultOrCustomTemplate(
 		"module_initializer.tmpl",
+		template,
+		instance.CustomTemplates,
+		instance.Config,
 		instance,
+		packageHelper,
+	)
+}
+
+// ExecuteDefaultOrCustomTemplate verify and execute a default or custom template
+func ExecuteDefaultOrCustomTemplate(
+	defaultTemplateName string,
+	defaultTemplates *Template,
+	customTemplates *Template,
+	config map[string]interface{},
+	tplData interface{},
+	packageHelper *PackageHelper,
+) (ret []byte, rErr error) {
+	tmplName, templates := GetDefaultOrCustomTemplate(defaultTemplateName, defaultTemplates, customTemplates, config)
+	return templates.ExecTemplate(
+		tmplName,
+		tplData,
 		packageHelper,
 	)
 }

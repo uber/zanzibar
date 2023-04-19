@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -37,10 +37,10 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
+func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*zanzibar.HTTPClient)
+	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
 }
 
@@ -51,7 +51,7 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // SaveContacts mocks base method.
-func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.Contacts_SaveContacts_Args, arg3 *zanzibar.TimeoutAndRetryOptions) (context.Context, *contacts.SaveContactsResponse, map[string]string, error) {
+func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.Contacts_SaveContacts_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, *contacts.SaveContactsResponse, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveContacts", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(context.Context)
@@ -68,7 +68,7 @@ func (mr *MockClientMockRecorder) SaveContacts(arg0, arg1, arg2, arg3 interface{
 }
 
 // TestURLURL mocks base method.
-func (m *MockClient) TestURLURL(arg0 context.Context, arg1 map[string]string, arg2 *zanzibar.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) TestURLURL(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TestURLURL", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
