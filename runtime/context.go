@@ -213,7 +213,10 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
 	previousFields := GetLogFieldsFromCtx(ctx)
-	return append(previousFields, newFields...)
+	previousFieldsLen := len(previousFields)
+	accumulatedFields := make([]zap.Field, previousFieldsLen, previousFieldsLen+len(newFields))
+	copy(accumulatedFields, previousFields)
+	return append(accumulatedFields, newFields...)
 }
 
 func accumulateLogMsgAndFieldsInContext(ctx context.Context, msg string, newFields []zap.Field, logLevel zapcore.Level) context.Context {
