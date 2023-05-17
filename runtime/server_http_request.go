@@ -123,6 +123,8 @@ func NewServerHTTPRequest(
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithLogFields(ctx, logFields...)
+
 	httpRequest := r.WithContext(ctx)
 
 	scope := endpoint.scope.Tagged(scopeTags)
@@ -145,7 +147,6 @@ func NewServerHTTPRequest(
 
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
-	req.setupLogFields(logFields)
 	return req
 }
 
@@ -208,9 +209,11 @@ func (req *ServerHTTPRequest) start() {
 		}
 		req.span = span
 	}
+	req.setupLogFields()
 }
 
-func (req *ServerHTTPRequest) setupLogFields(fields []zap.Field) {
+func (req *ServerHTTPRequest) setupLogFields() {
+	fields := GetLogFieldsFromCtx(req.Context())
 	fields = append(fields, zap.Time(logFieldRequestStartTime, req.startTime))
 	if span := req.GetSpan(); span != nil {
 		jc, ok := span.Context().(jaeger.SpanContext)
