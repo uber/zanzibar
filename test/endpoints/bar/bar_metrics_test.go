@@ -211,6 +211,11 @@ func TestCallMetrics(t *testing.T) {
 		"hostname",
 		"pid",
 		"requestUUID",
+		"host",
+		"remoteAddr",
+		"trace.traceId",
+		"trace.span",
+		"trace.sampled",
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logMsg, dynamicValue)
@@ -221,6 +226,8 @@ func TestCallMetrics(t *testing.T) {
 		"level":      "debug",
 		"msg":        "Finished an outgoing client HTTP request",
 		"statusCode": float64(200),
+		"method":     "POST",
+		"pathname":   "/bar/bar-path",
 		//"clientID":                       "bar",
 		//"clientMethod":                   "Normal",
 		//"clientThriftMethod":             "Bar::normal",

@@ -53,7 +53,11 @@ const (
 const (
 	// thrift service::method of endpoint thrift spec
 	logFieldRequestMethod       = "endpointThriftMethod"
+	logFieldRequestHTTPMethod   = "method"
 	logFieldRequestURL          = "url"
+	logFieldRequestPathname     = "pathname"
+	logFieldRequestRemoteAddr   = "remoteAddr"
+	logFieldRequestHost         = "host"
 	logFieldRequestStartTime    = "timestamp-started"
 	logFieldRequestFinishedTime = "timestamp-finished"
 	logFieldResponseStatusCode  = "statusCode"

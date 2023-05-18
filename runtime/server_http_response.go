@@ -28,8 +28,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uber/jaeger-client-go"
-
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
@@ -142,24 +140,8 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 
 func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field {
 	fields := []zapcore.Field{
-		zap.String("method", req.httpRequest.Method),
-		zap.String("remoteAddr", req.httpRequest.RemoteAddr),
-		zap.String("pathname", req.httpRequest.URL.RequestURI()),
-		zap.String("host", req.httpRequest.Host),
-		zap.Time("timestamp-started", req.startTime),
-		zap.Time("timestamp-finished", res.finishTime),
-		zap.Int("statusCode", res.StatusCode),
-	}
-
-	if span := req.GetSpan(); span != nil {
-		jc, ok := span.Context().(jaeger.SpanContext)
-		if ok {
-			fields = append(fields,
-				zap.String(TraceSpanKey, jc.SpanID().String()),
-				zap.String(TraceIDKey, jc.TraceID().String()),
-				zap.Bool(TraceSampledKey, jc.IsSampled()),
-			)
-		}
+		zap.Time(logFieldRequestFinishedTime, res.finishTime),
+		zap.Int(logFieldResponseStatusCode, res.StatusCode),
 	}
 
 	for k, v := range res.Headers() {
