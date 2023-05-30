@@ -119,7 +119,7 @@ func WithEndpointRequestHeadersField(ctx context.Context, requestHeaders map[str
 
 // GetEndpointRequestHeadersFromCtx returns the endpoint request headers, if it exists on context
 func GetEndpointRequestHeadersFromCtx(ctx context.Context) map[string]string {
-	var requestHeaders map[string]string
+	requestHeaders := make(map[string]string, 0)
 	if val := ctx.Value(endpointRequestHeader); val != nil {
 		headers, _ := val.(map[string]string)
 		requestHeaders = make(map[string]string, len(headers))
@@ -206,7 +206,7 @@ func WithScopeTags(ctx context.Context, newFields map[string]string) context.Con
 
 // GetScopeTagsFromCtx returns the tag info extracted from context.
 func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
-	var tags map[string]string
+	tags := make(map[string]string, 0)
 	if val := ctx.Value(scopeTags); val != nil {
 		headers, _ := val.(map[string]string)
 		tags = make(map[string]string, len(headers))
