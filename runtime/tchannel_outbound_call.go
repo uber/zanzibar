@@ -30,6 +30,8 @@ import (
 	"go.uber.org/thriftrw/protocol/binary"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
+	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

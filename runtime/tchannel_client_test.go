@@ -24,8 +24,10 @@ import (
 	"code.uber.internal/rt/eg/go-build/.go/src/gb2/src/github.com/uber-go/tally"
 	"context"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"testing"
+	"time"
 )
 
 func TestNilCallReferenceForLogger(t *testing.T) {

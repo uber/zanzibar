@@ -24,6 +24,7 @@ import (
 	"context"
 
 	"github.com/uber-go/tally"
+	"github.com/uber/tchannel-go"
 )
 
 const rawClient = "raw"
