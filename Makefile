@@ -79,8 +79,9 @@ cyclo-check:
 
 .PHONY: lint
 lint:
-	cat lint.log
 	@rm -f lint.log
+	echo "XXX" > lint.log
+	cat lint.log
 	@echo "Checking formatting..."
 	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	cat lint.log
