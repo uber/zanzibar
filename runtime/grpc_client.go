@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/uber-go/tally"
 	"go.uber.org/yarpc/yarpcerrors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -84,8 +85,9 @@ type callHelper struct {
 	startTime     time.Time
 	finishTime    time.Time
 	contextLogger ContextLogger
-	metrics       ContextMetrics
+	metrics       ContextMetrics // deprecated, as too slow
 	extractor     ContextExtractor
+	scope         tally.Scope
 }
 
 // NewGRPCClientCallHelper used to initialize a helper that will
@@ -96,6 +98,7 @@ func NewGRPCClientCallHelper(ctx context.Context, serviceMethod string, opts *GR
 		contextLogger: opts.ContextLogger,
 		metrics:       opts.Metrics,
 		extractor:     opts.ContextExtractor,
+		scope:         opts.Metrics.Scope().Tagged(GetScopeTagsFromCtx(ctx)),
 	}
 }
 
@@ -110,8 +113,10 @@ func (c *callHelper) Start() {
 func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 	c.finishTime = time.Now()
 	delta := c.finishTime.Sub(c.startTime)
-	c.metrics.RecordTimer(ctx, clientLatency, delta)
-	c.metrics.RecordHistogramDuration(ctx, clientLatency, delta)
+
+	c.scope.Timer(clientLatency).Record(delta)
+	c.scope.Histogram(clientLatency, tally.DefaultBuckets).RecordDuration(delta)
+
 	fields := []zapcore.Field{
 		zap.Time(logFieldRequestStartTime, c.startTime),
 		zap.Time(logFieldRequestFinishedTime, c.finishTime),
@@ -127,7 +132,7 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 			errCode := strings.Builder{}
 			errCode.WriteString("client.errors.")
 			errCode.WriteString(yarpcErr.Code().String())
-			c.metrics.IncCounter(ctx, errCode.String(), 1)
+			c.scope.Counter(errCode.String()).Inc(1)
 
 			fields = append(fields, zap.Int("code", int(yarpcErr.Code())))
 			fields = append(fields, zap.String("message", yarpcErr.Message()))
@@ -135,11 +140,12 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 		} else {
 			fields = append(fields, zap.Error(err))
 		}
-		c.metrics.IncCounter(ctx, "client.errors", 1)
+		c.scope.Counter("client.errors").Inc(1)
 		c.contextLogger.WarnZ(ctx, "Failed to send outgoing client gRPC request", fields...)
 		return ctx
 	}
 	c.contextLogger.DebugZ(ctx, "Finished an outgoing client gRPC request", fields...)
-	c.metrics.IncCounter(ctx, "client.success", 1)
+
+	c.scope.Counter("client.success").Inc(1)
 	return ctx
 }
