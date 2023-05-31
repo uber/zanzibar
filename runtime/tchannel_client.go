@@ -27,7 +27,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
-	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime/ruleengine"
 	netContext "golang.org/x/net/context"
 )
@@ -163,14 +162,15 @@ func (c *TChannelClient) Call(
 		scopeTagsTargetEndpoint: serviceMethod,
 	}
 	ctx = WithScopeTags(ctx, scopeTags)
-	call := &tchannelOutboundCall{
-		client:        c,
-		methodName:    c.methodNames[serviceMethod],
-		serviceMethod: serviceMethod,
-		reqHeaders:    reqHeaders,
-		contextLogger: c.ContextLogger,
-		metrics:       c.metrics,
-	}
+	call := newTchannelOutboundCall(
+		ctx,
+		c,
+		c.methodNames[serviceMethod],
+		serviceMethod,
+		reqHeaders,
+		c.ContextLogger,
+		c.metrics,
+	)
 
 	return c.call(ctx, call, reqHeaders, req, resp, timeoutAndRetryOptions)
 }

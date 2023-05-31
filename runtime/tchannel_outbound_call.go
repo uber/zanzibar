@@ -30,7 +30,6 @@ import (
 	"go.uber.org/thriftrw/protocol/binary"
 
 	"github.com/pkg/errors"
-	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -47,7 +46,22 @@ type tchannelOutboundCall struct {
 	reqHeaders    map[string]string
 	resHeaders    map[string]string
 	contextLogger ContextLogger
-	metrics       ContextMetrics
+	metrics       ContextMetrics // deprecated, as too slow
+	scope         tally.Scope    // use for metrics
+}
+
+func newTchannelOutboundCall(ctx context.Context, client *TChannelClient, methodName string, serviceMethod string,
+	reqHeaders map[string]string, contextLogger ContextLogger, contextMetrics ContextMetrics) *tchannelOutboundCall {
+	call := &tchannelOutboundCall{
+		client:        client,
+		methodName:    methodName,
+		serviceMethod: serviceMethod,
+		reqHeaders:    reqHeaders,
+		contextLogger: contextLogger,
+		metrics:       contextMetrics,
+		scope:         contextMetrics.Scope().Tagged(GetScopeTagsFromCtx(ctx)),
+	}
+	return call
 }
 
 func (c *tchannelOutboundCall) start() {
@@ -62,15 +76,15 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 		errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
 		scopeTags := map[string]string{scopeTagError: errCause.MetricsKey()}
 		ctx = WithScopeTags(ctx, scopeTags)
-		c.metrics.IncCounter(ctx, clientSystemErrors, 1)
+		c.scope.Counter(clientSystemErrors).Inc(1)
 	} else if !c.success {
-		c.metrics.IncCounter(ctx, clientAppErrors, 1)
+		c.scope.Counter(clientAppErrors).Inc(1)
 	} else {
-		c.metrics.IncCounter(ctx, clientSuccess, 1)
+		c.scope.Counter(clientSuccess).Inc(1)
 	}
 	delta := c.finishTime.Sub(c.startTime)
-	c.metrics.RecordTimer(ctx, clientLatency, delta)
-	c.metrics.RecordHistogramDuration(ctx, clientLatencyHist, delta)
+	c.scope.Timer(clientLatency).Record(delta)
+	c.scope.Histogram(clientLatency, tally.DefaultBuckets).RecordDuration(delta)
 	c.duration = delta
 
 	// write logs
@@ -182,7 +196,7 @@ func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) 
 	}
 
 	// request sent when arg3writer is closed
-	c.metrics.IncCounter(ctx, clientRequest, 1)
+	c.scope.Counter(clientRequest).Inc(1)
 	return nil
 }
 
@@ -236,7 +250,7 @@ func (c *tchannelOutboundCall) readResBody(ctx context.Context, response *tchann
 	}
 	if err := ReadStruct(treader, resp); err != nil {
 		_ = treader.Close()
-		c.metrics.IncCounter(ctx, clientTchannelUnmarshalError, 1)
+		c.scope.Counter(clientTchannelUnmarshalError).Inc(1)
 		return errors.Wrapf(
 			err, "Could not read outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,

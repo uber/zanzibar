@@ -24,7 +24,6 @@ import (
 	"context"
 
 	"github.com/uber-go/tally"
-	"github.com/uber/tchannel-go"
 )
 
 const rawClient = "raw"
@@ -72,14 +71,15 @@ func (r *RawTChannelClient) Call(
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 
-	call := &tchannelOutboundCall{
-		client:        r.tc,
-		methodName:    serviceMethod,
-		serviceMethod: serviceMethod,
-		reqHeaders:    reqHeaders,
-		contextLogger: r.tc.ContextLogger,
-		metrics:       r.metrics,
-	}
+	call := newTchannelOutboundCall(
+		ctx,
+		r.tc,
+		serviceMethod,
+		serviceMethod,
+		reqHeaders,
+		r.tc.ContextLogger,
+		r.metrics,
+	)
 
 	if m, ok := r.tc.methodNames[serviceMethod]; ok {
 		call.methodName = m

@@ -21,13 +21,11 @@
 package zanzibar
 
 import (
+	"code.uber.internal/rt/eg/go-build/.go/src/gb2/src/github.com/uber-go/tally"
 	"context"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
+	"testing"
 )
 
 func TestNilCallReferenceForLogger(t *testing.T) {
@@ -35,16 +33,21 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 		"header-key": "header-value",
 	}
 	staticTestTime := time.Unix(1500000000, 0)
-	outboundCall := &tchannelOutboundCall{
-		methodName:    "Get",
-		serviceMethod: "Test",
-		startTime:     staticTestTime,
-		finishTime:    staticTestTime,
-		reqHeaders:    headers,
-		resHeaders:    headers,
-	}
 	ctx := context.TODO()
 	ctx = WithLogFields(ctx, zap.String("foo", "bar"))
+
+	outboundCall := newTchannelOutboundCall(
+		ctx,
+		nil,
+		"Get",
+		"Test",
+		headers,
+		nil,
+		NewContextMetrics(tally.NoopScope),
+	)
+	outboundCall.resHeaders = headers
+	outboundCall.startTime = staticTestTime
+	outboundCall.finishTime = staticTestTime
 
 	fields := outboundCall.logFields(ctx)
 
