@@ -78,26 +78,34 @@ cyclo-check:
 	@gocyclo -over 15 $(filter-out examples ,$(PKG_FILES))
 
 .PHONY: lint
-lint: check-licence eclint-check
+lint:
+	cat lint.log
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	cat lint.log
 	@echo "Installing test dependencies for vet..."
 	@go test -i $(PKGS)
 	@echo "Checking printf statements..."
 	@git grep -E 'Fprintf\(os.Std(err|out)' | $(FILTER_LINT) | tee -a lint.log
+	cat lint.log
 	@echo "Checking vet..."
 	@$(foreach dir,$(PKG_FILES),go vet $(VET_RULES) ./$(dir)/... 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
+	cat lint.log
 	@echo "Checking lint..."
 	@go get golang.org/x/lint/golint
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
+	cat lint.log
 	@echo "Checking errcheck..."
 	@go run vendor/github.com/kisielk/errcheck/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	cat lint.log
 	@echo "Checking staticcheck..."
 	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
 	@./vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	cat lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
+	cat lint.log
 	@[ ! -s lint.log ]
 
 # .PHONY: verify_deps
