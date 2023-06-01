@@ -30,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 
+	"github.com/uber-go/tally"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -192,8 +193,9 @@ func (res *ClientHTTPResponse) finish() {
 
 	// emit metrics
 	delta := res.finishTime.Sub(res.req.startTime)
-	res.req.Metrics.RecordTimer(res.req.ctx, clientLatency, delta)
-	res.req.Metrics.RecordHistogramDuration(res.req.ctx, clientLatencyHist, delta)
+	scope := res.req.Metrics.Scope(res.req.ctx)
+	scope.Timer(clientLatency).Record(delta)
+	scope.Histogram(clientLatencyHist, tally.DefaultBuckets).RecordDuration(delta)
 	res.Duration = delta
 
 	_, known := knownStatusCodes[res.StatusCode]
@@ -204,11 +206,10 @@ func (res *ClientHTTPResponse) finish() {
 		)
 	} else {
 		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
-		res.req.ctx = WithScopeTags(res.req.ctx, scopeTags)
-		res.req.Metrics.IncCounter(res.req.ctx, clientStatus, 1)
+		scope.Tagged(scopeTags).Counter(clientStatus).Inc(1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
-		res.req.Metrics.IncCounter(res.req.ctx, clientErrors, 1)
+		scope.Counter(clientErrors).Inc(1)
 		logFn = res.req.ContextLogger.WarnZ
 	}
 
