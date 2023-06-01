@@ -98,7 +98,7 @@ func NewGRPCClientCallHelper(ctx context.Context, serviceMethod string, opts *GR
 		contextLogger: opts.ContextLogger,
 		metrics:       opts.Metrics,
 		extractor:     opts.ContextExtractor,
-		scope:         opts.Metrics.Scope().Tagged(GetScopeTagsFromCtx(ctx)),
+		scope:         opts.Metrics.Scope(ctx),
 	}
 }
 
