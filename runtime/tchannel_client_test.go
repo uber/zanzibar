@@ -22,12 +22,13 @@ package zanzibar
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
-	"testing"
-	"time"
 )
 
 func TestNilCallReferenceForLogger(t *testing.T) {
