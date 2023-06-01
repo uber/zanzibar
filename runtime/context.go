@@ -437,7 +437,7 @@ type Logger interface {
 // Methods that update metrics create a new tally scope on each call. This is unnecessary slow in scenarios that update
 // multiple metrics.
 type ContextMetrics interface {
-	Scope() tally.Scope
+	Scope(ctx context.Context) tally.Scope
 	IncCounter(ctx context.Context, name string, value int64)
 	RecordTimer(ctx context.Context, name string, d time.Duration)
 	RecordHistogramDuration(ctx context.Context, name string, d time.Duration)
@@ -456,8 +456,8 @@ func NewContextMetrics(scope tally.Scope) ContextMetrics {
 
 // Scope returns associated tally scope. This is useful for clients that want to bypass the implementation owing to its
 // slowness.
-func (c *contextMetrics) Scope() tally.Scope {
-	return c.scope
+func (c *contextMetrics) Scope(ctx context.Context) tally.Scope {
+	return c.scope.Tagged(GetScopeTagsFromCtx(ctx))
 }
 
 // IncCounter increments the counter with current tags from context
