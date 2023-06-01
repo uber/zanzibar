@@ -61,7 +61,7 @@ func newTchannelOutboundCall(ctx context.Context, client *TChannelClient, method
 		reqHeaders:    reqHeaders,
 		contextLogger: contextLogger,
 		metrics:       contextMetrics,
-		scope:         contextMetrics.Scope().Tagged(GetScopeTagsFromCtx(ctx)),
+		scope:         contextMetrics.Scope(ctx),
 	}
 	return call
 }
