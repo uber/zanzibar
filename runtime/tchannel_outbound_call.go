@@ -77,7 +77,7 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	if err != nil {
 		errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
 		scopeTags := map[string]string{scopeTagError: errCause.MetricsKey()}
-		ctx = WithScopeTags(ctx, scopeTags)
+		c.scope = c.scope.Tagged(scopeTags) // scopeTagError will be part of all following metrics
 		c.scope.Counter(clientSystemErrors).Inc(1)
 	} else if !c.success {
 		c.scope.Counter(clientAppErrors).Inc(1)

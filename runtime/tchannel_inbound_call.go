@@ -60,7 +60,8 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 	if err != nil {
 		errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
 		errTag := map[string]string{scopeTagError: errCause.MetricsKey()}
-		c.scope.Tagged(errTag).Counter(endpointSystemErrors).Inc(1)
+		c.scope = c.scope.Tagged(errTag) // errTag will be part of all following metrics
+		c.scope.Counter(endpointSystemErrors).Inc(1)
 	} else if !c.success {
 		// The endpoint already has emitted an app-error stat in the template
 	} else {
