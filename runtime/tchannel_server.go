@@ -220,10 +220,7 @@ func (s *TChannelRouter) handleHeader(
 	ctx = WithEndpointRequestHeadersField(ctx, c.reqHeaders)
 
 	// use user-provided extractor function to decide metric tags
-	scopeTags := make(map[string]string)
-	for k, v := range s.extractor.ExtractScopeTags(ctx) {
-		scopeTags[k] = v
-	}
+	scopeTags := s.extractor.ExtractScopeTags(ctx)
 	ctx = WithScopeTags(ctx, scopeTags)
 	if len(scopeTags) != 0 {
 		c.scope = c.scope.Tagged(scopeTags)
