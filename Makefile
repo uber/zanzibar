@@ -98,8 +98,6 @@ lint: check-licence eclint-check
 	@./vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
-	ls -al lint.log
-	cat lint.log
 	@[ ! -s lint.log ]
 
 # .PHONY: verify_deps
