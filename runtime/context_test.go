@@ -101,6 +101,24 @@ func TestGetScopeTagsFromCtx(t *testing.T) {
 	assert.Equal(t, expected, scopes)
 }
 
+func TestGetScopeFromCtx(t *testing.T) {
+
+	const counterName = "cn"
+
+	root := tally.NoopScope
+	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+
+	ctx := WithScopeTags(context.TODO(), tags, root)
+	scope := GetScope(ctx)
+	scope.Counter(counterName).Inc(1)
+
+	ts := scope.(tally.TestScope)
+	ss := ts.Snapshot()
+
+	assert.Equal(t, 1, len(ss.Counters()))
+	assert.Equal(t, tags, ss.Counters()[counterName].Tags)
+}
+
 func TestWithRequestFields(t *testing.T) {
 	uid := uuid.New()
 	ctx := withRequestUUID(context.TODO(), uid)
