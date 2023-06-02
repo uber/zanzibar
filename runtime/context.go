@@ -210,13 +210,13 @@ func WithScopeTags(ctx context.Context, fields map[string]string, defaultScope t
 		sd.scope = defaultScope
 	}
 
-	sd.tags = copyAndExtend(sd.tags, fields)
+	sd.tags = merge(sd.tags, fields)
 	sd.scope = sd.scope.Tagged(fields)
 
 	return context.WithValue(ctx, scopeTags, sd)
 }
 
-func copyAndExtend(m1, m2 map[string]string) map[string]string {
+func merge(m1, m2 map[string]string) map[string]string {
 	out := make(map[string]string, len(m1)+len(m2))
 	for k, v := range m1 {
 		out[k] = v
