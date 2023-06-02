@@ -204,7 +204,7 @@ func (res *ClientHTTPResponse) finish() {
 		)
 	} else {
 		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
-		res.req.ctx = WithScopeTags(res.req.ctx, scopeTags)
+		res.req.ctx = WithScopeTags(res.req.ctx, scopeTags, res.req.Metrics.Scope())
 		res.req.Metrics.IncCounter(res.req.ctx, clientStatus, 1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {

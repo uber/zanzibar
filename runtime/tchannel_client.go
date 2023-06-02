@@ -162,7 +162,7 @@ func (c *TChannelClient) Call(
 		scopeTagsTargetService:  c.serviceName,
 		scopeTagsTargetEndpoint: serviceMethod,
 	}
-	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithScopeTags(ctx, scopeTags, c.metrics.Scope())
 	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],

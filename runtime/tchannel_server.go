@@ -168,7 +168,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		scopeTagEndpointMethod: e.Method,
 		scopeTagProtocol:       scopeTagTChannel,
 	}
-	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithScopeTags(ctx, scopeTags, s.scope)
 
 	var err error
 	c := &tchannelInboundCall{
@@ -224,7 +224,7 @@ func (s *TChannelRouter) handleHeader(
 	for k, v := range s.extractor.ExtractScopeTags(ctx) {
 		scopeTags[k] = v
 	}
-	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithScopeTags(ctx, scopeTags, c.scope)
 	if len(scopeTags) != 0 {
 		c.scope = c.scope.Tagged(scopeTags)
 	}
