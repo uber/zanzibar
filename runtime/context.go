@@ -480,7 +480,7 @@ type ContextMetrics interface {
 // new scopes, for metric operations. Each metric operations constructs an identical scope, which is an expensive
 // operation
 //
-// This approach is deprecated in favour of storing tags, and updated scope directly in the context
+// This approach is deprecated in favour of storing tags, and updating scope directly in the context
 type contextMetrics struct {
 	scope tally.Scope
 }
