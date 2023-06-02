@@ -91,6 +91,12 @@ const (
 	apiEnvironmentDefault = "production"
 )
 
+// scopeData - scope and tags
+type scopeData struct {
+	tags  map[string]string
+	scope tally.Scope
+}
+
 // WithEndpointField adds the endpoint information in the
 // request context.
 func WithEndpointField(ctx context.Context, endpoint string) context.Context {
@@ -195,27 +201,55 @@ func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
 }
 
 // WithScopeTags returns a new context with the given scope tags attached to context.Context
-func WithScopeTags(ctx context.Context, newFields map[string]string) context.Context {
-	tags := GetScopeTagsFromCtx(ctx)
-	for k, v := range newFields {
-		tags[k] = v
+// This operation adds the fields and updates scope in context.
+// defaultScope when scopeData is stored for the first time
+func WithScopeTags(ctx context.Context, fields map[string]string, defaultScope tally.Scope) context.Context {
+	sd, ok := ctx.Value(scopeTags).(*scopeData)
+	if !ok {
+		sd = &scopeData{}
+		sd.scope = defaultScope
 	}
 
-	return context.WithValue(ctx, scopeTags, tags)
+	sd.tags = copyAndExtend(sd.tags, fields)
+	sd.scope = sd.scope.Tagged(fields)
+
+	return context.WithValue(ctx, scopeTags, sd)
+}
+
+func copyAndExtend(m1, m2 map[string]string) map[string]string {
+	out := make(map[string]string, len(m1)+len(m2))
+	for k, v := range m1 {
+		out[k] = v
+	}
+	for k, v := range m2 {
+		out[k] = v
+	}
+	return out
 }
 
 // GetScopeTagsFromCtx returns the tag info extracted from context.
 func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 	tags := make(map[string]string, 0)
 	if val := ctx.Value(scopeTags); val != nil {
-		headers, _ := val.(map[string]string)
-		tags = make(map[string]string, len(headers))
-		for k, v := range headers {
+		sd, _ := val.(*scopeData)
+
+		// copy
+		tags = make(map[string]string, len(sd.tags))
+		for k, v := range sd.tags {
 			tags[k] = v
 		}
 	}
 
 	return tags
+}
+
+// GetScope returns the scope stored in the context.
+func GetScope(ctx context.Context) tally.Scope {
+	if sd, ok := ctx.Value(scopeTags).(*scopeData); !ok {
+		return tally.NoopScope
+	} else {
+		return sd.scope
+	}
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
@@ -434,12 +468,19 @@ type Logger interface {
 }
 
 // ContextMetrics emit metrics with tags extracted from context.
+// This interface is now deprecated.
 type ContextMetrics interface {
+	Scope() tally.Scope
 	IncCounter(ctx context.Context, name string, value int64)
 	RecordTimer(ctx context.Context, name string, d time.Duration)
 	RecordHistogramDuration(ctx context.Context, name string, d time.Duration)
 }
 
+// contextMetrics is a holder of tally.Scope, which would be combined with the tags stored in the context to create
+// new scopes, for metric operations. Each metric operations constructs an identical scope, which is an expensive
+// operation
+//
+// This approach is deprecated in favour of storing tags, and updated scope directly in the context
 type contextMetrics struct {
 	scope tally.Scope
 }
@@ -451,19 +492,23 @@ func NewContextMetrics(scope tally.Scope) ContextMetrics {
 	}
 }
 
+func (c *contextMetrics) Scope() tally.Scope {
+	return c.scope
+}
+
 // IncCounter increments the counter with current tags from context
 func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int64) {
-	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Counter(name).Inc(value)
+	GetScope(ctx).Counter(name).Inc(value)
 }
 
 // RecordTimer records the duration with current tags from context
 func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Duration) {
-	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Timer(name).Record(d)
+	GetScope(ctx).Timer(name).Record(d)
 }
 
 // RecordHistogramDuration records the duration with current tags from context in a histogram
 func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name string, d time.Duration) {
-	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
+	GetScope(ctx).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
 }
 
 // GetAccumulatedLogContext returns accumulated log context

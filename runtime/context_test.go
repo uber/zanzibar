@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"github.com/uber-go/tally"
 	"testing"
 
 	"github.com/pborman/uuid"
@@ -79,18 +80,18 @@ func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
 
 func TestWithScopeTags(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeTags(context.TODO(), expected)
+	ctx := WithScopeTags(context.TODO(), expected, tally.NoopScope)
 	rs := ctx.Value(scopeTags)
-	scopes, ok := rs.(map[string]string)
+	sd, ok := rs.(*scopeData)
 
 	assert.True(t, ok)
-	assert.Equal(t, expected, scopes)
+	assert.Equal(t, expected, sd.tags)
 }
 
 func TestGetScopeTagsFromCtx(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	scope := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeTags(context.TODO(), scope)
+	scopeTags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctx := WithScopeTags(context.TODO(), scopeTags, tally.NoopScope)
 	scopes := GetScopeTagsFromCtx(ctx)
 	assert.Equal(t, expected, scopes)
 
