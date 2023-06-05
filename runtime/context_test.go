@@ -22,11 +22,11 @@ package zanzibar
 
 import (
 	"context"
-	"github.com/uber-go/tally"
 	"testing"
 
 	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
