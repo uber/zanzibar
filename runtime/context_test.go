@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/pborman/uuid"
@@ -116,6 +117,8 @@ func TestGetScopeFromCtx(t *testing.T) {
 	ss := ts.Snapshot()
 
 	assert.Equal(t, 1, len(ss.Counters()))
+	fmt.Println(ss.Counters())
+	fmt.Println(ss.Counters()[counterName])
 	assert.Equal(t, tags, ss.Counters()[counterName].Tags)
 }
 
