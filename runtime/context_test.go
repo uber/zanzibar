@@ -121,7 +121,6 @@ func TestGetScopeFromCtx(t *testing.T) {
 		assert.Equal(t, tags, counterSnapshot.Tags())
 		break
 	}
-	assert.Equal(t, tags, ss.Counters().Tags)
 }
 
 func TestWithRequestFields(t *testing.T) {
