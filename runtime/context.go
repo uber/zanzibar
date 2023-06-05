@@ -245,11 +245,11 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 
 // GetScope returns the scope stored in the context.
 func GetScope(ctx context.Context, defScope tally.Scope) tally.Scope {
-	if sd, ok := ctx.Value(scopeTags).(*scopeData); !ok {
+	sd, ok := ctx.Value(scopeTags).(*scopeData)
+	if !ok {
 		return defScope
-	} else {
-		return sd.scope
 	}
+	return sd.scope
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
