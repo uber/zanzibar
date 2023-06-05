@@ -73,7 +73,7 @@ func NewClientHTTPRequest(
 		scopeTagsTargetEndpoint: metricNormalizer.Replace(clientTargetEndpoint),
 	}
 
-	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithScopeTags(ctx, scopeTags, client.contextMetrics.Scope())
 	req := &ClientHTTPRequest{
 		ClientID:               clientID,
 		MethodName:             clientMethod,
