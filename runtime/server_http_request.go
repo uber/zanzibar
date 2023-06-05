@@ -127,7 +127,7 @@ func NewServerHTTPRequest(
 
 	httpRequest := r.WithContext(ctx)
 
-	scope := GetScope(ctx) // use the calculated scope instead of making a new one
+	scope := GetScope(ctx, endpoint.scope) // use the calculated scope instead of making a new one
 	logger := endpoint.contextLogger
 
 	req := &ServerHTTPRequest{

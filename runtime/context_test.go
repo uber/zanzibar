@@ -109,7 +109,7 @@ func TestGetScopeFromCtx(t *testing.T) {
 	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 
 	ctx := WithScopeTags(context.TODO(), tags, root)
-	scope := GetScope(ctx)
+	scope := GetScope(ctx, root)
 	scope.Counter(counterName).Inc(1)
 
 	ts := scope.(tally.TestScope)

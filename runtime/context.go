@@ -244,9 +244,9 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 }
 
 // GetScope returns the scope stored in the context.
-func GetScope(ctx context.Context) tally.Scope {
+func GetScope(ctx context.Context, defScope tally.Scope) tally.Scope {
 	if sd, ok := ctx.Value(scopeTags).(*scopeData); !ok {
-		return tally.NoopScope
+		return defScope
 	} else {
 		return sd.scope
 	}
@@ -499,17 +499,17 @@ func (c *contextMetrics) Scope() tally.Scope {
 
 // IncCounter increments the counter with current tags from context
 func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int64) {
-	GetScope(ctx).Counter(name).Inc(value)
+	GetScope(ctx, c.scope).Counter(name).Inc(value)
 }
 
 // RecordTimer records the duration with current tags from context
 func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Duration) {
-	GetScope(ctx).Timer(name).Record(d)
+	GetScope(ctx, c.scope).Timer(name).Record(d)
 }
 
 // RecordHistogramDuration records the duration with current tags from context in a histogram
 func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name string, d time.Duration) {
-	GetScope(ctx).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
+	GetScope(ctx, c.scope).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
 }
 
 // GetAccumulatedLogContext returns accumulated log context
