@@ -476,11 +476,11 @@ type ContextMetrics interface {
 	RecordHistogramDuration(ctx context.Context, name string, d time.Duration)
 }
 
-// contextMetrics is a holder of tally.Scope, which would be combined with the tags stored in the context to create
-// new scopes, for metric operations. Each metric operations constructs an identical scope, which is an expensive
-// operation
+// contextMetrics is a container that holds the initial value of tally.Scope and to be used when a context is
+// yet to be created.
 //
-// This approach is deprecated in favour of storing tags, and updating scope directly in the context
+// Note: current code passes contextMetrics to various pieces of code even though ctx is available. This wiring
+// should be deprecated in the future.
 type contextMetrics struct {
 	scope tally.Scope
 }
@@ -492,6 +492,7 @@ func NewContextMetrics(scope tally.Scope) ContextMetrics {
 	}
 }
 
+// Scope retrieves the scope stored within context metrics
 func (c *contextMetrics) Scope() tally.Scope {
 	return c.scope
 }
