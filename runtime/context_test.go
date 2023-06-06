@@ -80,7 +80,7 @@ func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
 
 func TestWithScopeTags(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeTags(context.TODO(), expected, tally.NoopScope)
+	ctx := WithScopeTagsDefault(context.TODO(), expected, tally.NoopScope)
 	rs := ctx.Value(scopeTags)
 	sd, ok := rs.(*scopeData)
 
@@ -91,7 +91,7 @@ func TestWithScopeTags(t *testing.T) {
 func TestGetScopeTagsFromCtx(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 	scopeTags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeTags(context.TODO(), scopeTags, tally.NoopScope)
+	ctx := WithScopeTagsDefault(context.TODO(), scopeTags, tally.NoopScope)
 	scopes := GetScopeTagsFromCtx(ctx)
 	assert.Equal(t, expected, scopes)
 
@@ -108,8 +108,8 @@ func TestGetScopeFromCtx(t *testing.T) {
 	root := tally.NoopScope
 	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 
-	ctx := WithScopeTags(context.TODO(), tags, root)
-	scope := GetScope(ctx, root)
+	ctx := WithScopeTagsDefault(context.TODO(), tags, root)
+	scope := getScope(ctx, root)
 	scope.Counter(counterName).Inc(1)
 
 	ts := scope.(tally.TestScope)
