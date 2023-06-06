@@ -122,12 +122,12 @@ func NewServerHTTPRequest(
 		}
 	}
 
-	ctx = WithScopeTags(ctx, scopeTags, endpoint.scope)
+	ctx = WithScopeTagsDefault(ctx, scopeTags, endpoint.scope)
 	ctx = WithLogFields(ctx, logFields...)
 
 	httpRequest := r.WithContext(ctx)
 
-	scope := GetScope(ctx, endpoint.scope) // use the calculated scope instead of making a new one
+	scope := getScope(ctx, endpoint.scope) // use the calculated scope instead of making a new one
 	logger := endpoint.contextLogger
 
 	req := &ServerHTTPRequest{

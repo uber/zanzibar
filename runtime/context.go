@@ -94,7 +94,7 @@ const (
 // scopeData - scope and tags
 type scopeData struct {
 	tags  map[string]string
-	scope tally.Scope
+	scope tally.Scope // optional - may not be used by zanzibar users who use
 }
 
 // WithEndpointField adds the endpoint information in the
@@ -200,14 +200,19 @@ func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
 	return fields
 }
 
-// WithScopeTags returns a new context with the given scope tags attached to context.Context
+// WithScopeTags adds tags to context without updating the scope
+func WithScopeTags(ctx context.Context, fields map[string]string) context.Context {
+	return WithScopeTagsDefault(ctx, fields, nil)
+}
+
+// WithScopeTagsDefault returns a new context with the given scope tags attached to context.Context
 // This operation adds the fields and updates scope in context.
 // defaultScope when scopeData is stored for the first time
-func WithScopeTags(ctx context.Context, fields map[string]string, defaultScope tally.Scope) context.Context {
+func WithScopeTagsDefault(ctx context.Context, fields map[string]string, defaultScope tally.Scope) context.Context {
 	sd, ok := ctx.Value(scopeTags).(*scopeData)
 	if !ok {
 		sd = &scopeData{}
-		sd.scope = defaultScope
+		sd.scope = defaultScope // this could be nil
 	}
 
 	sd.tags = merge(sd.tags, fields)

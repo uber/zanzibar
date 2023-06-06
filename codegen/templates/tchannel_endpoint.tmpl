@@ -162,7 +162,7 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+					ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 						"app-error": "{{.Type}}",
 					}, h.Deps.Default.ContextMetrics.Scope())
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
@@ -180,7 +180,7 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+					ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 						"app-error": "unknown",
 					}, h.Deps.Default.ContextMetrics.Scope())
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
