@@ -211,12 +211,19 @@ func WithScopeTags(ctx context.Context, fields map[string]string) context.Contex
 func WithScopeTagsDefault(ctx context.Context, fields map[string]string, defaultScope tally.Scope) context.Context {
 	sd, ok := ctx.Value(scopeTags).(*scopeData)
 	if !ok {
-		sd = &scopeData{}
-		sd.scope = defaultScope // this could be nil
+		m := make(map[string]string)
+		sd = &scopeData{tags: merge(m, fields)}
 	}
 
-	sd.tags = merge(sd.tags, fields)
-	sd.scope = sd.scope.Tagged(fields)
+	// assign a scope if one hasn't been sent
+	if sd.scope == nil {
+		sd.scope = defaultScope
+	}
+
+	// modify the scope if non nil
+	if sd.scope != nil {
+		sd.scope = sd.scope.Tagged(fields)
+	}
 
 	return context.WithValue(ctx, scopeTags, sd)
 }
@@ -251,8 +258,12 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 // getScope returns the scope stored in the context or returns the default scope when not found
 func getScope(ctx context.Context, defScope tally.Scope) tally.Scope {
 	sd, ok := ctx.Value(scopeTags).(*scopeData)
-	if !ok || sd.scope == nil {
-		return defScope.Tagged(sd.tags) // for backward compatibility - when ctx doesn't store scope
+	if !ok {
+		return defScope
+	}
+
+	if sd.scope == nil { //backward compatibility - scope was not calculated
+		return defScope.Tagged(sd.tags)
 	}
 	return sd.scope
 }
