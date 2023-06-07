@@ -107,7 +107,7 @@ func TestGetScopeFromCtx(t *testing.T) {
 	const counterName = "cn"
 
 	// create root scope
-	root := tally.NewTestScope("abcd8909", nil)
+	root := tally.NewTestScope("", nil)
 
 	// add scope tags to context
 	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
@@ -162,7 +162,7 @@ func TestContextMetrics_NoDefault(t *testing.T) {
 	const counterName = "cn"
 
 	// create root scope
-	root := tally.NewTestScope("abcd123", nil)
+	root := tally.NewTestScope("", nil)
 
 	// create context metrics
 	cm := NewContextMetrics(root)
@@ -195,7 +195,7 @@ func TestContextMetrics_NoDefault_TagDivergence(t *testing.T) {
 
 	// step: create a root scope with tags
 	rootTags := map[string]string{"tag": "t3"}
-	root := tally.NewTestScope("abcd123", rootTags)
+	root := tally.NewTestScope("", rootTags)
 
 	// step: create context metrics
 	cm := NewContextMetrics(root)
@@ -229,12 +229,12 @@ func TestContextMetrics_ScopeDivergence(t *testing.T) {
 
 	// step: create a root scope with tags and assign it to metrics
 	rootTags := map[string]string{"tag": "t3"}
-	root := tally.NewTestScope("abcd1234", rootTags)
+	root := tally.NewTestScope("", rootTags)
 	cm := NewContextMetrics(root)
 
 	// step: create another root scope with tags and assign it to context
 	ctxTags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctxRoot := tally.NewTestScope("abcd12890", ctxTags)
+	ctxRoot := tally.NewTestScope("", ctxTags)
 	ctx := WithScopeTagsDefault(context.TODO(), ctxTags, ctxRoot)
 
 	// step: increment counter
