@@ -91,6 +91,12 @@ const (
 	apiEnvironmentDefault = "production"
 )
 
+// scopeData - scope and tags
+type scopeData struct {
+	tags  map[string]string
+	scope tally.Scope // optional - may not be used by zanzibar users who use
+}
+
 // WithEndpointField adds the endpoint information in the
 // request context.
 func WithEndpointField(ctx context.Context, endpoint string) context.Context {
@@ -194,28 +200,72 @@ func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
 	return fields
 }
 
-// WithScopeTags returns a new context with the given scope tags attached to context.Context
-func WithScopeTags(ctx context.Context, newFields map[string]string) context.Context {
-	tags := GetScopeTagsFromCtx(ctx)
-	for k, v := range newFields {
-		tags[k] = v
+// WithScopeTags adds tags to context without updating the scope
+func WithScopeTags(ctx context.Context, fields map[string]string) context.Context {
+	return WithScopeTagsDefault(ctx, fields, nil)
+}
+
+// WithScopeTagsDefault returns a new context with the given scope tags attached to context.Context
+// This operation adds the fields and updates scope in context.
+// defaultScope when scopeData is stored for the first time
+func WithScopeTagsDefault(ctx context.Context, fields map[string]string, defaultScope tally.Scope) context.Context {
+	sd, ok := ctx.Value(scopeTags).(*scopeData)
+	if !ok {
+		m := make(map[string]string)
+		sd = &scopeData{tags: merge(m, fields)}
 	}
 
-	return context.WithValue(ctx, scopeTags, tags)
+	// assign a scope if one hasn't been sent
+	if sd.scope == nil {
+		sd.scope = defaultScope
+	}
+
+	// modify the scope if non nil
+	if sd.scope != nil {
+		sd.scope = sd.scope.Tagged(fields)
+	}
+
+	return context.WithValue(ctx, scopeTags, sd)
+}
+
+func merge(m1, m2 map[string]string) map[string]string {
+	out := make(map[string]string, len(m1)+len(m2))
+	for k, v := range m1 {
+		out[k] = v
+	}
+	for k, v := range m2 {
+		out[k] = v
+	}
+	return out
 }
 
 // GetScopeTagsFromCtx returns the tag info extracted from context.
 func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 	tags := make(map[string]string, 0)
 	if val := ctx.Value(scopeTags); val != nil {
-		headers, _ := val.(map[string]string)
-		tags = make(map[string]string, len(headers))
-		for k, v := range headers {
+		sd, _ := val.(*scopeData)
+
+		// copy
+		tags = make(map[string]string, len(sd.tags))
+		for k, v := range sd.tags {
 			tags[k] = v
 		}
 	}
 
 	return tags
+}
+
+// getScope returns the scope stored in the context or returns the default scope when not found
+func getScope(ctx context.Context, defScope tally.Scope) tally.Scope {
+	sd, ok := ctx.Value(scopeTags).(*scopeData)
+	if !ok {
+		return defScope
+	}
+
+	if sd.scope == nil { //backward compatibility - scope was not calculated
+		return defScope.Tagged(sd.tags)
+	}
+	return sd.scope
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
@@ -434,12 +484,19 @@ type Logger interface {
 }
 
 // ContextMetrics emit metrics with tags extracted from context.
+// This interface is now deprecated.
 type ContextMetrics interface {
+	Scope() tally.Scope
 	IncCounter(ctx context.Context, name string, value int64)
 	RecordTimer(ctx context.Context, name string, d time.Duration)
 	RecordHistogramDuration(ctx context.Context, name string, d time.Duration)
 }
 
+// contextMetrics is a container that holds the initial value of tally.Scope and to be used when a context is
+// yet to be created.
+//
+// Note: current code passes contextMetrics to various pieces of code even though ctx is available. This wiring
+// should be deprecated in the future.
 type contextMetrics struct {
 	scope tally.Scope
 }
@@ -451,19 +508,24 @@ func NewContextMetrics(scope tally.Scope) ContextMetrics {
 	}
 }
 
+// Scope retrieves the scope stored within context metrics
+func (c *contextMetrics) Scope() tally.Scope {
+	return c.scope
+}
+
 // IncCounter increments the counter with current tags from context
 func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int64) {
-	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Counter(name).Inc(value)
+	getScope(ctx, c.scope).Counter(name).Inc(value)
 }
 
 // RecordTimer records the duration with current tags from context
 func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Duration) {
-	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Timer(name).Record(d)
+	getScope(ctx, c.scope).Timer(name).Record(d)
 }
 
 // RecordHistogramDuration records the duration with current tags from context in a histogram
 func (c *contextMetrics) RecordHistogramDuration(ctx context.Context, name string, d time.Duration) {
-	c.scope.Tagged(GetScopeTagsFromCtx(ctx)).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
+	getScope(ctx, c.scope).Histogram(name, tally.DefaultBuckets).RecordDuration(d)
 }
 
 // GetAccumulatedLogContext returns accumulated log context

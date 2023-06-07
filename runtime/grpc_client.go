@@ -91,7 +91,7 @@ type callHelper struct {
 // NewGRPCClientCallHelper used to initialize a helper that will
 // be used to track logging and metric for a gRPC Client call.
 func NewGRPCClientCallHelper(ctx context.Context, serviceMethod string, opts *GRPCClientOpts) (context.Context, GRPCClientCallHelper) {
-	ctx = WithScopeTags(ctx, opts.ScopeTags[serviceMethod])
+	ctx = WithScopeTagsDefault(ctx, opts.ScopeTags[serviceMethod], opts.Metrics.Scope())
 	return ctx, &callHelper{
 		contextLogger: opts.ContextLogger,
 		metrics:       opts.Metrics,

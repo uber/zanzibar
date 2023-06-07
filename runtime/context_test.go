@@ -26,6 +26,7 @@ import (
 
 	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -79,18 +80,18 @@ func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
 
 func TestWithScopeTags(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeTags(context.TODO(), expected)
+	ctx := WithScopeTagsDefault(context.TODO(), expected, tally.NoopScope)
 	rs := ctx.Value(scopeTags)
-	scopes, ok := rs.(map[string]string)
+	sd, ok := rs.(*scopeData)
 
 	assert.True(t, ok)
-	assert.Equal(t, expected, scopes)
+	assert.Equal(t, expected, sd.tags)
 }
 
 func TestGetScopeTagsFromCtx(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	scope := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeTags(context.TODO(), scope)
+	scopeTags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctx := WithScopeTagsDefault(context.TODO(), scopeTags, tally.NoopScope)
 	scopes := GetScopeTagsFromCtx(ctx)
 	assert.Equal(t, expected, scopes)
 
@@ -98,6 +99,158 @@ func TestGetScopeTagsFromCtx(t *testing.T) {
 	ctx = context.TODO()
 	scopes = GetScopeTagsFromCtx(ctx)
 	assert.Equal(t, expected, scopes)
+}
+
+// TestGetScopeFromCtx tests the common case where a default scope is available
+func TestGetScopeFromCtx(t *testing.T) {
+
+	const counterName = "cn"
+
+	// create root scope
+	root := tally.NewTestScope("", nil)
+
+	// add scope tags to context
+	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctx := WithScopeTagsDefault(context.TODO(), tags, root)
+	scope := getScope(ctx, root)
+
+	// increment a counter
+	scope.Counter(counterName).Inc(1)
+
+	// check if the counter has the right tags
+	ts := scope.(tally.TestScope)
+	ss := ts.Snapshot()
+
+	assert.Equal(t, 1, len(ss.Counters()))
+	// examine only the first counter
+	for _, counterSnapshot := range ss.Counters() {
+		assert.Equal(t, tags, counterSnapshot.Tags())
+		break
+	}
+}
+
+// TestContextMetrics_NoDefault_getScope tests the scenario where
+//  1. a default scope is not available when tags are assigned to a context
+//  2. getScope chooses the default context
+func TestGetScopeFromCtx_NoDefault_getScope(t *testing.T) {
+
+	const counterName = "cn"
+
+	root := tally.NoopScope
+	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+
+	ctx := WithScopeTags(context.TODO(), tags)
+	scope := getScope(ctx, root)
+	scope.Counter(counterName).Inc(1)
+
+	ts := scope.(tally.TestScope)
+	ss := ts.Snapshot()
+
+	assert.Equal(t, 1, len(ss.Counters()))
+	// examine only the first counter
+	for _, counterSnapshot := range ss.Counters() {
+		assert.Equal(t, tags, counterSnapshot.Tags())
+		break
+	}
+}
+
+// TestContextMetrics_NoDefault tests the scenario where
+//  1. a default scope is not available
+//  2. methods in contextMetrics pick the scope stored within it
+func TestContextMetrics_NoDefault(t *testing.T) {
+
+	const counterName = "cn"
+
+	// create root scope
+	root := tally.NewTestScope("", nil)
+
+	// create context metrics
+	cm := NewContextMetrics(root)
+	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+
+	// add tags to context withot
+	ctx := WithScopeTags(context.TODO(), tags)
+
+	// increment a counter
+	cm.IncCounter(ctx, counterName, 1)
+
+	// check if the counter is generated with the right tags
+	scope := getScope(ctx, root)
+	ts := scope.(tally.TestScope)
+	ss := ts.Snapshot()
+	assert.Equal(t, 1, len(ss.Counters()))
+	// examine only the first counter
+	for _, counterSnapshot := range ss.Counters() {
+		assert.Equal(t, tags, counterSnapshot.Tags())
+		break
+	}
+}
+
+// TestContextMetrics_NoDefault_TagDivergence tests the scenario where
+//  1. a default scope is not available
+//  2. tags stored in the root scope and the context diverge
+func TestContextMetrics_NoDefault_TagDivergence(t *testing.T) {
+
+	const counterName = "cn"
+
+	// step: create a root scope with tags
+	rootTags := map[string]string{"tag": "t3"}
+	root := tally.NewTestScope("", rootTags)
+
+	// step: create context metrics
+	cm := NewContextMetrics(root)
+
+	// step: assign new tags to context without a default scope
+	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctx := WithScopeTags(context.TODO(), tags)
+
+	// step: increment counter
+	cm.IncCounter(ctx, counterName, 1)
+
+	// step: check if the counter is generated with the tags from root and context
+	expected := merge(rootTags, tags)
+	scope := getScope(ctx, root)
+	ts := scope.(tally.TestScope)
+	ss := ts.Snapshot()
+	assert.Equal(t, 1, len(ss.Counters()))
+
+	// step: examine only the first counter
+	for _, counterSnapshot := range ss.Counters() {
+		assert.Equal(t, expected, counterSnapshot.Tags())
+		break
+	}
+}
+
+// TestContextMetrics_ScopeDivergence checks for the case where
+// 1. the root scope and the scope within the context has diverged
+func TestContextMetrics_ScopeDivergence(t *testing.T) {
+
+	const counterName = "cn"
+
+	// step: create a root scope with tags and assign it to metrics
+	rootTags := map[string]string{"tag": "t3"}
+	root := tally.NewTestScope("", rootTags)
+	cm := NewContextMetrics(root)
+
+	// step: create another root scope with tags and assign it to context
+	ctxTags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctxRoot := tally.NewTestScope("", ctxTags)
+	ctx := WithScopeTagsDefault(context.TODO(), ctxTags, ctxRoot)
+
+	// step: increment counter
+	cm.IncCounter(ctx, counterName, 1)
+
+	// step: check if the counter is generated with the context tgs
+	scope := getScope(ctx, root)
+	ts := scope.(tally.TestScope)
+	ss := ts.Snapshot()
+	assert.Equal(t, 1, len(ss.Counters()))
+
+	// step: examine only the first counter
+	for _, counterSnapshot := range ss.Counters() {
+		assert.Equal(t, ctxTags, counterSnapshot.Tags())
+		break
+	}
 }
 
 func TestWithRequestFields(t *testing.T) {
