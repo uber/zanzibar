@@ -101,17 +101,23 @@ func TestGetScopeTagsFromCtx(t *testing.T) {
 	assert.Equal(t, expected, scopes)
 }
 
+// TestGetScopeFromCtx tests the common case where a default scope is available
 func TestGetScopeFromCtx(t *testing.T) {
 
 	const counterName = "cn"
 
+	// create root scope
 	root := tally.NewTestScope("abcd8909", nil)
-	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 
+	// add scope tags to context
+	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 	ctx := WithScopeTagsDefault(context.TODO(), tags, root)
 	scope := getScope(ctx, root)
+
+	// increment a counter
 	scope.Counter(counterName).Inc(1)
 
+	// check if the counter has the right tags
 	ts := scope.(tally.TestScope)
 	ss := ts.Snapshot()
 
@@ -123,7 +129,10 @@ func TestGetScopeFromCtx(t *testing.T) {
 	}
 }
 
-func TestGetScopeFromCtx_NoDefault(t *testing.T) {
+// TestContextMetrics_NoDefault_getScope tests the scenario where
+//  1. a default scope is not available when tags are assigned to a context
+//  2. getScope chooses the default context
+func TestGetScopeFromCtx_NoDefault_getScope(t *testing.T) {
 
 	const counterName = "cn"
 
@@ -145,14 +154,24 @@ func TestGetScopeFromCtx_NoDefault(t *testing.T) {
 	}
 }
 
-func TestContextMetrics(t *testing.T) {
+// TestContextMetrics_NoDefault tests the scenario where
+//  1. a default scope is not available
+//  2. methods in contextMetrics pick the scope stored within it
+func TestContextMetrics_NoDefault(t *testing.T) {
 
 	const counterName = "cn"
 
-	root, _ := tally.NewRootScope(tally.ScopeOptions{}, 0)
+	// create root scope
+	root := tally.NewTestScope("abcd123", nil)
+
+	// create context metrics
 	cm := NewContextMetrics(root)
 	tags := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+
+	// add tags to context withot
 	ctx := WithScopeTags(context.TODO(), tags)
+
+	// increment a counter
 	cm.IncCounter(ctx, counterName, 1)
 
 	// check if the counter is generated with the right tags
@@ -167,7 +186,10 @@ func TestContextMetrics(t *testing.T) {
 	}
 }
 
-func TestContextMetrics_tagDivergence(t *testing.T) {
+// TestContextMetrics_NoDefault_TagDivergence tests the scenario where
+//  1. a default scope is not available
+//  2. tags stored in the root scope and the context diverge
+func TestContextMetrics_NoDefault_TagDivergence(t *testing.T) {
 
 	const counterName = "cn"
 
@@ -199,7 +221,9 @@ func TestContextMetrics_tagDivergence(t *testing.T) {
 	}
 }
 
-func TestContextMetrics_scopeDivergence(t *testing.T) {
+// TestContextMetrics_ScopeDivergence checks for the case where
+// 1. the root scope and the scope within the context has diverged
+func TestContextMetrics_ScopeDivergence(t *testing.T) {
 
 	const counterName = "cn"
 
@@ -216,7 +240,7 @@ func TestContextMetrics_scopeDivergence(t *testing.T) {
 	// step: increment counter
 	cm.IncCounter(ctx, counterName, 1)
 
-	// step: check if the counter is generated with the tags from root and context
+	// step: check if the counter is generated with the context tgs
 	scope := getScope(ctx, root)
 	ts := scope.(tally.TestScope)
 	ss := ts.Snapshot()
