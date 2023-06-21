@@ -35,6 +35,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	zerrors "github.com/uber/zanzibar/runtime/errors"
 	"github.com/uber/zanzibar/runtime/ruleengine"
 
 	"go.uber.org/zap"
@@ -415,6 +416,7 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
+		zerrorFactory:          zerrors.NewZErrorFactory("client", "baz"),
 	}
 }
 
@@ -515,6 +517,7 @@ type bazClient struct {
 	client                 *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps            *zanzibar.DefaultDependencies
+	zerrorFactory          zerrors.ZErrorFactory
 }
 
 // EchoBinary is a client RPC call for method "SecondService::echoBinary"
@@ -563,23 +566,29 @@ func (c *bazClient) EchoBinary(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBinary. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoBinary")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoBinary"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -630,23 +639,29 @@ func (c *bazClient) EchoBool(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBool. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoBool")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoBool"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -697,23 +712,29 @@ func (c *bazClient) EchoDouble(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoDouble. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoDouble")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoDouble"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -764,23 +785,29 @@ func (c *bazClient) EchoEnum(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoEnum. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoEnum")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoEnum"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -831,23 +858,29 @@ func (c *bazClient) EchoI16(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI16. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoI16")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI16"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -898,23 +931,29 @@ func (c *bazClient) EchoI32(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI32. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoI32")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI32"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -965,23 +1004,29 @@ func (c *bazClient) EchoI64(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI64. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoI64")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI64"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1032,23 +1077,29 @@ func (c *bazClient) EchoI8(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI8. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoI8")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI8"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1099,23 +1150,29 @@ func (c *bazClient) EchoString(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoString")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoString"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1166,23 +1223,29 @@ func (c *bazClient) EchoStringList(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringList. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoStringList")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringList"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1233,23 +1296,29 @@ func (c *bazClient) EchoStringMap(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringMap. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoStringMap")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringMap"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1300,23 +1369,29 @@ func (c *bazClient) EchoStringSet(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringSet. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoStringSet")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringSet"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1367,23 +1442,29 @@ func (c *bazClient) EchoStructList(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructList. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoStructList")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStructList"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1434,23 +1515,29 @@ func (c *bazClient) EchoStructSet(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructSet. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoStructSet")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStructSet"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1501,23 +1588,29 @@ func (c *bazClient) EchoTypedef(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoTypedef. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoTypedef")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoTypedef"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1567,16 +1660,20 @@ func (c *bazClient) Call(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		default:
-			err = errors.New("bazClient received no result or unknown exception for Call")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Call"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, respHeaders, err
 	}
 
@@ -1629,27 +1726,33 @@ func (c *bazClient) Compare(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.zerrorFactory.ZError(result.OtherAuthErr, zerrors.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Compare. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for Compare")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Compare"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1700,25 +1803,31 @@ func (c *bazClient) GetProfile(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for GetProfile. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for GetProfile")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for GetProfile"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1769,27 +1878,33 @@ func (c *bazClient) HeaderSchema(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.zerrorFactory.ZError(result.OtherAuthErr, zerrors.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding")
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for HeaderSchema")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for HeaderSchema"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1840,23 +1955,29 @@ func (c *bazClient) Ping(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Ping. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for Ping")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Ping"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1906,18 +2027,22 @@ func (c *bazClient) DeliberateDiffNoop(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.ServerErr != nil:
-			err = result.ServerErr
+			err = c.zerrorFactory.ZError(result.ServerErr, zerrors.ClientException)
 		default:
-			err = errors.New("bazClient received no result or unknown exception for SillyNoop")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for SillyNoop"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, respHeaders, err
 	}
 
@@ -1969,14 +2094,18 @@ func (c *bazClient) TestUUID(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("bazClient received no result or unknown exception for TestUuid")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TestUuid"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, respHeaders, err
 	}
 
@@ -2029,27 +2158,33 @@ func (c *bazClient) Trans(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.zerrorFactory.ZError(result.OtherAuthErr, zerrors.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Trans. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for Trans")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Trans"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2100,27 +2235,33 @@ func (c *bazClient) TransHeaders(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.zerrorFactory.ZError(result.OtherAuthErr, zerrors.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeaders. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for TransHeaders")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeaders"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2171,25 +2312,31 @@ func (c *bazClient) TransHeadersNoReq(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersNoReq. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for TransHeadersNoReq")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeadersNoReq"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2240,27 +2387,33 @@ func (c *bazClient) TransHeadersType(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.zerrorFactory.ZError(result.OtherAuthErr, zerrors.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersType. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("bazClient received no result or unknown exception for TransHeadersType")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeadersType"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2310,14 +2463,18 @@ func (c *bazClient) URLTest(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("bazClient received no result or unknown exception for UrlTest")
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for UrlTest"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, respHeaders, err
 	}
 

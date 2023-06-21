@@ -1,12 +1,21 @@
 package errors
 
-import "fmt"
+import (
+	"fmt"
+
+	"go.uber.org/zap"
+)
 
 type ErrorType int
 
 const (
 	ClientException ErrorType = iota + 1
 	TChannelError
+)
+
+const (
+	logFieldErrorLocation = "errorLocation"
+	logFieldErrorType     = "errorType"
 )
 
 func (t ErrorType) String() string {
@@ -30,7 +39,8 @@ type ZError interface {
 
 type ZErrorFactory interface {
 	ZError(err error, errType ErrorType) ZError
-	ToZError(err error) ZError
+	LogFieldErrorLocation(err error) zap.Field
+	LogFieldErrorType(err error) zap.Field
 }
 
 type zError struct {
@@ -65,10 +75,10 @@ func (factory zErrorFactory) ZError(err error, errType ErrorType) ZError {
 	}
 }
 
-// ToZError casts input to ZError if possible, otherwise creates new ZError
+// toZError casts input to ZError if possible, otherwise creates new ZError
 // using "~" prefix (denotes pseudo) to the factory location, since actual error source may not
 // be the same.
-func (factory zErrorFactory) ToZError(err error) ZError {
+func (factory zErrorFactory) toZError(err error) ZError {
 	if zerr, ok := err.(ZError); ok {
 		return zerr
 	}
@@ -76,4 +86,14 @@ func (factory zErrorFactory) ToZError(err error) ZError {
 		error:         err,
 		errorLocation: "~" + factory.errLocation,
 	}
+}
+
+func (factory zErrorFactory) LogFieldErrorLocation(err error) zap.Field {
+	zerr := factory.toZError(err)
+	return zap.String(logFieldErrorLocation, zerr.ErrorLocation())
+}
+
+func (factory zErrorFactory) LogFieldErrorType(err error) zap.Field {
+	zerr := factory.toZError(err)
+	return zap.String(logFieldErrorType, zerr.ErrorType().String())
 }

@@ -388,15 +388,14 @@ type {{$clientName}} struct {
 			}
 		}
 
-		var zerr zerrors.ZError
 		if err != nil {
-			zerr = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+			err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
 		}
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
-					zerr = c.zerrorFactory.ZError(result.{{title .Name}}, zerrors.ClientException)
+					err = c.zerrorFactory.ZError(result.{{title .Name}}, zerrors.ClientException)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
@@ -404,32 +403,29 @@ type {{$clientName}} struct {
 					success = true
 				{{end -}}
 				default:
-					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
-					zerr = c.zerrorFactory.ZError(err, 0)
+					err = c.zerrorFactory.ZError(errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}"), 0)
 			}
 		}
-		if zerr != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(zerr),
-			    zap.String(zanzibar.LogFieldErrorType, zerr.ErrorType().String()),
-			    zap.String(zanzibar.LogFieldErrorLocation, zerr.ErrorLocation()))
+		if err != nil {
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			    c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		{{if eq .ResponseType "" -}}
-			return ctx, respHeaders, zerr
+			return ctx, respHeaders, err
 		{{else -}}
-			return ctx, resp, respHeaders, zerr
+			return ctx, resp, respHeaders, err
 		{{end -}}
 		}
 
 		{{if eq .ResponseType "" -}}
-			return ctx, respHeaders, zerr
+			return ctx, respHeaders, err
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				zerr = c.zerrorFactory.ZError(err, zerrors.ClientException)
+				err = c.zerrorFactory.ZError(err, zerrors.ClientException)
 				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
-				    zap.String(zanzibar.LogFieldErrorType, zerr.ErrorType().String()),
-                    zap.String(zanzibar.LogFieldErrorLocation, zerr.ErrorLocation()))
+				    c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 			}
-			return ctx, resp, respHeaders, zerr
+			return ctx, resp, respHeaders, err
 		{{end -}}
 	}
 {{end -}}

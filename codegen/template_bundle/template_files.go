@@ -3579,6 +3579,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	zerrors "github.com/uber/zanzibar/runtime/errors"
 
 
 	"go.uber.org/zap"
@@ -3788,6 +3789,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
+		zerrorFactory:          zerrors.NewZErrorFactory("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -3888,6 +3890,7 @@ type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps  *zanzibar.DefaultDependencies
+	zerrorFactory zerrors.ZErrorFactory
 }
 
 {{range $svc := .Services}}
@@ -3948,11 +3951,14 @@ type {{$clientName}} struct {
 			}
 		}
 
+		if err != nil {
+			err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+		}
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
-					err = result.{{title .Name}}
+					err = c.zerrorFactory.ZError(result.{{title .Name}}, zerrors.ClientException)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
@@ -3960,11 +3966,12 @@ type {{$clientName}} struct {
 					success = true
 				{{end -}}
 				default:
-					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
+					err = c.zerrorFactory.ZError(errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}"), 0)
 			}
 		}
 		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			    c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -3977,7 +3984,9 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+				    c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
@@ -3997,7 +4006,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15884, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16485, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4285,9 +4294,9 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+					ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 						"app-error": "{{.Type}}",
-					})
+					}, h.Deps.Default.ContextMetrics.Scope())
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					if v == nil {
 						ctx = h.Deps.Default.ContextLogger.ErrorZ(
@@ -4303,9 +4312,9 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+					ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 						"app-error": "unknown",
-					})
+					}, h.Deps.Default.ContextMetrics.Scope())
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 					return ctx, false, nil, resHeaders, errors.Wrapf(
@@ -4410,7 +4419,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9278, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

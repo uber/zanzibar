@@ -65,8 +65,6 @@ const (
 	logFieldEndpointID          = "endpointID"
 	logFieldEndpointHandler     = "endpointHandler"
 	logFieldClientHTTPMethod    = "clientHTTPMethod"
-	LogFieldErrorType           = "errorType"
-	LogFieldErrorLocation       = "errorLocation"
 
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"

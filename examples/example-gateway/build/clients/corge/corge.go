@@ -35,6 +35,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	zerrors "github.com/uber/zanzibar/runtime/errors"
 	"github.com/uber/zanzibar/runtime/ruleengine"
 
 	"go.uber.org/zap"
@@ -208,6 +209,7 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
+		zerrorFactory:          zerrors.NewZErrorFactory("client", "corge"),
 	}
 }
 
@@ -308,6 +310,7 @@ type corgeClient struct {
 	client                 *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps            *zanzibar.DefaultDependencies
+	zerrorFactory          zerrors.ZErrorFactory
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -356,23 +359,29 @@ func (c *corgeClient) EchoString(
 		}
 	}
 
+	if err != nil {
+		err = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = errors.New("corgeClient received no result or unknown exception for EchoString")
+			err = c.zerrorFactory.ZError(errors.New("corgeClient received no result or unknown exception for EchoString"), 0)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		err = c.zerrorFactory.ZError(err, zerrors.ClientException)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+			c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 	}
 	return ctx, resp, respHeaders, err
 }
