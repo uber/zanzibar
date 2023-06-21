@@ -16,6 +16,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	zerrors "github.com/uber/zanzibar/runtime/errors"
 
 
 	"go.uber.org/zap"
@@ -225,6 +226,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
+		zerrorFactory:          zerrors.NewZErrorFactory("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -325,6 +327,7 @@ type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps  *zanzibar.DefaultDependencies
+	zerrorFactory zerrors.ZErrorFactory
 }
 
 {{range $svc := .Services}}
@@ -385,11 +388,15 @@ type {{$clientName}} struct {
 			}
 		}
 
+		var zerr zerrors.ZError
+		if err != nil {
+			zerr = c.zerrorFactory.ZError(err, zerrors.TChannelError)
+		}
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
-					err = result.{{title .Name}}
+					zerr = c.zerrorFactory.ZError(result.{{title .Name}}, zerrors.ClientException)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
@@ -398,25 +405,31 @@ type {{$clientName}} struct {
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
+					zerr = c.zerrorFactory.ZError(err, 0)
 			}
 		}
-		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		if zerr != nil {
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(zerr),
+			    zap.String(zanzibar.LogFieldErrorType, zerr.ErrorType().String()),
+			    zap.String(zanzibar.LogFieldErrorLocation, zerr.ErrorLocation()))
 		{{if eq .ResponseType "" -}}
-			return ctx, respHeaders, err
+			return ctx, respHeaders, zerr
 		{{else -}}
-			return ctx, resp, respHeaders, err
+			return ctx, resp, respHeaders, zerr
 		{{end -}}
 		}
 
 		{{if eq .ResponseType "" -}}
-			return ctx, respHeaders, err
+			return ctx, respHeaders, zerr
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				zerr = c.zerrorFactory.ZError(err, zerrors.ClientException)
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
+				    zap.String(zanzibar.LogFieldErrorType, zerr.ErrorType().String()),
+                    zap.String(zanzibar.LogFieldErrorLocation, zerr.ErrorLocation()))
 			}
-			return ctx, resp, respHeaders, err
+			return ctx, resp, respHeaders, zerr
 		{{end -}}
 	}
 {{end -}}
