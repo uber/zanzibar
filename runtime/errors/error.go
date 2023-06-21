@@ -28,6 +28,11 @@ type ZError interface {
 	ErrorType() ErrorType
 }
 
+type ZErrorFactory interface {
+	ZError(err error, errType ErrorType) ZError
+	ToZError(err error) ZError
+}
+
 type zError struct {
 	error
 	errorType     ErrorType
@@ -46,16 +51,29 @@ type zErrorFactory struct {
 	errLocation string
 }
 
-func NewZErrorFactory(moduleClass, moduleName string) zErrorFactory {
+func NewZErrorFactory(moduleClass, moduleName string) ZErrorFactory {
 	return zErrorFactory{
 		errLocation: moduleClass + "::" + moduleName,
 	}
 }
 
 func (factory zErrorFactory) ZError(err error, errType ErrorType) ZError {
-	return &zError{
+	return zError{
 		error:         err,
 		errorType:     errType,
 		errorLocation: factory.errLocation,
+	}
+}
+
+// ToZError casts input to ZError if possible, otherwise creates new ZError
+// using "~" prefix (denotes pseudo) to the factory location, since actual error source may not
+// be the same.
+func (factory zErrorFactory) ToZError(err error) ZError {
+	if zerr, ok := err.(ZError); ok {
+		return zerr
+	}
+	return zError{
+		error:         err,
+		errorLocation: "~" + factory.errLocation,
 	}
 }
