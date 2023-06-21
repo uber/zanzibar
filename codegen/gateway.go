@@ -260,7 +260,7 @@ type EndpointSpec struct {
 	// If "custom" then where to import custom code from
 	WorkflowImportPath string `yaml:"workflowImportPath"`
 	// Config additional configs for the endpoint
-	Config map[string]interface{} `yaml:"config, omitempty"`
+	Config map[string]interface{} `yaml:"config,omitempty"`
 	// if "httpClient", which client to call.
 	ClientID string `yaml:"clientId,omitempty"`
 	// if "httpClient", which client method to call.
