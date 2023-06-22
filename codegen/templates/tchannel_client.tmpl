@@ -403,7 +403,7 @@ type {{$clientName}} struct {
 					success = true
 				{{end -}}
 				default:
-					err = c.zerrorFactory.ZError(errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}"), 0)
+					err = c.zerrorFactory.ZError(errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}"), zerrors.ClientError)
 			}
 		}
 		if err != nil {

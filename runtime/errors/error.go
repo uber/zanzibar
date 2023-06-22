@@ -9,8 +9,12 @@ import (
 type ErrorType int
 
 const (
+	// ClientException are client defined exceptions defined in the client thrifts.
 	ClientException ErrorType = iota + 1
+	// TChannelError are errors of type tchannel.SystemError.
 	TChannelError
+	// ClientError are errors from client such as undefined exceptions, incomplete response.
+	ClientError
 )
 
 const (
@@ -24,6 +28,8 @@ func (t ErrorType) String() string {
 		return "ClientException"
 	case TChannelError:
 		return "TChannelError"
+	case ClientError:
+		return "ClientError"
 	case 0:
 		return ""
 	default:
