@@ -368,7 +368,7 @@ func (c *corgeClient) EchoString(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("corgeClient received no result or unknown exception for EchoString"), 0)
+			err = c.zerrorFactory.ZError(errors.New("corgeClient received no result or unknown exception for EchoString"), zerrors.ClientError)
 		}
 	}
 	if err != nil {

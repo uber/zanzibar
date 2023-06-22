@@ -575,7 +575,7 @@ func (c *bazClient) EchoBinary(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBinary. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoBinary"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoBinary"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -648,7 +648,7 @@ func (c *bazClient) EchoBool(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBool. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoBool"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoBool"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -721,7 +721,7 @@ func (c *bazClient) EchoDouble(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoDouble. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoDouble"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoDouble"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -794,7 +794,7 @@ func (c *bazClient) EchoEnum(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoEnum. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoEnum"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoEnum"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -867,7 +867,7 @@ func (c *bazClient) EchoI16(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI16. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI16"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI16"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -940,7 +940,7 @@ func (c *bazClient) EchoI32(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI32. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI32"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI32"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1013,7 +1013,7 @@ func (c *bazClient) EchoI64(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI64. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI64"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI64"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1086,7 +1086,7 @@ func (c *bazClient) EchoI8(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI8. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI8"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoI8"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1159,7 +1159,7 @@ func (c *bazClient) EchoString(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoString"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoString"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1232,7 +1232,7 @@ func (c *bazClient) EchoStringList(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringList. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringList"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringList"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1305,7 +1305,7 @@ func (c *bazClient) EchoStringMap(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringMap. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringMap"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringMap"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1378,7 +1378,7 @@ func (c *bazClient) EchoStringSet(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringSet. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringSet"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStringSet"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1451,7 +1451,7 @@ func (c *bazClient) EchoStructList(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructList. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStructList"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStructList"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1524,7 +1524,7 @@ func (c *bazClient) EchoStructSet(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructSet. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStructSet"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoStructSet"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1597,7 +1597,7 @@ func (c *bazClient) EchoTypedef(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoTypedef. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoTypedef"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for EchoTypedef"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1668,7 +1668,7 @@ func (c *bazClient) Call(
 		case result.AuthErr != nil:
 			err = c.zerrorFactory.ZError(result.AuthErr, zerrors.ClientException)
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Call"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Call"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1739,7 +1739,7 @@ func (c *bazClient) Compare(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Compare. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Compare"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Compare"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1814,7 +1814,7 @@ func (c *bazClient) GetProfile(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for GetProfile. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for GetProfile"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for GetProfile"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1888,10 +1888,10 @@ func (c *bazClient) HeaderSchema(
 		case result.OtherAuthErr != nil:
 			err = c.zerrorFactory.ZError(result.OtherAuthErr, zerrors.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding")
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for HeaderSchema"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for HeaderSchema"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -1964,7 +1964,7 @@ func (c *bazClient) Ping(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Ping. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Ping"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Ping"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2037,7 +2037,7 @@ func (c *bazClient) DeliberateDiffNoop(
 		case result.ServerErr != nil:
 			err = c.zerrorFactory.ZError(result.ServerErr, zerrors.ClientException)
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for SillyNoop"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for SillyNoop"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2100,7 +2100,7 @@ func (c *bazClient) TestUUID(
 	if err == nil && !success {
 		switch {
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TestUuid"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TestUuid"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2171,7 +2171,7 @@ func (c *bazClient) Trans(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Trans. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Trans"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for Trans"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2248,7 +2248,7 @@ func (c *bazClient) TransHeaders(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeaders. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeaders"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeaders"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2323,7 +2323,7 @@ func (c *bazClient) TransHeadersNoReq(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersNoReq. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeadersNoReq"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeadersNoReq"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2400,7 +2400,7 @@ func (c *bazClient) TransHeadersType(
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersType. Overriding", zap.Error(err))
 			success = true
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeadersType"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for TransHeadersType"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
@@ -2469,7 +2469,7 @@ func (c *bazClient) URLTest(
 	if err == nil && !success {
 		switch {
 		default:
-			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for UrlTest"), 0)
+			err = c.zerrorFactory.ZError(errors.New("bazClient received no result or unknown exception for UrlTest"), zerrors.ClientError)
 		}
 	}
 	if err != nil {
