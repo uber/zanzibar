@@ -123,7 +123,7 @@ func (m *MiddlewareStack) Handle(
 			//for error metrics only emit when there is gateway error and not request error
 			// the percentage can be calculated via error_count/total_request
 			if res.pendingStatusCode >= 500 {
-				m.emitAvailabilityError(middlewareRequestStatusTag, m.middlewares[i].Name(), req.scope)
+				m.emitAvailabilityError(middlewareRequestStatusTag, req.scope)
 			}
 			return ctx
 		}
@@ -138,10 +138,9 @@ func (m *MiddlewareStack) Handle(
 }
 
 // emitAvailability is used to increment the error counter for a particular tagName.
-func (m *MiddlewareStack) emitAvailabilityError(tagName string, middlewareName string, scope tally.Scope) {
+func (m *MiddlewareStack) emitAvailabilityError(tagName string, scope tally.Scope) {
 	tagged := scope.Tagged(map[string]string{
-		scopeTagStatus:     "error",
-		scopeTagMiddleWare: middlewareName,
+		scopeTagStatus: "error",
 	})
 	tagged.Counter(tagName).Inc(1)
 }
