@@ -3971,7 +3971,7 @@ type {{$clientName}} struct {
 		}
 		if err != nil {
 			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err),
-			    c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
+				c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -3986,7 +3986,7 @@ type {{$clientName}} struct {
 			if err != nil {
 				err = c.zerrorFactory.ZError(err, zerrors.ClientException)
 				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err),
-				    c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
+					c.zerrorFactory.LogFieldErrorLocation(err), c.zerrorFactory.LogFieldErrorType(err))
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
@@ -4006,7 +4006,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16497, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

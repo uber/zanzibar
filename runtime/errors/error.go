@@ -26,6 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// ErrorType is used for error grouping.
 type ErrorType int
 
 const (
@@ -42,6 +43,7 @@ const (
 	logFieldErrorType     = "errorType"
 )
 
+// String returns string value used in log fields.
 func (t ErrorType) String() string {
 	switch t {
 	case ClientException:
@@ -57,12 +59,14 @@ func (t ErrorType) String() string {
 	}
 }
 
+// ZError extends the interface error to provide ErrorType and ErrorLocation.
 type ZError interface {
 	error
 	ErrorLocation() string
 	ErrorType() ErrorType
 }
 
+// ZErrorFactory is factory that creates ZError, additionally it provides log fields.
 type ZErrorFactory interface {
 	ZError(err error, errType ErrorType) ZError
 	LogFieldErrorLocation(err error) zap.Field
@@ -75,10 +79,12 @@ type zError struct {
 	errorLocation string
 }
 
+// ErrorLocation returns error location.
 func (z zError) ErrorLocation() string {
 	return z.errorLocation
 }
 
+// ErrorType returns error type.
 func (z zError) ErrorType() ErrorType {
 	return z.errorType
 }
@@ -87,12 +93,14 @@ type zErrorFactory struct {
 	errLocation string
 }
 
+// NewZErrorFactory creates the factory instance with error location set to module "id".
 func NewZErrorFactory(moduleClass, moduleName string) ZErrorFactory {
 	return zErrorFactory{
 		errLocation: moduleClass + "::" + moduleName,
 	}
 }
 
+// ZError creates ZError instance using input.
 func (factory zErrorFactory) ZError(err error, errType ErrorType) ZError {
 	return zError{
 		error:         err,
@@ -114,11 +122,13 @@ func (factory zErrorFactory) toZError(err error) ZError {
 	}
 }
 
+// LogFieldErrorLocation returns log field errorLocation.
 func (factory zErrorFactory) LogFieldErrorLocation(err error) zap.Field {
 	zerr := factory.toZError(err)
 	return zap.String(logFieldErrorLocation, zerr.ErrorLocation())
 }
 
+// LogFieldErrorType returns log field errorType.
 func (factory zErrorFactory) LogFieldErrorType(err error) zap.Field {
 	zerr := factory.toZError(err)
 	return zap.String(logFieldErrorType, zerr.ErrorType().String())
