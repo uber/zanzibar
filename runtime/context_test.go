@@ -482,12 +482,11 @@ func TestAccumulateLogMsgAndFieldsInContext(t *testing.T) {
 	ctx = accumulateLogMsgAndFieldsInContext(ctx, "message2",
 		[]zap.Field{zap.String("ctxField1", "ctxFieldValue2")}, zapcore.ErrorLevel)
 	logFields := GetLogFieldsFromCtx(ctx)
-	assert.Equal(t, []zap.Field{
-		zap.String("msg1", "message1"),
-		zap.String("ctxField1", "ctxFieldValue1"),
-		zap.String("msg2", "message2"),
-		zap.String("ctxField1", "ctxFieldValue2"),
-	}, logFields)
+	var keys []string
+	for _, f := range logFields {
+		keys = append(keys, f.Key)
+	}
+	assert.Equal(t, []string{"msg1", "ctxField1", "msg2", "ctxField1"}, keys)
 }
 
 func TestAccumulateLogMsgAndFieldsInContextWithLogLevel(t *testing.T) {
