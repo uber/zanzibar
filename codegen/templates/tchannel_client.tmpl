@@ -366,8 +366,8 @@ type {{$clientName}} struct {
 			err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 				elapsed := time.Now().Sub(start)
 				scope.Timer("hystrix-timer").Record(elapsed)
-    			success, respHeaders, err = c.client.Call(
-    				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result)
+				success, respHeaders, err = c.client.Call(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result)
 				if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 					// Declare ok if it is not a system-error
 					return nil
