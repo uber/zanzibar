@@ -183,6 +183,8 @@ func (h *EchoEchoHandler) redirectToDeputy(
 	timeoutAndRetryConfig := zanzibar.BuildTimeoutAndRetryConfig(timeoutPerAttemptConf, zanzibar.DefaultBackOffTimeAcrossRetriesConf,
 		maxAttempts, zanzibar.DefaultScaleFactor)
 
-	success, respHeaders, err := client.Call(ctx, "Echo", "echo", reqHeaders, req, res, &timeoutAndRetryConfig)
+	ctx = zanzibar.WithTimeAndRetryOptions(ctx, timeoutAndRetryConfig)
+
+	success, respHeaders, err := client.Call(ctx, "Echo", "echo", reqHeaders, req, res)
 	return ctx, success, res, respHeaders, err
 }

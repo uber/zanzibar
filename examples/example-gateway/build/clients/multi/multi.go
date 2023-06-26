@@ -45,12 +45,10 @@ type Client interface {
 	HelloA(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	HelloB(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -218,7 +216,6 @@ func (c *multiClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *multiClient) HelloA(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -232,7 +229,7 @@ func (c *multiClient) HelloA(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::helloA", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", "ServiceABack::helloA", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceA_b" + "/hello"
@@ -307,7 +304,6 @@ func (c *multiClient) HelloA(
 func (c *multiClient) HelloB(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -321,7 +317,7 @@ func (c *multiClient) HelloB(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::helloB", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", "ServiceBBack::helloB", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceB_b" + "/hello"

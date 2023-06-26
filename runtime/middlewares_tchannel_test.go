@@ -22,10 +22,8 @@ package zanzibar_test
 
 import (
 	"context"
-	"testing"
-	"time"
-
 	"go.uber.org/thriftrw/protocol/stream"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/mcuadros/go-jsonschema-generator"
@@ -66,17 +64,11 @@ func TestTchannelHandlers(t *testing.T) {
 
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any(), gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
 		Return(ctx, map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  1,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
-	)
+		ctx, "SimpleService", "Call", reqHeaders, args, &result)
 	dynamicRespHeaders := []string{
 		"client.response.duration",
 	}
@@ -102,16 +94,10 @@ func TestTchannelHandlers(t *testing.T) {
 		"x-nil-response-header": "true",
 	}
 
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any(), gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
 		Return(ctx, map[string]string{"some-res-header": "something"}, nil)
 	success, _, err = ms.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result, &zanzibar.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  1,
-			BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-		},
-	)
+		ctx, "SimpleService", "Call", reqHeaders, args, &result)
 	if !assert.Error(t, err, "got tchannel error") {
 		return
 	}

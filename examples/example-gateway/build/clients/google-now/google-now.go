@@ -47,12 +47,10 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	CheckCredentials(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 }
 
@@ -221,7 +219,6 @@ func (c *googleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -234,7 +231,7 @@ func (c *googleNowClient) AddCredentials(
 		headers[c.requestProcedureHeaderKey] = "GoogleNowService::addCredentials"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", "GoogleNowService::addCredentials", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", "GoogleNowService::addCredentials", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/add-credentials"
@@ -309,7 +306,6 @@ func (c *googleNowClient) AddCredentials(
 func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -322,7 +318,7 @@ func (c *googleNowClient) CheckCredentials(
 		headers[c.requestProcedureHeaderKey] = "GoogleNowService::checkCredentials"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", "GoogleNowService::checkCredentials", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", "GoogleNowService::checkCredentials", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/check-credentials"

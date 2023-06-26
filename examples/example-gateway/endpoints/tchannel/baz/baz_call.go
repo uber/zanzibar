@@ -22,14 +22,12 @@ package bazhandler
 
 import (
 	"context"
-	"net/textproto"
-	"time"
-
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
 	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
 	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"net/textproto"
 
 	"go.uber.org/zap"
 )
@@ -73,12 +71,7 @@ func (w Workflow) Handle(
 		Arg: (*clientBaz.BazRequest)(req.Arg),
 	}
 
-	ctx, clientRespHeaders, err := w.Clients.Baz.Call(ctx, clientReqHeaders, clientReq, &zanzibar.TimeoutAndRetryOptions{
-		OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
-		RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-		MaxAttempts:                  2,
-		BackOffTimeAcrossRetriesInMs: zanzibar.DefaultBackOffTimeAcrossRetries,
-	})
+	ctx, clientRespHeaders, err := w.Clients.Baz.Call(ctx, clientReqHeaders, clientReq)
 	respHeaders := zanzibar.ServerTChannelHeader(clientRespHeaders)
 	if err != nil {
 		switch v := err.(type) {

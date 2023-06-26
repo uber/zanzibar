@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	runtime "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -36,10 +36,10 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*runtime.HTTPClient)
+	ret0, _ := ret[0].(*zanzibar.HTTPClient)
 	return ret0
 }
 
@@ -50,9 +50,9 @@ func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 }
 
 // HelloA mocks base method.
-func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HelloA", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "HelloA", arg0, arg1)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(map[string]string)
@@ -61,15 +61,15 @@ func (m *MockClient) HelloA(arg0 context.Context, arg1 map[string]string, arg2 *
 }
 
 // HelloA indicates an expected call of HelloA.
-func (mr *MockClientMockRecorder) HelloA(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) HelloA(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HelloA", reflect.TypeOf((*MockClient)(nil).HelloA), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HelloA", reflect.TypeOf((*MockClient)(nil).HelloA), arg0, arg1)
 }
 
 // HelloB mocks base method.
-func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HelloB", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "HelloB", arg0, arg1)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(map[string]string)
@@ -78,7 +78,7 @@ func (m *MockClient) HelloB(arg0 context.Context, arg1 map[string]string, arg2 *
 }
 
 // HelloB indicates an expected call of HelloB.
-func (mr *MockClientMockRecorder) HelloB(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) HelloB(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HelloB", reflect.TypeOf((*MockClient)(nil).HelloB), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HelloB", reflect.TypeOf((*MockClient)(nil).HelloB), arg0, arg1)
 }

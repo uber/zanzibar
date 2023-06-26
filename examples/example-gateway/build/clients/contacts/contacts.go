@@ -47,12 +47,10 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error)
 	TestURLURL(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -221,7 +219,6 @@ func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsContactsContacts.Contacts_SaveContacts_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -235,7 +232,7 @@ func (c *contactsClient) SaveContacts(
 	}
 
 	var defaultRes *clientsIDlClientsContactsContacts.SaveContactsResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", "Contacts::saveContacts", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.SaveContactsRequest.UserUUID) + "/contacts"
@@ -316,7 +313,6 @@ func (c *contactsClient) SaveContacts(
 func (c *contactsClient) TestURLURL(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -330,7 +326,7 @@ func (c *contactsClient) TestURLURL(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", "Contacts::testUrlUrl", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", "Contacts::testUrlUrl", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/contacts" + "/testUrl"

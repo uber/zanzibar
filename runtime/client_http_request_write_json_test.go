@@ -53,13 +53,16 @@ func (wjs *writeJSONSuit) SetupSuite() {
 		nil,
 		time.Microsecond*time.Duration(20),
 	)
-	wjs.req = NewClientHTTPRequest(context.TODO(), "foo", "bar", "foo::bar", client,
-		&TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  1,
-			BackOffTimeAcrossRetriesInMs: DefaultBackOffTimeAcrossRetries,
-		})
+
+	retryOptions := &TimeoutAndRetryOptions{
+		OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
+		RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
+		MaxAttempts:                  1,
+		BackOffTimeAcrossRetriesInMs: DefaultBackOffTimeAcrossRetries,
+	}
+	ctx := WithTimeAndRetryOptions(context.Background(), retryOptions)
+
+	wjs.req = NewClientHTTPRequest(ctx, "foo", "bar", "foo::bar", client)
 	wjs.expectedRawBody = []byte("{\"field\":\"hello\"}")
 
 }

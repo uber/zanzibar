@@ -45,7 +45,6 @@ type Client interface {
 		{{if ne .RequestType "" -}}
 		args {{.RequestType}},
 		{{end -}}
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
 {{- end -}}
 {{- end -}}
@@ -272,7 +271,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if ne .RequestType "" -}}
 	r {{.RequestType}},
 	{{end -}}
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, {{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -288,7 +286,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", "{{$serviceMethod}}", c.httpClient,timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", "{{$serviceMethod}}", c.httpClient)
 
 	{{if .ReqHeaderGoStatements }}
 	{{range $index, $line := .ReqClientHeaderGoStatements -}}

@@ -25,16 +25,16 @@ import (
 	"time"
 )
 
-//BuildTimeoutAndRetryConfig encapsulates timeout and retry configs in TimeoutAndRetryOptions struct
+// BuildTimeoutAndRetryConfig encapsulates timeout and retry configs in TimeoutAndRetryOptions struct
 func BuildTimeoutAndRetryConfig(timeoutPerAttemptConf int, backOffTimeAcrossRetriesConf int,
-	maxAttempts int, scaleFactor float64) TimeoutAndRetryOptions {
+	maxAttempts int, scaleFactor float64) *TimeoutAndRetryOptions {
 
 	timeoutPerAttemptConf = int(math.Ceil(float64(timeoutPerAttemptConf) * scaleFactor))
 	timeoutPerAttempt := time.Duration(timeoutPerAttemptConf) * time.Millisecond
 	backOffTimeAcrossRetries := time.Duration(backOffTimeAcrossRetriesConf) * time.Millisecond
 	overAllTimeout := time.Duration((timeoutPerAttemptConf+backOffTimeAcrossRetriesConf)*(maxAttempts-1)+timeoutPerAttemptConf) * time.Millisecond
 
-	return TimeoutAndRetryOptions{
+	return &TimeoutAndRetryOptions{
 		OverallTimeoutInMs:           overAllTimeout,
 		RequestTimeoutPerAttemptInMs: timeoutPerAttempt,
 		MaxAttempts:                  maxAttempts,
