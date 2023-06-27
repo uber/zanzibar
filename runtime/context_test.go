@@ -602,3 +602,20 @@ func TestAccumulateLogField(t *testing.T) {
 	assert.Equal(t, "one", fields1[3].String)
 	assert.Equal(t, "two", fields2[3].String)
 }
+
+func TestTimeoutAndRetry(t *testing.T) {
+	tro := BuildTimeoutAndRetryConfig(1, 1, 1, 1)
+	ctx := context.Background()
+	ctx = WithTimeAndRetryOptions(ctx, tro)
+	tro1 := GetTimeoutAndRetryOptions(ctx)
+
+	assert.Equal(t, tro.BackOffTimeAcrossRetriesInMs, tro1.BackOffTimeAcrossRetriesInMs)
+	assert.Equal(t, tro.OverallTimeoutInMs, tro1.OverallTimeoutInMs)
+	assert.Equal(t, tro.RequestTimeoutPerAttemptInMs, tro1.RequestTimeoutPerAttemptInMs)
+	assert.Equal(t, tro.MaxAttempts, tro1.MaxAttempts)
+}
+
+func TestTimeoutAndRetry_NotSet(t *testing.T) {
+	tro := GetTimeoutAndRetryOptions(context.Background())
+	assert.Equal(t, tro, (*TimeoutAndRetryOptions)(nil))
+}
