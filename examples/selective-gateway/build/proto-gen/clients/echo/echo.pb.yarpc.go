@@ -107,10 +107,10 @@ type FxEchoYARPCClientResult struct {
 // NewFxEchoYARPCClient provides a EchoYARPCClient
 // to an Fx application using the given name for routing.
 //
-//	fx.Provide(
-//	  echo.NewFxEchoYARPCClient("service-name"),
-//	  ...
-//	)
+//  fx.Provide(
+//    echo.NewFxEchoYARPCClient("service-name"),
+//    ...
+//  )
 func NewFxEchoYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxEchoYARPCClientParams) FxEchoYARPCClientResult {
 		cc := params.Provider.ClientConfig(name)
@@ -156,10 +156,10 @@ type FxEchoYARPCProceduresResult struct {
 // NewFxEchoYARPCProcedures provides EchoYARPCServer procedures to an Fx application.
 // It expects a EchoYARPCServer to be present in the container.
 //
-//	fx.Provide(
-//	  echo.NewFxEchoYARPCProcedures(),
-//	  ...
-//	)
+//  fx.Provide(
+//    echo.NewFxEchoYARPCProcedures(),
+//    ...
+//  )
 func NewFxEchoYARPCProcedures() interface{} {
 	return func(params FxEchoYARPCProceduresParams) FxEchoYARPCProceduresResult {
 		return FxEchoYARPCProceduresResult{
@@ -311,10 +311,10 @@ type FxEchoInternalYARPCClientResult struct {
 // NewFxEchoInternalYARPCClient provides a EchoInternalYARPCClient
 // to an Fx application using the given name for routing.
 //
-//	fx.Provide(
-//	  echo.NewFxEchoInternalYARPCClient("service-name"),
-//	  ...
-//	)
+//  fx.Provide(
+//    echo.NewFxEchoInternalYARPCClient("service-name"),
+//    ...
+//  )
 func NewFxEchoInternalYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxEchoInternalYARPCClientParams) FxEchoInternalYARPCClientResult {
 		cc := params.Provider.ClientConfig(name)
@@ -360,10 +360,10 @@ type FxEchoInternalYARPCProceduresResult struct {
 // NewFxEchoInternalYARPCProcedures provides EchoInternalYARPCServer procedures to an Fx application.
 // It expects a EchoInternalYARPCServer to be present in the container.
 //
-//	fx.Provide(
-//	  echo.NewFxEchoInternalYARPCProcedures(),
-//	  ...
-//	)
+//  fx.Provide(
+//    echo.NewFxEchoInternalYARPCProcedures(),
+//    ...
+//  )
 func NewFxEchoInternalYARPCProcedures() interface{} {
 	return func(params FxEchoInternalYARPCProceduresParams) FxEchoInternalYARPCProceduresResult {
 		return FxEchoInternalYARPCProceduresResult{

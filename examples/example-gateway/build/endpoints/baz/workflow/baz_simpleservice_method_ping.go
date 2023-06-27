@@ -62,6 +62,7 @@ func NewSimpleServicePingWorkflow(deps *module.Dependencies) SimpleServicePingWo
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
+		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "baz"),
 	}
 }
 
@@ -71,6 +72,7 @@ type simpleServicePingWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -127,6 +129,10 @@ func (w simpleServicePingWorkflow) Handle(
 	)
 
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 
 		default:
@@ -134,10 +140,11 @@ func (w simpleServicePingWorkflow) Handle(
 				zap.Error(errValue),
 				zap.String("client", "Baz"),
 			)
-
-			return ctx, nil, nil, err
-
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+
+		return ctx, nil, nil, err
+
 	}
 
 	// Filter and map response headers from client to server response.

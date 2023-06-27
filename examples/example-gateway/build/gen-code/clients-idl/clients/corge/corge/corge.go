@@ -24,14 +24,14 @@ type Foo struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Foo) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -48,16 +48,16 @@ func (v *Foo) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Foo struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Foo
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Foo
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Foo) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -166,14 +166,14 @@ type NotModified struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *NotModified) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -190,16 +190,16 @@ func (v *NotModified) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a NotModified struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v NotModified
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v NotModified
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *NotModified) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -322,14 +322,14 @@ type Corge_EchoBool_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_EchoBool_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -355,16 +355,16 @@ func (v *Corge_EchoBool_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_EchoBool_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_EchoBool_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_EchoBool_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_EchoBool_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -628,14 +628,14 @@ type Corge_EchoBool_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_EchoBool_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -667,16 +667,16 @@ func (v *Corge_EchoBool_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_EchoBool_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_EchoBool_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_EchoBool_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_EchoBool_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -895,14 +895,14 @@ type Corge_EchoString_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_EchoString_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -928,16 +928,16 @@ func (v *Corge_EchoString_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_EchoString_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_EchoString_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_EchoString_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_EchoString_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -1201,14 +1201,14 @@ type Corge_EchoString_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_EchoString_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1240,16 +1240,16 @@ func (v *Corge_EchoString_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_EchoString_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_EchoString_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_EchoString_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_EchoString_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -1468,14 +1468,14 @@ type Corge_NoContent_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_NoContent_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1501,16 +1501,16 @@ func (v *Corge_NoContent_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_NoContent_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_NoContent_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_NoContent_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_NoContent_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -1779,14 +1779,14 @@ type Corge_NoContent_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_NoContent_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -1824,16 +1824,16 @@ func _NotModified_Read(w wire.Value) (*NotModified, error) {
 // An error is returned if we were unable to build a Corge_NoContent_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_NoContent_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_NoContent_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_NoContent_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -2044,14 +2044,14 @@ type Corge_NoContentNoException_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_NoContentNoException_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -2077,16 +2077,16 @@ func (v *Corge_NoContentNoException_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_NoContentNoException_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_NoContentNoException_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_NoContentNoException_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_NoContentNoException_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -2340,14 +2340,14 @@ type Corge_NoContentNoException_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_NoContentNoException_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -2364,16 +2364,16 @@ func (v *Corge_NoContentNoException_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_NoContentNoException_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_NoContentNoException_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_NoContentNoException_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_NoContentNoException_Result) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -2501,14 +2501,14 @@ type Corge_NoContentOnException_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_NoContentOnException_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -2534,16 +2534,16 @@ func (v *Corge_NoContentOnException_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Corge_NoContentOnException_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_NoContentOnException_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_NoContentOnException_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_NoContentOnException_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -2822,14 +2822,14 @@ type Corge_NoContentOnException_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Corge_NoContentOnException_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -2875,16 +2875,16 @@ func _Foo_Read(w wire.Value) (*Foo, error) {
 // An error is returned if we were unable to build a Corge_NoContentOnException_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Corge_NoContentOnException_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Corge_NoContentOnException_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Corge_NoContentOnException_Result) FromWire(w wire.Value) error {
 	var err error
 

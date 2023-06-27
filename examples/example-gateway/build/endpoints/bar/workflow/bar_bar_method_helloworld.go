@@ -62,6 +62,7 @@ func NewBarHelloWorldWorkflow(deps *module.Dependencies) BarHelloWorldWorkflow {
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
+		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "bar"),
 	}
 }
 
@@ -71,6 +72,7 @@ type barHelloWorldWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -127,31 +129,32 @@ func (w barHelloWorldWorkflow) Handle(
 	)
 
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 
 		case *clientsIDlClientsBarBar.BarException:
-			serverErr := convertHelloWorldBarException(
+			err = convertHelloWorldBarException(
 				errValue,
 			)
-
-			return ctx, "", nil, serverErr
 
 		case *clientsIDlClientsBarBar.SeeOthersRedirection:
-			serverErr := convertHelloWorldSeeOthersRedirection(
+			err = convertHelloWorldSeeOthersRedirection(
 				errValue,
 			)
-
-			return ctx, "", nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
 				zap.String("client", "Bar"),
 			)
-
-			return ctx, "", nil, err
-
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+
+		return ctx, "", nil, err
+
 	}
 
 	// Filter and map response headers from client to server response.

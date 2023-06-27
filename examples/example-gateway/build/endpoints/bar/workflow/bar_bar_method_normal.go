@@ -63,6 +63,7 @@ func NewBarNormalWorkflow(deps *module.Dependencies) BarNormalWorkflow {
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
+		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "bar"),
 	}
 }
 
@@ -72,6 +73,7 @@ type barNormalWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -130,24 +132,27 @@ func (w barNormalWorkflow) Handle(
 	)
 
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 
 		case *clientsIDlClientsBarBar.BarException:
-			serverErr := convertNormalBarException(
+			err = convertNormalBarException(
 				errValue,
 			)
-
-			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
 				zap.String("client", "Bar"),
 			)
-
-			return ctx, nil, nil, err
-
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+
+		return ctx, nil, nil, err
+
 	}
 
 	// Filter and map response headers from client to server response.

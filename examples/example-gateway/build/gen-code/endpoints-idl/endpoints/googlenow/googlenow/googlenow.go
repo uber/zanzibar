@@ -27,14 +27,14 @@ type GoogleNow_AddCredentials_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *GoogleNow_AddCredentials_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -60,16 +60,16 @@ func (v *GoogleNow_AddCredentials_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a GoogleNow_AddCredentials_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v GoogleNow_AddCredentials_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v GoogleNow_AddCredentials_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *GoogleNow_AddCredentials_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -323,14 +323,14 @@ type GoogleNow_AddCredentials_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *GoogleNow_AddCredentials_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -347,16 +347,16 @@ func (v *GoogleNow_AddCredentials_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a GoogleNow_AddCredentials_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v GoogleNow_AddCredentials_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v GoogleNow_AddCredentials_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *GoogleNow_AddCredentials_Result) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -483,14 +483,14 @@ type GoogleNow_CheckCredentials_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *GoogleNow_CheckCredentials_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -507,16 +507,16 @@ func (v *GoogleNow_CheckCredentials_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a GoogleNow_CheckCredentials_Args struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v GoogleNow_CheckCredentials_Args
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v GoogleNow_CheckCredentials_Args
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *GoogleNow_CheckCredentials_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -712,14 +712,14 @@ type GoogleNow_CheckCredentials_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *GoogleNow_CheckCredentials_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -736,16 +736,16 @@ func (v *GoogleNow_CheckCredentials_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a GoogleNow_CheckCredentials_Result struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v GoogleNow_CheckCredentials_Result
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v GoogleNow_CheckCredentials_Result
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *GoogleNow_CheckCredentials_Result) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
