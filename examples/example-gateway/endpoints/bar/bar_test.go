@@ -2,20 +2,17 @@ package bar_test
 
 import (
 	"context"
-	"net/http"
-	"testing"
-	"time"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
-	runtime "github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"net/http"
+	"testing"
 )
 
 var defaultTestOptions = &testGateway.Options{
@@ -42,7 +39,7 @@ func TestBarListAndEnumEndpoint(t *testing.T) {
 		Demos:    []bar.DemoType{bar.DemoTypeFirst, bar.DemoTypeSecond},
 	}
 	ctx := context.Background()
-	ms.MockClients().Bar.EXPECT().ListAndEnum(gomock.Any(), gomock.Any(), args, gomock.Any()).Return(ctx, "demo", nil, nil).AnyTimes()
+	ms.MockClients().Bar.EXPECT().ListAndEnum(gomock.Any(), gomock.Any(), args).Return(ctx, "demo", nil, nil).AnyTimes()
 
 	res, err := ms.MakeHTTPRequest(
 		"GET", "/bar/list-and-enum?demoIds=abc&demoIds=def&demoType=FIRST&demos=FIRST&demos=SECOND", nil, nil,
@@ -90,12 +87,6 @@ func TestBarListAndEnumClient(t *testing.T) {
 			DemoIds:  []string{"abc", "def"},
 			DemoType: &demoType,
 			Demos:    demos,
-		},
-		&runtime.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(5000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  2,
-			BackOffTimeAcrossRetriesInMs: runtime.DefaultBackOffTimeAcrossRetries,
 		},
 	)
 	assert.NoError(t, err)

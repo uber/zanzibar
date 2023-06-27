@@ -2,15 +2,12 @@ package bazhandler_test
 
 import (
 	"context"
-	"testing"
-	"time"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"testing"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
-	runtime "github.com/uber/zanzibar/runtime"
 )
 
 func TestBazCall(t *testing.T) {
@@ -41,16 +38,11 @@ func TestBazCall(t *testing.T) {
 
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any(), gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any()).
 		Return(ctx, map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result, &runtime.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  1,
-			BackOffTimeAcrossRetriesInMs: runtime.DefaultBackOffTimeAcrossRetries,
-		},
+		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 	dynamicRespHeaders := []string{
 		"client.response.duration",
@@ -75,16 +67,11 @@ func TestBazCall(t *testing.T) {
 		"x-uuid":                "uuid",
 		"x-nil-response-header": "true",
 	}
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any(), gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any()).
 		Return(ctx, map[string]string{"some-res-header": "something"}, nil)
 
 	success, _, err = ms.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result, &runtime.TimeoutAndRetryOptions{
-			OverallTimeoutInMs:           time.Duration(3000) * time.Millisecond,
-			RequestTimeoutPerAttemptInMs: time.Duration(2000) * time.Millisecond,
-			MaxAttempts:                  1,
-			BackOffTimeAcrossRetriesInMs: runtime.DefaultBackOffTimeAcrossRetries,
-		},
+		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 	if !assert.Error(t, err, "got tchannel error") {
 		return
