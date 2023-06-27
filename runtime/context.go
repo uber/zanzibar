@@ -52,19 +52,14 @@ const (
 
 const (
 	// thrift service::method of endpoint thrift spec
-	logFieldRequestMethod       = "endpointThriftMethod"
-	logFieldRequestHTTPMethod   = "method"
-	logFieldRequestURL          = "url"
-	logFieldRequestPathname     = "pathname"
-	logFieldRequestRemoteAddr   = "remoteAddr"
-	logFieldRequestHost         = "host"
-	logFieldRequestStartTime    = "timestamp-started"
-	logFieldRequestFinishedTime = "timestamp-finished"
-	logFieldResponseStatusCode  = "statusCode"
-	logFieldRequestUUID         = "requestUUID"
-	logFieldEndpointID          = "endpointID"
-	logFieldEndpointHandler     = "endpointHandler"
-	logFieldClientHTTPMethod    = "clientHTTPMethod"
+	logFieldRequestMethod      = "endpointThriftMethod"
+	logFieldRequestHTTPMethod  = "method"
+	logFieldRequestPathname    = "pathname"
+	logFieldRequestRemoteAddr  = "remoteAddr"
+	logFieldResponseStatusCode = "statusCode"
+	logFieldRequestUUID        = "requestUUID"
+	logFieldEndpointID         = "endpointID"
+	logFieldEndpointHandler    = "endpointHandler"
 
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"

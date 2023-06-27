@@ -84,18 +84,7 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 }
 
 func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
-	var hostPort string
-	if c.call != nil {
-		hostPort = c.call.RemotePeer().HostPort
-	} else {
-		hostPort = "unknown"
-	}
-	fields := []zapcore.Field{
-		zap.String("remoteAddr", hostPort),
-		zap.Time("timestamp-started", c.startTime),
-		zap.Time("timestamp-finished", c.finishTime),
-	}
-
+	var fields []zapcore.Field
 	headers := map[string]string{}
 	for k, v := range c.reqHeaders {
 		s := fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k)

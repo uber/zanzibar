@@ -78,11 +78,9 @@ func NewServerHTTPRequest(
 	logFields := []zap.Field{
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
 		zap.String(logFieldEndpointHandler, endpoint.HandlerName),
-		zap.String(logFieldRequestURL, r.URL.Path),
 		zap.String(logFieldRequestHTTPMethod, r.Method),
 		zap.String(logFieldRequestRemoteAddr, r.RemoteAddr),
 		zap.String(logFieldRequestPathname, r.URL.RequestURI()),
-		zap.String(logFieldRequestHost, r.Host),
 	}
 
 	// put request scope tags on context
@@ -214,7 +212,6 @@ func (req *ServerHTTPRequest) start() {
 
 func (req *ServerHTTPRequest) setupLogFields() {
 	fields := GetLogFieldsFromCtx(req.Context())
-	fields = append(fields, zap.Time(logFieldRequestStartTime, req.startTime))
 	if span := req.GetSpan(); span != nil {
 		jc, ok := span.Context().(jaeger.SpanContext)
 		if ok {

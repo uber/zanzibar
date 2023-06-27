@@ -84,8 +84,6 @@ func (c *tchannelInboundCall) logFields(ctx context.Context) []zap.Field {
 	fields := []zap.Field{
 		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
 		zap.String("calling-service", c.call.CallerName()),
-		zap.Time("timestamp-started", c.startTime),
-		zap.Time("timestamp-finished", c.finishTime),
 	}
 
 	for k, v := range c.resHeaders {
