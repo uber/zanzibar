@@ -22,7 +22,6 @@ package zanzibar_test
 
 import (
 	"context"
-	"go.uber.org/thriftrw/protocol/stream"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -32,6 +31,7 @@ import (
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 	exampletchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/protocol/stream"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.
