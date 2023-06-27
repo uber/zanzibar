@@ -3923,8 +3923,8 @@ type {{$clientName}} struct {
 			err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 				elapsed := time.Now().Sub(start)
 				scope.Timer("hystrix-timer").Record(elapsed)
-    			success, respHeaders, err = c.client.Call(
-    				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result)
+				success, respHeaders, clientErr = c.client.Call(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result)
 				if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 					// Declare ok if it is not a system-error
 					return nil
@@ -3986,7 +3986,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15722, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15721, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

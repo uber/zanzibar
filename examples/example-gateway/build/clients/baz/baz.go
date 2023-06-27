@@ -518,7 +518,7 @@ func (c *bazClient) EchoBinary(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoBinary", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -582,7 +582,7 @@ func (c *bazClient) EchoBool(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoBool", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -646,7 +646,7 @@ func (c *bazClient) EchoDouble(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoDouble", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -710,7 +710,7 @@ func (c *bazClient) EchoEnum(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoEnum", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -774,7 +774,7 @@ func (c *bazClient) EchoI16(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI16", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -838,7 +838,7 @@ func (c *bazClient) EchoI32(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI32", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -902,7 +902,7 @@ func (c *bazClient) EchoI64(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI64", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -966,7 +966,7 @@ func (c *bazClient) EchoI8(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoI8", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1030,7 +1030,7 @@ func (c *bazClient) EchoString(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoString", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1094,7 +1094,7 @@ func (c *bazClient) EchoStringList(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringList", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1158,7 +1158,7 @@ func (c *bazClient) EchoStringMap(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1222,7 +1222,7 @@ func (c *bazClient) EchoStringSet(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1286,7 +1286,7 @@ func (c *bazClient) EchoStructList(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStructList", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1350,7 +1350,7 @@ func (c *bazClient) EchoStructSet(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1414,7 +1414,7 @@ func (c *bazClient) EchoTypedef(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1477,7 +1477,7 @@ func (c *bazClient) Call(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "call", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1536,7 +1536,7 @@ func (c *bazClient) Compare(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "compare", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1604,7 +1604,7 @@ func (c *bazClient) GetProfile(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "getProfile", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1670,7 +1670,7 @@ func (c *bazClient) HeaderSchema(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1738,7 +1738,7 @@ func (c *bazClient) Ping(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "ping", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1801,7 +1801,7 @@ func (c *bazClient) DeliberateDiffNoop(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1861,7 +1861,7 @@ func (c *bazClient) TestUUID(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "testUuid", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1918,7 +1918,7 @@ func (c *bazClient) Trans(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "trans", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -1986,7 +1986,7 @@ func (c *bazClient) TransHeaders(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -2054,7 +2054,7 @@ func (c *bazClient) TransHeadersNoReq(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -2120,7 +2120,7 @@ func (c *bazClient) TransHeadersType(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
@@ -2187,7 +2187,7 @@ func (c *bazClient) URLTest(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "SimpleService", "urlTest", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error

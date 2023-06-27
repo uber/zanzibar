@@ -337,7 +337,7 @@ func (c *corgeClient) EchoString(
 		err = hystrix.DoC(ctx, circuitBreakerName, func(ctx context.Context) error {
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
-			success, respHeaders, err = c.client.Call(
+			success, respHeaders, clientErr = c.client.Call(
 				ctx, "Corge", "echoString", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
