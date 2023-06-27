@@ -2,6 +2,9 @@ package bar_test
 
 import (
 	"context"
+	"net/http"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
@@ -11,8 +14,6 @@ import (
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-	"net/http"
-	"testing"
 )
 
 var defaultTestOptions = &testGateway.Options{

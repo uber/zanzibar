@@ -2,7 +2,6 @@ package bounce_test
 
 import (
 	"context"
-	mock "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/mock-service"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -10,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
 	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
+	mock "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/mock-service"
 )
 
 func TestEcho(t *testing.T) {

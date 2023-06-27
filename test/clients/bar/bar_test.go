@@ -23,17 +23,16 @@ package bar_test
 import (
 	"context"
 	"encoding/json"
-	barGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
 	"io"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
+	barGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 var defaultTestOptions = &testGateway.Options{

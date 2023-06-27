@@ -22,6 +22,8 @@ package baz_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
@@ -30,7 +32,6 @@ import (
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-	"testing"
 )
 
 var defaultTestOptions = &testGateway.Options{
