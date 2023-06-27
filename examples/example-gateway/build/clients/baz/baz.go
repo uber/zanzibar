@@ -415,6 +415,7 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
+		errorBuilder:           zanzibar.NewErrorBuilder("client", "baz"),
 	}
 }
 
@@ -515,6 +516,7 @@ type bazClient struct {
 	client                 *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps            *zanzibar.DefaultDependencies
+	errorBuilder           zanzibar.ErrorBuilder
 }
 
 // EchoBinary is a client RPC call for method "SecondService::echoBinary"
@@ -562,7 +564,9 @@ func (c *bazClient) EchoBinary(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -570,6 +574,7 @@ func (c *bazClient) EchoBinary(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBinary")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -579,6 +584,7 @@ func (c *bazClient) EchoBinary(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -629,7 +635,9 @@ func (c *bazClient) EchoBool(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -637,6 +645,7 @@ func (c *bazClient) EchoBool(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBool")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -646,6 +655,7 @@ func (c *bazClient) EchoBool(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -696,7 +706,9 @@ func (c *bazClient) EchoDouble(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -704,6 +716,7 @@ func (c *bazClient) EchoDouble(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoDouble")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -713,6 +726,7 @@ func (c *bazClient) EchoDouble(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -763,7 +777,9 @@ func (c *bazClient) EchoEnum(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -771,6 +787,7 @@ func (c *bazClient) EchoEnum(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoEnum")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -780,6 +797,7 @@ func (c *bazClient) EchoEnum(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -830,7 +848,9 @@ func (c *bazClient) EchoI16(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -838,6 +858,7 @@ func (c *bazClient) EchoI16(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI16")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -847,6 +868,7 @@ func (c *bazClient) EchoI16(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -897,7 +919,9 @@ func (c *bazClient) EchoI32(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -905,6 +929,7 @@ func (c *bazClient) EchoI32(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI32")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -914,6 +939,7 @@ func (c *bazClient) EchoI32(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -964,7 +990,9 @@ func (c *bazClient) EchoI64(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -972,6 +1000,7 @@ func (c *bazClient) EchoI64(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI64")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -981,6 +1010,7 @@ func (c *bazClient) EchoI64(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1031,7 +1061,9 @@ func (c *bazClient) EchoI8(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1039,6 +1071,7 @@ func (c *bazClient) EchoI8(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI8")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1048,6 +1081,7 @@ func (c *bazClient) EchoI8(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1098,7 +1132,9 @@ func (c *bazClient) EchoString(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1106,6 +1142,7 @@ func (c *bazClient) EchoString(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoString")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1115,6 +1152,7 @@ func (c *bazClient) EchoString(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1165,7 +1203,9 @@ func (c *bazClient) EchoStringList(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1173,6 +1213,7 @@ func (c *bazClient) EchoStringList(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringList")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1182,6 +1223,7 @@ func (c *bazClient) EchoStringList(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1232,7 +1274,9 @@ func (c *bazClient) EchoStringMap(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1240,6 +1284,7 @@ func (c *bazClient) EchoStringMap(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringMap")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1249,6 +1294,7 @@ func (c *bazClient) EchoStringMap(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1299,7 +1345,9 @@ func (c *bazClient) EchoStringSet(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1307,6 +1355,7 @@ func (c *bazClient) EchoStringSet(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringSet")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1316,6 +1365,7 @@ func (c *bazClient) EchoStringSet(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1366,7 +1416,9 @@ func (c *bazClient) EchoStructList(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1374,6 +1426,7 @@ func (c *bazClient) EchoStructList(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructList")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1383,6 +1436,7 @@ func (c *bazClient) EchoStructList(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1433,7 +1487,9 @@ func (c *bazClient) EchoStructSet(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1441,6 +1497,7 @@ func (c *bazClient) EchoStructSet(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructSet")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1450,6 +1507,7 @@ func (c *bazClient) EchoStructSet(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1500,7 +1558,9 @@ func (c *bazClient) EchoTypedef(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1508,6 +1568,7 @@ func (c *bazClient) EchoTypedef(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoTypedef")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1517,6 +1578,7 @@ func (c *bazClient) EchoTypedef(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1566,13 +1628,16 @@ func (c *bazClient) Call(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Call")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1628,18 +1693,21 @@ func (c *bazClient) Compare(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Compare. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Compare")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1649,6 +1717,7 @@ func (c *bazClient) Compare(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1699,16 +1768,19 @@ func (c *bazClient) GetProfile(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for GetProfile. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for GetProfile")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1718,6 +1790,7 @@ func (c *bazClient) GetProfile(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1768,18 +1841,21 @@ func (c *bazClient) HeaderSchema(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for HeaderSchema")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1789,6 +1865,7 @@ func (c *bazClient) HeaderSchema(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1839,7 +1916,9 @@ func (c *bazClient) Ping(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -1847,6 +1926,7 @@ func (c *bazClient) Ping(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Ping")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1856,6 +1936,7 @@ func (c *bazClient) Ping(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -1905,15 +1986,18 @@ func (c *bazClient) DeliberateDiffNoop(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.ServerErr != nil:
-			err = result.ServerErr
+			err = c.errorBuilder.Error(result.ServerErr, zanzibar.ClientException)
 		default:
 			err = errors.New("bazClient received no result or unknown exception for SillyNoop")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -1968,11 +2052,14 @@ func (c *bazClient) TestUUID(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TestUuid")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -2028,18 +2115,21 @@ func (c *bazClient) Trans(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Trans. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Trans")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -2049,6 +2139,7 @@ func (c *bazClient) Trans(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -2099,18 +2190,21 @@ func (c *bazClient) TransHeaders(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeaders. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeaders")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -2120,6 +2214,7 @@ func (c *bazClient) TransHeaders(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -2170,16 +2265,19 @@ func (c *bazClient) TransHeadersNoReq(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersNoReq. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersNoReq")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -2189,6 +2287,7 @@ func (c *bazClient) TransHeadersNoReq(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -2239,18 +2338,21 @@ func (c *bazClient) TransHeadersType(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		case result.AuthErr != nil:
-			err = result.AuthErr
+			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.OtherAuthErr != nil:
-			err = result.OtherAuthErr
+			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
 			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersType. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersType")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -2260,6 +2362,7 @@ func (c *bazClient) TransHeadersType(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
 	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
@@ -2309,11 +2412,14 @@ func (c *bazClient) URLTest(
 			err = clientErr
 		}
 	}
-
+	if err != nil {
+		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+	}
 	if err == nil && !success {
 		switch {
 		default:
 			err = errors.New("bazClient received no result or unknown exception for UrlTest")
+			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {

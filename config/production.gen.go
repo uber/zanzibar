@@ -82,6 +82,7 @@ metrics.runtime.enableGCMetrics: true
 metrics.runtime.enableMemMetrics: true
 metrics.type: m3
 service.env.config: {}
+logger.level: warn
 subLoggerLevel.http: warn
 subLoggerLevel.jaeger: warn
 subLoggerLevel.tchannel: warn
@@ -100,7 +101,7 @@ func productionYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.yaml", size: 810, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.yaml", size: 829, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

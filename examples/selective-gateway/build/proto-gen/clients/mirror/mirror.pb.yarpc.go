@@ -107,10 +107,10 @@ type FxMirrorYARPCClientResult struct {
 // NewFxMirrorYARPCClient provides a MirrorYARPCClient
 // to an Fx application using the given name for routing.
 //
-//	fx.Provide(
-//	  mirror.NewFxMirrorYARPCClient("service-name"),
-//	  ...
-//	)
+//  fx.Provide(
+//    mirror.NewFxMirrorYARPCClient("service-name"),
+//    ...
+//  )
 func NewFxMirrorYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxMirrorYARPCClientParams) FxMirrorYARPCClientResult {
 		cc := params.Provider.ClientConfig(name)
@@ -156,10 +156,10 @@ type FxMirrorYARPCProceduresResult struct {
 // NewFxMirrorYARPCProcedures provides MirrorYARPCServer procedures to an Fx application.
 // It expects a MirrorYARPCServer to be present in the container.
 //
-//	fx.Provide(
-//	  mirror.NewFxMirrorYARPCProcedures(),
-//	  ...
-//	)
+//  fx.Provide(
+//    mirror.NewFxMirrorYARPCProcedures(),
+//    ...
+//  )
 func NewFxMirrorYARPCProcedures() interface{} {
 	return func(params FxMirrorYARPCProceduresParams) FxMirrorYARPCProceduresResult {
 		return FxMirrorYARPCProceduresResult{
@@ -311,10 +311,10 @@ type FxMirrorInternalYARPCClientResult struct {
 // NewFxMirrorInternalYARPCClient provides a MirrorInternalYARPCClient
 // to an Fx application using the given name for routing.
 //
-//	fx.Provide(
-//	  mirror.NewFxMirrorInternalYARPCClient("service-name"),
-//	  ...
-//	)
+//  fx.Provide(
+//    mirror.NewFxMirrorInternalYARPCClient("service-name"),
+//    ...
+//  )
 func NewFxMirrorInternalYARPCClient(name string, options ...protobuf.ClientOption) interface{} {
 	return func(params FxMirrorInternalYARPCClientParams) FxMirrorInternalYARPCClientResult {
 		cc := params.Provider.ClientConfig(name)
@@ -360,10 +360,10 @@ type FxMirrorInternalYARPCProceduresResult struct {
 // NewFxMirrorInternalYARPCProcedures provides MirrorInternalYARPCServer procedures to an Fx application.
 // It expects a MirrorInternalYARPCServer to be present in the container.
 //
-//	fx.Provide(
-//	  mirror.NewFxMirrorInternalYARPCProcedures(),
-//	  ...
-//	)
+//  fx.Provide(
+//    mirror.NewFxMirrorInternalYARPCProcedures(),
+//    ...
+//  )
 func NewFxMirrorInternalYARPCProcedures() interface{} {
 	return func(params FxMirrorInternalYARPCProceduresParams) FxMirrorInternalYARPCProceduresResult {
 		return FxMirrorInternalYARPCProceduresResult{

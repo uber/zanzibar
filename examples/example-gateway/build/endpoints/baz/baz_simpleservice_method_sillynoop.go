@@ -135,6 +135,9 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	}
 
 	if err != nil {
+		if zErr, ok := err.(zanzibar.Error); ok {
+			err = zErr.Unwrap()
+		}
 
 		switch errValue := err.(type) {
 

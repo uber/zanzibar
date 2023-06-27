@@ -20,82 +20,59 @@
 
 package zanzibar
 
-import "go.uber.org/zap"
-
-const (
-	logFieldErrorLocation = "errorLocation"
-	logFieldErrorType     = "errorType"
-)
-
-// ErrorBuilder provides useful functions to use Error.
+// ErrorBuilder wraps input error into Error.
 type ErrorBuilder interface {
-	Error(err error, errType ErrorType) Error
-	LogFieldErrorLocation(err error) zap.Field
-	LogFieldErrorType(err error) zap.Field
+	Error(err error, errType ErrorType) error
+
+	Rebuild(zErr Error, err error) error
 }
 
 // NewErrorBuilder creates an instance of ErrorBuilder.
 // Input module id is used as error location for Errors
 // created by this builder.
-//
-// PseudoErrLocation is prefixed with "~" to identify
-// logged error that is not created in the present module.
 func NewErrorBuilder(moduleClassName, moduleName string) ErrorBuilder {
-	return zErrorBuilder{
-		errLocation:       moduleClassName + "::" + moduleName,
-		pseudoErrLocation: "~" + moduleClassName + "::" + moduleName,
+	return errorBuilder{
+		errLocation: moduleClassName + "::" + moduleName,
 	}
 }
 
-type zErrorBuilder struct {
-	errLocation, pseudoErrLocation string
+type errorBuilder struct {
+	errLocation string
 }
 
-type zError struct {
+type wrappedError struct {
 	error
 	errLocation string
 	errType     ErrorType
 }
 
-var _ Error = (*zError)(nil)
-var _ ErrorBuilder = (*zErrorBuilder)(nil)
+var _ Error = (*wrappedError)(nil)
+var _ ErrorBuilder = (*errorBuilder)(nil)
 
-func (zb zErrorBuilder) Error(err error, errType ErrorType) Error {
-	return zError{
+func (eb errorBuilder) Error(err error, errType ErrorType) error {
+	return wrappedError{
 		error:       err,
-		errLocation: zb.errLocation,
+		errLocation: eb.errLocation,
 		errType:     errType,
 	}
 }
 
-func (zb zErrorBuilder) toError(err error) Error {
-	if zerr, ok := err.(Error); ok {
-		return zerr
-	}
-	return zError{
+func (eb errorBuilder) Rebuild(zErr Error, err error) error {
+	return wrappedError{
 		error:       err,
-		errLocation: zb.pseudoErrLocation,
+		errLocation: zErr.ErrorLocation(),
+		errType:     zErr.ErrorType(),
 	}
 }
 
-func (zb zErrorBuilder) LogFieldErrorLocation(err error) zap.Field {
-	zerr := zb.toError(err)
-	return zap.String(logFieldErrorLocation, zerr.ErrorLocation())
-}
-
-func (zb zErrorBuilder) LogFieldErrorType(err error) zap.Field {
-	zerr := zb.toError(err)
-	return zap.String(logFieldErrorType, zerr.ErrorType().String())
-}
-
-func (e zError) Unwrap() error {
+func (e wrappedError) Unwrap() error {
 	return e.error
 }
 
-func (e zError) ErrorLocation() string {
+func (e wrappedError) ErrorLocation() string {
 	return e.errLocation
 }
 
-func (e zError) ErrorType() ErrorType {
+func (e wrappedError) ErrorType() ErrorType {
 	return e.errType
 }

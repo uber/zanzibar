@@ -641,7 +641,10 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 
 	if err != nil {
-		{{- if eq (len .Exceptions) 0 -}}
+		if zErr, ok := err.(zanzibar.Error); ok {
+			err = zErr.Unwrap()
+		}
+		{{if eq (len .Exceptions) 0}}
 		res.SendError(500, "Unexpected server error", err)
 		return ctx
 		{{ else }}
@@ -702,7 +705,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7963, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8030, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3788,6 +3791,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
+		errorBuilder:           zanzibar.NewErrorBuilder("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -3888,6 +3892,7 @@ type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps  *zanzibar.DefaultDependencies
+	errorBuilder zanzibar.ErrorBuilder
 }
 
 {{range $svc := .Services}}
@@ -3947,12 +3952,14 @@ type {{$clientName}} struct {
 				err = clientErr
 			}
 		}
-
+		if err != nil {
+			err = c.errorBuilder.Error(err, zanzibar.TChannelError)
+		}
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
-					err = result.{{title .Name}}
+					err = c.errorBuilder.Error(result.{{title .Name}}, zanzibar.ClientException)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
@@ -3961,6 +3968,7 @@ type {{$clientName}} struct {
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
+					err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 			}
 		}
 		if err != nil {
@@ -3977,6 +3985,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
+				err = c.errorBuilder.Error(err, zanzibar.ClientException)
 				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return ctx, resp, respHeaders, err
@@ -3997,7 +4006,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15884, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16278, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4285,9 +4294,9 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+					ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 						"app-error": "{{.Type}}",
-					})
+					}, h.Deps.Default.ContextMetrics.Scope())
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					if v == nil {
 						ctx = h.Deps.Default.ContextLogger.ErrorZ(
@@ -4303,9 +4312,9 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+					ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 						"app-error": "unknown",
-					})
+					}, h.Deps.Default.ContextMetrics.Scope())
 					h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 					ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 					return ctx, false, nil, resHeaders, errors.Wrapf(
@@ -4410,7 +4419,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9278, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4512,6 +4521,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 		Logger:  deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps: deps.Default,
+		errorBuilder: zanzibar.NewErrorBuilder("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -4521,6 +4531,7 @@ type {{$workflowStruct}} struct {
 	Logger  *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -4644,34 +4655,31 @@ func (w {{$workflowStruct}}) Handle(
 
 	{{- $responseType := .ResponseType }}
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 			{{range $idx, $cException := $clientExceptions}}
 			case *{{$cException.Type}}:
-				serverErr := convert{{$methodName}}{{title $cException.Name}}(
+				err = convert{{$methodName}}{{title $cException.Name}}(
 					errValue,
 				)
-				{{if eq $responseType ""}}
-				return ctx, nil, serverErr
-				{{else if eq $responseType "string" }}
-				return ctx, "", nil, serverErr
-				{{else}}
-				return ctx, nil, nil, serverErr
-				{{end}}
 			{{end}}
 			default:
 				w.Logger.Warn("Client failure: could not make client request",
 					zap.Error(errValue),
 					zap.String("client", "{{$clientName}}"),
 				)
-
-				{{if eq $responseType ""}}
-				return ctx, nil, err
-				{{else if eq $responseType "string" }}
-				return ctx, "", nil, err
-				{{else}}
-				return ctx, nil, nil, err
-				{{end}}
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+		{{if eq $responseType ""}}
+		return ctx, nil, err
+		{{else if eq $responseType "string" }}
+		return ctx, "", nil, err
+		{{else}}
+		return ctx, nil, nil, err
+		{{end}}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -4746,7 +4754,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 10580, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 10619, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -5014,13 +5022,11 @@ var _bindata = map[string]func() (*asset, error){
 // directory embedded in the file by go-bindata.
 // For example if you run go-bindata on data/... and data contains the
 // following hierarchy:
-//
-//	data/
-//	  foo.txt
-//	  img/
-//	    a.png
-//	    b.png
-//
+//     data/
+//       foo.txt
+//       img/
+//         a.png
+//         b.png
 // then AssetDir("data") would return []string{"foo.txt", "img"}
 // AssetDir("data/img") would return []string{"a.png", "b.png"}
 // AssetDir("foo.txt") and AssetDir("notexist") would return an error

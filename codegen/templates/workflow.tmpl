@@ -95,6 +95,7 @@ func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}}
 		Logger:  deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps: deps.Default,
+		errorBuilder: zanzibar.NewErrorBuilder("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -104,6 +105,7 @@ type {{$workflowStruct}} struct {
 	Logger  *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -227,34 +229,31 @@ func (w {{$workflowStruct}}) Handle(
 
 	{{- $responseType := .ResponseType }}
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 			{{range $idx, $cException := $clientExceptions}}
 			case *{{$cException.Type}}:
-				serverErr := convert{{$methodName}}{{title $cException.Name}}(
+				err = convert{{$methodName}}{{title $cException.Name}}(
 					errValue,
 				)
-				{{if eq $responseType ""}}
-				return ctx, nil, serverErr
-				{{else if eq $responseType "string" }}
-				return ctx, "", nil, serverErr
-				{{else}}
-				return ctx, nil, nil, serverErr
-				{{end}}
 			{{end}}
 			default:
 				w.Logger.Warn("Client failure: could not make client request",
 					zap.Error(errValue),
 					zap.String("client", "{{$clientName}}"),
 				)
-
-				{{if eq $responseType ""}}
-				return ctx, nil, err
-				{{else if eq $responseType "string" }}
-				return ctx, "", nil, err
-				{{else}}
-				return ctx, nil, nil, err
-				{{end}}
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+		{{if eq $responseType ""}}
+		return ctx, nil, err
+		{{else if eq $responseType "string" }}
+		return ctx, "", nil, err
+		{{else}}
+		return ctx, nil, nil, err
+		{{end}}
 	}
 
 	// Filter and map response headers from client to server response.

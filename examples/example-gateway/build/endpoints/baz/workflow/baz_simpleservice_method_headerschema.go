@@ -63,6 +63,7 @@ func NewSimpleServiceHeaderSchemaWorkflow(deps *module.Dependencies) SimpleServi
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
+		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "baz"),
 	}
 }
 
@@ -72,6 +73,7 @@ type simpleServiceHeaderSchemaWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -145,31 +147,32 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	)
 
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 
 		case *clientsIDlClientsBazBaz.AuthErr:
-			serverErr := convertHeaderSchemaAuthErr(
+			err = convertHeaderSchemaAuthErr(
 				errValue,
 			)
-
-			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
-			serverErr := convertHeaderSchemaOtherAuthErr(
+			err = convertHeaderSchemaOtherAuthErr(
 				errValue,
 			)
-
-			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
 				zap.String("client", "Baz"),
 			)
-
-			return ctx, nil, nil, err
-
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+
+		return ctx, nil, nil, err
+
 	}
 
 	// Filter and map response headers from client to server response.

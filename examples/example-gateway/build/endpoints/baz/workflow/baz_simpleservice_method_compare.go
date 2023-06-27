@@ -64,6 +64,7 @@ func NewSimpleServiceCompareWorkflow(deps *module.Dependencies) SimpleServiceCom
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
+		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "baz"),
 	}
 }
 
@@ -73,6 +74,7 @@ type simpleServiceCompareWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
+	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -130,31 +132,32 @@ func (w simpleServiceCompareWorkflow) Handle(
 	)
 
 	if err != nil {
+		zErr, ok := err.(zanzibar.Error)
+		if ok {
+			err = zErr.Unwrap()
+		}
 		switch errValue := err.(type) {
 
 		case *clientsIDlClientsBazBaz.AuthErr:
-			serverErr := convertCompareAuthErr(
+			err = convertCompareAuthErr(
 				errValue,
 			)
-
-			return ctx, nil, nil, serverErr
 
 		case *clientsIDlClientsBazBaz.OtherAuthErr:
-			serverErr := convertCompareOtherAuthErr(
+			err = convertCompareOtherAuthErr(
 				errValue,
 			)
-
-			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
 				zap.String("client", "Baz"),
 			)
-
-			return ctx, nil, nil, err
-
 		}
+		err = w.errorBuilder.Rebuild(zErr, err)
+
+		return ctx, nil, nil, err
+
 	}
 
 	// Filter and map response headers from client to server response.
