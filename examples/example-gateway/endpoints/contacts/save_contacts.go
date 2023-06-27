@@ -2,6 +2,7 @@ package contacts
 
 import (
 	"context"
+
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
 	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
