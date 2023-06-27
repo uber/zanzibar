@@ -411,11 +411,8 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	logMsg := logMsgs[0]
 
 	dynamicHeaders := []string{
-		"url",
-		"timestamp-finished",
 		"Client-Req-Header-Uber-Trace-Id",
 		"Client-Res-Header-Content-Length",
-		"timestamp-started",
 		"Client-Res-Header-Date",
 		"ts",
 		"hostname",
