@@ -152,9 +152,7 @@ func (w withExceptionsFunc1Workflow) Handle(
 			)
 		}
 		err = w.errorBuilder.Rebuild(zErr, err)
-
 		return ctx, nil, nil, err
-
 	}
 
 	// Filter and map response headers from client to server response.

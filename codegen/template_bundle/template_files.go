@@ -644,7 +644,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		if zErr, ok := err.(zanzibar.Error); ok {
 			err = zErr.Unwrap()
 		}
-		{{if eq (len .Exceptions) 0}}
+		{{if eq (len .Exceptions) 0 -}}
 		res.SendError(500, "Unexpected server error", err)
 		return ctx
 		{{ else }}
@@ -705,7 +705,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8030, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8032, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4665,13 +4665,13 @@ func (w {{$workflowStruct}}) Handle(
 				)
 		}
 		err = w.errorBuilder.Rebuild(zErr, err)
-		{{if eq $responseType ""}}
+		{{if eq $responseType "" -}}
 		return ctx, nil, err
-		{{else if eq $responseType "string" }}
+		{{else if eq $responseType "string" -}}
 		return ctx, "", nil, err
-		{{else}}
+		{{else -}}
 		return ctx, nil, nil, err
-		{{end}}
+		{{- end -}}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -4746,7 +4746,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 10619, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 10628, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
