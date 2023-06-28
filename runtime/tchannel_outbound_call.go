@@ -91,9 +91,7 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 		hostPort = "unknown"
 	}
 	fields := []zapcore.Field{
-		zap.String("remoteAddr", hostPort),
-		zap.Time("timestamp-started", c.startTime),
-		zap.Time("timestamp-finished", c.finishTime),
+		zap.String(logFieldClientRemoteAddr, hostPort),
 	}
 
 	headers := map[string]string{}

@@ -200,13 +200,10 @@ func TestCallMetrics(t *testing.T) {
 	assert.Len(t, logMsgs, 1)
 	logMsg := logMsgs[0]
 	dynamicHeaders := []string{
-		"url",
-		"timestamp-finished",
 		"Client-Req-Header-Uber-Trace-Id",
 		"Client-Req-Header-X-Request-Uuid",
 		"Client-Res-Header-Content-Length",
 		"Client-Res-Header-Date",
-		"timestamp-started",
 		"ts",
 		"hostname",
 		"pid",
@@ -222,20 +219,19 @@ func TestCallMetrics(t *testing.T) {
 		delete(logMsg, dynamicValue)
 	}
 	expectedValues := map[string]interface{}{
-		"env":        "test",
-		"level":      "debug",
-		"msg":        "Finished an outgoing client HTTP request",
-		"statusCode": float64(200),
-		"method":     "POST",
-		"pathname":   "/bar/bar-path",
+		"env":      "test",
+		"level":    "debug",
+		"msg":      "Finished an outgoing client HTTP request",
+		"method":   "POST",
+		"pathname": "/bar/bar-path",
 		//"clientID":                       "bar",
 		//"clientMethod":                   "Normal",
 		//"clientThriftMethod":             "Bar::normal",
-		"clientHTTPMethod":               "POST",
 		"Client-Req-Header-X-Client-Id":  "bar",
 		"Client-Req-Header-Content-Type": "application/json",
 		"Client-Req-Header-Accept":       "application/json",
 		"Client-Res-Header-Content-Type": "text/plain; charset=utf-8",
+		"client_status_code":             float64(200),
 
 		"zone":            "unknown",
 		"service":         "example-gateway",

@@ -140,7 +140,6 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 
 func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field {
 	fields := []zapcore.Field{
-		zap.Time(logFieldRequestFinishedTime, res.finishTime),
 		zap.Int(logFieldResponseStatusCode, res.StatusCode),
 	}
 
