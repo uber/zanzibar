@@ -2369,12 +2369,10 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 	dynamicHeaders := []string{
 		"requestUUID",
 		"remoteAddr",
-		"timestamp-started",
 		"ts",
 		"hostname",
 		"host",
 		"pid",
-		"timestamp-finished",
 		zanzibar.TraceIDKey,
 		zanzibar.TraceSpanKey,
 		zanzibar.TraceSampledKey,
@@ -2400,7 +2398,6 @@ func testIncomingHTTPRequestServerLog(t *testing.T, isShadowRequest bool, enviro
 		"statusCode":      float64(200),
 		"endpointHandler": "foo",
 		"endpointID":      "foo",
-		"url":             "/foo",
 
 		"Accept-Encoding":         "gzip",
 		"User-Agent":              "Go-http-client/1.1",

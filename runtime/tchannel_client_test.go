@@ -49,13 +49,13 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 	fields := outboundCall.logFields(ctx)
 
 	// one field for each of the:
-	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader
+	// timestamp-started, timestamp-finished, clientRemoteAddr, requestHeader, responseHeader
 	assert.Len(t, fields, 6)
 
 	var addr, reqKey, resKey, foo bool
 	for _, f := range fields {
 		switch f.Key {
-		case "remoteAddr":
+		case "clientRemoteAddr":
 			assert.Equal(t, f.String, "unknown")
 			addr = true
 		case "Client-Req-Header-header-key":
@@ -69,7 +69,7 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 			foo = true
 		}
 	}
-	assert.True(t, addr, "remoteAddr key not present")
+	assert.True(t, addr, "clientRemoteAddr key not present")
 	assert.True(t, reqKey, "Client-Req-Header-header-key key not present")
 	assert.True(t, resKey, "Client-Res-Header-header-key key not present")
 	assert.True(t, foo, "foo key not present")
