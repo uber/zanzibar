@@ -247,13 +247,13 @@ func (w {{$workflowStruct}}) Handle(
 				)
 		}
 		err = w.errorBuilder.Rebuild(zErr, err)
-		{{if eq $responseType ""}}
+		{{if eq $responseType "" -}}
 		return ctx, nil, err
-		{{else if eq $responseType "string" }}
+		{{else if eq $responseType "string" -}}
 		return ctx, "", nil, err
-		{{else}}
+		{{else -}}
 		return ctx, nil, nil, err
-		{{end}}
+		{{- end -}}
 	}
 
 	// Filter and map response headers from client to server response.

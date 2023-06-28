@@ -152,9 +152,7 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 			)
 		}
 		err = w.errorBuilder.Rebuild(zErr, err)
-
 		return ctx, nil, err
-
 	}
 
 	// Filter and map response headers from client to server response.
