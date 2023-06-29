@@ -397,7 +397,8 @@ func (gateway *ChildProcessGateway) MakeTChannelRequest(
 	sc := gateway.channel.GetSubChannel(gateway.serviceName)
 	sc.Peers().Add(gateway.RealTChannelAddr)
 
-	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res, timeoutAndRetryOptions)
+	ctx = zanzibar.WithTimeAndRetryOptions(ctx, timeoutAndRetryOptions)
+	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
 
 // HTTPBackends returns the HTTP backends

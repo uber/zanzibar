@@ -46,7 +46,6 @@ type Client interface {
 	Func1(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error)
 }
 
@@ -212,7 +211,6 @@ func (c *withexceptionsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsWithexceptionsWithexceptions.Response, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -226,7 +224,7 @@ func (c *withexceptionsClient) Func1(
 	}
 
 	var defaultRes *clientsIDlClientsWithexceptionsWithexceptions.Response
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", "WithExceptions::Func1", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", "WithExceptions::Func1", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/withexceptions" + "/func1"

@@ -52,7 +52,6 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 }
 
@@ -115,7 +114,6 @@ func NewClient(deps *module.Dependencies) Client {
 	var headerPatterns []string
 	altChannelMap := make(map[string]*tchannel.SubChannel)
 	headerPatterns, re = initializeDynamicChannel(channel, deps, headerPatterns, altChannelMap, re)
-
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.corge.timeout"))
 	timeout := time.Millisecond * time.Duration(
 		timeoutVal,
@@ -315,7 +313,6 @@ func (c *corgeClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	var result clientsIDlClientsCorgeCorge.Corge_EchoString_Result
 	var resp string
@@ -327,8 +324,7 @@ func (c *corgeClient) EchoString(
 	var err error
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "Corge", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "Corge", "echoString", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -342,8 +338,7 @@ func (c *corgeClient) EchoString(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "Corge", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "Corge", "echoString", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil

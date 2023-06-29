@@ -10,7 +10,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	corge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
-	runtime "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -37,9 +36,9 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // EchoString mocks base method.
-func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, string, map[string]string, error) {
+func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args) (context.Context, string, map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(map[string]string)
@@ -48,7 +47,7 @@ func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, ar
 }
 
 // EchoString indicates an expected call of EchoString.
-func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0, arg1, arg2)
 }

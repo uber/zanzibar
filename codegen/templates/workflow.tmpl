@@ -174,7 +174,7 @@ func (w {{$workflowStruct}}) Handle(
 	}
 
 	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
-	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
+	var timeoutAndRetryConfig *zanzibar.TimeoutAndRetryOptions
 
 	//when endpoint level timeout information is available, override it with client level config
 	if w.defaultDeps.Config.ContainsKey("endpoints.{{$handleIdDotEndpointIdFmt}}.timeoutPerAttempt") {
@@ -185,42 +185,43 @@ func (w {{$workflowStruct}}) Handle(
 		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.{{$handleIdDotEndpointIdFmt}}.timeoutPerAttempt"))
 
 		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
+		ctx = zanzibar.WithTimeAndRetryOptions(ctx, timeoutAndRetryConfig)
 	}
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
-		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders, &timeoutAndRetryConfig)
+		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{else}}
-		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders, &timeoutAndRetryConfig)
+		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, &timeoutAndRetryConfig,
+			ctx, clientHeaders,
 		)
 		{{else}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, &timeoutAndRetryConfig,
+			ctx, clientHeaders,
 		)
 		{{- end }}
 	{{else if eq $clientResType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		ctx, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
 		ctx, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
 	{{else}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
 		ctx, clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
 	{{end -}}

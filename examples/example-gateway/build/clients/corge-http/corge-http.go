@@ -51,25 +51,21 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	NoContent(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	NoContentNoException(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	CorgeNoContentOnException(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsCorgeCorge.Foo, map[string]string, error)
 }
 
@@ -276,7 +272,6 @@ func (c *corgeHTTPClient) EchoString(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_EchoString_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -290,7 +285,7 @@ func (c *corgeHTTPClient) EchoString(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Corge::echoString", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Corge::echoString", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
 
@@ -386,7 +381,6 @@ func (c *corgeHTTPClient) NoContent(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContent_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -399,7 +393,7 @@ func (c *corgeHTTPClient) NoContent(
 		headers[c.requestProcedureHeaderKey] = "Corge::noContent"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContent", "Corge::noContent", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContent", "Corge::noContent", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
 
@@ -490,7 +484,6 @@ func (c *corgeHTTPClient) NoContentNoException(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentNoException_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -503,7 +496,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 		headers[c.requestProcedureHeaderKey] = "Corge::noContentNoException"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContentNoException", "Corge::noContentNoException", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoContentNoException", "Corge::noContentNoException", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
 
@@ -589,7 +582,6 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsCorgeCorge.Corge_NoContentOnException_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsCorgeCorge.Foo, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -603,7 +595,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	}
 
 	var defaultRes *clientsIDlClientsCorgeCorge.Foo
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CorgeNoContentOnException", "Corge::noContentOnException", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CorgeNoContentOnException", "Corge::noContentOnException", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
 

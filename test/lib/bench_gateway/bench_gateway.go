@@ -321,7 +321,8 @@ func (gateway *BenchGateway) MakeTChannelRequest(
 	sc := gateway.ActualGateway.ServerTChannel.GetSubChannel(gateway.ActualGateway.ServiceName)
 	sc.Peers().Add(gateway.ActualGateway.RealTChannelAddr)
 
-	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res, timeoutAndRetryOptions)
+	ctx = zanzibar.WithTimeAndRetryOptions(ctx, timeoutAndRetryOptions)
+	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
 
 // Close test gateway

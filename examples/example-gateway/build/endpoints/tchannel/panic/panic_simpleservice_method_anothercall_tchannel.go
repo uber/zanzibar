@@ -134,9 +134,9 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsIDlEndpointsTchannelBazBaz.AuthErr:
-			ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+			ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 				"app-error": "endpointsIDlEndpointsTchannelBazBaz.AuthErr",
-			})
+			}, h.Deps.Default.ContextMetrics.Scope())
 			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 			if v == nil {
 				ctx = h.Deps.Default.ContextLogger.ErrorZ(
@@ -151,9 +151,9 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 			}
 			res.AuthErr = v
 		default:
-			ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+			ctxWithError := zanzibar.WithScopeTagsDefault(ctx, map[string]string{
 				"app-error": "unknown",
-			})
+			}, h.Deps.Default.ContextMetrics.Scope())
 			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 			ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 			return ctx, false, nil, resHeaders, errors.Wrapf(
@@ -233,6 +233,8 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 	timeoutAndRetryConfig := zanzibar.BuildTimeoutAndRetryConfig(timeoutPerAttemptConf, zanzibar.DefaultBackOffTimeAcrossRetriesConf,
 		maxAttempts, zanzibar.DefaultScaleFactor)
 
-	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res, &timeoutAndRetryConfig)
+	ctx = zanzibar.WithTimeAndRetryOptions(ctx, timeoutAndRetryConfig)
+
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res)
 	return ctx, success, res, respHeaders, err
 }

@@ -65,7 +65,6 @@ func NewClientHTTPRequest(
 	clientMethod string,
 	clientTargetEndpoint string,
 	client *HTTPClient,
-	timeoutAndRetryOptions *TimeoutAndRetryOptions,
 ) *ClientHTTPRequest {
 	scopeTags := map[string]string{
 		scopeTagClientMethod:    clientMethod,
@@ -75,23 +74,19 @@ func NewClientHTTPRequest(
 
 	ctx = WithScopeTagsDefault(ctx, scopeTags, client.contextMetrics.Scope())
 	req := &ClientHTTPRequest{
-		ClientID:               clientID,
-		MethodName:             clientMethod,
-		ClientTargetEndpoint:   clientTargetEndpoint,
-		Metrics:                client.contextMetrics,
-		client:                 client,
-		ContextLogger:          client.ContextLogger,
-		defaultHeaders:         client.DefaultHeaders,
-		ctx:                    ctx,
-		jsonWrapper:            client.JSONWrapper,
-		timeoutAndRetryOptions: timeoutAndRetryOptions,
+		ClientID:             clientID,
+		MethodName:           clientMethod,
+		ClientTargetEndpoint: clientTargetEndpoint,
+		Metrics:              client.contextMetrics,
+		client:               client,
+		ContextLogger:        client.ContextLogger,
+		defaultHeaders:       client.DefaultHeaders,
+		ctx:                  ctx,
+		jsonWrapper:          client.JSONWrapper,
 	}
-	req.ContextLogger.Debug(req.ctx, "ClientHTTPRequest definition",
-		zap.String("clientId", req.ClientID), zap.String("methodName", req.MethodName),
-		zap.Int64("req.RequestTimeoutPerAttemptInMs", int64(req.timeoutAndRetryOptions.RequestTimeoutPerAttemptInMs)),
-		zap.Int("req.maxAttempts", req.timeoutAndRetryOptions.MaxAttempts))
 
 	req.res = NewClientHTTPResponse(req)
+	req.timeoutAndRetryOptions = GetTimeoutAndRetryOptions(ctx)
 	req.start()
 	return req
 }

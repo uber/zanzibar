@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	googlenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
-	runtime "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -37,9 +37,9 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // AddCredentials mocks base method.
-func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string, arg2 *googlenow.GoogleNowService_AddCredentials_Args, arg3 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string, arg2 *googlenow.GoogleNowService_AddCredentials_Args) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddCredentials", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "AddCredentials", arg0, arg1, arg2)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(map[string]string)
 	ret2, _ := ret[2].(error)
@@ -47,15 +47,15 @@ func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string
 }
 
 // AddCredentials indicates an expected call of AddCredentials.
-func (mr *MockClientMockRecorder) AddCredentials(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) AddCredentials(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddCredentials", reflect.TypeOf((*MockClient)(nil).AddCredentials), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddCredentials", reflect.TypeOf((*MockClient)(nil).AddCredentials), arg0, arg1, arg2)
 }
 
 // CheckCredentials mocks base method.
-func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, map[string]string, error) {
+func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]string) (context.Context, map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckCredentials", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "CheckCredentials", arg0, arg1)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(map[string]string)
 	ret2, _ := ret[2].(error)
@@ -63,16 +63,16 @@ func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]stri
 }
 
 // CheckCredentials indicates an expected call of CheckCredentials.
-func (mr *MockClientMockRecorder) CheckCredentials(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) CheckCredentials(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCredentials", reflect.TypeOf((*MockClient)(nil).CheckCredentials), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCredentials", reflect.TypeOf((*MockClient)(nil).CheckCredentials), arg0, arg1)
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*runtime.HTTPClient)
+	ret0, _ := ret[0].(*zanzibar.HTTPClient)
 	return ret0
 }
 
