@@ -247,7 +247,9 @@ func (w {{$workflowStruct}}) Handle(
 					zap.String("client", "{{$clientName}}"),
 				)
 		}
-		err = w.errorBuilder.Rebuild(zErr, err)
+		if zErr != nil {
+			err = w.errorBuilder.Rebuild(zErr, err)
+		}
 		{{if eq $responseType "" -}}
 		return ctx, nil, err
 		{{else if eq $responseType "string" -}}
