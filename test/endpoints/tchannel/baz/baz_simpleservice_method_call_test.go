@@ -130,7 +130,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"hostname",
 		"pid",
 		"Res-Header-client.response.duration",
-		"client_remote_addr",
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)
@@ -163,13 +162,12 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	logs = allLogs["Finished an outgoing client TChannel request"][0]
 	dynamicHeaders = []string{
 		"requestUUID",
-		"remoteAddr",
+		"client_remote_addr",
 		"ts",
 		"hostname",
 		"pid",
 		"Client-Req-Header-x-request-uuid",
 		"Client-Req-Header-$tracing$uber-trace-id",
-		"client_remote_addr",
 		zanzibar.TraceIDKey,
 		zanzibar.TraceSpanKey,
 		zanzibar.TraceSampledKey,
