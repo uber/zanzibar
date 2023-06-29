@@ -4664,7 +4664,9 @@ func (w {{$workflowStruct}}) Handle(
 					zap.String("client", "{{$clientName}}"),
 				)
 		}
-		err = w.errorBuilder.Rebuild(zErr, err)
+		if zErr != nil {
+			err = w.errorBuilder.Rebuild(zErr, err)
+		}
 		{{if eq $responseType "" -}}
 		return ctx, nil, err
 		{{else if eq $responseType "string" -}}
@@ -4746,7 +4748,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 10628, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 10652, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
