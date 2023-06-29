@@ -143,7 +143,9 @@ func (w barDeleteWithBodyWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 		}
-		err = w.errorBuilder.Rebuild(zErr, err)
+		if zErr != nil {
+			err = w.errorBuilder.Rebuild(zErr, err)
+		}
 		return ctx, nil, err
 	}
 

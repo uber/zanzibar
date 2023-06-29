@@ -137,7 +137,9 @@ func (w serviceAFrontHelloWorkflow) Handle(
 				zap.String("client", "Multi"),
 			)
 		}
-		err = w.errorBuilder.Rebuild(zErr, err)
+		if zErr != nil {
+			err = w.errorBuilder.Rebuild(zErr, err)
+		}
 		return ctx, "", nil, err
 	}
 

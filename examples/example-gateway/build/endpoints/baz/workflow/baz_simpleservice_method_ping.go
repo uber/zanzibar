@@ -140,7 +140,9 @@ func (w simpleServicePingWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 		}
-		err = w.errorBuilder.Rebuild(zErr, err)
+		if zErr != nil {
+			err = w.errorBuilder.Rebuild(zErr, err)
+		}
 		return ctx, nil, nil, err
 	}
 

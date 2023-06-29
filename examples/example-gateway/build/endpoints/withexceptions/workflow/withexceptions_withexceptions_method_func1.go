@@ -150,7 +150,9 @@ func (w withExceptionsFunc1Workflow) Handle(
 				zap.String("client", "Withexceptions"),
 			)
 		}
-		err = w.errorBuilder.Rebuild(zErr, err)
+		if zErr != nil {
+			err = w.errorBuilder.Rebuild(zErr, err)
+		}
 		return ctx, nil, nil, err
 	}
 
