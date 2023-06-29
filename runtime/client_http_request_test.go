@@ -411,11 +411,8 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	logMsg := logMsgs[0]
 
 	dynamicHeaders := []string{
-		"url",
-		"timestamp-finished",
 		"Client-Req-Header-Uber-Trace-Id",
 		"Client-Res-Header-Content-Length",
-		"timestamp-started",
 		"Client-Res-Header-Date",
 		"ts",
 		"hostname",
@@ -432,13 +429,12 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"env":                              "test",
 		"zone":                             "unknown",
 		"service":                          "example-gateway",
-		"statusCode":                       float64(200),
-		"clientHTTPMethod":                 "POST",
 		"Client-Req-Header-X-Client-Id":    "bar",
 		"Client-Req-Header-Content-Type":   "application/json",
 		"Client-Req-Header-Accept":         "application/json",
 		"Client-Res-Header-Example-Header": "Example-Value",
 		"Client-Res-Header-Content-Type":   "text/plain; charset=utf-8",
+		"client_status_code":               float64(200),
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
