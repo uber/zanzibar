@@ -3913,6 +3913,17 @@ type {{$clientName}} struct {
 		var success bool
 		respHeaders := make(map[string]string)
 		var err error
+		defer func() {
+			if err != nil {
+				ctx = logger.Append(ctx, zap.Error(err))
+				if zErr, ok := err.(zanzibar.Error); ok {
+					ctx = logger.Append(ctx,
+						zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+						zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+					)
+				}
+			}
+		}()
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = c.client.Call(
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result)
@@ -3952,7 +3963,7 @@ type {{$clientName}} struct {
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding")
 					success = true
 				{{end -}}
 				default:
@@ -3961,7 +3972,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -3975,7 +3986,7 @@ type {{$clientName}} struct {
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
 				err = c.errorBuilder.Error(err, zanzibar.ClientException)
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
@@ -3995,7 +4006,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16115, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16393, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
