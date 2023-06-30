@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	googlenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	runtime "github.com/uber/zanzibar/runtime"
 )
 
 // MockClient is a mock of Client interface.
@@ -69,10 +69,10 @@ func (mr *MockClientMockRecorder) CheckCredentials(arg0, arg1 interface{}) *gomo
 }
 
 // HTTPClient mocks base method.
-func (m *MockClient) HTTPClient() *zanzibar.HTTPClient {
+func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
-	ret0, _ := ret[0].(*zanzibar.HTTPClient)
+	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
 }
 
