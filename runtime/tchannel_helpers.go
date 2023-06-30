@@ -26,11 +26,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/pkg/errors"
-
-	stream "go.uber.org/thriftrw/protocol/stream"
-
-	"go.uber.org/thriftrw/protocol/binary"
+	"go.uber.org/thriftrw/protocol"
+	"go.uber.org/thriftrw/wire"
 )
 
 var bytesPool = sync.Pool{
@@ -74,16 +71,25 @@ func PutBuffer(buf *bytes.Buffer) {
 	bufPool.Put(buf)
 }
 
-// ReadStruct reads the given Thriftrw struct in a streaming fashion.
+// ReadStruct reads the given Thriftrw struct.
 func ReadStruct(reader io.Reader, s RWTStruct) error {
-	sr := binary.Default.Reader(reader)
-	var err error
-	defer func(sr stream.Reader) {
-		e := sr.Close()
-		if e != nil {
-			err = errors.Wrapf(e, "Could not close stream reader for readStruct")
+	readerAt, ok := reader.(io.ReaderAt)
+
+	// do not read all to buffer if reader already is type of io.ReaderAt
+	if !ok {
+		buf := GetBuffer()
+		defer PutBuffer(buf)
+
+		if _, err := buf.ReadFrom(reader); err != nil {
+			return err
 		}
-	}(sr)
-	err = s.Decode(sr)
+		readerAt = bytes.NewReader(buf.Bytes())
+	}
+
+	wireValue, err := protocol.Binary.Decode(readerAt, wire.TStruct)
+	if err != nil {
+		return err
+	}
+	err = s.FromWire(wireValue)
 	return err
 }

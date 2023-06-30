@@ -23,11 +23,10 @@ package defaultexampletchannel
 import (
 	"context"
 
-	"go.uber.org/thriftrw/protocol/stream"
-
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/wire"
 )
 
 type defaultExampleTchannelMiddleware struct {
@@ -54,7 +53,7 @@ func NewMiddleware(
 func (m *defaultExampleTchannelMiddleware) HandleRequest(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader,
+	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
 ) (context.Context, bool, error) {
 	return ctx, true, nil
