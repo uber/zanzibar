@@ -67,6 +67,12 @@ const (
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"
 	logFieldEndpointResponseHeaderPrefix = "Res-Header"
+
+	// LogFieldErrorLocation is field name to log error location.
+	LogFieldErrorLocation = "error_location"
+
+	// LogFieldErrorType is field name to log error type.
+	LogFieldErrorType = "error_type"
 )
 
 const (
@@ -373,6 +379,9 @@ type ContextLogger interface {
 	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
 
 	SetSkipZanzibarLogs(bool)
+
+	// Append appends the fields to the context.
+	Append(ctx context.Context, fields ...zap.Field) context.Context
 }
 
 // NewContextLogger returns a logger that extracts log fields a context before passing through to underlying zap logger.
@@ -395,6 +404,10 @@ func (c *contextLogger) SetSkipZanzibarLogs(skipZanzibarLogs bool) {
 type contextLogger struct {
 	log              *zap.Logger
 	skipZanzibarLogs bool
+}
+
+func (c *contextLogger) Append(ctx context.Context, fields ...zap.Field) context.Context {
+	return WithLogFields(ctx, fields...)
 }
 
 func (c *contextLogger) Debug(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
