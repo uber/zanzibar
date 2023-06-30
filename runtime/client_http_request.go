@@ -252,7 +252,7 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 			shouldRetry = req.client.CheckRetry(ctx, req.timeoutAndRetryOptions, res, err)
 		}
 
-		req.ContextLogger.GetLogger().Warn("errors while making http outbound request",
+		req.ContextLogger.Warn(ctx, "errors while making http outbound request",
 			zap.Error(err),
 			zap.String("clientId", req.ClientID), zap.String("methodName", req.MethodName),
 			zap.Int64("attempt", retryCount),
