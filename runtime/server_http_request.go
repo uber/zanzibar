@@ -73,6 +73,7 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	ctx := r.Context()
+	logger := endpoint.contextLogger
 
 	// put request log fields on context
 	logFields := []zap.Field{
@@ -122,12 +123,11 @@ func NewServerHTTPRequest(
 	}
 
 	ctx = WithScopeTagsDefault(ctx, scopeTags, endpoint.scope)
-	ctx = WithLogFields(ctx, logFields...)
+	logger.Append(ctx, logFields...)
 
 	httpRequest := r.WithContext(ctx)
 
 	scope := getScope(ctx, endpoint.scope) // use the calculated scope instead of making a new one
-	logger := endpoint.contextLogger
 
 	req := &ServerHTTPRequest{
 		httpRequest:   httpRequest,

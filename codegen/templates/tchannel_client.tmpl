@@ -358,9 +358,9 @@ type {{$clientName}} struct {
 		var err error
 		defer func() {
 			if err != nil {
-				ctx = logger.Append(ctx, zap.Error(err))
+				logger.Append(ctx, zap.Error(err))
 				if zErr, ok := err.(zanzibar.Error); ok {
-					ctx = logger.Append(ctx,
+					logger.Append(ctx,
 						zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
 						zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
 					)

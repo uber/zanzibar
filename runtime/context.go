@@ -193,6 +193,11 @@ type safeFields struct {
 	fields []zap.Field
 }
 
+// WithSafeLogFields initiates empty safeFields in the context.
+func WithSafeLogFields(ctx context.Context) context.Context {
+	return context.WithValue(ctx, safeFieldsKey, &safeFields{})
+}
+
 func (sf *safeFields) append(fields []zap.Field) {
 	sf.mu.Lock()
 	sf.fields = append(sf.fields, fields...)
