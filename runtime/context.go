@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/uber-go/tally"
@@ -44,10 +45,10 @@ const (
 	routingDelegateKey    = contextFieldKey("rd")
 	shardKey              = contextFieldKey("sk")
 	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
-	requestLogFields      = contextFieldKey("requestLogFields")
 	scopeTags             = contextFieldKey("scopeTags")
 	ctxLogCounterName     = contextFieldKey("ctxLogCounter")
 	ctxLogLevel           = contextFieldKey("ctxLogLevel")
+	safeFieldsKey         = contextFieldKey("safeFields")
 )
 
 const (
@@ -187,21 +188,49 @@ func GetShardKeyFromCtx(ctx context.Context) string {
 	return ""
 }
 
+type safeFields struct {
+	mu     sync.Mutex
+	fields []zap.Field
+}
+
+func (sf *safeFields) append(fields []zap.Field) {
+	sf.mu.Lock()
+	sf.fields = append(sf.fields, fields...)
+	sf.mu.Unlock()
+}
+
+func (sf *safeFields) getFields() []zap.Field {
+	sf.mu.Lock()
+	defer sf.mu.Unlock()
+	return sf.fields
+}
+
+func getSafeFieldsFromContext(ctx context.Context) *safeFields {
+	v := ctx.Value(safeFieldsKey).(*safeFields)
+	if v != nil {
+		return v
+	}
+	return &safeFields{}
+}
+
 // WithLogFields returns a new context with the given log fields attached to context.Context
+//
+// Deprecated: Use ContextLogger.Append instead.
 func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context {
-	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
+	sf := getSafeFieldsFromContext(ctx)
+	sf.append(newFields)
+	return context.WithValue(ctx, safeFieldsKey, sf)
 }
 
 // GetLogFieldsFromCtx returns the log fields attached to the context.Context
 func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
-	var fields []zap.Field
 	if ctx != nil {
-		v := ctx.Value(requestLogFields)
+		v := ctx.Value(safeFieldsKey)
 		if v != nil {
-			fields = v.([]zap.Field)
+			return v.(*safeFields).getFields()
 		}
 	}
-	return fields
+	return []zap.Field{}
 }
 
 // WithScopeTags adds tags to context without updating the scope
@@ -381,7 +410,7 @@ type ContextLogger interface {
 	SetSkipZanzibarLogs(bool)
 
 	// Append appends the fields to the context.
-	Append(ctx context.Context, fields ...zap.Field) context.Context
+	Append(ctx context.Context, fields ...zap.Field)
 }
 
 // NewContextLogger returns a logger that extracts log fields a context before passing through to underlying zap logger.
@@ -406,8 +435,9 @@ type contextLogger struct {
 	skipZanzibarLogs bool
 }
 
-func (c *contextLogger) Append(ctx context.Context, fields ...zap.Field) context.Context {
-	return WithLogFields(ctx, fields...)
+func (c *contextLogger) Append(ctx context.Context, fields ...zap.Field) {
+	v := getSafeFieldsFromContext(ctx)
+	v.append(fields)
 }
 
 func (c *contextLogger) Debug(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
