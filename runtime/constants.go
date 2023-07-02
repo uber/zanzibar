@@ -61,7 +61,6 @@ const (
 	// shadow headers and environment
 	shadowEnvironment = "shadow"
 	environmentKey    = "env"
-	apienvironmentKey = "apienvironment"
 
 	// HTTPStatusClientClosedRequest code describes client closed request as per this doc https://httpstatus.in/499/
 	HTTPStatusClientClosedRequest = 499

@@ -112,7 +112,6 @@ func NewServerHTTPRequest(
 	// Overriding the api-environment and default to production
 	apiEnvironment := GetAPIEnvironment(endpoint, r)
 	scopeTags[scopeTagsAPIEnvironment] = apiEnvironment
-	logFields = append(logFields, zap.String(apienvironmentKey, apiEnvironment))
 
 	// Overriding the environment for shadow requests
 	if endpoint.config != nil {
@@ -121,7 +120,6 @@ func NewServerHTTPRequest(
 			endpoint.config.ContainsKey("shadowRequestHeader") &&
 			r.Header.Get(endpoint.config.MustGetString("shadowRequestHeader")) != "" {
 			scopeTags[environmentKey] = shadowEnvironment
-			logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
 		}
 	}
 
