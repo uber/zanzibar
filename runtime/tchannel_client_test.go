@@ -46,7 +46,7 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 	ctx := context.TODO()
 	ctx = WithLogFields(ctx, zap.String("foo", "bar"))
 
-	fields := outboundCall.logFields(ctx)
+	fields := outboundCall.logFields()
 
 	// one field for each of the:
 	// client_remote_addr, requestHeader, responseHeader

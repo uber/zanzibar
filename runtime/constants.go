@@ -178,3 +178,7 @@ var DefaultBackOffTimeAcrossRetries = time.Duration(DefaultBackOffTimeAcrossRetr
 
 // DefaultScaleFactor is multiplied with timeoutPerAttempt
 var DefaultScaleFactor = 1.1
+
+var DefaultSensitiveHeaders = map[string]bool{
+	"utoken-caller": true,
+}
