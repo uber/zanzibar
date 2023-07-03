@@ -89,9 +89,9 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		time.Second,
 		true,
 	)
-	ctx := context.Background()
+	ctx := zanzibar.WithTimeAndRetryOptions(context.Background(), &retryOptions)
 	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff",
-		"clientID::DoStuff", client, &retryOptions)
+		"clientID::DoStuff", client)
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
@@ -128,9 +128,9 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		map[string]string{},
 		time.Second,
 	)
-	ctx := context.Background()
+	ctx := zanzibar.WithTimeAndRetryOptions(context.Background(), &retryOptions)
 	req := zanzibar.NewClientHTTPRequest(ctx, "clientID", "DoStuff",
-		"clientID::DoStuff", client, &retryOptions)
+		"clientID::DoStuff", client)
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
@@ -171,8 +171,8 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 
-	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptions)
+	ctx := zanzibar.WithTimeAndRetryOptions(context.Background(), &retryOptions)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client)
 
 	err = req.WriteJSON(
 		"POST",
@@ -236,8 +236,8 @@ func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetries(t *testing
 	retryOptionsCopy.RequestTimeoutPerAttemptInMs = 500 * time.Millisecond
 	retryOptionsCopy.MaxAttempts = 2
 
-	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptionsCopy)
+	ctx := zanzibar.WithTimeAndRetryOptions(context.Background(), &retryOptionsCopy)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client)
 
 	err = req.WriteJSON(
 		"POST",
@@ -305,8 +305,8 @@ func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetriesSuccess(t *
 	retryOptionsCopy.RequestTimeoutPerAttemptInMs = 500 * time.Millisecond
 	retryOptionsCopy.MaxAttempts = 2
 
-	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptionsCopy)
+	ctx := zanzibar.WithTimeAndRetryOptions(context.Background(), &retryOptions)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client)
 
 	err = req.WriteJSON(
 		"POST",
@@ -345,7 +345,7 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	retryOptionsCopy.MaxAttempts = 1
 
 	_, _, _, err = bar.EchoI8(
-		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42}, &retryOptionsCopy,
+		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
 	)
 
 	assert.NotNil(t, err)
@@ -399,7 +399,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	retryOptionsCopy.MaxAttempts = 1
 
 	_, body, headers, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{}, &retryOptionsCopy,
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, body)
@@ -473,7 +473,7 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	retryOptionsCopy.MaxAttempts = 1
 
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{}, &retryOptionsCopy,
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -514,7 +514,7 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	retryOptionsCopy.MaxAttempts = 1
 
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{}, &retryOptionsCopy,
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -557,7 +557,6 @@ func TestMakingCallWithThriftException(t *testing.T) {
 		&clientsBarBar.Bar_ArgNotStruct_Args{
 			Request: "request",
 		},
-		&retryOptionsCopy,
 	)
 	assert.Error(t, err)
 
@@ -598,7 +597,6 @@ func TestMakingClientCallWithServerError(t *testing.T) {
 
 	_, body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
-		&retryOptionsCopy,
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -635,7 +633,7 @@ func TestInjectSpan(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 	ctx := context.Background()
-	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client, &retryOptions)
+	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "Normal", "bar::Normal", client)
 	err = req.WriteJSON(
 		"POST",
 		client.BaseURL+"/bar-path",

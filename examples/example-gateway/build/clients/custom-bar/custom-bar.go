@@ -54,209 +54,174 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	ArgWithHeaders(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithHeaders_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithManyQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithNearDupQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithNestedQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithParams_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithParamsAndDuplicateFields(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryHeader(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ArgWithQueryParams_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	DeleteFoo(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_DeleteFoo_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	DeleteWithBody(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	DeleteWithQueryParams(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_DeleteWithQueryParams_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	Hello(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	ListAndEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_ListAndEnum_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	MissingArg(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	NoRequest(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	Normal(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_Normal_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	NormalRecur(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_NormalRecur_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error)
 	TooManyArgs(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Bar_TooManyArgs_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoBinary(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoBinary_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []byte, map[string]string, error)
 	EchoBool(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoBool_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, bool, map[string]string, error)
 	EchoDouble(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoDouble_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, float64, map[string]string, error)
 	EchoEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoEnum_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, clientsIDlClientsBarBar.Fruit, map[string]string, error)
 	EchoI16(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI16_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int16, map[string]string, error)
 	EchoI32(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI32_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int32, map[string]string, error)
 	EchoI32Map(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI32Map_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI64_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int64, map[string]string, error)
 	EchoI8(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoI8_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int8, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoString_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	EchoStringList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStringList_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []string, map[string]string, error)
 	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStringMap_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoStringSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStringSet_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]struct{}, map[string]string, error)
 	EchoStructList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStructList_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoStructSet_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error)
 	EchoTypedef(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBarBar.Echo_EchoTypedef_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, clientsIDlClientsBarBar.UUID, map[string]string, error)
 }
 
@@ -491,7 +456,6 @@ func (c *customBarClient) ArgNotStruct(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgNotStruct_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -504,7 +468,7 @@ func (c *customBarClient) ArgNotStruct(
 		headers[c.requestProcedureHeaderKey] = "Bar::argNotStruct"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgNotStruct", "Bar::argNotStruct", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgNotStruct", "Bar::argNotStruct", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/arg-not-struct-path"
@@ -585,7 +549,6 @@ func (c *customBarClient) ArgWithHeaders(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithHeaders_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -599,7 +562,7 @@ func (c *customBarClient) ArgWithHeaders(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithHeaders", "Bar::argWithHeaders", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithHeaders", "Bar::argWithHeaders", c.httpClient)
 
 	headers["name"] = string(r.Name)
 	if r.UserUUID != nil {
@@ -692,7 +655,6 @@ func (c *customBarClient) ArgWithManyQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithManyQueryParams_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -706,7 +668,7 @@ func (c *customBarClient) ArgWithManyQueryParams(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithManyQueryParams", "Bar::argWithManyQueryParams", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithManyQueryParams", "Bar::argWithManyQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithManyQueryParams"
@@ -878,7 +840,6 @@ func (c *customBarClient) ArgWithNearDupQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithNearDupQueryParams_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -892,7 +853,7 @@ func (c *customBarClient) ArgWithNearDupQueryParams(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNearDupQueryParams", "Bar::argWithNearDupQueryParams", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNearDupQueryParams", "Bar::argWithNearDupQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/clientArgWithNearDupQueryParams"
@@ -986,7 +947,6 @@ func (c *customBarClient) ArgWithNestedQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithNestedQueryParams_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1000,7 +960,7 @@ func (c *customBarClient) ArgWithNestedQueryParams(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNestedQueryParams", "Bar::argWithNestedQueryParams", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithNestedQueryParams", "Bar::argWithNestedQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
@@ -1118,7 +1078,6 @@ func (c *customBarClient) ArgWithParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithParams_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1132,7 +1091,7 @@ func (c *customBarClient) ArgWithParams(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParams", "Bar::argWithParams", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParams", "Bar::argWithParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParams" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
@@ -1209,7 +1168,6 @@ func (c *customBarClient) ArgWithParamsAndDuplicateFields(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1223,7 +1181,7 @@ func (c *customBarClient) ArgWithParamsAndDuplicateFields(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParamsAndDuplicateFields", "Bar::argWithParamsAndDuplicateFields", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParamsAndDuplicateFields", "Bar::argWithParamsAndDuplicateFields", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParamsAndDuplicateFields" + "/" + string(r.EntityUUID) + "/segment"
@@ -1300,7 +1258,6 @@ func (c *customBarClient) ArgWithQueryHeader(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithQueryHeader_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1314,7 +1271,7 @@ func (c *customBarClient) ArgWithQueryHeader(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryHeader", "Bar::argWithQueryHeader", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryHeader", "Bar::argWithQueryHeader", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryHeader"
@@ -1391,7 +1348,6 @@ func (c *customBarClient) ArgWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ArgWithQueryParams_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1405,7 +1361,7 @@ func (c *customBarClient) ArgWithQueryParams(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryParams", "Bar::argWithQueryParams", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithQueryParams", "Bar::argWithQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryParams"
@@ -1499,7 +1455,6 @@ func (c *customBarClient) DeleteFoo(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_DeleteFoo_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1512,7 +1467,7 @@ func (c *customBarClient) DeleteFoo(
 		headers[c.requestProcedureHeaderKey] = "Bar::deleteFoo"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteFoo", "Bar::deleteFoo", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteFoo", "Bar::deleteFoo", c.httpClient)
 
 	headers["x-uuid"] = string(r.UserUUID)
 
@@ -1589,7 +1544,6 @@ func (c *customBarClient) DeleteWithBody(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_DeleteWithBody_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1602,7 +1556,7 @@ func (c *customBarClient) DeleteWithBody(
 		headers[c.requestProcedureHeaderKey] = "Bar::deleteWithBody"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithBody", "Bar::deleteWithBody", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithBody", "Bar::deleteWithBody", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/withBody"
@@ -1672,7 +1626,6 @@ func (c *customBarClient) DeleteWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_DeleteWithQueryParams_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1685,7 +1638,7 @@ func (c *customBarClient) DeleteWithQueryParams(
 		headers[c.requestProcedureHeaderKey] = "Bar::deleteWithQueryParams"
 	}
 
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithQueryParams", "Bar::deleteWithQueryParams", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteWithQueryParams", "Bar::deleteWithQueryParams", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/withQueryParams"
@@ -1763,7 +1716,6 @@ func (c *customBarClient) DeleteWithQueryParams(
 func (c *customBarClient) Hello(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1777,7 +1729,7 @@ func (c *customBarClient) Hello(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Hello", "Bar::helloWorld", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Hello", "Bar::helloWorld", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/hello"
@@ -1866,7 +1818,6 @@ func (c *customBarClient) ListAndEnum(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_ListAndEnum_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1880,7 +1831,7 @@ func (c *customBarClient) ListAndEnum(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ListAndEnum", "Bar::listAndEnum", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ListAndEnum", "Bar::listAndEnum", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/list-and-enum"
@@ -1981,7 +1932,6 @@ func (c *customBarClient) ListAndEnum(
 func (c *customBarClient) MissingArg(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -1995,7 +1945,7 @@ func (c *customBarClient) MissingArg(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "MissingArg", "Bar::missingArg", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "MissingArg", "Bar::missingArg", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/missing-arg-path"
@@ -2082,7 +2032,6 @@ func (c *customBarClient) MissingArg(
 func (c *customBarClient) NoRequest(
 	ctx context.Context,
 	headers map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2096,7 +2045,7 @@ func (c *customBarClient) NoRequest(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoRequest", "Bar::noRequest", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NoRequest", "Bar::noRequest", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/no-request-path"
@@ -2184,7 +2133,6 @@ func (c *customBarClient) Normal(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_Normal_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2198,7 +2146,7 @@ func (c *customBarClient) Normal(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Normal", "Bar::normal", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Normal", "Bar::normal", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar-path"
@@ -2286,7 +2234,6 @@ func (c *customBarClient) NormalRecur(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_NormalRecur_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponseRecur, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2300,7 +2247,7 @@ func (c *customBarClient) NormalRecur(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponseRecur
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NormalRecur", "Bar::normalRecur", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "NormalRecur", "Bar::normalRecur", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/recur"
@@ -2387,7 +2334,6 @@ func (c *customBarClient) TooManyArgs(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Bar_TooManyArgs_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2401,7 +2347,7 @@ func (c *customBarClient) TooManyArgs(
 	}
 
 	var defaultRes *clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TooManyArgs", "Bar::tooManyArgs", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TooManyArgs", "Bar::tooManyArgs", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/too-many-args-path"
@@ -2498,7 +2444,6 @@ func (c *customBarClient) EchoBinary(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoBinary_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []byte, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2512,7 +2457,7 @@ func (c *customBarClient) EchoBinary(
 	}
 
 	var defaultRes []byte
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoBinary", "Echo::echoBinary", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoBinary", "Echo::echoBinary", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/binary"
@@ -2587,7 +2532,6 @@ func (c *customBarClient) EchoBool(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoBool_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, bool, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2601,7 +2545,7 @@ func (c *customBarClient) EchoBool(
 	}
 
 	var defaultRes bool
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoBool", "Echo::echoBool", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoBool", "Echo::echoBool", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/bool"
@@ -2682,7 +2626,6 @@ func (c *customBarClient) EchoDouble(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoDouble_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, float64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2696,7 +2639,7 @@ func (c *customBarClient) EchoDouble(
 	}
 
 	var defaultRes float64
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoDouble", "Echo::echoDouble", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoDouble", "Echo::echoDouble", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/double"
@@ -2777,7 +2720,6 @@ func (c *customBarClient) EchoEnum(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoEnum_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, clientsIDlClientsBarBar.Fruit, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2791,7 +2733,7 @@ func (c *customBarClient) EchoEnum(
 	}
 
 	var defaultRes clientsIDlClientsBarBar.Fruit
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoEnum", "Echo::echoEnum", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoEnum", "Echo::echoEnum", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/enum"
@@ -2872,7 +2814,6 @@ func (c *customBarClient) EchoI16(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI16_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int16, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2886,7 +2827,7 @@ func (c *customBarClient) EchoI16(
 	}
 
 	var defaultRes int16
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI16", "Echo::echoI16", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI16", "Echo::echoI16", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i16"
@@ -2967,7 +2908,6 @@ func (c *customBarClient) EchoI32(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI32_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int32, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -2981,7 +2921,7 @@ func (c *customBarClient) EchoI32(
 	}
 
 	var defaultRes int32
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32", "Echo::echoI32", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32", "Echo::echoI32", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i32"
@@ -3062,7 +3002,6 @@ func (c *customBarClient) EchoI32Map(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI32Map_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[int32]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3076,7 +3015,7 @@ func (c *customBarClient) EchoI32Map(
 	}
 
 	var defaultRes map[int32]*clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32Map", "Echo::echoI32Map", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI32Map", "Echo::echoI32Map", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i32-map"
@@ -3157,7 +3096,6 @@ func (c *customBarClient) EchoI64(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI64_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3171,7 +3109,7 @@ func (c *customBarClient) EchoI64(
 	}
 
 	var defaultRes int64
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI64", "Echo::echoI64", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI64", "Echo::echoI64", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i64"
@@ -3252,7 +3190,6 @@ func (c *customBarClient) EchoI8(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoI8_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int8, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3266,7 +3203,7 @@ func (c *customBarClient) EchoI8(
 	}
 
 	var defaultRes int8
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI8", "Echo::echoI8", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoI8", "Echo::echoI8", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i8"
@@ -3347,7 +3284,6 @@ func (c *customBarClient) EchoString(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoString_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3361,7 +3297,7 @@ func (c *customBarClient) EchoString(
 	}
 
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Echo::echoString", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", "Echo::echoString", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string"
@@ -3442,7 +3378,6 @@ func (c *customBarClient) EchoStringList(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStringList_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3456,7 +3391,7 @@ func (c *customBarClient) EchoStringList(
 	}
 
 	var defaultRes []string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringList", "Echo::echoStringList", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringList", "Echo::echoStringList", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-list"
@@ -3537,7 +3472,6 @@ func (c *customBarClient) EchoStringMap(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStringMap_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3551,7 +3485,7 @@ func (c *customBarClient) EchoStringMap(
 	}
 
 	var defaultRes map[string]*clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringMap", "Echo::echoStringMap", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringMap", "Echo::echoStringMap", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-map"
@@ -3632,7 +3566,6 @@ func (c *customBarClient) EchoStringSet(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStringSet_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]struct{}, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3646,7 +3579,7 @@ func (c *customBarClient) EchoStringSet(
 	}
 
 	var defaultRes map[string]struct{}
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringSet", "Echo::echoStringSet", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStringSet", "Echo::echoStringSet", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-set"
@@ -3727,7 +3660,6 @@ func (c *customBarClient) EchoStructList(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStructList_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3741,7 +3673,7 @@ func (c *customBarClient) EchoStructList(
 	}
 
 	var defaultRes []*clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructList", "Echo::echoStructList", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructList", "Echo::echoStructList", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-list"
@@ -3822,7 +3754,6 @@ func (c *customBarClient) EchoStructSet(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoStructSet_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []*clientsIDlClientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3836,7 +3767,7 @@ func (c *customBarClient) EchoStructSet(
 	}
 
 	var defaultRes []*clientsIDlClientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructSet", "Echo::echoStructSet", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoStructSet", "Echo::echoStructSet", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-set"
@@ -3917,7 +3848,6 @@ func (c *customBarClient) EchoTypedef(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsIDlClientsBarBar.Echo_EchoTypedef_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, clientsIDlClientsBarBar.UUID, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if headers == nil {
@@ -3931,7 +3861,7 @@ func (c *customBarClient) EchoTypedef(
 	}
 
 	var defaultRes clientsIDlClientsBarBar.UUID
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoTypedef", "Echo::echoTypedef", c.httpClient, timeoutAndRetryCfg)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoTypedef", "Echo::echoTypedef", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/typedef"

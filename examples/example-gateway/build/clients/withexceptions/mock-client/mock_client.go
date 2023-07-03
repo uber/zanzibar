@@ -37,9 +37,9 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // Func1 mocks base method.
-func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string, arg2 *runtime.TimeoutAndRetryOptions) (context.Context, *withexceptions.Response, map[string]string, error) {
+func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string) (context.Context, *withexceptions.Response, map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Func1", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Func1", arg0, arg1)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(*withexceptions.Response)
 	ret2, _ := ret[2].(map[string]string)
@@ -48,9 +48,9 @@ func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string, arg2 *r
 }
 
 // Func1 indicates an expected call of Func1.
-func (mr *MockClientMockRecorder) Func1(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) Func1(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Func1", reflect.TypeOf((*MockClient)(nil).Func1), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Func1", reflect.TypeOf((*MockClient)(nil).Func1), arg0, arg1)
 }
 
 // HTTPClient mocks base method.

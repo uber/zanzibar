@@ -53,161 +53,134 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []byte, map[string]string, error)
 	EchoBool(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, bool, map[string]string, error)
 	EchoDouble(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, float64, map[string]string, error)
 	EchoEnum(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, clientsIDlClientsBazBaz.Fruit, map[string]string, error)
 	EchoI16(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int16, map[string]string, error)
 	EchoI32(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int32, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int64, map[string]string, error)
 	EchoI8(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, int8, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, string, map[string]string, error)
 	EchoStringList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []string, map[string]string, error)
 	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	EchoStringSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]struct{}, map[string]string, error)
 	EchoStructList(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	EchoTypedef(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, clientsIDlClientsBazBase.UUID, map[string]string, error)
 
 	Call(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	Compare(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	GetProfile(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error)
 	HeaderSchema(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error)
 	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error)
 	DeliberateDiffNoop(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	TestUUID(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 	Trans(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.TransStruct, map[string]string, error)
 	TransHeaders(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersNoReq(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersType(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, *clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error)
 	URLTest(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 	) (context.Context, map[string]string, error)
 }
 
@@ -270,7 +243,6 @@ func NewClient(deps *module.Dependencies) Client {
 	var headerPatterns []string
 	altChannelMap := make(map[string]*tchannel.SubChannel)
 	headerPatterns, re = initializeDynamicChannel(channel, deps, headerPatterns, altChannelMap, re)
-
 	timeoutVal := int(deps.Default.Config.MustGetInt("clients.baz.timeout"))
 	timeout := time.Millisecond * time.Duration(
 		timeoutVal,
@@ -524,7 +496,6 @@ func (c *bazClient) EchoBinary(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoBinary_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []byte, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoBinary_Result
 	var resp []byte
@@ -534,10 +505,20 @@ func (c *bazClient) EchoBinary(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoBinary", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoBinary", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -551,8 +532,7 @@ func (c *bazClient) EchoBinary(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoBinary", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoBinary", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -570,7 +550,7 @@ func (c *bazClient) EchoBinary(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBinary. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBinary. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBinary")
@@ -578,14 +558,14 @@ func (c *bazClient) EchoBinary(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -595,7 +575,6 @@ func (c *bazClient) EchoBool(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoBool_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, bool, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoBool_Result
 	var resp bool
@@ -605,10 +584,20 @@ func (c *bazClient) EchoBool(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoBool", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoBool", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -622,8 +611,7 @@ func (c *bazClient) EchoBool(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoBool", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoBool", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -641,7 +629,7 @@ func (c *bazClient) EchoBool(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBool. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoBool. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBool")
@@ -649,14 +637,14 @@ func (c *bazClient) EchoBool(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -666,7 +654,6 @@ func (c *bazClient) EchoDouble(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoDouble_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, float64, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoDouble_Result
 	var resp float64
@@ -676,10 +663,20 @@ func (c *bazClient) EchoDouble(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoDouble", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoDouble", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -693,8 +690,7 @@ func (c *bazClient) EchoDouble(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoDouble", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoDouble", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -712,7 +708,7 @@ func (c *bazClient) EchoDouble(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoDouble. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoDouble. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoDouble")
@@ -720,14 +716,14 @@ func (c *bazClient) EchoDouble(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -737,7 +733,6 @@ func (c *bazClient) EchoEnum(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoEnum_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, clientsIDlClientsBazBaz.Fruit, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoEnum_Result
 	var resp clientsIDlClientsBazBaz.Fruit
@@ -747,10 +742,20 @@ func (c *bazClient) EchoEnum(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoEnum", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoEnum", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -764,8 +769,7 @@ func (c *bazClient) EchoEnum(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoEnum", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoEnum", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -783,7 +787,7 @@ func (c *bazClient) EchoEnum(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoEnum. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoEnum. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoEnum")
@@ -791,14 +795,14 @@ func (c *bazClient) EchoEnum(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -808,7 +812,6 @@ func (c *bazClient) EchoI16(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI16_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int16, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI16_Result
 	var resp int16
@@ -818,10 +821,20 @@ func (c *bazClient) EchoI16(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI16", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoI16", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -835,8 +848,7 @@ func (c *bazClient) EchoI16(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI16", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoI16", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -854,7 +866,7 @@ func (c *bazClient) EchoI16(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI16. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI16. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI16")
@@ -862,14 +874,14 @@ func (c *bazClient) EchoI16(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -879,7 +891,6 @@ func (c *bazClient) EchoI32(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI32_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int32, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI32_Result
 	var resp int32
@@ -889,10 +900,20 @@ func (c *bazClient) EchoI32(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI32", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoI32", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -906,8 +927,7 @@ func (c *bazClient) EchoI32(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI32", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoI32", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -925,7 +945,7 @@ func (c *bazClient) EchoI32(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI32. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI32. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI32")
@@ -933,14 +953,14 @@ func (c *bazClient) EchoI32(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -950,7 +970,6 @@ func (c *bazClient) EchoI64(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI64_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int64, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI64_Result
 	var resp int64
@@ -960,10 +979,20 @@ func (c *bazClient) EchoI64(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI64", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoI64", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -977,8 +1006,7 @@ func (c *bazClient) EchoI64(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI64", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoI64", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -996,7 +1024,7 @@ func (c *bazClient) EchoI64(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI64. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI64. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI64")
@@ -1004,14 +1032,14 @@ func (c *bazClient) EchoI64(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1021,7 +1049,6 @@ func (c *bazClient) EchoI8(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoI8_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, int8, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoI8_Result
 	var resp int8
@@ -1031,10 +1058,20 @@ func (c *bazClient) EchoI8(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoI8", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoI8", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1048,8 +1085,7 @@ func (c *bazClient) EchoI8(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoI8", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoI8", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1067,7 +1103,7 @@ func (c *bazClient) EchoI8(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI8. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoI8. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI8")
@@ -1075,14 +1111,14 @@ func (c *bazClient) EchoI8(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1092,7 +1128,6 @@ func (c *bazClient) EchoString(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoString_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, string, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoString_Result
 	var resp string
@@ -1102,10 +1137,20 @@ func (c *bazClient) EchoString(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoString", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1119,8 +1164,7 @@ func (c *bazClient) EchoString(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoString", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoString", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1138,7 +1182,7 @@ func (c *bazClient) EchoString(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoString")
@@ -1146,14 +1190,14 @@ func (c *bazClient) EchoString(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1163,7 +1207,6 @@ func (c *bazClient) EchoStringList(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStringList_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []string, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStringList_Result
 	var resp []string
@@ -1173,10 +1216,20 @@ func (c *bazClient) EchoStringList(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStringList", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoStringList", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1190,8 +1243,7 @@ func (c *bazClient) EchoStringList(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStringList", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoStringList", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1209,7 +1261,7 @@ func (c *bazClient) EchoStringList(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringList. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringList. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringList")
@@ -1217,14 +1269,14 @@ func (c *bazClient) EchoStringList(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1234,7 +1286,6 @@ func (c *bazClient) EchoStringMap(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStringMap_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStringMap_Result
 	var resp map[string]*clientsIDlClientsBazBase.BazResponse
@@ -1244,10 +1295,20 @@ func (c *bazClient) EchoStringMap(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1261,8 +1322,7 @@ func (c *bazClient) EchoStringMap(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoStringMap", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1280,7 +1340,7 @@ func (c *bazClient) EchoStringMap(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringMap. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringMap. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringMap")
@@ -1288,14 +1348,14 @@ func (c *bazClient) EchoStringMap(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1305,7 +1365,6 @@ func (c *bazClient) EchoStringSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStringSet_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]struct{}, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStringSet_Result
 	var resp map[string]struct{}
@@ -1315,10 +1374,20 @@ func (c *bazClient) EchoStringSet(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1332,8 +1401,7 @@ func (c *bazClient) EchoStringSet(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoStringSet", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1351,7 +1419,7 @@ func (c *bazClient) EchoStringSet(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringSet. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStringSet. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringSet")
@@ -1359,14 +1427,14 @@ func (c *bazClient) EchoStringSet(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1376,7 +1444,6 @@ func (c *bazClient) EchoStructList(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStructList_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStructList_Result
 	var resp []*clientsIDlClientsBazBase.BazResponse
@@ -1386,10 +1453,20 @@ func (c *bazClient) EchoStructList(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStructList", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoStructList", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1403,8 +1480,7 @@ func (c *bazClient) EchoStructList(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStructList", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoStructList", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1422,7 +1498,7 @@ func (c *bazClient) EchoStructList(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructList. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructList. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructList")
@@ -1430,14 +1506,14 @@ func (c *bazClient) EchoStructList(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1447,7 +1523,6 @@ func (c *bazClient) EchoStructSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoStructSet_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, []*clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoStructSet_Result
 	var resp []*clientsIDlClientsBazBase.BazResponse
@@ -1457,10 +1532,20 @@ func (c *bazClient) EchoStructSet(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1474,8 +1559,7 @@ func (c *bazClient) EchoStructSet(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoStructSet", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1493,7 +1577,7 @@ func (c *bazClient) EchoStructSet(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructSet. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoStructSet. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructSet")
@@ -1501,14 +1585,14 @@ func (c *bazClient) EchoStructSet(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1518,7 +1602,6 @@ func (c *bazClient) EchoTypedef(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SecondService_EchoTypedef_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, clientsIDlClientsBazBase.UUID, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SecondService_EchoTypedef_Result
 	var resp clientsIDlClientsBazBase.UUID
@@ -1528,10 +1611,20 @@ func (c *bazClient) EchoTypedef(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1545,8 +1638,7 @@ func (c *bazClient) EchoTypedef(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SecondService", "echoTypedef", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1564,7 +1656,7 @@ func (c *bazClient) EchoTypedef(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoTypedef. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoTypedef. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoTypedef")
@@ -1572,14 +1664,14 @@ func (c *bazClient) EchoTypedef(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1589,7 +1681,6 @@ func (c *bazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_Call_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Call_Result
 
@@ -1598,10 +1689,20 @@ func (c *bazClient) Call(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "call", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "call", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1615,8 +1716,7 @@ func (c *bazClient) Call(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "call", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "call", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1641,7 +1741,7 @@ func (c *bazClient) Call(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, respHeaders, err
 	}
 
@@ -1653,7 +1753,6 @@ func (c *bazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_Compare_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Compare_Result
 	var resp *clientsIDlClientsBazBase.BazResponse
@@ -1663,10 +1762,20 @@ func (c *bazClient) Compare(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "compare", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "compare", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1680,8 +1789,7 @@ func (c *bazClient) Compare(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "compare", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "compare", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1703,7 +1811,7 @@ func (c *bazClient) Compare(
 		case result.OtherAuthErr != nil:
 			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Compare. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Compare. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Compare")
@@ -1711,14 +1819,14 @@ func (c *bazClient) Compare(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1728,7 +1836,6 @@ func (c *bazClient) GetProfile(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_GetProfile_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBaz.GetProfileResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_GetProfile_Result
 	var resp *clientsIDlClientsBazBaz.GetProfileResponse
@@ -1738,10 +1845,20 @@ func (c *bazClient) GetProfile(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "getProfile", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "getProfile", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1755,8 +1872,7 @@ func (c *bazClient) GetProfile(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "getProfile", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "getProfile", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1776,7 +1892,7 @@ func (c *bazClient) GetProfile(
 		case result.AuthErr != nil:
 			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for GetProfile. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for GetProfile. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for GetProfile")
@@ -1784,14 +1900,14 @@ func (c *bazClient) GetProfile(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1801,7 +1917,6 @@ func (c *bazClient) HeaderSchema(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBaz.HeaderSchema, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Result
 	var resp *clientsIDlClientsBazBaz.HeaderSchema
@@ -1811,10 +1926,20 @@ func (c *bazClient) HeaderSchema(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1828,8 +1953,7 @@ func (c *bazClient) HeaderSchema(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "headerSchema", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1851,7 +1975,7 @@ func (c *bazClient) HeaderSchema(
 		case result.OtherAuthErr != nil:
 			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for HeaderSchema")
@@ -1859,14 +1983,14 @@ func (c *bazClient) HeaderSchema(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1875,7 +1999,6 @@ func (c *bazClient) HeaderSchema(
 func (c *bazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Ping_Result
 	var resp *clientsIDlClientsBazBase.BazResponse
@@ -1886,10 +2009,20 @@ func (c *bazClient) Ping(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "ping", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "ping", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1903,8 +2036,7 @@ func (c *bazClient) Ping(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "ping", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "ping", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -1922,7 +2054,7 @@ func (c *bazClient) Ping(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Ping. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Ping. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Ping")
@@ -1930,14 +2062,14 @@ func (c *bazClient) Ping(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -1946,7 +2078,6 @@ func (c *bazClient) Ping(
 func (c *bazClient) DeliberateDiffNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_SillyNoop_Result
 
@@ -1956,10 +2087,20 @@ func (c *bazClient) DeliberateDiffNoop(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -1973,8 +2114,7 @@ func (c *bazClient) DeliberateDiffNoop(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2001,7 +2141,7 @@ func (c *bazClient) DeliberateDiffNoop(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, respHeaders, err
 	}
 
@@ -2012,7 +2152,6 @@ func (c *bazClient) DeliberateDiffNoop(
 func (c *bazClient) TestUUID(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TestUuid_Result
 
@@ -2022,10 +2161,20 @@ func (c *bazClient) TestUUID(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "testUuid", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "testUuid", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -2039,8 +2188,7 @@ func (c *bazClient) TestUUID(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "testUuid", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "testUuid", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2063,7 +2211,7 @@ func (c *bazClient) TestUUID(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, respHeaders, err
 	}
 
@@ -2075,7 +2223,6 @@ func (c *bazClient) Trans(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_Trans_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.TransStruct, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_Trans_Result
 	var resp *clientsIDlClientsBazBase.TransStruct
@@ -2085,10 +2232,20 @@ func (c *bazClient) Trans(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "trans", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "trans", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -2102,8 +2259,7 @@ func (c *bazClient) Trans(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "trans", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "trans", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2125,7 +2281,7 @@ func (c *bazClient) Trans(
 		case result.OtherAuthErr != nil:
 			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Trans. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for Trans. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Trans")
@@ -2133,14 +2289,14 @@ func (c *bazClient) Trans(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2150,7 +2306,6 @@ func (c *bazClient) TransHeaders(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_TransHeaders_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TransHeaders_Result
 	var resp *clientsIDlClientsBazBase.TransHeaders
@@ -2160,10 +2315,20 @@ func (c *bazClient) TransHeaders(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -2177,8 +2342,7 @@ func (c *bazClient) TransHeaders(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "transHeaders", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2200,7 +2364,7 @@ func (c *bazClient) TransHeaders(
 		case result.OtherAuthErr != nil:
 			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeaders. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeaders. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeaders")
@@ -2208,14 +2372,14 @@ func (c *bazClient) TransHeaders(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2225,7 +2389,6 @@ func (c *bazClient) TransHeadersNoReq(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBase.TransHeaders, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Result
 	var resp *clientsIDlClientsBazBase.TransHeaders
@@ -2235,10 +2398,20 @@ func (c *bazClient) TransHeadersNoReq(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -2252,8 +2425,7 @@ func (c *bazClient) TransHeadersNoReq(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2273,7 +2445,7 @@ func (c *bazClient) TransHeadersNoReq(
 		case result.AuthErr != nil:
 			err = c.errorBuilder.Error(result.AuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersNoReq. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersNoReq. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersNoReq")
@@ -2281,14 +2453,14 @@ func (c *bazClient) TransHeadersNoReq(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2298,7 +2470,6 @@ func (c *bazClient) TransHeadersType(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Args,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, *clientsIDlClientsBazBaz.TransHeaderType, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Result
 	var resp *clientsIDlClientsBazBaz.TransHeaderType
@@ -2308,10 +2479,20 @@ func (c *bazClient) TransHeadersType(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -2325,8 +2506,7 @@ func (c *bazClient) TransHeadersType(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2348,7 +2528,7 @@ func (c *bazClient) TransHeadersType(
 		case result.OtherAuthErr != nil:
 			err = c.errorBuilder.Error(result.OtherAuthErr, zanzibar.ClientException)
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersType. Overriding", zap.Error(err))
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for TransHeadersType. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersType")
@@ -2356,14 +2536,14 @@ func (c *bazClient) TransHeadersType(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
 	if err != nil {
 		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }
@@ -2372,7 +2552,6 @@ func (c *bazClient) TransHeadersType(
 func (c *bazClient) URLTest(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	timeoutAndRetryCfg *zanzibar.TimeoutAndRetryOptions,
 ) (context.Context, map[string]string, error) {
 	var result clientsIDlClientsBazBaz.SimpleService_UrlTest_Result
 
@@ -2382,10 +2561,20 @@ func (c *bazClient) URLTest(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+	defer func() {
+		if err != nil {
+			logger.Append(ctx, zap.Error(err))
+			if zErr, ok := err.(zanzibar.Error); ok {
+				logger.Append(ctx,
+					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
+					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
+				)
+			}
+		}
+	}()
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
-			ctx, "SimpleService", "urlTest", reqHeaders, args, &result, timeoutAndRetryCfg,
-		)
+			ctx, "SimpleService", "urlTest", reqHeaders, args, &result)
 	} else {
 		// We want hystrix ckt-breaker to count errors only for system issues
 		var clientErr error
@@ -2399,8 +2588,7 @@ func (c *bazClient) URLTest(
 			elapsed := time.Now().Sub(start)
 			scope.Timer("hystrix-timer").Record(elapsed)
 			success, respHeaders, clientErr = c.client.Call(
-				ctx, "SimpleService", "urlTest", reqHeaders, args, &result, timeoutAndRetryCfg,
-			)
+				ctx, "SimpleService", "urlTest", reqHeaders, args, &result)
 			if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
 				// Declare ok if it is not a system-error
 				return nil
@@ -2423,7 +2611,7 @@ func (c *bazClient) URLTest(
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, respHeaders, err
 	}
 

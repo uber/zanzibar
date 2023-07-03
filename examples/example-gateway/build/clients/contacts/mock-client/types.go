@@ -27,7 +27,6 @@ import (
 	context "context"
 
 	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
-	runtime "github.com/uber/zanzibar/runtime"
 )
 
 // ClientFixture defines the client fixture type
@@ -45,13 +44,11 @@ type SaveContactsFixture struct {
 	Arg0 context.Context
 	Arg1 map[string]string
 	Arg2 *contacts.Contacts_SaveContacts_Args
-	Arg3 *runtime.TimeoutAndRetryOptions
 
 	// Arg{n}Any indicates the nth argument could be gomock.Any
 	Arg0Any bool
 	Arg1Any bool
 	Arg2Any bool
-	Arg3Any bool
 
 	Ret0 context.Context
 	Ret1 *contacts.SaveContactsResponse

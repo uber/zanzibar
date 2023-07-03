@@ -124,7 +124,7 @@ func (w barTooManyArgsWorkflow) Handle(
 	}
 
 	//when maxRetry is 0, timeout per client level is used & one attempt is made, and timoutPerAttempt is not used
-	var timeoutAndRetryConfig = zanzibar.TimeoutAndRetryOptions{}
+	var timeoutAndRetryConfig *zanzibar.TimeoutAndRetryOptions
 
 	//when endpoint level timeout information is available, override it with client level config
 	if w.defaultDeps.Config.ContainsKey("endpoints.bar.tooManyArgs.timeoutPerAttempt") {
@@ -135,10 +135,11 @@ func (w barTooManyArgsWorkflow) Handle(
 		timeoutPerAttemptConf := int(w.defaultDeps.Config.MustGetInt("endpoints.bar.tooManyArgs.timeoutPerAttempt"))
 
 		timeoutAndRetryConfig = zanzibar.BuildTimeoutAndRetryConfig(int(timeoutPerAttemptConf), backOffTimeAcrossRetriesCfg, maxRetry, scaleFactor)
+		ctx = zanzibar.WithTimeAndRetryOptions(ctx, timeoutAndRetryConfig)
 	}
 
 	ctx, clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
-		ctx, clientHeaders, clientRequest, &timeoutAndRetryConfig,
+		ctx, clientHeaders, clientRequest,
 	)
 
 	if err != nil {

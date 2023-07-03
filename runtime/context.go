@@ -40,15 +40,16 @@ type ContextScopeTagsExtractor func(context.Context) map[string]string
 type ContextLogFieldsExtractor func(context.Context) []zap.Field
 
 const (
-	endpointKey           = contextFieldKey("endpoint")
-	requestUUIDKey        = contextFieldKey("requestUUID")
-	routingDelegateKey    = contextFieldKey("rd")
-	shardKey              = contextFieldKey("sk")
-	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
-	scopeTags             = contextFieldKey("scopeTags")
-	ctxLogCounterName     = contextFieldKey("ctxLogCounter")
-	ctxLogLevel           = contextFieldKey("ctxLogLevel")
-	safeFieldsKey         = contextFieldKey("safeFields")
+	endpointKey            = contextFieldKey("endpoint")
+	requestUUIDKey         = contextFieldKey("requestUUID")
+	routingDelegateKey     = contextFieldKey("rd")
+	shardKey               = contextFieldKey("sk")
+	endpointRequestHeader  = contextFieldKey("endpointRequestHeader")
+	scopeTags              = contextFieldKey("scopeTags")
+	ctxLogCounterName      = contextFieldKey("ctxLogCounter")
+	ctxLogLevel            = contextFieldKey("ctxLogLevel")
+	ctxTimeoutRetryOptions = contextFieldKey("trOptions")
+	safeFieldsKey          = contextFieldKey("safeFields")
 )
 
 const (
@@ -100,6 +101,20 @@ const (
 type scopeData struct {
 	tags  map[string]string
 	scope tally.Scope // optional - may not be used by zanzibar users who use
+}
+
+// WithTimeAndRetryOptions returns a context with timeout and retry options.
+func WithTimeAndRetryOptions(ctx context.Context, tro *TimeoutAndRetryOptions) context.Context {
+	return context.WithValue(ctx, ctxTimeoutRetryOptions, tro)
+}
+
+// GetTimeoutAndRetryOptions returns timeout and retry options stored in the context
+func GetTimeoutAndRetryOptions(ctx context.Context) *TimeoutAndRetryOptions {
+	if val := ctx.Value(ctxTimeoutRetryOptions); val != nil {
+		tro, _ := val.(*TimeoutAndRetryOptions)
+		return tro
+	}
+	return nil
 }
 
 // WithEndpointField adds the endpoint information in the

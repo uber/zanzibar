@@ -68,7 +68,6 @@ func (r *RawTChannelClient) Call(
 	thriftService, methodName string,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
-	timeoutAndRetryOptions *TimeoutAndRetryOptions,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
 
@@ -87,5 +86,5 @@ func (r *RawTChannelClient) Call(
 		call.metrics = r.metrics
 	}
 
-	return r.tc.call(ctx, call, reqHeaders, req, resp, timeoutAndRetryOptions)
+	return r.tc.call(ctx, call, reqHeaders, req, resp)
 }
