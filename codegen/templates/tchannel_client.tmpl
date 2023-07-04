@@ -223,7 +223,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
-		errorBuilder:           zanzibar.NewErrorBuilder("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -324,7 +323,6 @@ type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps  *zanzibar.DefaultDependencies
-	errorBuilder zanzibar.ErrorBuilder
 }
 
 {{range $svc := .Services}}
@@ -381,14 +379,12 @@ type {{$clientName}} struct {
 				err = clientErr
 			}
 		}
-		if err != nil {
-			err = c.errorBuilder.Error(err, zanzibar.TChannelError)
-		}
+
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
-					err = c.errorBuilder.Error(result.{{title .Name}}, zanzibar.ClientException)
+					err = result.{{title .Name}}
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
@@ -397,7 +393,6 @@ type {{$clientName}} struct {
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
-					err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 			}
 		}
 		if err != nil {
@@ -414,7 +409,6 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				err = c.errorBuilder.Error(err, zanzibar.ClientException)
 				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return ctx, resp, respHeaders, err
