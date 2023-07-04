@@ -94,9 +94,8 @@ func NewServerHTTPRequest(
 	if endpoint.contextExtractor != nil {
 		headers := map[string]string{}
 
-		sensitiveHeaders := getSensitiveHeadersMap(endpoint)
 		for k, v := range r.Header {
-			if !sensitiveHeaders[strings.ToLower(k)] {
+			if !DefaultSensitiveHeaders[strings.ToLower(k)] {
 				// TODO: this 0th element logic is probably not correct
 				headers[k] = v[0]
 			}
@@ -148,22 +147,6 @@ func NewServerHTTPRequest(
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
 	return req
-}
-
-func getSensitiveHeadersMap(endpoint *RouterEndpoint) map[string]bool {
-	sensitiveHeaders := make(map[string]bool)
-	sensitiveHeadersKey := fmt.Sprintf("endpoints.%s.%s.sensitive_headers", endpoint.EndpointName, endpoint.HandlerName)
-	if endpoint.config.ContainsKey(sensitiveHeadersKey) {
-		v := endpoint.config.MustGetString(sensitiveHeadersKey)
-		headersList := getStringSliceFromCSV(v)
-		for _, h := range headersList {
-			sensitiveHeaders[h] = true
-		}
-	}
-	for k := range DefaultSensitiveHeaders {
-		sensitiveHeaders[k] = true
-	}
-	return sensitiveHeaders
 }
 
 // GetAPIEnvironment returns the api environment for a given request.

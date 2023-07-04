@@ -41,23 +41,3 @@ func BuildTimeoutAndRetryConfig(timeoutPerAttemptConf int, backOffTimeAcrossRetr
 		BackOffTimeAcrossRetriesInMs: backOffTimeAcrossRetries,
 	}
 }
-
-func getStringSliceFromCSV(s string) []string {
-	var arr []string
-	var i, j int
-	n := len(s)
-	for {
-		for ; j < n && (s[j] == ' ' || s[j] == ','); j++ {
-			i = j + 1
-		}
-		if j == n {
-			break
-		}
-		for ; j < n && !(s[j] == ' ' || s[j] == ','); j++ {
-		}
-		if i < j {
-			arr = append(arr, s[i:j])
-		}
-	}
-	return arr
-}

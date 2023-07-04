@@ -178,6 +178,8 @@ var DefaultBackOffTimeAcrossRetries = time.Duration(DefaultBackOffTimeAcrossRetr
 // DefaultScaleFactor is multiplied with timeoutPerAttempt
 var DefaultScaleFactor = 1.1
 
+// DefaultSensitiveHeaders is map of default sensitive headers that must not be logged.
+// This set is in addition to the default headers declared per endpoint. See getSensitiveHeadersMap.
 var DefaultSensitiveHeaders = map[string]bool{
 	"utoken-caller": true,
 }
