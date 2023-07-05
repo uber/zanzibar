@@ -26,7 +26,7 @@ import (
 	"io"
 	"sync"
 
-	"go.uber.org/thriftrw/protocol"
+	"go.uber.org/thriftrw/protocol/binary"
 	"go.uber.org/thriftrw/wire"
 )
 
@@ -86,7 +86,7 @@ func ReadStruct(reader io.Reader, s RWTStruct) error {
 		readerAt = bytes.NewReader(buf.Bytes())
 	}
 
-	wireValue, err := protocol.Binary.Decode(readerAt, wire.TStruct)
+	wireValue, err := binary.Default.Decode(readerAt, wire.TStruct)
 	if err != nil {
 		return err
 	}

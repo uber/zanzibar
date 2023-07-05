@@ -29,7 +29,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/thriftrw/protocol"
+	"go.uber.org/thriftrw/protocol/binary"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 )
@@ -157,7 +157,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 		)
 		return
 	}
-	wireValue, err = protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
+	wireValue, err = binary.Default.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
 		c.contextLogger.WarnZ(ctx, "Could not decode arg3 for inbound request", zap.Error(err))
 		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
@@ -260,7 +260,7 @@ func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) 
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
-	err = protocol.Binary.Encode(structWireValue, twriter)
+	err = binary.Default.Encode(structWireValue, twriter)
 	if err != nil {
 		_ = twriter.Close()
 		return errors.Wrapf(err, "Could not write arg3 for inbound %s.%s (%s) response",
