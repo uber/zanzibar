@@ -206,7 +206,6 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
-		errorBuilder:           zanzibar.NewErrorBuilder("client", "corge"),
 	}
 }
 
@@ -307,7 +306,6 @@ type corgeClient struct {
 	client                 *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps            *zanzibar.DefaultDependencies
-	errorBuilder           zanzibar.ErrorBuilder
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -352,9 +350,7 @@ func (c *corgeClient) EchoString(
 			err = clientErr
 		}
 	}
-	if err != nil {
-		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
-	}
+
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
@@ -362,7 +358,6 @@ func (c *corgeClient) EchoString(
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
-			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
@@ -372,7 +367,6 @@ func (c *corgeClient) EchoString(
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		err = c.errorBuilder.Error(err, zanzibar.ClientException)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err

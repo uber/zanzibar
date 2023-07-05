@@ -476,9 +476,6 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	}
 
 	if err != nil {
-		if zErr, ok := err.(zanzibar.Error); ok {
-			err = zErr.Unwrap()
-		}
 		res.SendError(500, "Unexpected server error", err)
 		return ctx
 
