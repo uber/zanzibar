@@ -62,7 +62,6 @@ func NewWithExceptionsFunc1Workflow(deps *module.Dependencies) WithExceptionsFun
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
-		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "withexceptions"),
 	}
 }
 
@@ -72,7 +71,6 @@ type withExceptionsFunc1Workflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
-	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -129,32 +127,31 @@ func (w withExceptionsFunc1Workflow) Handle(
 	)
 
 	if err != nil {
-		zErr, ok := err.(zanzibar.Error)
-		if ok {
-			err = zErr.Unwrap()
-		}
 		switch errValue := err.(type) {
 
 		case *clientsIDlClientsWithexceptionsWithexceptions.ExceptionType1:
-			err = convertFunc1E1(
+			serverErr := convertFunc1E1(
 				errValue,
 			)
 
+			return ctx, nil, nil, serverErr
+
 		case *clientsIDlClientsWithexceptionsWithexceptions.ExceptionType2:
-			err = convertFunc1E2(
+			serverErr := convertFunc1E2(
 				errValue,
 			)
+
+			return ctx, nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
 				zap.String("client", "Withexceptions"),
 			)
+
+			return ctx, nil, nil, err
+
 		}
-		if zErr != nil {
-			err = w.errorBuilder.Rebuild(zErr, err)
-		}
-		return ctx, nil, nil, err
 	}
 
 	// Filter and map response headers from client to server response.

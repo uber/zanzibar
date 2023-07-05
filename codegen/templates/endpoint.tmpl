@@ -217,10 +217,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 
 	if err != nil {
-		if zErr, ok := err.(zanzibar.Error); ok {
-			err = zErr.Unwrap()
-		}
-		{{if eq (len .Exceptions) 0 -}}
+		{{- if eq (len .Exceptions) 0 -}}
 		res.SendError(500, "Unexpected server error", err)
 		return ctx
 		{{ else }}

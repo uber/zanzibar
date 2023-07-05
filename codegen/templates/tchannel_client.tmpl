@@ -223,7 +223,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		client: client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
-		errorBuilder:           zanzibar.NewErrorBuilder("{{$instance.ClassName}}", "{{$instance.InstanceName}}"),
 	}
 }
 
@@ -324,7 +323,6 @@ type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps  *zanzibar.DefaultDependencies
-	errorBuilder zanzibar.ErrorBuilder
 }
 
 {{range $svc := .Services}}
@@ -353,17 +351,6 @@ type {{$clientName}} struct {
 		var success bool
 		respHeaders := make(map[string]string)
 		var err error
-		defer func() {
-			if err != nil {
-				ctx = logger.Append(ctx, zap.Error(err))
-				if zErr, ok := err.(zanzibar.Error); ok {
-					ctx = logger.Append(ctx,
-						zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-						zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-					)
-				}
-			}
-		}()
 		if (c.circuitBreakerDisabled) {
 			success, respHeaders, err = c.client.Call(
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result)
@@ -392,27 +379,24 @@ type {{$clientName}} struct {
 				err = clientErr
 			}
 		}
-		if err != nil {
-			err = c.errorBuilder.Error(err, zanzibar.TChannelError)
-		}
+
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
-					err = c.errorBuilder.Error(result.{{title .Name}}, zanzibar.ClientException)
+					err = result.{{title .Name}}
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding")
+					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
 					success = true
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
-					err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 			}
 		}
 		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -425,8 +409,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				err = c.errorBuilder.Error(err, zanzibar.ClientException)
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
