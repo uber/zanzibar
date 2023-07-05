@@ -4643,12 +4643,12 @@ func (w {{$workflowStruct}}) Handle(
 					errValue,
 				)
 				{{if eq $responseType ""}}
-                return ctx, nil, serverErr
-                {{else if eq $responseType "string" }}
-                return ctx, "", nil, serverErr
-                {{else}}
-                return ctx, nil, nil, serverErr
-                {{end}}
+				return ctx, nil, serverErr
+				{{else if eq $responseType "string" }}
+				return ctx, "", nil, serverErr
+				{{else}}
+				return ctx, nil, nil, serverErr
+				{{end}}
 			{{end}}
 			default:
 				w.Logger.Warn("Client failure: could not make client request",
@@ -4657,12 +4657,12 @@ func (w {{$workflowStruct}}) Handle(
 				)
 
 				{{if eq $responseType ""}}
-                return ctx, nil, err
-                {{else if eq $responseType "string" }}
-                return ctx, "", nil, err
-                {{else}}
-                return ctx, nil, nil, err
-                {{end}}
+				return ctx, nil, err
+				{{else if eq $responseType "string" }}
+				return ctx, "", nil, err
+				{{else}}
+				return ctx, nil, nil, err
+				{{end}}
 		}
 	}
 
@@ -4738,7 +4738,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 10598, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 10454, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
