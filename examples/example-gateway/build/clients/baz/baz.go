@@ -631,20 +631,6 @@ func (c *bazClient) EchoDouble(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoDouble", reqHeaders, args, &result)
@@ -709,20 +695,6 @@ func (c *bazClient) EchoEnum(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoEnum", reqHeaders, args, &result)
@@ -787,20 +759,6 @@ func (c *bazClient) EchoI16(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI16", reqHeaders, args, &result)
@@ -865,20 +823,6 @@ func (c *bazClient) EchoI32(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI32", reqHeaders, args, &result)
@@ -943,20 +887,6 @@ func (c *bazClient) EchoI64(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI64", reqHeaders, args, &result)
@@ -1021,20 +951,6 @@ func (c *bazClient) EchoI8(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoI8", reqHeaders, args, &result)
@@ -1099,20 +1015,6 @@ func (c *bazClient) EchoString(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoString", reqHeaders, args, &result)
@@ -1177,20 +1079,6 @@ func (c *bazClient) EchoStringList(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStringList", reqHeaders, args, &result)
@@ -1255,20 +1143,6 @@ func (c *bazClient) EchoStringMap(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result)
@@ -1333,20 +1207,6 @@ func (c *bazClient) EchoStringSet(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result)
@@ -1411,20 +1271,6 @@ func (c *bazClient) EchoStructList(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStructList", reqHeaders, args, &result)
@@ -1489,20 +1335,6 @@ func (c *bazClient) EchoStructSet(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result)
@@ -1567,20 +1399,6 @@ func (c *bazClient) EchoTypedef(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result)
@@ -1644,20 +1462,6 @@ func (c *bazClient) Call(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "call", reqHeaders, args, &result)
@@ -1717,20 +1521,6 @@ func (c *bazClient) Compare(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "compare", reqHeaders, args, &result)
@@ -1799,20 +1589,6 @@ func (c *bazClient) GetProfile(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "getProfile", reqHeaders, args, &result)
@@ -1879,20 +1655,6 @@ func (c *bazClient) HeaderSchema(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result)
@@ -1961,20 +1723,6 @@ func (c *bazClient) Ping(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "ping", reqHeaders, args, &result)
@@ -2038,20 +1786,6 @@ func (c *bazClient) DeliberateDiffNoop(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result)
@@ -2112,20 +1846,6 @@ func (c *bazClient) TestUUID(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "testUuid", reqHeaders, args, &result)
@@ -2183,20 +1903,6 @@ func (c *bazClient) Trans(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "trans", reqHeaders, args, &result)
@@ -2265,20 +1971,6 @@ func (c *bazClient) TransHeaders(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result)
@@ -2347,20 +2039,6 @@ func (c *bazClient) TransHeadersNoReq(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result)
@@ -2427,20 +2105,6 @@ func (c *bazClient) TransHeadersType(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result)
@@ -2508,20 +2172,6 @@ func (c *bazClient) URLTest(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "SimpleService", "urlTest", reqHeaders, args, &result)

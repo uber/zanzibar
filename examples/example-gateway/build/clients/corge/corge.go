@@ -322,20 +322,6 @@ func (c *corgeClient) EchoString(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
-<<<<<<< HEAD
-	defer func() {
-		if err != nil {
-			logger.Append(ctx, zap.Error(err))
-			if zErr, ok := err.(zanzibar.Error); ok {
-				logger.Append(ctx,
-					zap.String(zanzibar.LogFieldErrorLocation, zErr.ErrorLocation()),
-					zap.String(zanzibar.LogFieldErrorType, zErr.ErrorType().String()),
-				)
-			}
-		}
-	}()
-=======
->>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "Corge", "echoString", reqHeaders, args, &result)
