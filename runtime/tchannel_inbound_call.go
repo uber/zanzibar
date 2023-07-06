@@ -21,16 +21,16 @@
 package zanzibar
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"time"
 
-	"go.uber.org/thriftrw/protocol/binary"
-	"go.uber.org/thriftrw/protocol/stream"
-
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
+	"go.uber.org/thriftrw/protocol/binary"
+	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 )
 
@@ -134,10 +134,11 @@ func (c *tchannelInboundCall) readReqHeaders(ctx context.Context) error {
 }
 
 // readReqBody reads request body from arg3
-func (c *tchannelInboundCall) readReqBody(ctx context.Context) (stream.Reader, error) {
+func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.Value, err error) {
 	// fail fast if timed out
 	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
-		return nil, context.DeadlineExceeded
+		err = context.DeadlineExceeded
+		return
 	}
 
 	treader, err := c.call.Arg3Reader()
@@ -145,7 +146,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (stream.Reader, e
 		err = errors.Wrapf(err, "Could not create arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return nil, err
+		return
 	}
 	buf := GetBuffer()
 	defer PutBuffer(buf)
@@ -154,35 +155,42 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (stream.Reader, e
 		err = errors.Wrapf(err, "Could not read from arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return nil, err
+		return
 	}
-
+	wireValue, err = binary.Default.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
+	if err != nil {
+		c.contextLogger.WarnZ(ctx, "Could not decode arg3 for inbound request", zap.Error(err))
+		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+		return
+	}
 	if err = EnsureEmpty(treader, "reading request body"); err != nil {
 		_ = treader.Close()
 		err = errors.Wrapf(err, "Could not ensure arg3reader is empty for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return nil, err
+		return
 	}
 	if err = treader.Close(); err != nil {
 		err = errors.Wrapf(err, "Could not close arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
-		return nil, err
+		return
 	}
-	sr := binary.Default.Reader(buf)
-	return sr, nil
+
+	return
 }
 
 // handle tchannel server endpoint call
-func (c *tchannelInboundCall) handle(ctx context.Context, sr stream.Reader) (resp RWTStruct, err error) {
+func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value) (resp RWTStruct, err error) {
 	// fail fast if timed out
 	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
 		err = context.DeadlineExceeded
 		return
 	}
 
-	ctx, c.success, resp, c.resHeaders, err = c.endpoint.Handle(ctx, c.reqHeaders, sr)
+	ctx, c.success, resp, c.resHeaders, err = c.endpoint.Handle(ctx, c.reqHeaders, wireValue)
 	if c.endpoint.callback != nil {
 		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
 	}
@@ -236,27 +244,26 @@ func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) 
 		return context.DeadlineExceeded
 	}
 
+	structWireValue, err := resp.ToWire()
+	if err != nil {
+		if er := c.call.Response().SendSystemError(errors.New("Server Error")); er != nil {
+			c.contextLogger.WarnZ(ctx, "Error sending server error response", zap.Error(er))
+		}
+		return errors.Wrapf(err, "Could not serialize arg3 for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+
 	twriter, err := c.call.Response().Arg3Writer()
 	if err != nil {
 		return errors.Wrapf(err, "Could not create arg3writer for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
-	sw := binary.Default.Writer(twriter)
-	defer func(sw stream.Writer) {
-		e := sw.Close()
-		if e != nil {
-			err = errors.Wrapf(e, "Could not close stream writer for outbound %s.%s (%s) response",
-				c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method)
-		}
-	}(sw)
-
-	err = resp.Encode(sw)
+	err = binary.Default.Encode(structWireValue, twriter)
 	if err != nil {
-		if er := c.call.Response().SendSystemError(errors.New("Server Error")); er != nil {
-			c.contextLogger.WarnZ(ctx, "Error sending server error response", zap.Error(er))
-		}
-		return errors.Wrapf(err, "Could not serialize arg3 for inbound %s.%s (%s) response",
+		_ = twriter.Close()
+		return errors.Wrapf(err, "Could not write arg3 for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}

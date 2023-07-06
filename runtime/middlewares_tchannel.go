@@ -23,9 +23,8 @@ package zanzibar
 import (
 	"context"
 
-	"go.uber.org/thriftrw/protocol/stream"
-
 	"github.com/mcuadros/go-jsonschema-generator"
+	"go.uber.org/thriftrw/wire"
 )
 
 // MiddlewareTchannelStack is a stack of Middleware Handlers that can be invoked as an Handle.
@@ -57,7 +56,7 @@ type MiddlewareTchannelHandle interface {
 	HandleRequest(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		sr stream.Reader,
+		wireValue *wire.Value,
 		shared TchannelSharedState) (context.Context, bool, error)
 
 	// implement HandleResponse for your middleware. Return false
@@ -102,19 +101,19 @@ func (s TchannelSharedState) SetTchannelState(m MiddlewareTchannelHandle, state 
 func (m *MiddlewareTchannelStack) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader) (context.Context, bool, RWTStruct, map[string]string, error) {
+	wireValue *wire.Value) (context.Context, bool, RWTStruct, map[string]string, error) {
 	var res RWTStruct
 	var ok bool
 
 	shared := NewTchannelSharedState(m.middlewares)
 	for i := 0; i < len(m.middlewares); i++ {
-		ctx, ok, err := m.middlewares[i].HandleRequest(ctx, reqHeaders, sr, shared)
+		ctx, ok, err := m.middlewares[i].HandleRequest(ctx, reqHeaders, wireValue, shared)
 		if ok == false {
 			return ctx, ok, nil, map[string]string{}, err
 		}
 	}
 
-	ctx, ok, res, resHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, sr)
+	ctx, ok, res, resHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, wireValue)
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
 		res = m.middlewares[i].HandleResponse(ctx, res, shared)
 	}

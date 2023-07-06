@@ -28,7 +28,7 @@ import (
 	"runtime/debug"
 
 	"github.com/pkg/errors"
-	"go.uber.org/thriftrw/protocol/stream"
+	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -73,7 +73,7 @@ func (h *AppDemoServiceCallHandler) Register(g *zanzibar.Gateway) error {
 func (h *AppDemoServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader,
+	wireValue *wire.Value,
 ) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {

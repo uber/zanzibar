@@ -31,7 +31,7 @@ import (
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 	exampletchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/thriftrw/protocol/stream"
+	"go.uber.org/thriftrw/wire"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.
@@ -144,7 +144,7 @@ type mockTchannelHandler struct {
 func (c *countTchannelMiddleware) HandleRequest(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader,
+	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
 ) (context.Context, bool, error) {
 	c.reqCounter++
@@ -168,7 +168,7 @@ func (c *countTchannelMiddleware) Name() string {
 	return c.name
 }
 
-func (c *mockTchannelHandler) Handle(ctx context.Context, reqHeaders map[string]string, sr stream.Reader) (ctx_resp context.Context, success bool, resp zanzibar.RWTStruct, respHeaders map[string]string, err error) {
+func (c *mockTchannelHandler) Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (ctx_resp context.Context, success bool, resp zanzibar.RWTStruct, respHeaders map[string]string, err error) {
 	return ctx, true, nil, map[string]string{}, err
 }
 
