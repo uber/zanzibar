@@ -94,8 +94,7 @@ func (h *BarDeleteWithBodyHandler) HandleRequest(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
-				zap.String("stacktrace", stacktrace),
-				zap.String("endpoint", h.endpoint.EndpointName))
+				zap.String("stacktrace", stacktrace))
 
 			h.Dependencies.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
@@ -109,9 +108,7 @@ func (h *BarDeleteWithBodyHandler) HandleRequest(
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
-		zfields := []zapcore.Field{
-			zap.String("endpoint", h.endpoint.EndpointName),
-		}
+		var zfields []zapcore.Field
 		zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", req.GetRawBody())))
 		for _, k := range req.Header.Keys() {
 			if val, ok := req.Header.Get(k); ok {
@@ -142,9 +139,6 @@ func (h *BarDeleteWithBodyHandler) HandleRequest(
 	}
 
 	if err != nil {
-		if zErr, ok := err.(zanzibar.Error); ok {
-			err = zErr.Unwrap()
-		}
 		res.SendError(500, "Unexpected server error", err)
 		return ctx
 

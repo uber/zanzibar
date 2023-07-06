@@ -63,7 +63,6 @@ func NewGoogleNowAddCredentialsWorkflow(deps *module.Dependencies) GoogleNowAddC
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
-		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "googlenow"),
 	}
 }
 
@@ -73,7 +72,6 @@ type googleNowAddCredentialsWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
-	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -140,10 +138,6 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 	)
 
 	if err != nil {
-		zErr, ok := err.(zanzibar.Error)
-		if ok {
-			err = zErr.Unwrap()
-		}
 		switch errValue := err.(type) {
 
 		default:
@@ -151,11 +145,10 @@ func (w googleNowAddCredentialsWorkflow) Handle(
 				zap.Error(errValue),
 				zap.String("client", "GoogleNow"),
 			)
+
+			return ctx, nil, err
+
 		}
-		if zErr != nil {
-			err = w.errorBuilder.Rebuild(zErr, err)
-		}
-		return ctx, nil, err
 	}
 
 	// Filter and map response headers from client to server response.

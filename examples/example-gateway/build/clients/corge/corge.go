@@ -206,7 +206,6 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 		defaultDeps:            deps.Default,
-		errorBuilder:           zanzibar.NewErrorBuilder("client", "corge"),
 	}
 }
 
@@ -307,7 +306,6 @@ type corgeClient struct {
 	client                 *zanzibar.TChannelClient
 	circuitBreakerDisabled bool
 	defaultDeps            *zanzibar.DefaultDependencies
-	errorBuilder           zanzibar.ErrorBuilder
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -324,6 +322,7 @@ func (c *corgeClient) EchoString(
 	var success bool
 	respHeaders := make(map[string]string)
 	var err error
+<<<<<<< HEAD
 	defer func() {
 		if err != nil {
 			logger.Append(ctx, zap.Error(err))
@@ -335,6 +334,8 @@ func (c *corgeClient) EchoString(
 			}
 		}
 	}()
+=======
+>>>>>>> fixlogapm2
 	if c.circuitBreakerDisabled {
 		success, respHeaders, err = c.client.Call(
 			ctx, "Corge", "echoString", reqHeaders, args, &result)
@@ -363,28 +364,24 @@ func (c *corgeClient) EchoString(
 			err = clientErr
 		}
 	}
-	if err != nil {
-		err = c.errorBuilder.Error(err, zanzibar.TChannelError)
-	}
+
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding")
+			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
-			err = c.errorBuilder.Error(err, zanzibar.BadResponse)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		err = c.errorBuilder.Error(err, zanzibar.ClientException)
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return ctx, resp, respHeaders, err
 }

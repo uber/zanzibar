@@ -59,7 +59,6 @@ func NewServiceAFrontHelloWorkflow(deps *module.Dependencies) ServiceAFrontHello
 		Logger:                    deps.Default.Logger,
 		whitelistedDynamicHeaders: whitelistedDynamicHeaders,
 		defaultDeps:               deps.Default,
-		errorBuilder:              zanzibar.NewErrorBuilder("endpoint", "multi"),
 	}
 }
 
@@ -69,7 +68,6 @@ type serviceAFrontHelloWorkflow struct {
 	Logger                    *zap.Logger
 	whitelistedDynamicHeaders []string
 	defaultDeps               *zanzibar.DefaultDependencies
-	errorBuilder              zanzibar.ErrorBuilder
 }
 
 // Handle calls thrift client.
@@ -126,10 +124,6 @@ func (w serviceAFrontHelloWorkflow) Handle(
 	)
 
 	if err != nil {
-		zErr, ok := err.(zanzibar.Error)
-		if ok {
-			err = zErr.Unwrap()
-		}
 		switch errValue := err.(type) {
 
 		default:
@@ -137,11 +131,10 @@ func (w serviceAFrontHelloWorkflow) Handle(
 				zap.Error(errValue),
 				zap.String("client", "Multi"),
 			)
+
+			return ctx, "", nil, err
+
 		}
-		if zErr != nil {
-			err = w.errorBuilder.Rebuild(zErr, err)
-		}
-		return ctx, "", nil, err
 	}
 
 	// Filter and map response headers from client to server response.
