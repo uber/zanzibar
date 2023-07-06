@@ -27,7 +27,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/thriftrw/protocol"
+	"go.uber.org/thriftrw/protocol/binary"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -163,7 +163,7 @@ func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) 
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
-	if err := protocol.Binary.Encode(structWireValue, twriter); err != nil {
+	if err := binary.Default.Encode(structWireValue, twriter); err != nil {
 		_ = twriter.Close()
 		return errors.Wrapf(
 			err, "Could not write request for outbound %s.%s (%s %s) request",
