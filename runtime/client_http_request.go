@@ -215,7 +215,8 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 
 	if err != nil {
 		req.ContextLogger.ErrorZ(req.ctx, fmt.Sprintf("Could not make http outbound %s.%s request",
-			req.ClientID, req.MethodName), zap.Error(err))
+			req.ClientID, req.MethodName), zap.Error(err),
+			zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
 		return nil, errors.Wrapf(err, "errors while making outbound %s.%s request", req.ClientID, req.MethodName)
 	}
 
@@ -245,13 +246,6 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 		if i+1 < req.timeoutAndRetryOptions.MaxAttempts {
 			shouldRetry = req.client.CheckRetry(ctx, req.timeoutAndRetryOptions, res, err)
 		}
-
-		req.ContextLogger.Warn(ctx, "errors while making http outbound request",
-			zap.Error(err),
-			zap.String("clientId", req.ClientID), zap.String("methodName", req.MethodName),
-			zap.Int64("attempt", retryCount),
-			zap.Int("maxAttempts", req.timeoutAndRetryOptions.MaxAttempts),
-			zap.Bool("shouldRetry", shouldRetry))
 
 		// TODO (future releases) - make retry conditional, inspect error/response and then retry
 

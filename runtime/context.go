@@ -65,16 +65,11 @@ const (
 	logFieldEndpointHandler    = "endpointHandler"
 	logFieldClientStatusCode   = "client_status_code"
 	logFieldClientRemoteAddr   = "client_remote_addr"
+	logFieldClientAttempts     = "client.%s.attempts" // client.{client-id}.attempts
 
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"
 	logFieldEndpointResponseHeaderPrefix = "Res-Header"
-
-	// LogFieldErrorLocation is field name to log error location.
-	LogFieldErrorLocation = "error_location"
-
-	// LogFieldErrorType is field name to log error type.
-	LogFieldErrorType = "error_type"
 )
 
 const (
