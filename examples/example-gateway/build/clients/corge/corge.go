@@ -354,20 +354,22 @@ func (c *corgeClient) EchoString(
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding")
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
+			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }

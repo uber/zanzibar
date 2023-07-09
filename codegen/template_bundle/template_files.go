@@ -3937,18 +3937,20 @@ type {{$clientName}} struct {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
+					logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding")
 					success = true
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
+					logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 			}
 		}
 		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -3961,7 +3963,8 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
@@ -3981,7 +3984,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15721, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15999, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
