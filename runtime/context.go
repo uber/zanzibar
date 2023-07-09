@@ -223,8 +223,7 @@ func (sf *safeFields) getFields() []zap.Field {
 }
 
 func getSafeFieldsFromContext(ctx context.Context) *safeFields {
-	v := ctx.Value(safeFieldsKey).(*safeFields)
-	if v != nil {
+	if v, ok := ctx.Value(safeFieldsKey).(*safeFields); ok {
 		return v
 	}
 	return &safeFields{}
