@@ -48,12 +48,12 @@ type {{$handler}} struct {
 func (h *{{$handler}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader,
+	wireValue *wire.Value,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Args
 	var res {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Result
 
-	if err := req.Decode(sr); err != nil {
+	if err := req.FromWire(*wireValue); err != nil {
 		return ctx, false, nil, nil, err
 	}
 

@@ -26,9 +26,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pkg/errors"
-	stream "go.uber.org/thriftrw/protocol/stream"
-
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/uber-go/tally"
@@ -241,14 +238,7 @@ func (s *TChannelRouter) handleBody(
 	ctx context.Context,
 	c *tchannelInboundCall,
 ) (err error) {
-	sr, err := c.readReqBody(ctx)
-	defer func(sr stream.Reader) {
-		e := sr.Close()
-		if e != nil {
-			err = errors.Wrapf(e, "Could not close stream writer for outbound %s.%s (%s) response",
-				c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method)
-		}
-	}(sr)
+	wireValue, err := c.readReqBody(ctx)
 	if err != nil {
 		return err
 	}
@@ -268,13 +258,13 @@ func (s *TChannelRouter) handleBody(
 	}
 
 	// handle request
-	resp, err := c.handle(ctx, sr)
+	resp, err := c.handle(ctx, &wireValue)
 	if err != nil {
 		return err
 	}
 
 	// TODO: put response headers on ctx for final metrics and logs
-	// ctx = WithEndpointResponseHeadersField(ctx, c.resHeaders)
+	//ctx = WithEndpointResponseHeadersField(ctx, c.resHeaders)
 
 	// write response
 	if err = c.writeResHeaders(ctx); err != nil {

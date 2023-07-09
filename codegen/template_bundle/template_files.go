@@ -4036,12 +4036,12 @@ type {{$handler}} struct {
 func (h *{{$handler}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader,
+	wireValue *wire.Value,
 ) (context.Context, bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Args
 	var res {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Result
 
-	if err := req.Decode(sr); err != nil {
+	if err := req.FromWire(*wireValue); err != nil {
 		return ctx, false, nil, nil, err
 	}
 
@@ -4100,7 +4100,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3050, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3065, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4117,7 +4117,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.uber.org/thriftrw/protocol/stream"
+	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
 	tchannel "github.com/uber/tchannel-go"
@@ -4188,7 +4188,7 @@ func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	sr stream.Reader,
+	wireValue *wire.Value,
 ) (ctxRes context.Context, isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4221,7 +4221,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
-	if err := req.Decode(sr); err != nil {
+	if err := req.FromWire(*wireValue); err != nil {
 		ctx = h.Deps.Default.ContextLogger.ErrorZ(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return ctx, false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
@@ -4395,7 +4395,11 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9379, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+=======
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9434, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+>>>>>>> master
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
