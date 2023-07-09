@@ -66,6 +66,8 @@ const (
 	logFieldClientStatusCode   = "client_status_code"
 	logFieldClientRemoteAddr   = "client_remote_addr"
 	logFieldClientAttempts     = "client.%s.attempts" // client.{client-id}.attempts
+	logFieldErrorType          = "error_type"
+	logFieldErrorLocation      = "error_location"
 
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"

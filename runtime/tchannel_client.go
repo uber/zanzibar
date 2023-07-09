@@ -29,6 +29,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	"go.uber.org/zap"
 	netContext "golang.org/x/net/context"
 )
 
@@ -278,6 +279,7 @@ func (c *TChannelClient) call(
 	})
 
 	if err != nil {
+		c.ContextLogger.Append(ctx, zap.Error(err), LogFieldErrTypeTChannelError, LogFieldErrLocClient)
 		// Do not wrap system errors.
 		if _, ok := err.(tchannel.SystemError); ok {
 			return call.success, call.resHeaders, err
