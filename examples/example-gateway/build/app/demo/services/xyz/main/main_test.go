@@ -29,6 +29,7 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -71,7 +72,7 @@ func TestStartGateway(t *testing.T) {
 		),
 	)
 
-	gateway, err := createGateway()
+	gateway, deps, err := createGateway()
 	if err != nil {
 		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
@@ -79,6 +80,7 @@ func TestStartGateway(t *testing.T) {
 		)
 		return
 	}
+	assert.NotNil(t, deps)
 
 	cachedServer = gateway
 	err = gateway.Bootstrap()
