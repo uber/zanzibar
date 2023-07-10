@@ -55,6 +55,8 @@ type Result struct {
 	Gateway *zanzibar.Gateway
 	// Provider is an abstraction over the Zanzibar config store
 	Provider uberconfig.Provider `name:"zanzibarConfig"`
+	// Deps is a reference to the dependency tree inside zanzibar gateway
+	Deps *service.DependenciesTree
 }
 
 func main() {
@@ -74,7 +76,7 @@ func run(gateway *zanzibar.Gateway) {
 // or modify Result. Most users should use Module instead.
 func New(p Params) (Result, error) {
 	readFlags()
-	gateway, err := createGateway()
+	gateway, deps, err := createGateway()
 	if err != nil {
 		return Result{}, errors.Wrap(err, "failed to create gateway server")
 	}
@@ -113,16 +115,17 @@ func New(p Params) (Result, error) {
 	return Result{
 		Gateway: gateway,
 		Provider: provider,
+		Deps: deps,
 	}, nil
 }
 
-func createGateway() (*zanzibar.Gateway, error) {
+func createGateway() (*zanzibar.Gateway, *service.DependenciesTree, error) {
 	cfg := getConfig()
-	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
+	gateway, deps, err := service.CreateGateway(cfg, app.AppOptions)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return gateway, nil
+	return gateway, deps.(*service.DependenciesTree), nil
 }
 
 func getConfig() *zanzibar.StaticConfig {
