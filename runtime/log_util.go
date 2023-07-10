@@ -6,6 +6,7 @@ var (
 	LogFieldErrTypeClientException = LogFieldErrorType("client_exception")
 	LogFieldErrTypeTChannelError   = LogFieldErrorType("tchannel_error")
 	LogFieldErrTypeBadResponse     = LogFieldErrorType("bad_response")
+	LogFieldErrTypeBadRequest      = LogFieldErrorType("bad_request")
 
 	LogFieldErrLocClient = LogFieldErrorLocation("client")
 )

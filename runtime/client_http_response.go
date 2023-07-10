@@ -84,11 +84,11 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 	cerr := res.rawResponse.Body.Close()
 	if cerr != nil {
 		/* coverage ignore next line */
-		res.req.ContextLogger.Error(res.req.ctx, "Could not close response body", zap.Error(cerr))
+		res.req.ContextLogger.WarnZ(res.req.ctx, "Could not close response body", zap.Error(cerr), LogFieldErrLocClient)
 	}
 
 	if err != nil {
-		res.req.ContextLogger.ErrorZ(res.req.ctx, "Could not read response body", zap.Error(err))
+		res.req.ContextLogger.ErrorZ(res.req.ctx, "Could not read response body", zap.Error(err), LogFieldErrLocClient)
 		res.finish()
 		return nil, errors.Wrapf(
 			err, "Could not read %s.%s response body",
@@ -120,7 +120,8 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) error {
 	err := res.jsonWrapper.Unmarshal(rawBody, v)
 	if err != nil {
-		res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json", zap.Error(err))
+		res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json", zap.Error(err),
+			LogFieldErrTypeBadResponse, LogFieldErrLocClient)
 		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not parse %s.%s response json",
@@ -151,7 +152,8 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 
 	err = fmt.Errorf("all json serialization errors: %s", merr.Error())
 
-	res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json into any of provided interfaces", zap.Error(err))
+	res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json into any of provided interfaces",
+		zap.Error(err), LogFieldErrTypeBadResponse, LogFieldErrLocClient)
 	return nil, errors.Wrapf(
 		err, "Could not parse %s.%s response json into any of provided interfaces",
 		res.req.ClientID, res.req.MethodName,
@@ -198,10 +200,7 @@ func (res *ClientHTTPResponse) finish() {
 
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
-		res.req.ContextLogger.Error(res.req.ctx,
-			"Could not emit statusCode metric",
-			zap.Int("UnknownStatusCode", res.StatusCode),
-		)
+		res.req.ContextLogger.WarnZ(res.req.ctx, "Received unknown status code from client")
 	} else {
 		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
 		res.req.ctx = WithScopeTagsDefault(res.req.ctx, scopeTags, res.req.Metrics.Scope())

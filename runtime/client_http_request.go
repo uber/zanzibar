@@ -116,11 +116,10 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 		// headerName is case insensitive, http.Header Get canonicalize the key
 		headerValue := actualHeaders.Get(headerName)
 		if headerValue == "" {
+			err := errors.New("Missing mandatory header: " + headerName)
 			req.ContextLogger.WarnZ(req.ctx, "Got outbound request without mandatory header",
-				zap.String("headerName", headerName),
-			)
-
-			return errors.New("Missing mandatory header: " + headerName)
+				zap.Error(err), LogFieldErrTypeBadRequest, LogFieldErrLocClient)
+			return err
 		}
 	}
 
@@ -167,7 +166,8 @@ func (req *ClientHTTPRequest) WriteBytes(
 	}
 
 	if httpErr != nil {
-		req.ContextLogger.ErrorZ(req.ctx, "Could not create outbound request", zap.Error(httpErr))
+		req.ContextLogger.ErrorZ(req.ctx, "Could not create outbound request", zap.Error(httpErr),
+			LogFieldErrTypeBadRequest, LogFieldErrLocClient)
 		return errors.Wrapf(
 			httpErr, "Could not create outbound %s.%s request",
 			req.ClientID, req.MethodName,
@@ -215,7 +215,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 
 	if err != nil {
 		req.ContextLogger.ErrorZ(req.ctx, fmt.Sprintf("Could not make http outbound %s.%s request",
-			req.ClientID, req.MethodName), zap.Error(err),
+			req.ClientID, req.MethodName), zap.Error(err), LogFieldErrLocClient,
 			zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
 		return nil, errors.Wrapf(err, "errors while making outbound %s.%s request", req.ClientID, req.MethodName)
 	}
