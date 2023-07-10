@@ -31,6 +31,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/tchannel-go"
+	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 	netContext "golang.org/x/net/context"
 )
@@ -258,7 +259,13 @@ func (s *TChannelRouter) handleBody(
 	}
 
 	// handle request
-	resp, err := c.handle(ctx, &wireValue)
+	resp, err := DecorateWithRecover(
+		ctx,
+		&wireValue,
+		s.contextLogger,
+		func(ctx context.Context, wireValue *wire.Value) (RWTStruct, error) {
+			return c.handle(ctx, wireValue)
+		})
 	if err != nil {
 		return err
 	}
@@ -275,4 +282,21 @@ func (s *TChannelRouter) handleBody(
 	}
 
 	return err
+}
+
+func DecorateWithRecover(
+	ctx context.Context,
+	wireVal *wire.Value,
+	logger ContextLogger,
+	handleFn func(ctx context.Context, wireVal *wire.Value) (RWTStruct, error),
+) (resp RWTStruct, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+			if logger != nil {
+				logger.Error(ctx, err.Error())
+			}
+		}
+	}()
+	return handleFn(ctx, wireVal)
 }
