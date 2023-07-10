@@ -4395,11 +4395,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9379, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9434, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> master
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9383, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
