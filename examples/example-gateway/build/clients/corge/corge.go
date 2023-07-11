@@ -358,7 +358,7 @@ func (c *corgeClient) EchoString(
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -368,7 +368,7 @@ func (c *corgeClient) EchoString(
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err

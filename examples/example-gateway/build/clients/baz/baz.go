@@ -539,7 +539,7 @@ func (c *bazClient) EchoBinary(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBinary")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -549,7 +549,7 @@ func (c *bazClient) EchoBinary(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -605,7 +605,7 @@ func (c *bazClient) EchoBool(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoBool")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -615,7 +615,7 @@ func (c *bazClient) EchoBool(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -671,7 +671,7 @@ func (c *bazClient) EchoDouble(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoDouble")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -681,7 +681,7 @@ func (c *bazClient) EchoDouble(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -737,7 +737,7 @@ func (c *bazClient) EchoEnum(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoEnum")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -747,7 +747,7 @@ func (c *bazClient) EchoEnum(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -803,7 +803,7 @@ func (c *bazClient) EchoI16(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI16")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -813,7 +813,7 @@ func (c *bazClient) EchoI16(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -869,7 +869,7 @@ func (c *bazClient) EchoI32(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI32")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -879,7 +879,7 @@ func (c *bazClient) EchoI32(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -935,7 +935,7 @@ func (c *bazClient) EchoI64(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI64")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -945,7 +945,7 @@ func (c *bazClient) EchoI64(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1001,7 +1001,7 @@ func (c *bazClient) EchoI8(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoI8")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1011,7 +1011,7 @@ func (c *bazClient) EchoI8(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1067,7 +1067,7 @@ func (c *bazClient) EchoString(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoString")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1077,7 +1077,7 @@ func (c *bazClient) EchoString(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1133,7 +1133,7 @@ func (c *bazClient) EchoStringList(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringList")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1143,7 +1143,7 @@ func (c *bazClient) EchoStringList(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1199,7 +1199,7 @@ func (c *bazClient) EchoStringMap(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringMap")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1209,7 +1209,7 @@ func (c *bazClient) EchoStringMap(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1265,7 +1265,7 @@ func (c *bazClient) EchoStringSet(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStringSet")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1275,7 +1275,7 @@ func (c *bazClient) EchoStringSet(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1331,7 +1331,7 @@ func (c *bazClient) EchoStructList(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructList")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1341,7 +1341,7 @@ func (c *bazClient) EchoStructList(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1397,7 +1397,7 @@ func (c *bazClient) EchoStructSet(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoStructSet")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1407,7 +1407,7 @@ func (c *bazClient) EchoStructSet(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1463,7 +1463,7 @@ func (c *bazClient) EchoTypedef(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for EchoTypedef")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1473,7 +1473,7 @@ func (c *bazClient) EchoTypedef(
 
 	resp, err = clientsIDlClientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1525,10 +1525,10 @@ func (c *bazClient) Call(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Call")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1586,16 +1586,16 @@ func (c *bazClient) Compare(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for Compare. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Compare")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1605,7 +1605,7 @@ func (c *bazClient) Compare(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1658,13 +1658,13 @@ func (c *bazClient) GetProfile(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for GetProfile. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for GetProfile")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1674,7 +1674,7 @@ func (c *bazClient) GetProfile(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1727,16 +1727,16 @@ func (c *bazClient) HeaderSchema(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for HeaderSchema. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for HeaderSchema")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1746,7 +1746,7 @@ func (c *bazClient) HeaderSchema(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1802,7 +1802,7 @@ func (c *bazClient) Ping(
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Ping")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1812,7 +1812,7 @@ func (c *bazClient) Ping(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -1864,13 +1864,13 @@ func (c *bazClient) DeliberateDiffNoop(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.ServerErr != nil:
 			err = result.ServerErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		default:
 			err = errors.New("bazClient received no result or unknown exception for SillyNoop")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1927,7 +1927,7 @@ func (c *bazClient) TestUUID(
 		switch {
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TestUuid")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -1985,16 +1985,16 @@ func (c *bazClient) Trans(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for Trans. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for Trans")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -2004,7 +2004,7 @@ func (c *bazClient) Trans(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -2057,16 +2057,16 @@ func (c *bazClient) TransHeaders(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for TransHeaders. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeaders")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -2076,7 +2076,7 @@ func (c *bazClient) TransHeaders(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -2129,13 +2129,13 @@ func (c *bazClient) TransHeadersNoReq(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for TransHeadersNoReq. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersNoReq")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -2145,7 +2145,7 @@ func (c *bazClient) TransHeadersNoReq(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -2198,16 +2198,16 @@ func (c *bazClient) TransHeadersType(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, zanzibar.LogFieldErrLocClient)
 		case result.Success != nil:
 			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for TransHeadersType. Overriding")
 			success = true
 		default:
 			err = errors.New("bazClient received no result or unknown exception for TransHeadersType")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
@@ -2217,7 +2217,7 @@ func (c *bazClient) TransHeadersType(
 
 	resp, err = clientsIDlClientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
@@ -2269,7 +2269,7 @@ func (c *bazClient) URLTest(
 		switch {
 		default:
 			err = errors.New("bazClient received no result or unknown exception for UrlTest")
-			logger.Append(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
 		}
 	}
 	if err != nil {
