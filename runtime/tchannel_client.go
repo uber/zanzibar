@@ -279,7 +279,7 @@ func (c *TChannelClient) call(
 	})
 
 	if err != nil {
-		c.ContextLogger.Append(ctx, zap.Error(err), LogFieldErrTypeTChannelError, LogFieldErrLocClient)
+		AppendLogFieldsToContext(ctx, zap.Error(err), LogFieldErrTypeTChannelError, LogFieldErrLocClient)
 		// Do not wrap system errors.
 		if _, ok := err.(tchannel.SystemError); ok {
 			return call.success, call.resHeaders, err

@@ -123,7 +123,7 @@ func NewServerHTTPRequest(
 	}
 
 	ctx = WithScopeTagsDefault(ctx, scopeTags, endpoint.scope)
-	logger.Append(ctx, logFields...)
+	AppendLogFieldsToContext(ctx, logFields...)
 
 	httpRequest := r.WithContext(ctx)
 

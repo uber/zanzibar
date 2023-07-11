@@ -70,7 +70,7 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	c.metrics.RecordHistogramDuration(ctx, clientLatencyHist, delta)
 	c.duration = delta
 
-	c.contextLogger.Append(ctx, c.logFields()...)
+	AppendLogFieldsToContext(ctx, c.logFields()...)
 }
 
 func (c *tchannelOutboundCall) logFields() []zapcore.Field {

@@ -421,9 +421,6 @@ type ContextLogger interface {
 	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
 
 	SetSkipZanzibarLogs(bool)
-
-	// Append appends the fields to the context.
-	Append(ctx context.Context, fields ...zap.Field)
 }
 
 // NewContextLogger returns a logger that extracts log fields a context before passing through to underlying zap logger.
@@ -443,7 +440,8 @@ type contextLogger struct {
 	skipZanzibarLogs bool
 }
 
-func (c *contextLogger) Append(ctx context.Context, fields ...zap.Field) {
+// AppendLogFieldsToContext is safe to use concurrently.
+func AppendLogFieldsToContext(ctx context.Context, fields ...zap.Field) {
 	v := getSafeFieldsFromContext(ctx)
 	v.append(fields)
 }
