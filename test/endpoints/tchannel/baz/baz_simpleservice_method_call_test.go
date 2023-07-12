@@ -132,6 +132,9 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"hostname",
 		"pid",
 		"Res-Header-client.response.duration",
+		zanzibar.TraceIDKey,
+		zanzibar.TraceSpanKey,
+		zanzibar.TraceSampledKey,
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)

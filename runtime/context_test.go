@@ -619,3 +619,26 @@ func TestTimeoutAndRetry_NotSet(t *testing.T) {
 	tro := GetTimeoutAndRetryOptions(context.Background())
 	assert.Equal(t, tro, (*TimeoutAndRetryOptions)(nil))
 }
+
+func TestSafeLogFields(t *testing.T) {
+	ctx := context.Background()
+	ctx = WithSafeLogFields(ctx)
+	AppendLogFieldsToContext(ctx, zap.String("foo", "bar"))
+	AppendLogFieldsToContext(ctx, zap.String("hello", "world"))
+	fields := GetLogFieldsFromCtx(ctx)
+
+	assert.Len(t, fields, 2)
+	assert.Equal(t, zap.String("foo", "bar"), fields[0])
+	assert.Equal(t, zap.String("hello", "world"), fields[1])
+}
+
+func TestAppendLogFieldsToContext(t *testing.T) {
+	condition := "when context doesn't contain safeLogFields container"
+	t.Run(condition, func(t *testing.T) {
+		ctx := context.Background()
+		AppendLogFieldsToContext(ctx, zap.String("foo", "bar"))
+		fields := GetLogFieldsFromCtx(ctx)
+		assert.NotNil(t, fields)
+		assert.Len(t, fields, 0)
+	})
+}
