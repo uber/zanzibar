@@ -342,7 +342,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
 	}
 
