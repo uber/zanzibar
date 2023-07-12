@@ -25,6 +25,8 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 {{range $i, $svc := .ProtoServices -}}
@@ -216,6 +218,7 @@ func (e *{{$clientName}}) {{$methodName}}(
 			return err
 		}, nil)
 	}
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making grpc call: %s", err)), logFieldErrLocation)
 	callHelper.Finish(ctx, err)
 
 	return ctx, result, err

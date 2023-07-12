@@ -113,11 +113,6 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 	c.metrics.RecordTimer(ctx, clientLatency, delta)
 	c.metrics.RecordHistogramDuration(ctx, clientLatency, delta)
 	var fields []zapcore.Field
-	ctx = WithEndpointRequestHeadersField(ctx, map[string]string{})
-	if c.extractor != nil {
-		fields = append(fields, c.extractor.ExtractLogFields(ctx)...)
-	}
-	fields = append(fields, GetLogFieldsFromCtx(ctx)...)
 	if err != nil {
 		if yarpcerrors.IsStatus(err) {
 			yarpcErr := yarpcerrors.FromError(err)
@@ -126,11 +121,9 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 			errCode.WriteString(yarpcErr.Code().String())
 			c.metrics.IncCounter(ctx, errCode.String(), 1)
 
-			fields = append(fields, zap.Int("code", int(yarpcErr.Code())))
-			fields = append(fields, zap.String("message", yarpcErr.Message()))
-			fields = append(fields, zap.String("name", yarpcErr.Name()))
-		} else {
-			fields = append(fields, zap.Error(err))
+			fields = append(fields, zap.Int("grpc_client_error.code", int(yarpcErr.Code())))
+			fields = append(fields, zap.String("grpc_client_error.message", yarpcErr.Message()))
+			fields = append(fields, zap.String("grpc_client_error.name", yarpcErr.Name()))
 		}
 		c.metrics.IncCounter(ctx, "client.errors", 1)
 		c.contextLogger.WarnZ(ctx, "Failed to send outgoing client gRPC request", fields...)
