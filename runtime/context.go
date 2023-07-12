@@ -49,7 +49,7 @@ const (
 	ctxLogCounterName      = contextFieldKey("ctxLogCounter")
 	ctxLogLevel            = contextFieldKey("ctxLogLevel")
 	ctxTimeoutRetryOptions = contextFieldKey("trOptions")
-	safeFieldsKey          = contextFieldKey("safeFields")
+	safeLogFieldsKey       = contextFieldKey("safeLogFields")
 )
 
 const (
@@ -98,6 +98,12 @@ const (
 type scopeData struct {
 	tags  map[string]string
 	scope tally.Scope // optional - may not be used by zanzibar users who use
+}
+
+// safeLogFields is a log fields container that is safe to use concurrently.
+type safeLogFields struct {
+	mu     sync.Mutex
+	fields []zap.Field
 }
 
 // WithTimeAndRetryOptions returns a context with timeout and retry options.
@@ -205,45 +211,28 @@ type safeFields struct {
 	fields []zap.Field
 }
 
-// WithSafeLogFields initiates empty safeFields in the context.
-func WithSafeLogFields(ctx context.Context) context.Context {
-	return context.WithValue(ctx, safeFieldsKey, &safeFields{})
-}
-
-func (sf *safeFields) append(fields []zap.Field) {
-	sf.mu.Lock()
-	sf.fields = append(sf.fields, fields...)
-	sf.mu.Unlock()
-}
-
-func (sf *safeFields) getFields() []zap.Field {
-	sf.mu.Lock()
-	defer sf.mu.Unlock()
-	return sf.fields
-}
-
-func getSafeFieldsFromContext(ctx context.Context) *safeFields {
-	if v, ok := ctx.Value(safeFieldsKey).(*safeFields); ok {
-		return v
-	}
-	return &safeFields{}
-}
-
 // WithLogFields returns a new context with the given log fields attached to context.Context
 //
 // Deprecated: See AppendLogFieldsToContext.
 func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context {
-	sf := getSafeFieldsFromContext(ctx)
+	sf := getSafeLogFieldsFromContext(ctx)
 	sf.append(newFields)
-	return context.WithValue(ctx, safeFieldsKey, sf)
+	return context.WithValue(ctx, safeLogFieldsKey, sf)
+}
+
+// AppendLogFieldsToContext is safe to use concurrently. It doesn't require caller
+// to update the context. The context should have safeLogFields value set using WithSafeLogFields
+// (or WithLogFields for backward compatibility) before.
+func AppendLogFieldsToContext(ctx context.Context, fields ...zap.Field) {
+	v := getSafeLogFieldsFromContext(ctx)
+	v.append(fields)
 }
 
 // GetLogFieldsFromCtx returns the log fields attached to the context.Context
 func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
 	if ctx != nil {
-		v := ctx.Value(safeFieldsKey)
-		if v != nil {
-			return v.(*safeFields).getFields()
+		if v, ok := ctx.Value(safeLogFieldsKey).(*safeLogFields); ok {
+			return v.getFields()
 		}
 	}
 	return []zap.Field{}
@@ -440,13 +429,6 @@ type contextLogger struct {
 	skipZanzibarLogs bool
 }
 
-// AppendLogFieldsToContext is safe to use concurrently. The context should
-// have safeFields value set using WithSafeLogFields before.
-func AppendLogFieldsToContext(ctx context.Context, fields ...zap.Field) {
-	v := getSafeFieldsFromContext(ctx)
-	v.append(fields)
-}
-
 func (c *contextLogger) Debug(ctx context.Context, msg string, userFields ...zap.Field) context.Context {
 	c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
 	return ctx
@@ -582,4 +564,28 @@ func GetAccumulatedLogContext(ctx context.Context, c *contextLogger, msg string,
 		return ctx
 	}
 	return accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, logLevel)
+}
+
+// WithSafeLogFields initiates empty safeLogFields in the context.
+func WithSafeLogFields(ctx context.Context) context.Context {
+	return context.WithValue(ctx, safeLogFieldsKey, &safeLogFields{})
+}
+
+func (sf *safeLogFields) append(fields []zap.Field) {
+	sf.mu.Lock()
+	sf.fields = append(sf.fields, fields...)
+	sf.mu.Unlock()
+}
+
+func (sf *safeLogFields) getFields() []zap.Field {
+	sf.mu.Lock()
+	defer sf.mu.Unlock()
+	return sf.fields
+}
+
+func getSafeLogFieldsFromContext(ctx context.Context) *safeLogFields {
+	if v, ok := ctx.Value(safeLogFieldsKey).(*safeLogFields); ok {
+		return v
+	}
+	return &safeLogFields{}
 }
