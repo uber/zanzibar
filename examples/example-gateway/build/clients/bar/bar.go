@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -43,6 +44,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::bar")
 
 // Client defines bar client interface.
 type Client interface {
@@ -582,6 +585,7 @@ func (c *barClient) ArgWithHeaders(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -1478,6 +1482,7 @@ func (c *barClient) DeleteFoo(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, nil, headerErr
 	}
 
@@ -2466,6 +2471,7 @@ func (c *barClient) EchoBinary(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2554,6 +2560,7 @@ func (c *barClient) EchoBool(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2648,6 +2655,7 @@ func (c *barClient) EchoDouble(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2742,6 +2750,7 @@ func (c *barClient) EchoEnum(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2836,6 +2845,7 @@ func (c *barClient) EchoI16(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2930,6 +2940,7 @@ func (c *barClient) EchoI32(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3024,6 +3035,7 @@ func (c *barClient) EchoI32Map(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3118,6 +3130,7 @@ func (c *barClient) EchoI64(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3212,6 +3225,7 @@ func (c *barClient) EchoI8(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3306,6 +3320,7 @@ func (c *barClient) EchoString(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3400,6 +3415,7 @@ func (c *barClient) EchoStringList(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3494,6 +3510,7 @@ func (c *barClient) EchoStringMap(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3588,6 +3605,7 @@ func (c *barClient) EchoStringSet(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3682,6 +3700,7 @@ func (c *barClient) EchoStructList(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3776,6 +3795,7 @@ func (c *barClient) EchoStructSet(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3870,6 +3890,7 @@ func (c *barClient) EchoTypedef(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 

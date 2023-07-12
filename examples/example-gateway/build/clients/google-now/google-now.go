@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/zap"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
@@ -39,6 +40,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::google-now")
 
 // Client defines google-now client interface.
 type Client interface {
@@ -243,6 +246,7 @@ func (c *googleNowClient) AddCredentials(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, nil, headerErr
 	}
 
@@ -330,6 +334,7 @@ func (c *googleNowClient) CheckCredentials(
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, nil, headerErr
 	}
 

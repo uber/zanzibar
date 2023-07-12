@@ -40,6 +40,8 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::contacts")
+
 // Client defines contacts client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient

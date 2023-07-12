@@ -1488,6 +1488,8 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
@@ -1801,6 +1803,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ReqHeaders }}
 	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return {{ if eq .ResponseType "" -}}
 			ctx, nil, headerErr
 			{{- else -}}
@@ -2026,7 +2029,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 19491, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 19671, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
