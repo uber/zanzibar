@@ -111,18 +111,17 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 	}
 
 	actualHeaders := req.httpReq.Header
-
+	missingHeaders := make([]string, 0)
 	for _, headerName := range expected {
 		// headerName is case insensitive, http.Header Get canonicalize the key
 		headerValue := actualHeaders.Get(headerName)
 		if headerValue == "" {
-			err := errors.New("Missing mandatory header: " + headerName)
-			req.ContextLogger.WarnZ(req.ctx, "Got outbound request without mandatory header",
-				zap.Error(err), LogFieldErrTypeBadRequest, LogFieldErrLocClient)
-			return err
+			missingHeaders = append(missingHeaders, headerName)
 		}
 	}
-
+	if len(missingHeaders) > 0 {
+		return errors.New("missing mandatory headers: " + strings.Join(missingHeaders, ","))
+	}
 	return nil
 }
 
