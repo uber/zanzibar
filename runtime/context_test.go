@@ -619,3 +619,15 @@ func TestTimeoutAndRetry_NotSet(t *testing.T) {
 	tro := GetTimeoutAndRetryOptions(context.Background())
 	assert.Equal(t, tro, (*TimeoutAndRetryOptions)(nil))
 }
+
+func TestSafeLogFields(t *testing.T) {
+	ctx := context.Background()
+	ctx = WithSafeLogFields(ctx)
+	AppendLogFieldsToContext(ctx, zap.String("foo", "bar"))
+	AppendLogFieldsToContext(ctx, zap.String("hello", "world"))
+	fields := GetLogFieldsFromCtx(ctx)
+
+	assert.Len(t, fields, 2)
+	assert.Equal(t, zap.String("foo", "bar"), fields[0])
+	assert.Equal(t, zap.String("hello", "world"), fields[1])
+}
