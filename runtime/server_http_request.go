@@ -95,10 +95,8 @@ func NewServerHTTPRequest(
 		headers := map[string]string{}
 
 		for k, v := range r.Header {
-			if !DefaultSensitiveHeaders[strings.ToLower(k)] {
-				// TODO: this 0th element logic is probably not correct
-				headers[k] = v[0]
-			}
+			// TODO: this 0th element logic is probably not correct
+			headers[k] = v[0]
 		}
 		ctx = WithEndpointRequestHeadersField(ctx, headers)
 		for k, v := range endpoint.contextExtractor.ExtractScopeTags(ctx) {
