@@ -567,8 +567,8 @@ func WithSafeLogFields(ctx context.Context) context.Context {
 
 func (sf *safeLogFields) append(fields []zap.Field) {
 	sf.mu.Lock()
+	defer sf.mu.Unlock()
 	sf.fields = append(sf.fields, fields...)
-	sf.mu.Unlock()
 }
 
 func (sf *safeLogFields) getFields() []zap.Field {
