@@ -33,6 +33,8 @@ const CustomTemplateTesting = "test"
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
@@ -340,6 +342,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
 	}
 

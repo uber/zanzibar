@@ -136,9 +136,8 @@ func (req *ClientHTTPRequest) WriteJSON(
 		var err error
 		rawBody, err = req.jsonWrapper.Marshal(body)
 		if err != nil {
-			req.ContextLogger.ErrorZ(req.ctx, "Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(
-				err, "Could not serialize %s.%s request json",
+				err, "Could not serialize %s.%s request object",
 				req.ClientID, req.MethodName,
 			)
 		}
@@ -165,8 +164,6 @@ func (req *ClientHTTPRequest) WriteBytes(
 	}
 
 	if httpErr != nil {
-		req.ContextLogger.ErrorZ(req.ctx, "Could not create outbound request", zap.Error(httpErr),
-			LogFieldErrTypeBadRequest, LogFieldErrLocClient)
 		return errors.Wrapf(
 			httpErr, "Could not create outbound %s.%s request",
 			req.ClientID, req.MethodName,
