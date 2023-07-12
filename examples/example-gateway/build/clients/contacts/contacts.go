@@ -242,7 +242,7 @@ func (c *contactsClient) SaveContacts(
 
 	err := req.WriteJSON("POST", fullURL, headers, r.SaveContactsRequest)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -338,7 +338,7 @@ func (c *contactsClient) TestURLURL(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 

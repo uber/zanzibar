@@ -239,7 +239,7 @@ func (c *multiClient) HelloA(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -329,7 +329,7 @@ func (c *multiClient) HelloB(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 

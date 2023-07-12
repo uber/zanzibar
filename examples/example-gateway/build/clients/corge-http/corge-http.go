@@ -315,7 +315,7 @@ func (c *corgeHTTPClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -425,7 +425,7 @@ func (c *corgeHTTPClient) NoContent(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -530,7 +530,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -631,7 +631,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 

@@ -26,6 +26,7 @@ package corgeclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/textproto"
 	"strconv"
 	"strings"
@@ -45,6 +46,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::corge")
 
 // Client defines corge client interface.
 type Client interface {
@@ -350,6 +353,9 @@ func (c *corgeClient) EchoString(
 			err = clientErr
 		}
 	}
+	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making tchannel call: %s", err)), logFieldErrLocation)
+	}
 
 	if err == nil && !success {
 		switch {
@@ -358,7 +364,7 @@ func (c *corgeClient) EchoString(
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
-			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 		}
 	}
 	if err != nil {
@@ -368,7 +374,7 @@ func (c *corgeClient) EchoString(
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeBadResponse, zanzibar.LogFieldErrLocClient)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err

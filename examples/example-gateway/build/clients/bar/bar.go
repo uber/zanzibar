@@ -475,7 +475,7 @@ func (c *barClient) ArgNotStruct(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -582,7 +582,7 @@ func (c *barClient) ArgWithHeaders(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -775,7 +775,7 @@ func (c *barClient) ArgWithManyQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -884,7 +884,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1017,7 +1017,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1109,7 +1109,7 @@ func (c *barClient) ArgWithParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1201,7 +1201,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1293,7 +1293,7 @@ func (c *barClient) ArgWithQueryHeader(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1402,7 +1402,7 @@ func (c *barClient) ArgWithQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1495,7 +1495,7 @@ func (c *barClient) DeleteFoo(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1585,7 +1585,7 @@ func (c *barClient) DeleteWithBody(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1678,7 +1678,7 @@ func (c *barClient) DeleteWithQueryParams(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1762,7 +1762,7 @@ func (c *barClient) Hello(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1881,7 +1881,7 @@ func (c *barClient) ListAndEnum(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1982,7 +1982,7 @@ func (c *barClient) MissingArg(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2084,7 +2084,7 @@ func (c *barClient) NoRequest(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2187,7 +2187,7 @@ func (c *barClient) Normal(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2290,7 +2290,7 @@ func (c *barClient) NormalRecur(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2392,7 +2392,7 @@ func (c *barClient) TooManyArgs(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2504,7 +2504,7 @@ func (c *barClient) EchoBinary(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2595,7 +2595,7 @@ func (c *barClient) EchoBool(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2692,7 +2692,7 @@ func (c *barClient) EchoDouble(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2789,7 +2789,7 @@ func (c *barClient) EchoEnum(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2886,7 +2886,7 @@ func (c *barClient) EchoI16(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2983,7 +2983,7 @@ func (c *barClient) EchoI32(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3080,7 +3080,7 @@ func (c *barClient) EchoI32Map(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3177,7 +3177,7 @@ func (c *barClient) EchoI64(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3274,7 +3274,7 @@ func (c *barClient) EchoI8(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3371,7 +3371,7 @@ func (c *barClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3468,7 +3468,7 @@ func (c *barClient) EchoStringList(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3565,7 +3565,7 @@ func (c *barClient) EchoStringMap(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3662,7 +3662,7 @@ func (c *barClient) EchoStringSet(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3759,7 +3759,7 @@ func (c *barClient) EchoStructList(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3856,7 +3856,7 @@ func (c *barClient) EchoStructSet(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3953,7 +3953,7 @@ func (c *barClient) EchoTypedef(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
