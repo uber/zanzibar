@@ -378,6 +378,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 

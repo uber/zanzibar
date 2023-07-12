@@ -192,9 +192,6 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)
 	err := req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	if err != nil {
-		/* coverage ignore next line */
-		req.ContextLogger.ErrorZ(req.ctx, "Fail to inject span to headers", zap.Error(err))
-		/* coverage ignore next line */
 		return nil, err
 	}
 	var retryCount int64 = 1
@@ -210,9 +207,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	span.Finish()
 
 	if err != nil {
-		req.ContextLogger.ErrorZ(req.ctx, fmt.Sprintf("Could not make http outbound %s.%s request",
-			req.ClientID, req.MethodName), zap.Error(err), LogFieldErrLocClient,
-			zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
+		AppendLogFieldsToContext(req.ctx, zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
 		return nil, errors.Wrapf(err, "errors while making outbound %s.%s request", req.ClientID, req.MethodName)
 	}
 
@@ -280,7 +275,6 @@ func (req *ClientHTTPRequest) executeDo(ctx context.Context) (*http.Response, er
 func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
 	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
 	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
-		req.ContextLogger.ErrorZ(req.ctx, "Failed to inject tracing span.", zap.Error(err))
 		return err
 	}
 
