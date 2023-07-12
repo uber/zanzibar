@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	"go.uber.org/zap"
 	netContext "golang.org/x/net/context"
 )
 
@@ -191,8 +193,10 @@ func (c *TChannelClient) call(
 
 	call.start()
 
+	ctx = call.contextLogger.WarnZ(ctx, "Tchannel call started")
 	reqUUID := RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		ctx = context.WithValue(ctx, "requestUUID", reqUUID)
 		if reqHeaders == nil {
 			reqHeaders = make(map[string]string)
 		}
@@ -235,49 +239,67 @@ func (c *TChannelClient) call(
 		ctxBuilder.SetShardKey(sk)
 	}
 
-	ctx, cancel := ctxBuilder.Build()
+	ctx1, cancel := ctxBuilder.Build()
+	ctx = call.contextLogger.WarnZ(ctx1, "context headers", zap.Any("context-headers1", ctx1.Headers()))
 	defer cancel()
+
+	deadline, ok := ctx.Deadline()
+	if ok {
+		ctx = call.contextLogger.WarnZ(ctx, "ctxBuilder.Build", zap.Time("tchannel-client-deadline", deadline))
+	}
 
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
 		call.resHeaders = map[string]string{}
 		call.success = false
 
 		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
+		ctx = call.contextLogger.Warn(ctx, fmt.Sprintf("Initiating tchannel call with attempt : %d", rs.Attempt))
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
 			RequestState:    rs,
 			RoutingDelegate: GetRoutingDelegateFromCtx(ctx),
 		})
+		ctx = call.contextLogger.Warn(ctx, "tchannel call tried", zap.Bool("call-nil", call.call == nil), zap.Bool("call-error", cerr != nil))
 		if cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel call", zap.String("cerr", cerr.Error()))
 			return errors.Wrapf(
 				cerr, "Could not begin outbound %s.%s (%s %s) request",
 				call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
 			)
 		}
 
+		if call.call != nil && call.call.Response() != nil {
+			ctx = call.contextLogger.Warn(ctx, fmt.Sprintf("outbound call response format : %s", call.call.Response().Format().String()))
+		}
 		// trace request
 		reqHeaders = tchannel.InjectOutboundSpan(call.call.Response(), reqHeaders)
 
 		if cerr := call.writeReqHeaders(reqHeaders); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel req headers", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 		if cerr := call.writeReqBody(ctx, req); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel req body", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 
 		response := call.call.Response()
 		if cerr = call.readResHeaders(response); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel res headers", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 		if cerr = call.readResBody(ctx, response, resp); cerr != nil {
+			ctx = call.contextLogger.Warn(ctx, "Error in tchannel res body", zap.String("cerr", cerr.Error()))
 			return cerr
 		}
 
+		ctx = call.contextLogger.Warn(ctx, "No Error in tchannel call", zap.Bool("cerr", cerr != nil))
 		return cerr
 	})
 
 	if err != nil {
+		ctx = call.contextLogger.Warn(ctx, "Error in tchannel final", zap.String("tchannel-err", err.Error()))
 		// Do not wrap system errors.
 		if _, ok := err.(tchannel.SystemError); ok {
 			return call.success, call.resHeaders, err
