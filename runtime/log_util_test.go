@@ -18,20 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package zanzibar
+package zanzibar_test
 
-import "go.uber.org/zap"
+import (
+	"testing"
 
-// LogFieldErrTypeClientException is a log field used to tag errors corresponding
-// to exceptions defined in client thrifts.
-var LogFieldErrTypeClientException = LogFieldErrorType("client_exception")
+	"github.com/stretchr/testify/assert"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
+)
 
-// LogFieldErrorType returns error_type log field with given value.
-func LogFieldErrorType(errType string) zap.Field {
-	return zap.String(logFieldErrorType, errType)
+func TestLogFieldErrorType(t *testing.T) {
+	field := zanzibar.LogFieldErrorType("foo")
+	assert.Equal(t, zap.String("error_type", "foo"), field)
 }
 
-// LogFieldErrorLocation returns error_location log field with given value.
-func LogFieldErrorLocation(loc string) zap.Field {
-	return zap.String(logFieldErrorLocation, loc)
+func TestLogFieldErrorLocation(t *testing.T) {
+	field := zanzibar.LogFieldErrorLocation("bar")
+	assert.Equal(t, zap.String("error_location", "bar"), field)
 }
