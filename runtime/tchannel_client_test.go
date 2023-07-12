@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 )
 
@@ -125,4 +124,20 @@ func TestMaxAttemptFieldWithNoSet(t *testing.T) {
 	contextBuilder := tchannel.NewContextBuilder(tChannelClient.timeout).SetParentContext(ctx).SetRetryOptions(&retryOpts)
 	maxAttempts := contextBuilder.RetryOptions.MaxAttempts
 	assert.Equal(t, maxAttempts, 0)
+}
+
+func TestRetryOnDefault(t *testing.T) {
+	methodName := map[string]string{
+		"methodKey": "methodValue",
+	}
+	tChannelClient := &TChannelClient{
+		serviceName: "test",
+		methodNames: methodName,
+		timeout:     1,
+	}
+	ctx := context.TODO()
+	retryOpts := tchannel.RetryOptions{}
+	contextBuilder := tchannel.NewContextBuilder(tChannelClient.timeout).SetParentContext(ctx).SetRetryOptions(&retryOpts)
+	retryOn := contextBuilder.RetryOptions.RetryOn
+	assert.Equal(t, retryOn, tchannel.RetryDefault)
 }
