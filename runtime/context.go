@@ -231,7 +231,7 @@ func getSafeFieldsFromContext(ctx context.Context) *safeFields {
 
 // WithLogFields returns a new context with the given log fields attached to context.Context
 //
-// Deprecated: Use ContextLogger.Append instead.
+// Deprecated: See AppendLogFieldsToContext.
 func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context {
 	sf := getSafeFieldsFromContext(ctx)
 	sf.append(newFields)
@@ -440,7 +440,8 @@ type contextLogger struct {
 	skipZanzibarLogs bool
 }
 
-// AppendLogFieldsToContext is safe to use concurrently.
+// AppendLogFieldsToContext is safe to use concurrently. The context should
+// have safeFields value set using WithSafeLogFields before.
 func AppendLogFieldsToContext(ctx context.Context, fields ...zap.Field) {
 	v := getSafeFieldsFromContext(ctx)
 	v.append(fields)
