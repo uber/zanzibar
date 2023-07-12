@@ -224,8 +224,9 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 // to update the context. The context should have safeLogFields value set using WithSafeLogFields
 // (or WithLogFields for backward compatibility) before.
 func AppendLogFieldsToContext(ctx context.Context, fields ...zap.Field) {
-	v := getSafeLogFieldsFromContext(ctx)
-	v.append(fields)
+	if v := getSafeLogFieldsFromContext(ctx); v != nil {
+		v.append(fields)
+	}
 }
 
 // GetLogFieldsFromCtx returns the log fields attached to the context.Context
@@ -573,8 +574,8 @@ func WithSafeLogFields(ctx context.Context) context.Context {
 
 func (sf *safeLogFields) append(fields []zap.Field) {
 	sf.mu.Lock()
+	defer sf.mu.Unlock()
 	sf.fields = append(sf.fields, fields...)
-	sf.mu.Unlock()
 }
 
 func (sf *safeLogFields) getFields() []zap.Field {
