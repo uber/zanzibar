@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 )
 
