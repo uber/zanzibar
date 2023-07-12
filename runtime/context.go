@@ -206,11 +206,6 @@ func GetShardKeyFromCtx(ctx context.Context) string {
 	return ""
 }
 
-type safeFields struct {
-	mu     sync.Mutex
-	fields []zap.Field
-}
-
 // WithLogFields returns a new context with the given log fields attached to context.Context
 //
 // Deprecated: See AppendLogFieldsToContext.
