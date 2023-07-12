@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -314,6 +315,7 @@ func (c *corgeHTTPClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -338,6 +340,7 @@ func (c *corgeHTTPClient) EchoString(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -422,6 +425,7 @@ func (c *corgeHTTPClient) NoContent(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -446,6 +450,7 @@ func (c *corgeHTTPClient) NoContent(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -525,6 +530,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -549,6 +555,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -624,6 +631,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -648,6 +656,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 

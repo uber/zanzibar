@@ -241,6 +241,7 @@ func (c *googleNowClient) AddCredentials(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -271,6 +272,7 @@ func (c *googleNowClient) AddCredentials(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -329,6 +331,7 @@ func (c *googleNowClient) CheckCredentials(
 
 	err := req.WriteJSON("POST", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating outbound http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -359,6 +362,7 @@ func (c *googleNowClient) CheckCredentials(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
