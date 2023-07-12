@@ -151,7 +151,7 @@ func TestRetryOnSet(t *testing.T) {
 		serviceName: "test",
 		methodNames: methodName,
 		timeout:     1,
-		retryOn:     tchannel.RetryDefault,
+		retryOn:     tchannel.RetryIdempotent,
 	}
 	ctx := context.TODO()
 	retryOpts := tchannel.RetryOptions{}
