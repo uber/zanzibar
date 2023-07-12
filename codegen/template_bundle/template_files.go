@@ -1863,6 +1863,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -1870,6 +1871,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -1882,6 +1884,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -1889,10 +1892,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1906,6 +1911,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
@@ -1915,6 +1921,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -1938,6 +1945,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			return ctx, respHeaders, v.(error)
@@ -1946,6 +1954,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -1959,6 +1968,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -1966,10 +1976,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1998,6 +2010,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 			return ctx, defaultRes, respHeaders, v.(error)
@@ -2006,6 +2019,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
@@ -2031,7 +2045,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 19938, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 21052, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2445,6 +2459,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -2452,6 +2467,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -2464,6 +2480,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -2471,10 +2488,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2488,6 +2507,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
@@ -2497,6 +2517,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -2520,6 +2541,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			return ctx, respHeaders, v.(error)
@@ -2528,6 +2550,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -2541,6 +2564,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -2548,10 +2572,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2580,6 +2606,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 			return ctx, defaultRes, respHeaders, v.(error)
@@ -2588,6 +2615,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
@@ -2613,7 +2641,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19965, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21079, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -522,6 +522,7 @@ func (c *customBarClient) ArgNotStruct(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 
@@ -532,6 +533,7 @@ func (c *customBarClient) ArgNotStruct(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, v.(error)
@@ -539,6 +541,7 @@ func (c *customBarClient) ArgNotStruct(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -635,10 +638,12 @@ func (c *customBarClient) ArgWithHeaders(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -647,6 +652,7 @@ func (c *customBarClient) ArgWithHeaders(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -822,10 +828,12 @@ func (c *customBarClient) ArgWithManyQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -834,6 +842,7 @@ func (c *customBarClient) ArgWithManyQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -931,10 +940,12 @@ func (c *customBarClient) ArgWithNearDupQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -943,6 +954,7 @@ func (c *customBarClient) ArgWithNearDupQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1064,10 +1076,12 @@ func (c *customBarClient) ArgWithNestedQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1076,6 +1090,7 @@ func (c *customBarClient) ArgWithNestedQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1156,10 +1171,12 @@ func (c *customBarClient) ArgWithParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1168,6 +1185,7 @@ func (c *customBarClient) ArgWithParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1248,10 +1266,12 @@ func (c *customBarClient) ArgWithParamsAndDuplicateFields(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1260,6 +1280,7 @@ func (c *customBarClient) ArgWithParamsAndDuplicateFields(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1340,10 +1361,12 @@ func (c *customBarClient) ArgWithQueryHeader(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1352,6 +1375,7 @@ func (c *customBarClient) ArgWithQueryHeader(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1449,10 +1473,12 @@ func (c *customBarClient) ArgWithQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1461,6 +1487,7 @@ func (c *customBarClient) ArgWithQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1546,12 +1573,14 @@ func (c *customBarClient) DeleteFoo(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -1630,12 +1659,14 @@ func (c *customBarClient) DeleteWithBody(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -1723,12 +1754,14 @@ func (c *customBarClient) DeleteWithQueryParams(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -1808,10 +1841,12 @@ func (c *customBarClient) Hello(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1825,6 +1860,7 @@ func (c *customBarClient) Hello(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -1832,6 +1868,7 @@ func (c *customBarClient) Hello(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -1927,10 +1964,12 @@ func (c *customBarClient) ListAndEnum(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1942,6 +1981,7 @@ func (c *customBarClient) ListAndEnum(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -1949,6 +1989,7 @@ func (c *customBarClient) ListAndEnum(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2028,10 +2069,12 @@ func (c *customBarClient) MissingArg(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2044,6 +2087,7 @@ func (c *customBarClient) MissingArg(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -2051,6 +2095,7 @@ func (c *customBarClient) MissingArg(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2130,10 +2175,12 @@ func (c *customBarClient) NoRequest(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2146,6 +2193,7 @@ func (c *customBarClient) NoRequest(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -2153,6 +2201,7 @@ func (c *customBarClient) NoRequest(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2233,10 +2282,12 @@ func (c *customBarClient) Normal(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2249,6 +2300,7 @@ func (c *customBarClient) Normal(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -2256,6 +2308,7 @@ func (c *customBarClient) Normal(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2336,10 +2389,12 @@ func (c *customBarClient) NormalRecur(
 		var responseBody clientsIDlClientsBarBar.BarResponseRecur
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2351,6 +2406,7 @@ func (c *customBarClient) NormalRecur(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -2358,6 +2414,7 @@ func (c *customBarClient) NormalRecur(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2438,10 +2495,12 @@ func (c *customBarClient) TooManyArgs(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2454,6 +2513,7 @@ func (c *customBarClient) TooManyArgs(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -2463,6 +2523,7 @@ func (c *customBarClient) TooManyArgs(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -2470,6 +2531,7 @@ func (c *customBarClient) TooManyArgs(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2554,12 +2616,14 @@ func (c *customBarClient) EchoBinary(
 	case 200:
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2645,10 +2709,12 @@ func (c *customBarClient) EchoBool(
 		var responseBody bool
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2656,6 +2722,7 @@ func (c *customBarClient) EchoBool(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2741,10 +2808,12 @@ func (c *customBarClient) EchoDouble(
 		var responseBody float64
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2752,6 +2821,7 @@ func (c *customBarClient) EchoDouble(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2837,10 +2907,12 @@ func (c *customBarClient) EchoEnum(
 		var responseBody clientsIDlClientsBarBar.Fruit
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2848,6 +2920,7 @@ func (c *customBarClient) EchoEnum(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -2933,10 +3006,12 @@ func (c *customBarClient) EchoI16(
 		var responseBody int16
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2944,6 +3019,7 @@ func (c *customBarClient) EchoI16(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3029,10 +3105,12 @@ func (c *customBarClient) EchoI32(
 		var responseBody int32
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3040,6 +3118,7 @@ func (c *customBarClient) EchoI32(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3125,10 +3204,12 @@ func (c *customBarClient) EchoI32Map(
 		var responseBody map[int32]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3136,6 +3217,7 @@ func (c *customBarClient) EchoI32Map(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3221,10 +3303,12 @@ func (c *customBarClient) EchoI64(
 		var responseBody int64
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3232,6 +3316,7 @@ func (c *customBarClient) EchoI64(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3317,10 +3402,12 @@ func (c *customBarClient) EchoI8(
 		var responseBody int8
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3328,6 +3415,7 @@ func (c *customBarClient) EchoI8(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3413,10 +3501,12 @@ func (c *customBarClient) EchoString(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3424,6 +3514,7 @@ func (c *customBarClient) EchoString(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3509,10 +3600,12 @@ func (c *customBarClient) EchoStringList(
 		var responseBody []string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3520,6 +3613,7 @@ func (c *customBarClient) EchoStringList(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3605,10 +3699,12 @@ func (c *customBarClient) EchoStringMap(
 		var responseBody map[string]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3616,6 +3712,7 @@ func (c *customBarClient) EchoStringMap(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3701,10 +3798,12 @@ func (c *customBarClient) EchoStringSet(
 		var responseBody map[string]struct{}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3712,6 +3811,7 @@ func (c *customBarClient) EchoStringSet(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3797,10 +3897,12 @@ func (c *customBarClient) EchoStructList(
 		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3808,6 +3910,7 @@ func (c *customBarClient) EchoStructList(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3893,10 +3996,12 @@ func (c *customBarClient) EchoStructSet(
 		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3904,6 +4009,7 @@ func (c *customBarClient) EchoStructSet(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -3989,10 +4095,12 @@ func (c *customBarClient) EchoTypedef(
 		var responseBody clientsIDlClientsBarBar.UUID
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -4000,6 +4108,7 @@ func (c *customBarClient) EchoTypedef(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}

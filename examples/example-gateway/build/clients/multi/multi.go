@@ -284,10 +284,12 @@ func (c *multiClient) HelloA(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -295,6 +297,7 @@ func (c *multiClient) HelloA(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -374,10 +377,12 @@ func (c *multiClient) HelloB(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -385,6 +390,7 @@ func (c *multiClient) HelloB(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}

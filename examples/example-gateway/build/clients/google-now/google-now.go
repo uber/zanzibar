@@ -292,12 +292,14 @@ func (c *googleNowClient) AddCredentials(
 	case 202:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -382,12 +384,14 @@ func (c *googleNowClient) CheckCredentials(
 	case 202:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}

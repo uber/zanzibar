@@ -360,10 +360,12 @@ func (c *corgeHTTPClient) EchoString(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -371,6 +373,7 @@ func (c *corgeHTTPClient) EchoString(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
@@ -476,6 +479,7 @@ func (c *corgeHTTPClient) NoContent(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -576,6 +580,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
@@ -676,10 +681,12 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		var responseBody clientsIDlClientsCorgeCorge.Foo
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -692,6 +699,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}

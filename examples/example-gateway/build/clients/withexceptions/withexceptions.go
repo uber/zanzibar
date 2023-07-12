@@ -279,10 +279,12 @@ func (c *withexceptionsClient) Func1(
 		var responseBody clientsIDlClientsWithexceptionsWithexceptions.Response
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -294,6 +296,7 @@ func (c *withexceptionsClient) Func1(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, defaultRes, respHeaders, v.(error)
@@ -301,6 +304,7 @@ func (c *withexceptionsClient) Func1(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
