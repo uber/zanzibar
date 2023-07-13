@@ -125,8 +125,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	logs := allLogs["Finished an incoming server TChannel request"][0]
 	dynamicHeaders := []string{
 		"requestUUID",
-		"timestamp-started",
-		"timestamp-finished",
 		"remoteAddr",
 		"ts",
 		"hostname",
@@ -167,12 +165,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	logs = allLogs["Finished an outgoing client TChannel request"][0]
 	dynamicHeaders = []string{
 		"requestUUID",
-		"remoteAddr",
-		"timestamp-started",
+		"client_remote_addr",
 		"ts",
 		"hostname",
 		"pid",
-		"timestamp-finished",
 		"Client-Req-Header-x-request-uuid",
 		"Client-Req-Header-$tracing$uber-trace-id",
 		zanzibar.TraceIDKey,
@@ -201,10 +197,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"Regionname":           "sf",
 
 		// client specific logs
-		//"clientID":                          "baz",
-		//"clientService":                     "bazService",
-		//"clientThriftMethod":                "SimpleService::call",
-		//"clientMethod":                      "Call",
 		"Client-Req-Header-Device":          "ios",
 		"Client-Req-Header-x-uuid":          "uuid",
 		"Client-Req-Header-Regionname":      "sf",
