@@ -255,7 +255,6 @@ func (router *httpRouter) handleNotFound(
 
 	ctx := r.Context()
 	ctx = WithScopeTagsDefault(ctx, scopeTags, router.gateway.RootScope)
-	ctx = WithSafeLogFields(ctx)
 	r = r.WithContext(ctx)
 	req := NewServerHTTPRequest(w, r, nil, router.notFoundEndpoint)
 	http.NotFound(w, r)
@@ -275,7 +274,6 @@ func (router *httpRouter) handleMethodNotAllowed(
 
 	ctx := r.Context()
 	ctx = WithScopeTagsDefault(ctx, scopeTags, router.gateway.RootScope)
-	ctx = WithSafeLogFields(ctx)
 	r = r.WithContext(ctx)
 	req := NewServerHTTPRequest(w, r, nil, router.methodNotAllowedEndpoint)
 	http.Error(w,
