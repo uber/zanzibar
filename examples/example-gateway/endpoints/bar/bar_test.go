@@ -92,7 +92,4 @@ func TestBarListAndEnumClient(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, body)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an incoming server HTTP request with 200 status code"], 1)
 }

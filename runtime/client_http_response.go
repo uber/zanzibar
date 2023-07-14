@@ -109,7 +109,6 @@ func (res *ClientHTTPResponse) GetRawBody() []byte {
 func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 	rawBody, err := res.ReadAll()
 	if err != nil {
-		/* coverage ignore next line */
 		return err
 	}
 	return res.UnmarshalBody(v, rawBody)
