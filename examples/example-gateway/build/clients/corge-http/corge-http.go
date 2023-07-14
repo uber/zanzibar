@@ -378,7 +378,7 @@ func (c *corgeHTTPClient) EchoString(
 		}
 	}
 
-	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -485,7 +485,7 @@ func (c *corgeHTTPClient) NoContent(
 		}
 	}
 
-	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -587,7 +587,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 		}
 	}
 
-	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -707,7 +707,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		}
 	}
 
-	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
