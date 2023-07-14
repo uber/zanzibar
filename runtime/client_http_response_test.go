@@ -22,7 +22,6 @@ package zanzibar_test
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"net/http"
 	"testing"
 	"time"
@@ -34,6 +33,7 @@ import (
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"go.uber.org/zap"
 )
 
 func TestReadAndUnmarshalNonStructBody(t *testing.T) {
