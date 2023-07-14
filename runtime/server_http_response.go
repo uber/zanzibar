@@ -113,7 +113,10 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 	}
 
 	if !known {
-		res.contextLogger.WarnZ(ctx, "Unknown status code")
+		res.contextLogger.Error(ctx,
+			"Unknown status code",
+			append(logFields, zap.Int("UnknownStatusCode", res.StatusCode))...,
+		)
 	} else {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
@@ -220,7 +223,7 @@ func (res *ServerHTTPResponse) MarshalResponseJSON(body interface{}) []byte {
 	bytes, err := res.jsonWrapper.Marshal(body)
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
-		res.contextLogger.ErrorZ(ctx, "Could not serialize json response", zap.Error(err))
+		res.contextLogger.Error(ctx, "Could not serialize json response", zap.Error(err))
 		return nil
 	}
 	return bytes

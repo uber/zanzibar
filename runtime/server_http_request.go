@@ -73,7 +73,6 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	ctx := r.Context()
-	logger := endpoint.contextLogger
 
 	// put request log fields on context
 	logFields := []zap.Field{
@@ -109,6 +108,7 @@ func NewServerHTTPRequest(
 	// Overriding the api-environment and default to production
 	apiEnvironment := GetAPIEnvironment(endpoint, r)
 	scopeTags[scopeTagsAPIEnvironment] = apiEnvironment
+	logFields = append(logFields, zap.String(apienvironmentKey, apiEnvironment))
 
 	// Overriding the environment for shadow requests
 	if endpoint.config != nil {
@@ -117,15 +117,17 @@ func NewServerHTTPRequest(
 			endpoint.config.ContainsKey("shadowRequestHeader") &&
 			r.Header.Get(endpoint.config.MustGetString("shadowRequestHeader")) != "" {
 			scopeTags[environmentKey] = shadowEnvironment
+			logFields = append(logFields, zap.String(environmentKey, shadowEnvironment))
 		}
 	}
 
 	ctx = WithScopeTagsDefault(ctx, scopeTags, endpoint.scope)
-	AppendLogFieldsToContext(ctx, logFields...)
+	ctx = WithLogFields(ctx, logFields...)
 
 	httpRequest := r.WithContext(ctx)
 
 	scope := getScope(ctx, endpoint.scope) // use the calculated scope instead of making a new one
+	logger := endpoint.contextLogger
 
 	req := &ServerHTTPRequest{
 		httpRequest:   httpRequest,
