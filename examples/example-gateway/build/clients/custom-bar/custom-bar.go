@@ -547,6 +547,7 @@ func (c *customBarClient) ArgNotStruct(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -658,6 +659,7 @@ func (c *customBarClient) ArgWithHeaders(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -848,6 +850,7 @@ func (c *customBarClient) ArgWithManyQueryParams(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -960,6 +963,7 @@ func (c *customBarClient) ArgWithNearDupQueryParams(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1096,6 +1100,7 @@ func (c *customBarClient) ArgWithNestedQueryParams(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1191,6 +1196,7 @@ func (c *customBarClient) ArgWithParams(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1286,6 +1292,7 @@ func (c *customBarClient) ArgWithParamsAndDuplicateFields(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1381,6 +1388,7 @@ func (c *customBarClient) ArgWithQueryHeader(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1493,6 +1501,7 @@ func (c *customBarClient) ArgWithQueryParams(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1586,6 +1595,7 @@ func (c *customBarClient) DeleteFoo(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1672,6 +1682,7 @@ func (c *customBarClient) DeleteWithBody(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1767,6 +1778,7 @@ func (c *customBarClient) DeleteWithQueryParams(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1875,6 +1887,7 @@ func (c *customBarClient) Hello(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1997,6 +2010,7 @@ func (c *customBarClient) ListAndEnum(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2104,6 +2118,7 @@ func (c *customBarClient) MissingArg(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2211,6 +2226,7 @@ func (c *customBarClient) NoRequest(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2319,6 +2335,7 @@ func (c *customBarClient) Normal(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2426,6 +2443,7 @@ func (c *customBarClient) NormalRecur(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2545,6 +2563,7 @@ func (c *customBarClient) TooManyArgs(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2637,6 +2656,7 @@ func (c *customBarClient) EchoBinary(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2736,6 +2756,7 @@ func (c *customBarClient) EchoBool(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2835,6 +2856,7 @@ func (c *customBarClient) EchoDouble(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2934,6 +2956,7 @@ func (c *customBarClient) EchoEnum(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3033,6 +3056,7 @@ func (c *customBarClient) EchoI16(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3132,6 +3156,7 @@ func (c *customBarClient) EchoI32(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3231,6 +3256,7 @@ func (c *customBarClient) EchoI32Map(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3330,6 +3356,7 @@ func (c *customBarClient) EchoI64(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3429,6 +3456,7 @@ func (c *customBarClient) EchoI8(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3528,6 +3556,7 @@ func (c *customBarClient) EchoString(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3627,6 +3656,7 @@ func (c *customBarClient) EchoStringList(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3726,6 +3756,7 @@ func (c *customBarClient) EchoStringMap(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3825,6 +3856,7 @@ func (c *customBarClient) EchoStringSet(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3924,6 +3956,7 @@ func (c *customBarClient) EchoStructList(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -4023,6 +4056,7 @@ func (c *customBarClient) EchoStructSet(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -4122,6 +4156,7 @@ func (c *customBarClient) EchoTypedef(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),

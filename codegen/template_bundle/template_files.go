@@ -2029,7 +2029,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 	}
 	{{end}}
-
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
@@ -2050,7 +2050,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 21304, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 21458, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2627,7 +2627,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 	}
 	{{end}}
-
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
@@ -2648,7 +2648,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21331, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21485, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -304,6 +304,7 @@ func (c *googleNowClient) AddCredentials(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -396,6 +397,7 @@ func (c *googleNowClient) CheckCredentials(
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %s", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
