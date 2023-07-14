@@ -70,7 +70,13 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	c.metrics.RecordHistogramDuration(ctx, clientLatencyHist, delta)
 	c.duration = delta
 
+	// write logs
 	AppendLogFieldsToContext(ctx, c.logFields()...)
+	if err == nil {
+		c.contextLogger.DebugZ(ctx, "Finished an outgoing client TChannel request")
+	} else {
+		c.contextLogger.WarnZ(ctx, "Failed to send outgoing client TChannel request")
+	}
 }
 
 func (c *tchannelOutboundCall) logFields() []zapcore.Field {
