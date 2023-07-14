@@ -192,6 +192,9 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)
 	err := req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	if err != nil {
+		/* coverage ignore next line */
+		req.ContextLogger.ErrorZ(req.ctx, "Fail to inject span to headers", zap.Error(err))
+		/* coverage ignore next line */
 		return nil, err
 	}
 	var retryCount int64 = 1
