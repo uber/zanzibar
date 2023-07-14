@@ -489,7 +489,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
-				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
@@ -555,7 +555,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
-				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
