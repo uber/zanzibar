@@ -1,0 +1,69 @@
+module github.com/uber/zanzibar/v2
+
+go 1.19
+
+require (
+	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
+	github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239
+	github.com/beorn7/perks v1.0.1
+	github.com/buger/jsonparser v1.1.2-0.20210414060732-09bcf22e90f4
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
+	github.com/emicklei/proto v1.9.1-0.20200526182332-448b4e8774b8
+	github.com/fatih/structtag v1.2.0
+	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/gogo/googleapis v1.2.0
+	github.com/gogo/protobuf v1.2.1
+	github.com/gogo/status v1.1.0
+	github.com/golang/mock v1.5.0
+	github.com/golang/protobuf v1.5.2
+	github.com/google/uuid v1.2.1-0.20210331013651-512b657a4288
+	github.com/jessevdk/go-flags v1.4.1-0.20181221193153-c0795c8afcf4
+	github.com/josharian/intern v1.0.1-0.20191216181125-a140101e2404
+	github.com/jteeuwen/go-bindata v3.0.8-0.20180305030458-6025e8de665b+incompatible
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+	github.com/kisielk/errcheck v1.6.1-0.20210520174305-98b1bd1016b6
+	github.com/kisielk/gotool v1.0.0
+	github.com/mailru/easyjson v0.7.7
+	github.com/matttproud/golang_protobuf_extensions v1.0.4
+	github.com/mcuadros/go-jsonschema-generator v0.0.0-20171001215842-821f57ef6082
+	github.com/mitchellh/mapstructure v1.4.2-0.20210112220257-4664f9ee512b
+	github.com/opentracing/opentracing-go v1.2.0
+	github.com/pborman/uuid v1.2.1
+	github.com/pkg/errors v0.9.1
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
+	github.com/prometheus/client_golang v0.8.0
+	github.com/prometheus/client_model v0.2.1-0.20210116133347-0255a22d35ad
+	github.com/prometheus/common v0.25.0
+	github.com/prometheus/procfs v0.0.6
+	github.com/sergi/go-diff v1.2.0
+	github.com/stretchr/testify v1.7.0
+	github.com/twmb/murmur3 v1.1.5
+	github.com/uber-go/mapdecode v1.0.0
+	github.com/uber-go/tally v3.4.0+incompatible
+	github.com/uber/jaeger-client-go v2.28.0+incompatible
+	github.com/uber/jaeger-lib v2.4.1+incompatible
+	github.com/uber/tchannel-go v1.21.2
+	go.uber.org/atomic v1.7.0
+	go.uber.org/automaxprocs v1.4.0
+	go.uber.org/config v1.4.0
+	go.uber.org/dig v1.10.0
+	go.uber.org/fx v1.13.1
+	go.uber.org/multierr v1.7.0
+	go.uber.org/net/metrics v1.3.0
+	go.uber.org/thriftrw v1.29.2
+	go.uber.org/yarpc v1.53.2
+	go.uber.org/zap v1.16.0
+	golang.org/x/mod v0.4.3-0.20210512182355-6088ed88cecd
+	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023
+	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015
+	golang.org/x/text v0.3.7-0.20210503195748-5c7c50ebbd4f
+	golang.org/x/tools v0.1.2-0.20210520182517-2275bb55e0a9
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
+	google.golang.org/genproto v0.0.0-20210520160233-290a1ae68a05
+	google.golang.org/grpc v1.38.0
+	google.golang.org/protobuf v1.26.1-0.20210520194023-50a85913fbce
+	gopkg.in/validator.v2 v2.0.0-20210331031555-b37d688a7fb0
+	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	honnef.co/go/tools v0.0.0-20180920025451-e3ad64cb4ed3
+)
