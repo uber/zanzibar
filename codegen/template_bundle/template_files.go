@@ -2017,6 +2017,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
@@ -2049,7 +2050,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 21178, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 21304, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2614,6 +2615,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
@@ -2646,7 +2648,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21331, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

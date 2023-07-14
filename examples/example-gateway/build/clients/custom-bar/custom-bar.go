@@ -1864,6 +1864,7 @@ func (c *customBarClient) Hello(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
@@ -1985,6 +1986,7 @@ func (c *customBarClient) ListAndEnum(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
@@ -2091,6 +2093,7 @@ func (c *customBarClient) MissingArg(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
@@ -2197,6 +2200,7 @@ func (c *customBarClient) NoRequest(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
@@ -2304,6 +2308,7 @@ func (c *customBarClient) Normal(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
@@ -2410,6 +2415,7 @@ func (c *customBarClient) NormalRecur(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
@@ -2517,6 +2523,7 @@ func (c *customBarClient) TooManyArgs(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 	case 418:
 		allOptions := []interface{}{
@@ -2527,6 +2534,7 @@ func (c *customBarClient) TooManyArgs(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:

@@ -299,6 +299,7 @@ func (c *withexceptionsClient) Func1(
 			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
