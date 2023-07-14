@@ -558,6 +558,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
