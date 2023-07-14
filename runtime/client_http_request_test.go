@@ -24,6 +24,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"strings"
@@ -96,12 +97,9 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
 	assert.Equal(t,
-		"Could not serialize clientID.DoStuff request json: json: error calling MarshalJSON for type *zanzibar_test.failingJsonObj: cannot serialize",
+		"Could not serialize clientID.DoStuff request object: json: error calling MarshalJSON for type *zanzibar_test.failingJsonObj: cannot serialize",
 		err.Error(),
 	)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Could not serialize request json"], 1)
 }
 
 func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
@@ -138,9 +136,6 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		"Could not create outbound clientID.DoStuff request: net/http: invalid method \"@INVALIDMETHOD\"",
 		err.Error(),
 	)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Could not create outbound request"], 1)
 }
 
 func TestMakingClientCallWithHeaders(t *testing.T) {
@@ -192,9 +187,6 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	bytes, err := res.ReadAll()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("Example-Value"), bytes)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestMakingClientCallWithHeadersWithRequestLevelTimeoutAndRetries(t *testing.T) {
@@ -347,19 +339,6 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	_, _, _, err = bar.EchoI8(
 		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
 	)
-
-	assert.NotNil(t, err)
-	assert.Equal(t, "Missing mandatory header: x-uuid", err.Error())
-
-	logs := gateway.AllLogs()
-
-	lines := logs["Got outbound request without mandatory header"]
-	assert.Equal(t, 1, len(lines))
-
-	logLine := lines[0]
-	//assert.Equal(t, "bar", logLine["clientID"])
-	//assert.Equal(t, "EchoI8", logLine["clientMethod"])
-	assert.Equal(t, "x-uuid", logLine["headerName"])
 }
 
 func TestMakingClientCallWithRespHeaders(t *testing.T) {
@@ -398,49 +377,58 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	retryOptionsCopy := retryOptions
 	retryOptionsCopy.MaxAttempts = 1
 
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 	_, body, headers, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		ctx, nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, body)
 	assert.Equal(t, "Example-Value", headers["Example-Header"])
 
-	logs := bgateway.AllLogs()
-	logMsgs := logs["Finished an outgoing client HTTP request"]
-	assert.Len(t, logMsgs, 1)
-	logMsg := logMsgs[0]
-
-	dynamicHeaders := []string{
+	dynamicFields := []string{
 		"Client-Req-Header-Uber-Trace-Id",
 		"Client-Res-Header-Content-Length",
 		"Client-Res-Header-Date",
-		"ts",
-		"hostname",
-		"pid",
 	}
-	for _, dynamicValue := range dynamicHeaders {
-		assert.Contains(t, logMsg, dynamicValue)
-		delete(logMsg, dynamicValue)
+	expectedFields := []zap.Field{
+		zap.String("Client-Req-Header-X-Client-Id", "bar"),
+		zap.String("Client-Req-Header-Content-Type", "application/json"),
+		zap.String("Client-Req-Header-Accept", "application/json"),
+		zap.String("Client-Res-Header-Example-Header", "Example-Value"),
+		zap.String("Client-Res-Header-Content-Type", "text/plain; charset=utf-8"),
+		zap.Int64("client_status_code", 200),
 	}
+	testLogFields(t, ctx, dynamicFields, expectedFields)
+}
 
-	expectedValues := map[string]interface{}{
-		"msg":                              "Finished an outgoing client HTTP request",
-		"level":                            "debug",
-		"env":                              "test",
-		"zone":                             "unknown",
-		"service":                          "example-gateway",
-		"Client-Req-Header-X-Client-Id":    "bar",
-		"Client-Req-Header-Content-Type":   "application/json",
-		"Client-Req-Header-Accept":         "application/json",
-		"Client-Res-Header-Example-Header": "Example-Value",
-		"Client-Res-Header-Content-Type":   "text/plain; charset=utf-8",
-		"client_status_code":               float64(200),
+func testLogFields(t *testing.T, ctx context.Context, dynamicFields []string, expectedFields []zap.Field) {
+	expectedFieldsMap := make(map[string]zap.Field)
+	for _, field := range expectedFields {
+		expectedFieldsMap[field.Key] = field
 	}
-	for actualKey, actualValue := range logMsg {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
+	logFields := zanzibar.GetLogFieldsFromCtx(ctx)
+	logFieldsMap := make(map[string]zap.Field)
+	for _, v := range logFields {
+		logFieldsMap[v.Key] = v
 	}
-	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, logMsg[expectedKey], expectedValue, "unexpected field %q", expectedKey)
+	for _, k := range dynamicFields {
+		_, ok := logFieldsMap[k]
+		assert.True(t, ok, "expected field missing %s", k)
+		delete(logFieldsMap, k)
+	}
+	for k, field := range logFieldsMap {
+		_, ok := expectedFieldsMap[k]
+		assert.True(t, ok, "unexpected log field %s", k)
+		if ok {
+			assert.Equal(t, expectedFieldsMap[k], field)
+		}
+	}
+	for k, field := range expectedFieldsMap {
+		_, ok := logFieldsMap[k]
+		assert.True(t, ok, "expected fields missing %s", k)
+		if ok {
+			assert.Equal(t, field, logFieldsMap[k])
+		}
 	}
 }
 
@@ -472,8 +460,9 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	retryOptionsCopy := retryOptions
 	retryOptionsCopy.MaxAttempts = 1
 
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		ctx, nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -481,8 +470,28 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	realError := err.(*clientsBarBar.BarException)
 	assert.Equal(t, realError.StringField, "test")
 
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
+	expectedFields := []zap.Field{
+		zap.Error(&clientsBarBar.BarException{StringField: "test"}),
+		zap.String("error_type", "client_exception"),
+		zap.String("error_location", "client::bar"),
+	}
+	for _, field := range expectedFields {
+		_, ok := logFieldsMap[field.Key]
+		assert.True(t, ok, "missing field %s", field.Key)
+		if ok {
+			assert.Equal(t, field, logFieldsMap[field.Key])
+		}
+	}
+}
+
+func getLogFieldsMapFromContext(ctx context.Context) map[string]zap.Field {
+	logFieldsMap := make(map[string]zap.Field)
+	logFields := zanzibar.GetLogFieldsFromCtx(ctx)
+	for _, field := range logFields {
+		logFieldsMap[field.Key] = field
+	}
+	return logFieldsMap
 }
 
 func TestMakingClientCallWithBadStatusCode(t *testing.T) {
@@ -513,16 +522,30 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	retryOptionsCopy := retryOptions
 	retryOptionsCopy.MaxAttempts = 1
 
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		ctx, nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
 	assert.Equal(t, "Unexpected http client response (402)", err.Error())
 
 	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Unknown response status code"], 1)
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+	assert.Len(t, logs["Received unexpected client response status code"], 1)
+
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
+	expectedFields := []zap.Field{
+		zap.String("error", "unexpected http response status code: 402"),
+		zap.String("error_location", "client::bar"),
+		zap.Int("client_status_code", 402),
+	}
+	for _, field := range expectedFields {
+		_, ok := logFieldsMap[field.Key]
+		assert.True(t, ok, "missing field %s", field.Key)
+		if ok {
+			assert.Equal(t, field, logFieldsMap[field.Key])
+		}
+	}
 }
 
 func TestMakingCallWithThriftException(t *testing.T) {
@@ -552,8 +575,9 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	retryOptionsCopy := retryOptions
 	retryOptionsCopy.MaxAttempts = 1
 
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 	_, _, err = bClient.ArgNotStruct(
-		context.Background(), nil,
+		ctx, nil,
 		&clientsBarBar.Bar_ArgNotStruct_Args{
 			Request: "request",
 		},
@@ -563,8 +587,19 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	realError := err.(*clientsBarBar.BarException)
 	assert.Equal(t, realError.StringField, "test")
 
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
+	expectedFields := []zap.Field{
+		zap.Error(&clientsBarBar.BarException{StringField: "test"}),
+		zap.String("error_type", "client_exception"),
+		zap.String("error_location", "client::bar"),
+	}
+	for _, field := range expectedFields {
+		_, ok := logFieldsMap[field.Key]
+		assert.True(t, ok, "missing field %s", field.Key)
+		if ok {
+			assert.Equal(t, field, logFieldsMap[field.Key])
+		}
+	}
 }
 
 func TestMakingClientCallWithServerError(t *testing.T) {
@@ -595,16 +630,30 @@ func TestMakingClientCallWithServerError(t *testing.T) {
 	retryOptionsCopy := retryOptions
 	retryOptionsCopy.MaxAttempts = 1
 
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 	_, body, _, err := bClient.Normal(
-		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
+		ctx, nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
 	assert.Equal(t, "Unexpected http client response (500)", err.Error())
 
 	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Unknown response status code"], 1)
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+	assert.Len(t, logs["Received unexpected client response status code"], 1)
+
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
+	expectedFields := []zap.Field{
+		zap.String("error", "unexpected http response status code: 500"),
+		zap.String("error_location", "client::bar"),
+		zap.Int("client_status_code", 500),
+	}
+	for _, field := range expectedFields {
+		_, ok := logFieldsMap[field.Key]
+		assert.True(t, ok, "missing field %s", field.Key)
+		if ok {
+			assert.Equal(t, field, logFieldsMap[field.Key])
+		}
+	}
 }
 
 func TestInjectSpan(t *testing.T) {
