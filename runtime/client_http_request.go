@@ -275,6 +275,7 @@ func (req *ClientHTTPRequest) executeDo(ctx context.Context) (*http.Response, er
 func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
 	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
 	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
+		req.ContextLogger.ErrorZ(req.ctx, "Failed to inject tracing span.", zap.Error(err))
 		return err
 	}
 
