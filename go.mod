@@ -1,4 +1,4 @@
-module github.com/uber/zanzibar/v2
+module github.com/uber/zanzibar
 
 go 1.19
 
