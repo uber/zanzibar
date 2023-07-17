@@ -80,6 +80,10 @@ done
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 
+#TODO: (cp): replace all the import paths
+find "$BUILD_DIR/gen-code" -type f | xargs sed -i '' 's/github.com\/uber\/zanzibar\/examples/\github.com\/uber\/zanzibar\/v2\/examples/g'
+
+
 PROTO_GENCODE_PACKAGE=$($YQ -r '.genCodePackage[".proto"]' "$CONFIG_DIR/build.yaml")
 PROTO_GENCODE_DIR=$(basename "$PROTO_GENCODE_PACKAGE")
 ABS_PROTO_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/$PROTO_GENCODE_DIR")"
@@ -221,15 +225,16 @@ for config_file in ${config_files}; do
 done
 target_dirs=($(echo "$target_dirs" | tr ' ' '\n' | sort | uniq))
 
-echo "Generating JSON Marshal/Unmarshal"
-thriftrw_gofiles=(
-$(find "${target_dirs[@]}" -name "*.go" | \
-	grep -v "versioncheck.go" | \
-	grep -v "easyjson.go" | sort)
-)
-"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
+# TODO: (cp) enable generation
+# echo "Generating JSON Marshal/Unmarshal"
+#thriftrw_gofiles=(
+#$(find "${target_dirs[@]}" -name "*.go" | \
+#	grep -v "versioncheck.go" | \
+#	grep -v "easyjson.go" | sort)
+#)
+#"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
-goimports -w "$ABS_GENCODE_DIR" "$ABS_PROTO_GENCODE_DIR"
+# goimports -w "$ABS_GENCODE_DIR" "$ABS_PROTO_GENCODE_DIR"
 
 end=$(date +%s)
 runtime=$((end - start))
