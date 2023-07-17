@@ -24,9 +24,9 @@
 package module
 
 import (
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce"
+	bounceendpointgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the selective-gateway service module

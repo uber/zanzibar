@@ -12,7 +12,7 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	foo "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/foo/foo"
+	foo "github.com/uber/zanzibar/v2/examples/selective-gateway/build/gen-code/clients/foo/foo"
 )
 
 // suppress unused package warning

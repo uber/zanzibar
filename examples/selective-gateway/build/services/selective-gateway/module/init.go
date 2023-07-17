@@ -24,14 +24,14 @@
 package module
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
-	echoclientmodule "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/module"
-	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
-	mirrorclientmodule "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/module"
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce"
-	bounceendpointmodule "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo"
+	echoclientmodule "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo/module"
+	mirrorclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror"
+	mirrorclientmodule "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror/module"
+	bounceendpointgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce"
+	bounceendpointmodule "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce/module"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // DependenciesTree contains all deps for this service.

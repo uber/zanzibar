@@ -24,10 +24,10 @@
 package module
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
-	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo"
+	mirrorclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the bounce endpoint module

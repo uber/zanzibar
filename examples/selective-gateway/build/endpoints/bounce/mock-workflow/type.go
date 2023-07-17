@@ -24,10 +24,10 @@
 package mockbounceworkflow
 
 import (
-	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo"
-	echoclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
-	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror"
-	mirrorclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo"
+	echoclientgeneratedmock "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo/mock-client"
+	mirrorclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror"
+	mirrorclientgeneratedmock "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror/mock-client"
 )
 
 // MockClientNodes contains mock client dependencies for the bounce endpoint module

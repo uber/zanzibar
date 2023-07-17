@@ -28,15 +28,15 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/zap"
 
-	echoclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
-	mirrorclientgeneratedmock "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
-	module "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
-	workflow "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/workflow"
-	fixtureechoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/clients/echo/fixture"
-	bounceendpointstatic "github.com/uber/zanzibar/examples/selective-gateway/endpoints/bounce"
+	echoclientgeneratedmock "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo/mock-client"
+	mirrorclientgeneratedmock "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror/mock-client"
+	module "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce/module"
+	workflow "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce/workflow"
+	fixtureechoclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/clients/echo/fixture"
+	bounceendpointstatic "github.com/uber/zanzibar/v2/examples/selective-gateway/endpoints/bounce"
 )
 
 // NewBounceBounceWorkflowMock creates a workflow with mock clients
