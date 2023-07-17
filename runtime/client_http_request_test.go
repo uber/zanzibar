@@ -336,9 +336,26 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	retryOptionsCopy := retryOptions
 	retryOptionsCopy.MaxAttempts = 1
 
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 	_, _, _, err = bar.EchoI8(
-		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
+		ctx, nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
 	)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, "missing mandatory headers: x-uuid", err.Error())
+
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
+	expectedFields := []zap.Field{
+		zap.Error(err),
+		zap.String("error_location", "client::bar"),
+	}
+	for _, field := range expectedFields {
+		_, ok := logFieldsMap[field.Key]
+		assert.True(t, ok, "expected field missing: %s", field.Key)
+		if ok {
+			assert.Equal(t, field, logFieldsMap[field.Key])
+		}
+	}
 }
 
 func TestMakingClientCallWithRespHeaders(t *testing.T) {
