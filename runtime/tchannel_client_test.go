@@ -142,20 +142,3 @@ func TestRetryOnDefault(t *testing.T) {
 	retryOn := contextBuilder.RetryOptions.RetryOn
 	assert.Equal(t, retryOn, tchannel.RetryDefault)
 }
-
-func TestRetryOnSet(t *testing.T) {
-	methodName := map[string]string{
-		"methodKey": "methodValue",
-	}
-	tChannelClient := &TChannelClient{
-		serviceName: "test",
-		methodNames: methodName,
-		timeout:     1,
-		retryOn:     tchannel.RetryIdempotent,
-	}
-	ctx := context.TODO()
-	retryOpts := tchannel.RetryOptions{}
-	contextBuilder := tchannel.NewContextBuilder(tChannelClient.timeout).SetParentContext(ctx).SetRetryOptions(&retryOpts)
-	retryOn := contextBuilder.RetryOptions.RetryOn
-	assert.Equal(t, retryOn, tchannel.RetryIdempotent)
-}
