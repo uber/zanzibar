@@ -34,7 +34,7 @@ import (
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/parallelize"
+	"github.com/uber/zanzibar/v2/parallelize"
 )
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains
@@ -1012,6 +1012,11 @@ func readPackageInfo(
 	config *ClassConfig,
 	options Options,
 ) (*PackageInfo, error) {
+	{
+		// TODO: (cp) Hack to support the example gateways
+		packageRoot = strings.Replace(packageRoot, "github.com/uber/zanzibar/examples/", "github.com/uber/zanzibar/v2/examples/", 1)
+	}
+
 	qualifiedClassName := strings.Title(CamelCase(className))
 	qualifiedInstanceName := strings.Title(CamelCase(config.Name))
 	defaultAlias := packageName(qualifiedInstanceName + qualifiedClassName)
@@ -1736,11 +1741,12 @@ func (info *PackageInfo) ModulePackageAlias() string {
 
 // ModuleInstance is a configured module inside a module class directory.
 // For example, this could be
-//     ClassName:    "Endpoint,
-//     ClassType:    "http",
-//     BaseDirectory "/path/to/service/base/"
-//     Directory:    "clients/health/"
-//     InstanceName: "health",
+//
+//	ClassName:    "Endpoint,
+//	ClassType:    "http",
+//	BaseDirectory "/path/to/service/base/"
+//	Directory:    "clients/health/"
+//	InstanceName: "health",
 type ModuleInstance struct {
 	// genSpec is used to share generated specs across dependencies. Generators
 	// should not mutate this directly, and should return the spec as a result.

@@ -32,7 +32,7 @@ import (
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/parallelize"
+	"github.com/uber/zanzibar/v2/parallelize"
 	"gopkg.in/validator.v2"
 )
 
@@ -307,9 +307,13 @@ func generateServiceMock(instance *ModuleInstance, h *PackageHelper, t *Template
 			configPath = filepath.Join("config", configFile)
 		}
 	}
+
+	// TODO: (cp) change packageRoot to get the directory
+	rootPath := strings.Replace(h.packageRoot, "github.com/uber/zanzibar/v2/", "github.com/uber/zanzibar/", 1)
+
 	data := map[string]interface{}{
 		"Instance":       instance,
-		"TestConfigPath": filepath.Join(h.packageRoot, configPath),
+		"TestConfigPath": filepath.Join(rootPath, configPath),
 	}
 	return t.ExecTemplate("service_mock.tmpl", data, h)
 }

@@ -302,6 +302,7 @@ func (p PackageHelper) TypeImportPath(idlFile string) (string, error) {
 	if !ok {
 		return "", errors.Errorf("genCodePackage for %q idl file is not configured in build.yaml", ext)
 	}
+
 	return path.Join(
 		genCodePkg,
 		idlFile[idx+len(p.idlRootDir):len(suffix)],
