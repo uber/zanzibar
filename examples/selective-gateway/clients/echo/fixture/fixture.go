@@ -1,8 +1,8 @@
 package fixture
 
 import (
-	mc "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
-	gen "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
+	mc "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo/mock-client"
+	gen "github.com/uber/zanzibar/v2/examples/selective-gateway/build/proto-gen/clients/echo"
 )
 
 var echoEchoFixtures = &mc.EchoEchoScenarios{
