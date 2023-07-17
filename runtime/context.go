@@ -65,6 +65,8 @@ const (
 	logFieldEndpointHandler    = "endpointHandler"
 	logFieldClientStatusCode   = "client_status_code"
 	logFieldClientRemoteAddr   = "client_remote_addr"
+	logFieldErrorType          = "error_type"
+	logFieldErrorLocation      = "error_location"
 
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"
