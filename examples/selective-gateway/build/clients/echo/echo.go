@@ -25,9 +25,11 @@ package echoclient
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/afex/hystrix-go/hystrix"
 	"go.uber.org/yarpc"
+	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/module"
 	gen "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/echo"
@@ -37,6 +39,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::echo")
 
 // Client defines echo client interface.
 type Client interface {
@@ -202,6 +206,7 @@ func (e *echoClient) EchoEcho(
 			return err
 		}, nil)
 	}
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making grpc call: %s", err)), logFieldErrLocation)
 	callHelper.Finish(ctx, err)
 
 	return ctx, result, err

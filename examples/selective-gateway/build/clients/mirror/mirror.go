@@ -25,9 +25,11 @@ package mirrorclient
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/afex/hystrix-go/hystrix"
 	"go.uber.org/yarpc"
+	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/module"
 	gen "github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
@@ -37,6 +39,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::mirror")
 
 // Client defines mirror client interface.
 type Client interface {
@@ -212,6 +216,7 @@ func (e *mirrorClient) MirrorMirror(
 			return err
 		}, nil)
 	}
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making grpc call: %s", err)), logFieldErrLocation)
 	callHelper.Finish(ctx, err)
 
 	return ctx, result, err
@@ -253,6 +258,7 @@ func (e *mirrorClient) MirrorInternalMirror(
 			return err
 		}, nil)
 	}
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making grpc call: %s", err)), logFieldErrLocation)
 	callHelper.Finish(ctx, err)
 
 	return ctx, result, err

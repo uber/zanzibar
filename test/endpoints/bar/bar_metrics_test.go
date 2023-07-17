@@ -195,8 +195,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.True(t, keyFound, fmt.Sprintf("expected the key: %s to be in metrics", key))
 
 	allLogs := gateway.AllLogs()
-
-	logMsgs := allLogs["Finished an outgoing client HTTP request"]
+	logMsgs := allLogs["Finished an incoming server HTTP request with 200 status code"]
 	assert.Len(t, logMsgs, 1)
 	logMsg := logMsgs[0]
 	dynamicHeaders := []string{
@@ -221,7 +220,7 @@ func TestCallMetrics(t *testing.T) {
 	expectedValues := map[string]interface{}{
 		"env":                            "test",
 		"level":                          "debug",
-		"msg":                            "Finished an outgoing client HTTP request",
+		"msg":                            "Finished an incoming server HTTP request with 200 status code",
 		"method":                         "POST",
 		"pathname":                       "/bar/bar-path",
 		"Client-Req-Header-X-Client-Id":  "bar",
@@ -241,6 +240,8 @@ func TestCallMetrics(t *testing.T) {
 		"User-Agent":                     "Go-http-client/1.1",
 		"Accept-Encoding":                "gzip",
 		"apienvironment":                 "production",
+		"Res-Header-Content-Type":        "application/json",
+		"statusCode":                     float64(200),
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
