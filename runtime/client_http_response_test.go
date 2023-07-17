@@ -33,6 +33,7 @@ import (
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"go.uber.org/zap"
 )
 
 func TestReadAndUnmarshalNonStructBody(t *testing.T) {
@@ -92,9 +93,6 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	var resp string
 	assert.NoError(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "foo", resp)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
@@ -154,10 +152,6 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	var resp string
 	assert.Error(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "", resp)
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Could not parse response json"], 1)
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestUnknownStatusCode(t *testing.T) {
@@ -213,7 +207,7 @@ func TestUnknownStatusCode(t *testing.T) {
 		true,
 	)
 
-	ctx := context.Background()
+	ctx := zanzibar.WithSafeLogFields(context.Background())
 
 	req := zanzibar.NewClientHTTPRequest(ctx, "bar", "echo", "bar::echo", client)
 
@@ -228,18 +222,15 @@ func TestUnknownStatusCode(t *testing.T) {
 	assert.Equal(t, "", resp)
 	assert.Equal(t, 999, res.StatusCode)
 
-	logLines := bgateway.Logs("error", "Could not emit statusCode metric")
-	assert.NotNil(t, logLines)
-	assert.Equal(t, 1, len(logLines))
-
-	lineStruct := logLines[0]
-	code := lineStruct["UnknownStatusCode"].(float64)
-	assert.Equal(t, 999.0, code)
-
 	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Could not parse response json"], 1)
-	assert.Len(t, logs["Could not emit statusCode metric"], 1)
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+	assert.Len(t, logs["Received unknown status code from client"], 1)
+
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
+	_, ok := logFieldsMap["client_status_code"]
+	assert.True(t, ok, "missing field client_status_code")
+	if ok {
+		assert.Equal(t, zap.Int("client_status_code", 999), logFieldsMap["client_status_code"])
+	}
 }
 
 func TestNotFollowRedirect(t *testing.T) {
@@ -303,9 +294,6 @@ func TestNotFollowRedirect(t *testing.T) {
 	assert.Equal(t, "", resp)
 	assert.Equal(t, 303, res.StatusCode)
 	assert.Equal(t, redirectURI, res.Header["Location"][0])
-
-	logs := bgateway.AllLogs()
-	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 type myJson struct{}
