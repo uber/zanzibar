@@ -1,5 +1,5 @@
 config:
-  path: github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel
+  path: github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example_tchannel
   schema: ./middlewares/example_tchannel/example_tchannel_schema.json
 dependencies: {}
 name: example_tchannel
