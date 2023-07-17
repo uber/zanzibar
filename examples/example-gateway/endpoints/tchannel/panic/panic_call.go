@@ -23,10 +23,10 @@ package panichandler
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
-	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
+	endpointBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
 	"go.uber.org/zap"
 )

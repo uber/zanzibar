@@ -5,5 +5,5 @@ qpsLevel: 2
 thriftFile: endpoints/bounce/bounce.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Bounce::bounce
-workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/endpoints/bounce
+workflowImportPath: github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/bounce
 workflowType: custom

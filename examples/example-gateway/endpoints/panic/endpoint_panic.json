@@ -7,7 +7,7 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "ServiceCFront::hello",
 	"workflowType": "custom",
-	"workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic",
+	"workflowImportPath": "github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/panic",
 	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {},
