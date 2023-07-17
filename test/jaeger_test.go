@@ -32,14 +32,14 @@ import (
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 	jaegerGen "github.com/uber/jaeger-client-go/thrift-gen/jaeger"
-	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/uber/zanzibar/v2/test/lib/util"
 
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	bazClient "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	clientsBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	clientsBazBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
 )
 
 func TestHTTPEndpointToHTTPClient(t *testing.T) {

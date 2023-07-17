@@ -27,11 +27,11 @@ import (
 
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/stretchr/testify/assert"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	benchGateway "github.com/uber/zanzibar/v2/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v2/test/lib/util"
 
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	exampleGateway "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestCircuitBreakerSettings(t *testing.T) {

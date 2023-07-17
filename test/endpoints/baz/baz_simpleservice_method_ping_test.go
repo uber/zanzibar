@@ -26,15 +26,15 @@ import (
 	"io"
 	"testing"
 
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	benchGateway "github.com/uber/zanzibar/v2/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v2/test/lib/util"
 
 	"github.com/stretchr/testify/assert"
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	bazClient "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	clientsBazBase "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	exampleGateway "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway"
 )
 
 var testConfig = map[string]interface{}{
