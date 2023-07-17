@@ -439,11 +439,7 @@ func testLogFields(t *testing.T, ctx context.Context, dynamicFields []string, ex
 	for _, field := range expectedFields {
 		expectedFieldsMap[field.Key] = field
 	}
-	logFields := zanzibar.GetLogFieldsFromCtx(ctx)
-	logFieldsMap := make(map[string]zap.Field)
-	for _, v := range logFields {
-		logFieldsMap[v.Key] = v
-	}
+	logFieldsMap := getLogFieldsMapFromContext(ctx)
 	for _, k := range dynamicFields {
 		_, ok := logFieldsMap[k]
 		assert.True(t, ok, "expected field missing %s", k)
