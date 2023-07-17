@@ -23,7 +23,13 @@ package zanzibar
 import (
 	"math"
 	"time"
+
+	"go.uber.org/zap"
 )
+
+// LogFieldErrTypeClientException is a log field used to tag errors corresponding
+// to exceptions defined in client thrifts.
+var LogFieldErrTypeClientException = LogFieldErrorType("client_exception")
 
 // BuildTimeoutAndRetryConfig encapsulates timeout and retry configs in TimeoutAndRetryOptions struct
 func BuildTimeoutAndRetryConfig(timeoutPerAttemptConf int, backOffTimeAcrossRetriesConf int,
@@ -40,4 +46,14 @@ func BuildTimeoutAndRetryConfig(timeoutPerAttemptConf int, backOffTimeAcrossRetr
 		MaxAttempts:                  maxAttempts,
 		BackOffTimeAcrossRetriesInMs: backOffTimeAcrossRetries,
 	}
+}
+
+// LogFieldErrorType returns error_type log field with given value.
+func LogFieldErrorType(errType string) zap.Field {
+	return zap.String(logFieldErrorType, errType)
+}
+
+// LogFieldErrorLocation returns error_location log field with given value.
+func LogFieldErrorLocation(loc string) zap.Field {
+	return zap.String(logFieldErrorLocation, loc)
 }
