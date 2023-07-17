@@ -3593,6 +3593,8 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 {{range $svc := .Services -}}
@@ -3936,24 +3938,29 @@ type {{$clientName}} struct {
 				err = clientErr
 			}
 		}
+		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making tchannel call: %s", err)), logFieldErrLocation)
+		}
 
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
+					zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding")
 					success = true
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
+					zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			}
 		}
 		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -3966,7 +3973,8 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
@@ -3986,7 +3994,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15721, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16209, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
