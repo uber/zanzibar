@@ -209,8 +209,8 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 
 	span.Finish()
 
+	AppendLogFieldsToContext(req.ctx, zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
 	if err != nil {
-		AppendLogFieldsToContext(req.ctx, zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
 		return nil, errors.Wrapf(err, "errors while making outbound %s.%s request", req.ClientID, req.MethodName)
 	}
 

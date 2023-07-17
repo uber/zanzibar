@@ -26,13 +26,16 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	barGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"go.uber.org/zap"
 )
 
 var defaultTestOptions = &testGateway.Options{
@@ -77,6 +80,64 @@ func TestHelloWorld(t *testing.T) {
 	)
 	assert.Equal(t, new(barGen.SeeOthersRedirection), err)
 	assert.Equal(t, "", result)
+}
+
+func TestHelloWorld_WithTimeoutAndRetryOptions(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	attempt := 1
+	attemptPtr := &attempt
+	// note: we set clients.bar.followRedirect: false in test.yaml
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/hello",
+		func(w http.ResponseWriter, r *http.Request) {
+			if *attemptPtr == 1 {
+				*attemptPtr = 2
+				time.Sleep(1 * time.Second)
+			}
+			w.Header().Add("Location", "http://example.com/")
+			w.WriteHeader(303)
+			_, err := w.Write([]byte(`hello world`))
+			assert.NoError(t, err)
+		},
+	)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	ctx := zanzibar.WithTimeAndRetryOptions(context.Background(), &zanzibar.TimeoutAndRetryOptions{
+		OverallTimeoutInMs:           3 * time.Second,
+		RequestTimeoutPerAttemptInMs: 1 * time.Second,
+		BackOffTimeAcrossRetriesInMs: 0,
+		MaxAttempts:                  2,
+	})
+	ctx = zanzibar.WithSafeLogFields(ctx)
+	_, result, _, err := bar.Hello(
+		ctx, map[string]string{
+			"x-uuid": "a-uuid",
+		},
+	)
+	assert.Equal(t, new(barGen.SeeOthersRedirection), err)
+	assert.Equal(t, "", result)
+
+	logFields := zanzibar.GetLogFieldsFromCtx(ctx)
+	logFieldsMap := make(map[string]zap.Field)
+	for _, field := range logFields {
+		logFieldsMap[field.Key] = field
+	}
+	_, ok := logFieldsMap["client.bar.attempts"]
+	assert.True(t, ok, "expected log field missing: client.bar.attempts")
+	if ok {
+		assert.Equal(t, int64(2), logFieldsMap["client.bar.attempts"].Integer)
+	}
 }
 
 func TestEchoI8(t *testing.T) {
