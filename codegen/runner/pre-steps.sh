@@ -225,15 +225,15 @@ for config_file in ${config_files}; do
 done
 target_dirs=($(echo "$target_dirs" | tr ' ' '\n' | sort | uniq))
 
-# TODO: (cp) enable generation
-# echo "Generating JSON Marshal/Unmarshal"
-#thriftrw_gofiles=(
-#$(find "${target_dirs[@]}" -name "*.go" | \
-#	grep -v "versioncheck.go" | \
-#	grep -v "easyjson.go" | sort)
-#)
-#"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
+echo "Generating JSON Marshal/Unmarshal"
+thriftrw_gofiles=(
+$(find "${target_dirs[@]}" -name "*.go" | \
+	grep -v "versioncheck.go" | \
+	grep -v "easyjson.go" | sort)
+)
+"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
+# TODO: (cp) enable go imports
 # goimports -w "$ABS_GENCODE_DIR" "$ABS_PROTO_GENCODE_DIR"
 
 end=$(date +%s)
