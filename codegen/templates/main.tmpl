@@ -9,7 +9,7 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v2/config"
 
 	"github.com/pkg/errors"
 
@@ -17,7 +17,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
 	app "{{$instance.PackageInfo.PackageRoot}}"
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"

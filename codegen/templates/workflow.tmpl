@@ -23,9 +23,9 @@ package workflow
 import (
 	"context"
 	"net/textproto"
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v2/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
