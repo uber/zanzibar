@@ -4,5 +4,5 @@ handleId: bounce
 thriftFile: endpoints/bounce/bounce.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: Bounce::bounce
-workflowImportPath: github.com/uber/zanzibar/examples/selective-gateway/endpoints/bounce
+workflowImportPath: github.com/uber/zanzibar/v2/examples/selective-gateway/endpoints/bounce
 workflowType: custom

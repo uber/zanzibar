@@ -7,9 +7,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
-	"github.com/uber/zanzibar/examples/selective-gateway/build/proto-gen/clients/mirror"
-	mock "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/mock-service"
+	"github.com/uber/zanzibar/v2/examples/selective-gateway/build/gen-code/endpoints/bounce/bounce"
+	"github.com/uber/zanzibar/v2/examples/selective-gateway/build/proto-gen/clients/mirror"
+	mock "github.com/uber/zanzibar/v2/examples/selective-gateway/build/services/selective-gateway/mock-service"
 )
 
 func TestEcho(t *testing.T) {
