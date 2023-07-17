@@ -27,12 +27,12 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	exampleGateway "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
+	benchGateway "github.com/uber/zanzibar/v2/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v2/test/lib/util"
 )
 
 func TestReadAndUnmarshalNonStructBody(t *testing.T) {

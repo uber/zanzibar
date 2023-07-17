@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

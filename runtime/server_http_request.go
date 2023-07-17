@@ -35,7 +35,7 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber-go/tally"
 	"github.com/uber/jaeger-client-go"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 	"go.uber.org/zap"
 )
 
