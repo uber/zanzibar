@@ -6,11 +6,10 @@ package base
 import (
 	errors "errors"
 	fmt "fmt"
-	strings "strings"
-
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
+	strings "strings"
 )
 
 type Message struct {
@@ -24,14 +23,14 @@ type Message struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//	x, err := v.ToWire()
-//	if err != nil {
-//	  return err
-//	}
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
 //
-//	if err := binaryProtocol.Encode(x, writer); err != nil {
-//	  return err
-//	}
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
 func (v *Message) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -57,16 +56,16 @@ func (v *Message) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Message struct
 // from the provided intermediate representation.
 //
-//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//	if err != nil {
-//	  return nil, err
-//	}
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
 //
-//	var v Message
-//	if err := v.FromWire(x); err != nil {
-//	  return nil, err
-//	}
-//	return &v, nil
+//   var v Message
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
 func (v *Message) FromWire(w wire.Value) error {
 	var err error
 

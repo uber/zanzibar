@@ -24,13 +24,13 @@
 package module
 
 import (
-	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
+	barclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the bar endpoint module

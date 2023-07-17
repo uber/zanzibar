@@ -24,7 +24,7 @@
 package module
 
 import (
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the multi client module

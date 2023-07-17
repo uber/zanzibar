@@ -24,7 +24,7 @@
 package clientmock
 
 import (
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
+	base "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
 )
 
 // ClientFixture defines the client fixture type

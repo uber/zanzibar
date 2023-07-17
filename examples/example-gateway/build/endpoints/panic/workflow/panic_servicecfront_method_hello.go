@@ -26,7 +26,7 @@ package workflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // ServiceCFrontHelloWorkflow defines the interface for ServiceCFrontHello workflow

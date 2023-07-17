@@ -31,7 +31,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
 )
 
 func getDirNameTooManyArgsSuccessfulRequest() string {

@@ -31,17 +31,17 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/workflow"
-	endpointsIDlEndpointsWithexceptionsWithexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/withexceptions/withexceptions"
+	workflow "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/withexceptions/workflow"
+	endpointsIDlEndpointsWithexceptionsWithexceptions "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/withexceptions/withexceptions"
 
-	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
-	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+	defaultExample "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/withexceptions/module"
 )
 
 // WithExceptionsFunc1Handler is the handler for "/withexceptions/func1"

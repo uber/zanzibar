@@ -34,10 +34,10 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/config"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	service "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/services/xyz"
+	service "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/services/xyz"
 )
 
 // MockService interface

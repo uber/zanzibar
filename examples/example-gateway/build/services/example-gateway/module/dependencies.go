@@ -24,19 +24,19 @@
 package module
 
 import (
-	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
-	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	clientlessendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/clientless"
-	contactsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
-	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
-	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
-	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
-	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
-	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
-	quuxendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux"
-	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
+	barendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar"
+	bazendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/baz"
+	clientlessendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/clientless"
+	contactsendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/contacts"
+	googlenowendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/googlenow"
+	multiendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/multi"
+	panicendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/panic"
+	baztchannelendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/baz"
+	panictchannelendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/panic"
+	quuxendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/quux"
+	withexceptionsendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/withexceptions"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the example-gateway service module

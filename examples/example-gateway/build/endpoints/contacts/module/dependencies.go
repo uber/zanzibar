@@ -24,12 +24,12 @@
 package module
 
 import (
-	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	contactsclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/contacts"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the contacts endpoint module

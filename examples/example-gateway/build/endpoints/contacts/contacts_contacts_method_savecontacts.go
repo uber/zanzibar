@@ -33,17 +33,17 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	endpointsIDlEndpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
-	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+	endpointsIDlEndpointsContactsContacts "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/contacts/contacts"
+	customContacts "github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/contacts"
 
-	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
-	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+	defaultExample "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example2"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/contacts/module"
 )
 
 // ContactsSaveContactsHandler is the handler for "/contacts/:userUUID/contacts"

@@ -84,7 +84,7 @@ func (m *MockIClientWithFixture) ExpectEchoMessage() *EchoMessageMock {
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package
-// github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
+// github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux/fixture
 func (s *EchoMessageMock) Success() Call {
 	f := s.scenarios.Success
 
@@ -117,7 +117,7 @@ func (m *MockIClientWithFixture) ExpectEchoString() *EchoStringMock {
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package
-// github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
+// github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux/fixture
 func (s *EchoStringMock) Success() Call {
 	f := s.scenarios.Success
 
