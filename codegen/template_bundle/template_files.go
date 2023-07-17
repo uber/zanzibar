@@ -1488,6 +1488,8 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
@@ -1795,12 +1797,14 @@ func (c *{{$clientName}}) {{$methodName}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
 	}
 
 	{{if .ReqHeaders }}
 	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return {{ if eq .ResponseType "" -}}
 			ctx, nil, headerErr
 			{{- else -}}
@@ -1830,6 +1834,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
@@ -1858,6 +1863,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -1865,6 +1871,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -1877,6 +1884,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -1884,10 +1892,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1901,6 +1911,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
@@ -1910,6 +1921,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -1933,14 +1945,17 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -1954,6 +1969,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -1961,10 +1977,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1993,19 +2011,22 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
-
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
@@ -2026,7 +2047,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 19491, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 21540, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2066,6 +2087,8 @@ const CustomTemplateTesting = "test"
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
@@ -2373,6 +2396,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return {{if eq .ResponseType ""}}ctx, nil, err{{else}}ctx, defaultRes, nil, err{{end}}
 	}
 
@@ -2408,6 +2432,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
@@ -2436,6 +2461,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -2443,6 +2469,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -2455,6 +2482,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -2462,10 +2490,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2479,6 +2509,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
@@ -2488,6 +2519,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- if and (ne (.OKStatusCode.Code) 204) (ne (.OKStatusCode.Code) 304) -}}
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 			{{- end}}
@@ -2511,14 +2543,17 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, respHeaders, err
 			}
 	}
@@ -2532,6 +2567,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 		{{- if eq .ResponseType "[]byte"}}
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
@@ -2539,10 +2575,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 		var responseBody {{unref .ResponseType}}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2571,19 +2609,22 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, v.(error)
 			{{end}}
 		{{- end}}
 		default:
 			_, err = res.ReadAll()
 			if err != nil {
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 				return ctx, defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
-
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
@@ -2604,7 +2645,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19602, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21567, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
