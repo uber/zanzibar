@@ -6,11 +6,12 @@ package withexceptions
 import (
 	errors "errors"
 	fmt "fmt"
+	strings "strings"
+
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	strings "strings"
 )
 
 type ExceptionType1 struct {
@@ -24,14 +25,14 @@ type ExceptionType1 struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *ExceptionType1) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -57,16 +58,16 @@ func (v *ExceptionType1) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ExceptionType1 struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v ExceptionType1
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v ExceptionType1
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *ExceptionType1) FromWire(w wire.Value) error {
 	var err error
 
@@ -238,14 +239,14 @@ type ExceptionType2 struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *ExceptionType2) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -271,16 +272,16 @@ func (v *ExceptionType2) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ExceptionType2 struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v ExceptionType2
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v ExceptionType2
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *ExceptionType2) FromWire(w wire.Value) error {
 	var err error
 
@@ -451,14 +452,14 @@ type Response struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Response) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -475,16 +476,16 @@ func (v *Response) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Response struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Response
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Response
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Response) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -596,14 +597,14 @@ type WithExceptions_Func1_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *WithExceptions_Func1_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -620,16 +621,16 @@ func (v *WithExceptions_Func1_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a WithExceptions_Func1_Args struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v WithExceptions_Func1_Args
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v WithExceptions_Func1_Args
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *WithExceptions_Func1_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -862,14 +863,14 @@ type WithExceptions_Func1_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *WithExceptions_Func1_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -935,16 +936,16 @@ func _ExceptionType2_Read(w wire.Value) (*ExceptionType2, error) {
 // An error is returned if we were unable to build a WithExceptions_Func1_Result struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v WithExceptions_Func1_Result
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v WithExceptions_Func1_Result
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *WithExceptions_Func1_Result) FromWire(w wire.Value) error {
 	var err error
 

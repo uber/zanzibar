@@ -8,6 +8,7 @@ package bar
 import (
 	json "encoding/json"
 	fmt "fmt"
+
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"

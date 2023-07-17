@@ -6,11 +6,12 @@ package contacts
 import (
 	errors "errors"
 	fmt "fmt"
+	strings "strings"
+
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
 	zapcore "go.uber.org/zap/zapcore"
-	strings "strings"
 )
 
 type BadRequest struct {
@@ -23,14 +24,14 @@ type BadRequest struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *BadRequest) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -47,16 +48,16 @@ func (v *BadRequest) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a BadRequest struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v BadRequest
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v BadRequest
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *BadRequest) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -206,14 +207,14 @@ func (_List_ContactFragment_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Contact) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -279,16 +280,16 @@ func _ContactAttributes_Read(w wire.Value) (*ContactAttributes, error) {
 // An error is returned if we were unable to build a Contact struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Contact
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Contact
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Contact) FromWire(w wire.Value) error {
 	var err error
 
@@ -602,14 +603,14 @@ type ContactAttributes struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *ContactAttributes) ToWire() (wire.Value, error) {
 	var (
 		fields [13]wire.Field
@@ -733,16 +734,16 @@ func (v *ContactAttributes) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a ContactAttributes struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v ContactAttributes
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v ContactAttributes
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *ContactAttributes) FromWire(w wire.Value) error {
 	var err error
 
@@ -1599,14 +1600,14 @@ type ContactFragment struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *ContactFragment) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -1648,16 +1649,16 @@ func _ContactFragmentType_Read(w wire.Value) (ContactFragmentType, error) {
 // An error is returned if we were unable to build a ContactFragment struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v ContactFragment
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v ContactFragment
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *ContactFragment) FromWire(w wire.Value) error {
 	var err error
 
@@ -1941,14 +1942,14 @@ type NotFound struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *NotFound) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -1965,16 +1966,16 @@ func (v *NotFound) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a NotFound struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v NotFound
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v NotFound
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *NotFound) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -2124,14 +2125,14 @@ func (_List_Contact_ValueList) Close() {}
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *SaveContactsRequest) ToWire() (wire.Value, error) {
 	var (
 		fields [2]wire.Field
@@ -2188,16 +2189,16 @@ func _List_Contact_Read(l wire.ValueList) ([]*Contact, error) {
 // An error is returned if we were unable to build a SaveContactsRequest struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v SaveContactsRequest
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v SaveContactsRequest
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *SaveContactsRequest) FromWire(w wire.Value) error {
 	var err error
 
@@ -2495,14 +2496,14 @@ type SaveContactsResponse struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *SaveContactsResponse) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -2519,16 +2520,16 @@ func (v *SaveContactsResponse) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a SaveContactsResponse struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v SaveContactsResponse
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v SaveContactsResponse
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *SaveContactsResponse) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -2689,14 +2690,14 @@ type Contacts_SaveContacts_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Contacts_SaveContacts_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -2731,16 +2732,16 @@ func _SaveContactsRequest_Read(w wire.Value) (*SaveContactsRequest, error) {
 // An error is returned if we were unable to build a Contacts_SaveContacts_Args struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Contacts_SaveContacts_Args
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Contacts_SaveContacts_Args
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Contacts_SaveContacts_Args) FromWire(w wire.Value) error {
 	var err error
 
@@ -3045,14 +3046,14 @@ type Contacts_SaveContacts_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Contacts_SaveContacts_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
@@ -3118,16 +3119,16 @@ func _NotFound_Read(w wire.Value) (*NotFound, error) {
 // An error is returned if we were unable to build a Contacts_SaveContacts_Result struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Contacts_SaveContacts_Result
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Contacts_SaveContacts_Result
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Contacts_SaveContacts_Result) FromWire(w wire.Value) error {
 	var err error
 
@@ -3469,14 +3470,14 @@ type Contacts_TestUrlUrl_Args struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Contacts_TestUrlUrl_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [0]wire.Field
@@ -3493,16 +3494,16 @@ func (v *Contacts_TestUrlUrl_Args) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Contacts_TestUrlUrl_Args struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Contacts_TestUrlUrl_Args
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Contacts_TestUrlUrl_Args
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Contacts_TestUrlUrl_Args) FromWire(w wire.Value) error {
 
 	for _, field := range w.GetStruct().Fields {
@@ -3708,14 +3709,14 @@ type Contacts_TestUrlUrl_Result struct {
 // An error is returned if the struct or any of its fields failed to
 // validate.
 //
-//   x, err := v.ToWire()
-//   if err != nil {
-//     return err
-//   }
+//	x, err := v.ToWire()
+//	if err != nil {
+//	  return err
+//	}
 //
-//   if err := binaryProtocol.Encode(x, writer); err != nil {
-//     return err
-//   }
+//	if err := binaryProtocol.Encode(x, writer); err != nil {
+//	  return err
+//	}
 func (v *Contacts_TestUrlUrl_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -3747,16 +3748,16 @@ func (v *Contacts_TestUrlUrl_Result) ToWire() (wire.Value, error) {
 // An error is returned if we were unable to build a Contacts_TestUrlUrl_Result struct
 // from the provided intermediate representation.
 //
-//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
-//   if err != nil {
-//     return nil, err
-//   }
+//	x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//	if err != nil {
+//	  return nil, err
+//	}
 //
-//   var v Contacts_TestUrlUrl_Result
-//   if err := v.FromWire(x); err != nil {
-//     return nil, err
-//   }
-//   return &v, nil
+//	var v Contacts_TestUrlUrl_Result
+//	if err := v.FromWire(x); err != nil {
+//	  return nil, err
+//	}
+//	return &v, nil
 func (v *Contacts_TestUrlUrl_Result) FromWire(w wire.Value) error {
 	var err error
 
