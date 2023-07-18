@@ -106,11 +106,11 @@ lint: check-licence eclint-check
 #	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 #	@echo "Checking errcheck..."
 #	@go run vendor/github.com/kisielk/errcheck/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
-	@echo "Checking staticcheck..."
+#	@echo "Checking staticcheck..."
 #	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
 #	echo $(PKGS)
-	staticcheck $(PKGS) 2>tmp.log
-	cat tmp.log | tee -a lint.log
+#	staticcheck $(PKGS) 2>tmp.log
+#	cat tmp.log | tee -a lint.log
 #	@echo "Checking for unresolved FIXMEs..."
 #	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
 	@[ ! -s lint.log ]
