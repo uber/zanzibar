@@ -51,7 +51,7 @@ install-tools:
 
 .PHONY: install-staticcheck
 install-staticcheck:
-	go install  honnef.co/go/tools/cmd/staticcheck@2022.1
+	#go install  honnef.co/go/tools/cmd/staticcheck@2022.1
 
 .PHONY: check-licence
 check-licence:
