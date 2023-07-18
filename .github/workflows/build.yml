@@ -2,9 +2,13 @@ name: Build using GitHub Actions
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - '*'
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - '*'
 
 jobs:
 
