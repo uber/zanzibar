@@ -535,8 +535,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
-				zap.String("stacktrace", stacktrace),
-				zap.String("endpoint", h.endpoint.EndpointName))
+				zap.String("stacktrace", stacktrace))
 
 			h.Dependencies.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
@@ -574,9 +573,7 @@ func (h *{{$handlerName}}) HandleRequest(
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
-		zfields := []zapcore.Field{
-			zap.String("endpoint", h.endpoint.EndpointName),
-		}
+		var zfields []zapcore.Field
 		{{- if ne .RequestType ""}}
 		zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", req.GetRawBody())))
 		{{- end}}
@@ -604,9 +601,7 @@ func (h *{{$handlerName}}) HandleRequest(
 
 	// log downstream response to endpoint
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
-		zfields := []zapcore.Field{
-			zap.String("endpoint", h.endpoint.EndpointName),
-		}
+		var zfields []zapcore.Field
 		{{- if ne .ResponseType ""}}
 		if body, err := json.Marshal(response); err == nil {
 			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
@@ -702,7 +697,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7966, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7801, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3598,6 +3593,8 @@ import (
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
 
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::{{$instance.InstanceName}}")
+
 // Client defines {{$clientID}} client interface.
 type Client interface {
 {{range $svc := .Services -}}
@@ -3941,24 +3938,29 @@ type {{$clientName}} struct {
 				err = clientErr
 			}
 		}
+		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making tchannel call: %s", err)), logFieldErrLocation)
+		}
 
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
+					zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
+					ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding")
 					success = true
 				{{end -}}
 				default:
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
+					zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			}
 		}
 		if err != nil {
-			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
 		{{else -}}
@@ -3971,7 +3973,8 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+				zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
+				ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 			}
 			return ctx, resp, respHeaders, err
 		{{end -}}
@@ -3991,7 +3994,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15730, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 16218, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4208,8 +4211,7 @@ func (h *{{$handlerName}}) Handle(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
-				zap.String("stacktrace", stacktrace),
-				zap.String("endpoint", h.endpoint.EndpointID))
+				zap.String("stacktrace", stacktrace))
 
 			h.Deps.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			isSuccessful = false
@@ -4406,7 +4408,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9437, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9386, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
