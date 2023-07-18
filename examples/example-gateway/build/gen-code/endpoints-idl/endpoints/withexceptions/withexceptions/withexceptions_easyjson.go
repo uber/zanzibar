@@ -22,7 +22,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(in *jlexer.Lexer, out *WithExceptions_Func1_Result) {
+func easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(in *jlexer.Lexer, out *WithExceptions_Func1_Result) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -81,7 +81,7 @@ func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Consumed()
 	}
 }
-func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(out *jwriter.Writer, in WithExceptions_Func1_Result) {
+func easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(out *jwriter.Writer, in WithExceptions_Func1_Result) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -117,27 +117,27 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v WithExceptions_Func1_Result) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(&w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v WithExceptions_Func1_Result) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *WithExceptions_Func1_Result) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(&r, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *WithExceptions_Func1_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(l, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc1(l, v)
 }
-func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(in *jlexer.Lexer, out *WithExceptions_Func1_Args) {
+func easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(in *jlexer.Lexer, out *WithExceptions_Func1_Args) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -166,7 +166,7 @@ func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Consumed()
 	}
 }
-func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(out *jwriter.Writer, in WithExceptions_Func1_Args) {
+func easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(out *jwriter.Writer, in WithExceptions_Func1_Args) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -176,27 +176,27 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v WithExceptions_Func1_Args) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(&w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v WithExceptions_Func1_Args) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *WithExceptions_Func1_Args) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(&r, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *WithExceptions_Func1_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(l, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptionsWithExceptionsFunc11(l, v)
 }
-func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(in *jlexer.Lexer, out *Response) {
+func easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(in *jlexer.Lexer, out *Response) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -225,7 +225,7 @@ func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Consumed()
 	}
 }
-func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(out *jwriter.Writer, in Response) {
+func easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(out *jwriter.Writer, in Response) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -235,27 +235,27 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v Response) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(&w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Response) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Response) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(&r, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Response) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(l, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions(l, v)
 }
-func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(in *jlexer.Lexer, out *EndpointExceptionType2) {
+func easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(in *jlexer.Lexer, out *EndpointExceptionType2) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -291,7 +291,7 @@ func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'message2' is required"))
 	}
 }
-func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(out *jwriter.Writer, in EndpointExceptionType2) {
+func easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(out *jwriter.Writer, in EndpointExceptionType2) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -306,27 +306,27 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v EndpointExceptionType2) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(&w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EndpointExceptionType2) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EndpointExceptionType2) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(&r, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EndpointExceptionType2) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(l, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions1(l, v)
 }
-func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(in *jlexer.Lexer, out *EndpointExceptionType1) {
+func easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(in *jlexer.Lexer, out *EndpointExceptionType1) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -362,7 +362,7 @@ func easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'message1' is required"))
 	}
 }
-func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(out *jwriter.Writer, in EndpointExceptionType1) {
+func easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(out *jwriter.Writer, in EndpointExceptionType1) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -377,23 +377,23 @@ func easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v EndpointExceptionType1) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(&w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EndpointExceptionType1) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD396a41aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(w, v)
+	easyjsonD396a41aEncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EndpointExceptionType1) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(&r, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EndpointExceptionType1) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD396a41aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(l, v)
+	easyjsonD396a41aDecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeEndpointsIdlEndpointsWithexceptionsWithexceptions2(l, v)
 }

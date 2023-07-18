@@ -22,7 +22,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(in *jlexer.Lexer, out *GoogleNowService_CheckCredentials_Result) {
+func easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(in *jlexer.Lexer, out *GoogleNowService_CheckCredentials_Result) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -51,7 +51,7 @@ func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Consumed()
 	}
 }
-func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(out *jwriter.Writer, in GoogleNowService_CheckCredentials_Result) {
+func easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(out *jwriter.Writer, in GoogleNowService_CheckCredentials_Result) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -61,27 +61,27 @@ func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v GoogleNowService_CheckCredentials_Result) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(&w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v GoogleNowService_CheckCredentials_Result) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *GoogleNowService_CheckCredentials_Result) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(&r, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *GoogleNowService_CheckCredentials_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(l, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials(l, v)
 }
-func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(in *jlexer.Lexer, out *GoogleNowService_CheckCredentials_Args) {
+func easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(in *jlexer.Lexer, out *GoogleNowService_CheckCredentials_Args) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -110,7 +110,7 @@ func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Consumed()
 	}
 }
-func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(out *jwriter.Writer, in GoogleNowService_CheckCredentials_Args) {
+func easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(out *jwriter.Writer, in GoogleNowService_CheckCredentials_Args) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -120,27 +120,27 @@ func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v GoogleNowService_CheckCredentials_Args) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(&w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v GoogleNowService_CheckCredentials_Args) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *GoogleNowService_CheckCredentials_Args) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(&r, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *GoogleNowService_CheckCredentials_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(l, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceCheckCredentials1(l, v)
 }
-func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(in *jlexer.Lexer, out *GoogleNowService_AddCredentials_Result) {
+func easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(in *jlexer.Lexer, out *GoogleNowService_AddCredentials_Result) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -169,7 +169,7 @@ func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Consumed()
 	}
 }
-func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(out *jwriter.Writer, in GoogleNowService_AddCredentials_Result) {
+func easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(out *jwriter.Writer, in GoogleNowService_AddCredentials_Result) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -179,27 +179,27 @@ func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v GoogleNowService_AddCredentials_Result) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(&w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v GoogleNowService_AddCredentials_Result) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *GoogleNowService_AddCredentials_Result) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(&r, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *GoogleNowService_AddCredentials_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(l, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials(l, v)
 }
-func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(in *jlexer.Lexer, out *GoogleNowService_AddCredentials_Args) {
+func easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(in *jlexer.Lexer, out *GoogleNowService_AddCredentials_Args) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -235,7 +235,7 @@ func easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'authCode' is required"))
 	}
 }
-func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(out *jwriter.Writer, in GoogleNowService_AddCredentials_Args) {
+func easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(out *jwriter.Writer, in GoogleNowService_AddCredentials_Args) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -250,23 +250,23 @@ func easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 // MarshalJSON supports json.Marshaler interface
 func (v GoogleNowService_AddCredentials_Args) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(&w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v GoogleNowService_AddCredentials_Args) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson25b7f9c9EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(w, v)
+	easyjson25b7f9c9EncodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *GoogleNowService_AddCredentials_Args) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(&r, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *GoogleNowService_AddCredentials_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson25b7f9c9DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(l, v)
+	easyjson25b7f9c9DecodeGithubComUberZanzibarV2ExamplesExampleGatewayBuildGenCodeClientsIdlClientsGooglenowGooglenowGoogleNowServiceAddCredentials1(l, v)
 }
