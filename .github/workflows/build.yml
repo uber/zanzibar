@@ -21,7 +21,7 @@ jobs:
     env:
       GOPATH: ${{ github.workspace }}
       GOBIN: ${{ github.workspace }}/bin
-      GO111MODULE: off
+      GO111MODULE: auto
     defaults:
       run:
         working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
