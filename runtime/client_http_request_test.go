@@ -430,6 +430,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		zap.String("Client-Res-Header-Example-Header", "Example-Value"),
 		zap.String("Client-Res-Header-Content-Type", "text/plain; charset=utf-8"),
 		zap.Int64("client_status_code", 200),
+		zap.Int64("client.bar.attempts", 1),
 	}
 	testLogFields(t, ctx, dynamicFields, expectedFields)
 }
