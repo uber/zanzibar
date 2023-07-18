@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/uber-go/tally"
@@ -44,28 +45,28 @@ const (
 	routingDelegateKey     = contextFieldKey("rd")
 	shardKey               = contextFieldKey("sk")
 	endpointRequestHeader  = contextFieldKey("endpointRequestHeader")
-	requestLogFields       = contextFieldKey("requestLogFields")
 	scopeTags              = contextFieldKey("scopeTags")
 	ctxLogCounterName      = contextFieldKey("ctxLogCounter")
 	ctxLogLevel            = contextFieldKey("ctxLogLevel")
 	ctxTimeoutRetryOptions = contextFieldKey("trOptions")
+	safeLogFieldsKey       = contextFieldKey("safeLogFields")
 )
 
 const (
 	// thrift service::method of endpoint thrift spec
-	logFieldRequestMethod       = "endpointThriftMethod"
-	logFieldRequestHTTPMethod   = "method"
-	logFieldRequestURL          = "url"
-	logFieldRequestPathname     = "pathname"
-	logFieldRequestRemoteAddr   = "remoteAddr"
-	logFieldRequestHost         = "host"
-	logFieldRequestStartTime    = "timestamp-started"
-	logFieldRequestFinishedTime = "timestamp-finished"
-	logFieldResponseStatusCode  = "statusCode"
-	logFieldRequestUUID         = "requestUUID"
-	logFieldEndpointID          = "endpointID"
-	logFieldEndpointHandler     = "endpointHandler"
-	logFieldClientHTTPMethod    = "clientHTTPMethod"
+	logFieldRequestMethod      = "endpointThriftMethod"
+	logFieldRequestHTTPMethod  = "method"
+	logFieldRequestPathname    = "pathname"
+	logFieldRequestRemoteAddr  = "remoteAddr"
+	logFieldRequestHost        = "host"
+	logFieldResponseStatusCode = "statusCode"
+	logFieldRequestUUID        = "requestUUID"
+	logFieldEndpointID         = "endpointID"
+	logFieldEndpointHandler    = "endpointHandler"
+	logFieldClientStatusCode   = "client_status_code"
+	logFieldClientRemoteAddr   = "client_remote_addr"
+	logFieldErrorType          = "error_type"
+	logFieldErrorLocation      = "error_location"
 
 	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
 	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"
@@ -96,6 +97,12 @@ const (
 type scopeData struct {
 	tags  map[string]string
 	scope tally.Scope // optional - may not be used by zanzibar users who use
+}
+
+// safeLogFields is a log fields container that is safe to use concurrently.
+type safeLogFields struct {
+	mu     sync.Mutex
+	fields []zap.Field
 }
 
 // WithTimeAndRetryOptions returns a context with timeout and retry options.
@@ -199,20 +206,31 @@ func GetShardKeyFromCtx(ctx context.Context) string {
 }
 
 // WithLogFields returns a new context with the given log fields attached to context.Context
+//
+// Deprecated: See AppendLogFieldsToContext.
 func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context {
-	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
+	sf := getSafeLogFieldsFromContext(ctx)
+	sf.append(newFields)
+	return context.WithValue(ctx, safeLogFieldsKey, sf)
+}
+
+// AppendLogFieldsToContext is safe to use concurrently. It doesn't require caller
+// to update the context. The context should have safeLogFields value set using WithSafeLogFields
+// (or WithLogFields for backward compatibility) before.
+func AppendLogFieldsToContext(ctx context.Context, fields ...zap.Field) {
+	if v := getSafeLogFieldsFromContext(ctx); v != nil {
+		v.append(fields)
+	}
 }
 
 // GetLogFieldsFromCtx returns the log fields attached to the context.Context
 func GetLogFieldsFromCtx(ctx context.Context) []zap.Field {
-	var fields []zap.Field
 	if ctx != nil {
-		v := ctx.Value(requestLogFields)
-		if v != nil {
-			fields = v.([]zap.Field)
+		if v, ok := ctx.Value(safeLogFieldsKey).(*safeLogFields); ok {
+			return v.getFields()
 		}
 	}
-	return fields
+	return []zap.Field{}
 }
 
 // WithScopeTags adds tags to context without updating the scope
@@ -541,4 +559,28 @@ func GetAccumulatedLogContext(ctx context.Context, c *contextLogger, msg string,
 		return ctx
 	}
 	return accumulateLogMsgAndFieldsInContext(ctx, msg, userFields, logLevel)
+}
+
+// WithSafeLogFields initiates empty safeLogFields in the context.
+func WithSafeLogFields(ctx context.Context) context.Context {
+	return context.WithValue(ctx, safeLogFieldsKey, &safeLogFields{})
+}
+
+func (sf *safeLogFields) append(fields []zap.Field) {
+	sf.mu.Lock()
+	defer sf.mu.Unlock()
+	sf.fields = append(sf.fields, fields...)
+}
+
+func (sf *safeLogFields) getFields() []zap.Field {
+	sf.mu.Lock()
+	defer sf.mu.Unlock()
+	return sf.fields
+}
+
+func getSafeLogFieldsFromContext(ctx context.Context) *safeLogFields {
+	if v, ok := ctx.Value(safeLogFieldsKey).(*safeLogFields); ok {
+		return v
+	}
+	return &safeLogFields{}
 }

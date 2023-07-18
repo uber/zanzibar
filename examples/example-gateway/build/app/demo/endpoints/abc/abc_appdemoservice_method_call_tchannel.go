@@ -83,8 +83,7 @@ func (h *AppDemoServiceCallHandler) Handle(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
-				zap.String("stacktrace", stacktrace),
-				zap.String("endpoint", h.endpoint.EndpointID))
+				zap.String("stacktrace", stacktrace))
 
 			h.Deps.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			isSuccessful = false

@@ -222,8 +222,7 @@ func (res *ClientHTTPResponse) finish() {
 
 func clientHTTPLogFields(req *ClientHTTPRequest, res *ClientHTTPResponse) []zapcore.Field {
 	fields := []zapcore.Field{
-		zap.Time(logFieldRequestFinishedTime, res.finishTime),
-		zap.Int(logFieldResponseStatusCode, res.StatusCode),
+		zap.Int(logFieldClientStatusCode, res.StatusCode),
 	}
 	for k, v := range req.httpReq.Header {
 		if len(v) > 0 {

@@ -112,10 +112,7 @@ func (c *callHelper) Finish(ctx context.Context, err error) context.Context {
 	delta := c.finishTime.Sub(c.startTime)
 	c.metrics.RecordTimer(ctx, clientLatency, delta)
 	c.metrics.RecordHistogramDuration(ctx, clientLatency, delta)
-	fields := []zapcore.Field{
-		zap.Time(logFieldRequestStartTime, c.startTime),
-		zap.Time(logFieldRequestFinishedTime, c.finishTime),
-	}
+	var fields []zapcore.Field
 	ctx = WithEndpointRequestHeadersField(ctx, map[string]string{})
 	if c.extractor != nil {
 		fields = append(fields, c.extractor.ExtractLogFields(ctx)...)

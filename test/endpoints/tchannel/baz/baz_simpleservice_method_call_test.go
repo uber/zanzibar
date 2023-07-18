@@ -125,13 +125,17 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	logs := allLogs["Finished an incoming server TChannel request"][0]
 	dynamicHeaders := []string{
 		"requestUUID",
-		"timestamp-started",
-		"timestamp-finished",
 		"remoteAddr",
 		"ts",
 		"hostname",
 		"pid",
+		"Client-Req-Header-x-request-uuid",
+		"Client-Req-Header-$tracing$uber-trace-id",
+		"client_remote_addr",
 		"Res-Header-client.response.duration",
+		zanzibar.TraceIDKey,
+		zanzibar.TraceSpanKey,
+		zanzibar.TraceSampledKey,
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)
@@ -139,20 +143,25 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	expectedValues := map[string]string{
-		"level":                      "debug",
-		"msg":                        "Finished an incoming server TChannel request",
-		"env":                        "test",
-		"service":                    "example-gateway",
-		"endpointID":                 "bazTChannel",
-		"endpointHandler":            "call",
-		"endpointThriftMethod":       "SimpleService::Call",
-		"x-uuid":                     "uuid",
-		"calling-service":            "test-gateway",
-		"zone":                       "unknown",
-		"Device":                     "ios",
-		"Regionname":                 "sf",
-		"Deviceversion":              "1.0",
-		"Res-Header-some-res-header": "something",
+		"level":                             "debug",
+		"msg":                               "Finished an incoming server TChannel request",
+		"env":                               "test",
+		"service":                           "example-gateway",
+		"endpointID":                        "bazTChannel",
+		"endpointHandler":                   "call",
+		"endpointThriftMethod":              "SimpleService::Call",
+		"x-uuid":                            "uuid",
+		"calling-service":                   "test-gateway",
+		"zone":                              "unknown",
+		"Device":                            "ios",
+		"Regionname":                        "sf",
+		"Deviceversion":                     "1.0",
+		"Res-Header-some-res-header":        "something",
+		"Client-Req-Header-x-uuid":          "uuid",
+		"Client-Req-Header-Deviceversion":   "1.0",
+		"Client-Res-Header-some-res-header": "something",
+		"Client-Req-Header-Device":          "ios",
+		"Client-Req-Header-Regionname":      "sf",
 	}
 	for actualKey, actualValue := range logs {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
@@ -164,12 +173,10 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	logs = allLogs["Finished an outgoing client TChannel request"][0]
 	dynamicHeaders = []string{
 		"requestUUID",
-		"remoteAddr",
-		"timestamp-started",
+		"client_remote_addr",
 		"ts",
 		"hostname",
 		"pid",
-		"timestamp-finished",
 		"Client-Req-Header-x-request-uuid",
 		"Client-Req-Header-$tracing$uber-trace-id",
 		zanzibar.TraceIDKey,
@@ -198,10 +205,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"Regionname":           "sf",
 
 		// client specific logs
-		//"clientID":                          "baz",
-		//"clientService":                     "bazService",
-		//"clientThriftMethod":                "SimpleService::call",
-		//"clientMethod":                      "Call",
 		"Client-Req-Header-Device":          "ios",
 		"Client-Req-Header-x-uuid":          "uuid",
 		"Client-Req-Header-Regionname":      "sf",

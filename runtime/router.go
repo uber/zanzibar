@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -211,6 +210,8 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 
 // ServeHTTP implements the http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
 func (router *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := WithSafeLogFields(r.Context())
+	r = r.WithContext(ctx)
 	router.httpRouter.ServeHTTP(w, r)
 }
 
@@ -225,16 +226,8 @@ func (router *httpRouter) handlePanic(
 	if !ok {
 		err = errors.Wrap(err, "wrapped")
 	}
-	logger := router.gateway.Logger
-	for k, v := range r.Header {
-		val, _ := json.Marshal(v)
-		logger = logger.With(zap.String(k, string(val)))
-	}
-	logger.Error(
-		"A http request handler paniced",
-		zap.Error(err),
-		zap.String("pathname", r.URL.RequestURI()),
-	)
+	logger := router.gateway.ContextLogger
+	logger.Error(r.Context(), "A http request handler paniced", zap.Error(err), zap.Int(logFieldResponseStatusCode, http.StatusInternalServerError))
 	router.panicCount.Inc(1)
 
 	http.Error(w,

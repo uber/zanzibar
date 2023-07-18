@@ -27,7 +27,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/zap"
 )
 
 func TestNilCallReferenceForLogger(t *testing.T) {
@@ -43,19 +42,17 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 		reqHeaders:    headers,
 		resHeaders:    headers,
 	}
-	ctx := context.TODO()
-	ctx = WithLogFields(ctx, zap.String("foo", "bar"))
 
-	fields := outboundCall.logFields(ctx)
+	fields := outboundCall.logFields()
 
 	// one field for each of the:
-	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader
-	assert.Len(t, fields, 6)
+	// client_remote_addr, requestHeader, responseHeader
+	assert.Len(t, fields, 3)
 
-	var addr, reqKey, resKey, foo bool
+	var addr, reqKey, resKey bool
 	for _, f := range fields {
 		switch f.Key {
-		case "remoteAddr":
+		case "client_remote_addr":
 			assert.Equal(t, f.String, "unknown")
 			addr = true
 		case "Client-Req-Header-header-key":
@@ -64,15 +61,11 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 		case "Client-Res-Header-header-key":
 			assert.Equal(t, f.String, "header-value")
 			resKey = true
-		case "foo":
-			assert.Equal(t, f.String, "bar")
-			foo = true
 		}
 	}
-	assert.True(t, addr, "remoteAddr key not present")
+	assert.True(t, addr, "client_remote_addr key not present")
 	assert.True(t, reqKey, "Client-Req-Header-header-key key not present")
 	assert.True(t, resKey, "Client-Res-Header-header-key key not present")
-	assert.True(t, foo, "foo key not present")
 }
 
 func TestMaxAttempts(t *testing.T) {

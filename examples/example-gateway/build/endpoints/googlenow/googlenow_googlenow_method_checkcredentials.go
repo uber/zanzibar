@@ -92,8 +92,7 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 				ctx,
 				"Endpoint failure: endpoint panic",
 				zap.Error(e),
-				zap.String("stacktrace", stacktrace),
-				zap.String("endpoint", h.endpoint.EndpointName))
+				zap.String("stacktrace", stacktrace))
 
 			h.Dependencies.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
@@ -106,9 +105,7 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
-		zfields := []zapcore.Field{
-			zap.String("endpoint", h.endpoint.EndpointName),
-		}
+		var zfields []zapcore.Field
 		for _, k := range req.Header.Keys() {
 			if val, ok := req.Header.Get(k); ok {
 				zfields = append(zfields, zap.String(k, val))
