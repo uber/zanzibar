@@ -27,18 +27,29 @@ GOGOSLICK = "$(PWD)/vendor/github.com/gogo/protobuf/protoc-gen-gogoslick"
 YARPCGO = "$(PWD)/vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go"
 
 .PHONY: install
-install:
+install: install-packages install-tools install-staticcheck
+
+.PHONY: install-packages
+install-packages:
 	@echo "Mounting git pre-push hook"
 	cp .git-pre-push-hook .git/hooks/pre-push
 	@echo "Installing Glide and locked dependencies..."
 	pip install --user yq
 	glide --version || go get -u -f github.com/Masterminds/glide
 	glide install
+
+.PHONY: install-tools
+# set GO111MODULE to off to compile ancient tools within the vendor directory
+install-tools: export GO111MODULE = off
+install-tools:
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 	go build -o $(GOMOCK)/mockgen ./vendor/github.com/golang/mock/mockgen/
 	go build -o $(GOGOSLICK)/protoc-gen-gogoslick ./vendor/github.com/gogo/protobuf/protoc-gen-gogoslick/
 	go build -o $(YARPCGO)/protoc-gen-yarpc-go ./vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go/
+
+.PHONY: install-staticcheck
+install-staticcheck:
 	go install  honnef.co/go/tools/cmd/staticcheck@2022.1
 
 .PHONY: check-licence
