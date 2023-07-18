@@ -33,15 +33,16 @@ install: install-packages install-tools install-staticcheck
 install-packages:
 	@echo "Mounting git pre-push hook"
 	cp .git-pre-push-hook .git/hooks/pre-push
-	@echo "Installing Glide and locked dependencies..."
+	@echo "Installing python packages..."
 	pip install --user yq
-	glide --version || go get -u -f github.com/Masterminds/glide
-	glide install
 
 .PHONY: install-tools
 # set GO111MODULE to off to compile ancient tools within the vendor directory
 install-tools: export GO111MODULE = off
 install-tools:
+	@echo "Installing Glide and locked dependencies..."
+	glide --version || go get -u -f github.com/Masterminds/glide
+	glide install
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 	go build -o $(GOMOCK)/mockgen ./vendor/github.com/golang/mock/mockgen/
