@@ -81,7 +81,8 @@ ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 
 #TODO: (cp): replace all the import paths
-find "$BUILD_DIR/gen-code" -type f | xargs sed -i '' 's/github.com\/uber\/zanzibar\/examples/\github.com\/uber\/zanzibar\/v2\/examples/g'
+echo "replacing zanzibar import path"
+find "$BUILD_DIR/gen-code" -name "*.go" -type f -exec sed -i "" "s/github.com\/uber\/zanzibar\/examples/\github.com\/uber\/zanzibar\/v2\/examples/g" {} \;
 
 
 PROTO_GENCODE_PACKAGE=$($YQ -r '.genCodePackage[".proto"]' "$CONFIG_DIR/build.yaml")
