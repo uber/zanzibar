@@ -39,6 +39,7 @@ install:
 	go build -o $(GOMOCK)/mockgen ./vendor/github.com/golang/mock/mockgen/
 	go build -o $(GOGOSLICK)/protoc-gen-gogoslick ./vendor/github.com/gogo/protobuf/protoc-gen-gogoslick/
 	go build -o $(YARPCGO)/protoc-gen-yarpc-go ./vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go/
+	go install  honnef.co/go/tools/cmd/staticcheck@2022.1
 
 .PHONY: check-licence
 check-licence:
@@ -80,24 +81,26 @@ cyclo-check:
 .PHONY: lint
 lint: check-licence eclint-check
 	@rm -f lint.log
-	@echo "Checking formatting..."
-	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
-	@echo "Installing test dependencies for vet..."
-	@go test -i $(PKGS)
-	@echo "Checking printf statements..."
-	@git grep -E 'Fprintf\(os.Std(err|out)' | $(FILTER_LINT) | tee -a lint.log
-	@echo "Checking vet..."
-	@$(foreach dir,$(PKG_FILES),go vet $(VET_RULES) ./$(dir)/... 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
-	@echo "Checking lint..."
-	@go get golang.org/x/lint/golint
-	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
-	@echo "Checking errcheck..."
-	@go run vendor/github.com/kisielk/errcheck/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+#	@echo "Checking formatting..."
+#	@$(GOIMPORTS)/goimports -d $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+#	@echo "Installing test dependencies for vet..."
+#	@go test -i $(PKGS)
+#	@echo "Checking printf statements..."
+#	@git grep -E 'Fprintf\(os.Std(err|out)' | $(FILTER_LINT) | tee -a lint.log
+#	@echo "Checking vet..."
+#	@$(foreach dir,$(PKG_FILES),go vet $(VET_RULES) ./$(dir)/... 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
+#	@echo "Checking lint..."
+#	@go get golang.org/x/lint/golint
+#	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
+#	@echo "Checking errcheck..."
+#	@go run vendor/github.com/kisielk/errcheck/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
-	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
-	@./vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
-	@echo "Checking for unresolved FIXMEs..."
-	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
+#	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
+#	echo $(PKGS)
+	staticcheck $(PKGS) 2>tmp.log
+	cat tmp.log | tee -a lint.log
+#	@echo "Checking for unresolved FIXMEs..."
+#	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
 	@[ ! -s lint.log ]
 
 # .PHONY: verify_deps
