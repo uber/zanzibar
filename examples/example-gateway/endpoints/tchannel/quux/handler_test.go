@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
-	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
+	ms "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
 func TestEchoStringFixture(t *testing.T) {

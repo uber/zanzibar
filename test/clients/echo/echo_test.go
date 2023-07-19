@@ -35,10 +35,10 @@ import (
 	"go.uber.org/yarpc/transport/grpc"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
-	echoclient "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/config"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
+	echoclient "github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 type echoServer struct{}

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	{{$classPkg}} "{{$instance.PackageInfo.ModulePackagePath}}"
 
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}

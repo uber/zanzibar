@@ -24,9 +24,9 @@
 package exampletchannelmiddleware
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
-	handle "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel/module"
+	handle "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example_tchannel"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Middleware is a container for module.Deps and factory for MiddlewareHandle

@@ -13,7 +13,7 @@ import (
 	strconv "strconv"
 	strings "strings"
 
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
+	base "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/baz/base"
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"

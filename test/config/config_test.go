@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v2/config"
 )
 
 const (

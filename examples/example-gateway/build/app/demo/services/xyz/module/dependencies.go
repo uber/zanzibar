@@ -24,10 +24,10 @@
 package module
 
 import (
-	appdemoabcendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc"
-	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
+	appdemoabcendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc"
+	barendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the app/demo/xyz service module

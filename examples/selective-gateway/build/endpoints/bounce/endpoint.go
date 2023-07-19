@@ -24,8 +24,8 @@
 package bounceendpoint
 
 import (
-	module "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce/module"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Endpoint registers a request handler on a gateway

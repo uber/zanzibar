@@ -24,13 +24,13 @@
 package mocktchannelquuxworkflow
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
+	quuxclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/quux/mock-client"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	quuxclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux"
 )
 
 // MockClientNodes contains mock client dependencies for the tchannel/quux endpoint module

@@ -27,12 +27,12 @@ import (
 
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
-	exampleReader "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
+	exampleGateway "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
+	exampleReader "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example_reader"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	benchGateway "github.com/uber/zanzibar/v2/test/lib/bench_gateway"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.

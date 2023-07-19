@@ -28,20 +28,20 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/zap"
 
-	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	echoclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/mock-client"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/workflow"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	bounceendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/bounce"
+	bazclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
+	echoclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bounce/module"
+	workflow "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bounce/workflow"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	bounceendpointstatic "github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/bounce"
 )
 
 // NewBounceBounceWorkflowMock creates a workflow with mock clients

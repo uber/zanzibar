@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	ms "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
 func TestBazEcho(t *testing.T) {

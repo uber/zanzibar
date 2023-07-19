@@ -24,13 +24,13 @@
 package mockbounceworkflow
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	echoclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/mock-client"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	echoclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
+	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
+	echoclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	echoclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo"
 )
 
 // MockClientNodes contains mock client dependencies for the bounce endpoint module

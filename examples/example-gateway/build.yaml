@@ -3,15 +3,15 @@ clientConfig: ./clients
 copyrightHeader: ./copyright_header.txt
 endpointConfig: ./endpoints
 genCodePackage:
-  .thrift: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
-  .proto: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
+  .thrift: github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code
+  .proto: github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code
 genMock: true
 middlewareConfig: ./middlewares
 defaultMiddlewareConfig: ./middlewares/default
 defaultHeaders:
   - x-uber-foo
   - x-uber-bar
-packageRoot: github.com/uber/zanzibar/examples/example-gateway
+packageRoot: github.com/uber/zanzibar/v2/examples/example-gateway
 targetGenDir: ./build
 idlRootDir: ./idl
 moduleIdlSubDir:

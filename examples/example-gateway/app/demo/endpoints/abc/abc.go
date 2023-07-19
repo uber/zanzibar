@@ -3,10 +3,10 @@ package abc
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/workflow"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/module"
+	workflow "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/workflow"
 )
 
 // NewAppDemoServiceCallWorkflow creates the demo app service callback workflow.

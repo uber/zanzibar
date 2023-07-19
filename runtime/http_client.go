@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/uber-go/tally"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 )
 
 // CheckRetry specifies a policy for handling retries. It is called

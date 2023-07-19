@@ -25,7 +25,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/v2/codegen"
 )
 
 var fixtures = map[string]string{

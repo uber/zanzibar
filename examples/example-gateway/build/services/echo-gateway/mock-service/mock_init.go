@@ -25,21 +25,21 @@ package echogatewayservicegeneratedmock
 
 import (
 	"github.com/golang/mock/gomock"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/echo-gateway/module"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo/mock-client"
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
-	bounceendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce/module"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
-	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
+	bounceendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bounce"
+	bounceendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bounce/module"
+	echoendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/echo"
+	echoendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/echo/module"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 )
 
 // MockClientNodes contains mock client dependencies

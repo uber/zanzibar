@@ -27,7 +27,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/v2/codegen"
 )
 
 func TestModuleSpec(t *testing.T) {

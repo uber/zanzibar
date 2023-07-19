@@ -33,14 +33,14 @@ import (
 	"go.uber.org/zap"
 
 	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	endpointsIDlEndpointsTchannelQuuxQuux "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
-	customQuux "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/quux"
+	endpointsIDlEndpointsTchannelQuuxQuux "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/quux/quux"
+	customQuux "github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/tchannel/quux"
 
-	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
+	defaultExampleTchannel "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example_tchannel"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/quux/module"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/quux/module"
 )
 
 // NewSimpleServiceEchoStringHandler creates a handler to be registered with a thrift server.

@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"path/filepath"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	{{range $idx, $pkg := .Spec.IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}

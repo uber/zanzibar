@@ -7,5 +7,5 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::AnotherCall",
 	"workflowType": "custom",
-	"workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
+	"workflowImportPath": "github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/tchannel/panic"
 }

@@ -24,9 +24,9 @@
 package module
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Dependencies contains dependencies for the default/default_example middleware module

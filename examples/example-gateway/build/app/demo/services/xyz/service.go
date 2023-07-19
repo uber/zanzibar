@@ -24,9 +24,9 @@
 package xyzservicegenerated
 
 import (
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/services/xyz/module"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/services/xyz/module"
 )
 
 // DependenciesTree re-exported for convenience.

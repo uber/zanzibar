@@ -26,7 +26,7 @@ package clientlessendpoint
 import (
 	"runtime"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 func getDirName() string {

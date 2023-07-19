@@ -13,7 +13,7 @@ import (
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 {{$clientID := $instance.InstanceName -}}

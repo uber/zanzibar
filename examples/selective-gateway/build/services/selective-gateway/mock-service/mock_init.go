@@ -25,14 +25,14 @@ package selectivegatewayservicegeneratedmock
 
 import (
 	"github.com/golang/mock/gomock"
-	module "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v2/examples/selective-gateway/build/services/selective-gateway/module"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	echoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/echo/mock-client"
-	mirrorclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/clients/mirror/mock-client"
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce"
-	bounceendpointmodule "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
-	fixtureechoclientgenerated "github.com/uber/zanzibar/examples/selective-gateway/clients/echo/fixture"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/echo/mock-client"
+	mirrorclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/clients/mirror/mock-client"
+	bounceendpointgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce"
+	bounceendpointmodule "github.com/uber/zanzibar/v2/examples/selective-gateway/build/endpoints/bounce/module"
+	fixtureechoclientgenerated "github.com/uber/zanzibar/v2/examples/selective-gateway/clients/echo/fixture"
 )
 
 // MockClientNodes contains mock client dependencies

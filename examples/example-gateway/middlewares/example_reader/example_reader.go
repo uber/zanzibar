@@ -25,9 +25,9 @@ import (
 	"net/http"
 
 	"github.com/mcuadros/go-jsonschema-generator"
-	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_reader/module"
-	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_reader/module"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 type exampleReaderMiddleware struct {

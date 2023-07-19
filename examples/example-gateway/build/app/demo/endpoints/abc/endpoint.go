@@ -24,8 +24,8 @@
 package appdemoabcendpoint
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/module"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Endpoint registers a request handler on a gateway
