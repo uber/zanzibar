@@ -80,12 +80,17 @@ done
 ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 
-#TODO: (cp): replace all the import paths.
+# update zanzibar import paths to include major version
+# 1. thrift uses physical directory to determine import paths, however since the
+# code is resident within Zanzibar, the major version has to be upgraded
+# 2. a simple sed script works here since gen-code only uses zanzibar in import paths
 echo "replacing zanzibar import path"
+# did not use inplace replacement
 # https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
+tmpfile="/tmp/change.txt"
 for f in `find "$BUILD_DIR/gen-code" -name "*.go" -type f`; do
-  sed "s/github.com\/uber\/zanzibar\/examples/\github.com\/uber\/zanzibar\/v2\/examples/g" $f > change.txt
-  mv change.txt $f
+  sed "s/github.com\/uber\/zanzibar\/examples/\github.com\/uber\/zanzibar\/v2\/examples/g" "$f" > $tmpfile
+  mv $tmpfile "$f"
 done
 
 

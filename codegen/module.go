@@ -1013,7 +1013,7 @@ func readPackageInfo(
 	options Options,
 ) (*PackageInfo, error) {
 	{
-		// TODO: (cp) Hack to support the example gateways
+		// TODO: (cp) root for example gateways have to consider the package major version since they reside with the package
 		packageRoot = strings.Replace(packageRoot, "github.com/uber/zanzibar/examples/", "github.com/uber/zanzibar/v2/examples/", 1)
 	}
 

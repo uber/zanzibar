@@ -308,7 +308,9 @@ func generateServiceMock(instance *ModuleInstance, h *PackageHelper, t *Template
 		}
 	}
 
-	// TODO: (cp) change packageRoot to get the directory
+	// TODO: (cp) change packageRoot to get the directory for example gateways
+	// the rootpath for the example gateways is derived from packageRoot, which has been modified earlier to include
+	// major version
 	rootPath := strings.Replace(h.packageRoot, "github.com/uber/zanzibar/v2/", "github.com/uber/zanzibar/", 1)
 
 	data := map[string]interface{}{
