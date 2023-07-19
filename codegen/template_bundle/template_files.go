@@ -2047,11 +2047,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	info := bindataFileInfo{name: "http_client.tmpl", size: 21540, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "http_client.tmpl", size: 19500, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> version-2
+	info := bindataFileInfo{name: "http_client.tmpl", size: 21549, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2649,11 +2645,7 @@ func http_client_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21567, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "http_client_test.tmpl", size: 19611, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> version-2
+	info := bindataFileInfo{name: "http_client_test.tmpl", size: 21576, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
