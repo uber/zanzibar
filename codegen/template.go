@@ -29,7 +29,7 @@ import (
 	tmpl "text/template"
 
 	"github.com/pkg/errors"
-	templates "github.com/uber/zanzibar/codegen/template_bundle"
+	templates "github.com/uber/zanzibar/v2/codegen/template_bundle"
 )
 
 // CustomTemplate custom template representation

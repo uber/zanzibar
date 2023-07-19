@@ -5,7 +5,7 @@ config:
   exposedMethods:
     "EchoEcho": "Echo::Echo"
   fixture:
-    importPath: github.com/uber/zanzibar/examples/selective-gateway/clients/echo/fixture
+    importPath: github.com/uber/zanzibar/v2/examples/selective-gateway/clients/echo/fixture
     scenarios:
       EchoEcho:
       - success

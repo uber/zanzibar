@@ -9,5 +9,5 @@ middlewares:
 thriftFile: endpoints/tchannel/baz/baz.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: SimpleService::Call
-workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz
+workflowImportPath: github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/tchannel/baz
 workflowType: custom

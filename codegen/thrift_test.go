@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/v2/codegen"
 	"go.uber.org/thriftrw/compile"
 	"go.uber.org/thriftrw/wire"
 )

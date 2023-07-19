@@ -28,19 +28,19 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/zap"
 
-	appdemoabcendpointstatic "github.com/uber/zanzibar/examples/example-gateway/app/demo/endpoints/abc"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/workflow"
-	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	appdemoabcendpointstatic "github.com/uber/zanzibar/v2/examples/example-gateway/app/demo/endpoints/abc"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/module"
+	workflow "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/workflow"
+	bazclientgeneratedmock "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 )
 
 // NewAppDemoServiceCallWorkflowMock creates a workflow with mock clients

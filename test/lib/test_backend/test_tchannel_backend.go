@@ -31,8 +31,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/config"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // TestTChannelBackend will pretend to be a tchannel backend

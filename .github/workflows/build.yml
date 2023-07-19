@@ -2,9 +2,13 @@ name: Build using GitHub Actions
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - '*'
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - '*'
 
 jobs:
 
@@ -17,7 +21,7 @@ jobs:
     env:
       GOPATH: ${{ github.workspace }}
       GOBIN: ${{ github.workspace }}/bin
-      GO111MODULE: off
+      GO111MODULE: auto
     defaults:
       run:
         working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
@@ -56,7 +60,7 @@ jobs:
 
       - name: make jenkins-install
         run: make jenkins-install
-        
+
       - name: make jenkins-test
         run: make jenkins-test
         
@@ -71,14 +75,15 @@ jobs:
 
       - name: make test-benchmark-runner
         run: make test-benchmark-runner
-   
-      - name: make cover
-        run: make cover
+
+# TODO: (cp) enable code coverage
+#      - name: make cover
+#        run: make cover
         
-      - name: Publish to coveralls.io
-        uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}/coverage/lcov.info
+#      - name: Publish to coveralls.io
+#        uses: coverallsapp/github-action@v1.1.2
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          path-to-lcov: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}/coverage/lcov.info
         
       - run: echo "🍏 This job's status is ${{ job.status }}."

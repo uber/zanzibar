@@ -24,24 +24,24 @@
 package module
 
 import (
-	appdemoabcendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc"
-	appdemoabcendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
-	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	barclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	bazclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
-	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
-	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
-	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
-	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
-	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
-	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
-	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
-	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	appdemoabcendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc"
+	appdemoabcendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/module"
+	barclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar"
+	barclientmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar/module"
+	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	bazclientmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/module"
+	barendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar"
+	barendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar/module"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
+	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // DependenciesTree contains all deps for this service.

@@ -8,7 +8,7 @@ import (
 	fmt "fmt"
 	strings "strings"
 
-	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
+	base "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/foo/base/base"
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"

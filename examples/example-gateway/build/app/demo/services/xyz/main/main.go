@@ -29,7 +29,7 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v2/config"
 
 	"github.com/pkg/errors"
 
@@ -37,10 +37,10 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	app "github.com/uber/zanzibar/examples/example-gateway"
-	service "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/services/xyz"
+	app "github.com/uber/zanzibar/v2/examples/example-gateway"
+	service "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/services/xyz"
 	uberconfig "go.uber.org/config"
 )
 

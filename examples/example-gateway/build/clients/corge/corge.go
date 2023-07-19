@@ -26,6 +26,7 @@ package corgeclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/textproto"
 	"strconv"
 	"strings"
@@ -33,18 +34,20 @@ import (
 
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/config"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/ruleengine"
+	"github.com/uber/zanzibar/v2/config"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	"github.com/uber/zanzibar/v2/runtime/ruleengine"
 
 	"go.uber.org/zap"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
-	clientsIDlClientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/corge/module"
+	clientsIDlClientsCorgeCorge "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
 )
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::corge")
 
 // Client defines corge client interface.
 type Client interface {
@@ -350,24 +353,29 @@ func (c *corgeClient) EchoString(
 			err = clientErr
 		}
 	}
+	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making tchannel call: %s", err)), logFieldErrLocation)
+	}
 
 	if err == nil && !success {
 		switch {
 		case result.Success != nil:
-			ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding", zap.Error(err))
+			ctx = logger.WarnZ(ctx, "Internal error. Success flag is not set for EchoString. Overriding")
 			success = true
 		default:
 			err = errors.New("corgeClient received no result or unknown exception for EchoString")
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 		}
 	}
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error", zap.Error(err))
+		ctx = logger.WarnZ(ctx, "Client failure: TChannel client call returned error")
 		return ctx, resp, respHeaders, err
 	}
 
 	resp, err = clientsIDlClientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response", zap.Error(err))
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
+		ctx = logger.WarnZ(ctx, "Client failure: unable to unwrap client response")
 	}
 	return ctx, resp, respHeaders, err
 }

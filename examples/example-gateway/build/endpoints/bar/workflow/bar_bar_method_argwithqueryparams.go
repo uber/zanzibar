@@ -27,14 +27,14 @@ import (
 	"context"
 	"net/textproto"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v2/config"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar/module"
 	"go.uber.org/zap"
 )
 

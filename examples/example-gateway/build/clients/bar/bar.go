@@ -34,12 +34,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
-	clientsIDlClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	clientsIDlClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar/module"
+	clientsIDlClientsBarBar "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	clientsIDlClientsFooFoo "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo"
 )
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping

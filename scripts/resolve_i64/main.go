@@ -32,8 +32,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/codegen"
-	"github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/codegen"
+	"github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/thriftrw/compile"
 )
 

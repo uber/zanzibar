@@ -5,5 +5,5 @@ qpsLevel: 1
 thriftFile: endpoints/tchannel/quux/quux.thrift
 thriftFileSha: '{{placeholder}}'
 thriftMethodName: SimpleService::EchoString
-workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/quux
+workflowImportPath: github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/tchannel/quux
 workflowType: custom

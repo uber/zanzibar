@@ -25,13 +25,13 @@ import (
 
 	"go.uber.org/fx"
 
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 
 	"go.uber.org/zap"
 
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // AppOptions defines the custom application func

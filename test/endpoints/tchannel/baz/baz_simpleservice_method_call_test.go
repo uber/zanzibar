@@ -30,12 +30,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	bazClient "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	clientsBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointsBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v2/test/lib/util"
 )
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
@@ -129,6 +129,9 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"ts",
 		"hostname",
 		"pid",
+		"Client-Req-Header-x-request-uuid",
+		"Client-Req-Header-$tracing$uber-trace-id",
+		"client_remote_addr",
 		"Res-Header-client.response.duration",
 		zanzibar.TraceIDKey,
 		zanzibar.TraceSpanKey,
@@ -140,20 +143,25 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	expectedValues := map[string]string{
-		"level":                      "debug",
-		"msg":                        "Finished an incoming server TChannel request",
-		"env":                        "test",
-		"service":                    "example-gateway",
-		"endpointID":                 "bazTChannel",
-		"endpointHandler":            "call",
-		"endpointThriftMethod":       "SimpleService::Call",
-		"x-uuid":                     "uuid",
-		"calling-service":            "test-gateway",
-		"zone":                       "unknown",
-		"Device":                     "ios",
-		"Regionname":                 "sf",
-		"Deviceversion":              "1.0",
-		"Res-Header-some-res-header": "something",
+		"level":                             "debug",
+		"msg":                               "Finished an incoming server TChannel request",
+		"env":                               "test",
+		"service":                           "example-gateway",
+		"endpointID":                        "bazTChannel",
+		"endpointHandler":                   "call",
+		"endpointThriftMethod":              "SimpleService::Call",
+		"x-uuid":                            "uuid",
+		"calling-service":                   "test-gateway",
+		"zone":                              "unknown",
+		"Device":                            "ios",
+		"Regionname":                        "sf",
+		"Deviceversion":                     "1.0",
+		"Res-Header-some-res-header":        "something",
+		"Client-Req-Header-x-uuid":          "uuid",
+		"Client-Req-Header-Deviceversion":   "1.0",
+		"Client-Res-Header-some-res-header": "something",
+		"Client-Req-Header-Device":          "ios",
+		"Client-Req-Header-Regionname":      "sf",
 	}
 	for actualKey, actualValue := range logs {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)

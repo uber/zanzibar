@@ -31,11 +31,11 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"go.uber.org/zap"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/jsonwrapper"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
-	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/google-now/module"
+	clientsIDlClientsGooglenowGooglenow "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/googlenow/googlenow"
 )
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping

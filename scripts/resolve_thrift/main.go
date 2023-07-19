@@ -25,7 +25,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/v2/codegen"
 	"go.uber.org/thriftrw/compile"
 )
 

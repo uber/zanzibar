@@ -29,12 +29,12 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	barGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
+	barGen "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	exampleGateway "github.com/uber/zanzibar/v2/examples/example-gateway/build/services/example-gateway"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
+	benchGateway "github.com/uber/zanzibar/v2/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/v2/test/lib/test_gateway"
+	"github.com/uber/zanzibar/v2/test/lib/util"
 	"go.uber.org/zap"
 )
 

@@ -3,7 +3,7 @@ config:
     SaveContacts: Contacts::saveContacts
     TestURLURL: Contacts::testUrlUrl
   fixture:
-    importPath: github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
+    importPath: github.com/uber/zanzibar/v2/examples/example-gateway/clients/contacts/fixture
     scenarios:
       SaveContacts:
       - success

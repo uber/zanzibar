@@ -24,11 +24,11 @@ import (
 	"context"
 	"net/textproto"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
-	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
-	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	"github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
+	clientBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/baz/baz"
+	endpointBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"go.uber.org/zap"
 )
 

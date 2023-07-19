@@ -24,9 +24,9 @@
 package defaultexamplemiddleware
 
 import (
-	module "github.com/uber/zanzibar/examples/selective-gateway/build/middlewares/default/default_example/module"
-	handle "github.com/uber/zanzibar/examples/selective-gateway/middlewares/default/default_example"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	module "github.com/uber/zanzibar/v2/examples/selective-gateway/build/middlewares/default/default_example/module"
+	handle "github.com/uber/zanzibar/v2/examples/selective-gateway/middlewares/default/default_example"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
 
 // Middleware is a container for module.Deps and factory for MiddlewareHandle

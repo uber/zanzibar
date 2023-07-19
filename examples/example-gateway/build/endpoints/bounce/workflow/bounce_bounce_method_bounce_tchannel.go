@@ -26,9 +26,9 @@ package workflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	endpointsIDlEndpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
+	endpointsIDlEndpointsBounceBounce "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bounce/bounce"
 )
 
 // BounceBounceWorkflow defines the interface for BounceBounce workflow

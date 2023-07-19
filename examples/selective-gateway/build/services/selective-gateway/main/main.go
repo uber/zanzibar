@@ -29,7 +29,7 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/v2/config"
 
 	"github.com/pkg/errors"
 
@@ -37,10 +37,10 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	app "github.com/uber/zanzibar/examples/selective-gateway"
-	service "github.com/uber/zanzibar/examples/selective-gateway/build/services/selective-gateway"
+	app "github.com/uber/zanzibar/v2/examples/selective-gateway"
+	service "github.com/uber/zanzibar/v2/examples/selective-gateway/build/services/selective-gateway"
 	uberconfig "go.uber.org/config"
 )
 

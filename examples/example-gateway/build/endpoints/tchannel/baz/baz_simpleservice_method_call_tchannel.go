@@ -34,15 +34,15 @@ import (
 	"go.uber.org/zap"
 
 	tchannel "github.com/uber/tchannel-go"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/v2/runtime"
 
-	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
+	endpointsIDlEndpointsTchannelBazBaz "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/tchannel/baz/baz"
+	customBaz "github.com/uber/zanzibar/v2/examples/example-gateway/endpoints/tchannel/baz"
 
-	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
-	exampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
+	defaultExampleTchannel "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example_tchannel"
+	exampleTchannel "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example_tchannel"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/tchannel/baz/module"
 )
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.

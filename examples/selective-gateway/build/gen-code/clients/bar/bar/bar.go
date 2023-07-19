@@ -13,7 +13,7 @@ import (
 	strconv "strconv"
 	strings "strings"
 
-	foo "github.com/uber/zanzibar/examples/selective-gateway/build/gen-code/clients/foo/foo"
+	foo "github.com/uber/zanzibar/v2/examples/selective-gateway/build/gen-code/clients/foo/foo"
 	multierr "go.uber.org/multierr"
 	stream "go.uber.org/thriftrw/protocol/stream"
 	wire "go.uber.org/thriftrw/wire"
