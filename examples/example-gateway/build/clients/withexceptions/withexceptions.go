@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/zap"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
@@ -39,6 +40,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::withexceptions")
 
 // Client defines withexceptions client interface.
 type Client interface {
@@ -231,6 +234,7 @@ func (c *withexceptionsClient) Func1(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -255,6 +259,7 @@ func (c *withexceptionsClient) Func1(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -274,10 +279,12 @@ func (c *withexceptionsClient) Func1(
 		var responseBody clientsIDlClientsWithexceptionsWithexceptions.Response
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -289,17 +296,21 @@ func (c *withexceptionsClient) Func1(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),

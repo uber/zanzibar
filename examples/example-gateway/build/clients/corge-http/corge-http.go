@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/v2/config"
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
@@ -42,6 +43,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::corge-http")
 
 // Client defines corge-http client interface.
 type Client interface {
@@ -312,6 +315,7 @@ func (c *corgeHTTPClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -336,6 +340,7 @@ func (c *corgeHTTPClient) EchoString(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -355,10 +360,12 @@ func (c *corgeHTTPClient) EchoString(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -366,10 +373,12 @@ func (c *corgeHTTPClient) EchoString(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -420,6 +429,7 @@ func (c *corgeHTTPClient) NoContent(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -444,6 +454,7 @@ func (c *corgeHTTPClient) NoContent(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -469,10 +480,12 @@ func (c *corgeHTTPClient) NoContent(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -523,6 +536,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -547,6 +561,7 @@ func (c *corgeHTTPClient) NoContentNoException(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -567,10 +582,12 @@ func (c *corgeHTTPClient) NoContentNoException(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -622,6 +639,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -646,6 +664,7 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -665,10 +684,12 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 		var responseBody clientsIDlClientsCorgeCorge.Foo
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -681,10 +702,12 @@ func (c *corgeHTTPClient) CorgeNoContentOnException(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),

@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
@@ -43,6 +44,8 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
+
+var logFieldErrLocation = zanzibar.LogFieldErrorLocation("client::bar")
 
 // Client defines bar client interface.
 type Client interface {
@@ -472,6 +475,7 @@ func (c *barClient) ArgNotStruct(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -496,6 +500,7 @@ func (c *barClient) ArgNotStruct(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -514,6 +519,7 @@ func (c *barClient) ArgNotStruct(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 
@@ -524,17 +530,21 @@ func (c *barClient) ArgNotStruct(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -577,11 +587,13 @@ func (c *barClient) ArgWithHeaders(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -606,6 +618,7 @@ func (c *barClient) ArgWithHeaders(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -625,10 +638,12 @@ func (c *barClient) ArgWithHeaders(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -637,10 +652,12 @@ func (c *barClient) ArgWithHeaders(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -767,6 +784,7 @@ func (c *barClient) ArgWithManyQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -791,6 +809,7 @@ func (c *barClient) ArgWithManyQueryParams(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -810,10 +829,12 @@ func (c *barClient) ArgWithManyQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -822,10 +843,12 @@ func (c *barClient) ArgWithManyQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -874,6 +897,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -898,6 +922,7 @@ func (c *barClient) ArgWithNearDupQueryParams(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -917,10 +942,12 @@ func (c *barClient) ArgWithNearDupQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -929,10 +956,12 @@ func (c *barClient) ArgWithNearDupQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1005,6 +1034,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1029,6 +1059,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1048,10 +1079,12 @@ func (c *barClient) ArgWithNestedQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1060,10 +1093,12 @@ func (c *barClient) ArgWithNestedQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1095,6 +1130,7 @@ func (c *barClient) ArgWithParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1119,6 +1155,7 @@ func (c *barClient) ArgWithParams(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1138,10 +1175,12 @@ func (c *barClient) ArgWithParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1150,10 +1189,12 @@ func (c *barClient) ArgWithParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1185,6 +1226,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1209,6 +1251,7 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1228,10 +1271,12 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1240,10 +1285,12 @@ func (c *barClient) ArgWithParamsAndDuplicateFields(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1275,6 +1322,7 @@ func (c *barClient) ArgWithQueryHeader(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1299,6 +1347,7 @@ func (c *barClient) ArgWithQueryHeader(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1318,10 +1367,12 @@ func (c *barClient) ArgWithQueryHeader(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1330,10 +1381,12 @@ func (c *barClient) ArgWithQueryHeader(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1382,6 +1435,7 @@ func (c *barClient) ArgWithQueryParams(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1406,6 +1460,7 @@ func (c *barClient) ArgWithQueryParams(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1425,10 +1480,12 @@ func (c *barClient) ArgWithQueryParams(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -1437,10 +1494,12 @@ func (c *barClient) ArgWithQueryParams(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1473,11 +1532,13 @@ func (c *barClient) DeleteFoo(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, nil, headerErr
 	}
 
@@ -1502,6 +1563,7 @@ func (c *barClient) DeleteFoo(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1520,16 +1582,19 @@ func (c *barClient) DeleteFoo(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1560,6 +1625,7 @@ func (c *barClient) DeleteWithBody(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1584,6 +1650,7 @@ func (c *barClient) DeleteWithBody(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1602,16 +1669,19 @@ func (c *barClient) DeleteWithBody(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1651,6 +1721,7 @@ func (c *barClient) DeleteWithQueryParams(
 
 	err := req.WriteJSON("DELETE", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1675,6 +1746,7 @@ func (c *barClient) DeleteWithQueryParams(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, nil, err
 	}
 
@@ -1693,16 +1765,19 @@ func (c *barClient) DeleteWithQueryParams(
 	case 200:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 		return ctx, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1733,6 +1808,7 @@ func (c *barClient) Hello(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1757,6 +1833,7 @@ func (c *barClient) Hello(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1776,10 +1853,12 @@ func (c *barClient) Hello(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1793,17 +1872,21 @@ func (c *barClient) Hello(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1850,6 +1933,7 @@ func (c *barClient) ListAndEnum(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1874,6 +1958,7 @@ func (c *barClient) ListAndEnum(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1893,10 +1978,12 @@ func (c *barClient) ListAndEnum(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -1908,17 +1995,21 @@ func (c *barClient) ListAndEnum(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -1949,6 +2040,7 @@ func (c *barClient) MissingArg(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1973,6 +2065,7 @@ func (c *barClient) MissingArg(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -1992,10 +2085,12 @@ func (c *barClient) MissingArg(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2008,17 +2103,21 @@ func (c *barClient) MissingArg(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2049,6 +2148,7 @@ func (c *barClient) NoRequest(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2073,6 +2173,7 @@ func (c *barClient) NoRequest(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2092,10 +2193,12 @@ func (c *barClient) NoRequest(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2108,17 +2211,21 @@ func (c *barClient) NoRequest(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2150,6 +2257,7 @@ func (c *barClient) Normal(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2174,6 +2282,7 @@ func (c *barClient) Normal(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2193,10 +2302,12 @@ func (c *barClient) Normal(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2209,17 +2320,21 @@ func (c *barClient) Normal(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2251,6 +2366,7 @@ func (c *barClient) NormalRecur(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2275,6 +2391,7 @@ func (c *barClient) NormalRecur(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2294,10 +2411,12 @@ func (c *barClient) NormalRecur(
 		var responseBody clientsIDlClientsBarBar.BarResponseRecur
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2309,17 +2428,21 @@ func (c *barClient) NormalRecur(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2351,6 +2474,7 @@ func (c *barClient) TooManyArgs(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2375,6 +2499,7 @@ func (c *barClient) TooManyArgs(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2394,10 +2519,12 @@ func (c *barClient) TooManyArgs(
 		var responseBody clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
@@ -2410,8 +2537,10 @@ func (c *barClient) TooManyArgs(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 	case 418:
 		allOptions := []interface{}{
@@ -2419,17 +2548,21 @@ func (c *barClient) TooManyArgs(
 		}
 		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(v.(error)), zanzibar.LogFieldErrTypeClientException, logFieldErrLocation)
 		return ctx, defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2461,11 +2594,13 @@ func (c *barClient) EchoBinary(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2490,6 +2625,7 @@ func (c *barClient) EchoBinary(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2508,16 +2644,19 @@ func (c *barClient) EchoBinary(
 	case 200:
 		responseBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		return ctx, responseBody, respHeaders, nil
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2549,11 +2688,13 @@ func (c *barClient) EchoBool(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2578,6 +2719,7 @@ func (c *barClient) EchoBool(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2597,10 +2739,12 @@ func (c *barClient) EchoBool(
 		var responseBody bool
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2608,10 +2752,12 @@ func (c *barClient) EchoBool(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2643,11 +2789,13 @@ func (c *barClient) EchoDouble(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2672,6 +2820,7 @@ func (c *barClient) EchoDouble(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2691,10 +2840,12 @@ func (c *barClient) EchoDouble(
 		var responseBody float64
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2702,10 +2853,12 @@ func (c *barClient) EchoDouble(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2737,11 +2890,13 @@ func (c *barClient) EchoEnum(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2766,6 +2921,7 @@ func (c *barClient) EchoEnum(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2785,10 +2941,12 @@ func (c *barClient) EchoEnum(
 		var responseBody clientsIDlClientsBarBar.Fruit
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2796,10 +2954,12 @@ func (c *barClient) EchoEnum(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2831,11 +2991,13 @@ func (c *barClient) EchoI16(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2860,6 +3022,7 @@ func (c *barClient) EchoI16(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2879,10 +3042,12 @@ func (c *barClient) EchoI16(
 		var responseBody int16
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2890,10 +3055,12 @@ func (c *barClient) EchoI16(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -2925,11 +3092,13 @@ func (c *barClient) EchoI32(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -2954,6 +3123,7 @@ func (c *barClient) EchoI32(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -2973,10 +3143,12 @@ func (c *barClient) EchoI32(
 		var responseBody int32
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -2984,10 +3156,12 @@ func (c *barClient) EchoI32(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3019,11 +3193,13 @@ func (c *barClient) EchoI32Map(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3048,6 +3224,7 @@ func (c *barClient) EchoI32Map(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3067,10 +3244,12 @@ func (c *barClient) EchoI32Map(
 		var responseBody map[int32]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3078,10 +3257,12 @@ func (c *barClient) EchoI32Map(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3113,11 +3294,13 @@ func (c *barClient) EchoI64(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3142,6 +3325,7 @@ func (c *barClient) EchoI64(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3161,10 +3345,12 @@ func (c *barClient) EchoI64(
 		var responseBody int64
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3172,10 +3358,12 @@ func (c *barClient) EchoI64(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3207,11 +3395,13 @@ func (c *barClient) EchoI8(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3236,6 +3426,7 @@ func (c *barClient) EchoI8(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3255,10 +3446,12 @@ func (c *barClient) EchoI8(
 		var responseBody int8
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3266,10 +3459,12 @@ func (c *barClient) EchoI8(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3301,11 +3496,13 @@ func (c *barClient) EchoString(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3330,6 +3527,7 @@ func (c *barClient) EchoString(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3349,10 +3547,12 @@ func (c *barClient) EchoString(
 		var responseBody string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3360,10 +3560,12 @@ func (c *barClient) EchoString(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3395,11 +3597,13 @@ func (c *barClient) EchoStringList(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3424,6 +3628,7 @@ func (c *barClient) EchoStringList(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3443,10 +3648,12 @@ func (c *barClient) EchoStringList(
 		var responseBody []string
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3454,10 +3661,12 @@ func (c *barClient) EchoStringList(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3489,11 +3698,13 @@ func (c *barClient) EchoStringMap(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3518,6 +3729,7 @@ func (c *barClient) EchoStringMap(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3537,10 +3749,12 @@ func (c *barClient) EchoStringMap(
 		var responseBody map[string]*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3548,10 +3762,12 @@ func (c *barClient) EchoStringMap(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3583,11 +3799,13 @@ func (c *barClient) EchoStringSet(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3612,6 +3830,7 @@ func (c *barClient) EchoStringSet(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3631,10 +3850,12 @@ func (c *barClient) EchoStringSet(
 		var responseBody map[string]struct{}
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3642,10 +3863,12 @@ func (c *barClient) EchoStringSet(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3677,11 +3900,13 @@ func (c *barClient) EchoStructList(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3706,6 +3931,7 @@ func (c *barClient) EchoStructList(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3725,10 +3951,12 @@ func (c *barClient) EchoStructList(
 		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3736,10 +3964,12 @@ func (c *barClient) EchoStructList(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3771,11 +4001,13 @@ func (c *barClient) EchoStructSet(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3800,6 +4032,7 @@ func (c *barClient) EchoStructSet(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3819,10 +4052,12 @@ func (c *barClient) EchoStructSet(
 		var responseBody []*clientsIDlClientsBarBar.BarResponse
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3830,10 +4065,12 @@ func (c *barClient) EchoStructSet(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
@@ -3865,11 +4102,13 @@ func (c *barClient) EchoTypedef(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error creating http request: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
 	headerErr := req.CheckHeaders([]string{"x-uuid"})
 	if headerErr != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.Error(headerErr), logFieldErrLocation)
 		return ctx, defaultRes, nil, headerErr
 	}
 
@@ -3894,6 +4133,7 @@ func (c *barClient) EchoTypedef(
 		}
 	}
 	if err != nil {
+		zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("error making http call: %s", err)), logFieldErrLocation)
 		return ctx, defaultRes, nil, err
 	}
 
@@ -3913,10 +4153,12 @@ func (c *barClient) EchoTypedef(
 		var responseBody clientsIDlClientsBarBar.UUID
 		rawBody, err := res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 		err = res.UnmarshalBody(&responseBody, rawBody)
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 
@@ -3924,10 +4166,12 @@ func (c *barClient) EchoTypedef(
 	default:
 		_, err = res.ReadAll()
 		if err != nil {
+			zanzibar.AppendLogFieldsToContext(ctx, zap.Error(err), logFieldErrLocation)
 			return ctx, defaultRes, respHeaders, err
 		}
 	}
 
+	zanzibar.AppendLogFieldsToContext(ctx, zap.String("error", fmt.Sprintf("unexpected http response status code: %d", res.StatusCode)), logFieldErrLocation)
 	return ctx, defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),

@@ -111,19 +111,17 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 	}
 
 	actualHeaders := req.httpReq.Header
-
+	missingHeaders := make([]string, 0)
 	for _, headerName := range expected {
 		// headerName is case insensitive, http.Header Get canonicalize the key
 		headerValue := actualHeaders.Get(headerName)
 		if headerValue == "" {
-			req.ContextLogger.WarnZ(req.ctx, "Got outbound request without mandatory header",
-				zap.String("headerName", headerName),
-			)
-
-			return errors.New("Missing mandatory header: " + headerName)
+			missingHeaders = append(missingHeaders, headerName)
 		}
 	}
-
+	if len(missingHeaders) > 0 {
+		return errors.New("missing mandatory headers: " + strings.Join(missingHeaders, ","))
+	}
 	return nil
 }
 
@@ -138,9 +136,8 @@ func (req *ClientHTTPRequest) WriteJSON(
 		var err error
 		rawBody, err = req.jsonWrapper.Marshal(body)
 		if err != nil {
-			req.ContextLogger.ErrorZ(req.ctx, "Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(
-				err, "Could not serialize %s.%s request json",
+				err, "Could not serialize %s.%s request object",
 				req.ClientID, req.MethodName,
 			)
 		}
@@ -167,7 +164,6 @@ func (req *ClientHTTPRequest) WriteBytes(
 	}
 
 	if httpErr != nil {
-		req.ContextLogger.ErrorZ(req.ctx, "Could not create outbound request", zap.Error(httpErr))
 		return errors.Wrapf(
 			httpErr, "Could not create outbound %s.%s request",
 			req.ClientID, req.MethodName,
@@ -213,9 +209,8 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 
 	span.Finish()
 
+	AppendLogFieldsToContext(req.ctx, zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
 	if err != nil {
-		req.ContextLogger.ErrorZ(req.ctx, fmt.Sprintf("Could not make http outbound %s.%s request",
-			req.ClientID, req.MethodName), zap.Error(err))
 		return nil, errors.Wrapf(err, "errors while making outbound %s.%s request", req.ClientID, req.MethodName)
 	}
 
@@ -245,13 +240,6 @@ func (req *ClientHTTPRequest) executeDoWithRetry(ctx context.Context) (*http.Res
 		if i+1 < req.timeoutAndRetryOptions.MaxAttempts {
 			shouldRetry = req.client.CheckRetry(ctx, req.timeoutAndRetryOptions, res, err)
 		}
-
-		req.ContextLogger.Warn(ctx, "errors while making http outbound request",
-			zap.Error(err),
-			zap.String("clientId", req.ClientID), zap.String("methodName", req.MethodName),
-			zap.Int64("attempt", retryCount),
-			zap.Int("maxAttempts", req.timeoutAndRetryOptions.MaxAttempts),
-			zap.Bool("shouldRetry", shouldRetry))
 
 		// TODO (future releases) - make retry conditional, inspect error/response and then retry
 

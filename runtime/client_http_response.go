@@ -84,11 +84,10 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 	cerr := res.rawResponse.Body.Close()
 	if cerr != nil {
 		/* coverage ignore next line */
-		res.req.ContextLogger.Error(res.req.ctx, "Could not close response body", zap.Error(cerr))
+		res.req.ContextLogger.WarnZ(res.req.ctx, "Could not close response body", zap.Error(cerr))
 	}
 
 	if err != nil {
-		res.req.ContextLogger.ErrorZ(res.req.ctx, "Could not read response body", zap.Error(err))
 		res.finish()
 		return nil, errors.Wrapf(
 			err, "Could not read %s.%s response body",
@@ -110,7 +109,6 @@ func (res *ClientHTTPResponse) GetRawBody() []byte {
 func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 	rawBody, err := res.ReadAll()
 	if err != nil {
-		/* coverage ignore next line */
 		return err
 	}
 	return res.UnmarshalBody(v, rawBody)
@@ -120,7 +118,6 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 func (res *ClientHTTPResponse) UnmarshalBody(v interface{}, rawBody []byte) error {
 	err := res.jsonWrapper.Unmarshal(rawBody, v)
 	if err != nil {
-		res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json", zap.Error(err))
 		res.req.Metrics.IncCounter(res.req.ctx, clientHTTPUnmarshalError, 1)
 		return errors.Wrapf(
 			err, "Could not parse %s.%s response json",
@@ -149,11 +146,8 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 		merr = multierr.Append(merr, err)
 	}
 
-	err = fmt.Errorf("all json serialization errors: %s", merr.Error())
-
-	res.req.ContextLogger.WarnZ(res.req.ctx, "Could not parse response json into any of provided interfaces", zap.Error(err))
 	return nil, errors.Wrapf(
-		err, "Could not parse %s.%s response json into any of provided interfaces",
+		merr, "Could not parse %s.%s response json into any of provided interfaces",
 		res.req.ClientID, res.req.MethodName,
 	)
 }
@@ -165,10 +159,7 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 			return
 		}
 	}
-
-	res.req.ContextLogger.WarnZ(res.req.ctx, "Unknown response status code",
-		zap.Int("UnknownStatusCode", res.rawResponse.StatusCode),
-	)
+	res.req.ContextLogger.WarnZ(res.req.ctx, "Received unexpected client response status code")
 }
 
 // finish will handle final logic, like metrics
@@ -188,8 +179,6 @@ func (res *ClientHTTPResponse) finish() {
 	res.finished = true
 	res.finishTime = time.Now()
 
-	logFn := res.req.ContextLogger.DebugZ
-
 	// emit metrics
 	delta := res.finishTime.Sub(res.req.startTime)
 	res.req.Metrics.RecordTimer(res.req.ctx, clientLatency, delta)
@@ -198,10 +187,7 @@ func (res *ClientHTTPResponse) finish() {
 
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
-		res.req.ContextLogger.Error(res.req.ctx,
-			"Could not emit statusCode metric",
-			zap.Int("UnknownStatusCode", res.StatusCode),
-		)
+		res.req.ContextLogger.WarnZ(res.req.ctx, "Received unknown status code from client")
 	} else {
 		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
 		res.req.ctx = WithScopeTagsDefault(res.req.ctx, scopeTags, res.req.Metrics.Scope())
@@ -209,15 +195,8 @@ func (res *ClientHTTPResponse) finish() {
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		res.req.Metrics.IncCounter(res.req.ctx, clientErrors, 1)
-		logFn = res.req.ContextLogger.WarnZ
 	}
-
-	// write logs
-	logFn(
-		res.req.ctx,
-		"Finished an outgoing client HTTP request",
-		clientHTTPLogFields(res.req, res)...,
-	)
+	AppendLogFieldsToContext(res.req.ctx, clientHTTPLogFields(res.req, res)...)
 }
 
 func clientHTTPLogFields(req *ClientHTTPRequest, res *ClientHTTPResponse) []zapcore.Field {
