@@ -102,8 +102,8 @@ func TestHelloWorld_WithTimeoutAndRetryOptions(t *testing.T) {
 		"GET", "/bar/hello",
 		func(w http.ResponseWriter, r *http.Request) {
 			if *attemptPtr == 1 {
-				time.Sleep(1 * time.Second)
 				*attemptPtr++
+				time.Sleep(1 * time.Second)
 			}
 			w.Header().Add("Location", "http://example.com/")
 			w.WriteHeader(303)
