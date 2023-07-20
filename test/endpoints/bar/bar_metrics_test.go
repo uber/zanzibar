@@ -242,6 +242,7 @@ func TestCallMetrics(t *testing.T) {
 		"apienvironment":                 "production",
 		"Res-Header-Content-Type":        "application/json",
 		"statusCode":                     float64(200),
+		"client.bar.attempts":            float64(1),
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
