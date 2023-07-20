@@ -95,10 +95,16 @@ func TestHelloWorld_WithTimeoutAndRetryOptions(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
+	attempt := 1
+	attemptPtr := &attempt
 	// note: we set clients.bar.followRedirect: false in test.yaml
 	bgateway.HTTPBackends()["bar"].HandleFunc(
 		"GET", "/bar/hello",
 		func(w http.ResponseWriter, r *http.Request) {
+			if *attemptPtr == 1 {
+				time.Sleep(1 * time.Second)
+				*attemptPtr++
+			}
 			w.Header().Add("Location", "http://example.com/")
 			w.WriteHeader(303)
 			_, err := w.Write([]byte(`hello world`))
@@ -131,7 +137,7 @@ func TestHelloWorld_WithTimeoutAndRetryOptions(t *testing.T) {
 	_, ok := logFieldsMap["client.bar.attempts"]
 	assert.True(t, ok, "expected log field missing: client.bar.attempts")
 	if ok {
-		assert.Equal(t, int64(1), logFieldsMap["client.bar.attempts"].Integer)
+		assert.Equal(t, int64(2), logFieldsMap["client.bar.attempts"].Integer)
 	}
 }
 
