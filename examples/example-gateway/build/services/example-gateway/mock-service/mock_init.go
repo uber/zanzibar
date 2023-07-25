@@ -64,7 +64,6 @@ import (
 	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel/module"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/clients/contacts/fixture"
@@ -143,9 +142,9 @@ func InitializeDependenciesMock(
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedMiddlewareDependencies.Example = examplemiddlewarestatic.NewMiddleware(&examplemiddlewaremodule.Dependencies{
+	initializedMiddlewareDependencies.Example = examplemiddlewarestatic.NewMiddleware(&examplemiddlewarestatic.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &examplemiddlewaremodule.ClientDependencies{
+		Client: &examplemiddlewarestatic.ClientDependencies{
 			Baz:  initializedClientDependencies.Baz,
 			Echo: initializedClientDependencies.Echo,
 		},
