@@ -40,9 +40,9 @@ import (
 	workflow "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsIDlEndpointsBarBar "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/endpoints-idl/endpoints/bar/bar"
 
-	example "github.com/uber/zanzibar/v2/examples/example-gateway/invalid-path/example"
 	defaultExample "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example"
 	defaultExample2 "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/default/default_example2"
+	example "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
 
 	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar/module"
 )

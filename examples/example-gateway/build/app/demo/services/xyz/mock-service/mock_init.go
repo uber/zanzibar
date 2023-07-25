@@ -32,7 +32,6 @@ import (
 	appdemoabcendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/module"
 	barclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
-	echoclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
 	barendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
@@ -41,14 +40,14 @@ import (
 	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	examplemiddlewarestatic "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
+	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
+	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
 )
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Bar  *barclientgenerated.MockClient
-	Baz  *bazclientgenerated.MockClient
-	Echo *echoclientgenerated.MockClient
+	Bar *barclientgenerated.MockClient
+	Baz *bazclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -73,15 +72,13 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Bar:  barclientgenerated.NewMockClient(ctrl),
-		Baz:  bazclientgenerated.NewMockClient(ctrl),
-		Echo: echoclientgenerated.NewMockClient(ctrl),
+		Bar: barclientgenerated.NewMockClient(ctrl),
+		Baz: bazclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Bar = mockClientNodes.Bar
 	initializedClientDependencies.Baz = mockClientNodes.Baz
-	initializedClientDependencies.Echo = mockClientNodes.Echo
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -100,11 +97,10 @@ func InitializeDependenciesMock(
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedMiddlewareDependencies.Example = examplemiddlewarestatic.NewMiddleware(&examplemiddlewarestatic.Dependencies{
+	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &examplemiddlewarestatic.ClientDependencies{
-			Baz:  initializedClientDependencies.Baz,
-			Echo: initializedClientDependencies.Echo,
+		Client: &examplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
 		},
 	})
 

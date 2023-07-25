@@ -65,11 +65,11 @@ import (
 	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
+	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
+	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel/module"
-	echoclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo"
 	quuxclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux"
-	examplemiddlewarestatic "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
@@ -86,7 +86,6 @@ type ClientDependenciesNodes struct {
 	Bar            barclientgenerated.Client
 	Baz            bazclientgenerated.Client
 	Contacts       contactsclientgenerated.Client
-	Echo           echoclientstatic.Client
 	GoogleNow      googlenowclientgenerated.Client
 	Multi          multiclientgenerated.Client
 	Quux           quuxclientstatic.IClient
@@ -98,7 +97,7 @@ type MiddlewareDependenciesNodes struct {
 	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
 	DefaultExample2        defaultexample2middlewaregenerated.Middleware
 	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
-	Example                examplemiddlewarestatic.Middleware
+	Example                examplemiddlewaregenerated.Middleware
 	ExampleTchannel        exampletchannelmiddlewaregenerated.Middleware
 }
 
@@ -149,9 +148,6 @@ func InitializeDependencies(
 	initializedClientDependencies.Contacts = contactsclientgenerated.NewClient(&contactsclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Echo = echoclientstatic.NewClient(&echoclientstatic.Dependencies{
-		Default: initializedDefaultDependencies,
-	})
 	initializedClientDependencies.GoogleNow = googlenowclientgenerated.NewClient(&googlenowclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
@@ -182,11 +178,10 @@ func InitializeDependencies(
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedMiddlewareDependencies.Example = examplemiddlewarestatic.NewMiddleware(&examplemiddlewarestatic.Dependencies{
+	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &examplemiddlewarestatic.ClientDependencies{
-			Baz:  initializedClientDependencies.Baz,
-			Echo: initializedClientDependencies.Echo,
+		Client: &examplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
 		},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
