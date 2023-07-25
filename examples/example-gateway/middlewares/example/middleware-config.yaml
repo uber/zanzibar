@@ -7,5 +7,5 @@ dependencies:
   - echo
 name: example
 type: custom
-CustomInitialisation: true
+CustomInitialisation: false
 CustomImportPath: github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example
