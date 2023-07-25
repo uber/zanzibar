@@ -1053,6 +1053,11 @@ func readPackageInfo(
 		customInitialisation = *config.CustomInitialisation
 	}
 
+	var customImportPath string
+	if config.CustomImportPath != nil {
+		customImportPath = *config.CustomImportPath
+	}
+
 	return &PackageInfo{
 		// The package name is assumed to be the lower case of the instance
 		// Name plus the titular class name, such as fooClient
@@ -1085,6 +1090,7 @@ func readPackageInfo(
 		ExportType:            qualifiedClassName,
 		IsExportGenerated:     isExportGenerated,
 		CustomInitialisation:  customInitialisation,
+		CustomImportPath:      customImportPath,
 	}, nil
 }
 
@@ -1693,12 +1699,19 @@ type PackageInfo struct {
 	// hence the new import path are outside of the build folder or generated code, giving developer control over
 	// the constructors of the module.
 	CustomInitialisation bool
+
+	// override the import path with the user provided path
+	// works only when CustomInitialisation is set to true
+	CustomImportPath string
 }
 
 // ImportPackagePath returns the correct package path for the module's exported
 // type, depending on which package (generated or not) the type lives in
 func (info *PackageInfo) ImportPackagePath() string {
 	if info.CustomInitialisation {
+		if info.CustomImportPath != "" {
+			return info.CustomImportPath
+		}
 		return info.PackagePath
 	}
 	if info.IsExportGenerated {
@@ -1725,8 +1738,12 @@ func (info *PackageInfo) ImportPackageAlias() string {
 // type, depending on which package (generated or not) the type lives in
 func (info *PackageInfo) ModulePackagePath() string {
 	if info.CustomInitialisation {
+		if info.CustomImportPath != "" {
+			return info.CustomImportPath
+		}
 		return info.PackagePath
 	}
+
 	return info.GeneratedModulePackagePath
 }
 
@@ -1850,6 +1867,8 @@ type ClassConfigBase struct {
 	IsExportGenerated *bool `yaml:"IsExportGenerated,omitempty" json:"IsExportGenerated"`
 	// CustomInitialisation defaults to false if not set.
 	CustomInitialisation *bool `yaml:"CustomInitialisation,omitempty" json:"CustomInitialisation"`
+	// CustomImportPath to use a different location for the source code
+	CustomImportPath *string `yaml:"CustomImportPath,omitempty" json:"CustomImportPath"`
 	// Owner is the Name of the class instance owner
 	Owner string `yaml:"owner,omitempty"`
 	// SelectiveBuilding allows the module to be built with subset of dependencies
