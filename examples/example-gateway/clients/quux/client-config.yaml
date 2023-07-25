@@ -11,3 +11,5 @@ config:
 dependencies: {}
 name: quux
 type: custom
+CustomInitialisation: false
+CustomImportPath: github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux
