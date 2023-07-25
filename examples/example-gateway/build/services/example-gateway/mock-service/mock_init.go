@@ -31,6 +31,7 @@ import (
 	barclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/contacts/mock-client"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
 	googlenowclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/google-now/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/multi/mock-client"
 	quuxclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/quux/mock-client"
@@ -63,12 +64,11 @@ import (
 	defaultexample2middlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2/module"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
-	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
-	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel/module"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/clients/contacts/fixture"
 	fixturequuxclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux/fixture"
+	examplemiddlewarestatic "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
 )
 
 // MockClientNodes contains mock client dependencies
@@ -76,6 +76,7 @@ type MockClientNodes struct {
 	Bar            *barclientgenerated.MockClient
 	Baz            *bazclientgenerated.MockClient
 	Contacts       *contactsclientgenerated.MockClientWithFixture
+	Echo           *echoclientgenerated.MockClient
 	GoogleNow      *googlenowclientgenerated.MockClient
 	Multi          *multiclientgenerated.MockClient
 	Quux           *quuxclientgenerated.MockIClientWithFixture
@@ -107,6 +108,7 @@ func InitializeDependenciesMock(
 		Bar:            barclientgenerated.NewMockClient(ctrl),
 		Baz:            bazclientgenerated.NewMockClient(ctrl),
 		Contacts:       contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
+		Echo:           echoclientgenerated.NewMockClient(ctrl),
 		GoogleNow:      googlenowclientgenerated.NewMockClient(ctrl),
 		Multi:          multiclientgenerated.NewMockClient(ctrl),
 		Quux:           quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
@@ -117,6 +119,7 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.Bar = mockClientNodes.Bar
 	initializedClientDependencies.Baz = mockClientNodes.Baz
 	initializedClientDependencies.Contacts = mockClientNodes.Contacts
+	initializedClientDependencies.Echo = mockClientNodes.Echo
 	initializedClientDependencies.GoogleNow = mockClientNodes.GoogleNow
 	initializedClientDependencies.Multi = mockClientNodes.Multi
 	initializedClientDependencies.Quux = mockClientNodes.Quux
@@ -139,10 +142,11 @@ func InitializeDependenciesMock(
 	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
+	initializedMiddlewareDependencies.Example = examplemiddlewarestatic.NewMiddleware(&examplemiddlewarestatic.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &examplemiddlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+		Client: &examplemiddlewarestatic.ClientDependencies{
+			Baz:  initializedClientDependencies.Baz,
+			Echo: initializedClientDependencies.Echo,
 		},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{

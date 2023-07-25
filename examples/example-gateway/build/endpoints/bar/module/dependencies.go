@@ -28,7 +28,7 @@ import (
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
 	defaultexample2middlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example2"
 	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel"
-	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
+	examplemiddlewarestatic "github.com/uber/zanzibar/v2/examples/example-gateway/middlewares/example"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
@@ -50,5 +50,5 @@ type MiddlewareDependencies struct {
 	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
 	DefaultExample2        defaultexample2middlewaregenerated.Middleware
 	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
-	Example                examplemiddlewaregenerated.Middleware
+	Example                examplemiddlewarestatic.Middleware
 }
