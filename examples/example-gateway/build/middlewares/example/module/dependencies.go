@@ -25,6 +25,7 @@ package module
 
 import (
 	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz"
+	echoclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
@@ -37,5 +38,6 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Baz bazclientgenerated.Client
+	Baz  bazclientgenerated.Client
+	Echo echoclientstatic.Client
 }

@@ -40,6 +40,7 @@ import (
 	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
+	echoclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 )
@@ -53,8 +54,9 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Bar barclientgenerated.Client
-	Baz bazclientgenerated.Client
+	Bar  barclientgenerated.Client
+	Baz  bazclientgenerated.Client
+	Echo echoclientstatic.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -100,6 +102,9 @@ func InitializeDependencies(
 	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedClientDependencies.Echo = echoclientstatic.NewClient(&echoclientstatic.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -121,7 +126,8 @@ func InitializeDependencies(
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &examplemiddlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+			Baz:  initializedClientDependencies.Baz,
+			Echo: initializedClientDependencies.Echo,
 		},
 	})
 
