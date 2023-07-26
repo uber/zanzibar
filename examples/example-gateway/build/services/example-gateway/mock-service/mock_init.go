@@ -31,6 +31,7 @@ import (
 	barclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/contacts/mock-client"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
 	googlenowclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/google-now/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/multi/mock-client"
 	quuxclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/quux/mock-client"
@@ -76,6 +77,7 @@ type MockClientNodes struct {
 	Bar            *barclientgenerated.MockClient
 	Baz            *bazclientgenerated.MockClient
 	Contacts       *contactsclientgenerated.MockClientWithFixture
+	Echo           *echoclientgenerated.MockClient
 	GoogleNow      *googlenowclientgenerated.MockClient
 	Multi          *multiclientgenerated.MockClient
 	Quux           *quuxclientgenerated.MockIClientWithFixture
@@ -107,6 +109,7 @@ func InitializeDependenciesMock(
 		Bar:            barclientgenerated.NewMockClient(ctrl),
 		Baz:            bazclientgenerated.NewMockClient(ctrl),
 		Contacts:       contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
+		Echo:           echoclientgenerated.NewMockClient(ctrl),
 		GoogleNow:      googlenowclientgenerated.NewMockClient(ctrl),
 		Multi:          multiclientgenerated.NewMockClient(ctrl),
 		Quux:           quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
@@ -117,6 +120,7 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.Bar = mockClientNodes.Bar
 	initializedClientDependencies.Baz = mockClientNodes.Baz
 	initializedClientDependencies.Contacts = mockClientNodes.Contacts
+	initializedClientDependencies.Echo = mockClientNodes.Echo
 	initializedClientDependencies.GoogleNow = mockClientNodes.GoogleNow
 	initializedClientDependencies.Multi = mockClientNodes.Multi
 	initializedClientDependencies.Quux = mockClientNodes.Quux
@@ -142,7 +146,8 @@ func InitializeDependenciesMock(
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &examplemiddlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+			Baz:  initializedClientDependencies.Baz,
+			Echo: initializedClientDependencies.Echo,
 		},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{

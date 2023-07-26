@@ -69,6 +69,7 @@ import (
 	examplemiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/example_tchannel/module"
+	echoclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo"
 	quuxclientstatic "github.com/uber/zanzibar/v2/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
@@ -86,6 +87,7 @@ type ClientDependenciesNodes struct {
 	Bar            barclientgenerated.Client
 	Baz            bazclientgenerated.Client
 	Contacts       contactsclientgenerated.Client
+	Echo           echoclientstatic.Client
 	GoogleNow      googlenowclientgenerated.Client
 	Multi          multiclientgenerated.Client
 	Quux           quuxclientstatic.IClient
@@ -148,6 +150,9 @@ func InitializeDependencies(
 	initializedClientDependencies.Contacts = contactsclientgenerated.NewClient(&contactsclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedClientDependencies.Echo = echoclientstatic.NewClient(&echoclientstatic.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedClientDependencies.GoogleNow = googlenowclientgenerated.NewClient(&googlenowclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
@@ -181,7 +186,8 @@ func InitializeDependencies(
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &examplemiddlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+			Baz:  initializedClientDependencies.Baz,
+			Echo: initializedClientDependencies.Echo,
 		},
 	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{

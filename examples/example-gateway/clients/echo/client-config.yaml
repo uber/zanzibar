@@ -5,3 +5,4 @@ config:
   exposedMethods:
     "EchoEcho": "Echo::Echo"
 CustomInitialisation: true
+CustomImportPath: github.com/uber/zanzibar/v2/examples/example-gateway/clients/echo

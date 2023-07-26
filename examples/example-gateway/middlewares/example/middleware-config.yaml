@@ -4,5 +4,6 @@ config:
 dependencies:
   client:
   - baz
+  - echo
 name: example
 type: http

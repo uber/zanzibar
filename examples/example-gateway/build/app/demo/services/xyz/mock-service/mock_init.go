@@ -32,6 +32,7 @@ import (
 	appdemoabcendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/app/demo/endpoints/abc/module"
 	barclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/baz/mock-client"
+	echoclientgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/echo/mock-client"
 	barendpointgenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/v2/examples/example-gateway/build/endpoints/bar/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/v2/examples/example-gateway/build/middlewares/default/default_example"
@@ -46,8 +47,9 @@ import (
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Bar *barclientgenerated.MockClient
-	Baz *bazclientgenerated.MockClient
+	Bar  *barclientgenerated.MockClient
+	Baz  *bazclientgenerated.MockClient
+	Echo *echoclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -72,13 +74,15 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Bar: barclientgenerated.NewMockClient(ctrl),
-		Baz: bazclientgenerated.NewMockClient(ctrl),
+		Bar:  barclientgenerated.NewMockClient(ctrl),
+		Baz:  bazclientgenerated.NewMockClient(ctrl),
+		Echo: echoclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Bar = mockClientNodes.Bar
 	initializedClientDependencies.Baz = mockClientNodes.Baz
+	initializedClientDependencies.Echo = mockClientNodes.Echo
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -100,7 +104,8 @@ func InitializeDependenciesMock(
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &examplemiddlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+			Baz:  initializedClientDependencies.Baz,
+			Echo: initializedClientDependencies.Echo,
 		},
 	})
 
