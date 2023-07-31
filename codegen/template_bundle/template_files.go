@@ -1467,6 +1467,7 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/v2/config"
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
@@ -2047,7 +2048,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 21549, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 21568, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

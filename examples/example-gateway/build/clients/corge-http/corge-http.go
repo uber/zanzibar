@@ -31,11 +31,11 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
-	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/v2/config"
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
+	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/corge-http/module"
 	clientsIDlClientsCorgeCorge "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/corge/corge"
