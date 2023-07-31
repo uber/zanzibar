@@ -29,10 +29,10 @@ import (
 	"time"
 
 	"github.com/afex/hystrix-go/hystrix"
-	"go.uber.org/zap"
 
 	zanzibar "github.com/uber/zanzibar/v2/runtime"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
+	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/v2/examples/example-gateway/build/clients/contacts/module"
 	clientsIDlClientsContactsContacts "github.com/uber/zanzibar/v2/examples/example-gateway/build/gen-code/clients-idl/clients/contacts/contacts"
