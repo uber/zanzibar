@@ -243,7 +243,7 @@ func NewPackageHelper(
 		packageRoot:            packageRoot,
 		configRoot:             absConfigRoot,
 		idlRootDir:             filepath.Join(absConfigRoot, options.relIdlRootDir()),
-		protoIdlRootDir:             filepath.Join(absConfigRoot, options.protoRelIdlRootDir()),
+		protoIdlRootDir:        filepath.Join(absConfigRoot, options.protoRelIdlRootDir()),
 		genCodePackage:         options.genCodePackage(packageRoot),
 		goGatewayNamespace:     goGatewayNamespace,
 		targetGenDir:           filepath.Join(absConfigRoot, options.relTargetGenDir()),
@@ -317,7 +317,7 @@ func (p PackageHelper) TypeImportPath(idlFile string) (string, error) {
 		return "", errors.Errorf("genCodePackage for %q idl file is not configured in build.yaml", ext)
 	}
 
-	if strings.HasSuffix(idlFile, protoExtension){
+	if strings.HasSuffix(idlFile, protoExtension) {
 		return path.Join(
 			genCodePkg,
 			idlFile[idxProto+len(p.protoIdlRootDir):len(suffix)],
