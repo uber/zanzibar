@@ -43,13 +43,13 @@ func TestModuleSpecNoThriftExist(t *testing.T) {
 }
 
 func TestProtoModuleSpec(t *testing.T) {
-	echoProto := "../examples/example-gateway/idl/clients-idl/clients/echo/echo.proto"
+	echoProto := "../examples/example-gateway/bazel-out/idl/clients-idl/clients/echo/echo.proto"
 	_, err := codegen.NewProtoModuleSpec(echoProto, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the proto file")
 }
 
 func TestProtoModuleSpecParseError(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("../examples/example-gateway/idl/clients-idl/clients/", "temp*.proto")
+	tmpFile, err := ioutil.TempFile("../examples/example-gateway/bazel-out/idl/clients-idl/clients/", "temp*.proto")
 	assert.NoError(t, err, "failed to create temp file")
 	defer func(name string) {
 		_ = os.Remove(name)

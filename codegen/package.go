@@ -146,6 +146,7 @@ func (p *PackageHelperOptions) protoRelIdlRootDir() string {
 	if p.ProtoRelIdlRootDir != "" {
 		return p.ProtoRelIdlRootDir
 	}
+
 	return p.relIdlRootDir()
 }
 
