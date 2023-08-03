@@ -38,6 +38,12 @@ var fooThrift = filepath.Join(
 	"examples/example-gateway/idl/",
 	"clients-idl/clients/foo/foo.thrift")
 
+var fooProto = filepath.Join(
+	os.Getenv("GOPATH"),
+	"/src/github.com/uber/zanzibar/",
+	"examples/example-gateway/bazel-out/idl/",
+	"clients-idl/clients/foo/foo.proto")
+
 var testCopyrightHeader = `// Copyright (c) 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -74,6 +80,7 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 			".proto":  packageRoot + "/build/gen-code",
 		},
 		TraceKey: "trace-key",
+		ProtoRelIdlRootDir: "./bazel-out/idl",
 	}
 
 	h, err := codegen.NewPackageHelper(
@@ -87,14 +94,39 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 	return h
 }
 
+func TestProtoRelIdlRootDirInitializeToIDL(t *testing.T) {
+	relativeGatewayPath := "../examples/example-gateway"
+	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
+	assert.NoError(t, err)
+
+	packageRoot := "foo/"
+	options := &codegen.PackageHelperOptions{}
+
+	h, err := codegen.NewPackageHelper(
+		packageRoot,
+		absGatewayPath,
+		options,
+	)
+	
+	assert.NoError(t, err)
+	assert.Equal(t, "/go/src/github.com/uber/zanzibar/examples/example-gateway/idl", h.ProtoIdlPath())
+}
+
 func TestImportPath(t *testing.T) {
 	h := newPackageHelper(t)
 	p, err := h.TypeImportPath(fooThrift)
 	assert.Nil(t, err, "should not return error")
 	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo",
 		p, "wrong type import path")
+	
+	p, err = h.TypeImportPath(fooProto)
+	assert.Nil(t, err, "should not return error")
+	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo",
+		p, "wrong type import path")
+
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.go")
 	assert.Error(t, err, "should return error for not a thrift file")
+
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/zanzibar/clients/foo/foo.thrift")
 	assert.Error(t, err, "should return error for not in IDL dir")
 }
@@ -104,6 +136,11 @@ func TestTypePackageName(t *testing.T) {
 	packageName, err := h.TypePackageName(fooThrift)
 	assert.Nil(t, err, "should not return error")
 	assert.Equal(t, "clientsIDlClientsFooFoo", packageName, "wrong package name")
+
+	packageName, err = h.TypePackageName(fooProto)
+	assert.Nil(t, err, "should not return error")
+	assert.Equal(t, "clientsIDlClientsFooFoo", packageName, "wrong package name")
+
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.txt")
 	assert.Error(t, err, "should return error for not a thrift file")
 }

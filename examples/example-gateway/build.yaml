@@ -14,6 +14,7 @@ defaultHeaders:
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
 idlRootDir: ./idl
+protoIdlRootDir: ./bazel-out/idl
 moduleIdlSubDir:
   endpoints: endpoints-idl
   default: clients-idl

@@ -438,6 +438,7 @@ func newTestPackageHelper(t *testing.T) *PackageHelper {
 		},
 		TraceKey:        "trace-key",
 		ModuleIdlSubDir: map[string]string{"endpoints": "endpoints-idl", "default": "clients-idl"},
+		ProtoRelIdlRootDir: "./bazel-out/idl",
 	}
 
 	h, err := NewPackageHelper(
@@ -540,8 +541,8 @@ func TestGRPCClientNewClientSpec(t *testing.T) {
 		},
 	}
 	h := newTestPackageHelper(t)
-
-	idlFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), "clients/echo/echo.proto")
+	assert.Equal(t, "/go/src/github.com/uber/zanzibar/examples/example-gateway/bazel-out/idl", h.ProtoIdlPath())
+	idlFile := filepath.Join(h.ProtoIdlPath(), h.GetModuleIdlSubDir(false), "clients/echo/echo.proto")
 	expectedSpec := &ClientSpec{
 		ModuleSpec:         nil,
 		YAMLFile:           instance.YAMLFileName,
