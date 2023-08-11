@@ -171,7 +171,7 @@ func findField(fieldPath string, toFields []*compile.FieldSpec) (*compile.FieldS
 		prevPath := []string(currPath)
 		currPos := currPath[0]
 		for _, v := range currFields {
-			if strings.ToLower(v.Name) == strings.ToLower(currPos) {
+			if strings.EqualFold(v.Name, currPos) {
 				if len(currPath) == 1 {
 					return v, nil
 				}
