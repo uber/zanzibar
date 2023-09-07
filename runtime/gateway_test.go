@@ -22,14 +22,17 @@ package zanzibar
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"sync"
 	"testing"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
+	"github.com/uber/jaeger-client-go"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime/jsonwrapper"
 	"go.uber.org/zap"
@@ -232,4 +235,92 @@ func TestGatewaySetupServerTChannelWithShutdown(t *testing.T) {
 	err = g.shutdownTChannelServerAndClients(context.Background())
 	assert.NoError(t, err)
 	assert.True(t, g.tchannelServer.Closed())
+}
+
+func TestGatewayWithTracerOverride(t *testing.T) {
+	tracer := opentracing.NoopTracer{}
+	tracerCloser := io.NopCloser(nil)
+	rawCfgMap := map[string]interface{}{
+		"logger.level":                       "fatal",
+		"http.port":                          int64(1234),
+		"tchannel.port":                      int64(5678),
+		"metrics.flushInterval":              1000,
+		"metrics.runtime.collectInterval":    1000,
+		"metrics.runtime.enableCPUMetrics":   false,
+		"metrics.runtime.enableMemMetrics":   false,
+		"metrics.runtime.enableGCMetrics":    false,
+		"useDatacenter":                      false,
+		"metrics.m3.includeHost":             false,
+		"envVarsToTagInRootScope":            []string{},
+		"metrics.m3.maxPacketSizeBytes":      int64(99999),
+		"metrics.m3.maxQueueSize":            int64(9999),
+		"metrics.m3.hostPort":                "127.0.0.1:8053",
+		"metrics.type":                       "m3",
+		"jaeger.disabled":                    false,
+		"jaeger.reporter.flush.milliseconds": 10000,
+		"jaeger.reporter.hostport":           "localhost:6831",
+		"jaeger.sampler.param":               0,
+		"jaeger.sampler.type":                "const",
+		"logger.fileName":                    "",
+		"logger.output":                      "",
+		"subLoggerLevel.jaeger":              "info",
+		"subLoggerLevel.http":                "info",
+		"subLoggerLevel.tchannel":            "info",
+		"env":                                "local",
+		"datacenter":                         "xyz1",
+		"tchannel.serviceName":               "test",
+		"tchannel.processName":               "test",
+		"sidecarRouter.default.grpc.ip":      "127.0.0.1",
+		"sidecarRouter.default.grpc.port":    4998,
+		"grpc.clientServiceNameMapping":      map[string]string{"test": "test"},
+		"serviceName":                        "not-overridden",
+		"metrics.serviceName":                "not-overridden",
+		"serviceNameEnv":                     "TEST",
+		"metrics.serviceNameEnv":             "TEST",
+		"http.notFoundHandler.custom":        true,
+		"http.handleMethodNotAllowed":        true,
+	}
+
+	var metricsBackend tally.CachedStatsReporter
+	opts := &Options{
+		GetContextScopeExtractors: nil,
+		GetContextFieldExtractors: nil,
+		JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
+		MetricsBackend:            metricsBackend,
+		NotFoundHandler: func(gateway *Gateway) http.HandlerFunc {
+			return func(writer http.ResponseWriter, request *http.Request) {}
+		},
+		Tracer:       tracer,
+		TracerCloser: tracerCloser,
+	}
+
+	t.Run("without config", func(t *testing.T) {
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.NotEqual(t, tracer, g.Tracer)
+		assert.NotEqual(t, tracerCloser, g.tracerCloser)
+		_, ok := g.Tracer.(*jaeger.Tracer)
+		assert.True(t, ok)
+	})
+
+	t.Run("with config and value being false", func(t *testing.T) {
+		rawCfgMap["jaeger.tracer.custom"] = false
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.NotEqual(t, tracer, g.Tracer)
+		assert.NotEqual(t, tracerCloser, g.tracerCloser)
+		_, ok := g.Tracer.(*jaeger.Tracer)
+		assert.True(t, ok)
+	})
+
+	t.Run("with config", func(t *testing.T) {
+		rawCfgMap["jaeger.tracer.custom"] = true
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.Equal(t, tracer, g.Tracer)
+		assert.Equal(t, tracerCloser, g.tracerCloser)
+	})
 }
