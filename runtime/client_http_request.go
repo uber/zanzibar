@@ -40,8 +40,8 @@ var metricNormalizer = strings.NewReplacer("::", "--")
 
 // ClientHTTPRequest is the struct for making a single client request using an outbound http client.
 type ClientHTTPRequest struct {
-	ClientID               string
 	ClientTargetEndpoint   string
+	ClientID               string
 	MethodName             string
 	Metrics                ContextMetrics
 	client                 *HTTPClient
