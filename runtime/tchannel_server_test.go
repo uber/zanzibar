@@ -23,6 +23,7 @@ package zanzibar_test
 import (
 	"context"
 	"fmt"
+	"net/textproto"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,4 +93,45 @@ func (m mockRWTStruct) ToWire() (wire.Value, error) {
 
 func (m mockRWTStruct) FromWire(wire.Value) error {
 	return nil
+}
+
+func TestGetRequestUUID(t *testing.T) {
+	uuidHeaderKey := "test-uuid-key"
+	testUuidValue := uuid.New()
+
+	testCases := map[string]struct {
+		reqHeaders 		map[string]string
+		expectedEquals  string
+	}{
+		"Success: return new UUID when no request header map is given": {},
+		"Success: return new UUID when no request header map is given": {
+			reqHeaders: map[string]string{},
+		},
+		"Success: return uuid when provided through the headerMap with any casing": {
+			reqHeaders: map[string]string{
+				uuidHeaderKey: testUuidValue,
+			},
+			expectedEquals: testUuidValue,
+		},
+		"Success: return a UUID when multiple are provided through the headerMap": {
+			reqHeaders: map[string]string{
+				uuidHeaderKey: testUuidValue,
+				"TEST-uuid-KEY": testUuidValue,
+				textproto.CanonicalMIMEHeaderKey(uuidHeaderKey): testUuidValue,
+			},
+			expectedEquals: testUuidValue,
+		},
+	}
+
+	for tc, tt := range testCases {
+		t.Run(tc, func(t *testing.T) {
+			resp, err := zanzibar.DecorateWithRecover(context.Background(), nil, nil, tt.handleFn)
+			uuid := getRequestUUID(uuidHeaderKey, tc.reqHeaders)
+
+			assert.NotEqual(t, "", uuid, "request UUID should generate a new UUID if one does not exist")
+			if tt.expectedEquals != "" {
+				assert.Equal(t, tt.expectedEquals, uuid, "request UUID should be returned if one does exist")
+			}
+		})
+	}
 }
