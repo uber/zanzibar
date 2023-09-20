@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"fmt"
+	"net/textproto"
 	"strings"
 	"sync"
 
@@ -206,10 +207,7 @@ func (s *TChannelRouter) handleHeader(
 		return ctx, err
 	}
 
-	reqUUID, ok := c.reqHeaders[s.requestUUIDHeaderKey]
-	if !ok {
-		reqUUID = uuid.New()
-	}
+	reqUUID := getRequestUUID(s.requestUUIDHeaderKey, c.reqHeaders)
 	ctx = withRequestUUID(ctx, reqUUID)
 
 	// put request headers on context so that user-provided extractor
@@ -299,4 +297,19 @@ func DecorateWithRecover(
 		}
 	}()
 	return handleFn(ctx, wireVal)
+}
+
+// getRequestUUID returns the first UUID matching the request uuid header key, or a new
+// uuid if no such UUID exists in request headers
+func getRequestUUID(
+	reqUUIDHeaderKey string,
+	reqHeaders map[string]string,
+) string {
+	canonicalHeaderKey := textproto.CanonicalMIMEHeaderKey(reqUUIDHeaderKey)
+	for key, value := range reqHeaders {
+		if textproto.CanonicalMIMEHeaderKey(key) == canonicalHeaderKey && value != "" {
+			return value
+		}
+	}
+	return uuid.New()
 }
