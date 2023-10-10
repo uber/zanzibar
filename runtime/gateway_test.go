@@ -290,8 +290,9 @@ func TestGatewayWithTracerOverride(t *testing.T) {
 		NotFoundHandler: func(gateway *Gateway) http.HandlerFunc {
 			return func(writer http.ResponseWriter, request *http.Request) {}
 		},
-		Tracer:       tracer,
-		TracerCloser: tracerCloser,
+		TracerProvider: func(gateway *Gateway) (opentracing.Tracer, io.Closer, error) {
+			return tracer, tracerCloser, nil
+		},
 	}
 
 	t.Run("without config", func(t *testing.T) {
