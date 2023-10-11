@@ -34,7 +34,7 @@ install-packages:
 	@echo "Mounting git pre-push hook"
 	cp .git-pre-push-hook .git/hooks/pre-push
 	@echo "Installing python packages..."
-	pip install --user yq
+	pip3 install --user yq
 
 .PHONY: install-tools
 # set GO111MODULE to off to compile ancient tools within the vendor directory
