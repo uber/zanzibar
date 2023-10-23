@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -272,6 +273,32 @@ func (c *TChannelClient) call(
 		}
 		if cerr = call.readResBody(ctx, response, resp); cerr != nil {
 			return cerr
+		}
+
+		// capture
+		{
+			id := "testid"
+			fmt.Println("==[THRIFT]=========================")
+			reqValue, err := req.ToWire()
+			if err != nil {
+				return err
+			}
+
+			rspValue, err := resp.ToWire()
+			if err != nil {
+				return err
+			}
+			capture := &ThriftCapture{
+				ID:          id,
+				MethodName:  call.methodName,
+				ServiceName: c.serviceName,
+				ReqHeaders:  call.reqHeaders,
+				ReqBody:     reqValue,
+				RspHeaders:  call.resHeaders,
+				RspBody:     rspValue,
+			}
+
+			fmt.Printf("Capturing Thrift: %+v\n", *capture)
 		}
 
 		return cerr
