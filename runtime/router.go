@@ -130,6 +130,23 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	ctx := req.Context()
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
+
+	// Capture the request if required
+	{
+		id := "testid"
+		fmt.Println("==[HTTP]=========================")
+
+		capture := &HTTPCapture{
+			ID:         id,
+			URL:        r.URL.String(),
+			ReqHeaders: r.Header.Clone(),
+			ReqBody:    req.rawBody,
+			RspHeaders: w.Header().Clone(),
+			RspBody:    req.res.pendingBodyBytes,
+		}
+
+		fmt.Printf("Capturing HTTP: %+v\n", *capture)
+	}
 }
 
 // httpRouter data structure to handle and register endpoints
