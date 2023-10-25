@@ -128,7 +128,11 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	urlValues := ParamsFromContext(r.Context())
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
+
+	// setting up capture for endpoint
 	ctx = WithEventContainer(ctx, &EventContainer{})
+	ctx = WithToCapture(ctx, true)
+
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
 
