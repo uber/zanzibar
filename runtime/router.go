@@ -128,24 +128,38 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	urlValues := ParamsFromContext(r.Context())
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
+	ctx = WithEventContainer(ctx, &EventContainer{})
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
 
 	// Capture the request if required
-	{
-		id := "testid"
+	if GetToCapture(ctx) {
+		var events []Event
+		if ec := GetEventContainer(ctx); ec != nil {
+			events = append(events, ec.events...)
+		}
+
 		fmt.Println("==[HTTP]=========================")
 
-		capture := &HTTPCapture{
-			ID:         id,
-			URL:        r.URL.String(),
+		event := &HTTPCaptureEvent{
+
+			MetaData: &EventMetaData{
+				EndpointName: endpoint.EndpointName,
+				HandlerName:  endpoint.HandlerName,
+			},
+
+			URL: r.URL.String(),
+
 			ReqHeaders: r.Header.Clone(),
 			ReqBody:    req.rawBody,
 			RspHeaders: w.Header().Clone(),
 			RspBody:    req.res.pendingBodyBytes,
 		}
 
-		fmt.Printf("Capturing HTTP: %+v\n", *capture)
+		fmt.Printf("Capturing HTTP: %+v\n", *event)
+
+		events = append(events, event)
+		CaptureEvents(events)
 	}
 }
 
