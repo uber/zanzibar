@@ -645,7 +645,7 @@ func TestAppendLogFieldsToContext(t *testing.T) {
 
 func TestToCapture(t *testing.T) {
 	ctx := context.Background()
-	ctx = WithToCapture(ctx, true)
+	ctx = WithToCapture(ctx)
 	toCapture := GetToCapture(ctx)
 
 	assert.Equal(t, toCapture, true)

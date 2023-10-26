@@ -1,3 +1,6 @@
+// IO is captured using Events. This file provides structures and functions to depict the IO, and capture the
+// events.
+
 package zanzibar
 
 // Context Variables
@@ -12,11 +15,13 @@ const (
 )
 
 type EventHandlerFn func([]Event) error
+type EventSamplerFn func(string, string) bool
 
 type Event interface {
 	Name() string
 }
 
+// EventContainer holds generated events.
 type EventContainer struct {
 	events []Event
 }
@@ -66,4 +71,9 @@ func (hce *HTTPCaptureEvent) Name() string {
 // NoOpEventHandler ignored events
 func NoOpEventHandler(events []Event) error {
 	return nil
+}
+
+// NoOpEventSampler will not sample
+func NoOpEventSampler(_, _ string) bool {
+	return false
 }

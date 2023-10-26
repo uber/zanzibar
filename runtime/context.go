@@ -138,8 +138,8 @@ func GetEventContainer(ctx context.Context) *EventContainer {
 }
 
 // WithToCapture sets event capture on for a context
-func WithToCapture(ctx context.Context, toCapture bool) context.Context {
-	return context.WithValue(ctx, eventCaptureKey, toCapture)
+func WithToCapture(ctx context.Context) context.Context {
+	return context.WithValue(ctx, eventCaptureKey, true)
 }
 
 // GetToCapture returns the stored event

@@ -90,6 +90,7 @@ type RouterEndpoint struct {
 	tracer           opentracing.Tracer
 	config           *StaticConfig
 	eventHandler     EventHandlerFn
+	eventSampler     EventSamplerFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -111,6 +112,7 @@ func NewRouterEndpoint(
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
 		eventHandler:     deps.Gateway.EventHandler,
+		eventSampler:     deps.Gateway.EventSampler,
 	}
 }
 
@@ -132,18 +134,17 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	ctx := req.Context()
 
 	// setting up capture for endpoint
-	ctx = WithEventContainer(ctx, &EventContainer{})
+	if endpoint.eventSampler(endpoint.EndpointName, endpoint.HandlerName) {
+		ctx = WithToCapture(ctx)
+		ctx = WithEventContainer(ctx, &EventContainer{})
+	}
 
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
 
 	// retrieve the container to see if any events are generated?
-	ec := GetEventContainer(ctx)
-
-	// generate additional events if internal events are generated
-	// event generation can be triggered at the beginning of request handling or whilst
-	// handling the event.
-	if GetToCapture(ctx) || len(ec.events) > 0 {
+	if GetToCapture(ctx) {
+		ec := GetEventContainer(ctx)
 		var events []Event
 		if ec != nil {
 			events = append(events, ec.events...)
