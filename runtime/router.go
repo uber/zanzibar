@@ -89,6 +89,7 @@ type RouterEndpoint struct {
 	scope            tally.Scope
 	tracer           opentracing.Tracer
 	config           *StaticConfig
+	eventHandler     EventHandlerFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -109,6 +110,7 @@ func NewRouterEndpoint(
 		tracer:           deps.Tracer,
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
+		eventHandler:     deps.Gateway.EventHandler,
 	}
 }
 
@@ -131,19 +133,21 @@ func (endpoint *RouterEndpoint) HandleRequest(
 
 	// setting up capture for endpoint
 	ctx = WithEventContainer(ctx, &EventContainer{})
-	ctx = WithToCapture(ctx, true)
 
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
 
-	// Capture the request if required
-	if GetToCapture(ctx) {
+	// retrieve the container to see if any events are generated?
+	ec := GetEventContainer(ctx)
+
+	// generate additional events if internal events are generated
+	// event generation can be triggered at the beginning of request handling or whilst
+	// handling the event.
+	if GetToCapture(ctx) || len(ec.events) > 0 {
 		var events []Event
-		if ec := GetEventContainer(ctx); ec != nil {
+		if ec != nil {
 			events = append(events, ec.events...)
 		}
-
-		fmt.Println("==[HTTP]=========================")
 
 		event := &HTTPCaptureEvent{
 
@@ -160,10 +164,8 @@ func (endpoint *RouterEndpoint) HandleRequest(
 			RspBody:    req.res.pendingBodyBytes,
 		}
 
-		fmt.Printf("Capturing HTTP: %+v\n", *event)
-
 		events = append(events, event)
-		CaptureEvents(events)
+		_ = endpoint.eventHandler(events) // ignore errors
 	}
 }
 

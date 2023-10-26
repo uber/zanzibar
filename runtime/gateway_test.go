@@ -325,3 +325,39 @@ func TestGatewayWithTracerOverride(t *testing.T) {
 		assert.Equal(t, tracerCloser, g.tracerCloser)
 	})
 }
+
+func TestGatewayWithEventHandler(t *testing.T) {
+
+	rawCfgMap := map[string]interface{}{}
+	var metricsBackend tally.CachedStatsReporter
+
+	opts := &Options{
+		GetContextScopeExtractors: nil,
+		GetContextFieldExtractors: nil,
+		JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
+		MetricsBackend:            metricsBackend,
+		NotFoundHandler: func(gateway *Gateway) http.HandlerFunc {
+			return func(writer http.ResponseWriter, request *http.Request) {}
+		},
+	}
+
+	t.Run("without event handler", func(t *testing.T) {
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.NotEqual(t, NoOpEventHandler, g.EventHandler)
+	})
+
+	t.Run("with event handler", func(t *testing.T) {
+		eventHandlerFn := func(_ []Event) error {
+			return nil
+		}
+		opts.EventHandlerProvider = func(gateway *Gateway) EventHandlerFn {
+			return eventHandlerFn
+		}
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.NotEqual(t, eventHandlerFn, g.EventHandler)
+	})
+}

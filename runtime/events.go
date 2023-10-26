@@ -1,9 +1,5 @@
 package zanzibar
 
-import (
-	"fmt"
-)
-
 // Context Variables
 const (
 	// ToCapture set to true if events have to be captured
@@ -14,6 +10,8 @@ const (
 	EventThriftCapture = "event-thrift-capture"
 	EventHTTPCapture   = "event-http-capture"
 )
+
+type EventHandlerFn func([]Event) error
 
 type Event interface {
 	Name() string
@@ -65,7 +63,7 @@ func (hce *HTTPCaptureEvent) Name() string {
 	return EventHTTPCapture
 }
 
-// CaptureEvents captures generated events
-func CaptureEvents(events []Event) {
-	fmt.Printf("======== Capturing: %d events", len(events))
+// NoOpEventHandler ignored events
+func NoOpEventHandler(events []Event) error {
+	return nil
 }

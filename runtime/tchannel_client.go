@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"go.uber.org/thriftrw/protocol/binary"
 	"strings"
 	"time"
@@ -279,8 +278,6 @@ func (c *TChannelClient) call(
 
 		// capture
 		if GetToCapture(ctx) {
-			fmt.Println("==[THRIFT]=========================")
-
 			reqValue, err := req.ToWire()
 			if err != nil {
 				return err
@@ -305,8 +302,6 @@ func (c *TChannelClient) call(
 				RspHeaders:  call.resHeaders,
 				RspBody:     rspBuf.Bytes(),
 			}
-
-			fmt.Printf("Capturing Thrift: %+v\n", *event)
 
 			if ec := GetEventContainer(ctx); ec != nil {
 				ec.events = append(ec.events, event)
