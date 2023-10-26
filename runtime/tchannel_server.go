@@ -30,7 +30,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/uber-go/tally"
-	"github.com/uber/jaeger-client-go"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
@@ -245,16 +244,7 @@ func (s *TChannelRouter) handleBody(
 	// trace request
 	tracer := tchannel.TracerFromRegistrar(s.registrar)
 	ctx = tchannel.ExtractInboundSpan(ctx, c.call, c.reqHeaders, tracer)
-
-	if s := opentracing.SpanFromContext(ctx); s != nil {
-		if jaegerCtx, ok := s.Context().(jaeger.SpanContext); ok {
-			logFields := make([]zap.Field, 3)
-			logFields[0] = zap.String(TraceIDKey, jaegerCtx.TraceID().String())
-			logFields[1] = zap.String(TraceSpanKey, jaegerCtx.SpanID().String())
-			logFields[2] = zap.Bool(TraceSampledKey, jaegerCtx.IsSampled())
-			ctx = WithLogFields(ctx, logFields...)
-		}
-	}
+	ctx = WithLogFields(ctx, extractSpanLogFields(opentracing.SpanFromContext(ctx))...)
 
 	// handle request
 	resp, err := DecorateWithRecover(

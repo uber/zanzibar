@@ -204,6 +204,14 @@ func (req *ServerHTTPRequest) start() {
 		}
 		req.span = span
 	}
+	req.setupLogFields()
+}
+
+func (req *ServerHTTPRequest) setupLogFields() {
+	fields := GetLogFieldsFromCtx(req.Context())
+	fields = append(fields, extractSpanLogFields(req.GetSpan())...)
+	ctx := WithLogFields(req.Context(), fields...)
+	req.httpRequest = req.httpRequest.WithContext(ctx)
 }
 
 // CheckHeaders verifies that request contains required headers.
