@@ -379,6 +379,7 @@ func (gateway *Gateway) registerPredefined() {
 		ContextLogger: gateway.ContextLogger,
 		Logger:        gateway.Logger,
 		Tracer:        gateway.Tracer,
+		Gateway:       gateway,
 	}
 
 	tracer := NewRouterEndpoint(
