@@ -192,6 +192,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		Scope:         gateway.RootScope,
 		Tracer:        gateway.Tracer,
 		Config:        gateway.Config,
+		Gateway:       gateway,
 	}
 
 	router := &httpRouter{
