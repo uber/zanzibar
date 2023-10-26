@@ -589,6 +589,15 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		defaultTags["host"] = GetHostname()
 	}
 
+	// Adds in any additional default tags specified in config
+	if config.ContainsKey("metrics.tags.default") {
+		defaultTagsFromConfig := make(map[string]string)
+		config.MustGetStruct("metrics.tags.default", &defaultTagsFromConfig)
+		for tagName, tagValue := range defaultTagsFromConfig {
+			defaultTags[tagName] = tagValue
+		}
+	}
+
 	// Adds in any env variable variables specified in config
 	envVarsToTagInRootScope := []string{}
 	config.MustGetStruct("envVarsToTagInRootScope", &envVarsToTagInRootScope)
