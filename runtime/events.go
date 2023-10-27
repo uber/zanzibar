@@ -10,8 +10,9 @@ const (
 )
 
 const (
-	EventThriftCapture = "event-thrift-capture"
-	EventHTTPCapture   = "event-http-capture"
+	EventThriftOutgoing = "event-thrift-outgoing"
+	EventHTTPIncoming   = "event-http-incoming"
+	EventHTTPOutgoing   = "event-http-outgoing"
 )
 
 type EventHandlerFn func([]Event) error
@@ -33,10 +34,8 @@ type EventMetaData struct {
 	HandlerName  string // optional
 }
 
-// ThriftCaptureEvent captures request and response data
-type ThriftCaptureEvent struct {
-	MetaData *EventMetaData
-
+// ThriftOutgoingEvent captures request and response data
+type ThriftOutgoingEvent struct {
 	MethodName  string
 	ServiceName string
 
@@ -47,25 +46,45 @@ type ThriftCaptureEvent struct {
 	RspBody    []byte
 }
 
-func (tce *ThriftCaptureEvent) Name() string {
-	return EventThriftCapture
+func (tce *ThriftOutgoingEvent) Name() string {
+	return EventThriftOutgoing
 }
 
-// HTTPCaptureEvent captures request and response data
-type HTTPCaptureEvent struct {
-	MetaData *EventMetaData
+// HTTPIncomingEvent captures incoming request and response data received
+type HTTPIncomingEvent struct {
+	EndpointName string // optional
+	HandlerName  string // optional
 
-	URL string
+	HTTPCapture
+}
 
+func (hce *HTTPIncomingEvent) Name() string {
+	return EventHTTPIncoming
+}
+
+// HTTPOutgoingEvent captures incoming request and response data received
+type HTTPOutgoingEvent struct {
+	ClientID       string // optional
+	ClientEndpoint string // optional
+
+	HTTPCapture
+}
+
+func (hce *HTTPOutgoingEvent) Name() string {
+	return EventHTTPOutgoing
+}
+
+// HTTPCapture captures request and response data
+type HTTPCapture struct {
+	ReqURL     string
+	ReqMethod  string
 	ReqHeaders map[string][]string
 	ReqBody    []byte
 
-	RspHeaders map[string][]string
-	RspBody    []byte
-}
-
-func (hce *HTTPCaptureEvent) Name() string {
-	return EventHTTPCapture
+	RspStatusCode int
+	RspMethod     string
+	RspHeaders    map[string][]string
+	RspBody       []byte
 }
 
 // NoOpEventHandler ignored events

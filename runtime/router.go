@@ -150,19 +150,18 @@ func (endpoint *RouterEndpoint) HandleRequest(
 			events = append(events, ec.events...)
 		}
 
-		event := &HTTPCaptureEvent{
-
-			MetaData: &EventMetaData{
-				EndpointName: endpoint.EndpointName,
-				HandlerName:  endpoint.HandlerName,
+		event := &HTTPIncomingEvent{
+			EndpointName: endpoint.EndpointName,
+			HandlerName:  endpoint.HandlerName,
+			HTTPCapture: HTTPCapture{
+				ReqURL:        r.URL.String(),
+				ReqMethod:     r.Method,
+				ReqHeaders:    r.Header.Clone(),
+				ReqBody:       req.rawBody,
+				RspStatusCode: req.res.StatusCode,
+				RspHeaders:    w.Header().Clone(),
+				RspBody:       req.res.pendingBodyBytes,
 			},
-
-			URL: r.URL.String(),
-
-			ReqHeaders: r.Header.Clone(),
-			ReqBody:    req.rawBody,
-			RspHeaders: w.Header().Clone(),
-			RspBody:    req.res.pendingBodyBytes,
 		}
 
 		events = append(events, event)

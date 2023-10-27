@@ -218,6 +218,32 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	req.Metrics.IncCounter(req.ctx, clientRequest, retryCount)
 
 	req.res.setRawHTTPResponse(res)
+
+	// generate events
+	if GetToCapture(req.ctx) {
+
+		rspBytes, err := req.res.ReadAll()
+		if err == nil {
+			event := &HTTPOutgoingEvent{
+				ClientID:       req.ClientID,
+				ClientEndpoint: req.ClientTargetEndpoint,
+				HTTPCapture: HTTPCapture{
+					ReqURL:        req.httpReq.URL.String(),
+					ReqMethod:     req.httpReq.Method,
+					ReqHeaders:    req.httpReq.Header.Clone(),
+					ReqBody:       req.rawBody,
+					RspStatusCode: res.StatusCode,
+					RspHeaders:    res.Header.Clone(),
+					RspBody:       rspBytes,
+				},
+			}
+
+			if ec := GetEventContainer(ctx); ec != nil {
+				ec.events = append(ec.events, event)
+			}
+		}
+	}
+
 	return req.res, nil
 }
 

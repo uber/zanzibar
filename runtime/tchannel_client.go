@@ -294,7 +294,7 @@ func (c *TChannelClient) call(
 			rspBuf := &bytes.Buffer{}
 			binary.Default.Encode(rspValue, rspBuf)
 
-			event := &ThriftCaptureEvent{
+			event := &ThriftOutgoingEvent{
 				MethodName:  call.methodName,
 				ServiceName: c.serviceName,
 				ReqHeaders:  call.reqHeaders,
