@@ -34,7 +34,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber-go/tally"
-	"github.com/uber/jaeger-client-go"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 	"go.uber.org/zap"
 )
@@ -213,17 +212,7 @@ func (req *ServerHTTPRequest) start() {
 
 func (req *ServerHTTPRequest) setupLogFields() {
 	fields := GetLogFieldsFromCtx(req.Context())
-	if span := req.GetSpan(); span != nil {
-		jc, ok := span.Context().(jaeger.SpanContext)
-		if ok {
-			fields = append(fields,
-				zap.String(TraceSpanKey, jc.SpanID().String()),
-				zap.String(TraceIDKey, jc.TraceID().String()),
-				zap.Bool(TraceSampledKey, jc.IsSampled()),
-			)
-		}
-	}
-
+	fields = append(fields, extractSpanLogFields(req.GetSpan())...)
 	ctx := WithLogFields(req.Context(), fields...)
 	req.httpRequest = req.httpRequest.WithContext(ctx)
 }
