@@ -23,7 +23,7 @@ package zanzibar
 import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
-	"go.opentelemetry.io/otel/trace/trace"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
