@@ -352,12 +352,18 @@ func TestGatewayWithEventHandler(t *testing.T) {
 		eventHandlerFn := func(_ []Event) error {
 			return nil
 		}
-		opts.EventHandlerProvider = func(gateway *Gateway) EventHandlerFn {
-			return eventHandlerFn
+
+		eventSamplerFn := func(_, _ string) bool {
+			return false
+		}
+		opts.EventProvider = func(gateway *Gateway) (EventSamplerFn, EventHandlerFn) {
+			return eventSamplerFn, eventHandlerFn
 		}
 		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
 		g, err := CreateGateway(cfg, opts)
 		assert.Nil(t, err)
-		assert.NotEqual(t, eventHandlerFn, g.EventHandler)
+		assert.Equal(t, eventHandlerFn, g.EventHandler)
+		assert.Equal(t, eventSamplerFn, g.EventSampler)
+
 	})
 }
