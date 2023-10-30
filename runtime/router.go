@@ -139,6 +139,12 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		ctx = WithEventContainer(ctx, &EventContainer{})
 	}
 
+	// make a copy of request headers since it could be mutated within the endpoint handler
+	var reqHeaders map[string][]string
+	if GetToCapture(ctx) {
+		reqHeaders = r.Header.Clone()
+	}
+
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
 
@@ -156,7 +162,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 			HTTPCapture: HTTPCapture{
 				ReqURL:        r.URL.String(),
 				ReqMethod:     r.Method,
-				ReqHeaders:    r.Header.Clone(),
+				ReqHeaders:    reqHeaders,
 				ReqBody:       req.rawBody,
 				RspStatusCode: req.res.StatusCode,
 				RspHeaders:    w.Header().Clone(),
