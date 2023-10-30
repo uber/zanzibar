@@ -44,13 +44,6 @@ type EventContainer struct {
 	events []Event
 }
 
-// EventMetaData is information required to aid with storage and linking of different requests
-type EventMetaData struct {
-	// filled for http requests received by the gateway
-	EndpointName string // optional
-	HandlerName  string // optional
-}
-
 // ThriftOutgoingEvent captures request and response data
 type ThriftOutgoingEvent struct {
 	MethodName  string
