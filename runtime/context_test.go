@@ -642,3 +642,19 @@ func TestAppendLogFieldsToContext(t *testing.T) {
 		assert.Len(t, fields, 0)
 	})
 }
+
+func TestToCapture(t *testing.T) {
+	ctx := context.Background()
+	ctx = WithToCapture(ctx)
+	toCapture := GetToCapture(ctx)
+
+	assert.Equal(t, toCapture, true)
+}
+
+func TestEventContainer(t *testing.T) {
+	ctx := context.Background()
+	ctx = WithEventContainer(ctx, &EventContainer{})
+	ec := GetEventContainer(ctx)
+
+	assert.Equal(t, len(ec.events), 0)
+}

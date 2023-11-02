@@ -50,6 +50,8 @@ const (
 	ctxLogLevel            = contextFieldKey("ctxLogLevel")
 	ctxTimeoutRetryOptions = contextFieldKey("trOptions")
 	safeLogFieldsKey       = contextFieldKey("safeLogFields")
+	eventContainer         = contextFieldKey("event")
+	eventCaptureKey        = contextFieldKey("event-capture")
 )
 
 const (
@@ -118,6 +120,34 @@ func GetTimeoutAndRetryOptions(ctx context.Context) *TimeoutAndRetryOptions {
 		return tro
 	}
 	return nil
+}
+
+// WithEventContainer stores an event in the context. Use it only when the request is expected to generate a single
+// event
+func WithEventContainer(ctx context.Context, ec *EventContainer) context.Context {
+	return context.WithValue(ctx, eventContainer, ec)
+}
+
+// GetEventContainer returns the stored event
+func GetEventContainer(ctx context.Context) *EventContainer {
+	if val := ctx.Value(eventContainer); val != nil {
+		ec, _ := val.(*EventContainer)
+		return ec
+	}
+	return nil
+}
+
+// WithToCapture sets event capture on for a context
+func WithToCapture(ctx context.Context) context.Context {
+	return context.WithValue(ctx, eventCaptureKey, true)
+}
+
+// GetToCapture returns the stored event
+func GetToCapture(ctx context.Context) bool {
+	if v, ok := ctx.Value(eventCaptureKey).(bool); ok && v {
+		return true
+	}
+	return false
 }
 
 // WithEndpointField adds the endpoint information in the

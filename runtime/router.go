@@ -89,6 +89,8 @@ type RouterEndpoint struct {
 	scope            tally.Scope
 	tracer           opentracing.Tracer
 	config           *StaticConfig
+	eventHandler     EventHandlerFn
+	eventSampler     EventSamplerFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -109,6 +111,8 @@ func NewRouterEndpoint(
 		tracer:           deps.Tracer,
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
+		eventHandler:     deps.Gateway.EventHandler,
+		eventSampler:     deps.Gateway.EventSampler,
 	}
 }
 
@@ -128,8 +132,47 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	urlValues := ParamsFromContext(r.Context())
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
+
+	// setting up capture for endpoint
+	if endpoint.eventSampler(endpoint.EndpointName, endpoint.HandlerName) {
+		ctx = WithToCapture(ctx)
+		ctx = WithEventContainer(ctx, &EventContainer{})
+	}
+
+	// make a copy of request headers since it could be mutated within the endpoint handler
+	var reqHeaders map[string][]string
+	if GetToCapture(ctx) {
+		reqHeaders = r.Header.Clone()
+	}
+
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
+
+	// retrieve the container to see if any events are generated?
+	if GetToCapture(ctx) {
+		ec := GetEventContainer(ctx)
+		var events []Event
+		if ec != nil {
+			events = append(events, ec.events...)
+		}
+
+		event := &HTTPIncomingEvent{
+			EndpointName: endpoint.EndpointName,
+			HandlerName:  endpoint.HandlerName,
+			HTTPCapture: HTTPCapture{
+				ReqURL:        r.URL.String(),
+				ReqMethod:     r.Method,
+				ReqHeaders:    reqHeaders,
+				ReqBody:       req.rawBody,
+				RspStatusCode: req.res.StatusCode,
+				RspHeaders:    w.Header().Clone(),
+				RspBody:       req.res.pendingBodyBytes,
+			},
+		}
+
+		events = append(events, event)
+		_ = endpoint.eventHandler(events) // ignore errors
+	}
 }
 
 // httpRouter data structure to handle and register endpoints
@@ -154,6 +197,7 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		Scope:         gateway.RootScope,
 		Tracer:        gateway.Tracer,
 		Config:        gateway.Config,
+		Gateway:       gateway,
 	}
 
 	router := &httpRouter{
