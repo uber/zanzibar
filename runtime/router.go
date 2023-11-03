@@ -101,6 +101,16 @@ func NewRouterEndpoint(
 	handlerID string,
 	handler HandlerFn,
 ) *RouterEndpoint {
+
+	// many test cases use this method without providing a gateway, this change allow the tests to
+	// continue working as is.
+	eh := NoOpEventHandler
+	es := NoOpEventSampler
+	if deps.Gateway != nil {
+		eh = deps.Gateway.EventHandler
+		es = deps.Gateway.EventSampler
+	}
+
 	return &RouterEndpoint{
 		EndpointName:     endpointID,
 		HandlerName:      handlerID,
@@ -111,8 +121,8 @@ func NewRouterEndpoint(
 		tracer:           deps.Tracer,
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
-		eventHandler:     deps.Gateway.EventHandler,
-		eventSampler:     deps.Gateway.EventSampler,
+		eventHandler:     eh,
+		eventSampler:     es,
 	}
 }
 
