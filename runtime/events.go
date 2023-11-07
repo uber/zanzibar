@@ -35,7 +35,7 @@ const (
 )
 
 type EventHandlerFn func([]Event) error
-type EventSamplerFn func(string, string) bool
+type EnableEventGenFn func(string, string) bool
 
 type Event interface {
 	Name() string
@@ -104,7 +104,7 @@ func NoOpEventHandler(events []Event) error {
 	return nil
 }
 
-// NoOpEventSampler will not sample
-func NoOpEventSampler(_, _ string) bool {
+// NoOpEventGen will not sample
+func NoOpEventGen(_, _ string) bool {
 	return false
 }

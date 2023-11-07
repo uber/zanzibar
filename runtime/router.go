@@ -90,7 +90,7 @@ type RouterEndpoint struct {
 	tracer           opentracing.Tracer
 	config           *StaticConfig
 	eventHandler     EventHandlerFn
-	eventSampler     EventSamplerFn
+	enableEventGenFn EnableEventGenFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -105,10 +105,10 @@ func NewRouterEndpoint(
 	// many test cases use this method without providing a gateway, this change allow the tests to
 	// continue working as is.
 	eh := NoOpEventHandler
-	es := NoOpEventSampler
+	eg := NoOpEventGen
 	if deps.Gateway != nil {
 		eh = deps.Gateway.EventHandler
-		es = deps.Gateway.EventSampler
+		eg = deps.Gateway.EnableEventGen
 	}
 
 	return &RouterEndpoint{
@@ -122,7 +122,7 @@ func NewRouterEndpoint(
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
 		eventHandler:     eh,
-		eventSampler:     es,
+		enableEventGenFn: eg,
 	}
 }
 
@@ -144,7 +144,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	ctx := req.Context()
 
 	// setting up event container
-	if endpoint.eventSampler(endpoint.EndpointName, endpoint.HandlerName) {
+	if endpoint.enableEventGenFn(endpoint.EndpointName, endpoint.HandlerName) {
 		ctx = WithEventContainer(ctx, &EventContainer{})
 		ctx = WithToCapture(ctx)
 	}
