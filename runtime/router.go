@@ -143,16 +143,16 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
 
-	// setting up capture for endpoint
+	// setting up event container
 	if endpoint.eventSampler(endpoint.EndpointName, endpoint.HandlerName) {
-		ctx = WithToCapture(ctx)
 		ctx = WithEventContainer(ctx, &EventContainer{})
+		ctx = WithToCapture(ctx)
 	}
 
 	// make a copy of request headers since it could be mutated within the endpoint handler
-	var reqHeaders map[string][]string
+	var reqHeadersOriginal map[string][]string
 	if GetToCapture(ctx) {
-		reqHeaders = r.Header.Clone()
+		reqHeadersOriginal = r.Header.Clone() // TODO: check if really required
 	}
 
 	endpoint.HandlerFn(ctx, req, req.res)
@@ -172,7 +172,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 			HTTPCapture: HTTPCapture{
 				ReqURL:        r.URL.String(),
 				ReqMethod:     r.Method,
-				ReqHeaders:    reqHeaders,
+				ReqHeaders:    reqHeadersOriginal,
 				ReqBody:       req.rawBody,
 				RspStatusCode: req.res.StatusCode,
 				RspHeaders:    w.Header().Clone(),

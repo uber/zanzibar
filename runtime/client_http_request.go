@@ -220,8 +220,8 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	req.res.setRawHTTPResponse(res)
 
 	// generate events
-	if GetToCapture(req.ctx) {
-
+	if GetToCapture(ctx) {
+		// ReadAll, caches bytes internally so multiple calls will return the same data
 		rspBytes, err := req.res.ReadAll()
 		if err == nil {
 			event := &HTTPOutgoingEvent{
@@ -230,10 +230,10 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 				HTTPCapture: HTTPCapture{
 					ReqURL:        req.httpReq.URL.String(),
 					ReqMethod:     req.httpReq.Method,
-					ReqHeaders:    req.httpReq.Header.Clone(),
+					ReqHeaders:    req.httpReq.Header.Clone(), // TODO: clone or not?
 					ReqBody:       req.rawBody,
 					RspStatusCode: res.StatusCode,
-					RspHeaders:    res.Header.Clone(),
+					RspHeaders:    res.Header.Clone(), // TODO: clone or not?
 					RspBody:       rspBytes,
 				},
 			}
