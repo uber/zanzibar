@@ -136,16 +136,8 @@ func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) err
 	return nil
 }
 
-// writeReqBody writes request body to arg3
+// writeReqBody writes request's wire Value to arg3
 func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, reqWireValue *wire.Value) error {
-	//structWireValue, err := req.ToWire()
-	//if err != nil {
-	//	return errors.Wrapf(
-	//		err, "Could not write request for outbound %s.%s (%s %s) request",
-	//		c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
-	//	)
-	//}
-
 	twriter, err := c.call.Arg3Writer()
 	if err != nil {
 		return errors.Wrapf(
