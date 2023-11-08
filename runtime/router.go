@@ -90,7 +90,7 @@ type RouterEndpoint struct {
 	tracer           opentracing.Tracer
 	config           *StaticConfig
 	eventHandler     EventHandlerFn
-	enableEventGenFn EnableEventGenFn
+	enableEventGen   EnableEventGenFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -122,7 +122,7 @@ func NewRouterEndpoint(
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
 		eventHandler:     eh,
-		enableEventGenFn: eg,
+		enableEventGen:   eg,
 	}
 }
 
@@ -144,7 +144,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	ctx := req.Context()
 
 	// setting up event container
-	if endpoint.enableEventGenFn(endpoint.EndpointName, endpoint.HandlerName) {
+	if endpoint.enableEventGen(endpoint.EndpointName, endpoint.HandlerName) {
 		ctx = WithEventContainer(ctx, &EventContainer{})
 		ctx = WithToCapture(ctx)
 	}
@@ -152,7 +152,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	// make a copy of request headers since it could be mutated within the endpoint handler
 	var reqHeadersOriginal map[string][]string
 	if GetToCapture(ctx) {
-		reqHeadersOriginal = r.Header.Clone() // TODO: check if really required
+		reqHeadersOriginal = r.Header.Clone()
 	}
 
 	endpoint.HandlerFn(ctx, req, req.res)

@@ -230,10 +230,10 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 				HTTPCapture: HTTPCapture{
 					ReqURL:        req.httpReq.URL.String(),
 					ReqMethod:     req.httpReq.Method,
-					ReqHeaders:    req.httpReq.Header.Clone(), // TODO: clone or not?
+					ReqHeaders:    req.httpReq.Header.Clone(), // cloning headers maybe inefficient
 					ReqBody:       req.rawBody,
 					RspStatusCode: res.StatusCode,
-					RspHeaders:    res.Header.Clone(), // TODO: clone or not?
+					RspHeaders:    res.Header.Clone(), // cloning headers maybe inefficient
 					RspBody:       rspBytes,
 				},
 			}
