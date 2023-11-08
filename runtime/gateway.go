@@ -82,7 +82,7 @@ type Options struct {
 	JSONWrapper               jsonwrapper.JSONWrapper
 	NotFoundHandler           func(*Gateway) http.HandlerFunc
 	TracerProvider            func(*Gateway) (opentracing.Tracer, io.Closer, error)
-	EventProvider             func(*Gateway) (EventSamplerFn, EventHandlerFn)
+	EventProvider             func(*Gateway) (EnableEventGenFn, EventHandlerFn)
 	// If present, request uuid is retrieved from the incoming request
 	// headers using the key, and put on the context. Otherwise, a new
 	// uuid is created for the incoming request.
@@ -113,7 +113,7 @@ type Gateway struct {
 	Tracer                 opentracing.Tracer
 	JSONWrapper            jsonwrapper.JSONWrapper
 	EventHandler           EventHandlerFn
-	EventSampler           EventSamplerFn
+	EnableEventGen         EnableEventGenFn
 	// gRPC client dispatcher for gRPC client lifecycle management
 	GRPCClientDispatcher *yarpc.Dispatcher
 
@@ -266,11 +266,11 @@ func CreateGateway(
 	}
 
 	if opts.EventProvider != nil {
-		samplerFn, handlerFn := opts.EventProvider(gateway)
-		gateway.EventSampler = samplerFn
+		eventGenFn, handlerFn := opts.EventProvider(gateway)
+		gateway.EnableEventGen = eventGenFn
 		gateway.EventHandler = handlerFn
 	} else {
-		gateway.EventSampler = NoOpEventSampler
+		gateway.EnableEventGen = NoOpEventGen
 		gateway.EventHandler = NoOpEventHandler
 	}
 

@@ -90,7 +90,7 @@ type RouterEndpoint struct {
 	tracer           opentracing.Tracer
 	config           *StaticConfig
 	eventHandler     EventHandlerFn
-	eventSampler     EventSamplerFn
+	enableEventGen   EnableEventGenFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -105,10 +105,10 @@ func NewRouterEndpoint(
 	// many test cases use this method without providing a gateway, this change allow the tests to
 	// continue working as is.
 	eh := NoOpEventHandler
-	es := NoOpEventSampler
+	eg := NoOpEventGen
 	if deps.Gateway != nil {
 		eh = deps.Gateway.EventHandler
-		es = deps.Gateway.EventSampler
+		eg = deps.Gateway.EnableEventGen
 	}
 
 	return &RouterEndpoint{
@@ -122,7 +122,7 @@ func NewRouterEndpoint(
 		JSONWrapper:      deps.JSONWrapper,
 		config:           deps.Config,
 		eventHandler:     eh,
-		eventSampler:     es,
+		enableEventGen:   eg,
 	}
 }
 
@@ -143,16 +143,16 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
 
-	// setting up capture for endpoint
-	if endpoint.eventSampler(endpoint.EndpointName, endpoint.HandlerName) {
-		ctx = WithToCapture(ctx)
+	// setting up event container
+	if endpoint.enableEventGen(endpoint.EndpointName, endpoint.HandlerName) {
 		ctx = WithEventContainer(ctx, &EventContainer{})
+		ctx = WithToCapture(ctx)
 	}
 
 	// make a copy of request headers since it could be mutated within the endpoint handler
-	var reqHeaders map[string][]string
+	var reqHeadersOriginal map[string][]string
 	if GetToCapture(ctx) {
-		reqHeaders = r.Header.Clone()
+		reqHeadersOriginal = r.Header.Clone()
 	}
 
 	endpoint.HandlerFn(ctx, req, req.res)
@@ -172,7 +172,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 			HTTPCapture: HTTPCapture{
 				ReqURL:        r.URL.String(),
 				ReqMethod:     r.Method,
-				ReqHeaders:    reqHeaders,
+				ReqHeaders:    reqHeadersOriginal,
 				ReqBody:       req.rawBody,
 				RspStatusCode: req.res.StatusCode,
 				RspHeaders:    w.Header().Clone(),

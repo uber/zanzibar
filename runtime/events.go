@@ -20,6 +20,8 @@
 
 package zanzibar
 
+import "go.uber.org/thriftrw/wire"
+
 // Context Variables
 const (
 	// ToCapture set to true if events have to be captured
@@ -33,7 +35,7 @@ const (
 )
 
 type EventHandlerFn func([]Event) error
-type EventSamplerFn func(string, string) bool
+type EnableEventGenFn func(string, string) bool
 
 type Event interface {
 	Name() string
@@ -49,11 +51,11 @@ type ThriftOutgoingEvent struct {
 	MethodName  string
 	ServiceName string
 
-	ReqHeaders map[string]string
-	ReqBody    []byte
+	ReqHeaders   map[string]string
+	ReqWireValue *wire.Value
 
-	RspHeaders map[string]string
-	RspBody    []byte
+	RspHeaders   map[string]string
+	RspWireValue *wire.Value
 }
 
 func (tce *ThriftOutgoingEvent) Name() string {
@@ -102,7 +104,7 @@ func NoOpEventHandler(events []Event) error {
 	return nil
 }
 
-// NoOpEventSampler will not sample
-func NoOpEventSampler(_, _ string) bool {
+// NoOpEventGen will not sample
+func NoOpEventGen(_, _ string) bool {
 	return false
 }

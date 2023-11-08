@@ -21,9 +21,7 @@
 package zanzibar
 
 import (
-	"bytes"
 	"context"
-	"go.uber.org/thriftrw/protocol/binary"
 	"strings"
 	"time"
 
@@ -264,7 +262,16 @@ func (c *TChannelClient) call(
 		if cerr := call.writeReqHeaders(reqHeaders); cerr != nil {
 			return cerr
 		}
-		if cerr := call.writeReqBody(ctx, req); cerr != nil {
+
+		reqWireValue, err := req.ToWire()
+		if err != nil {
+			return errors.Wrapf(
+				err, "Could not write request for outbound %s.%s (%s %s) request",
+				call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
+			)
+		}
+
+		if cerr := call.writeReqBody(ctx, &reqWireValue); cerr != nil {
 			return cerr
 		}
 
@@ -272,35 +279,21 @@ func (c *TChannelClient) call(
 		if cerr = call.readResHeaders(response); cerr != nil {
 			return cerr
 		}
-		if cerr = call.readResBody(ctx, response, resp); cerr != nil {
+
+		resWireValue, cerr := call.readResBody(ctx, response, resp)
+		if cerr != nil {
 			return cerr
 		}
 
 		// capture
 		if GetToCapture(ctx) {
-			reqValue, err := req.ToWire()
-			if err != nil {
-				return err
-			}
-
-			rspValue, err := resp.ToWire()
-			if err != nil {
-				return err
-			}
-
-			reqBuf := &bytes.Buffer{}
-			binary.Default.Encode(reqValue, reqBuf)
-
-			rspBuf := &bytes.Buffer{}
-			binary.Default.Encode(rspValue, rspBuf)
-
 			event := &ThriftOutgoingEvent{
-				MethodName:  call.methodName,
-				ServiceName: c.serviceName,
-				ReqHeaders:  call.reqHeaders,
-				ReqBody:     reqBuf.Bytes(),
-				RspHeaders:  call.resHeaders,
-				RspBody:     rspBuf.Bytes(),
+				MethodName:   call.methodName,
+				ServiceName:  c.serviceName,
+				ReqHeaders:   call.reqHeaders,
+				ReqWireValue: &reqWireValue,
+				RspHeaders:   call.resHeaders,
+				RspWireValue: resWireValue,
 			}
 
 			if ec := GetEventContainer(ctx); ec != nil {
