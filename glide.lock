@@ -112,6 +112,8 @@ imports:
   subpackages:
   - ext
   - log
+- name: go.opentelemetry.io/otel
+  version: e0852d609c4a4205d550e2de45afdbf80d43557b
 - name: github.com/pborman/uuid
   version: 5b6091a6a160ee5ce12917b21ab96acec2a4fdc0
 - name: github.com/pkg/errors

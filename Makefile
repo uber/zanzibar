@@ -30,6 +30,13 @@ YARPCGO = "$(PWD)/vendor/go.uber.org/yarpc/encoding/protobuf/protoc-gen-yarpc-go
 install:
 	@echo "Mounting git pre-push hook"
 	cp .git-pre-push-hook .git/hooks/pre-push
+	@echo "Installing python packages..."
+	pip3 install --user yq
+
+.PHONY: install-tools
+# set GO111MODULE to off to compile ancient tools within the vendor directory
+install-tools: export GO111MODULE = off
+install-tools:
 	@echo "Installing Glide and locked dependencies..."
 	pip install --user yq
 	glide --version || go get -u -f github.com/Masterminds/glide

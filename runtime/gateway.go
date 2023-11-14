@@ -80,6 +80,8 @@ type Options struct {
 	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 	GetContextFieldExtractors func() []ContextLogFieldsExtractor
 	JSONWrapper               jsonwrapper.JSONWrapper
+	NotFoundHandler           func(*Gateway) http.HandlerFunc
+	TracerProvider            func(*Gateway) (opentracing.Tracer, io.Closer, error)
 
 	// If present, request uuid is retrieved from the incoming request
 	// headers using the key, and put on the context. Otherwise, a new
@@ -246,8 +248,19 @@ func CreateGateway(
 		return nil, err
 	}
 
-	if err := gateway.setupTracer(config); err != nil {
-		return nil, err
+	if opts.TracerProvider != nil &&
+		config.ContainsKey("jaeger.tracer.custom") &&
+		config.MustGetBoolean("jaeger.tracer.custom") {
+		tracer, closer, err := opts.TracerProvider(gateway)
+		if err != nil {
+			return nil, err
+		}
+		gateway.Tracer = tracer
+		gateway.tracerCloser = closer
+	} else {
+		if err := gateway.setupTracer(config); err != nil {
+			return nil, err
+		}
 	}
 
 	// setup router after metrics and logs
