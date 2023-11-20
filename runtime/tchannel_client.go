@@ -293,12 +293,12 @@ func (c *TChannelClient) call(
 	// capture when no error in making/reading client call
 	if GetToCapture(ctx) {
 		event := &ThriftOutgoingEvent{
-			MethodName:   call.methodName,
-			ServiceName:  c.serviceName,
-			ReqHeaders:   call.reqHeaders,
-			ReqWireValue: req,
-			RspHeaders:   call.resHeaders,
-			RspWireValue: resp,
+			MethodName:  call.methodName,
+			ServiceName: c.serviceName,
+			ReqHeaders:  call.reqHeaders,
+			Req:         req,
+			RspHeaders:  call.resHeaders,
+			Rsp:         resp,
 		}
 
 		if ec := GetEventContainer(ctx); ec != nil {
