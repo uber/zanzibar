@@ -49,11 +49,11 @@ type ThriftOutgoingEvent struct {
 	MethodName  string
 	ServiceName string
 
-	ReqHeaders   map[string]string
-	ReqWireValue RWTStruct
+	ReqHeaders map[string]string
+	Req        RWTStruct
 
-	RspHeaders   map[string]string
-	RspWireValue RWTStruct
+	RspHeaders map[string]string
+	Rsp        RWTStruct
 }
 
 func (tce *ThriftOutgoingEvent) Name() string {
