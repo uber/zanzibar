@@ -20,8 +20,6 @@
 
 package zanzibar
 
-import "go.uber.org/thriftrw/wire"
-
 // Context Variables
 const (
 	// ToCapture set to true if events have to be captured
@@ -52,10 +50,10 @@ type ThriftOutgoingEvent struct {
 	ServiceName string
 
 	ReqHeaders   map[string]string
-	ReqWireValue *wire.Value
+	ReqWireValue RWTStruct
 
 	RspHeaders   map[string]string
-	RspWireValue *wire.Value
+	RspWireValue RWTStruct
 }
 
 func (tce *ThriftOutgoingEvent) Name() string {
