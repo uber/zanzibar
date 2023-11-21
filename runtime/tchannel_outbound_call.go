@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"context"
 	"fmt"
-	"go.uber.org/thriftrw/wire"
 	"time"
 
 	"github.com/pkg/errors"
@@ -136,8 +135,15 @@ func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) err
 	return nil
 }
 
-// writeReqBody writes request's wire Value to arg3
-func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, reqWireValue *wire.Value) error {
+// writeReqBody writes request body to arg3
+func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) error {
+	structWireValue, err := req.ToWire()
+	if err != nil {
+		return errors.Wrapf(
+			err, "Could not write request for outbound %s.%s (%s %s) request",
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
+		)
+	}
 	twriter, err := c.call.Arg3Writer()
 	if err != nil {
 		return errors.Wrapf(
@@ -145,7 +151,7 @@ func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, reqWireValue *w
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
-	if err := binary.Default.Encode(*reqWireValue, twriter); err != nil {
+	if err := binary.Default.Encode(structWireValue, twriter); err != nil {
 		_ = twriter.Close()
 		return errors.Wrapf(
 			err, "Could not write request for outbound %s.%s (%s %s) request",
@@ -204,39 +210,38 @@ func (c *tchannelOutboundCall) readResHeaders(response *tchannel.OutboundCallRes
 }
 
 // readResBody read response body from arg3
-func (c *tchannelOutboundCall) readResBody(ctx context.Context, response *tchannel.OutboundCallResponse, resp RWTStruct) (*wire.Value, error) {
+func (c *tchannelOutboundCall) readResBody(ctx context.Context, response *tchannel.OutboundCallResponse, resp RWTStruct) error {
 	treader, err := response.Arg3Reader()
 	if err != nil {
-		return nil, errors.Wrapf(
+		return errors.Wrapf(
 			err, "Could not create arg3Reader for outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
-	wireValue, err := ReadStruct(treader, resp)
-	if err != nil {
+	if err = ReadStruct(treader, resp); err != nil {
 		_ = treader.Close()
 		c.metrics.IncCounter(ctx, clientTchannelUnmarshalError, 1)
-		return nil, errors.Wrapf(
+		return errors.Wrapf(
 			err, "Could not read outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
-	if err := EnsureEmpty(treader, "reading response body"); err != nil {
+	if err = EnsureEmpty(treader, "reading response body"); err != nil {
 		_ = treader.Close()
-		return nil, errors.Wrapf(
+		return errors.Wrapf(
 			err, "Could not ensure arg3reader is empty for outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
-	if err := treader.Close(); err != nil {
-		return nil, errors.Wrapf(
+	if err = treader.Close(); err != nil {
+		return errors.Wrapf(
 			err, "Could not close arg3reader outbound %s.%s (%s %s) response",
 			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
-	return wireValue, nil
+	return nil
 }

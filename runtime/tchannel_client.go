@@ -263,15 +263,7 @@ func (c *TChannelClient) call(
 			return cerr
 		}
 
-		reqWireValue, err := req.ToWire()
-		if err != nil {
-			return errors.Wrapf(
-				err, "Could not write request for outbound %s.%s (%s %s) request",
-				call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
-			)
-		}
-
-		if cerr := call.writeReqBody(ctx, &reqWireValue); cerr != nil {
+		if cerr := call.writeReqBody(ctx, req); cerr != nil {
 			return cerr
 		}
 
@@ -280,25 +272,8 @@ func (c *TChannelClient) call(
 			return cerr
 		}
 
-		resWireValue, cerr := call.readResBody(ctx, response, resp)
-		if cerr != nil {
+		if cerr = call.readResBody(ctx, response, resp); cerr != nil {
 			return cerr
-		}
-
-		// capture
-		if GetToCapture(ctx) {
-			event := &ThriftOutgoingEvent{
-				MethodName:   call.methodName,
-				ServiceName:  c.serviceName,
-				ReqHeaders:   call.reqHeaders,
-				ReqWireValue: &reqWireValue,
-				RspHeaders:   call.resHeaders,
-				RspWireValue: resWireValue,
-			}
-
-			if ec := GetEventContainer(ctx); ec != nil {
-				ec.events = append(ec.events, event)
-			}
 		}
 
 		return cerr
@@ -313,6 +288,22 @@ func (c *TChannelClient) call(
 			err, "Could not make outbound %s.%s (%s %s) response",
 			call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
 		)
+	}
+
+	// capture when no error in making/reading client call
+	if GetToCapture(ctx) {
+		event := &ThriftOutgoingEvent{
+			MethodName:  call.methodName,
+			ServiceName: c.serviceName,
+			ReqHeaders:  call.reqHeaders,
+			Req:         req,
+			RspHeaders:  call.resHeaders,
+			Rsp:         resp,
+		}
+
+		if ec := GetEventContainer(ctx); ec != nil {
+			ec.events = append(ec.events, event)
+		}
 	}
 
 	return call.success, call.resHeaders, err

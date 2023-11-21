@@ -72,7 +72,7 @@ func PutBuffer(buf *bytes.Buffer) {
 }
 
 // ReadStruct reads the given Thriftrw struct.
-func ReadStruct(reader io.Reader, s RWTStruct) (*wire.Value, error) {
+func ReadStruct(reader io.Reader, s RWTStruct) error {
 	readerAt, ok := reader.(io.ReaderAt)
 
 	// do not read all to buffer if reader already is type of io.ReaderAt
@@ -81,15 +81,15 @@ func ReadStruct(reader io.Reader, s RWTStruct) (*wire.Value, error) {
 		defer PutBuffer(buf)
 
 		if _, err := buf.ReadFrom(reader); err != nil {
-			return nil, err
+			return err
 		}
 		readerAt = bytes.NewReader(buf.Bytes())
 	}
 
 	wireValue, err := binary.Default.Decode(readerAt, wire.TStruct)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = s.FromWire(wireValue)
-	return &wireValue, err
+	return err
 }
