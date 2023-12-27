@@ -798,7 +798,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	if err != nil {
 		req.contextLogger.ErrorZ(req.Context(), "Could not read request body", zap.Error(err))
 		if !req.parseFailed {
-			req.res.SendError(500, "Could not read request body", err)
+			req.res.SendError(400, "Could not read request body", err)
 			req.parseFailed = true
 		}
 		return nil, false
