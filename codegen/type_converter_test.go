@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -667,7 +667,7 @@ func TestConvertWithBadImportTypedef(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyString one
 			2: required string two
@@ -698,7 +698,7 @@ func TestConvertWithBadImportEnum(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyEnum one
 			2: required string two
@@ -732,7 +732,7 @@ func TestConvertWithBadImportStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyStruct one
 			2: required string two
@@ -825,7 +825,7 @@ func TestConvertListOfStruct(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required list<Inner> two
@@ -867,7 +867,7 @@ func TestConvertWithBadImportListOfStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional list<bar.MyStruct> one
 			2: required string two
@@ -902,7 +902,7 @@ func TestConvertWithMisMatchListTypes(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required string two
@@ -933,7 +933,7 @@ func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
 		struct Inner {
 			1: optional bar.MyStruct field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required string two
@@ -998,7 +998,7 @@ func TestConvertMapStringToStruct(t *testing.T) {
 			1: required string one
 			2: optional string two
 		}
-		
+
 		struct Foo {
 			1: required map<string, MapValue> uuidMap
 		}
@@ -1037,7 +1037,7 @@ func TestConvertMapTypeDefToStruct(t *testing.T) {
 			1: required string one
 			2: optional string two
 		}
-		
+
 		struct Foo {
 			1: required map<UUID, MapValue> uuidMap
 		}
@@ -1071,7 +1071,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: required map<string, Inner> two
@@ -1113,7 +1113,7 @@ func TestConvertWithBadImportMapOfStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional map<string, bar.MyStruct> one
 			2: required string two
@@ -1148,7 +1148,7 @@ func TestConvertWithMisMatchMapTypes(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: required string two
@@ -1179,7 +1179,7 @@ func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
 		struct Inner {
 			1: optional bar.MyStruct field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: required string two
@@ -1559,7 +1559,7 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
 		}
-		out.Two = (*bool)(in.Two)	
+		out.Two = (*bool)(in.Two)
 	`), lines)
 }
 
@@ -2312,7 +2312,7 @@ func TestConverterMapMapType(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional map<string, Inner> two
@@ -2379,7 +2379,7 @@ func TestConverterMapMapType(t *testing.T) {
 					out.Two[key7] = nil
 				}
 			}
-		}		
+		}
 	`), lines)
 }
 
@@ -2395,7 +2395,7 @@ func TestConvertWithMisMatchListTypesForOverride(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: optional string two
@@ -2430,7 +2430,7 @@ func TestConverterMapListTypeIncompatabile(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: optional list<string> two
@@ -2465,7 +2465,7 @@ func TestConvertWithMisMatchMapTypesForOverride(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional string two
@@ -2500,7 +2500,7 @@ func TestConverterMapMapTypeIncompatabile(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional map<string, string> two
@@ -2535,7 +2535,7 @@ func TestConverterInvalidMapping(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional map<string, string> two
@@ -2650,7 +2650,7 @@ func TestConverterRecursiveNested(t *testing.T) {
 		`
 		struct StringFoo {
 			1: required string one
-			2: optional StringFoo recur 
+			2: optional StringFoo recur
 		}
 
 		struct Foo {
@@ -2698,13 +2698,13 @@ func TestConverterRecursiveMixedDeep(t *testing.T) {
 
 		struct StringFooA {
 			1: required string one
-			2: optional StringFooA recur 
+			2: optional StringFooA recur
 			3: required DeepFoo deep
 		}
 
 		struct StringFooB {
 			1: required string one
-			2: optional StringFooB recur 
+			2: optional StringFooB recur
 			3: required DeepFoo deep
 		}
 
@@ -2886,7 +2886,7 @@ func TestConverterMapTypeDef(t *testing.T) {
 		struct RecurFoo2 {
 			1: required UUIDFoo field1
 		}
-		
+
 		struct RecurBar2 {
 			1: required UUIDBar field1
 		}
@@ -2894,7 +2894,7 @@ func TestConverterMapTypeDef(t *testing.T) {
 		struct RecurFoo1 {
 			1: required map<UUIDFoo, RecurFoo2> field1
 		}
-		
+
 		struct RecurBar1 {
 			1: required map<UUIDBar, RecurBar2> field1
 		}
