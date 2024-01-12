@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,10 +32,10 @@ const (
 	singleServiceSpec = `
 		syntax = "proto3";
 		package echo;
-	
+
 		message Request { string message = 1; }
 		message Response { string message = 1; }
-	
+
 		service EchoService {
 	        rpc EchoMethod(Request) returns (Response);
 		}
@@ -43,12 +43,12 @@ const (
 	multiServiceSpec = `
 		syntax = "proto3";
 		package echo;
-	
+
 		message Request1 { string message = 1; }
 		message Response1 { string message = 1; }
 		message Request2 { string message = 1; }
 		message Response2 { string message = 1; }
-		
+
 		service EchoService {
 	        rpc EchoMethod1(Request1) returns (Response1);
 			rpc EchoMethod2(Request2) returns (Response2);
@@ -57,11 +57,11 @@ const (
 	mixedServiceSpec = `
 		syntax = "proto3";
 		package echo;
-	
+
 		message Request1 { string message = 1; }
 		message Response1 { string message = 1; }
 		message Response2 { string message = 1; }
-		
+
 		service EchoService {
 	        rpc EchoMethod1(Request1) returns (Response1);
 			rpc EchoMethod2(Request1) returns (Response2);
@@ -70,17 +70,17 @@ const (
 	noServiceSpec = `
 		syntax = "proto3";
 		package echo;
-	
+
 		message Request { string message = 1; }
 		message Response { string message = 1; }
 	`
 	emptyServiceSpec = `
 		syntax = "proto3";
 		package echo;
-	
+
 		message Request { string message = 1; }
 		message Response { string message = 1; }
-	
+
 		service EchoService {}
 	`
 )

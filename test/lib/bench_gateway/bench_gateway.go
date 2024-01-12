@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,12 +31,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uber/zanzibar/test/lib/util"
-
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 	"go.uber.org/zap/zapcore"
 )
 

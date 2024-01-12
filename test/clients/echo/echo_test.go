@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,15 +30,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
-	"go.uber.org/yarpc"
-	"go.uber.org/yarpc/api/transport"
-	"go.uber.org/yarpc/transport/grpc"
-	"go.uber.org/zap"
-
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/echo"
 	echoclient "github.com/uber/zanzibar/examples/example-gateway/clients/echo"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/yarpc"
+	"go.uber.org/yarpc/api/transport"
+	"go.uber.org/yarpc/transport/grpc"
+	"go.uber.org/zap"
 )
 
 type echoServer struct{}

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,10 @@ import (
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // TestTChannelBackend will pretend to be a tchannel backend

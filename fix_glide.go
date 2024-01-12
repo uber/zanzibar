@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,10 @@ package fixglide
 import (
 	// Import go-flags to workaround glide
 	_ "github.com/anmitsu/go-shlex"
+	_ "github.com/jessevdk/go-flags"
+	_ "go.uber.org/atomic"
 	_ "go.uber.org/thriftrw/compile"
 	_ "go.uber.org/thriftrw/gen"
 	_ "go.uber.org/thriftrw/idl"
-	_ "go.uber.org/thriftrw/version"
-
-	// Import go-flags to workaround glide
-	_ "github.com/jessevdk/go-flags"
-	_ "go.uber.org/atomic"
+	_ "go.uber.org/thriftrw/version" // Import go-flags to workaround glide
 )

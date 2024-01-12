@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -100,8 +100,8 @@ func TestGetRequestUUID(t *testing.T) {
 	testUuidValue := uuid.New()
 
 	testCases := map[string]struct {
-		reqHeaders 		map[string]string
-		expectedEquals  string
+		reqHeaders     map[string]string
+		expectedEquals string
 	}{
 		"Success: return new UUID when no request header map is given": {},
 		"Success: return new UUID when no request header map is given": {
@@ -115,7 +115,7 @@ func TestGetRequestUUID(t *testing.T) {
 		},
 		"Success: return a UUID when multiple are provided through the headerMap": {
 			reqHeaders: map[string]string{
-				uuidHeaderKey: testUuidValue,
+				uuidHeaderKey:   testUuidValue,
 				"TEST-uuid-KEY": testUuidValue,
 				textproto.CanonicalMIMEHeaderKey(uuidHeaderKey): testUuidValue,
 			},

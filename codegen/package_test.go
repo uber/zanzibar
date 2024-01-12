@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -107,7 +107,7 @@ func TestProtoRelIdlRootDirInitializeToIDL(t *testing.T) {
 		absGatewayPath,
 		options,
 	)
-	
+
 	assert.NoError(t, err)
 	assert.Equal(t, "/go/src/github.com/uber/zanzibar/examples/example-gateway/idl", h.ProtoIdlPath())
 }
@@ -118,7 +118,7 @@ func TestImportPath(t *testing.T) {
 	assert.Nil(t, err, "should not return error")
 	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo/foo",
 		p, "wrong type import path")
-	
+
 	p, err = h.TypeImportPath(fooProto)
 	assert.Nil(t, err, "should not return error")
 	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/foo",

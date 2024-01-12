@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -413,4 +413,3 @@ func TestAccumulateLogField(t *testing.T) {
 	assert.Equal(t, "one", fields1[3].String)
 	assert.Equal(t, "two", fields2[3].String)
 }
-

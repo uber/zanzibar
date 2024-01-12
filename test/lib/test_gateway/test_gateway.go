@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,13 +35,12 @@ import (
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/jaeger-client-go/testutils"
 	"github.com/uber/tchannel-go"
-	"go.uber.org/zap"
-
 	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testM3Server "github.com/uber/zanzibar/test/lib/test_m3_server"
+	"go.uber.org/zap"
 )
 
 // TestGateway interface
