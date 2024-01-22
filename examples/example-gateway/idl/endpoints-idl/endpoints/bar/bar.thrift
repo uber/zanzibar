@@ -81,7 +81,7 @@ service Bar {
     string helloWorld(
     ) throws (
        1: BarException barException (zanzibar.http.status = "403")
-       2: SeeOthersRedirection seeOthersRedirection (zanzibar.http.status = "303", zanzibar.http.res.body.disallow = "true")
+       2: SeeOthersRedirection seeOthersRedirection (zanzibar.http.status = "303", zanzibar.http.res.body.disallow = "true", rpc.Code = "UNAUTHORIZED")
    ) (
        zanzibar.http.method = "GET"
        zanzibar.http.path = "/bar/hello"

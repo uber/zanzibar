@@ -45,6 +45,8 @@ const (
 	// The annotated method should have one and only one argument.
 	AntHTTPReqDefBoxed = "%s.http.req.def"
 	antHTTPResNoBody   = "%s.http.res.body.disallow"
+	// RPCCode is a rpc code type that allows to read the annotation in thrift and convert to a corresponding header
+	RPCCode = "rpc.Code"
 )
 
 const queryAnnotationPrefix = "query."
@@ -65,6 +67,8 @@ type ExceptionSpec struct {
 
 	StatusCode       StatusCode
 	IsBodyDisallowed bool
+	IsRPCCodeSet     bool
+	RPCCodeValue     string
 }
 
 // HeaderFieldInfo contains information about where to store
@@ -165,6 +169,7 @@ type annotations struct {
 	Handler         string
 	HTTPReqDefBoxed string
 	HTTPResNoBody   string
+	RPCCode         string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -210,6 +215,7 @@ func NewMethod(
 		Meta:            fmt.Sprintf(antMeta, ant),
 		Handler:         fmt.Sprintf(antHandler, ant),
 		HTTPReqDefBoxed: fmt.Sprintf(AntHTTPReqDefBoxed, ant),
+		RPCCode:         fmt.Sprintf(RPCCode, ant),
 		HTTPResNoBody:   fmt.Sprintf(antHTTPResNoBody, ant),
 	}
 
@@ -416,6 +422,8 @@ func (ms *MethodSpec) setExceptions(
 		}
 
 		bodyDisallowed := ms.isBodyDisallowed(e)
+		rpcSet := ms.isRPCHeaderSet(e)
+		rpcValue := ms.extractRPCCodeValue(e)
 		if !ms.WantAnnot {
 			exception := ExceptionSpec{
 				StructSpec: StructSpec{
@@ -423,7 +431,10 @@ func (ms *MethodSpec) setExceptions(
 					Name: e.Name,
 				},
 				IsBodyDisallowed: bodyDisallowed,
+				RPCCodeValue:     rpcValue,
+				IsRPCCodeSet:     rpcSet,
 			}
+
 			ms.Exceptions[i] = exception
 			ms.ExceptionsIndex[e.Name] = exception
 			if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
@@ -455,6 +466,8 @@ func (ms *MethodSpec) setExceptions(
 				Message: e.Name,
 			},
 			IsBodyDisallowed: bodyDisallowed,
+			IsRPCCodeSet:     rpcSet,
+			RPCCodeValue:     rpcValue,
 		}
 		ms.Exceptions[i] = exception
 		ms.ExceptionsIndex[e.Name] = exception
@@ -1578,6 +1591,15 @@ func (ms *MethodSpec) isRequestBoxed(f *compile.FunctionSpec) bool {
 func (ms *MethodSpec) isBodyDisallowed(f *compile.FieldSpec) bool {
 	val, ok := f.Annotations[ms.annotations.HTTPResNoBody]
 	return ok && val == "true"
+}
+
+func (ms *MethodSpec) isRPCHeaderSet(f *compile.FieldSpec) bool {
+	_, ok := f.Annotations[RPCCode]
+	return ok
+}
+
+func (ms *MethodSpec) extractRPCCodeValue(f *compile.FieldSpec) string {
+	return f.Annotations[RPCCode]
 }
 
 func headers(annotation string) []string {
