@@ -159,8 +159,11 @@ func (h *{{$handlerName}}) Handle(
 		if err != nil {
 			switch v := err.(type) {
 			{{$method := .Name -}}
-			{{range .Exceptions -}}
+			{{range $idx, $exception := .Exceptions}}
 				case *{{.Type}}:
+					{{if $exception.IsRPCCodeSet -}}
+          		    resHeaders["$rpc$-application-error-code"] =  "{{$exception.RPCCodeValue}}"
+           			{{end -}}
 					ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
 						"app-error": "{{.Type}}",
 					})
