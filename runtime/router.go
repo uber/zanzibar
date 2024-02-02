@@ -153,10 +153,11 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	var reqHeadersOriginal map[string][]string
 	var reqBodyOriginal []byte
 	if GetToCapture(ctx) {
-		reqBodyOriginal = make([]byte, len(req.rawBody))
-		copy(reqBodyOriginal, req.rawBody)
+		// Do not access rawBody directly. It might not have been populated at this stage
+		body, _ := req.ReadAll()
+		reqBodyOriginal = make([]byte, len(body))
+		copy(reqBodyOriginal, body)
 		reqHeadersOriginal = r.Header.Clone()
-
 	}
 
 	endpoint.HandlerFn(ctx, req, req.res)
