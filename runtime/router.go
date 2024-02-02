@@ -143,18 +143,28 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
 
+	// read body, fail early if unable to read.
+	// ReadAll also generates a response in case of failure, which will be sent to the client
+	// The downside of this approach is that the body will be read for all requests,
+	// which may be unnecessary for some requests; e.g malicious requests
+	// TODO: perform additional body & header validations (body type and header match, max body length etc) before
+	//  invoking event capture or handler
+	body, success := req.ReadAll()
+	if !success {
+		req.res.flush(ctx)
+		return
+	}
+
 	// setting up event container
 	if endpoint.enableEventGen(endpoint.EndpointName, endpoint.HandlerName) {
 		ctx = WithEventContainer(ctx, &EventContainer{})
 		ctx = WithToCapture(ctx)
 	}
 
-	// make a copy of request headers since it could be mutated within the endpoint handler
+	// make a copy of request headers and body since they could be mutated within the endpoint handler
 	var reqHeadersOriginal map[string][]string
 	var reqBodyOriginal []byte
 	if GetToCapture(ctx) {
-		// Do not access rawBody directly. It might not have been populated at this stage
-		body, _ := req.ReadAll()
 		reqBodyOriginal = make([]byte, len(body))
 		copy(reqBodyOriginal, body)
 		reqHeadersOriginal = r.Header.Clone()
