@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -143,15 +143,34 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	ctx := req.Context()
 
+	// read body, fail early if unable to read.
+	// ReadAll also generates a response in case of failure, which will be sent to the client
+	// The downside of this approach is that the body will be read for all requests,
+	// which may be unnecessary for some requests; e.g malicious requests
+	// TODO: perform additional body & header validations (body type and header match, max body length etc) before
+	//  invoking event capture or handler
+	body, success := req.ReadAll()
+	if !success {
+		// in case ReadAll hasn't generated a response, generate one here
+		if req.res.pendingStatusCode == 0 {
+			req.res.SendError(400, "Could not read request body", nil)
+		}
+		req.res.flush(ctx)
+		return
+	}
+
 	// setting up event container
 	if endpoint.enableEventGen(endpoint.EndpointName, endpoint.HandlerName) {
 		ctx = WithEventContainer(ctx, &EventContainer{})
 		ctx = WithToCapture(ctx)
 	}
 
-	// make a copy of request headers since it could be mutated within the endpoint handler
+	// make a copy of request headers and body since they could be mutated within the endpoint handler
 	var reqHeadersOriginal map[string][]string
+	var reqBodyOriginal []byte
 	if GetToCapture(ctx) {
+		reqBodyOriginal = make([]byte, len(body))
+		copy(reqBodyOriginal, body)
 		reqHeadersOriginal = r.Header.Clone()
 	}
 
@@ -173,7 +192,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 				ReqURL:        r.URL.String(),
 				ReqMethod:     r.Method,
 				ReqHeaders:    reqHeadersOriginal,
-				ReqBody:       req.rawBody,
+				ReqBody:       reqBodyOriginal,
 				RspStatusCode: req.res.StatusCode,
 				RspHeaders:    w.Header().Clone(),
 				RspBody:       req.res.pendingBodyBytes,
