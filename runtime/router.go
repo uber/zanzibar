@@ -151,6 +151,10 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//  invoking event capture or handler
 	body, success := req.ReadAll()
 	if !success {
+		// in case ReadAll hasn't generated a response, generate one here
+		if req.res.pendingStatusCode == 0 {
+			req.res.SendError(400, "Could not read request body", nil)
+		}
 		req.res.flush(ctx)
 		return
 	}
