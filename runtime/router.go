@@ -151,8 +151,12 @@ func (endpoint *RouterEndpoint) HandleRequest(
 
 	// make a copy of request headers since it could be mutated within the endpoint handler
 	var reqHeadersOriginal map[string][]string
+	var reqBodyOriginal []byte
 	if GetToCapture(ctx) {
+		reqBodyOriginal = make([]byte, len(req.rawBody))
+		copy(reqBodyOriginal, req.rawBody)
 		reqHeadersOriginal = r.Header.Clone()
+
 	}
 
 	endpoint.HandlerFn(ctx, req, req.res)
@@ -173,7 +177,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 				ReqURL:        r.URL.String(),
 				ReqMethod:     r.Method,
 				ReqHeaders:    reqHeadersOriginal,
-				ReqBody:       req.rawBody,
+				ReqBody:       reqBodyOriginal,
 				RspStatusCode: req.res.StatusCode,
 				RspHeaders:    w.Header().Clone(),
 				RspBody:       req.res.pendingBodyBytes,
