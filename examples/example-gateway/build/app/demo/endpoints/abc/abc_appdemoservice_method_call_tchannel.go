@@ -41,7 +41,7 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
 )
 
-// NewAppDemoServiceCallHandler creates a handler to be registered with a thrift server.
+// NewAppDemoServiceCallHandler creates a simple handler to be registered with a thrift server.
 func NewAppDemoServiceCallHandler(deps *module.Dependencies) *AppDemoServiceCallHandler {
 	handler := &AppDemoServiceCallHandler{
 		Deps: deps,

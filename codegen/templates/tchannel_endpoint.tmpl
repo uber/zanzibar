@@ -39,7 +39,7 @@ import (
 {{- $clientID := .ClientID }}
 
 {{with .Method -}}
-// New{{$handlerName}} creates a handler to be registered with a thrift server.
+// New{{$handlerName}} creates a simple handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Deps: deps,

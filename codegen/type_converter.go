@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -120,7 +120,7 @@ func (c *TypeConverter) getGoTypeName(valueType compile.TypeSpec) (string, error
 	return GoType(c.Helper, valueType)
 }
 
-//   input of "A.B.C.D" returns ["A","A.B", "A.B.C", "A.B.C.D"]
+// input of "A.B.C.D" returns ["A","A.B", "A.B.C", "A.B.C.D"]
 func getMiddleIdentifiers(identifier string) []string {
 	subIds := strings.Split(identifier, ".")
 
@@ -134,7 +134,7 @@ func getMiddleIdentifiers(identifier string) []string {
 	return middleIds
 }
 
-//  converts a list of identifier paths into boolean nil check expressions on those paths
+// converts a list of identifier paths into boolean nil check expressions on those paths
 func convertIdentifiersToNilChecks(identifiers []string) []string {
 	checks := make([]string, 0, len(identifiers)-1)
 
@@ -641,13 +641,14 @@ func (c *TypeConverter) genConverterForMap(
 }
 
 // recursive function to walk a DFS on toFields and try to assign fromFields or fieldMap tranforms
-//  generated code is appended as we traverse the toFields thrift type structure
-//  keyPrefix - the identifier (path) of the current position in the "to" struct
-//  fromPrefix - the identifier (path) of the corresponding position in the "from" struct
-//  indent - a string of tabs for current block scope
-//  fromFields - fields in the current from struct,  can be nil  if only fieldMap transforms are applicable in the path
-//  toFields - fields in the current to struct
-//  fieldMap - a data structure specifying configured transforms   Map[toIdentifier ] ->  fromField FieldMapperEntry
+//
+//	generated code is appended as we traverse the toFields thrift type structure
+//	keyPrefix - the identifier (path) of the current position in the "to" struct
+//	fromPrefix - the identifier (path) of the corresponding position in the "from" struct
+//	indent - a string of tabs for current block scope
+//	fromFields - fields in the current from struct,  can be nil  if only fieldMap transforms are applicable in the path
+//	toFields - fields in the current to struct
+//	fieldMap - a data structure specifying configured transforms   Map[toIdentifier ] ->  fromField FieldMapperEntry
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	fromPrefix string,
@@ -1291,8 +1292,9 @@ func isRecursiveStruct(spec compile.TypeSpec, seenSoFar map[string]bool) bool {
 
 // Returns true if any of the fields of a struct form a cycle anywhere down the line
 // e.g. struct A has optional field of type A -> cycle of length 0
-//		struct A has optional field of type B; struct B has optional field of type A -> cycle of length 2
-// 		struct A has optional field of type B; struct B has optional field of type B -> cycle of length 0 downstream
+//
+//	struct A has optional field of type B; struct B has optional field of type A -> cycle of length 2
+//	struct A has optional field of type B; struct B has optional field of type B -> cycle of length 0 downstream
 func (c *TypeConverter) isRecursiveStruct(fields []*compile.FieldSpec) bool {
 	for _, field := range fields {
 		if isRecursiveStruct(field.Type, make(map[string]bool)) {

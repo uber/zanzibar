@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,13 +28,13 @@ import (
 // count are done. This avoids sync.WaitGroup panic when count is negative.
 //
 // Usage:
-//     wg := WaitAtLeast{}
-//     wg.Add(1)
-//     wg.Wait()
-//     go func() {
-//         wg.Done()
-//     }()
 //
+//	wg := WaitAtLeast{}
+//	wg.Add(1)
+//	wg.Wait()
+//	go func() {
+//	    wg.Done()
+//	}()
 type WaitAtLeast struct {
 	mutex sync.Mutex
 	wg    sync.WaitGroup

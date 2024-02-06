@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1736,11 +1736,12 @@ func (info *PackageInfo) ModulePackageAlias() string {
 
 // ModuleInstance is a configured module inside a module class directory.
 // For example, this could be
-//     ClassName:    "Endpoint,
-//     ClassType:    "http",
-//     BaseDirectory "/path/to/service/base/"
-//     Directory:    "clients/health/"
-//     InstanceName: "health",
+//
+//	ClassName:    "Endpoint,
+//	ClassType:    "http",
+//	BaseDirectory "/path/to/service/base/"
+//	Directory:    "clients/health/"
+//	InstanceName: "health",
 type ModuleInstance struct {
 	// genSpec is used to share generated specs across dependencies. Generators
 	// should not mutate this directly, and should return the spec as a result.
