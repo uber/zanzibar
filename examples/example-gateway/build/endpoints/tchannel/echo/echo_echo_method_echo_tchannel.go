@@ -43,7 +43,7 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 )
 
-// NewEchoEchoHandler creates a handler to be registered with a thrift server.
+// NewEchoEchoHandler creates a simple handler to be registered with a thrift server.
 func NewEchoEchoHandler(deps *module.Dependencies) *EchoEchoHandler {
 	handler := &EchoEchoHandler{
 		Deps: deps,

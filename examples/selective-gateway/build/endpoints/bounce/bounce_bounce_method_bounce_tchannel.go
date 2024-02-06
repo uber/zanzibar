@@ -41,7 +41,7 @@ import (
 	module "github.com/uber/zanzibar/examples/selective-gateway/build/endpoints/bounce/module"
 )
 
-// NewBounceBounceHandler creates a handler to be registered with a thrift server.
+// NewBounceBounceHandler creates a simple handler to be registered with a thrift server.
 func NewBounceBounceHandler(deps *module.Dependencies) *BounceBounceHandler {
 	handler := &BounceBounceHandler{
 		Deps: deps,

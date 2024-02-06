@@ -4159,7 +4159,7 @@ import (
 {{- $clientID := .ClientID }}
 
 {{with .Method -}}
-// New{{$handlerName}} creates a handler to be registered with a thrift server.
+// New{{$handlerName}} creates a simple handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Deps: deps,
@@ -4408,7 +4408,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9383, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9390, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -44,7 +44,7 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 )
 
-// NewSimpleServiceAnotherCallHandler creates a handler to be registered with a thrift server.
+// NewSimpleServiceAnotherCallHandler creates a simple handler to be registered with a thrift server.
 func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServiceAnotherCallHandler {
 	handler := &SimpleServiceAnotherCallHandler{
 		Deps: deps,
