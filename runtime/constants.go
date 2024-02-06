@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -77,6 +77,9 @@ const (
 	ClientResponseDurationKey = "client.response.duration"
 	// ClientTypeKey denotes the type of the client, usually http / tchannel / client-less / custom
 	ClientTypeKey = "client.type"
+
+	//RPC
+	ClientRPCCode = "rpc$-application-error-name"
 )
 
 var knownMetrics = []string{

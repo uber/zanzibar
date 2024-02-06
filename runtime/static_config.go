@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -87,13 +87,13 @@ func ConfigFileContents(fileBytes []byte) *ConfigOption {
 // The files must be a list of YAML files. Each file must be a flat object of
 // key, value pairs. It's recommended that you use keys like:
 //
-// {
-//     "name": "my-name",
-//     "clients.thingy": {
-//          "some client": "config"
-//     },
-//     "server.my-port": 9999
-// }
+//	{
+//	    "name": "my-name",
+//	    "clients.thingy": {
+//	         "some client": "config"
+//	    },
+//	    "server.my-port": 9999
+//	}
 //
 // To organize your configuration file.
 func NewStaticConfigOrDie(
