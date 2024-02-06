@@ -77,9 +77,6 @@ const (
 	ClientResponseDurationKey = "client.response.duration"
 	// ClientTypeKey denotes the type of the client, usually http / tchannel / client-less / custom
 	ClientTypeKey = "client.type"
-
-	//RPC
-	ClientRPCCode = "rpc$-application-error-name"
 )
 
 var knownMetrics = []string{
