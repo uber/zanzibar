@@ -234,6 +234,9 @@ func (h *{{$handlerName}}) HandleRequest(
 		{{end -}}
 		{{range $idx, $exception := .Exceptions}}
 		case *{{$exception.Type}}:
+		    {{if $exception.IsRPCCodeSet -}}
+            cliRespHeaders.Add("$rpc$-application-error-code", "{{$exception.RPCCodeValue}}")
+            {{end -}}
 			{{if $exception.IsBodyDisallowed -}}
 			res.WriteJSONBytes({{$exception.StatusCode.Code}}, cliRespHeaders, nil)
 			{{else -}}
