@@ -54,6 +54,8 @@ type ThriftOutgoingEvent struct {
 
 	RspHeaders map[string]string
 	Rsp        RWTStruct
+
+	Success bool
 }
 
 func (tce *ThriftOutgoingEvent) Name() string {
