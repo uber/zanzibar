@@ -299,6 +299,7 @@ func (c *TChannelClient) call(
 			Req:         req,
 			RspHeaders:  call.resHeaders,
 			Rsp:         resp,
+			Success:     call.success,
 		}
 
 		if ec := GetEventContainer(ctx); ec != nil {
