@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Uber Technologies, Inc.
+// Copyright (c) 2024 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -138,7 +138,6 @@ type httpRouter struct {
 	httpRouter               *zrouter.Router
 	notFoundEndpoint         *RouterEndpoint
 	methodNotAllowedEndpoint *RouterEndpoint
-	panicCount               tally.Counter
 	routeMap                 map[string]*RouterEndpoint
 
 	requestUUIDHeaderKey string
@@ -165,9 +164,8 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 			gateway.ContextExtractor, deps,
 			methodNotAllowed, methodNotAllowed, nil,
 		),
-		gateway:    gateway,
-		panicCount: gateway.RootScope.Counter("runtime.router.panic"),
-		routeMap:   make(map[string]*RouterEndpoint),
+		gateway:  gateway,
+		routeMap: make(map[string]*RouterEndpoint),
 
 		requestUUIDHeaderKey: gateway.requestUUIDHeaderKey,
 	}
@@ -228,8 +226,14 @@ func (router *httpRouter) handlePanic(
 	}
 	logger := router.gateway.ContextLogger
 	logger.Error(r.Context(), "A http request handler paniced", zap.Error(err), zap.Int(logFieldResponseStatusCode, http.StatusInternalServerError))
-	router.panicCount.Inc(1)
-
+	m := router.gateway.ContextExtractor.ExtractScopeTags(r.Context())
+	endpointId := m[scopeTagEndpoint]
+	handlerId := m[scopeTagHandler]
+	scopeTags := map[string]string{
+		scopeTagEndpoint: endpointId,
+		scopeTagHandler:  handlerId,
+	}
+	router.gateway.RootScope.Tagged(scopeTags).Counter("runtime.router.panic")
 	http.Error(w,
 		http.StatusText(http.StatusInternalServerError),
 		http.StatusInternalServerError,
@@ -245,7 +249,6 @@ func (router *httpRouter) handleNotFound(
 		scopeTagHandler:  router.notFoundEndpoint.HandlerName,
 		scopeTagProtocol: scopeTagHTTP,
 	}
-
 	ctx := r.Context()
 	ctx = WithScopeTagsDefault(ctx, scopeTags, router.gateway.RootScope)
 	r = r.WithContext(ctx)
