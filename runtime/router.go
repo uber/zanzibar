@@ -301,8 +301,15 @@ func (router *httpRouter) handlePanic(
 	}
 	logger := router.gateway.ContextLogger
 	logger.Error(r.Context(), "A http request handler paniced", zap.Error(err), zap.Int(logFieldResponseStatusCode, http.StatusInternalServerError))
-	router.panicCount.Inc(1)
-
+	scopeTags := map[string]string{}
+	if router.gateway != nil && router.gateway.ContextExtractor != nil {
+		m := router.gateway.ContextExtractor.ExtractScopeTags(r.Context())
+		endpointId := m[scopeTagEndpoint]
+		handlerId := m[scopeTagHandler]
+		scopeTags[scopeTagEndpoint] = endpointId
+		scopeTags[scopeTagEndpoint] = handlerId
+	}
+	router.gateway.RootScope.Tagged(scopeTags).Counter("runtime.router.panic")
 	http.Error(w,
 		http.StatusText(http.StatusInternalServerError),
 		http.StatusInternalServerError,
