@@ -55,6 +55,11 @@ func (s *routerSuite) SetupTest() {
 		},
 	)
 	s.router = NewHTTPRouter(s.gw).(*httpRouter)
+	extractors = &ContextExtractors{
+		ScopeTagsExtractors: []ContextScopeTagsExtractor{scopeExtractor},
+		LogFieldsExtractors: []ContextLogFieldsExtractor{logFieldsExtractors},
+	}
+	s.router.gateway.ContextExtractor = extractors
 }
 
 func (s *routerSuite) TestRouter() {
