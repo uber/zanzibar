@@ -28,6 +28,7 @@ const (
 
 const (
 	EventThriftOutgoing = "event-thrift-outgoing"
+	EventGRPCOutgoing   = "event-grpc-outgoing"
 	EventHTTPIncoming   = "event-http-incoming"
 	EventHTTPOutgoing   = "event-http-outgoing"
 )
@@ -60,6 +61,24 @@ type ThriftOutgoingEvent struct {
 
 func (tce *ThriftOutgoingEvent) Name() string {
 	return EventThriftOutgoing
+}
+
+// GRPCOutgoingEvent captures request and response data
+type GRPCOutgoingEvent struct {
+	MethodName  string
+	ServiceName string
+
+	ReqHeaders map[string]string
+	Req        []byte
+
+	RspHeaders map[string]string
+	Rsp        []byte
+
+	Success bool
+}
+
+func (gce *GRPCOutgoingEvent) Name() string {
+	return EventGRPCOutgoing
 }
 
 // HTTPIncomingEvent captures incoming request and response data received
