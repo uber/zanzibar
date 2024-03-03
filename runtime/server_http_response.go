@@ -36,6 +36,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const (
+	// _errTmpl is Error Template
+	_errTmpl = `{"error":%s}`
+)
+
 // ServerHTTPResponse struct manages server http response
 type ServerHTTPResponse struct {
 	Request              *ServerHTTPRequest
@@ -169,7 +174,7 @@ func (res *ServerHTTPResponse) SendErrorString(
 	statusCode int, errMsg string,
 ) {
 	res.WriteJSONBytes(statusCode, nil,
-		[]byte(`{"error":"`+errMsg+`"}`),
+		[]byte(populateJSONTemplate(_errTmpl, errMsg)),
 	)
 }
 
@@ -179,7 +184,7 @@ func (res *ServerHTTPResponse) SendError(
 ) {
 	res.Err = errCause
 	res.WriteJSONBytes(statusCode, nil,
-		[]byte(`{"error":"`+errMsg+`"}`),
+		[]byte(populateJSONTemplate(_errTmpl, errMsg)),
 	)
 }
 
@@ -336,4 +341,8 @@ func (res *ServerHTTPResponse) GetPendingResponseObject() interface{} {
 // Headers returns the underlying http response's headers
 func (res *ServerHTTPResponse) Headers() http.Header {
 	return res.responseWriter.Header()
+}
+
+func populateJSONTemplate(template, msg string) string {
+	return fmt.Sprintf(template, strconv.Quote(msg))
 }
