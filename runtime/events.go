@@ -22,7 +22,7 @@ package zanzibar
 
 // Context Variables
 const (
-	// ToCapture set to true if events have to be captured
+	// ToCapture set to true if Events have to be captured
 	ToCapture = "to_capture"
 )
 
@@ -40,9 +40,9 @@ type Event interface {
 	Name() string
 }
 
-// EventContainer holds generated events.
+// EventContainer holds generated Events.
 type EventContainer struct {
-	events []Event
+	Events []Event
 }
 
 // ThriftOutgoingEvent captures request and response data
@@ -118,7 +118,7 @@ type HTTPCapture struct {
 	RspBody       []byte
 }
 
-// NoOpEventHandler ignored events
+// NoOpEventHandler ignored Events
 func NoOpEventHandler(events []Event) error {
 	return nil
 }

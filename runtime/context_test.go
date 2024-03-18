@@ -656,5 +656,5 @@ func TestEventContainer(t *testing.T) {
 	ctx = WithEventContainer(ctx, &EventContainer{})
 	ec := GetEventContainer(ctx)
 
-	assert.Equal(t, len(ec.events), 0)
+	assert.Equal(t, len(ec.Events), 0)
 }

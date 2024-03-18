@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
@@ -177,12 +176,12 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush(ctx)
 
-	// retrieve the container to see if any events are generated?
+	// retrieve the container to see if any Events are generated?
 	if GetToCapture(ctx) {
 		ec := GetEventContainer(ctx)
 		var events []Event
 		if ec != nil {
-			events = append(events, ec.events...)
+			events = append(events, ec.Events...)
 		}
 
 		event := &HTTPIncomingEvent{

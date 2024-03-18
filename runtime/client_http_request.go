@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 
@@ -219,7 +218,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 
 	req.res.setRawHTTPResponse(res)
 
-	// generate events
+	// generate Events
 	if GetToCapture(ctx) {
 		// ReadAll, caches bytes internally so multiple calls will return the same data
 		rspBytes, err := req.res.ReadAll()
@@ -239,7 +238,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 			}
 
 			if ec := GetEventContainer(ctx); ec != nil {
-				ec.events = append(ec.events, event)
+				ec.Events = append(ec.Events, event)
 			}
 		}
 	}
