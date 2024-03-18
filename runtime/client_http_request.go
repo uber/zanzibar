@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 
@@ -239,7 +238,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 			}
 
 			if ec := GetEventContainer(ctx); ec != nil {
-				ec.events = append(ec.events, event)
+				ec.Events = append(ec.Events, event)
 			}
 		}
 	}

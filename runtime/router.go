@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
@@ -182,7 +181,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		ec := GetEventContainer(ctx)
 		var events []Event
 		if ec != nil {
-			events = append(events, ec.events...)
+			events = append(events, ec.Events...)
 		}
 
 		event := &HTTPIncomingEvent{
