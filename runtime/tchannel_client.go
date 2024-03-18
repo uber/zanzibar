@@ -303,7 +303,7 @@ func (c *TChannelClient) call(
 		}
 
 		if ec := GetEventContainer(ctx); ec != nil {
-			ec.events = append(ec.events, event)
+			ec.Events = append(ec.Events, event)
 		}
 	}
 

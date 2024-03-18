@@ -182,7 +182,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		ec := GetEventContainer(ctx)
 		var events []Event
 		if ec != nil {
-			events = append(events, ec.events...)
+			events = append(events, ec.Events...)
 		}
 
 		event := &HTTPIncomingEvent{

@@ -239,7 +239,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 			}
 
 			if ec := GetEventContainer(ctx); ec != nil {
-				ec.events = append(ec.events, event)
+				ec.Events = append(ec.Events, event)
 			}
 		}
 	}
