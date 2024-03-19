@@ -42,7 +42,7 @@ type Event interface {
 
 // EventContainer holds generated events.
 type EventContainer struct {
-	events []Event
+	Events []Event
 }
 
 // ThriftOutgoingEvent captures request and response data
