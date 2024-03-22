@@ -21,8 +21,11 @@
 package router
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"sort"
 	"strings"
@@ -130,6 +133,23 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if handler, params, err := trie.Get(reqPath, isWhitelisted); err == nil {
 			ctx := context.WithValue(req.Context(), urlParamsKey, params)
 			req = req.WithContext(ctx)
+			body, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+				return
+			}
+			reqSize := len(body)
+			if reqSize == 0 {
+				http.Error(w, "Failed to parse JSON data", http.StatusBadRequest)
+				return
+			}
+			var buf bytes.Buffer
+			if err := json.Compact(&buf, body); err != nil {
+				http.Error(w, "Failed to parse JSON data", http.StatusBadRequest)
+				return
+			}
+			//Reset back into req body.
+			req.Body = ioutil.NopCloser(bytes.NewReader(buf.Bytes()))
 			handler.ServeHTTP(w, req)
 			return
 		}
