@@ -27,11 +27,15 @@ struct HeaderSchema {}
 
 exception AuthErr {
     1: required string message
-}
+} (
+    rpc.code = "INVALID_ARGUMENT"
+)
 
 exception OtherAuthErr {
   1: required string message
-}
+} (
+    rpc.code = "internal"
+)
 
 struct Recur3 {
     1: required UUID field31
@@ -77,7 +81,7 @@ service SimpleService {
         1: required base.TransStruct arg1
         2: optional base.TransStruct arg2
     ) throws (
-        1: AuthErr authErr
+        1: AuthErr authErr (rpc.code = "internal")
         2: OtherAuthErr otherAuthErr
     )
 

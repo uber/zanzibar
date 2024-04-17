@@ -47,8 +47,32 @@ const (
 	antHTTPResNoBody   = "%s.http.res.body.disallow"
 )
 
+const _errorCodeAnnotationKey = "rpc.code"
+
 const queryAnnotationPrefix = "query."
 const headerAnnotationPrefix = "headers."
+
+var (
+	_gRPCCodeNameToYARPCErrorCodeType = map[string]string{
+		// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+		"CANCELLED":           "yarpcerrors.CodeCancelled",
+		"UNKNOWN":             "yarpcerrors.CodeUnknown",
+		"INVALID_ARGUMENT":    "yarpcerrors.CodeInvalidArgument",
+		"DEADLINE_EXCEEDED":   "yarpcerrors.CodeDeadlineExceeded",
+		"NOT_FOUND":           "yarpcerrors.CodeNotFound",
+		"ALREADY_EXISTS":      "yarpcerrors.CodeAlreadyExists",
+		"PERMISSION_DENIED":   "yarpcerrors.CodePermissionDenied",
+		"RESOURCE_EXHAUSTED":  "yarpcerrors.CodeResourceExhausted",
+		"FAILED_PRECONDITION": "yarpcerrors.CodeFailedPrecondition",
+		"ABORTED":             "yarpcerrors.CodeAborted",
+		"OUT_OF_RANGE":        "yarpcerrors.CodeOutOfRange",
+		"UNIMPLEMENTED":       "yarpcerrors.CodeUnimplemented",
+		"INTERNAL":            "yarpcerrors.CodeInternal",
+		"UNAVAILABLE":         "yarpcerrors.CodeUnavailable",
+		"DATA_LOSS":           "yarpcerrors.CodeDataLoss",
+		"UNAUTHENTICATED":     "yarpcerrors.CodeUnauthenticated",
+	}
+)
 
 // PathSegment represents a part of the http path.
 type PathSegment struct {
@@ -415,6 +439,18 @@ func (ms *MethodSpec) setExceptions(
 			)
 		}
 
+		errorCode := ""
+		if errorCodeString, ok := e.Type.ThriftAnnotations()[_errorCodeAnnotationKey]; ok {
+			if yarpcCode, ok := _gRPCCodeNameToYARPCErrorCodeType[strings.ToUpper(errorCodeString)]; ok {
+				errorCode = yarpcCode
+			}
+		}
+		if errorCodeString, ok := e.Annotations[_errorCodeAnnotationKey]; ok {
+			if yarpcCode, ok := _gRPCCodeNameToYARPCErrorCodeType[strings.ToUpper(errorCodeString)]; ok {
+				errorCode = yarpcCode
+			}
+		}
+
 		bodyDisallowed := ms.isBodyDisallowed(e)
 		if !ms.WantAnnot {
 			exception := ExceptionSpec{
@@ -424,6 +460,7 @@ func (ms *MethodSpec) setExceptions(
 				},
 				IsBodyDisallowed: bodyDisallowed,
 			}
+			exception = addRpcAnnotationToException(exception, errorCode)
 			ms.Exceptions[i] = exception
 			ms.ExceptionsIndex[e.Name] = exception
 			if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
@@ -456,6 +493,7 @@ func (ms *MethodSpec) setExceptions(
 			},
 			IsBodyDisallowed: bodyDisallowed,
 		}
+		exception = addRpcAnnotationToException(exception, errorCode)
 		ms.Exceptions[i] = exception
 		ms.ExceptionsIndex[e.Name] = exception
 		if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
@@ -1585,4 +1623,14 @@ func headers(annotation string) []string {
 		return nil
 	}
 	return strings.Split(annotation, ",")
+}
+
+func addRpcAnnotationToException(exception ExceptionSpec, errorCode string) ExceptionSpec {
+	if errorCode != "" {
+		if exception.Annotations == nil {
+			exception.Annotations = make(compile.Annotations)
+		}
+		exception.Annotations[_errorCodeAnnotationKey] = errorCode
+	}
+	return exception
 }
