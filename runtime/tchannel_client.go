@@ -27,7 +27,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
-	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/v2/runtime/ruleengine"
 	netContext "golang.org/x/net/context"
 )
@@ -234,6 +233,7 @@ func (c *TChannelClient) call(
 	if sk != "" {
 		ctxBuilder.SetShardKey(sk)
 	}
+	serviceName := ""
 
 	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
@@ -242,7 +242,8 @@ func (c *TChannelClient) call(
 		call.resHeaders = map[string]string{}
 		call.success = false
 
-		sc, ctx := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx)
+		sc, ctx, altService := c.getDynamicChannelWithFallback(reqHeaders, c.sc, ctx, c.serviceName)
+		serviceName = altService
 		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:          tchannel.Thrift,
 			ShardKey:        GetShardKeyFromCtx(ctx),
@@ -294,7 +295,7 @@ func (c *TChannelClient) call(
 	if GetToCapture(ctx) {
 		event := &ThriftOutgoingEvent{
 			MethodName:  call.serviceMethod,
-			ServiceName: c.serviceName,
+			ServiceName: serviceName,
 			ReqHeaders:  call.reqHeaders,
 			Req:         req,
 			RspHeaders:  call.resHeaders,
@@ -312,10 +313,10 @@ func (c *TChannelClient) call(
 
 // first rule match, would be the chosen channel. if nothing matches fallback to default channel
 func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]string,
-	sc *tchannel.SubChannel, ctx netContext.Context) (*tchannel.SubChannel, netContext.Context) {
+	sc *tchannel.SubChannel, ctx netContext.Context, serviceName string) (*tchannel.SubChannel, netContext.Context, string) {
 	ch := sc
 	if c.ruleEngine == nil {
-		return ch, ctx
+		return ch, ctx, serviceName
 	}
 	for _, headerPattern := range c.headerPatterns {
 		// this header is not present, so can't match a rule
@@ -334,8 +335,8 @@ func (c *TChannelClient) getDynamicChannelWithFallback(reqHeaders map[string]str
 		if len(serviceDetails) > 1 {
 			ctx = WithRoutingDelegate(ctx, serviceDetails[1])
 		}
-		return ch, ctx
+		return ch, ctx, serviceDetails[0]
 	}
 	// if nothing matches return the default channel/**/
-	return ch, ctx
+	return ch, ctx, serviceName
 }
