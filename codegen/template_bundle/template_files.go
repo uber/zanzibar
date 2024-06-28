@@ -2981,9 +2981,9 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	zerrors "github.com/uber/zanzibar/runtime/errors"
 
 
 	"go.uber.org/zap"
@@ -3004,22 +3004,6 @@ import (
 
 // CircuitBreakerConfigKey is key value for qps level to circuit breaker parameters mapping
 const CircuitBreakerConfigKey = "circuitbreaking-configurations"
-
-const _errorCodeAnnotationKey = "rpc.code"
-
-var (
-	// _tchannelCodeToCode maps TChannel SystemErrCodes to their corresponding Code.
-	_tchannelCodeToCode = map[tchannel.SystemErrCode]yarpcerrors.Code{
-		tchannel.ErrCodeTimeout:    yarpcerrors.CodeDeadlineExceeded,
-		tchannel.ErrCodeCancelled:  yarpcerrors.CodeCancelled,
-		tchannel.ErrCodeBusy:       yarpcerrors.CodeResourceExhausted,
-		tchannel.ErrCodeDeclined:   yarpcerrors.CodeUnavailable,
-		tchannel.ErrCodeUnexpected: yarpcerrors.CodeInternal,
-		tchannel.ErrCodeBadRequest: yarpcerrors.CodeInvalidArgument,
-		tchannel.ErrCodeNetwork:    yarpcerrors.CodeUnavailable,
-		tchannel.ErrCodeProtocol:   yarpcerrors.CodeInternal,
-	}
-)
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -3303,7 +3287,7 @@ type {{$clientName}} struct {
 }
 
 {{range $svc := .Services}}
-{{range $method := .Methods}}
+{{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 {{if $methodName -}}
@@ -3332,8 +3316,8 @@ type {{$clientName}} struct {
 			success, respHeaders, err = c.client.Call(
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
-			if isSystemError(err) {
-				ctx = setContextSystemErrorCode(ctx, err)
+			if zerrors.IsSystemError(err) {
+				ctx = zerrors.SetContextSystemErrorCode(ctx, err)
 			}
 		} else {
 			// We want hystrix ckt-breaker to count errors only for system issues
@@ -3350,11 +3334,11 @@ type {{$clientName}} struct {
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
-				if isSystemError(clientErr) {
+				if !zerrors.IsSystemError(clientErr) {
 					// Declare ok if it is not a system-error
 					return nil
 				}
-				ctx = setContextSystemErrorCode(ctx, clientErr)
+				ctx = zerrors.SetContextSystemErrorCode(ctx, clientErr)
 				return clientErr
 			}, nil)
 			if err == nil {
@@ -3370,18 +3354,18 @@ type {{$clientName}} struct {
 					err = result.{{title .Name}}
 					{{range $annotation, $statusCode := $exc.Annotations -}}
 					{{if eq $annotation "rpc.code" -}}
-						ctx = setContextStatusCode(ctx, {{$statusCode}})
+						ctx = zerrors.SetContextStatusCode(ctx, {{$statusCode}})
 					{{end -}}
 					{{end -}}
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
-					ctx = setContextStatusCode(ctx, yarpcerrors.CodeOK)
+					ctx = zerrors.SetContextStatusCode(ctx, yarpcerrors.CodeOK)
 					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
 					success = true
 				{{end -}}
 				default:
-					ctx = setContextStatusCode(ctx, yarpcerrors.CodeUnknown)
+					ctx = zerrors.SetContextStatusCode(ctx, yarpcerrors.CodeUnknown)
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}
 		}
@@ -3394,7 +3378,7 @@ type {{$clientName}} struct {
 		{{end -}}
 		}
 
-		ctx = setContextStatusCode(ctx, yarpcerrors.CodeOK)
+		ctx = zerrors.SetContextStatusCode(ctx, yarpcerrors.CodeOK)
 
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
@@ -3409,37 +3393,6 @@ type {{$clientName}} struct {
 {{end -}}
 {{end -}}
 {{end}}
-
-func isSystemError(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, isSysErr := err.(tchannel.SystemError)
-	return isSysErr
-}
-
-func setContextSystemErrorCode(ctx context.Context, err error) context.Context {
-	if ctx != nil && err != nil {
-		if systemErr, ok := err.(tchannel.SystemError); ok {
-			if code, ok := _tchannelCodeToCode[systemErr.Code()]; ok {
-				ctx = setContextStatusCode(ctx, code)
-			} else {
-				// same as yarpc-go https://github.com/yarpc/yarpc-go/blob/d33ff85d687eb11de3324507ffdc817a39001b3f/transport/tchannel/error.go#L67C39-L67C51
-				ctx = setContextStatusCode(ctx, yarpcerrors.CodeInternal)
-			}
-		}
-	}
-	return ctx
-}
-
-func setContextStatusCode(ctx context.Context, code yarpcerrors.Code) context.Context {
-	if ctx != nil {
-		if statusCode := ctx.Value(_errorCodeAnnotationKey); statusCode == nil {
-			ctx = context.WithValue(ctx, _errorCodeAnnotationKey, code)
-		}
-	}
-	return ctx
-}
 `)
 
 func tchannel_clientTmplBytes() ([]byte, error) {
@@ -3452,7 +3405,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 17374, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15845, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
