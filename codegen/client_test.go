@@ -23,6 +23,7 @@ package codegen
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -72,6 +73,7 @@ config:
   exposedMethods:
     a: method
 `
+
 	grpcClientYAML = `
 name: test
 type: grpc
@@ -665,4 +667,57 @@ config:
 	expectedErr := "testable client config validation failed: Config.Fixture.ImportPath: zero value"
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err.Error())
+}
+
+func TestTChannelRPCAnnotations(t *testing.T) {
+	validator := getExposedMethodValidator()
+	annotatedTChannelClientYAML := strings.ReplaceAll(tchannelClientYAML, "bar", "baz")
+	client, errClient := newClientConfig([]byte(annotatedTChannelClientYAML), validator)
+	assert.NoError(t, errClient)
+	instance := &ModuleInstance{
+		YAMLFileName: "YAMLFileName",
+		JSONFileName: "JSONFileName",
+		InstanceName: "InstanceName",
+		PackageInfo: &PackageInfo{
+			ExportName:            "ExportName",
+			ExportType:            "ExportType",
+			QualifiedInstanceName: "QualifiedInstanceName",
+		},
+	}
+	h := newTestPackageHelper(t)
+
+	idlFile := filepath.Join(h.IdlPath(), h.GetModuleIdlSubDir(false), "clients/baz/baz.thrift")
+	expectedSpec := &ClientSpec{
+		ModuleSpec:         nil,
+		YAMLFile:           instance.YAMLFileName,
+		JSONFile:           instance.JSONFileName,
+		ClientType:         "tchannel",
+		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
+		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
+		ExportName:         instance.PackageInfo.ExportName,
+		ExportType:         instance.PackageInfo.ExportType,
+		ThriftFile:         idlFile,
+		ClientID:           instance.InstanceName,
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
+		ExposedMethods: map[string]string{
+			"a": "method",
+		},
+		SidecarRouter: "sidecar",
+	}
+
+	spec, errSpec := client.NewClientSpec(instance, h)
+	annotatedExceptions := 0
+	for _, service := range spec.ModuleSpec.Services {
+		for _, method := range service.Methods {
+			for _, exception := range method.Exceptions {
+				if _, ok := exception.Annotations["rpc.code"]; ok {
+					annotatedExceptions++
+				}
+			}
+		}
+	}
+	assert.Equal(t, annotatedExceptions, 15)
+	spec.ModuleSpec = nil // Not interested in ModuleSpec here
+	assert.NoError(t, errSpec)
+	assert.Equal(t, expectedSpec, spec)
 }
