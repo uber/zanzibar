@@ -926,6 +926,9 @@ func (gateway *Gateway) setupGRPCClientDispatcher(config *StaticConfig) error {
 	dispatcher := yarpc.NewDispatcher(yarpc.Config{
 		Name:      config.MustGetString("serviceName"),
 		Outbounds: outbounds,
+		OutboundMiddleware: yarpc.OutboundMiddleware{
+			Unary: NewCaptureOutboundMiddleware(),
+		},
 		Logging: yarpc.LoggingConfig{
 			Zap: gateway.Logger,
 			// TODO: set proper extractors
