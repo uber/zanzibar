@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 

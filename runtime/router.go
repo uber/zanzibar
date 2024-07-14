@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
