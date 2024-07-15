@@ -5,14 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"maps"
 
 	"go.uber.org/yarpc/api/middleware"
 	"go.uber.org/yarpc/api/transport"
 )
-
-const _tracingKeyPrefix = "$tracing$"
-const tracingKeyMappingSize = 100
 
 // NewCaptureOutboundMiddleware captures outbound rpc calls
 func NewCaptureOutboundMiddleware() middleware.UnaryOutbound {
@@ -70,7 +66,7 @@ func prepareRequest(request *transport.Request) (*GRPCOutgoingEvent, error) {
 		return nil, err
 	}
 	request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
-	clonedHeaders := maps.Clone(request.Headers.OriginalItems())
+	clonedHeaders := cloneMap(request.Headers.OriginalItems())
 	return &GRPCOutgoingEvent{
 		ServiceName: request.Service,
 		MethodName:  request.Procedure,
@@ -94,7 +90,15 @@ func prepareResponse(req *transport.Request, resp *transport.Response, event *GR
 	}
 	resp.Body = io.NopCloser(bytes.NewReader(responseBytes))
 	event.Rsp = responseBytes
-	event.RspHeaders = maps.Clone(resp.Headers.Items())
+	event.RspHeaders = cloneMap(resp.Headers.Items())
 	event.Success = !resp.ApplicationError
 	return nil
+}
+
+func cloneMap(src map[string]string) map[string]string {
+	clone := make(map[string]string)
+	for key, val := range src {
+		clone[key] = val
+	}
+	return clone
 }
