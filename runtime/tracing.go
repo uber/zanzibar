@@ -21,10 +21,17 @@
 package zanzibar
 
 import (
+	"net/http"
+
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber/jaeger-client-go"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+)
+
+var (
+	tracingComponentTag = opentracing.Tag{Key: string(ext.Component), Value: "zanzibar"}
 )
 
 // The span context struct in otel is not exportable, an this is the way to access fields in span context
@@ -54,4 +61,22 @@ func extractSpanLogFields(span opentracing.Span) []zap.Field {
 		}
 	}
 	return fields
+}
+
+// updateClientSpanWithError updates a client span with the error tags and logs
+func updateClientSpanWithError(span opentracing.Span, res *http.Response, err error) {
+	if span == nil {
+		return
+	}
+
+	if res != nil {
+		ext.HTTPStatusCode.Set(span, uint16(res.StatusCode))
+		if res.StatusCode >= 400 {
+			ext.Error.Set(span, true)
+		}
+	}
+	if err != nil {
+		ext.Error.Set(span, true)
+		ext.LogError(span, err)
+	}
 }

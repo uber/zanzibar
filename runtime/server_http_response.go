@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
@@ -126,14 +127,18 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 		tagged.Counter(endpointStatus).Inc(1)
 	}
 
+	span := res.Request.GetSpan()
 	logFn := res.contextLogger.Debug
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		tagged.Counter(endpointAppErrors).Inc(1)
 		logFn = res.contextLogger.WarnZ
+		if span != nil {
+			ext.Error.Set(span, true)
+		}
 	}
 
-	span := res.Request.GetSpan()
 	if span != nil {
+		ext.HTTPStatusCode.Set(span, uint16(res.StatusCode))
 		span.Finish()
 	}
 

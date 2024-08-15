@@ -23,11 +23,13 @@ package gateway
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
@@ -94,6 +96,17 @@ func TestHTTPEndpointToHTTPClient(t *testing.T) {
 	assert.Equal(t, "bar.Hello(Bar::helloWorld)", clientSpan.GetOperationName())
 	assert.Equal(t, "bar.helloWorld", endpointSpan.GetOperationName())
 	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())
+
+	assertStrTag(t, clientSpan, string(ext.SpanKind), "client")
+	assertStrTag(t, clientSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, clientSpan, string(ext.HTTPMethod), "GET")
+	assertIntTag(t, clientSpan, string(ext.HTTPStatusCode), http.StatusOK)
+
+	assertStrTag(t, endpointSpan, string(ext.SpanKind), "server")
+	assertStrTag(t, endpointSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, endpointSpan, string(ext.HTTPMethod), "GET")
+	assertStrTag(t, endpointSpan, string(ext.HTTPUrl), "/bar/hello")
+	assertIntTag(t, endpointSpan, string(ext.HTTPStatusCode), http.StatusOK)
 }
 
 func TestHTTPEndpointToHTTPClientWithUpstreamSpan(t *testing.T) {
@@ -177,6 +190,84 @@ func TestHTTPEndpointToHTTPClientWithUpstreamSpan(t *testing.T) {
 	assert.Equal(t, "bar.helloWorld", endpointSpan.GetOperationName())
 	assert.Equal(t, int64(upstreamSpanID), endpointSpan.GetParentSpanId())
 	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())
+
+	assertStrTag(t, clientSpan, string(ext.SpanKind), "client")
+	assertStrTag(t, clientSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, clientSpan, string(ext.HTTPMethod), "GET")
+	assertIntTag(t, clientSpan, string(ext.HTTPStatusCode), http.StatusOK)
+
+	assertStrTag(t, endpointSpan, string(ext.SpanKind), "server")
+	assertStrTag(t, endpointSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, endpointSpan, string(ext.HTTPMethod), "GET")
+	assertStrTag(t, endpointSpan, string(ext.HTTPUrl), "/bar/hello")
+	assertIntTag(t, endpointSpan, string(ext.HTTPStatusCode), http.StatusOK)
+}
+
+func TestHTTPEndpointToHTTPClientNon200(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
+		"clients.bar.serviceName": "barService",
+	}, &testGateway.Options{
+		CountMetrics:      true,
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+		JaegerFlushMillis: 1,
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	cg := gateway.(*testGateway.ChildProcessGateway)
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/hello",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+			if _, err := w.Write([]byte(`"hello"`)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+		},
+	)
+
+	_, err = gateway.MakeRequest(
+		"GET",
+		"/bar/hello",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	// Wait until all spans are flushed
+	time.Sleep(time.Millisecond * 100)
+
+	batches := cg.JaegerAgent.GetJaegerBatches()
+
+	var spans []*jaegerGen.Span
+	for _, batch := range batches {
+		for _, span := range batch.Spans {
+			spans = append(spans, span)
+		}
+	}
+
+	assert.Equal(t, 2, len(spans))
+	endpointSpan, clientSpan := spans[1], spans[0]
+	assert.Equal(t, "bar.Hello(Bar::helloWorld)", clientSpan.GetOperationName())
+	assert.Equal(t, "bar.helloWorld", endpointSpan.GetOperationName())
+	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())
+
+	assertStrTag(t, clientSpan, string(ext.SpanKind), "client")
+	assertStrTag(t, clientSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, clientSpan, string(ext.HTTPMethod), "GET")
+	assertIntTag(t, clientSpan, string(ext.HTTPStatusCode), 500)
+	assertBoolTag(t, clientSpan, string(ext.Error), true)
+
+	assertStrTag(t, endpointSpan, string(ext.SpanKind), "server")
+	assertStrTag(t, endpointSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, endpointSpan, string(ext.HTTPMethod), "GET")
+	assertStrTag(t, endpointSpan, string(ext.HTTPUrl), "/bar/hello")
+	assertIntTag(t, endpointSpan, string(ext.HTTPStatusCode), 500)
+	assertBoolTag(t, endpointSpan, string(ext.Error), true)
 }
 
 func TestHTTPEndpointToTChannelClient(t *testing.T) {
@@ -344,6 +435,13 @@ func TestHTTPEndpointToTChannelClientWithUpstreamSpan(t *testing.T) {
 	assert.Equal(t, "baz.call", endpointSpan.GetOperationName())
 	assert.Equal(t, int64(upstreamSpanID), endpointSpan.GetParentSpanId())
 	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())
+
+	assertStrTag(t, clientSpan, string(ext.SpanKind), "client")
+	assertStrTag(t, endpointSpan, string(ext.SpanKind), "server")
+	assertStrTag(t, endpointSpan, string(ext.Component), "zanzibar")
+	assertStrTag(t, endpointSpan, string(ext.HTTPMethod), "POST")
+	assertStrTag(t, endpointSpan, string(ext.HTTPUrl), "/baz/call")
+	assertIntTag(t, endpointSpan, string(ext.HTTPStatusCode), http.StatusNoContent)
 }
 
 func TestTChannelEndpoint(t *testing.T) {
@@ -426,4 +524,31 @@ func TestTChannelEndpoint(t *testing.T) {
 	assert.Equal(t, "SimpleService::call", clientSpan.GetOperationName())
 	assert.Equal(t, "SimpleService::Call", endpointSpan.GetOperationName())
 	assert.Equal(t, endpointSpan.GetSpanId(), clientSpan.GetParentSpanId())
+}
+
+func assertStrTag(t *testing.T, span *jaegerGen.Span, key, val string) {
+	for _, tag := range span.GetTags() {
+		if tag.GetKey() == key && tag.VType == jaegerGen.TagType_STRING && tag.GetVStr() == val {
+			return
+		}
+	}
+	assert.Fail(t, fmt.Sprintf("tag {key: %s, value: %s} not found", key, val))
+}
+
+func assertIntTag(t *testing.T, span *jaegerGen.Span, key string, val int64) {
+	for _, tag := range span.GetTags() {
+		if tag.GetKey() == key && tag.VType == jaegerGen.TagType_LONG && tag.GetVLong() == val {
+			return
+		}
+	}
+	assert.Fail(t, fmt.Sprintf("tag {key: %s, value: %d} not found", key, val))
+}
+
+func assertBoolTag(t *testing.T, span *jaegerGen.Span, key string, val bool) {
+	for _, tag := range span.GetTags() {
+		if tag.GetKey() == key && tag.VType == jaegerGen.TagType_BOOL && tag.GetVBool() == val {
+			return
+		}
+	}
+	assert.Fail(t, fmt.Sprintf("tag {key: %s, value: %t} not found", key, val))
 }

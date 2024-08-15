@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/v2/runtime/jsonwrapper"
 
@@ -187,9 +188,9 @@ func (req *ClientHTTPRequest) WriteBytes(
 // Do will send the request out.
 func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	opName := fmt.Sprintf("%s.%s(%s)", req.ClientID, req.MethodName, req.ClientTargetEndpoint)
-	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
-	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
-	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)
+	urlTag := opentracing.Tag{Key: string(ext.HTTPUrl), Value: req.httpReq.URL}
+	methodTag := opentracing.Tag{Key: string(ext.HTTPMethod), Value: req.httpReq.Method}
+	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag, ext.SpanKindRPCClient, tracingComponentTag)
 	err := req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	if err != nil {
 		/* coverage ignore next line */
@@ -207,6 +208,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 		res, retryCount, err = req.executeDoWithRetry(ctx) // new code for retry and timeout per ep level
 	}
 
+	updateClientSpanWithError(span, res, err)
 	span.Finish()
 
 	AppendLogFieldsToContext(req.ctx, zap.Int64(fmt.Sprintf(logFieldClientAttempts, req.ClientID), retryCount))
