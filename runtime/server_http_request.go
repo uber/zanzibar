@@ -191,8 +191,8 @@ func (req *ServerHTTPRequest) start() {
 
 	if req.tracer != nil {
 		opName := fmt.Sprintf("%s.%s", req.EndpointName, req.HandlerName)
-		urlTag := opentracing.Tag{Key: "URL", Value: req.URL}
-		MethodTag := opentracing.Tag{Key: "Method", Value: req.Method}
+		urlTag := opentracing.Tag{Key: string(ext.HTTPUrl), Value: req.URL}
+		MethodTag := opentracing.Tag{Key: string(ext.HTTPMethod), Value: req.Method}
 		carrier := opentracing.HTTPHeadersCarrier(req.httpRequest.Header)
 		spanContext, err := req.tracer.Extract(opentracing.HTTPHeaders, carrier)
 		var span opentracing.Span
@@ -201,9 +201,10 @@ func (req *ServerHTTPRequest) start() {
 				/* coverage ignore next line */
 				req.contextLogger.WarnZ(req.Context(), "Error Extracting Trace Headers", zap.Error(err))
 			}
-			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
+			span = req.tracer.StartSpan(opName, urlTag, MethodTag, tracingComponentTag, ext.SpanKindRPCServer)
+			ext.LogError(span, err)
 		} else {
-			span = req.tracer.StartSpan(opName, urlTag, MethodTag, ext.RPCServerOption(spanContext))
+			span = req.tracer.StartSpan(opName, urlTag, MethodTag, tracingComponentTag, ext.RPCServerOption(spanContext))
 		}
 		req.span = span
 	}

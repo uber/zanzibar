@@ -21,8 +21,12 @@
 package zanzibar
 
 import (
+	"io"
+	"net/http"
 	"testing"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uber/jaeger-client-go"
@@ -36,13 +40,7 @@ func TestExtractSpanLogFields(t *testing.T) {
 	})
 
 	t.Run("jaeger span", func(t *testing.T) {
-		tracer, closer, err := config.Configuration{
-			ServiceName: "test",
-			Sampler: &config.SamplerConfig{
-				Type:  "const",
-				Param: 1,
-			}}.NewTracer(config.Reporter(jaeger.NewInMemoryReporter()))
-		require.NoError(t, err)
+		tracer, closer := createTestTracer(t)
 		defer closer.Close()
 
 		span := tracer.StartSpan("op")
@@ -57,4 +55,86 @@ func TestExtractSpanLogFields(t *testing.T) {
 			zap.Bool(TraceSampledKey, jSpan.SpanContext().IsSampled()),
 		}, fields)
 	})
+}
+
+func TestUpdateClientSpanWithError(t *testing.T) {
+	tests := []struct {
+		name                  string
+		res                   *http.Response
+		err                   error
+		errTagExpected        bool
+		statusCodeTagExpected bool
+	}{
+		{
+			name: "nil response; no err",
+		},
+		{
+			name:           "nil response; err",
+			err:            errors.New("some error"),
+			errTagExpected: true,
+		},
+		{
+			name:                  "200 response; no err",
+			res:                   &http.Response{StatusCode: http.StatusOK},
+			statusCodeTagExpected: true,
+		},
+		{
+			name:                  "200 response; err",
+			res:                   &http.Response{StatusCode: http.StatusOK},
+			err:                   errors.New("some error"),
+			errTagExpected:        true,
+			statusCodeTagExpected: true,
+		},
+		{
+			name:                  "400 response; no err",
+			res:                   &http.Response{StatusCode: http.StatusBadRequest},
+			errTagExpected:        true,
+			statusCodeTagExpected: true,
+		},
+		{
+			name:                  "400 response; err",
+			res:                   &http.Response{StatusCode: http.StatusBadRequest},
+			err:                   errors.New("some error"),
+			errTagExpected:        true,
+			statusCodeTagExpected: true,
+		},
+	}
+
+	tracer, closer := createTestTracer(t)
+	defer closer.Close()
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			span := tracer.StartSpan("test")
+			updateClientSpanWithError(span, test.res, test.err)
+			jSpan, ok := span.(*jaeger.Span)
+			require.True(t, ok)
+
+			_, exist := jSpan.Tags()["error"]
+			assert.Equal(t, test.errTagExpected, exist)
+			statusCode, exist := jSpan.Tags()["http.status_code"]
+			assert.Equal(t, test.statusCodeTagExpected, exist)
+			if test.statusCodeTagExpected {
+				assert.Equal(t, uint16(test.res.StatusCode), statusCode)
+			}
+			if test.err != nil {
+				assert.Len(t, jSpan.Logs(), 1)
+			}
+		})
+	}
+}
+
+func TestUpdateClientSpanWithErrorNilSpan(t *testing.T) {
+
+}
+
+func createTestTracer(t *testing.T) (opentracing.Tracer, io.Closer) {
+	tracer, closer, err := config.Configuration{
+		ServiceName: "test",
+		Sampler: &config.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		}}.NewTracer(config.Reporter(jaeger.NewInMemoryReporter()))
+	require.NoError(t, err)
+	return tracer, closer
 }
