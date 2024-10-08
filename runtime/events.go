@@ -20,6 +20,8 @@
 
 package zanzibar
 
+import "net/http"
+
 // Context Variables
 const (
 	// ToCapture set to true if events have to be captured
@@ -35,6 +37,7 @@ const (
 
 type EventHandlerFn func([]Event) error
 type EnableEventGenFn func(string, string) bool
+type RedirectFn func(w http.ResponseWriter, r *http.Request) bool
 
 type Event interface {
 	Name() string
@@ -125,5 +128,9 @@ func NoOpEventHandler(events []Event) error {
 
 // NoOpEventGen will not sample
 func NoOpEventGen(_, _ string) bool {
+	return false
+}
+
+func NoOpRedirectFn(_ http.ResponseWriter, _ *http.Request) bool {
 	return false
 }
