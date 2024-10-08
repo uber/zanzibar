@@ -91,6 +91,7 @@ type RouterEndpoint struct {
 	config           *StaticConfig
 	eventHandler     EventHandlerFn
 	enableEventGen   EnableEventGenFn
+	redirectFn       RedirectFn
 }
 
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
@@ -106,9 +107,11 @@ func NewRouterEndpoint(
 	// continue working as is.
 	eh := NoOpEventHandler
 	eg := NoOpEventGen
+	rh := NoOpRedirectFn
 	if deps.Gateway != nil {
 		eh = deps.Gateway.EventHandler
 		eg = deps.Gateway.EnableEventGen
+		rh = deps.Gateway.RedirectFn
 	}
 
 	return &RouterEndpoint{
@@ -123,6 +126,7 @@ func NewRouterEndpoint(
 		config:           deps.Config,
 		eventHandler:     eh,
 		enableEventGen:   eg,
+		redirectFn:       rh,
 	}
 }
 
@@ -138,6 +142,10 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
 	//	defer cancel()
 	//}
+
+	if ok := endpoint.redirectFn(w, r); ok {
+		return
+	}
 
 	urlValues := ParamsFromContext(r.Context())
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)

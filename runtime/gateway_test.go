@@ -367,3 +367,40 @@ func TestGatewayWithEventHandler(t *testing.T) {
 
 	})
 }
+
+func TestGatewayWithRedirectHandler(t *testing.T) {
+
+	rawCfgMap := map[string]interface{}{}
+	var metricsBackend tally.CachedStatsReporter
+
+	opts := &Options{
+		GetContextScopeExtractors: nil,
+		GetContextFieldExtractors: nil,
+		JSONWrapper:               jsonwrapper.NewDefaultJSONWrapper(),
+		MetricsBackend:            metricsBackend,
+		NotFoundHandler: func(gateway *Gateway) http.HandlerFunc {
+			return func(writer http.ResponseWriter, request *http.Request) {}
+		},
+	}
+
+	t.Run("without redirect handler", func(t *testing.T) {
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.NotEqual(t, NoOpRedirectFn, g.RedirectFn)
+	})
+
+	t.Run("with redirect handler", func(t *testing.T) {
+		redirectFn := func(_ http.ResponseWriter, _ *http.Request) bool {
+			return false
+		}
+		opts.RedirectProvider = func(gateway *Gateway) RedirectFn {
+			return redirectFn
+		}
+		cfg := NewStaticConfigOrDie(nil, rawCfgMap)
+		g, err := CreateGateway(cfg, opts)
+		assert.Nil(t, err)
+		assert.Equal(t, redirectFn, g.RedirectFn)
+
+	})
+}
