@@ -37,7 +37,7 @@ const (
 
 type EventHandlerFn func([]Event) error
 type EnableEventGenFn func(string, string) bool
-type RedirectFn func(w http.ResponseWriter, r *http.Request) bool
+type RedirectFn func(w http.ResponseWriter, r *http.Request, endpointGroup, endpointID string) bool
 
 type Event interface {
 	Name() string
@@ -131,6 +131,6 @@ func NoOpEventGen(_, _ string) bool {
 	return false
 }
 
-func NoOpRedirectFn(_ http.ResponseWriter, _ *http.Request) bool {
+func NoOpRedirectFn(_ http.ResponseWriter, _ *http.Request, _, _ string) bool {
 	return false
 }

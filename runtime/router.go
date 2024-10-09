@@ -143,7 +143,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	defer cancel()
 	//}
 
-	if isRedirected := endpoint.redirectFn(w, r); isRedirected {
+	if isRedirected := endpoint.redirectFn(w, r, endpoint.EndpointName, endpoint.HandlerName); isRedirected {
 		return
 	}
 
