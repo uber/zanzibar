@@ -391,7 +391,7 @@ func TestGatewayWithRedirectHandler(t *testing.T) {
 	})
 
 	t.Run("with redirect handler", func(t *testing.T) {
-		redirectFn := func(_ http.ResponseWriter, _ *http.Request) bool {
+		redirectFn := func(_ http.ResponseWriter, _ *http.Request, _, _ string) bool {
 			return false
 		}
 		opts.RedirectProvider = func(gateway *Gateway) RedirectFn {
