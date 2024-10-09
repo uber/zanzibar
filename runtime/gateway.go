@@ -83,6 +83,7 @@ type Options struct {
 	NotFoundHandler           func(*Gateway) http.HandlerFunc
 	TracerProvider            func(*Gateway) (opentracing.Tracer, io.Closer, error)
 	EventProvider             func(*Gateway) (EnableEventGenFn, EventHandlerFn)
+	RedirectProvider          func(*Gateway) RedirectFn
 	// If present, request uuid is retrieved from the incoming request
 	// headers using the key, and put on the context. Otherwise, a new
 	// uuid is created for the incoming request.
@@ -114,6 +115,7 @@ type Gateway struct {
 	JSONWrapper            jsonwrapper.JSONWrapper
 	EventHandler           EventHandlerFn
 	EnableEventGen         EnableEventGenFn
+	RedirectFn             RedirectFn
 	// gRPC client dispatcher for gRPC client lifecycle management
 	GRPCClientDispatcher *yarpc.Dispatcher
 
@@ -272,6 +274,13 @@ func CreateGateway(
 	} else {
 		gateway.EnableEventGen = NoOpEventGen
 		gateway.EventHandler = NoOpEventHandler
+	}
+
+	if opts.RedirectProvider != nil {
+		redirectFn := opts.RedirectProvider(gateway)
+		gateway.RedirectFn = redirectFn
+	} else {
+		gateway.RedirectFn = NoOpRedirectFn
 	}
 
 	if opts.NotFoundHandler != nil &&
