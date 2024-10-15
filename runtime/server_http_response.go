@@ -124,7 +124,7 @@ func (res *ServerHTTPResponse) finish(ctx context.Context) {
 			append(logFields, zap.Int("UnknownStatusCode", res.StatusCode))...,
 		)
 	} else {
-		tagged.Counter(endpointStatus).Inc(1)
+		tagged.Tagged(map[string]string{"host": GetHostname()}).Counter(endpointStatus).Inc(1)
 	}
 
 	span := res.Request.GetSpan()
