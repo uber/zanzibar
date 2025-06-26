@@ -29,7 +29,10 @@ import (
 	"unicode/utf8"
 )
 
-var pascalCaseMap *sync.Map
+var (
+	pascalCaseMap *sync.Map
+	once          sync.Once
+)
 
 // CommonInitialisms is taken from https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
 var CommonInitialisms = map[string]bool{
@@ -137,9 +140,9 @@ func ensureGolangAncronymCasing(segment []byte) []byte {
 
 // PascalCase converts the given string to pascal case
 func PascalCase(src string) string {
-	if pascalCaseMap == nil {
+	once.Do(func() {
 		pascalCaseMap = &sync.Map{}
-	}
+	})
 	if res, ok := pascalCaseMap.Load(src); ok {
 		return res.(string)
 	}
