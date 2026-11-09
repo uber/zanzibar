@@ -32,6 +32,7 @@ import (
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type tchannelInboundCall struct {
@@ -71,11 +72,13 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 	c.scope.Histogram(endpointLatencyHist, tally.DefaultBuckets).RecordDuration(delta)
 	c.scope.Counter(endpointRequest).Inc(1)
 
-	fields := c.logFields(ctx)
 	if err == nil {
-		c.contextLogger.Debug(ctx, "Finished an incoming server TChannel request", fields...)
+		// logFields is expensive, so build it only when the debug entry is written
+		if ce := c.contextLogger.Check(zapcore.DebugLevel, "Finished an incoming server TChannel request"); ce != nil {
+			ce.Write(accumulateLogFields(ctx, c.logFields(ctx))...)
+		}
 	} else {
-		fields = append(fields, zap.Error(err))
+		fields := append(c.logFields(ctx), zap.Error(err))
 		c.contextLogger.Warn(ctx, "Failed to serve incoming TChannel request", fields...)
 	}
 }

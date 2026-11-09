@@ -71,11 +71,13 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	c.duration = delta
 
 	// write logs
-	fields := c.logFields(ctx)
 	if err == nil {
-		c.contextLogger.Debug(ctx, "Finished an outgoing client TChannel request", fields...)
+		// logFields is expensive, so build it only when the debug entry is written
+		if ce := c.contextLogger.Check(zapcore.DebugLevel, "Finished an outgoing client TChannel request"); ce != nil {
+			ce.Write(accumulateLogFields(ctx, c.logFields(ctx))...)
+		}
 	} else {
-		fields = append(fields, zap.Error(err))
+		fields := append(c.logFields(ctx), zap.Error(err))
 		c.contextLogger.Warn(ctx, "Failed to send outgoing client TChannel request", fields...)
 	}
 }
