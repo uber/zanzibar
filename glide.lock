@@ -235,7 +235,7 @@ imports:
   - push
   - tallypush
 - name: go.uber.org/thriftrw
-  version: 39f2ce9d9a39ec5b4dee6dbffaad8f71fd84505c
+  version: ceb80180659f6bc0f1bc0eca422000bd54fbc0ad
   subpackages:
   - ast
   - compile
@@ -254,6 +254,7 @@ imports:
   - plugin/api
   - protocol
   - protocol/binary
+  - protocol/stream
   - ptr
   - thriftreflect
   - version
