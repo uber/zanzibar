@@ -22,11 +22,14 @@ package zanzibar
 
 import (
 	"bytes"
+	"io"
 	"math/rand"
 	"sync"
 	"testing"
 
 	"github.com/uber/tchannel-go/testutils/testreader"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients-idl/clients/bar/bar"
+	"go.uber.org/thriftrw/protocol/binary"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -78,4 +81,43 @@ func TestBuffers(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+// fromWireOnly hides Decode, so ReadStruct takes the FromWire path.
+type fromWireOnly struct{ RWTStruct }
+
+func BenchmarkReadStruct(b *testing.B) {
+	args := &clientsBarBar.Echo_EchoStructList_Args{}
+	for i := 0; i < 8; i++ {
+		args.Arg = append(args.Arg, &clientsBarBar.BarResponse{
+			StringField:        "a",
+			MapIntWithRange:    map[clientsBarBar.UUID]int32{"fakeUUID": int32(i)},
+			MapIntWithoutRange: map[string]int32{"0": int32(i)},
+			BinaryField:        []byte("d29ybGQ="),
+		})
+	}
+	w, err := args.ToWire()
+	require.NoError(b, err)
+	var buf bytes.Buffer
+	require.NoError(b, binary.Default.Encode(w, &buf))
+	data := buf.Bytes()
+
+	benchmarks := []struct {
+		name      string
+		newStruct func() RWTStruct
+	}{
+		{"Decode", func() RWTStruct { return &clientsBarBar.Echo_EchoStructList_Args{} }},
+		{"FromWire", func() RWTStruct { return fromWireOnly{&clientsBarBar.Echo_EchoStructList_Args{}} }},
+	}
+	for _, bb := range benchmarks {
+		b.Run(bb.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(data)))
+			for i := 0; i < b.N; i++ {
+				if err := ReadStruct(struct{ io.Reader }{bytes.NewReader(data)}, bb.newStruct()); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
 }
