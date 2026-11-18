@@ -115,6 +115,8 @@ lint: check-licence eclint-check
 # 	@[ ! -s deps.log ]
 
 .PHONY: generate
+# set GO111MODULE to off to compile ancient tools within the vendor directory
+generate: export GO111MODULE = off
 generate:
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@chmod 644 ./codegen/templates/*.tmpl

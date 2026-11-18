@@ -51,19 +51,19 @@ func (*defaultAssetCollection) Asset(assetName string) ([]byte, error) {
 }
 
 var defaultFuncMap = tmpl.FuncMap{
-	"lower":                strings.ToLower,
-	"title":                strings.Title,
-	"fullTypeName":         fullTypeName,
-	"camel":                CamelCase,
-	"split":                strings.Split,
-	"dec":                  decrement,
-	"basePath":             filepath.Base,
-	"pascal":               PascalCase,
-	"isPointerType":        IsPointerType,
-	"unref":                Unref,
-	"lintAcronym":          LintAcronym,
-	"args":                 args,
-	"firstIsClientOrEmpty": firstIsClientOrEmpty,
+	"lower":                  strings.ToLower,
+	"title":                  strings.Title,
+	"fullTypeName":           fullTypeName,
+	"camel":                  CamelCase,
+	"split":                  strings.Split,
+	"dec":                    decrement,
+	"basePath":               filepath.Base,
+	"pascal":                 PascalCase,
+	"isPointerType":          IsPointerType,
+	"unref":                  Unref,
+	"lintAcronym":            LintAcronym,
+	"args":                   args,
+	"firstIsClientOrEmpty":   firstIsClientOrEmpty,
 }
 
 func fullTypeName(typeName, packageName string) string {

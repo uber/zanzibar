@@ -2203,9 +2203,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -2981,12 +2981,13 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime/ruleengine"
+	zerrors "github.com/uber/zanzibar/runtime/errors"
 
 
 	"go.uber.org/zap"
+	"go.uber.org/yarpc/yarpcerrors"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -3315,6 +3316,9 @@ type {{$clientName}} struct {
 			success, respHeaders, err = c.client.Call(
 				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 			)
+			if zerrors.IsSystemError(err) {
+				ctx = zerrors.SetContextSystemErrorCode(ctx, err)
+			}
 		} else {
 			// We want hystrix ckt-breaker to count errors only for system issues
 			var clientErr error
@@ -3330,10 +3334,11 @@ type {{$clientName}} struct {
 				success, respHeaders, clientErr = c.client.Call(
 					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 				)
-				if _, isSysErr := clientErr.(tchannel.SystemError); !isSysErr {
+				if !zerrors.IsSystemError(clientErr) {
 					// Declare ok if it is not a system-error
 					return nil
 				}
+				ctx = zerrors.SetContextSystemErrorCode(ctx, clientErr)
 				return clientErr
 			}, nil)
 			if err == nil {
@@ -3344,16 +3349,23 @@ type {{$clientName}} struct {
 
 		if err == nil && !success {
 			switch {
-				{{range .Exceptions -}}
+				{{range $exc := .Exceptions -}}
 				case result.{{title .Name}} != nil:
 					err = result.{{title .Name}}
+					{{range $annotation, $statusCode := $exc.Annotations -}}
+					{{if eq $annotation "rpc.code" -}}
+						ctx = zerrors.SetContextStatusCode(ctx, {{$statusCode}})
+					{{end -}}
+					{{end -}}
 				{{end -}}
 				{{if ne .ResponseType "" -}}
 				case result.Success != nil:
+					ctx = zerrors.SetContextStatusCode(ctx, yarpcerrors.CodeOK)
 					ctx = logger.ErrorZ(ctx, "Internal error. Success flag is not set for {{title .Name}}. Overriding", zap.Error(err))
 					success = true
 				{{end -}}
 				default:
+					ctx = zerrors.SetContextStatusCode(ctx, yarpcerrors.CodeUnknown)
 					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}
 		}
@@ -3365,6 +3377,8 @@ type {{$clientName}} struct {
 			return ctx, resp, respHeaders, err
 		{{end -}}
 		}
+
+		ctx = zerrors.SetContextStatusCode(ctx, yarpcerrors.CodeOK)
 
 		{{if eq .ResponseType "" -}}
 			return ctx, respHeaders, err
@@ -3391,7 +3405,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15262, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 15845, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3555,7 +3569,7 @@ import (
 {{- $clientID := .ClientID }}
 
 {{with .Method -}}
-// New{{$handlerName}} creates a handler to be registered with a thrift server.
+// New{{$handlerName}} creates a simple handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Deps: deps,
@@ -3800,7 +3814,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8945, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8952, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -4384,11 +4398,13 @@ var _bindata = map[string]func() (*asset, error){
 // directory embedded in the file by go-bindata.
 // For example if you run go-bindata on data/... and data contains the
 // following hierarchy:
-//     data/
-//       foo.txt
-//       img/
-//         a.png
-//         b.png
+//
+//	data/
+//	  foo.txt
+//	  img/
+//	    a.png
+//	    b.png
+//
 // then AssetDir("data") would return []string{"foo.txt", "img"}
 // AssetDir("data/img") would return []string{"a.png", "b.png"}
 // AssetDir("foo.txt") and AssetDir("notexist") would return an error
